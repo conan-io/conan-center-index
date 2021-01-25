@@ -1,5 +1,40 @@
 # Changelog
 
+### 30-December-2020 - 13:24 CET
+
+- [feature] BuildSingleReference: Run tests for packages that already exist.
+- [feature] BuildSingleReference: Add functionality so it is able to build a PR merging into 'master'.
+- [feature] Specify Conan version to use in every node call (decouple from conan-docker-tools updates).
+- [fix] AddBetaUser: Fix "ghost" user added weekly for deleted users.
+
+### 29-December-2020 - 17:18 CET
+
+- Updated Conan client to the 1.32.1 version in Windows and Mac agents.
+
+### 14-December-2020 - 09:51 CET
+
+- [feature] Remove repositories after a pull-request is merged.
+- [feature] Run promotion in parallel for merge-commits.
+- [feature] Viewer for summary.json files.
+- [feature] Trigger a BuildSingleReference job at the end of pull-request jobs to build new configurations.
+- [fix] Manage repository permissions independently in pull-requests.
+
+### 27-November-2020 - 10:14 CEST
+
+ - [feature] More (and better) properties are stored in Artifactory for each package.
+ - [feature] Use modularized jobs in CI to run parts of the pipeline.
+ - [fix] Fix error affecting PRs that were blocked in the past by a team member
+ - [fix] Fix issue with properties associated to new configurations
+
+### 18-November-2020 - 12:58 CEST
+
+- [fix] Notify unexpected errors to slack channel (add link to message).
+- [job] AutomaticMerge: Fix PRs blocked by non team member users.
+- [bug] Build everything but OK or INVALID_CONFIG.
+- [fix] Do not use `--all` argument with `conan upload` when the package ID is given.
+- [fix] Fix error getting properties when the recipe doesn't have options.
+- [job] Tapaholes: Propose new profile set including new compiler configurations.
+
 ### 18-November-2020 - 11:23 CEST
 
 - Updated Conan client to the 1.31.3 version in Windows and Mac agents.

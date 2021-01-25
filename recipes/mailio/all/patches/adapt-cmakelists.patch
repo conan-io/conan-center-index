@@ -1,0 +1,48 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9cd343d..3fa8a34 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -53,17 +53,6 @@ option(MAILIO_BUILD_EXAMPLES "Turn on to build examples." ON)
+ include(CMakeDependentOption)
+ cmake_dependent_option(MAILIO_BUILD_LATEX_DOCUMENTATION "Build latex docs" ON "MAILIO_BUILD_DOCUMENTATION" ON)
+ 
+-if(WIN32)
+-    set(Boost_USE_STATIC_LIBS ON)
+-endif(WIN32)
+-
+-find_package(Boost REQUIRED COMPONENTS system date_time regex)
+-find_package(OpenSSL)
+-set(CMAKE_THREAD_PREFER_PTHREAD)
+-# "Use of both the imported target as well as this switch is highly recommended for new code."
+-set(THREADS_PREFER_PTHREAD_FLAG)
+-find_package(Threads)
+-
+ set(project_sources 
+     ${PROJECT_SOURCE_DIR}/src/base64.cpp
+     ${PROJECT_SOURCE_DIR}/src/binary.cpp
+@@ -142,7 +131,7 @@ install(FILES ${CMAKE_BINARY_DIR}/mailio.pc DESTINATION ${LIB_INSTALL_DIR}/pkgco
+ 
+ configure_file(${PROJECT_SOURCE_DIR}/include/version.hpp.in version.hpp)
+ target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_BINARY_DIR}")
+-install(FILES ${CMAKE_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
++install(FILES ${PROJECT_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
+ 
+ # generate the export header for exporting symbols
+ # this is needed to generate a shared library.
+@@ -155,15 +144,7 @@ target_include_directories(${PROJECT_NAME}
+ )
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/export.hpp DESTINATION "${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}")
+ 
+-if(Boost_FOUND)
+-    target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+-    target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+-endif()
+-
+-if(OPENSSL_FOUND)
+-    target_include_directories(${PROJECT_NAME} PUBLIC ${OPENSSL_INCLUDE_DIR})
+-    target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES})
+-endif()
++target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+ 
+ install(DIRECTORY include/mailio DESTINATION ${INCLUDE_INSTALL_DIR})
+ 

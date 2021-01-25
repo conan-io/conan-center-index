@@ -20,7 +20,7 @@ class LibrdkafkaConan(ConanFile):
         "plugins": [True, False],
         "ssl": [True, False],
         "sasl": [True, False],
-        "lz4": [True, False],
+        "lz4": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
@@ -30,9 +30,9 @@ class LibrdkafkaConan(ConanFile):
         "plugins": False,
         "ssl": False,
         "sasl": False,
-        "lz4": False,
+        "lz4": "deprecated",
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
@@ -47,18 +47,26 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.lz4 != "deprecated":
+            self.output.warn("lz4 option is deprecated. Actually, librdkafka always depends on lz4.")
 
     def requirements(self):
+        self.requires("lz4/1.9.3")
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
-        if self.options.lz4:
-            self.requires("lz4/1.9.2")
+
+    def package_id(self):
+        del self.info.options.lz4
+
+    def build_requirements(self):
+        if self.options.sasl and self.settings.os != "Windows":
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -70,7 +78,7 @@ class LibrdkafkaConan(ConanFile):
             tools.patch(**patch)
 
     def _configure_cmake(self):
-        if self._cmake is not None:
+        if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
@@ -85,7 +93,7 @@ class LibrdkafkaConan(ConanFile):
         self._cmake.definitions["WITH_PLUGINS"] = self.options.plugins
         self._cmake.definitions["WITH_SSL"] = self.options.ssl
         self._cmake.definitions["WITH_SASL"] = self.options.sasl
-        self._cmake.definitions["ENABLE_LZ4_EXT"] = self.options.lz4
+        self._cmake.definitions["ENABLE_LZ4_EXT"] = True
         self._cmake.configure()
         return self._cmake
 
@@ -111,6 +119,7 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.components["rdkafka"].names["cmake_find_package_multi"] = "rdkafka"
         self.cpp_info.components["rdkafka"].names["pkg_config"] = "rdkafka"
         self.cpp_info.components["rdkafka"].libs = ["rdkafka"]
+        self.cpp_info.components["rdkafka"].requires = ["lz4::lz4"]
         if self.options.zlib:
             self.cpp_info.components["rdkafka"].requires.append("zlib::zlib")
         if self.options.zstd:
@@ -119,8 +128,6 @@ class LibrdkafkaConan(ConanFile):
             self.cpp_info.components["rdkafka"].requires.append("openssl::openssl")
         if self.options.sasl and self.settings.os != "Windows":
             self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
-        if self.options.lz4:
-            self.cpp_info.components["rdkafka"].requires.append("lz4::lz4")
         if self.settings.os == "Windows":
             self.cpp_info.components["rdkafka"].system_libs = ["ws2_32", "secur32"]
             if self.options.ssl:

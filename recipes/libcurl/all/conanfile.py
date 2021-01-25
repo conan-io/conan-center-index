@@ -17,46 +17,48 @@ class LibcurlConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
-               "with_openssl": [True, False, "deprecated"],
-               "with_wolfssl": [True, False, "deprecated"],
-               "with_winssl": [True, False, "deprecated"],
-               "darwin_ssl": [True, False, "deprecated"],
-               "with_ldap": [True, False],
-               "with_libssh2": [True, False],
-               "with_libidn": [True, False],
-               "with_librtmp": [True, False],
-               "with_libmetalink": [True, False],
-               "with_libpsl": [True, False],
-               "with_largemaxwritesize": [True, False],
-               "with_nghttp2": [True, False],
-               "with_zlib": [True, False],
-               "with_brotli": [True, False],
-               "with_zstd": [True, False],
-               "with_c_ares": [True, False],
-               }
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_ssl": "openssl",
-                       "with_openssl": "deprecated",
-                       "with_wolfssl": "deprecated",
-                       "with_winssl": "deprecated",
-                       "darwin_ssl": "deprecated",
-                       "with_ldap": False,
-                       "with_libssh2": False,
-                       "with_libidn": False,
-                       "with_librtmp": False,
-                       "with_libmetalink": False,
-                       "with_libpsl": False,
-                       "with_largemaxwritesize": False,
-                       "with_nghttp2": False,
-                       "with_zlib": True,
-                       "with_brotli": False,
-                       "with_zstd": False,
-                       "with_c_ares": False,
-                       }
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
+        "with_openssl": [True, False, "deprecated"],
+        "with_wolfssl": [True, False, "deprecated"],
+        "with_winssl": [True, False, "deprecated"],
+        "darwin_ssl": [True, False, "deprecated"],
+        "with_ldap": [True, False],
+        "with_libssh2": [True, False],
+        "with_libidn": [True, False],
+        "with_librtmp": [True, False],
+        "with_libmetalink": [True, False],
+        "with_libpsl": [True, False],
+        "with_largemaxwritesize": [True, False],
+        "with_nghttp2": [True, False],
+        "with_zlib": [True, False],
+        "with_brotli": [True, False],
+        "with_zstd": [True, False],
+        "with_c_ares": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_ssl": "openssl",
+        "with_openssl": "deprecated",
+        "with_wolfssl": "deprecated",
+        "with_winssl": "deprecated",
+        "darwin_ssl": "deprecated",
+        "with_ldap": False,
+        "with_libssh2": False,
+        "with_libidn": False,
+        "with_librtmp": False,
+        "with_libmetalink": False,
+        "with_libpsl": False,
+        "with_largemaxwritesize": False,
+        "with_nghttp2": False,
+        "with_zlib": True,
+        "with_brotli": False,
+        "with_zstd": False,
+        "with_c_ares": False,
+    }
 
     _autotools = None
     _autotools_vars = None
@@ -140,11 +142,11 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.5.0")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.40.0")
+            self.requires("libnghttp2/1.42.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
         if self.options.with_zlib:
@@ -152,9 +154,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.16.1")
+            self.requires("c-ares/1.17.1")
 
     def package_id(self):
         # Deprecated options
@@ -221,25 +223,30 @@ class LibcurlConan(ConanFile):
                                   "if(UNIX)", "if(TRUE)")
 
     def _get_configure_command_args(self):
-        params = []
-        params.append("--without-libidn2" if not self.options.with_libidn else "--with-libidn2")
-        params.append("--without-librtmp" if not self.options.with_librtmp else "--with-librtmp")
-        params.append("--without-libmetalink" if not self.options.with_libmetalink else "--with-libmetalink")
-        params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
-
+        yes_no = lambda v: "yes" if v else "no"
+        params = [
+            "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
+            "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
+            "--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)),
+            "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
+            "--with-schannel={}".format(yes_no(self.options.with_ssl == "schannel")),
+            "--with-darwinssl={}".format(yes_no(self.options.with_ssl == "darwinssl")),
+            "--with-brotli={}".format(yes_no(self.options.with_brotli)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-ldap={}".format(yes_no(self.options.with_ldap)),
+            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
+            "--enable-threaded-resolver={}".format(yes_no(self.options.with_c_ares)),
+        ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
-        elif self.options.with_ssl == "wolfssl":
-            params.append("--with-wolfssl={}".format(tools.unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
-            params.append("--without-ssl")
-        elif self.options.with_ssl == "schannel":
-            params.append("--with-schannel")
-            params.append("--without-ssl")
-        elif self.options.with_ssl == "darwinssl":
-            params.append("--with-darwinssl")
-            params.append("--without-ssl")
         else:
             params.append("--without-ssl")
+        if self.options.with_ssl == "wolfssl":
+            params.append("--with-wolfssl={}".format(tools.unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
+        else:
+            params.append("--without-wolfssl")
 
         if self.options.with_libssh2:
             params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].lib_paths[0])))
@@ -256,27 +263,8 @@ class LibcurlConan(ConanFile):
         else:
             params.append("--without-zlib")
 
-        params.append("--with-brotli" if self.options.with_brotli else "--without-brotli")
-
         if self._has_zstd_option:
-            params.append("--with-zstd" if self.options.with_zstd else "--without-zstd")
-
-        if not self.options.shared:
-            params.append("--disable-shared")
-            params.append("--enable-static")
-        else:
-            params.append("--enable-shared")
-            params.append("--disable-static")
-
-        if not self.options.with_ldap:
-            params.append("--disable-ldap")
-
-        if self.settings.build_type == "Debug":
-           params.append("--enable-debug")
-
-        if self.options.with_c_ares:
-            params.append("--enable-ares")
-            params.append("--enable-threaded-resolver")
+            params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
         # Cross building flags
         if tools.cross_building(self.settings):
@@ -484,7 +472,10 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CURL_STATICLIB"] = not self.options.shared
         self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
-        self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        if tools.Version(self.version) >= "7.72.0":
+            self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        else:
+            self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         if tools.Version(self.version) >= "7.70.0":
             self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
@@ -558,7 +549,7 @@ class LibcurlConan(ConanFile):
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_ssl == "schannel":
-                self.cpp_info.components["curl"].system_libs.append("Crypt32")
+                self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif self.settings.os == "Macos":
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")

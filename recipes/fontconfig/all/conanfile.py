@@ -40,9 +40,12 @@ class FontconfigConan(ConanFile):
         self.requires("expat/2.2.10")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
+        elif self.settings.os == "Macos":
+            self.requires("libgettext/0.20.1")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
+        self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
@@ -61,6 +64,7 @@ class FontconfigConan(ConanFile):
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--localstatedir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "var")))
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self._autotools.libs = []
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
         return self._autotools
@@ -72,8 +76,9 @@ class FontconfigConan(ConanFile):
     def build(self):
         # Patch files from dependencies
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -90,7 +95,7 @@ class FontconfigConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"

@@ -7,8 +7,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package", "pkg_config"
 
     def build(self):
-        if self.settings.os != 'Windows':
-            self.run('gdbus-codegen -h', run_environment=True)
+        if self.settings.os != "Windows":
+            self.run("gdbus-codegen -h", run_environment=True)
 
         cmake = CMake(self)
         cmake.configure()
@@ -18,4 +18,3 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
-

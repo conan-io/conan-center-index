@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+ALL_ARGS=$@
+
+BUILD=no
+for i in "$@":
+do
+  case $i in
+    --build)
+    BUILD=yes
+    ;;
+    *)
+    ;;
+  esac
+done
+
+if [ $BUILD == "yes" ]; then
+  cmake "$@"
+else
+  # TODO check if, based on log level, some configurable outbut of these values could be nice to have
+  fix_cmake_flags="-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=NEVER"
+  cmake "$@" ${CONAN_USER_CMAKE_FLAGS} ${fix_cmake_flags}
+fi

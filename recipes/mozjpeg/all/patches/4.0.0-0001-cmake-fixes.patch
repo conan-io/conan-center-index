@@ -1,0 +1,26 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1433,7 +1433,7 @@
+       else()
+         set(DIR ${CMAKE_CURRENT_BINARY_DIR})
+       endif()
+-      install(PROGRAMS ${DIR}/tjbench-static${EXE}
++      install(PROGRAMS $<TARGET_FILE:tjbench-static>
+         DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME tjbench${EXE})
+     endif()
+   endif()
+@@ -1449,11 +1449,11 @@
+     else()
+       set(DIR ${CMAKE_CURRENT_BINARY_DIR})
+     endif()
+-    install(PROGRAMS ${DIR}/cjpeg-static${EXE}
++    install(PROGRAMS  $<TARGET_FILE:cjpeg-static>
+       DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME cjpeg${EXE})
+-    install(PROGRAMS ${DIR}/djpeg-static${EXE}
++    install(PROGRAMS  $<TARGET_FILE:djpeg-static>
+       DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME djpeg${EXE})
+-    install(PROGRAMS ${DIR}/jpegtran-static${EXE}
++    install(PROGRAMS $<TARGET_FILE:jpegtran-static>
+       DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME jpegtran${EXE})
+   endif()
+ endif()

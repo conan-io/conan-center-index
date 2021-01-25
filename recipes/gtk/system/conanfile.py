@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 
 class ConanGTK(ConanFile):
@@ -8,11 +8,15 @@ class ConanGTK(ConanFile):
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
-    settings = {"os": "Linux"}
+    settings = "os"
     options = {"version": [2, 3]}
     default_options = {"version": 2}
     topics = ("gui", "widget", "graphical")
 
+    def configure(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
+    
     def package_id(self):
         self.info.settings.clear()
 
@@ -37,8 +41,8 @@ class ConanGTK(ConanFile):
         self.cpp_info.components[name].cxxflags = cflags
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
                 packages = ["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"]
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
@@ -51,7 +55,10 @@ class ConanGTK(ConanFile):
                 self.output.warn("Do not know how to install 'GTK-{}' for {}."
                                  .format(self.options.version,
                                          tools.os_info.linux_distro))
-                packages = []
+        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["gtk{}".format(self.options.version)]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             for p in packages:
                 package_tool.install(update=True, packages=p)
 

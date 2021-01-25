@@ -113,14 +113,6 @@ class SwigConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        if self.settings.compiler != "Visual Studio":
-            with tools.chdir(os.path.join(self.package_folder, "bin")):
-                strip = (tools.get_env("STRIP") or tools.which("strip")).replace("\\", "/")
-                ext = ".exe" if tools.os_info.is_windows else ""
-                if strip:
-                    self.run("{} swig{}".format(strip, ext), win_bash=tools.os_info.is_windows)
-                    self.run("{} ccache-swig{}".format(strip, ext), win_bash=tools.os_info.is_windows)
-
     @property
     def _swiglibdir(self):
         return os.path.join(self.package_folder, "bin", "swiglib").replace("\\", "/")

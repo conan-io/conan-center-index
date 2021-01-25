@@ -26,7 +26,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -120,6 +120,7 @@ class LibMysqlClientCConan(ConanFile):
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
         self.cpp_info.names["cmake_find_package"] = "MySQL"
         self.cpp_info.names["cmake_find_package_multi"] = "MySQL"
+        self.cpp_info.names["pkg_config"] = "mysqlclient"
         if not self.options.shared:
             if self._stdcpp_library:
                 self.cpp_info.system_libs.append(self._stdcpp_library)

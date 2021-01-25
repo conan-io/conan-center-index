@@ -69,9 +69,9 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         elif self.options.with_ssl == "libressl":
-            self.requires("libressl/3.2.0")
+            self.requires("libressl/3.2.1")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
@@ -79,9 +79,9 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
@@ -158,7 +158,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
         self._cmake.definitions["ENABLE_UNINSTALL"] = False
-        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
+        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
