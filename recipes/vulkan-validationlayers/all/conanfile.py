@@ -105,7 +105,7 @@ class VulkanValidationLayersConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if self.settings != "Windows":
+        if self.settings.os != "Windows":
             os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
