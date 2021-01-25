@@ -9,25 +9,23 @@ class civetwebConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
     topics = ("conan", "civetweb", "web-server", "embedded")
-    exports = ("README.md")
-    exports_sources = ("src/*", "cmake/*", "include/*", "CMakeLists.txt")
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared"            : [True, False],
         "fPIC"              : [True, False],
-        "enable_ssl"        : [True, False],
-        "enable_websockets" : [True, False],
-        "enable_ipv6"       : [True, False],
-        "enable_cxx"        : [True, False]
+        "with_ssl"        : [True, False],
+        "with_websockets" : [True, False],
+        "with_ipv6"       : [True, False],
+        "with_cxx"        : [True, False]
     }
     default_options = {
         "shared"            : False,
         "fPIC"              : True,
-        "enable_ssl"        : True,
-        "enable_websockets" : True,
-        "enable_ipv6"       : True,
-        "enable_cxx"        : True
+        "with_ssl"        : True,
+        "with_websockets" : True,
+        "with_ipv6"       : True,
+        "with_cxx"        : True
     }
 
     @property
@@ -43,20 +41,20 @@ class civetwebConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.enable_cxx:
+        if not self.options.with_cxx:
             del self.settings.compiler.libcxx
 
     def requirements(self):
-        if self.options.enable_ssl:
+        if self.options.with_ssl:
             self.requires("openssl/1.1.1i")
 
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.verbose = True
-        cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.enable_ssl
-        cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.enable_websockets
-        cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.enable_ipv6
-        cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.enable_cxx
+        cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
+        cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
+        cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
+        cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
         cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
         cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
         cmake.configure(
@@ -91,7 +89,7 @@ class civetwebConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.extend(["dl", "rt", "pthread"])
-            if self.options.enable_cxx:
+            if self.options.with_cxx:
                 self.cpp_info.libs.append("m")
         elif self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework Cocoa")
@@ -99,9 +97,9 @@ class civetwebConan(ConanFile):
             self.cpp_info.defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
             self.cpp_info.libs.append("Ws2_32")
-        if self.options.enable_websockets:
+        if self.options.with_websockets:
             self.cpp_info.defines.append("USE_WEBSOCKET")
-        if self.options.enable_ipv6:
+        if self.options.with_ipv6:
             self.cpp_info.defines.append("USE_IPV6")
-        if not self.options.enable_ssl:
+        if not self.options.with_ssl:
             self.cpp_info.defines.append("NO_SSL")
