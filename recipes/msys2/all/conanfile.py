@@ -30,6 +30,10 @@ class MSYS2Conan(ConanFile):
             raise ConanInvalidConfiguration("Only Windows supported")
         if tools.Version(self.version) >= "20210105" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
+        if tools.Version(self.version) <= "20161025"
+            raise ConanInvalidConfiguration("msys2 v.20161025 is no longer supported")    
+
+            
 
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
