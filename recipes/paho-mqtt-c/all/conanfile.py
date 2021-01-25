@@ -132,6 +132,6 @@ class PahoMqttcConan(ConanFile):
             target += "s"
         if not self.options.shared:
             # https://github.com/eclipse/paho.mqtt.c/blob/317fb008e1541838d1c29076d2bc5c3e4b6c4f53/src/CMakeLists.txt#L154
-            if tools.Version(self.version) < "1.3.1" or self.settings.os == "Windows":
+            if tools.Version(self.version) < "1.3.2" or self.settings.os == "Windows":
                 target += "-static"
         return target
