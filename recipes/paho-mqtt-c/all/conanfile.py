@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -32,8 +33,8 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # There is unsureness if static linking before 1.3.4 did every work.
-        # If you need it, teak here, on Linux and OSX you might have success.
+        # There is uncertainty if static linking before 1.3.4 worked.
+        # If you need it, tweak here, on Linux and OSX you might have success.
         if tools.Version(self.version) < "1.3.4":
             self.options.shared = True
 
@@ -76,6 +77,7 @@ class PahoMqttcConan(ConanFile):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
+        # cmake.build(target=self._cmake_target)
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
@@ -89,6 +91,12 @@ class PahoMqttcConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        # Remove the extra version that do not match the options
+        for lib_pattern in ["*paho-mqtt3as*", "*paho-mqtt3cs*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
+                            "*paho-mqtt3as-static*", "*paho-mqtt3cs-static*", "*paho-mqtt3c-static*", "*paho-mqtt3a-static*"]:
+            if not self._lib_target in lib_pattern:
+                for lib_file in glob.glob(os.path.join(self.package_folder, "lib", lib_pattern)):
+                    os.remove(lib_file)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
