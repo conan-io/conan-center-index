@@ -78,23 +78,24 @@ class MSYS2Conan(ConanFile):
             self.run('bash -l -c "pacman -Syu --noconfirm"')
 
     def _kill_pacman(self):
-        taskkill_exe = os.path.join(os.environ['WINDIR'], 'system32', 'taskkill.exe')
+        if self.settings.os == "Windows":
+            taskkill_exe = os.path.join(os.environ['WINDIR'], 'system32', 'taskkill.exe')
 
-        log_out = True
-        if log_out:
-            out = subprocess.PIPE
-            err = subprocess.STDOUT
-        else:
-            out = file(os.devnull, 'w')
-            err = subprocess.PIPE
+            log_out = True
+            if log_out:
+                out = subprocess.PIPE
+                err = subprocess.STDOUT
+            else:
+                out = file(os.devnull, 'w')
+                err = subprocess.PIPE
 
-        if os.path.exists(taskkill_exe):
-            taskkill_cmd = taskkill_exe + ' /f /fi "MODULES eq msys-2.0.dll"'
-            try:
-                proc = subprocess.Popen(taskkill_cmd, stdout=out, stderr=err, bufsize=1)
-            except OSError as e:
-                if e.errno == errno.ENOENT:
-                    raise ConanException("Cannot kill pacman")
+            if os.path.exists(taskkill_exe):
+                taskkill_cmd = taskkill_exe + ' /f /fi "MODULES eq msys-2.0.dll"'
+                try:
+                    proc = subprocess.Popen(taskkill_cmd, stdout=out, stderr=err, bufsize=1)
+                except OSError as e:
+                    if e.errno == errno.ENOENT:
+                        raise ConanException("Cannot kill pacman")
 
     def configure(self):
         self._kill_pacman()
