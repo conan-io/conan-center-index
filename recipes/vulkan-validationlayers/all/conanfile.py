@@ -105,10 +105,14 @@ class VulkanValidationLayersConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings != "Windows":
+            os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
-        self.cpp_info.libs = ["VkLayer_utils"]
+        if not tools.is_apple_os(self.settings.os):
+            self.cpp_info.libs = ["VkLayer_utils"]
 
-        vk_layer_path = os.path.join(self.package_folder, "lib")
+        manifest_subfolder = "lib" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
+        vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
         self.output.info("Appending VK_LAYER_PATH environment variable: {}".format(vk_layer_path))
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)
