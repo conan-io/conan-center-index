@@ -82,7 +82,10 @@ class civetwebConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
-        shutil.rmtree(os.path.join(self.package_folder, "bin"))
+        bin_folder = os.path.join(self.package_folder, "bin");
+        for bin_file in os.listdir(bin_folder):
+            if not bin_file.startswith("civetweb"):
+                os.remove(os.path.join(bin_folder, bin_file))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
