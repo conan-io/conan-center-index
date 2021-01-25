@@ -95,7 +95,7 @@ class PahoMqttcConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package"] = self._cmake_target
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package_multi"] = self._cmake_target
-        self.cpp_info.components["_paho-mqtt-c"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_paho-mqtt-c"].libs = [self._lib_target]
         if self.settings.os == "Windows":
             if not self.options.shared:
                 self.cpp_info.components["_paho-mqtt-c"].system_libs.append("ws2_32")
@@ -122,4 +122,16 @@ class PahoMqttcConan(ConanFile):
             target += "s"
         if not self.options.shared:
             target += "-static"
+        return target
+
+    @property
+    def _lib_target(self):
+        target = "paho-mqtt3"
+        target += "a" if self.options.asynchronous else "c"
+        if self.options.ssl:
+            target += "s"
+        if not self.options.shared:
+            # https://github.com/eclipse/paho.mqtt.c/blob/317fb008e1541838d1c29076d2bc5c3e4b6c4f53/src/CMakeLists.txt#L154
+            if tools.Version(self.version) < "1.3.1" or self.settings.os == "Windows":
+                target += "-static"
         return target
