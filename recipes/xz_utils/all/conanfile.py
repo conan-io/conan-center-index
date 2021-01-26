@@ -77,7 +77,6 @@ class XZUtils(ConanFile):
                 targets=[target],
                 build_type=self._effective_msbuild_type(),
                 platforms={"x86": "Win32", "x86_64": "x64"},
-                use_env=False,
                 upgrade_project=False)
 
     def _configure_autotools(self):
