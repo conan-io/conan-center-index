@@ -2,6 +2,12 @@
 
 This is a curated list of various bots and helpful tools that aim to making approaching Conan-Center-Index and contributing easier.
 
+<!-- toc -->
+## Contents
+
+  * [Bots](#bots)
+  * [Tools](#tools)<!-- endToc -->
+
 ## Bots
 
 - [Updatable Recipes](https://github.com/qchateau/conan-center-bot): Automatically scans available recipes and checked for new upstream releases and tests one configuration
