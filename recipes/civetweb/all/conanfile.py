@@ -87,7 +87,7 @@ class civetwebConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["dl", "rt", "pthread"])
+            self.cpp_info.system_libs.extend(["dl", "rt", "pthread"])
             if self.options.with_cxx:
                 self.cpp_info.libs.append("m")
         elif self.settings.os == "Macos":
