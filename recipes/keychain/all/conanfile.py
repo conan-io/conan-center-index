@@ -10,7 +10,7 @@ class KeychainConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     @property
     def _source_subfolder(self):
@@ -19,6 +19,10 @@ class KeychainConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libsecret/0.20.4")
+
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
