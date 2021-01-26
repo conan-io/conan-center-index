@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+import shutil
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -105,14 +106,25 @@ class VulkanValidationLayersConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if self.settings.os != "Windows":
+        # Move several files, but it's important to preserve relative path
+        # between module library and manifest json file
+        if self.settings.os == "Windows":
+            # import lib is useless, validation layer lib is loaded at runtime
+            os.remove(os.path.join(self.package_folder("lib", "VkLayer_khronos_validation.lib")))
+            # move module library and manifest file in bin folder
+            for validation_layer in glob.glob(os.path.join(self.package_folder, "lib", "VkLayer_khronos_validation.*")):
+                shutil.move(
+                    src=validation_layer,
+                    dst=os.path.join(self.package_folder, "bin", os.path.basename(validation_layer))
+                )
+        else:
             os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         if not tools.is_apple_os(self.settings.os):
             self.cpp_info.libs = ["VkLayer_utils"]
 
-        manifest_subfolder = "lib" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
+        manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
         self.output.info("Appending VK_LAYER_PATH environment variable: {}".format(vk_layer_path))
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)
