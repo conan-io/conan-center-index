@@ -1,5 +1,9 @@
 # Supported platforms and configurations
 
+toc
+
+## Introduction
+
 The pipeline iterates a fixed list of profiles for every Conan reference,
 it computes the packageID for each profile and discard duplicates. Then it
 builds the packages for the remaining profiles and upload them to

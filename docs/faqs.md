@@ -1,7 +1,8 @@
 # FAQs
 
-
 This section gathers the most common questions from the community related to packages and usability of this repository.
+
+toc
 
 ## What is the policy on recipe name collisions?
 
