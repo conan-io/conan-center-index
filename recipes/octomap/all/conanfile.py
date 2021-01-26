@@ -62,9 +62,12 @@ class OctomapConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeLists.txt"),
                               "SET( BASE_DIR ${CMAKE_SOURCE_DIR} )",
                               "SET( BASE_DIR ${CMAKE_BINARY_DIR} )")
+        compiler_settings = os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake")
         # Do not force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake"),
-                              "ADD_DEFINITIONS(-fPIC)", "")
+        tools.replace_in_file(compiler_settings, "ADD_DEFINITIONS(-fPIC)", "")
+        # No -Werror
+        if tools.Version(self.version) >= "1.9.6":
+            tools.replace_in_file(compiler_settings, "-Werror", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))
