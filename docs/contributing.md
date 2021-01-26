@@ -2,7 +2,12 @@
 
 The following summarizes the process for contributing to the CCI (Conan Center Index) project.
 
-toc
+<!-- toc -->
+## Contents
+
+  * [Community](#community)
+  * [Dev-flow & Pull Requests](#dev-flow--pull-requests)
+  * [Issues](#issues)<!-- endToc -->
 
 ## Community
 

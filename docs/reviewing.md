@@ -2,7 +2,12 @@
 
 The following policies are preferred during the review, but not mandatory:
 
-toc
+<!-- toc -->
+## Contents
+
+  * [Trailing white-spaces](#trailing-white-spaces)
+  * [Quotes](#quotes)
+  * [Order of methods and attributes](#order-of-methods-and-attributes)<!-- endToc -->
 
 ## Trailing white-spaces
 
