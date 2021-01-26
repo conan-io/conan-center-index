@@ -5,6 +5,5 @@ using namespace keychain;
 int main()
 {
     Error error;
-    getPassword("conan-test-pkg", "conan-test-srv", "conan-test-user", error);
-    return error.type == ErrorType::NotFound ? 0 : 1;
+    return error.type == ErrorType::NoError ? 0 : 1;
 }
