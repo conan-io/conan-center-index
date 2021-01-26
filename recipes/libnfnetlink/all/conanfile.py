@@ -61,3 +61,4 @@ class LibnfnetlinkConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["nfnetlink"]
+        self.cpp_info.names["pkg_config"] = "libnfnetlink"
