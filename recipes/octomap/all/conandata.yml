@@ -5,3 +5,10 @@ sources:
   "1.9.5":
     url: "https://github.com/OctoMap/octomap/archive/v1.9.5.tar.gz"
     sha256: "adf87320c4c830c0fd85fe8d913d8aa174e2f72d0ea64c917599a50a561092b6"
+patches:
+  "1.9.3":
+    - patch_file: "patches/targets-outputname-collision-1.9.3.patch"
+      base_path: "source_subfolder"
+  "1.9.5":
+    - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
+      base_path: "source_subfolder"
