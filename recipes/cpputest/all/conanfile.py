@@ -67,6 +67,7 @@ class CppUTestConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "CppUTest", "cmake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CppUTest"
