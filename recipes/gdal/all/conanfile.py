@@ -203,6 +203,11 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         self._strict_options_requirements()
 
+        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
+        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
+           tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
+
     def _strict_options_requirements(self):
         if self.options.with_qhull:
             self.options["qhull"].reentrant = False
