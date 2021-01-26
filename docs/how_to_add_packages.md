@@ -166,6 +166,12 @@ Call `conan create . lib/1.0@` in the folder of the recipe using the profile you
     cd conan-center-index/recipes/boost/all
     conan create . 1.74.0@
 
+### Updating conan hooks on your machine
+
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
+
+    conan config install
+
 ### Debugging failed builds
 
    Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
