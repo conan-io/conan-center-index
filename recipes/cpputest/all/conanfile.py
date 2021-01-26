@@ -18,12 +18,28 @@ class CppUTestConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_encoding": [True, False]
+        "verbose": [True, False],
+        "use_std_c_lib": ["ON", "OFF"],
+        "use_std_cpp_lib": ["ON", "OFF"],
+        "use_cpp11": ["ON", "OFF"],
+        "detect_mem_leaks": ["ON", "OFF"],
+        "extensions": ["ON", "OFF"],
+        "longlong": ["ON", "OFF"],
+        "coverage": ["ON", "OFF"],
+        "tests": ["ON", "OFF"],
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "enable_encoding": False
+        "fPIC": False,
+        "verbose": False,
+        "use_std_c_lib": "ON",
+        "use_std_cpp_lib": "ON",
+        "use_cpp11": "ON",
+        "detect_mem_leaks": "ON",
+        "extensions": "ON",
+        "longlong": "ON",
+        "coverage": "OFF",
+        "tests": "ON",
     }
 
     _cmake = None
@@ -58,7 +74,15 @@ class CppUTestConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.verbose = self.options.verbose
+        self._cmake.definitions["STD_C"] = self.options.use_std_c_lib
+        self._cmake.definitions["STD_CPP"] = self.options.use_std_cpp_lib
+        self._cmake.definitions["C++11"] = self.options.use_cpp11
+        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_mem_leaks
+        self._cmake.definitions["EXTENSIONS"] = self.options.extensions
+        self._cmake.definitions["LONGLONG"] = self.options.longlong
+        self._cmake.definitions["COVERAGE"] = self.options.coverage
+        self._cmake.definitions["TESTS"] = self.options.tests
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
