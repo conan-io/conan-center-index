@@ -58,11 +58,7 @@ class CppUTestConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["SZIP_ENABLE_ENCODING"] = self.options.enable_encoding
-        self._cmake.definitions["SZIP_EXTERNALLY_CONFIGURED"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["SZIP_BUILD_FRAMEWORKS"] = False
-        self._cmake.definitions["SZIP_PACK_MACOSX_FRAMEWORK"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
