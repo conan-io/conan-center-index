@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - documentation-tocs
 jobs:
   release:
     runs-on: windows-latest
