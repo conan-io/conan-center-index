@@ -12,7 +12,7 @@ class CppUTestConan(ConanFile):
     topics = ("conan", "testing", "unit-testing")
     homepage = "http://cpputest.github.io"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,8 +49,6 @@ class CppUTestConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         cmake = self._configure_cmake()
