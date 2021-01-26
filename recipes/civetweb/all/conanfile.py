@@ -50,18 +50,17 @@ class civetwebConan(ConanFile):
             self.requires("openssl/1.1.1i")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.verbose = True
-        cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
-        cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
-        cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
-        cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
-        cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
-        cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
-        cmake.configure(
-                source_dir=os.path.relpath(self._source_subfolder, self._build_subfolder),
-                build_dir=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
+        self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
+        self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
+        self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
+        self._cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
+        self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
+        self._cmake.configure(source_dir=self._source_subfolder, build_dir=self._build_subfolder)
+        return self._cmake
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
