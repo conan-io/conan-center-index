@@ -8,6 +8,7 @@ class civetwebConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
     topics = ("conan", "civetweb", "web-server", "embedded")
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -65,11 +66,6 @@ class civetwebConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("civetweb-%s" % self.version, self._source_subfolder)
-        tools.replace_in_file(file_path=os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              search="project (civetweb)",
-                              replace="""project (civetweb)
-                                 include(../conanbuildinfo.cmake)
-                                 conan_basic_setup()""")
 
     def build(self):
         cmake = self._configure_cmake()
