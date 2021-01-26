@@ -44,8 +44,6 @@ class KeychainConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs     = ['lib']
         self.cpp_info.libs        = tools.collect_libs(self)
 
         if self.settings.os == 'Macos':
