@@ -1,6 +1,6 @@
 # Community Resources
 
-This is a currated list of various bots and helpfull tools that aim to making approaching Conan-Center-Index and contributing easier.
+This is a curated list of various bots and helpful tools that aim to making approaching Conan-Center-Index and contributing easier.
 
 ## Bots
 
