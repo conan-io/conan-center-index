@@ -2,6 +2,8 @@
 
 The following summarizes the process for contributing to the CCI (Conan Center Index) project.
 
+toc
+
 ## Community
 
 Conan Center Index is an Open Source MIT licensed project.

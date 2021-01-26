@@ -2,6 +2,8 @@
 
 The following policies are preferred during the review, but not mandatory:
 
+toc
+
 ## Trailing white-spaces
 
 Avoid trailing white-space characters, if possible
