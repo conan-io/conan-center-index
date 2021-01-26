@@ -1,6 +1,19 @@
 # Adding Packages to ConanCenter
 
-toc
+<!-- toc -->
+## Contents
+
+  * [Join the Early Access Program](#join-the-early-access-program)
+  * [More Information about Recipes](#more-information-about-recipes)
+    * [Before start](#before-start)
+    * [The recipe folder](#the-recipe-folder)
+    * [The version folder/s](#the-version-folders)
+    * [The conanfile.py and `test_package` folder](#the-conanfilepy-and-test_package-folder)
+    * [The `conandata.yml`](#the-conandatayml)
+    * [How to provide a good recipe](#how-to-provide-a-good-recipe)
+    * [Test the recipe locally](#test-the-recipe-locally)
+    * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
+    * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
 
 ## Join the Early Access Program
 

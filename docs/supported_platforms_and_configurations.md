@@ -1,6 +1,12 @@
 # Supported platforms and configurations
 
-toc
+<!-- toc -->
+## Contents
+
+  * [Introduction](#introduction)
+  * [Windows](#windows)
+  * [Linux](#linux)
+  * [MacOS](#macos)<!-- endToc -->
 
 ## Introduction
 
