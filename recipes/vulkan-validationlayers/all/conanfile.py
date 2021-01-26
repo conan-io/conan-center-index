@@ -109,14 +109,15 @@ class VulkanValidationLayersConan(ConanFile):
         # Move several files, but it's important to preserve relative path
         # between module library and manifest json file
         if self.settings.os == "Windows":
-            # import lib is useless, validation layer lib is loaded at runtime
-            os.remove(os.path.join(self.package_folder, "lib", "VkLayer_khronos_validation.lib"))
-            # move module library and manifest file in bin folder
-            for validation_layer in glob.glob(os.path.join(self.package_folder, "lib", "VkLayer_khronos_validation.*")):
-                shutil.move(
-                    src=validation_layer,
-                    dst=os.path.join(self.package_folder, "bin", os.path.basename(validation_layer))
-                )
+            bin_dir = os.path.join(self.package_folder, "bin")
+            lib_dir = os.path.join(self.package_folder, "lib")
+            # import lib is useless, validation layer dll is loaded at runtime
+            os.remove(os.path.join(lib_dir, "VkLayer_khronos_validation.lib"))
+            # move dll and manifest file in bin folder
+            tools.mkdir(bin_dir)
+            for validation_layer in glob.glob(os.path.join(lib_dir, "VkLayer_khronos_validation.*")):
+                layer_filename = os.path.basename(validation_layer)
+                shutil.move(validation_layer, os.path.join(bin_dir, layer_filename))
         else:
             os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
