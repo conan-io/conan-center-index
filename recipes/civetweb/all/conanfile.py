@@ -96,7 +96,7 @@ class civetwebConan(ConanFile):
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
             self.cpp_info.defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.append("Ws2_32")
+            self.cpp_info.system_libs .append("ws2_32")
         if self.options.with_websockets:
             self.cpp_info.defines.append("USE_WEBSOCKET")
         if self.options.with_ipv6:
