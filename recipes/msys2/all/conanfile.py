@@ -1,7 +1,8 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 import shutil
+import subprocess
 
 
 class MSYS2Conan(ConanFile):
@@ -32,8 +33,6 @@ class MSYS2Conan(ConanFile):
             raise ConanInvalidConfiguration("Only Windows x64 supported")
         if tools.Version(self.version) <= "20161025":
             raise ConanInvalidConfiguration("msys2 v.20161025 is no longer supported")    
-
-            
 
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
@@ -69,15 +68,77 @@ class MSYS2Conan(ConanFile):
             verify_command = 'bash -l -c "pacman-key --verify %s"' % self._keyring_sig.replace("\\", "/")
             self.run(verify_command)
 
-            update_command = 'bash -l -c "pacman -U %s --noconfirm"' % self._keyring_file.replace("\\", "/")
-            self.run(update_command)
+            install_command = 'bash -l -c "pacman -U %s --noconfirm"' % self._keyring_file.replace("\\", "/")
+            self.run(install_command)
+            self._kill_pacman()
+
+    def _update_very_old_pacman(self):
+        if (tools.Version(self.version) < "20200517"):
+            # Fix (https://github.com/msys2/MSYS2-packages/issues/1967)
+            # install zstd and pacman manually
+            pacman_packages_x64=["http://repo.msys2.org/msys/x86_64/libzstd-1.4.4-2-x86_64.pkg.tar.xz",
+                                 "http://repo.msys2.org/msys/x86_64/zstd-1.4.4-2-x86_64.pkg.tar.xz",
+                                 "http://repo.msys2.org/msys/x86_64/pacman-5.2.1-6-x86_64.pkg.tar.xz"]
+            
+            if (self.settings.arch == "x86_64"):
+                for i in pacman_packages_x64:
+                    self.run('bash -l -c "pacman --noconfirm -U %s"' % i)
+
+            pacman_packages_x32=["http://repo.msys2.org/msys/i686/libzstd-1.4.4-2-i686.pkg.tar.xz",
+                                 "http://repo.msys2.org/msys/i686/zstd-1.4.4-2-i686.pkg.tar.xz",
+                                 "http://repo.msys2.org/msys/i686/pacman-5.2.1-6-i686.pkg.tar.xz"]
+
+            if (self.settings.arch == "x86"):                     
+                for i in pacman_packages_x32:
+                    self.run('bash -l -c "pacman --noconfirm -U %s"' % i)
+
+            self._kill_pacman()
+
 
     def _update_pacman(self):
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
-            self.run('bash -l -c "pacman -Sy pacman --noconfirm"')
-            self.run('bash -l -c "pacman -Rc dash --noconfirm"')
-            self.run('bash -l -c "pacman -Syu --noconfirm"')
+            self._update_very_old_pacman()
 
+            # https://www.msys2.org/news/   see  2020-05-31 - Update may fail with "could not open file"
+            # update pacman separately first
+            self.run('bash -l -c "pacman --noconfirm -Sydd pacman"')
+
+            # https://www.msys2.org/docs/ci/
+            self.run('bash -l -c "pacman --noconfirm -Syuu"')  # Core update (in case any core packages are outdated)
+            self._kill_pacman()
+            self.run('bash -l -c "pacman --noconfirm -Syuu"')  # Normal update
+            self._kill_pacman()
+            self.run('bash -l -c "pacman -Rc dash --noconfirm"')
+
+    # https://github.com/msys2/MSYS2-packages/issues/1966
+    def _kill_pacman(self):
+        if (self.settings.os == "Windows"):
+            taskkill_exe = os.path.join(os.environ.get('SystemRoot'), 'system32', 'taskkill.exe')
+
+            log_out = True
+            if log_out:
+                out = subprocess.PIPE
+                err = subprocess.STDOUT
+            else:
+                out = file(os.devnull, 'w')
+                err = subprocess.PIPE
+
+            if os.path.exists(taskkill_exe):
+                taskkill_cmd1 = taskkill_exe + " /f /t /im pacman.exe"
+                taskkill_cmd2 = taskkill_exe + " /f /im gpg-agent.exe"
+                taskkill_cmd3 = taskkill_exe + " /f /im dirmngr.exe"
+
+                taskkill_cmd4 = taskkill_exe + ' /fi "MODULES eq msys-2.0.dll"'
+
+                try:
+                    proc = subprocess.Popen(taskkill_cmd1, stdout=out, stderr=err, bufsize=1)
+                    proc = subprocess.Popen(taskkill_cmd2, stdout=out, stderr=err, bufsize=1)
+                    proc = subprocess.Popen(taskkill_cmd3, stdout=out, stderr=err, bufsize=1)
+
+                    proc = subprocess.Popen(taskkill_cmd4, stdout=out, stderr=err, bufsize=1)
+                except OSError as e:
+                    if e.errno == errno.ENOENT:
+                        raise ConanException("Cannot kill pacman")
 
     @property
     def _msys_dir(self):
