@@ -39,7 +39,7 @@ class CppUTestConan(ConanFile):
         "extensions": "ON",
         "longlong": "ON",
         "coverage": "OFF",
-        "tests": "ON",
+        "tests": "OFF",
     }
 
     _cmake = None
