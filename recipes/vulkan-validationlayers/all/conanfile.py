@@ -110,7 +110,7 @@ class VulkanValidationLayersConan(ConanFile):
         # between module library and manifest json file
         if self.settings.os == "Windows":
             # import lib is useless, validation layer lib is loaded at runtime
-            os.remove(os.path.join(self.package_folder("lib", "VkLayer_khronos_validation.lib")))
+            os.remove(os.path.join(self.package_folder, "lib", "VkLayer_khronos_validation.lib"))
             # move module library and manifest file in bin folder
             for validation_layer in glob.glob(os.path.join(self.package_folder, "lib", "VkLayer_khronos_validation.*")):
                 shutil.move(
