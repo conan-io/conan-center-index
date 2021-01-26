@@ -1,6 +1,5 @@
 sources:
   "4.0":
-    - url: "https://github.com/cpputest/cpputest/releases/download/v4.0/cpputest-4.0.tar.gz"
-      sha256: 21c692105db15299b5529af81a11a7ad80397f92c122bd7bf1e4a4b0e85654f7
-    - url: "https://raw.githubusercontent.com/cpputest/cpputest/v4.0/COPYING"
-      sha256: d8fe282e4047197e1fbd6ef2527bde832a1514be6bd82fac7d1296ce184285c8
+    url: "https://github.com/cpputest/cpputest/releases/download/v4.0/cpputest-4.0.tar.gz"
+    sha256: 21c692105db15299b5529af81a11a7ad80397f92c122bd7bf1e4a4b0e85654f7
+
