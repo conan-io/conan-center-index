@@ -2,13 +2,15 @@ import os
 
 from conans import ConanFile, CMake, tools
 
-class SzipConan(ConanFile):
-    name = "szip"
-    description = "C Implementation of the extended-Rice lossless compression " \
-                  "algorithm, suitable for use with scientific data."
-    license = "Szip License"
-    topics = ("conan", "szip", "compression", "decompression")
-    homepage = "https://support.hdfgroup.org/doc_resource/SZIP/"
+class CppUTestConan(ConanFile):
+    name = "cpputest"
+    description = \
+"CppUTest is a C /C++ based unit xUnit test framework for unit testing and for test-driving your code." \
+"It is written in C++ but is used in C and C++ projects and frequently" \
+"used in embedded systems but it works for any C/C++ project."
+    license = "BSD-3-Clause License"
+    topics = ("conan", "testing", "unit-testing")
+    homepage = "http://cpputest.github.io"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
@@ -72,7 +74,7 @@ class SzipConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "SZIP"
-        self.cpp_info.names["cmake_find_package_multi"] = "SZIP"
+        self.cpp_info.names["cmake_find_package"] = "CppUTest"
+        self.cpp_info.names["cmake_find_package_multi"] = "CppUTest"
 
         self.cpp_info.libs = tools.collect_libs(self)
