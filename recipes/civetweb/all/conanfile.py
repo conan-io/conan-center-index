@@ -79,7 +79,7 @@ class civetwebConan(ConanFile):
         self.copy(os.path.join(self._source_subfolder, "LICENSE.md"), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         bin_folder = os.path.join(self.package_folder, "bin");
         for bin_file in os.listdir(bin_folder):
             if not bin_file.startswith("civetweb"):
