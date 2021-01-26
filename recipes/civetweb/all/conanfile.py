@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import shutil
 
 class civetwebConan(ConanFile):
     name = "civetweb"
