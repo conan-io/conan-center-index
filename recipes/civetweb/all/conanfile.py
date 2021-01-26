@@ -1,5 +1,5 @@
-from conans import ConanFile, tools, CMake
 import os
+from conans import ConanFile, tools, CMake
 
 class civetwebConan(ConanFile):
     name = "civetweb"
