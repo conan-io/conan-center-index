@@ -1,12 +1,12 @@
 # Supported platforms and configurations
 
-The pipeline iterates a fixed list of profiles for every Conan reference, 
-it computes the packageID for each profile and discard duplicates. Then it 
-builds the packages for the remaining profiles and upload them to 
+The pipeline iterates a fixed list of profiles for every Conan reference,
+it computes the packageID for each profile and discard duplicates. Then it
+builds the packages for the remaining profiles and upload them to
 [JFrog ConanCenter](https://conan.io/center/) once the pull-request is merged.
 
-Because duplicated packageIDs are discarded, the pipeline iterates the 
-profiles always in the same order and the profiles selected to build when 
+Because duplicated packageIDs are discarded, the pipeline iterates the
+profiles always in the same order and the profiles selected to build when
 there is a duplicate follow some rules:
 
  * Static linkage (option `shared=False`) is preferred over dynamic linking.
@@ -15,9 +15,9 @@ there is a duplicate follow some rules:
  * Older compiler versions are considered first.
  * In Linux, GCC is iterated before Clang.
 
-Currently, given the following supported platforms and configurations we 
-are generating **136 different binary packages for a C++ library** 
-and **88 for a C library**. 
+Currently, given the following supported platforms and configurations we
+are generating **136 different binary packages for a C++ library**
+and **88 for a C library**.
 
 
 ## Windows
