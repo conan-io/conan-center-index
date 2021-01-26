@@ -60,7 +60,7 @@ class civetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
         self._cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
         self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
-        self._cmake.configure(source_dir=self._source_subfolder, build_dir=self._build_subfolder)
+        self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
     def source(self):
