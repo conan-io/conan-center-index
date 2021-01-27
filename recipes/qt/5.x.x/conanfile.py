@@ -252,7 +252,7 @@ class QtConan(ConanFile):
                 _enablemodule(req)
 
         for module in self._submodules:
-            if getattr(self.options, module):
+            if self.options.get_safe(module):
                 _enablemodule(module)
 
     def requirements(self):
@@ -444,7 +444,7 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
 
         for module in self._submodules:
-            if not getattr(self.options, module):
+            if not self.options.get_safe(module):
                 args.append("-skip " + module)
 
         args.append("--zlib=system")
@@ -495,7 +495,7 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
                               ("with_sqlite3", "sqlite")]:
-            if getattr(self.options, opt, False):
+            if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     args += ["-qt-" + conf_arg]
                 else:
@@ -643,7 +643,7 @@ Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
         for module in self._submodules:
-            if not getattr(self.options, module):
+            if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
