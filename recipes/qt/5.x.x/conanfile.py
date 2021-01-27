@@ -20,10 +20,10 @@ class qt(Generator):
 
 
 class QtConan(ConanFile):
-    _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns", 
+    _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns",
     "qttranslations", "qtdoc", "qtrepotools", "qtqa", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
-    "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview", 
+    "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
     "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d"]
 
@@ -142,8 +142,8 @@ class QtConan(ConanFile):
             mybuf = StringIO()
             cmd_v = "{} --version".format(python_exe)
             self.run(cmd_v, output=mybuf)
-            verstr = mybuf.getvalue().strip().split('Python ')[1]
-            if verstr.endswith('+'):
+            verstr = mybuf.getvalue().strip().split("Python ")[1]
+            if verstr.endswith("+"):
                 verstr = verstr[:-1]
             version = tools.Version(verstr)
             # >= 2.7.5 & < 3
@@ -177,7 +177,7 @@ class QtConan(ConanFile):
             self.options.opengl = "dynamic"
 
     def configure(self):
-        #if self.settings.os != 'Linux':
+        #if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if self.options.widgets and not self.options.gui:
@@ -219,8 +219,8 @@ class QtConan(ConanFile):
             del self.settings.build_type
 
         if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
-            raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
-                                            'Either enable qt:with_doubleconversion or switch to libc++')
+            raise ConanInvalidConfiguration("Qt without libc++ needs qt:with_doubleconversion. "
+                                            "Either enable qt:with_doubleconversion or switch to libc++")
 
         if tools.os_info.is_linux:
             if self.options.qtwebengine:
@@ -230,7 +230,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
         config = configparser.ConfigParser()
-        config.read(os.path.join(self.recipe_folder, 'qtmodules%s.conf' % self.version))
+        config.read(os.path.join(self.recipe_folder, "qtmodules%s.conf" % self.version))
         submodules_tree = {}
         assert config.sections()
         for s in config.sections():
@@ -246,7 +246,7 @@ class QtConan(ConanFile):
                     submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
 
         def _enablemodule(mod):
-            if mod != 'qtbase':
+            if mod != "qtbase":
                 setattr(self.options, mod, True)
             for req in submodules_tree[mod]["depends"]:
                 _enablemodule(req)
@@ -527,7 +527,7 @@ class QtConan(ConanFile):
                   ("xkbcommon", "XKBCOMMON")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
-                if package == 'freetype':
+                if package == "freetype":
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
 
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
@@ -537,10 +537,10 @@ class QtConan(ConanFile):
             args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
             args += ["-L \"%s\"" % s for s in self.deps_cpp_info[package].lib_paths]
 
-        if 'libmysqlclient' in self.deps_cpp_info.deps:
-            args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
-        if 'libpq' in self.deps_cpp_info.deps:
-            args.append("-psql_config \"%s\"" % os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
+        if "libmysqlclient" in self.deps_cpp_info.deps:
+            args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info["libmysqlclient"].rootpath, "bin", "mysql_config"))
+        if "libpq" in self.deps_cpp_info.deps:
+            args.append("-psql_config \"%s\"" % os.path.join(self.deps_cpp_info["libpq"].rootpath, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
@@ -581,7 +581,7 @@ class QtConan(ConanFile):
                 os.environ[var] = val
             return val
 
-        value = _getenvpath('CC')
+        value = _getenvpath("CC")
         if value:
             args += ['QMAKE_CC="' + value + '"',
                      'QMAKE_LINK_C="' + value + '"',
@@ -597,23 +597,23 @@ class QtConan(ConanFile):
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
         if self.options.qtwebengine and self.settings.os == "Linux":
-            args += ['-qt-webengine-ffmpeg',
-                     '-system-webengine-opus']
+            args += ["-qt-webengine-ffmpeg",
+                     "-system-webengine-opus"]
 
         if self.options.config:
             args.append(str(self.options.config))
 
-        os.mkdir('build_folder')
-        with tools.chdir('build_folder'):
+        os.mkdir("build_folder")
+        with tools.chdir("build_folder"):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
                 with tools.environment_append(build_env):
-                    
+
                     if tools.os_info.is_macos:
-                        open(".qmake.stash" , 'w').close()
-                        open(".qmake.super" , 'w').close()
+                        open(".qmake.stash" , "w").close()
+                        open(".qmake.super" , "w").close()
 
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                     if tools.os_info.is_macos:
@@ -625,9 +625,9 @@ class QtConan(ConanFile):
                         self.run(self._make_program(), run_environment=True)
 
     def package(self):
-        with tools.chdir('build_folder'):
+        with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
-        with open(os.path.join(self.package_folder, "bin", "qt.conf"), 'w') as f:
+        with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
             f.write("""[Paths]
 Prefix = ..
 ArchData = bin/archdatadir
@@ -647,9 +647,9 @@ Examples = bin/datadir/examples""")
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.la*')
-        tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.pdb*')
-        tools.remove_files_by_mask(os.path.join(self.package_folder, 'bin'), '*.pdb')
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb*")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
@@ -665,28 +665,29 @@ Examples = bin/datadir/examples""")
                 self.info.settings.compiler.runtime = "MT/MTd"
 
     def package_info(self):
+        # FIXME add components
         self.cpp_info.libs = tools.collect_libs(self)
 
         # Add top level include directory, so code compile if someone uses
         # includes with prefixes (e.g. "#include <QtCore/QString>")
-        self.cpp_info.includedirs = ['include']
+        self.cpp_info.includedirs = ["include"]
 
         # Add all Qt module directories (QtCore, QtGui, QtWidgets and so on), so prefix
         # can be omited in includes (e.g. "#include <QtCore/QString>" => "#include <QString>")
-        fu = ['include/' + f.name for f in os.scandir('include') if f.is_dir()]
+        fu = ["include/" + f.name for f in os.scandir("include") if f.is_dir()]
         self.cpp_info.includedirs.extend(fu)
 
         if not self.options.shared:
-            if self.settings.os == 'Windows':
-                self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
-                self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
-                self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
-                self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs.append("Version")   # "Qt5Cored.lib" require "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
+                self.cpp_info.system_libs.append("Winmm")     # "Qt5Cored.lib" require "__imp_timeSetEvent" which is in "Winmm.lib" library
+                self.cpp_info.system_libs.append("Netapi32")  # "Qt5Cored.lib" require "NetApiBufferFree" which is in "Netapi32.lib" library
+                self.cpp_info.system_libs.append("UserEnv")   # "Qt5Cored.lib" require "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
 
-            if self.settings.os == 'Macos':
-                self.cpp_info.frameworks.extend(["IOKit"])    # 'libQt5Core.a' require '_IORegistryEntryCreateCFProperty', '_IOServiceGetMatchingService' and much more which are in 'IOKit' framework
-                self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
-                self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.extend(["IOKit"])    # "libQt5Core.a" require "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+                self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
 
     @staticmethod
