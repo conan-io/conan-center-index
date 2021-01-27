@@ -19,13 +19,6 @@ class MingwConan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("MinGW is only supported by Windows.")
-        if self.settings.compiler == "gcc":
-            if str(self.settings.compiler.threads) != str(self.options.threads):
-                self.output.warn("MinGW threads may not differ from 'settings.compiler.threads'.")
-            if str(self.settings.compiler.exception) != str(self.options.exception):
-                self.output.warn("MinGW exception may not differ from 'settings.compiler.exception'.")
-        else:
-            self.output.warn("Only 'gcc' should be used as compiler.")
 
     def source(self):
         url = self.conan_data["sources"][self.version]["url"][str(self.settings.arch)] \
@@ -45,6 +38,23 @@ class MingwConan(ConanFile):
         del self.info.settings.compiler
 
     def package_info(self):
+        if getattr(self, "settings_target", None):
+            if self.settings_target.compiler != "gcc":
+                raise ConanInvalidConfiguration("Only GCC is allowed as compiler.")
+            if str(self.settings_target.compiler.threads) != str(self.options.threads):
+                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
+                                                "with threads={}, your profile:host declares "
+                                                "threads={}, please use the same value for both."
+                                                .format(self.options.threads,
+                                                        self.settings_target.compiler.threads))
+            if str(self.settings_target.compiler.exception) != str(self.options.exception):
+                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
+                                                "with exception={}, your profile:host declares "
+                                                "exception={}, please use the same value for both."
+                                                .format(self.options.exception,
+                                                        self.settings_target.compiler.exception))
+
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
@@ -52,3 +62,12 @@ class MingwConan(ConanFile):
         self.env_info.CONAN_CMAKE_GENERATOR = "MinGW Makefiles"
         self.env_info.CXX = os.path.join(self.package_folder, "bin", "g++.exe").replace("\\", "/")
         self.env_info.CC = os.path.join(self.package_folder, "bin", "gcc.exe").replace("\\", "/")
+        self.env_info.LD = os.path.join(self.package_folder, "bin", "ld.exe").replace("\\", "/")
+        self.env_info.NM = os.path.join(self.package_folder, "bin", "nm.exe").replace("\\", "/")
+        self.env_info.AR = os.path.join(self.package_folder, "bin", "ar.exe").replace("\\", "/")
+        self.env_info.AS = os.path.join(self.package_folder, "bin", "as.exe").replace("\\", "/")
+        self.env_info.STRIP = os.path.join(self.package_folder, "bin", "strip.exe").replace("\\", "/")
+        self.env_info.RANLIB = os.path.join(self.package_folder, "bin", "ranlib.exe").replace("\\", "/")
+        self.env_info.STRINGS = os.path.join(self.package_folder, "bin", "strings.exe").replace("\\", "/")
+        self.env_info.OBJDUMP = os.path.join(self.package_folder, "bin", "objdump.exe").replace("\\", "/")
+        self.env_info.GCOV = os.path.join(self.package_folder, "bin", "gcov.exe").replace("\\", "/")
