@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	 */
 	ret = 1;
 	mnl_socket_setsockopt(nl, NETLINK_NO_ENOBUFS, &ret, sizeof(int));
-    ret = mnl_socket_recvfrom(nl, buf, sizeof_buf);
+	ret = mnl_socket_recvfrom(nl, buf, sizeof_buf);
 	if (ret == -1) {
 		perror("mnl_socket_recvfrom");
 		exit(EXIT_FAILURE);
