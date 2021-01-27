@@ -89,7 +89,7 @@ class GlfwConan(ConanFile):
             content += (
                 "if(TARGET {aliased} AND NOT TARGET {alias})\n"
                 "    add_library({alias} INTERFACE IMPORTED)\n"
-                "    target_link_libraries({alias} INTERFACE {aliased})\n"
+                "    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})\n"
                 "endif()\n"
             ).format(alias=alias, aliased=aliased)
         tools.save(module_file, content)
