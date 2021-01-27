@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
 
         if "arm" in self.settings.arch:
             self.test_arm()
-        elif tools.cross_building(self.settings) and self.settings.os == "Windows":
+        elif tools.cross_building(self.settings) and self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             self.test_mingw_cross()
         else:
             bin_path = os.path.join("bin", "test_package")
