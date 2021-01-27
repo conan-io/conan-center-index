@@ -167,6 +167,9 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
+        if self.settings.compiler in ["gcc", "clang"]:
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
@@ -406,9 +409,6 @@ class QtConan(ConanFile):
         return None
 
     def build(self):
-        if self.settings.compiler in ["gcc", "clang"]:
-            if tools.Version(self.settings.compiler.version) < "5.0":
-                raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
         args.append("-v")
