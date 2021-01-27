@@ -8,7 +8,7 @@ TEST_GROUP(FirstTestGroup)
 
 TEST(FirstTestGroup, FirstTest)
 {
-   CHECK_TRUE(true);
+    CHECK_TRUE(true);
 }
 
 int main(int argc, const char** argv)
