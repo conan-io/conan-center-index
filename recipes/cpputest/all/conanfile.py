@@ -8,7 +8,7 @@ class CppUTestConan(ConanFile):
 "CppUTest is a C /C++ based unit xUnit test framework for unit testing and for test-driving your code." \
 "It is written in C++ but is used in C and C++ projects and frequently" \
 "used in embedded systems but it works for any C/C++ project."
-    license = "BSD-3-Clause License"
+    license = "BSD-3-Clause"
     topics = ("conan", "testing", "unit-testing")
     homepage = "http://cpputest.github.io"
     url = "https://github.com/conan-io/conan-center-index"
