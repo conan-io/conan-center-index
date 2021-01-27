@@ -35,7 +35,7 @@ class GTestConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "googletest-release-" + self.version
+        extracted_dir = glob.glob("googletest" + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -78,6 +78,9 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
+        
+        if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
+            self.cpp_info.components["libgtest"].system_libs.append("regex")
 
         if self.options.shared:
             self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")

@@ -3,3 +3,5 @@ versions:
     folder: all
   "1.10.0":
     folder: all
+  "cci-26012021":
+    folder: all
