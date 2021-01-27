@@ -10,7 +10,7 @@ class CppUTestConan(ConanFile):
 "used in embedded systems but it works for any C/C++ project."
     license = "BSD-3-Clause"
     topics = ("conan", "testing", "unit-testing")
-    homepage = "http://cpputest.github.io"
+    homepage = "https://cpputest.github.io"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
