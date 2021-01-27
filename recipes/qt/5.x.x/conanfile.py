@@ -372,7 +372,10 @@ class QtConan(ConanFile):
                                "x86_64": "winrt-x64-msvc2015"},
                         "15": {"armv7": "winrt-arm-msvc2017",
                                "x86": "winrt-x86-msvc2017",
-                               "x86_64": "winrt-x64-msvc2017"}
+                               "x86_64": "winrt-x64-msvc2017"},
+                        "16": {"armv7": "winrt-arm-msvc2019",
+                               "x86": "winrt-x86-msvc2019",
+                               "x86_64": "winrt-x64-msvc2019"}
                         }.get(str(self.settings.compiler.version)).get(str(self.settings.arch))
 
         elif self.settings.os == "FreeBSD":
