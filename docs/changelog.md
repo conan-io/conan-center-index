@@ -1,5 +1,16 @@
 # Changelog
 
+### 27-January-2021 - 09:37 CET
+
+- Feature: PropulateProperties: Notify alert error if there are orphan packages, but keep going #577
+- Feature: Capture output and exit code running Conan commands #578
+- Feature: New job to delete an Artifactory repo #575
+- Fix: AutomaticMerge: Fix alerts when there are no errors #576
+- Fix: PopulateProperties: Do not raise if a property assignment fails, go with the next one #586
+- Fix: Improve packages generated message #579
+- Fix: BuildSingleReference: Add boolean parameter to configure hooks errors #592
+- Fix: Handle scenario where a package doesn't have properties (#603)
+
 ### 30-December-2020 - 13:24 CET
 
 - [feature] BuildSingleReference: Run tests for packages that already exist.
