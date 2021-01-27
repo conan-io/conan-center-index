@@ -5,7 +5,7 @@ class KeychainConan(ConanFile):
     name = "keychain"
     homepage = "https://github.com/hrantzsch/keychain"
     description = "A cross-platform wrapper for the operating system's credential storage"
-    topics = ("conan", "keychain", "security", "keychain", "password", "cpp11")
+    topics = ("conan", "keychain", "security", "credentials", "password", "cpp11")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
@@ -49,4 +49,4 @@ class KeychainConan(ConanFile):
         if self.settings.os == 'Macos':
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ['Crypt32']
+            self.cpp_info.system_libs = ['crypt32']
