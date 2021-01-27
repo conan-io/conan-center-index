@@ -172,8 +172,6 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_mysql = False
             self.options.opengl = "dynamic"
-        if self.settings.os == "Macos":
-            del self.settings.os.version
 
     def configure(self):
         #if self.settings.os != 'Linux':
