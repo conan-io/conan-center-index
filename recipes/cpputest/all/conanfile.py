@@ -28,7 +28,7 @@ class CppUTestConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
         "verbose": False,
         "use_std_c_lib": "ON",
         "use_std_cpp_lib": "ON",
