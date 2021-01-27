@@ -37,6 +37,7 @@ class LibcurlConan(ConanFile):
         "with_brotli": [True, False],
         "with_zstd": [True, False],
         "with_c_ares": [True, False],
+        "xp_compatible": [True, False],
     }
     default_options = {
         "shared": False,
@@ -58,6 +59,7 @@ class LibcurlConan(ConanFile):
         "with_brotli": False,
         "with_zstd": False,
         "with_c_ares": False,
+        "xp_compatible": False,
     }
 
     _autotools = None
@@ -91,6 +93,8 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Windows" or not self._is_using_cmake_build:
+            del self.options.xp_compatible
         if not self._has_zstd_option:
             del self.options.with_zstd
         # Default options
@@ -486,6 +490,10 @@ class LibcurlConan(ConanFile):
             self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+        if self.options.get_safe("xp_compatible"):
+            self._cmake.definitions['CURL_TARGET_WINDOWS_VERSION'] = '0x0501'
+            self._cmake.definitions['ENABLE_INET_PTON'] = False
+            self._cmake.definitions['HAVE_INET_PTON'] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
