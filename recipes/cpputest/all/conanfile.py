@@ -25,8 +25,6 @@ class CppUTestConan(ConanFile):
         "detect_mem_leaks": ["ON", "OFF"],
         "extensions": ["ON", "OFF"],
         "longlong": ["ON", "OFF"],
-        "coverage": ["ON", "OFF"],
-        "tests": ["ON", "OFF"],
     }
     default_options = {
         "shared": False,
@@ -38,8 +36,6 @@ class CppUTestConan(ConanFile):
         "detect_mem_leaks": "ON",
         "extensions": "ON",
         "longlong": "ON",
-        "coverage": "OFF",
-        "tests": "OFF",
     }
 
     _cmake = None
@@ -81,8 +77,8 @@ class CppUTestConan(ConanFile):
         self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_mem_leaks
         self._cmake.definitions["EXTENSIONS"] = self.options.extensions
         self._cmake.definitions["LONGLONG"] = self.options.longlong
-        self._cmake.definitions["COVERAGE"] = self.options.coverage
-        self._cmake.definitions["TESTS"] = self.options.tests
+        self._cmake.definitions["COVERAGE"] = "OFF"
+        self._cmake.definitions["TESTS"] = "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
