@@ -3,14 +3,17 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
+required_conan_version = ">=1.32.0"
+
+
 class FrugallyDeepConan(ConanFile):
     name = "frugally-deep"
     description = "Use Keras models in C++ with ease."
-    license = "The MIT License (MIT)"
+    license = "MIT"
     topics = ("keras", "tensorflow")
     homepage = "https://github.com/Dobiasd/frugally-deep"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     @property
@@ -26,7 +29,7 @@ class FrugallyDeepConan(ConanFile):
             "apple-clang": "9",
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
 
@@ -44,8 +47,8 @@ class FrugallyDeepConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.3.9")
-        self.requires("functionalplus/v0.2.13-p0")
-        self.requires("jsonformoderncpp/3.1.0@conan/stable")
+        self.requires("functionalplus/0.2.13-p0")
+        self.requires("nlohmann_json/3.9.1")
 
     def package_id(self):
         self.info.header_only()
@@ -63,5 +66,8 @@ class FrugallyDeepConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "frugally-deep"
         self.cpp_info.components["fdeep"].names["cmake_find_package"] = "fdeep"
         self.cpp_info.components["fdeep"].names["cmake_find_package_multi"] = "fdeep"
+        self.cpp_info.components["fdeep"].requires = ["eigen::eigen",
+                                                      "functionalplus::functionalplus",
+                                                      "nlohmann_json::nlohmann_json"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["fdeep"].system_libs = ["pthread"]
