@@ -4,10 +4,9 @@ import itertools
 import glob
 
 import configparser
-from conans import ConanFile, tools, __version__ as conan_version, RunEnvironment
+from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
-from conans.tools import Version
 
 
 class qt(Generator):
@@ -168,7 +167,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
             self.options.with_mysql = False
