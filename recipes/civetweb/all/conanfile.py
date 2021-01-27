@@ -90,7 +90,6 @@ class civetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].system_libs.extend(["dl", "rt", "pthread"])
         elif self.settings.os == "Macos":
             self.cpp_info.components["_civetweb"].frameworks.append("Cocoa")
-            self.cpp_info.components["_civetweb"].sharedlinkflags = self.cpp_info.exelinkflags
             self.cpp_info.components["_civetweb"].defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
             self.cpp_info.components["_civetweb"].system_libs .append("ws2_32")
