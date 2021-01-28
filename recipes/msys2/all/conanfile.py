@@ -107,9 +107,9 @@ class MSYS2Conan(ConanFile):
             self._kill_pacman()
 
             # https://www.msys2.org/docs/ci/
-            self.run('bash -l -c "pacman --noconfirm -Syuu"')  # Core update (in case any core packages are outdated)
+            self.run('bash -l -c "pacman --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
             self._kill_pacman()
-            self.run('bash -l -c "pacman --noconfirm -Syuu"')  # Normal update
+            self.run('bash -l -c "pacman --noconfirm --ask 20 -Syuu"')  # Normal update
             self._kill_pacman()
             self.run('bash -l -c "pacman -Rc dash --noconfirm"')
 
