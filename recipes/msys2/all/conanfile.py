@@ -26,9 +26,6 @@ class MSYS2Conan(ConanFile):
     }
     settings = "os", "arch"
 
-    def configure(self):
-        self._kill_pacman()
-
 
     def validate(self):
         if self.settings.os != "Windows":
