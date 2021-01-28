@@ -94,5 +94,6 @@ class CppUTestConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "CppUTest"
         self.cpp_info.names["cmake_find_package"] = "CppUTest"
         self.cpp_info.names["cmake_find_package_multi"] = "CppUTest"
+        self.cpp_info.names["pkg_config"] = "cpputest"
 
         self.cpp_info.libs = tools.collect_libs(self)
