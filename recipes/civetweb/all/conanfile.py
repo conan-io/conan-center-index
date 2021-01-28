@@ -54,7 +54,6 @@ class civetwebConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
