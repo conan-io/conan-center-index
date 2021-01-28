@@ -28,23 +28,6 @@ class LibavrocppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
-
-        minimal_version = {
-            "Visual Studio": "10",
-            "gcc": "4.9.1",
-            "clang": "3.3",
-            "apple-clang": "5",
-        }
-
-        if compiler in minimal_version and compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports"
-                " at least C++11. %s %s is not"
-                " supported." % (self.name, compiler, compiler_version)
-            )
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
@@ -68,7 +51,7 @@ class LibavrocppConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("boost/[>=1.38.0]")
+        self.requires("boost/1.75.0")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -76,9 +59,6 @@ class LibavrocppConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["avrocpp"].libs = ["avrocpp"]
