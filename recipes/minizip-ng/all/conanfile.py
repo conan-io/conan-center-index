@@ -104,7 +104,25 @@ class MinizipNgConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "BZIP2_FOUND",
+                              "BZip2_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "BZIP2_VERSION_STRING",
+                              "BZip2_VERSION")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "BZIP2_INCLUDE_DIRS",
+                              "BZip2_INCLUDE_DIRS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "BZIP2_LIBRARIES",
+                              "BZip2_LIBRARIES")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "BZIP2_LIBRARY_DIRS",
+                              "BZip2_LIB_DIRS")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
