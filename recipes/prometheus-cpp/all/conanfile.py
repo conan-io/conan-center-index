@@ -93,6 +93,8 @@ class PrometheusCppConan(ConanFile):
         self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package_multi"] = "core"
         self.cpp_info.components["prometheus-cpp-core"].names["pkg_config"] = "prometheus-cpp-core"
         self.cpp_info.components["prometheus-cpp-core"].libs = ["prometheus-cpp-core"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["prometheus-cpp-core"].system_libs = ["pthread", "rt"]
 
         if self.options.with_push:
             self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package"] = "push"
@@ -103,6 +105,8 @@ class PrometheusCppConan(ConanFile):
                 "prometheus-cpp-core",
                 "libcurl::libcurl",
             ]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["prometheus-cpp-push"].system_libs = ["pthread", "rt"]
 
         if self.options.with_pull:
             self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package"] = "pull"
@@ -115,4 +119,6 @@ class PrometheusCppConan(ConanFile):
             ]
             if self.options.with_compression:
                 self.cpp_info.components["prometheus-cpp-pull"].requires.append("zlib::zlib")
+            if self.settings.os == "Linux":
+                self.cpp_info.components["prometheus-cpp-pull"].system_libs = ["pthread", "rt"]
 
