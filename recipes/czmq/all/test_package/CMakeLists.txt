@@ -1,13 +1,18 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
-
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(czmq REQUIRED CONFIG)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+# TODO: remove czmq:: namespace when fixed in conanfile.py
+if(CZMQ_SHARED)
+  target_link_libraries(${PROJECT_NAME} czmq::czmq)
+else()
+  target_link_libraries(${PROJECT_NAME} czmq::czmq-static)
+endif()
 
 if(WITH_LIBSODIUM)
   target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_LIBSODIUM")

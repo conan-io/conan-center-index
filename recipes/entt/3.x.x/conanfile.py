@@ -1,28 +1,22 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
 class EnttConan(ConanFile):
     name = "entt"
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
-    topics = ("conan," "entt", "gaming", "entity", "ecs")
+    topics = ("conan", "entt", "gaming", "entity", "ecs")
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     no_copy_source = True
-    settings = "os", "compiler", "build_type", "arch"
-
-    _cmake = None
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def configure(self):
         minimal_cpp_standard = "17"
@@ -44,43 +38,27 @@ class EnttConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+        # Compare versions asuming minor satisfies if not explicitly set
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        if lazy_lt_semver(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_LIBCPP"] = False
-        self._cmake.definitions["USE_ASAN"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_DOCS"] = False
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
-        return self._cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-
-    def package_id(self):
-        self.info.header_only()
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "src"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "EnTT"

@@ -1,8 +1,7 @@
 import os
 import fnmatch
-import platform
 from functools import total_ordering
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 
@@ -89,6 +88,31 @@ class OpenSSLConan(ConanFile):
                "no_sha": [True, False],
                "no_async": [True, False],
                "no_dso": [True, False],
+               "no_aria": [True, False],
+               "no_blake2": [True, False],
+               "no_camellia": [True, False],
+               "no_chacha": [True, False],
+               "no_cms": [True, False],
+               "no_comp": [True, False],
+               "no_ct": [True, False],
+               "no_deprecated": [True, False],
+               "no_dgram": [True, False],
+               "no_engine": [True, False],
+               "no_filenames": [True, False],
+               "no_gost": [True, False],
+               "no_idea": [True, False],
+               "no_md4": [True, False],
+               "no_ocsp": [True, False],
+               "no_pinshared": [True, False],
+               "no_rmd160": [True, False],
+               "no_sm2": [True, False],
+               "no_sm3": [True, False],
+               "no_sm4": [True, False],
+               "no_srp": [True, False],
+               "no_srtp": [True, False],
+               "no_ssl": [True, False],
+               "no_ts": [True, False],
+               "no_whirlpool": [True, False],
                "capieng_dialog": [True, False],
                "enable_capieng": [True, False],
                "openssldir": "ANY"}
@@ -101,10 +125,31 @@ class OpenSSLConan(ConanFile):
 
     def config_options(self):
         if self._full_version >= "1.1.0":
-              del self.options.no_md2
-              del self.options.no_rc4
-              del self.options.no_rc5
-              del self.options.no_zlib
+            del self.options.no_md2
+            del self.options.no_rc4
+            del self.options.no_rc5
+            del self.options.no_zlib
+
+        if self._full_version < "1.1.0":
+            del self.options.no_camellia
+            del self.options.no_cast
+            del self.options.no_cms
+            del self.options.no_comp
+            del self.options.no_dgram
+            del self.options.no_engine
+            del self.options.no_idea
+            del self.options.no_md4
+            del self.options.no_ocsp
+            del self.options.no_srp
+            del self.options.no_ts
+            del self.options.no_whirlpool
+
+        if self._full_version < "1.1.1":
+            del self.options.no_aria
+            del self.options.no_pinshared
+            del self.options.no_sm2
+            del self.options.no_sm3
+            del self.options.no_sm4
 
         if self.settings.os != "Windows":
             del self.options.capieng_dialog
@@ -117,10 +162,10 @@ class OpenSSLConan(ConanFile):
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
-                self.build_requires("nasm/2.14")
+                self.build_requires("nasm/2.15.05")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+            if "CONAN_BASH_PATH" not in os.environ:
+                self.build_requires("msys2/20200517")
 
     @property
     def _is_msvc(self):
@@ -143,14 +188,7 @@ class OpenSSLConan(ConanFile):
         return OpenSSLVersion(self.version)
 
     def source(self):
-        try:
-            tools.get(**self.conan_data["sources"][self.version])
-        except ConanException:
-            self.output.warn("Downloading OpenSSL from the mirror.")
-            url = self.conan_data["sources"][self.version]["url"]
-            url = url.replace("https://www.openssl.org/source/",
-                              "https://www.openssl.org/source/old/%s/" % self._full_version.base)
-            tools.get(url, sha256=self.conan_data["sources"][self.version]["sha256"])
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
@@ -459,9 +497,9 @@ class OpenSSLConan(ConanFile):
                     lib_path = lib_path.replace('\\', '/')
 
                 if zlib_info.shared:
-                  args.append("zlib-dynamic")
+                    args.append("zlib-dynamic")
                 else:
-                  args.append("zlib")
+                    args.append("zlib")
 
                 args.extend(['--with-zlib-include="%s"' % include_path,
                              '--with-zlib-lib="%s"' % lib_path])
@@ -483,6 +521,9 @@ class OpenSSLConan(ConanFile):
         {defines}
         includes => add({includes}),
         lflags => add("{lflags}"),
+        {shared_target}
+        {shared_cflag}
+        {shared_extension}
         {cc}
         {cxx}
         {ar}
@@ -522,6 +563,15 @@ class OpenSSLConan(ConanFile):
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
         else:
             ancestor = '[ "%s" ]' % self._ancestor_target
+        shared_cflag = ''
+        shared_extension = ''
+        shared_target = ''
+        if self.settings.os == 'Neutrino':
+            if self.options.shared:
+                shared_extension = 'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
+                shared_target = 'shared_target  => "gnu-shared",'
+            if self.options.fPIC:
+                shared_cflag='shared_cflag => "-fPIC",'
 
         config = config_template.format(targets=targets,
                                         target=self._target,
@@ -535,6 +585,9 @@ class OpenSSLConan(ConanFile):
                                         defines=defines,
                                         includes=includes,
                                         perlasm_scheme=perlasm_scheme,
+                                        shared_target=shared_target,
+                                        shared_extension=shared_extension,
+                                        shared_cflag=shared_cflag,
                                         lflags=" ".join(env_build.link_flags))
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
@@ -551,6 +604,11 @@ class OpenSSLConan(ConanFile):
             # workaround for random error: size too large (archive member extends past the end of the file)
             # /Library/Developer/CommandLineTools/usr/bin/ar: internal ranlib command failed
             if self.settings.os == "Macos" and self._full_version < "1.1.0":
+                parallel = False
+
+            # Building in parallel for versions less than 1.0.2d causes errors
+            # See https://github.com/openssl/openssl/issues/298
+            if self._full_version < "1.0.2d":
                 parallel = False
             command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
         self.run(" ".join(command), win_bash=self._win_bash)
@@ -725,7 +783,7 @@ class OpenSSLConan(ConanFile):
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]
- 
+
         self.cpp_info.components["ssl"].requires = ["crypto"]
 
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):

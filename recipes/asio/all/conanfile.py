@@ -31,8 +31,8 @@ class Asio(ConanFile):
 
     def package_info(self):
         self.cpp_info.defines.append('ASIO_STANDALONE')
-        if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.libs.append('pthread')
+        if str(self.settings.os) in ["Linux"]:
+            self.cpp_info.system_libs.append('pthread')
 
     def package_id(self):
         self.info.header_only()

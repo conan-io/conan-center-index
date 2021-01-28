@@ -1,0 +1,5 @@
+versions:
+  "2.45":
+    folder: all
+  "2.46":
+    folder: all

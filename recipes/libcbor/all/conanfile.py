@@ -10,15 +10,17 @@ class LibCborStackConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = """CBOR protocol implementation for C"""
     topics = ("cbor", "serialization", "messaging")
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ['CMakeLists.txt', 'patches/*']
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "custom_alloc": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "custom_alloc": False
     }
     generators = "cmake"
 
@@ -51,15 +53,16 @@ class LibCborStackConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EXAMPLES"] = False
         self._cmake.definitions["SANITIZE"] = False
-        
+        self._cmake.definitions["CBOR_CUSTOM_ALLOC"] = self.options.custom_alloc
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
-
-
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)

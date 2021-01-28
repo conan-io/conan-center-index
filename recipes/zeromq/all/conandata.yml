@@ -2,6 +2,12 @@ sources:
   "4.3.2":
     url: "https://github.com/zeromq/libzmq/archive/v4.3.2.tar.gz"
     sha256: "02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb"
+  "4.3.3":
+    url: "https://github.com/zeromq/libzmq/archive/v4.3.3.tar.gz"
+    sha256: "c4fd999d67cd12872a8604162f2b1cf5b5a02fb807a88215f0f96bd50331b166"
+  "4.3.4":
+    url: "https://github.com/zeromq/libzmq/archive/v4.3.4.tar.gz"
+    sha256: "0ff5a531c9ffaf0dfdc7dc78d13d1383088f454896d252934c429b2554d10559"
 patches:
   "4.3.2":
     - base_path: "source_subfolder"

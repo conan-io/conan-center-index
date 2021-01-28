@@ -45,3 +45,15 @@ versions:
     folder: all
   10.2.1:
     folder: all
+  10.3.0:
+    folder: all
+  10.4.0:
+    folder: all
+  10.5.0:
+    folder: all
+  10.5.1:
+    folder: all
+  10.6.0:
+    folder: all
+  10.7.0:
+    folder: all

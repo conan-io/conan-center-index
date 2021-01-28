@@ -2,37 +2,41 @@
 
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP,  please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
 
-With EAP, contribution of packages are now done via pull requests to the recipe found in the Github repository in https://github.com/conan-io/conan-center-index.
+All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This process helps CCI against spam and malicious code.
+
+The contribution of packages is done via pull requests to the recipes found in this Github repository https://github.com/conan-io/conan-center-index.
 
 The specific steps to add new packages are:
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it.
-* Create a new folder with the Conan package recipe (conanfile.py)
+* Create a new folder with the Conan package recipe (conanfile.py).
 * Push to GitHub, and submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
 
-When the pull request is reviewed and merged, those packages are published to center.conan.io.
+When the pull request is reviewed and merged, those packages are published to [JFrog ConanCenter](https://conan.io/center/).
 
 ## More Information about Recipes
 
-The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the [conan-center](https://bintray.com/conan/conan-center) repository.
+The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the remote [conan-center](https://conan.io/center/) repository. This remote is added by default to a clean installation of the Conan client.
 
-To contribute with a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to the **master branch** of this repository. The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
+Recipes are contributed by opening pull-requests to this `conan-center-index` repository as it is explained in the section below.
 
-> ⚠️ **Note**: This CI service is not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor ran in recipes by default. Before submitting a PR it is mandatory to run at least a local package creation.
+When pull requests are merged, the CI will upload the generated packages to [JFrog ConanCenter](https://conan.io/center/). Packages generated and uploaded by this build service don't include any _user_ or _channel_ (existing references with any `@user/channel` should be considered as deprecated in favor of packages without it). Once the packages are uploaded, you will be able to install them using the reference as `name/version` (requires Conan >= 1.21): `conan install cmake/3.18.2@`.
+
+The CI bot will start a new build only after being approved in EAP. Your PR can be reviewed in the middle time, but is not mandatory.
 
 The CI system will also report with messages in the PR any error in the process, even linking to the logs to see more details and debug.
 
-When pull requests are merged, the CI generated package binaries will be uploaded to ConanCenter. These packages won't contain the `@user/channel` part. You will be able to install them specifying only `library_name/version` as a requirement, omitting the `@user/channel` part. (Conan >= 1.21).
+To contribute a Conan recipe into the `conan-center-index` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls). The **build service** associated to this repo will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) for a list of generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
-Previously existing packages in ConanCenter, with the full reference including `@user/channel` will still be available, but the previous process of “inclusion request” for getting them into Conan-center is now deprecated, and new contributions should follow this guide. Those packages will be gradually contributed to this repo to generate new binaries without the `@user/channel`.
+> ⚠️ **Note**: This not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor run in recipes by default. Before submitting a pull request, please ensure that it works locally for some configurations.
 
-## How to submit a Pull Request
+The pipeline will report errors and build logs by creating a comment in the pull-request after every commit. The message will include links to the logs for inspecting.
 
 ### Before start
 
-Make sure you are using the latest [Conan client](https://conan.io/downloads) version, the recipes might evolve introducing features of the newer Conan releases.
+Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 
 
 ### The recipe folder
@@ -132,7 +136,15 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
      tools.get(**self.conan_data["sources"][self.version])
 ```
 
+### How to provide a good recipe
 
+The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe.
+
+If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
+
+For C/C++ projects which use CMake for building, you can take a look on [szip](https://github.com/conan-io/conan-center-index/blob/master/recipes/szip/all/conanfile.py) and [recastnavigation](https://github.com/conan-io/conan-center-index/blob/master/recipes/recastnavigation/all/conanfile.py).
+
+However, if you need to use autotools for building, you can take a look on [mpc](https://github.com/conan-io/conan-center-index/blob/master/recipes/mpc/all/conanfile.py), [libatomic_ops](https://github.com/conan-io/conan-center-index/blob/master/recipes/libatomic_ops/all/conanfile.py), [libev](https://github.com/conan-io/conan-center-index/blob/master/recipes/libev/all/conanfile.py).
 
 ### Test the recipe locally
 
@@ -144,9 +156,24 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
 ```
 
   The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
+  All hook checks will print a similar message:
 
-Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test.
+  [HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
+  [HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
+
+Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
+
+    cd conan-center-index/recipes/boost/all
+    conan create . 1.74.0@
+
+### Updating conan hooks on your machine
+
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
+
+    conan config install
 
 ### Debugging failed builds
 
-   Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more.
+   Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
+
+   Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.

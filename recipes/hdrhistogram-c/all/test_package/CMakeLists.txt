@@ -1,9 +1,14 @@
-cmake_minimum_required(VERSION 2.8.11)
-project(PackageTest LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.1)
+project(test_package LANGUAGES C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(hdr_decoder_cxx hdr_decoder.cpp)
+find_package(hdr_histogram REQUIRED CONFIG)
 
-target_link_libraries(hdr_decoder_cxx ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.c)
+if(HDRHISTOGRAM_SHARED)
+  target_link_libraries(${PROJECT_NAME} hdr_histogram::hdr_histogram)
+else()
+  target_link_libraries(${PROJECT_NAME} hdr_histogram::hdr_histogram_static)
+endif()

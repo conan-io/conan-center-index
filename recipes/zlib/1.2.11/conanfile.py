@@ -65,6 +65,10 @@ class ZlibConan(ConanFile):
         else:
             make_target = "libz.a"
 
+        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
+            target = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
+            env_build.flags.append(target)
+
         env = {}
         if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
             env = {"CC": "clang", "CXX": "clang++"}
@@ -89,15 +93,18 @@ class ZlibConan(ConanFile):
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
-            for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_UNISTD_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_STDARG_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
+
+            is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
+            if not is_apple_clang12:
+                for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_UNISTD_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_STDARG_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
             tools.mkdir("_build")
             with tools.chdir("_build"):
                 if self._use_autotools:
@@ -128,8 +135,9 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler == "gcc":
-                    current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                    os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                    if self.settings.os != "Windows" or not self.settings.os.subsystem:
+                        current_lib = os.path.join(lib_path, "libzlibstatic.a")
+                        os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
                 elif self.settings.compiler == "clang":
                     current_lib = os.path.join(lib_path, "zlibstatic.lib")
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
@@ -167,6 +175,6 @@ class ZlibConan(ConanFile):
             self.cpp_info.libs.append('minizip')
             if self.options.shared:
                 self.cpp_info.defines.append('MINIZIP_DLL')
-        self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
+        self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"

@@ -17,18 +17,26 @@ class NCursesConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_cxx": [True, False],
-        "with_pcre2": [True, False],
-        "with_reentrant": [True, False],
         "with_widec": [True, False],
+        "with_extended_colors": [True, False],
+        "with_cxx": [True, False],
+        "with_progs": [True, False],
+        "with_ticlib": ["auto", True, False],
+        "with_reentrant": [True, False],
+        "with_tinfo": ["auto", True, False],
+        "with_pcre2": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_widec": True,
+        "with_extended_colors": True,
         "with_cxx": True,
-        "with_pcre2": False,
+        "with_progs": True,
+        "with_ticlib": "auto",
         "with_reentrant": False,
-        "with_widec": False,
+        "with_tinfo": "auto",
+        "with_pcre2": False,
     }
 
     _autotools = None
@@ -37,32 +45,53 @@ class NCursesConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _with_ticlib(self):
+        if self.options.with_ticlib == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return self.options.with_ticlib
+
+    @property
+    def _with_tinfo(self):
+        if self.options.with_tinfo == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return self.options.with_tinfo
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.options.with_widec:
-                raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
-            raise ConanInvalidConfiguration("Unsupported on Visual Studio")
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio":
+                if "MT" in str(self.settings.compiler.runtime):
+                    raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if not self.options.with_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
+        if not self.options.with_widec:
+            del self.options.with_extended_colors
+        if self.settings.os == "Windows":
+            if self._with_tinfo:
+                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
+            if self.options.shared and self._with_ticlib:
+                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def requirements(self):
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
+        if self.settings.compiler == "Visual Studio":
+            self.requires("getopt-for-visual-studio/20200201")
+            self.requires("dirent/1.23.2")
+            if self.options.get_safe("with_extended_colors", False):
+                self.requires("naive-tsearch/0.1.1")
 
     def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("getopt-for-visual-studio/20200201")
-            self.build_requires("dirent/1.23.2")
-        if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -74,23 +103,15 @@ class NCursesConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         build = None
         host = None
-        conf_args = []
-        if self.options.shared:
-            conf_args.extend(["--with-shared", "--without-normal"])
-        else:
-            conf_args.extend(["--without-shared", "--with-normal"])
-        if self.options.with_cxx:
-            conf_args.append("--with-cxx-binding")
-            if self.options.shared:
-                conf_args.append("--with-cxx-shared")
-            else:
-                conf_args.append("--without-cxx-shared")
-        else:
-            conf_args.append("--without-cxx-binding")
-        conf_args.extend([
-            "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
+        conf_args = [
             "--enable-widec" if self.options.with_widec else "--disable-widec",
+            "--enable-ext-colors" if self.options.get_safe("with_extended_colors", False) else "--disable-ext-colors",
+            "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
             "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
+            "--with-cxx-binding" if self.options.with_cxx else "--without-cxx-binding",
+            "--with-progs" if self.options.with_progs else "--without-progs",
+            "--with-termlib" if self._with_tinfo else "--without-termlib",
+            "--with-ticlib" if self._with_ticlib else "--without-ticlib",
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -102,7 +123,11 @@ class NCursesConan(ConanFile):
             "--disable-rpath",
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
             "--disable-pc-files",
-        ])
+        ]
+        if self.options.shared:
+            conf_args.extend(["--with-shared", "--without-normal", "--with-cxx-shared",])
+        else:
+            conf_args.extend(["--without-shared", "--with-normal", "--without-cxx-shared"])
         if self.settings.os == "Windows":
             conf_args.extend([
                 "--disable-macros",
@@ -113,11 +138,9 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.append("_WIN32")
-            if self.settings.arch == "x86_64":
-                self._autotools.defines.append("_WIN64")
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
+                "ac_cv_func_setvbuf_reversed=no",
             ])
             build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
             self._autotools.flags.append("-FS")
@@ -137,7 +160,7 @@ class NCursesConan(ConanFile):
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
-                    "LDFLAGS": "user32.lib",
+                    "LDFLAGS": "",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
                     "AR": "lib -nologo",
@@ -150,19 +173,21 @@ class NCursesConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        # return
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make(target="libs" if self.settings.compiler == "Visual Studio" else None)
+            autotools.make()
 
     @property
     def _major_version(self):
         return tools.Version(self.version).major
 
     def package(self):
+        # return
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            autotools.make(target="install.libs" if self.settings.compiler == "Visual Studio" else "install")
+            autotools.install()
 
             os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
 
@@ -186,18 +211,65 @@ class NCursesConan(ConanFile):
                     res += ".dll.a"
         return res
 
-    @property
-    def _libs(self):
-        libs = []
-        if self.options.with_cxx:
-            libs.append("ncurses++")
-        libs.extend(["form", "menu", "panel", "ncurses"])
-        return list(l+self._lib_suffix for l in libs)
+    def package_id(self):
+        self.info.options.with_ticlib = self._with_ticlib
+        self.info.options.with_tinfo = self._with_tinfo
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "ncurses" + self._suffix))
-        self.cpp_info.libs = self._libs
+        if self._with_tinfo:
+            self.cpp_info.components["tinfo"].libs = ["tinfo" + self._lib_suffix]
+            self.cpp_info.components["tinfo"].names["pkg_config"] = "tinfo" + self._lib_suffix
+            self.cpp_info.components["tinfo"].includedirs.append(os.path.join("include", "ncurses" + self._suffix))
+
+        self.cpp_info.components["libcurses"].libs = ["ncurses" + self._lib_suffix]
+        self.cpp_info.components["libcurses"].names["pkg_config"] = "ncurses" + self._lib_suffix
+        self.cpp_info.components["libcurses"].includedirs.append(os.path.join("include", "ncurses" + self._suffix))
         if not self.options.shared:
-            self.cpp_info.defines = ["NCURSES_STATIC"]
+            self.cpp_info.components["libcurses"].defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl", "m"]
+                self.cpp_info.components["libcurses"].system_libs = ["dl", "m"]
+        if self._with_tinfo:
+            self.cpp_info.components["libcurses"].requires.append("tinfo")
+
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["libcurses"].requires.extend([
+                "getopt-for-visual-studio::getopt-for-visual-studio",
+                "dirent::dirent",
+            ])
+            if self.options.get_safe("with_extended_colors", False):
+                self.cpp_info.components["libcurses"].requires.append("naive-tsearch::naive-tsearch")
+
+        self.cpp_info.components["panel"].libs = ["panel" + self._lib_suffix]
+        self.cpp_info.components["panel"].names["pkg_config"] = "panel" + self._lib_suffix
+        self.cpp_info.components["panel"].requires = ["libcurses"]
+
+        self.cpp_info.components["menu"].libs = ["menu" + self._lib_suffix]
+        self.cpp_info.components["menu"].names["pkg_config"] = "menu" + self._lib_suffix
+        self.cpp_info.components["menu"].requires = ["libcurses"]
+
+        self.cpp_info.components["form"].libs = ["form" + self._lib_suffix]
+        self.cpp_info.components["form"].names["pkg_config"] = "form" + self._lib_suffix
+        self.cpp_info.components["form"].requires = ["libcurses"]
+        if self.options.with_pcre2:
+            self.cpp_info.components["form"].requires.append("pcre2::pcre2")
+
+        if self.options.with_cxx:
+            self.cpp_info.components["curses++"].libs = ["ncurses++" + self._lib_suffix]
+            self.cpp_info.components["curses++"].names["pkg_config"] = "ncurses++" + self._lib_suffix
+            self.cpp_info.components["curses++"].requires = ["libcurses"]
+
+        if self._with_ticlib:
+            self.cpp_info.components["ticlib"].libs = ["tic" + self._lib_suffix]
+            self.cpp_info.components["ticlib"].names["pkg_config"] = "tic" + self._lib_suffix
+            self.cpp_info.components["ticlib"].requires = ["libcurses"]
+
+        if self.options.with_progs:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
+
+        terminfo = os.path.join(self.package_folder, "bin", "share", "terminfo")
+        self.output.info("Setting TERMINFO environment variable: {}".format(terminfo))
+        self.env_info.TERMINFO = terminfo
+
+        self.user_info.lib_suffix = self._lib_suffix

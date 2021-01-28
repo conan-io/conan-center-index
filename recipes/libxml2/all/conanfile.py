@@ -17,6 +17,7 @@ class Libxml2Conan(ConanFile):
     # from ./configure and ./win32/configure.js
     default_options = {'shared': False,
                        'fPIC': True,
+                       'include_utils': True,
                        "c14n": True,
                        "catalog": True,
                        "docbook": True,
@@ -50,7 +51,7 @@ class Libxml2Conan(ConanFile):
                        }
 
     options = {name: [True, False] for name in default_options.keys()}
-    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
+    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -59,11 +60,11 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.lzma:
-            self.requires("xz_utils/5.2.4")
+            self.requires("xz_utils/5.2.5")
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/64.2")
+            self.requires("icu/68.1")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
@@ -144,14 +145,22 @@ class Libxml2Conan(ConanFile):
 
             self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
 
+            if self.options.include_utils:
+                self.run("nmake /f Makefile.msvc utils")
+
+
     def _package_msvc(self):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install-libs")
+
+            if self.options.include_utils:
+                self.run("nmake /f Makefile.msvc install-dist")
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         if not tools.os_info.is_windows:
             self._autotools.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
@@ -195,6 +204,9 @@ class Libxml2Conan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make(["libxml2.la"])
 
+            if self.options.include_utils:
+                autotools.make(["xmllint", "xmlcatalog", "xml2-config"])
+
     def package(self):
         # copy package license
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
@@ -203,6 +215,10 @@ class Libxml2Conan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
+
+            if self.options.include_utils:
+                autotools.make(["install","xmllint", "xmlcatalog", "xml2-config"])
+
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
 
         for prefix in ["run", "test"]:
@@ -234,7 +250,11 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        if self.options.include_utils:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
+        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')

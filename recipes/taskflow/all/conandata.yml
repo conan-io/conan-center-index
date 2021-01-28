@@ -8,3 +8,12 @@ sources:
   2.5.0:
     url: "https://github.com/taskflow/taskflow/archive/v2.5.0.tar.gz"
     sha256: "B7016EE3486458AE401D521EA6BC0403DDE975828038B9734621A6A325ACAC1A"
+  2.6.0:
+    url: "https://github.com/taskflow/taskflow/archive/v2.6.0.tar.gz"
+    sha256: "2F511F4291653D759AF12A7854BABCEBF57CFBB8B49BF6CD3EB0DD98A1A4039C"
+  2.7.0:
+    url: "https://github.com/taskflow/taskflow/archive/v2.7.0.tar.gz"
+    sha256: "BC2227DCABEC86ABEBA1FEE56BB357D9D3C0EF0184F7C2275D7008E8758DFC3E"
+  3.0.0:
+    url: "https://github.com/taskflow/taskflow/archive/v3.0.0.tar.gz"
+    sha256: "553C88A6E56E115D29AC1520B8A0FEA4557A5FCDA1AF1427BD3BA454926D03A2"

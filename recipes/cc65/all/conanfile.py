@@ -1,5 +1,4 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
-from conans.client.tools.win import msvs_toolset
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -98,7 +97,7 @@ class Cc65Conan(ConanFile):
                 for fn in os.listdir("."):
                     if not fn.endswith(".vcxproj"):
                         continue
-                    tools.replace_in_file(fn, "v141", msvs_toolset(self.settings))
+                    tools.replace_in_file(fn, "v141", tools.msvs_toolset(self))
                     tools.replace_in_file(fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
         if self.settings.os == "Windows":
             # Add ".exe" suffix to calls from cl65 to other utilities
@@ -136,6 +135,7 @@ class Cc65Conan(ConanFile):
             self._package_autotools()
 
     def package_id(self):
+        del self.info.settings.compiler
         if self.settings.compiler == "Visual Studio":
             if self.settings.arch == "x86_64":
                 self.info.settings.arch = "x86"

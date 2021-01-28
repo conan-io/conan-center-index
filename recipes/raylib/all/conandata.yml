@@ -1,0 +1,4 @@
+sources:
+  "3.5.0":
+    url: "https://github.com/raysan5/raylib/archive/3.5.0.tar.gz"
+    sha256: "761985876092fa98a99cbf1fef7ca80c3ee0365fb6a107ab901a272178ba69f5"

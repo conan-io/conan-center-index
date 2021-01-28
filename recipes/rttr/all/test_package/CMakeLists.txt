@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(rttr REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+if(RTTR_SHARED)
+  target_link_libraries(${PROJECT_NAME} RTTR::Core)
+else()
+  target_link_libraries(${PROJECT_NAME} RTTR::Core_Lib)
+endif()

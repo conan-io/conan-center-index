@@ -12,7 +12,7 @@ class ZyreConan(ConanFile):
               "message-queue", "asynchronous")
     exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "compiler", "build_type", "arch"
-    requires = "zeromq/4.3.2", "czmq/4.2.0"
+    generators = ["cmake", "cmake_find_package"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,14 +23,28 @@ class ZyreConan(ConanFile):
         "fPIC": True,
         "drafts": False,
     }
-    generators = ["cmake", "cmake_find_package"]
+
     _cmake = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("czmq/4.2.0")
+        self.requires("zeromq/4.3.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,6 +74,7 @@ class ZyreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libzyre"
         self.cpp_info.libs = ["zyre"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]

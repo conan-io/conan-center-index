@@ -5,6 +5,15 @@ sources:
   "2.16.3-gpl":
     url: "https://tls.mbed.org/download/mbedtls-2.16.3-gpl.tgz"
     sha256: "fd01fe4b289116df7781d05e1ef712b6c98823c5334f4a27404f13a8d066ef6a"
+  "2.23.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
+    sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
+  "2.24.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz"
+    sha256: "b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
+  "2.25.0":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.25.0.tar.gz"
+    sha256: "ea2049c2dd4868693998d5a9780e198194be5aea1706ff4a9d4f882f18c0a101"
 patches:
   "2.16.3-apache":
     - patch_file: "patches/0001-visual-studio-shared-apache.patch"

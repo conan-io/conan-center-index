@@ -1,0 +1,71 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -845,14 +845,14 @@ if (NOT EVENT__DISABLE_OPENSSL)
+ 
+     set(EVENT__HAVE_OPENSSL 1)
+ 
+-    message(STATUS "OpenSSL include: ${OPENSSL_INCLUDE_DIR}")
+-    message(STATUS "OpenSSL lib: ${OPENSSL_LIBRARIES}")
++    message(STATUS "OpenSSL include: ${OpenSSL_INCLUDE_DIRS}")
++    message(STATUS "OpenSSL lib: ${OpenSSL_LIBRARIES}")
+ 
+-    include_directories(${OPENSSL_INCLUDE_DIR})
++    include_directories(${OpenSSL_INCLUDE_DIRS})
+ 
+     list(APPEND SRC_OPENSSL bufferevent_openssl.c)
+     list(APPEND HDR_PUBLIC include/event2/bufferevent_ssl.h)
+-    list(APPEND LIB_APPS ${OPENSSL_LIBRARIES})
++    list(APPEND LIB_APPS ${OpenSSL_LIBRARIES})
+ endif()
+ 
+ if (NOT EVENT__DISABLE_THREAD_SUPPORT)
+@@ -955,8 +955,8 @@ add_event_library(event_extra
+ if (NOT EVENT__DISABLE_OPENSSL)
+     add_event_library(event_openssl
+         INNER_LIBRARIES event_core
+-        OUTER_INCLUDES ${OPENSSL_INCLUDE_DIR}
+-        LIBRARIES ${OPENSSL_LIBRARIES}
++        OUTER_INCLUDES ${OpenSSL_INCLUDE_DIRS}
++        LIBRARIES ${OpenSSL_LIBRARIES}
+         SOURCES ${SRC_OPENSSL})
+ endif()
+ 
+@@ -970,16 +970,15 @@ endif()
+ # library exists for historical reasons; it contains the contents of
+ # both libevent_core and libevent_extra. You shouldn’t use it; it may
+ # go away in a future version of Libevent.
+-add_event_library(event SOURCES ${SRC_CORE} ${SRC_EXTRA})
+ 
+ set(WIN32_GETOPT)
+ if (WIN32)
+     set(_TMPLIBS)
+     if (${EVENT_LIBRARY_STATIC})
+-        list(APPEND _TMPLIBS event_core_static event_static)
++        list(APPEND _TMPLIBS event_core_static)
+     endif()
+     if (${EVENT_LIBRARY_SHARED})
+-        list(APPEND _TMPLIBS event_core_shared event_shared)
++        list(APPEND _TMPLIBS event_core_shared)
+     endif()
+     foreach(lib ${_TMPLIBS})
+         target_link_libraries(${lib} iphlpapi)
+--- a/cmake/AddEventLibrary.cmake
++++ b/cmake/AddEventLibrary.cmake
+@@ -42,7 +42,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+         install(TARGETS "${LIB_NAME}_${TYPE}"
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT lib
+             COMPONENT dev
+         )
+     else()
+@@ -69,7 +69,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+             EXPORT LibeventTargets-${TYPE}
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT lib
+             COMPONENT dev
+         )
+     endif()

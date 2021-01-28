@@ -5,6 +5,9 @@ sources:
   "2.5.0":
     url: "https://github.com/SRombauts/SQLiteCpp/archive/2.5.0.tar.gz"
     sha256: "a598a07626ba0cb8bbad7e2f932f204b645eec5cb83e8cd7f0740fcbcce1ba50"  
+  "3.1.1":
+    url: "https://github.com/SRombauts/SQLiteCpp/archive/3.1.1.tar.gz"
+    sha256: "b00b1efad985dd415c3b62b01252cae20d9f2c32dcac435ddd8a105e9d4ddcde"  
 patches:
   "2.4.0":
     - base_path: "source_subfolder"
@@ -12,4 +15,6 @@ patches:
   "2.5.0":
     - base_path: "source_subfolder"
       patch_file: "patches/2.5.0/0001-conan.patch"
-    
+  "3.1.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.1.1/0001-conan.patch"

@@ -1,0 +1,4 @@
+sources:
+  "1.3.5":
+    url: "https://github.com/nfrechette/acl/archive/v1.3.5.tar.gz"
+    sha256: "06112ad5dc6b586124cc7b22ff6979ea1de9b69abefcd94d43556e20617355a1"

@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -46,26 +46,45 @@ class LibtorrentConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _check_compiler_supports_cxx14(self):
+        min_compiler_version = {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_compiler_version is None:
+            self.output.warn("Unknown compiler. Assuming it is supporting c++14")
+        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            raise ConanInvalidConfiguration("This compiler (version) does not support c++ 14.")
+        return True, None
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+        if tools.Version(self.version) < "2.0":
+            if self.settings.compiler.cppstd:
+                tools.check_min_cppstd(self, 11)
+        else:
+            self._check_compiler_supports_cxx14()
+            if self.settings.compiler.cppstd:
+                tools.check_min_cppstd(self, 14)
 
     def requirements(self):
-        self.requires("boost/1.71.0")
+        self.requires("boost/1.74.0")
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1h")
         if self.options.enable_iconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
+
+    def _validate_dependency_graph(self):
+        if tools.Version(self.deps_cpp_info["boost"].version) < "1.69.0" and \
+           (self.options["boost"].header_only or self.options["boost"].without_system):
+            raise ConanInvalidConfiguration("libtorrent requires boost with system, which is non-header only in boost < 1.69.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -88,27 +107,39 @@ class LibtorrentConan(ConanFile):
         self._cmake.definitions["build_tools"] = False
         self._cmake.definitions["python-bindings"] = False
         self._cmake.definitions["python-bindings"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["static_runtime"] = "MT" in str(self.settings.compiler.runtime)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
-        for patch_data in self.conan_data["patches"][self.version]:
+        for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch_data)
 
-        if self.options.enable_iconv:
-            replace = "find_public_dependency(Iconv REQUIRED)"
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
+        if tools.Version(self.version) < "2.0":
+            if self.options.enable_iconv:
+                replace = "find_public_dependency(Iconv REQUIRED)"
+            else:
+                replace = "set(Iconv_FOUND OFF)"
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "find_public_dependency(Iconv)",
+                                  replace)
+            if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
+                # https://github.com/arvidn/libtorrent/issues/3557
+                tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
+                                      "file_entry& operator=(file_entry&&) & noexcept = default;",
+                                      "file_entry& operator=(file_entry&&) & = default;")
         else:
-            replace = "set(Iconv_FOUND OFF)"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "find_public_dependency(Iconv)",
-                              replace)
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
-            # https://github.com/arvidn/libtorrent/issues/3557
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
-                                  "file_entry& operator=(file_entry&&) & noexcept = default;",
-                                  "file_entry& operator=(file_entry&&) & = default;")
+            min_compiler_version = {
+                "gcc": "5",
+            }.get(str(self.settings.compiler))
+            if min_compiler_version:
+                if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    raise ConanInvalidConfiguration("This compiler cannot build libtorrent due to missing features")
 
     def build(self):
+        self._validate_dependency_graph()
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
@@ -126,12 +157,31 @@ class LibtorrentConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libtorrent-rasterbar"
         self.cpp_info.names["cmake_find_package"] = "LibtorrentRasterbar"
         self.cpp_info.names["cmake_find_package_multi"] = "LibtorrentRasterbar"
-        self.cpp_info.includedirs = ["include", os.path.join("include", "libtorrent")]
-        self.cpp_info.libs = ["torrent-rasterbar"]
+        self.cpp_info.components["libtorrent-rasterbar"].names["cmake_find_package"] = "torrent-rasterbar"
+        self.cpp_info.components["libtorrent-rasterbar"].names["cmake_find_package_multi"] = "torrent-rasterbar"
+        self.cpp_info.components["libtorrent-rasterbar"].includedirs = ["include", os.path.join("include", "libtorrent")]
+        self.cpp_info.components["libtorrent-rasterbar"].libs = ["torrent-rasterbar"]
+
+        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::boost"]
+        if self.options.enable_encryption:
+            self.cpp_info.components["libtorrent-rasterbar"].requires.append("openssl::openssl")
+        if self.options.enable_iconv:
+            self.cpp_info.components["libtorrent-rasterbar"].requires.append("libiconv::libiconv")
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread"]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32", "iphlpapi", "debug", "dbghelp"]
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "dbghelp"]
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation", "SystemConfiguration"]
+            self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
+
+        if self.options.shared:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_LINKING_SHARED")
+        if self.options.enable_encryption:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.extend(["TORRENT_USE_OPENSSL", "TORRENT_USE_LIBCRYPTO"])
+        else:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_DISABLE_ENCRYPTION")
+        if self.options.enable_iconv:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_USE_ICONV")
+        if not self.options.enable_dht:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_DISABLE_DHT")

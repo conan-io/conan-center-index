@@ -2,3 +2,6 @@ sources:
   "1.2.2":
     url: https://github.com/martinmoene/variant-lite/archive/v1.2.2.tar.gz
     sha256: 97334108c3a92f7becc74e2798ab8e0ea57fd67d4ad893ec0b0b8e1c35bb411c
+  "2.0.0":
+    url: https://github.com/martinmoene/variant-lite/archive/v2.0.0.tar.gz
+    sha256: 70c1509e24d03abfd22d2e702ab398238e69658b7b2890ce1d7e9731d6b5a7cb

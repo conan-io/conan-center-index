@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 
-# Force test_package to be generated in build_folder (CMAKE_BINARY_DIR) 
-# so we get same behaviour between Unix Makefiles & Visual studio generator 
+# Force test_package to be generated in build_folder (CMAKE_BINARY_DIR)
+# so we get same behaviour between Unix Makefiles & Visual studio generator
 
 # First for the generic no-config case (e.g. with mingw)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

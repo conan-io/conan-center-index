@@ -1,0 +1,29 @@
+--- configure.ac
++++ configure.ac
+@@ -9,7 +9,7 @@
+ AC_PROG_LIBTOOL
+ AC_C_INLINE
+ AM_PROG_CC_C_O
+-
++LT_INIT([win32-dll])
+ # Library versioning
+ LT_MAJOR="8"
+ LT_REVISION="4"
+@@ -22,7 +22,7 @@
+ LIBUSB01_VERSION="0.1.12"
+ AC_SUBST(LIBUSB01_VERSION)
+ 
+-PKG_CHECK_MODULES([LIBUSB_1_0], libusb-1.0 >= 0.9.1)
++PKG_CHECK_MODULES([LIBUSB_1_0], [libusb-1.0 >= 0.9.1])
+ AC_SUBST(LIBUSB_1_0_CFLAGS)
+ AC_SUBST(LIBUSB_1_0_LIBS)
+ 
+@@ -70,7 +70,7 @@
+ CFLAGS="$saved_cflags"
+ 
+ AC_DEFINE([API_EXPORTED], [__attribute__((visibility("default")))], [Default visibility])
+-AM_CFLAGS="-std=gnu99 $inline_cflags -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow"
++AM_CFLAGS="-std=gnu99 $inline_cflags -Wall"
+ AC_SUBST(AM_CFLAGS)
+ 
+ AC_CONFIG_FILES([libusb.pc] [libusb-config] [Makefile] [libusb/Makefile] [examples/Makefile])
