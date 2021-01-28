@@ -104,8 +104,7 @@ class MSYS2Conan(ConanFile):
             # https://www.msys2.org/news/   see  2020-05-31 - Update may fail with "could not open file"
             # update pacman separately first
             self.run('bash -l -c "pacman --noconfirm -Sydd pacman"')
-            self._kill_pacman()
-
+  
             # https://www.msys2.org/docs/ci/
             self.run('bash -l -c "pacman --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
             self._kill_pacman()
