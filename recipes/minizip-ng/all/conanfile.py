@@ -1,6 +1,5 @@
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
 import os
+from conans import ConanFile, tools, CMake
 
 
 class MinizipNgConan(ConanFile):
@@ -79,8 +78,6 @@ class MinizipNgConan(ConanFile):
         if self.settings.os != "Windows":
             if self.options.with_iconv:
                 self.requires("libiconv/1.16")
-            if self.options.with_libbsd:
-                self.requires("libbsd/0.10.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -102,6 +99,7 @@ class MinizipNgConan(ConanFile):
 
         if self.settings.os != "Windows":
             self._cmake.definitions["MZ_ICONV"] = self.options.with_iconv
+            self._cmake.definitions["MZ_LIBBSD"] = self.options.with_libbsd
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
