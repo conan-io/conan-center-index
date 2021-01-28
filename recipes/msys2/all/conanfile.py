@@ -26,6 +26,10 @@ class MSYS2Conan(ConanFile):
     }
     settings = "os", "arch"
 
+    def configure(self):
+        self._kill_pacman()
+
+
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
@@ -159,11 +163,14 @@ class MSYS2Conan(ConanFile):
 
         if (tools.Version(self.version) < "20210105"):
             self._install_pacman_keyring()
-            self._update_pacman()
+            
+        self._update_pacman()
 
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
+
+        self._kill_pacman()
 
         # create /tmp dir in order to avoid
         # bash.exe: warning: could not find /tmp, please create!
