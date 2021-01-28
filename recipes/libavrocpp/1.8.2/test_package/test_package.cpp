@@ -2,6 +2,8 @@
 #include "avro/Encoder.hh"
 #include "avro/Specific.hh"
 
+#include <memory>
+
 int main()
 {
     int64_t dummy = 1234;
