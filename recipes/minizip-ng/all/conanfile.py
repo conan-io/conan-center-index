@@ -64,11 +64,13 @@ class MinizipNgConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-        if tools.is_apple_os(self.settings.os) and self.options.with_libcomp:
-            self.options.with_zlib = False
+        if not tools.is_apple_os(self.settings.os):
+            del self.options.with_libcomp
+        elif self.options.with_libcomp:
+            del self.options.with_zlib
 
     def requirements(self):
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
@@ -93,7 +95,7 @@ class MinizipNgConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["MZ_FETCH_LIBS"] = False
         self._cmake.definitions["MZ_COMPAT"] = self.options.mz_compatibility
-        self._cmake.definitions["MZ_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["MZ_ZLIB"] = self.options.get_safe("with_zlib", False)
         self._cmake.definitions["MZ_BZIP2"] = self.options.with_bzip2
         self._cmake.definitions["MZ_LZMA"] = self.options.with_lzma
         self._cmake.definitions["MZ_ZSTD"] = self.options.with_zstd
