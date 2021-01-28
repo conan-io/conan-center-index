@@ -54,6 +54,7 @@ class civetwebConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
@@ -84,7 +85,6 @@ class civetwebConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
-        self.cpp_info.components["_civetweb"].names["pkg_config"] = "civetweb"
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
         if self.settings.os == "Linux":
             self.cpp_info.components["_civetweb"].system_libs.extend(["dl", "rt", "pthread"])
@@ -92,7 +92,7 @@ class civetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].frameworks.append("Cocoa")
             self.cpp_info.components["_civetweb"].defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
-            self.cpp_info.components["_civetweb"].system_libs .append("ws2_32")
+            self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
         if self.options.with_websockets:
             self.cpp_info.components["_civetweb"].defines.append("USE_WEBSOCKET")
         if self.options.with_ipv6:
@@ -105,7 +105,6 @@ class civetwebConan(ConanFile):
         if self.options.with_cxx:
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
-            self.cpp_info.components["civetweb-cpp"].names["pkg_config"] = "civetweb-cpp"
             self.cpp_info.components["civetweb-cpp"].libs = ["civetweb-cpp"]
             self.cpp_info.components["civetweb-cpp"].requires = ["_civetweb"]
             if self.settings.os == "Linux":
