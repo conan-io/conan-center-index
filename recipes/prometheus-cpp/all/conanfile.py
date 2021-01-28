@@ -10,7 +10,7 @@ class PrometheusCppConan(ConanFile):
     license = "MIT"
     topics = ("conan", "metrics", "prometheus", "networking")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
