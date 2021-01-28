@@ -119,19 +119,12 @@ class CivetwebConan(ConanFile):
                 self.cpp_info.components["_civetweb"].system_libs.append("dl")
         elif self.settings.os == "Macos":
             self.cpp_info.components["_civetweb"].frameworks.append("Cocoa")
-            self.cpp_info.components["_civetweb"].defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
             self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
             if self.options.shared:
-                self.cpp_info.components["_civetweb"].append("CIVETWEB_DLL_IMPORTS")
-        if self.options.with_websockets:
-            self.cpp_info.components["_civetweb"].defines.append("USE_WEBSOCKET")
-        if self.options.with_ipv6:
-            self.cpp_info.components["_civetweb"].defines.append("USE_IPV6")
+                self.cpp_info.components["_civetweb"].defines.append("CIVETWEB_DLL_IMPORTS")
         if self.options.with_ssl:
             self.cpp_info.components["_civetweb"].requires = ["openssl::openssl"]
-        else:
-            self.cpp_info.components["_civetweb"].defines.append("NO_SSL")
 
         if self.options.with_cxx:
             self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
