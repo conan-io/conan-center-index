@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 
-class civetwebConan(ConanFile):
+class CivetwebConan(ConanFile):
     name = "civetweb"
     license = "MIT"
     homepage = "https://github.com/civetweb/civetweb"
@@ -76,7 +76,7 @@ class civetwebConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        bin_folder = os.path.join(self.package_folder, "bin");
+        bin_folder = os.path.join(self.package_folder, "bin")
         for bin_file in os.listdir(bin_folder):
             if not bin_file.startswith("civetweb"):
                 os.remove(os.path.join(bin_folder, bin_file))
