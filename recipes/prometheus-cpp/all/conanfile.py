@@ -87,11 +87,9 @@ class PrometheusCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "prometheus-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "prometheus-cpp"
-        self.cpp_info.names["pkg_config"] = "prometheus-cpp"
 
         self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package"] = "core"
         self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package_multi"] = "core"
-        self.cpp_info.components["prometheus-cpp-core"].names["pkg_config"] = "prometheus-cpp-core"
         self.cpp_info.components["prometheus-cpp-core"].libs = ["prometheus-cpp-core"]
         if self.settings.os == "Linux":
             self.cpp_info.components["prometheus-cpp-core"].system_libs = ["pthread", "rt"]
@@ -99,7 +97,6 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_push:
             self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package"] = "push"
             self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package_multi"] = "push"
-            self.cpp_info.components["prometheus-cpp-push"].names["pkg_config"] = "prometheus-cpp-push"
             self.cpp_info.components["prometheus-cpp-push"].libs = ["prometheus-cpp-push"]
             self.cpp_info.components["prometheus-cpp-push"].requires = [
                 "prometheus-cpp-core",
@@ -111,7 +108,6 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_pull:
             self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package"] = "pull"
             self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package_multi"] = "pull"
-            self.cpp_info.components["prometheus-cpp-pull"].names["pkg_config"] = "prometheus-cpp-pull"
             self.cpp_info.components["prometheus-cpp-pull"].libs = ["prometheus-cpp-pull"]
             self.cpp_info.components["prometheus-cpp-pull"].requires = [
                 "prometheus-cpp-core",
