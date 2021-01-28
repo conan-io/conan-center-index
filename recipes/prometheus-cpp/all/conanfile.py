@@ -9,7 +9,7 @@ class LibZipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jupp0r/prometheus-cpp"
     license = "MIT"
-    topics = ("conan", "metrics", "networking")
+    topics = ("conan", "metrics", "prometheus", "networking")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
