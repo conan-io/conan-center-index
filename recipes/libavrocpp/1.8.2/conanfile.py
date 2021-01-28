@@ -71,6 +71,8 @@ class LibavrocppConan(ConanFile):
         self.requires("boost/[>=1.38.0]")
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
