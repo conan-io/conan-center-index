@@ -46,6 +46,7 @@ class CivetwebConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if not self.options.with_cxx:
+            del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
 
     def requirements(self):
