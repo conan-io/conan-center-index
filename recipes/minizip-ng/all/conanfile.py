@@ -24,6 +24,7 @@ class MinizipNgConan(ConanFile):
         "with_openssl": [True, False],
         "with_iconv": [True, False],
         "with_libbsd": [True, False],
+        "with_libcomp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class MinizipNgConan(ConanFile):
         "with_openssl": True,
         "with_iconv": True,
         "with_libbsd": True,
+        "with_libcomp": True,
     }
 
     _cmake = None
