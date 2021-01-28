@@ -64,6 +64,9 @@ class MinizipNgConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+        if tools.is_apple_os(self.settings.os) and self.options.with_libcomp:
+            self.options.with_zlib = False
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
