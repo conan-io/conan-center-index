@@ -108,6 +108,8 @@ class CivetwebConan(ConanFile):
                 os.remove(os.path.join(bin_folder, bin_file))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "civetweb"
+        self.cpp_info.names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
