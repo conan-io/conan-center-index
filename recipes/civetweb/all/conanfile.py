@@ -92,6 +92,8 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["_civetweb"].defines.append("USE_COCOA")
         elif self.settings.os == "Windows":
             self.cpp_info.components["_civetweb"].system_libs.append("ws2_32")
+            if self.options.shared:
+                self.cpp_info.components["_civetweb"].append("CIVETWEB_DLL_IMPORTS")
         if self.options.with_websockets:
             self.cpp_info.components["_civetweb"].defines.append("USE_WEBSOCKET")
         if self.options.with_ipv6:
@@ -108,3 +110,6 @@ class CivetwebConan(ConanFile):
             self.cpp_info.components["civetweb-cpp"].requires = ["_civetweb"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["civetweb-cpp"].system_libs.append("m")
+            elif self.settings.os == "Windows":
+                if self.options.shared:
+                    self.cpp_info.components["civetweb-cpp"].defines.append("CIVETWEB_CXX_DLL_IMPORTS")
