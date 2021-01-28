@@ -11,7 +11,7 @@ class MinizipNgConan(ConanFile):
     homepage = "https://github.com/zlib-ng/minizip-ng"
     license = "BSD-3-Clause"
     exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
