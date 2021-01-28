@@ -4,7 +4,7 @@ import os
 
 class PrometheusCppConan(ConanFile):
     name = "prometheus-cpp"
-    description = "This library aims to enable Metrics-Driven Development for C++ services. It implements the Prometheus Data Model, a powerful abstraction on which to collect and expose metrics. We offer the possibility for metrics to be collected by Prometheus, but other push/pull collections can be added as plugins."
+    description = "Prometheus Client Library for Modern C++"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jupp0r/prometheus-cpp"
     license = "MIT"
