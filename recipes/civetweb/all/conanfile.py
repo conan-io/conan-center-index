@@ -1,5 +1,9 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.32.0"
+
 
 class CivetwebConan(ConanFile):
     name = "civetweb"
@@ -9,12 +13,13 @@ class CivetwebConan(ConanFile):
     description = "Embedded C/C++ web server"
     topics = ("conan", "civetweb", "web-server", "embedded")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared"            : [True, False],
         "fPIC"              : [True, False],
         "with_ssl"        : [True, False],
+        "ssl_dynamic_loading": [True, False],
         "with_websockets" : [True, False],
         "with_ipv6"       : [True, False],
         "with_cxx"        : [True, False]
@@ -23,6 +28,7 @@ class CivetwebConan(ConanFile):
         "shared"            : False,
         "fPIC"              : True,
         "with_ssl"        : True,
+        "ssl_dynamic_loading": False,
         "with_websockets" : True,
         "with_ipv6"       : True,
         "with_cxx"        : True
@@ -48,16 +54,27 @@ class CivetwebConan(ConanFile):
         if not self.options.with_cxx:
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
+        if not self.options.with_ssl:
+            del self.options.ssl_dynamic_loading
 
     def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1i")
+
+    def validate(self):
+        if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
+            raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
+        if self.options.with_ssl:
+            openssl_version = tools.Version(self.deps_cpp_info["openssl"].version[:-1])
+            self._cmake.definitions["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
+            self._cmake.definitions["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.minor == "1"
+            self._cmake.definitions["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
         self._cmake.definitions["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         self._cmake.definitions["CIVETWEB_ENABLE_IPV6"] = self.options.with_ipv6
         self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
@@ -70,7 +87,13 @@ class CivetwebConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("civetweb-%s" % self.version, self._source_subfolder)
 
+    def _patch_sources(self):
+        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
+        tools.replace_in_file(cmakelists_src, "${OPENSSL_INCLUDE_DIR}", "${OpenSSL_INCLUDE_DIR}")
+        tools.replace_in_file(cmakelists_src, "${OPENSSL_LIBRARIES}", "OpenSSL::SSL OpenSSL::Crypto")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -89,7 +112,9 @@ class CivetwebConan(ConanFile):
         self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
         self.cpp_info.components["_civetweb"].libs = ["civetweb"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["_civetweb"].system_libs.extend(["dl", "rt", "pthread"])
+            self.cpp_info.components["_civetweb"].system_libs.extend(["rt", "pthread"])
+            if self.options.get_safe("ssl_dynamic_loading"):
+                self.cpp_info.components["_civetweb"].system_libs.append("dl")
         elif self.settings.os == "Macos":
             self.cpp_info.components["_civetweb"].frameworks.append("Cocoa")
             self.cpp_info.components["_civetweb"].defines.append("USE_COCOA")
@@ -102,7 +127,7 @@ class CivetwebConan(ConanFile):
         if self.options.with_ipv6:
             self.cpp_info.components["_civetweb"].defines.append("USE_IPV6")
         if self.options.with_ssl:
-            self.cpp_info.components["_civetweb"].requires = ["openssl::ssl"]
+            self.cpp_info.components["_civetweb"].requires = ["openssl::openssl"]
         else:
             self.cpp_info.components["_civetweb"].defines.append("NO_SSL")
 
