@@ -89,24 +89,30 @@ class PrometheusCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "prometheus-cpp"
         self.cpp_info.names["pkg_config"] = "prometheus-cpp"
 
-        self.cpp_info.components["core"].names["cmake_find_package"] = "core"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
-        self.cpp_info.components["core"].names["pkg_config"] = "core"
-        self.cpp_info.components["core"].libs = ["prometheus-cpp-core"]
+        self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package"] = "core"
+        self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package_multi"] = "core"
+        self.cpp_info.components["prometheus-cpp-core"].names["pkg_config"] = "prometheus-cpp-core"
+        self.cpp_info.components["prometheus-cpp-core"].libs = ["prometheus-cpp-core"]
 
         if self.options.with_push:
-            self.cpp_info.components["push"].names["cmake_find_package"] = "push"
-            self.cpp_info.components["push"].names["cmake_find_package_multi"] = "push"
-            self.cpp_info.components["push"].names["pkg_config"] = "push"
-            self.cpp_info.components["push"].libs = ["prometheus-cpp-push"]
-            self.cpp_info.components["push"].requires = ["core", "libcurl::libcurl"]
+            self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package"] = "push"
+            self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package_multi"] = "push"
+            self.cpp_info.components["prometheus-cpp-push"].names["pkg_config"] = "prometheus-cpp-push"
+            self.cpp_info.components["prometheus-cpp-push"].libs = ["prometheus-cpp-push"]
+            self.cpp_info.components["prometheus-cpp-push"].requires = [
+                "prometheus-cpp-core",
+                "libcurl::libcurl",
+            ]
 
         if self.options.with_pull:
-            self.cpp_info.components["pull"].names["cmake_find_package"] = "pull"
-            self.cpp_info.components["pull"].names["cmake_find_package_multi"] = "pull"
-            self.cpp_info.components["pull"].names["pkg_config"] = "pull"
-            self.cpp_info.components["pull"].libs = ["prometheus-cpp-pull"]
-            self.cpp_info.components["pull"].requires = ["core", "civetweb::civetweb-cpp"]
+            self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package"] = "pull"
+            self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package_multi"] = "pull"
+            self.cpp_info.components["prometheus-cpp-pull"].names["pkg_config"] = "prometheus-cpp-pull"
+            self.cpp_info.components["prometheus-cpp-pull"].libs = ["prometheus-cpp-pull"]
+            self.cpp_info.components["prometheus-cpp-pull"].requires = [
+                "prometheus-cpp-core",
+                "civetweb::civetweb-cpp"
+            ]
             if self.options.with_compression:
-                self.cpp_info.components["pull"].requires.append("zlib::zlib")
+                self.cpp_info.components["prometheus-cpp-pull"].requires.append("zlib::zlib")
 
