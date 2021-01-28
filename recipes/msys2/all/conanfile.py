@@ -100,9 +100,11 @@ class MSYS2Conan(ConanFile):
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             self._update_very_old_pacman()
 
+            self._kill_pacman()
             # https://www.msys2.org/news/   see  2020-05-31 - Update may fail with "could not open file"
             # update pacman separately first
             self.run('bash -l -c "pacman --noconfirm -Sydd pacman"')
+            self._kill_pacman()
 
             # https://www.msys2.org/docs/ci/
             self.run('bash -l -c "pacman --noconfirm -Syuu"')  # Core update (in case any core packages are outdated)
