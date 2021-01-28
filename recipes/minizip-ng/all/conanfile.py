@@ -8,7 +8,7 @@ class MinizipNgConan(ConanFile):
     topics = ("conan", "compression", "zip")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/minizip-ng"
-    license = "BSD-3-Clause"
+    license = "Zlib"
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "compiler", "build_type", "arch"
