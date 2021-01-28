@@ -17,6 +17,7 @@ class LibavrocppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
+    exports_sources = ["patches/**"]
 
     _cmake = None
 
@@ -65,6 +66,9 @@ class LibavrocppConan(ConanFile):
         self.cpp_info.components["avrocpp"].requires = ["boost::boost"]
 
     def build(self):
+        if self.settings.compiler == "Visual Studio":
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
