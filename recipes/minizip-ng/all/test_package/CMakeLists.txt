@@ -7,5 +7,5 @@ conan_basic_setup()
 find_package(minizip)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} minizip::minizip)
+target_link_libraries(${PROJECT_NAME} MINIZIP::minizip)
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)

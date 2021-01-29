@@ -12,6 +12,7 @@ class MinizipNgConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "compiler", "build_type", "arch"
+    provides = "minizip"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -139,7 +140,31 @@ class MinizipNgConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "minizip"
-        self.cpp_info.names["cmake_find_package_multi"] = "minizip"
+        self.cpp_info.filenames["cmake_find_package"] = "minizip"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "minizip"
+        self.cpp_info.names["cmake_find_package"] = "MINIZIP"
+        self.cpp_info.names["cmake_find_package_multi"] = "MINIZIP"
         self.cpp_info.names["pkg_config"] = "minizip"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["minizip"].names["cmake_find_package"] = "minizip"
+        self.cpp_info.components["minizip"].names["cmake_find_package_multi"] = "minizip"
+        self.cpp_info.components["minizip"].libs = tools.collect_libs(self)
+
+        if self.options.get_safe("with_zlib"):
+            self.cpp_info.components["minizip"].requires.append("zlib::zlib")
+        if self.options.with_bzip2:
+            self.cpp_info.components["minizip"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["minizip"].requires.append("xz_utils::xz_utils")
+        if self.options.with_zstd:
+            self.cpp_info.components["minizip"].requires.append("zstd::zstd")
+        if self.options.with_openssl:
+            self.cpp_info.components["minizip"].requires.append("openssl::openssl")
+        if self.settings.os != "Windows" and self.options.with_iconv:
+            self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
+
+        if self.options.with_lzma:
+            self.cpp_info.defines.append('HAVE_LZMA')
+        if tools.is_apple_os(self.settings.os) and self.options.with_libcomp:
+            self.cpp_info.defines.append('HAVE_LIBCOMP')
+        if self.options.with_bzip2:
+            self.cpp_info.defines.append('HAVE_BZIP2')
