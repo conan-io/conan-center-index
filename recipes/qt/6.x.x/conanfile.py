@@ -108,6 +108,7 @@ class QtConan(ConanFile):
     def build_requirements(self):
         self.build_requires("cmake/3.19.1")
         self.build_requires("ninja/1.10.2")
+        self.build_requires('pkgconf/1.7.3')
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
