@@ -196,19 +196,19 @@ class AwsSdkCppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        
+
         build_only = list([])
         for sdk in self.sdks:
             if getattr(self.options, "build_" + sdk):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
-        
+
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
 
-        self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size 
-        self._cmake.definitions["FORCE_SHARED_CRT"] = self.options.shared 
+        self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
+        self._cmake.definitions["FORCE_SHARED_CRT"] = self.options.shared
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
