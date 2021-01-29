@@ -170,6 +170,8 @@ class AwsSdkCppConan(ConanFile):
             "min_size": False
         })
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -227,20 +229,20 @@ class AwsSdkCppConan(ConanFile):
 
         for sdk in self.sdks:
             if getattr(self.options, "build_" + sdk):
-                libs.append("aws-cpp-sdk-" + sdk)
-        libs.extend(["aws-cpp-sdk-core", "aws-c-event-stream", "aws-c-common", "aws-checksums"])
+                self.cpp_info.libs.append("aws-cpp-sdk-" + sdk)
+        self.cpp_info.libs.extend(["aws-cpp-sdk-core", "aws-c-event-stream", "aws-c-common", "aws-checksums"])
 
         if self.settings.os == "Windows":
-            libs.append("winhttp")
-            libs.append("wininet")
-            libs.append("bcrypt")
-            libs.append("userenv")
-            libs.append("version")
-            libs.append("ws2_32")
+            self.cpp_info.libs.append("winhttp")
+            self.cpp_info.libs.append("wininet")
+            self.cpp_info.libs.append("bcrypt")
+            self.cpp_info.libs.append("userenv")
+            self.cpp_info.libs.append("version")
+            self.cpp_info.libs.append("ws2_32")
 
         if self.settings.os == "Linux":
-            libs.append("atomic")
-            if self.settings.compiler == "clang":
-                libs.append("-stdlib=libstdc++")
+            self.cpp_info.system_libs.append("atomic")
 
-        self.cpp_info.libs = libs
+        lib_stdcpp = tools.stdcpp_library(self)
+        if lib_stdcpp:
+            self.cpp_info.system_libs.append(lib_stdcpp)
