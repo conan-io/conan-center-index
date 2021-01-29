@@ -332,6 +332,11 @@ class QtConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self, generator="Ninja")
 
+        self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
+        self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
+        self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
+        self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
+
         self._cmake.definitions["QT_BUILD_TESTS"] = "OFF"
         self._cmake.definitions["QT_BUILD_EXAMPLES"] = "OFF"
 
@@ -459,27 +464,25 @@ class QtConan(ConanFile):
             tools.replace_in_file(f,
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
-        os.mkdir("build_folder")
-        with tools.chdir("build_folder"):
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
-                if self.settings.os == "Windows":
-                    build_env["PATH"] = [os.path.join(self.source_folder, "qt6", "gnuwin32", "bin")]
-                with tools.environment_append(build_env):
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
+            if self.settings.os == "Windows":
+                build_env["PATH"] = [os.path.join(self.source_folder, "qt6", "gnuwin32", "bin")]
+            with tools.environment_append(build_env):
 
-                    if tools.os_info.is_macos:
-                        open(".qmake.stash" , "w").close()
-                        open(".qmake.super" , "w").close()
+                if tools.os_info.is_macos:
+                    open(".qmake.stash" , "w").close()
+                    open(".qmake.super" , "w").close()
 
-                    cmake = self._configure_cmake()
-                    if tools.os_info.is_macos:
-                        with open("bash_env", "w") as f:
-                            f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
-                    with tools.environment_append({
-                        "BASH_ENV": os.path.abspath("bash_env")
-                    }) if tools.os_info.is_macos else tools.no_op():
-                        with tools.run_environment(self):
-                            cmake.build()
+                cmake = self._configure_cmake()
+                if tools.os_info.is_macos:
+                    with open("bash_env", "w") as f:
+                        f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                with tools.environment_append({
+                    "BASH_ENV": os.path.abspath("bash_env")
+                }) if tools.os_info.is_macos else tools.no_op():
+                    with tools.run_environment(self):
+                        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
@@ -487,17 +490,17 @@ class QtConan(ConanFile):
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
             f.write("""[Paths]
 Prefix = ..
-ArchData = bin/archdatadir
-HostData = bin/archdatadir
-Data = bin/datadir
-Sysconf = bin/sysconfdir
-LibraryExecutables = bin/archdatadir/bin
-Plugins = bin/archdatadir/plugins
-Imports = bin/archdatadir/imports
-Qml2Imports = bin/archdatadir/qml
-Translations = bin/datadir/translations
-Documentation = bin/datadir/doc
-Examples = bin/datadir/examples""")
+ArchData = res/archdatadir
+HostData = res/archdatadir
+Data = res/datadir
+Sysconf = res/sysconfdir
+LibraryExecutables = res/archdatadir/bin
+Plugins = res/archdatadir/plugins
+Imports = res/archdatadir/imports
+Qml2Imports = res/archdatadir/qml
+Translations = res/datadir/translations
+Documentation = res/datadir/doc
+Examples = res/datadir/examples""")
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
@@ -507,6 +510,7 @@ Examples = bin/datadir/examples""")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
 
     def package_id(self):
         del self.info.options.cross_compile
