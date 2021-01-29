@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import glob
+import yaml
 
 
 class NormConan(ConanFile):
@@ -10,6 +11,7 @@ class NormConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
     exports_sources = ["CMakeLists.txt"]
+    exports = ["protolib.yml"]
     generators = "cmake"
     _cmake = None
     license = "NRL"
@@ -31,9 +33,13 @@ class NormConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = self.conan_data["protolib"][self.version]["githash"]
-        self._cmake.configure()
-        return self._cmake
+
+        protolib_filename = os.path.join(self.recipe_folder, 'protolib.yml')
+        with open(protolib_filename, 'r') as protolib_stream:
+            protolib_data = yaml.load(protolib_stream)
+            self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = protolib_data["protolib"][self.version]["commit"]
+            self._cmake.configure()
+            return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()

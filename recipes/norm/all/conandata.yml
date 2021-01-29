@@ -2,6 +2,3 @@ sources:
   "cci.20210118":
     url: "https://github.com/USNavalResearchLaboratory/norm/archive/1008f83092269d89facf66cc9c4d95f46f48cabb.zip"
     sha256: be5d5e2ac53db7b44fa7a1fcfe1b7bd632da55f9160a4738e95c34134ee72539
-protolib:
-  "cci.20210118":
-    githash: 49197511df68e26176313a49cef9e39b3eda3134
