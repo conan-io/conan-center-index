@@ -163,8 +163,8 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
 
         if self.options.with_lzma:
-            self.cpp_info.defines.append('HAVE_LZMA')
+            self.cpp_info.components["minizip"].defines.append('HAVE_LZMA')
         if tools.is_apple_os(self.settings.os) and self.options.with_libcomp:
-            self.cpp_info.defines.append('HAVE_LIBCOMP')
+            self.cpp_info.components["minizip"].defines.append('HAVE_LIBCOMP')
         if self.options.with_bzip2:
-            self.cpp_info.defines.append('HAVE_BZIP2')
+            self.cpp_info.components["minizip"].defines.append('HAVE_BZIP2')
