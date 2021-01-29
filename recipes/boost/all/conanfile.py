@@ -780,6 +780,7 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
+            flags.append("--disable-icu")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
             flags.append("--disable-icu --disable-iconv")
