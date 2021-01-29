@@ -351,7 +351,7 @@ class QtConan(ConanFile):
 
         for module in self._submodules:
             if module != 'qtbase':
-                self._cmake.definitions["BUILD_%s" % module] = ("ON" if getattr(self.options, module) else "OFF")
+                self._cmake.definitions["BUILD_%s" % module] = ("ON" if self.options.get_safe(module) else "OFF")
 
         self._cmake.definitions["FEATURE_system_zlib"] = "ON"
 
@@ -389,7 +389,7 @@ class QtConan(ConanFile):
                               ("with_odbc", "sql_odbc"),
                               ("gui", "gui"),
                               ("widgets", "widgets")]:
-            self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if getattr(self.options, opt) else "OFF")
+            self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
         for opt, conf_arg in [
@@ -401,7 +401,7 @@ class QtConan(ConanFile):
                               ("with_libpng", "png"),
                               ("with_sqlite3", "sqlite"),
                               ("with_pcre2", "pcre2"),]:
-            if getattr(self.options, opt):
+            if self.options.get_safe(opt, False):
                 if self.options.multiconfiguration:
                     self._cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
                 else:
