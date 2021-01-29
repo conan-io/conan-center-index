@@ -14,8 +14,7 @@ class AwsSdkCppConan(ConanFile):
     description = "AWS SDK for C++"
     topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    requires = "zlib/1.2.11"
+    generators = "cmake", "cmake_find_package"
     sdks = ("access_management",
             "acm",
             "alexaforbusiness"
@@ -185,6 +184,7 @@ class AwsSdkCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
             if self.settings.os != "Macos":
                 self.requires("openssl/1.1.1d")
@@ -233,12 +233,7 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.libs.extend(["aws-cpp-sdk-core", "aws-c-event-stream", "aws-c-common", "aws-checksums"])
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("winhttp")
-            self.cpp_info.libs.append("wininet")
-            self.cpp_info.libs.append("bcrypt")
-            self.cpp_info.libs.append("userenv")
-            self.cpp_info.libs.append("version")
-            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("atomic")
