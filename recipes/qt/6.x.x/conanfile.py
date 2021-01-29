@@ -440,6 +440,22 @@ class QtConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for f in glob.glob("*.cmake"):
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:>",
+                "", strict=False)
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:>",
+                "", strict=False)
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:>",
+                "", strict=False)
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:-Wl,--export-dynamic>",
+                "", strict=False)
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
+                "", strict=False)
         os.mkdir("build_folder")
         with tools.chdir("build_folder"):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
