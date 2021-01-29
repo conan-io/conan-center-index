@@ -20,8 +20,8 @@ class CImgConan(ConanFile):
         ("enable_png",          "cimg_use_png",        "libpng/1.6.37"),
         ("enable_tiff",         "cimg_use_tiff",       "libtiff/4.0.9"),
         # ("enable_ffmpeg",       "cimg_use_ffmpeg",     "ffmpeg/???"),
-        ("enable_opencv"        "cimg_use_opencv",     "opencv/4.5.1"),
-        # ("enable_magick"        "cimg_use_magick",     "magick/???"),
+        ("enable_opencv",        "cimg_use_opencv",     "opencv/4.5.1"),
+        # ("enable_magick",        "cimg_use_magick",     "magick/???"),
         # ("enable_xrandr",       "cimg_use_xrandr",     "xrandr/???"),
         # ("enable_xshm",         "cimg_use_xshm",       "xshm/???"),
     )
