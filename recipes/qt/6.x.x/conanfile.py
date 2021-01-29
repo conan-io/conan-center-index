@@ -110,9 +110,10 @@ class QtConan(ConanFile):
         self.build_requires("ninja/1.10.2")
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
+            self.options.with_glib = False
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("qt 6 does not support GCC before 8")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
