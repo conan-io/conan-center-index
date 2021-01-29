@@ -82,7 +82,7 @@ class QtConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_libpng": True,
         "with_sqlite3": True,
-        "with_mysql": True,
+        "with_mysql": False,
         "with_pq": True,
         "with_odbc": True,
         "with_zstd": True,
@@ -119,10 +119,7 @@ class QtConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang"]:
             if tools.Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.3":
-            del self.options.with_mysql
         if self.settings.os == "Windows":
-            self.options.with_mysql = False
             self.options.opengl = "dynamic"
 
     def configure(self):
