@@ -1,4 +1,8 @@
-SOURCES += test_package.cpp
+ include($$OUT_PWD/../conanbuildinfo.pri)
+
+ LIBS += $$CONAN_LIBDIRS
+
+ SOURCES += test_package.cpp
 
 HEADERS += greeter.h
 
