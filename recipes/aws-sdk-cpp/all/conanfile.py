@@ -185,11 +185,13 @@ class AwsSdkCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("aws-c-common/0.4.25")
+        self.requires("aws-c-event-stream/0.1.5")
         self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
             if self.settings.os != "Macos":
-                self.requires("openssl/1.1.1d")
-            self.requires("libcurl/7.66.0")
+                self.requires("openssl/1.1.1g")
+            self.requires("libcurl/7.71.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -206,6 +208,7 @@ class AwsSdkCppConan(ConanFile):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
 
+        self._cmake.definitions["BUILD_DEPS"] = False
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
@@ -221,7 +224,7 @@ class AwsSdkCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
