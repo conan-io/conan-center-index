@@ -83,7 +83,7 @@ class QtConan(ConanFile):
         "with_pcre2": True,
         "with_glib": False,
         # "with_libiconv": True, # QTBUG-84708
-        "with_doubleconversion": True,
+        "with_doubleconversion": False,
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
@@ -218,10 +218,6 @@ class QtConan(ConanFile):
 
         if self.options.multiconfiguration:
             del self.settings.build_type
-
-        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
-            raise ConanInvalidConfiguration("Qt without libc++ needs qt:with_doubleconversion. "
-                                            "Either enable qt:with_doubleconversion or switch to libc++")
 
         if tools.os_info.is_linux:
             if self.options.qtwebengine:
