@@ -113,12 +113,14 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_icu
             del self.options.with_fontconfig
-        if self.settings.compiler == "apple-clang":
-            if tools.Version(self.settings.compiler.version) < "10.0":
-                raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
-        if self.settings.compiler in ["gcc", "clang"]:
-            if tools.Version(self.settings.compiler.version) < "5.0":
-                raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration("qt 6 does not support GCC before 8")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("qt 6 does not support clang before 9")
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("qt 6 does not support Visual Studio before 2019")
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11":
+            raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
 
