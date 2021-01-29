@@ -154,7 +154,7 @@ class AwsSdkCppConan(ConanFile):
             "xray"
            )
     options = {
-            **{ "build_" + x: [True, False] for x in sdks },
+            **{ x: [True, False] for x in sdks },
             **{
                 "shared": [True, False],
                 "fPIC": [True, False],
@@ -162,7 +162,7 @@ class AwsSdkCppConan(ConanFile):
                 }
             }
     default_options = {
-            **{ "build_" + x: False for x in sdks },
+            **{ x: False for x in sdks },
             **{
                 "shared": False,
                 "fPIC": True,
@@ -204,7 +204,7 @@ class AwsSdkCppConan(ConanFile):
 
         build_only = list([])
         for sdk in self.sdks:
-            if getattr(self.options, "build_" + sdk):
+            if getattr(self.options, sdk):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
 
@@ -232,7 +232,7 @@ class AwsSdkCppConan(ConanFile):
         libs = list([])
 
         for sdk in self.sdks:
-            if getattr(self.options, "build_" + sdk):
+            if getattr(self.options, sdk):
                 self.cpp_info.libs.append("aws-cpp-sdk-" + sdk)
         self.cpp_info.libs.extend(["aws-cpp-sdk-core", "aws-c-event-stream", "aws-c-common", "aws-checksums"])
 

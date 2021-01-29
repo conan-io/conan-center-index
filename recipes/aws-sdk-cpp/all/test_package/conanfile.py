@@ -13,10 +13,10 @@ class AwsSdkCppTestConan(ConanFile):
                 self.settings.compiler.runtime = "MT"
             else:
                 self.settings.compiler.runtime = "MTd"
-        self.options["aws-sdk-cpp"].build_s3 = True
-        self.options["aws-sdk-cpp"].build_logs = True
-        self.options["aws-sdk-cpp"].build_monitoring = True
-        self.options["aws-sdk-cpp"].build_transfer = True
+        self.options["aws-sdk-cpp"].s3 = True
+        self.options["aws-sdk-cpp"].logs = True
+        self.options["aws-sdk-cpp"].monitoring = True
+        self.options["aws-sdk-cpp"].transfer = True
 
     def build(self):
         cmake = CMake(self)
