@@ -7,7 +7,7 @@ class MingwConan(ConanFile):
     name = "mingw"
     description = "MinGW is a contraction of Minimalist GNU for Windows"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.mingw.org"
+    homepage = "http://mingw-w64.org/doku.php"
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
     settings = "os", "arch", "compiler"
