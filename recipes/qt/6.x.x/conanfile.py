@@ -109,6 +109,8 @@ class QtConan(ConanFile):
         self.build_requires("cmake/3.19.1")
         self.build_requires("ninja/1.10.2")
         self.build_requires('pkgconf/1.7.3')
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires('strawberryperl/5.30.0.1')
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
