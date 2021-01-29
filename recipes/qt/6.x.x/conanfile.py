@@ -41,7 +41,7 @@ class QtConan(ConanFile):
         "shared": [True, False],
         "commercial": [True, False],
 
-        "opengl": ["no", "es2", "desktop", "dynamic"],
+        "opengl": ["no", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
@@ -208,7 +208,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
 
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
@@ -450,8 +450,6 @@ class QtConan(ConanFile):
         opengl = self.options.get_safe("opengl", "no")
         if opengl == "no":
             args += ["-no-opengl"]
-        elif opengl == "es2":
-            args += ["-opengl es2"]
         elif opengl == "desktop":
             args += ["-opengl desktop"]
         elif opengl == "dynamic":
