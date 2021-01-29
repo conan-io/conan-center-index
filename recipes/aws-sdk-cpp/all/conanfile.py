@@ -178,6 +178,10 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.settings.os != "Windows":
             if self.settings.os != "Macos":
@@ -188,29 +192,35 @@ class AwsSdkCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
-    def build(self):
-        cmake = CMake(self)
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        
         build_only = list([])
         for sdk in self.sdks:
             if getattr(self.options, "build_" + sdk):
                 build_only.append(sdk)
+        self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
+        
+        self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
+        self._cmake.definitions["ENABLE_TESTING"] = False
+        self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
 
-        cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
-        cmake.definitions["ENABLE_UNITY_BUILD"] = "ON"
-        cmake.definitions["ENABLE_TESTING"] = "OFF"
-        cmake.definitions["AUTORUN_UNIT_TESTS"] = "OFF"
+        self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size 
+        self._cmake.definitions["FORCE_SHARED_CRT"] = self.options.shared 
 
-        cmake.definitions["MINIMIZE_SIZE"] = "ON" if self.options.min_size else "OFF"
-        cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
-        cmake.definitions["FORCE_SHARED_CRT"] = "ON" if self.options.shared else "OFF"
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self.build_folder)
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = CMake(self)
-        cmake.install(build_dir=self.build_folder)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         libs = list([])
@@ -234,5 +244,3 @@ class AwsSdkCppConan(ConanFile):
                 libs.append("-stdlib=libstdc++")
 
         self.cpp_info.libs = libs
-        self.cpp_info.libdirs = ["lib"]
-        self.cpp_info.includedirs = ["include"]
