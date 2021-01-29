@@ -1,0 +1,23 @@
+From effc8b5c3e4276062d9bfe0307d15b3e49355f39 Mon Sep 17 00:00:00 2001
+From: Joerg Bornemann <joerg.bornemann@qt.io>
+Date: Wed, 09 Dec 2020 09:37:22 +0100
+Subject: [PATCH] CMake: Fix FEATURE_static_runtime build
+
+We must call qt_set_common_target_properties on Bootstrap too, because
+that's were FEATURE_static_runtime is handled.
+
+Change-Id: Ie54f7d599d0c3a54b761e6c679983b475e77c17d
+Pick-to: 6.0
+Fixes: QTBUG-89201
+---
+
+diff --git a/src/tools/bootstrap/CMakeLists.txt b/src/tools/bootstrap/CMakeLists.txt
+index 218d634..75f2d3e 100644
+--- a/src/tools/bootstrap/CMakeLists.txt
++++ b/src/tools/bootstrap/CMakeLists.txt
+@@ -267,4 +267,5 @@
+ set_target_properties(Bootstrap PROPERTIES AUTOMOC OFF AUTOUIC OFF AUTORCC OFF)
+ qt_internal_add_target_aliases(Bootstrap)
+ qt_set_msvc_cplusplus_options(Bootstrap PUBLIC)
++qt_set_common_target_properties(Bootstrap)
+ qt_internal_apply_intel_cet(Bootstrap PUBLIC)

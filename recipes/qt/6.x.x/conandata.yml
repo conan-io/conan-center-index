@@ -6,3 +6,7 @@ sources:
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
     sha256: "d39a1a557a0dc8dc5ea2eaaee0fa015c71dcbb79c25a6aea421c594227565296"
+patches:
+  "6.0.0":
+    - patch_file: "patches/effc8b5.diff"
+      base_path: "qt6/qtbase"
