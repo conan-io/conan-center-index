@@ -53,6 +53,7 @@ jobs:
             compiler: 'vs'
             compiler_version: '16'
             vs_runtimes: 'MDd,MTd'
+            archs: 'x86'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
