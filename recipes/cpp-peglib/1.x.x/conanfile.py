@@ -21,7 +21,7 @@ class CpppeglibConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15.7",
-            "gcc": "8.1",
+            "gcc": "7",
             "clang": "5",
             "apple-clang": "10"
         }
