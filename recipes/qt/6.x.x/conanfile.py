@@ -46,7 +46,6 @@ class QtConan(ConanFile):
         "openssl": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
-        # "with_libiconv": [True, False],  # QTBUG-84708 Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
@@ -82,7 +81,6 @@ class QtConan(ConanFile):
         "openssl": True,
         "with_pcre2": True,
         "with_glib": False,
-        # "with_libiconv": True, # QTBUG-84708
         "with_doubleconversion": False,
         "with_freetype": True,
         "with_fontconfig": True,
@@ -178,8 +176,6 @@ class QtConan(ConanFile):
             self.options.opengl = "dynamic"
 
     def configure(self):
-        #if self.settings.os != "Linux":
-        #         self.options.with_libiconv = False # QTBUG-84708
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
@@ -260,8 +256,6 @@ class QtConan(ConanFile):
 
         if self.options.with_glib:
             self.requires("glib/2.67.1")
-        # if self.options.with_libiconv: # QTBUG-84708
-        #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -469,8 +463,6 @@ class QtConan(ConanFile):
             else:
                 args += ["-openssl-linked"]
 
-        # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))# QTBUG-84708
-
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
         args.append("--fontconfig=" + ("yes" if self.options.get_safe("with_fontconfig", False) else "no"))
@@ -502,7 +494,6 @@ class QtConan(ConanFile):
                   ("openssl", "OPENSSL"),
                   ("pcre2", "PCRE2"),
                   ("glib", "GLIB"),
-                  # ("libiconv", "ICONV"),# QTBUG-84708
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
