@@ -91,6 +91,7 @@ class PahoMqttcConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
         # Remove the extra version that do not match the options
         for lib_pattern in ["*paho-mqtt3as*", "*paho-mqtt3cs*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
                             "*paho-mqtt3as-static*", "*paho-mqtt3cs-static*", "*paho-mqtt3c-static*", "*paho-mqtt3a-static*"]:
@@ -99,6 +100,8 @@ class PahoMqttcConan(ConanFile):
                     os.remove(lib_file)
 
     def package_info(self):
+        if tools.Version(self.version) < "1.3.4" and self.options.shared:
+            self.output.warn("This should be impossible")
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package"] = self._cmake_target
