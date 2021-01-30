@@ -15,6 +15,14 @@ class NormConan(ConanFile):
     license = "NRL"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _cmake = None
     _protolib = {"cci.20210118": "49197511df68e26176313a49cef9e39b3eda3134"}
@@ -22,6 +30,10 @@ class NormConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
