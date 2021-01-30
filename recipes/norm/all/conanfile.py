@@ -25,7 +25,7 @@ class NormConan(ConanFile):
     }
 
     _cmake = None
-    _protolib = {"cci.20210118": "49197511df68e26176313a49cef9e39b3eda3134"}
+    _protolib = {"cci.20210130": "49197511df68e26176313a49cef9e39b3eda3134"}
 
     @property
     def _source_subfolder(self):

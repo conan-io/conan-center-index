@@ -1,4 +1,4 @@
 sources:
-  "cci.20210118":
-    url: "https://github.com/USNavalResearchLaboratory/norm/archive/1008f83092269d89facf66cc9c4d95f46f48cabb.zip"
-    sha256: be5d5e2ac53db7b44fa7a1fcfe1b7bd632da55f9160a4738e95c34134ee72539
+  "cci.20210130":
+    url: "https://github.com/USNavalResearchLaboratory/norm/archive/d630f65613120e20e949798c23944c01b07c8b18.zip"
+    sha256: fd51779643da35e5cc985b1eab046aecdd5499b37973eea8ff3201b065452fbe
