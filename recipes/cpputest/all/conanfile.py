@@ -53,8 +53,9 @@ class CppUTestConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if not self.option.use_std_cpp_lib:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
