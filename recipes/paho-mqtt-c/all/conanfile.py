@@ -33,16 +33,13 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # There is uncertainty if static linking before 1.3.4 worked.
-        # If you need it, tweak here, on Linux and OSX you might have success.
-        if tools.Version(self.version) < "1.3.4":
-            self.options.shared = True
 
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.options.shared == False and self.settings.os == "Windows" and tools.Version(self.version) < "1.3.4":
-            raise ConanInvalidConfiguration("Static linking in Windows did not work before version 1.3.4")
+
+        if not self.options.shared and tools.Version(self.version) < "1.3.4":
+            raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
 
     def requirements(self):
         if self.options.ssl:
@@ -100,8 +97,6 @@ class PahoMqttcConan(ConanFile):
                     os.remove(lib_file)
 
     def package_info(self):
-        if tools.Version(self.version) < "1.3.4" and not self.options.shared:
-            self.output.warn("This should be impossible")
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
         self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package"] = self._cmake_target
