@@ -1,4 +1,4 @@
 sources:
-  3.0.0-alpha10:
-    sha256: b1699acf2148db31f12edf5ebfdf12a92bfd3f0e60538d169710408a3cd3b138
-    url: https://www.openssl.org/source/openssl-3.0.0-alpha10.tar.gz
+  3.0.0-alpha11:
+    sha256: 2a18f18df6a7ba33cfcc423b77d93990bf70939c06aa2b599b1eabf6e222ea74
+    url: https://www.openssl.org/source/openssl-3.0.0-alpha11.tar.gz
