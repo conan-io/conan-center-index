@@ -100,7 +100,7 @@ class PahoMqttcConan(ConanFile):
                     os.remove(lib_file)
 
     def package_info(self):
-        if tools.Version(self.version) < "1.3.4" and self.options.shared:
+        if tools.Version(self.version) < "1.3.4" and not self.options.shared:
             self.output.warn("This should be impossible")
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
