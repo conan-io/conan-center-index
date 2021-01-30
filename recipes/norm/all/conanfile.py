@@ -58,4 +58,4 @@ class NormConan(ConanFile):
         else:
             self.cpp_info.system_libs = ["pthread"]
         if(self.settings.os == "Linux"):
-            self.cpp_info.system_libs.append(["dl rt"])
+            self.cpp_info.system_libs.extend(["dl", "rt"])
