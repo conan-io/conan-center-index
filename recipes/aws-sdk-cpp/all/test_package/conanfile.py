@@ -8,11 +8,6 @@ class AwsSdkCppTestConan(ConanFile):
     generators = "cmake"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.build_type == "Release":
-                self.settings.compiler.runtime = "MT"
-            else:
-                self.settings.compiler.runtime = "MTd"
         self.options["aws-sdk-cpp"].s3 = True
         self.options["aws-sdk-cpp"].logs = True
         self.options["aws-sdk-cpp"].monitoring = True
