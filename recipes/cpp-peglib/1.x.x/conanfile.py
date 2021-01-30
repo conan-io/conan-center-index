@@ -38,7 +38,7 @@ class CpppeglibConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("{} {} requires C++17. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
+            self.output.warn("{} {} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name, self.version))
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
