@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, Meson, tools
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">= 1.29.1"
 
 class Dav1dConan(ConanFile):
     name = "dav1d"
