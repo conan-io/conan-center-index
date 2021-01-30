@@ -96,4 +96,4 @@ class CppUTestConan(ConanFile):
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["winmm"]
+            self.cpp_info.system_libs.extend(["winmm"])
