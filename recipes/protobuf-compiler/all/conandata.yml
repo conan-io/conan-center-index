@@ -1,0 +1,41 @@
+sources:
+  3.9.1:
+    Windows:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.9.1-win64.zip"
+      sha256: "71bc2b1dfd69c9baf5a86d88de040a84dca43b78082c5cca11a3ad1f753e8587"
+    Linux:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.9.1-linux-x86_64.zip"
+      sha256: "77410d08e9a3c1ebb68afc13ee0c0fb4272c01c20bfd289adfb51b1c622bab07"
+    Macos:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.9.1-osx-x86_64.zip"
+      sha256: "fd2e8a52b9b173bf90633f346901f4dcf3083769ea24f917809932d29ffa1410"
+  3.11.4:
+    Windows:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.11.4-win64.zip"
+      sha256: "93d006549a4b87fbc0a2e931c248e83c75a6b8d5318575c4a29521b7ed3e736d"
+    Linux:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.11.4-linux-x86_64.zip"
+      sha256: "6d0f18cd84b918c7b3edd0203e75569e0c8caecb1367bbbe409b45e28514f5be"
+    Macos:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.11.4-osx-x86_64.zip"
+      sha256: "8c6af11e1058efe953830ecb38324c0e0fd2fb67df3891896d138c535932e7db"
+  3.12.4:
+    Windows:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.12.4-win64.zip"
+      sha256: "61b843af43afd5291897be1348b58e22764a3402db51538dce9d7f242091fa76"
+    Linux:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.12.4-linux-x86_64.zip"
+      sha256: "d0d4c7a3c08d3ea9a20f94eaface12f5d46d7b023fe2057e834a4181c9e93ff3"
+    Macos:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.12.4-osx-x86_64.zip"
+      sha256: "210227683a5db4a9348cd7545101d006c5829b9e823f3f067ac8539cb387519e"
+  3.13.0:
+    Windows:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-win64.zip"
+      sha256: "326a18c917cce8bc58fa6741260f6fb733186ffdab728a952b4cf31e57a76b91"
+    Linux:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-linux-x86_64.zip"
+      sha256: "4a3b26d1ebb9c1d23e933694a6669295f6a39ddc64c3db2adf671f0a6026f82e"
+    Macos:
+      url: "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-osx-x86_64.zip"
+      sha256: "a201954cc7d1a309b5f4feacd23a0abcf3ffc20eb15e79c9a0856a5804f6c34c"

@@ -76,6 +76,11 @@ class ProtobufConan(ConanFile):
             self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
+            if self.settings.os == "Android":
+                # self._cmake.definitions["CMAKE_CXX_STANDARD_LIBRARIES"] = "liblog.so"   # TODO better?
+                # TODO should protoc built for build machine arch?
+                self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
+                self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
