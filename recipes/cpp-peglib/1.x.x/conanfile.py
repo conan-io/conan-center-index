@@ -42,6 +42,10 @@ class CpppeglibConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) == "7" and \
+           tools.stdcpp_library(self) == "stdc++":
+            raise ConanInvalidConfiguration("{} {} does not support clang 7 with libstdc++.".format(self.name, self.version))
+
     def package_id(self):
         self.info.header_only()
 
