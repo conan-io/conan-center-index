@@ -102,3 +102,8 @@ class Dav1dConan(ConanFile):
         self.cpp_info.libs = ["dav1d"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])
+        
+        if self.options.with_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
