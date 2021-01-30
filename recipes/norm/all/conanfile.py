@@ -11,12 +11,13 @@ class NormConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
     exports_sources = ["CMakeLists.txt"]
-    exports = ["protolib.yml"]
     generators = "cmake"
-    _cmake = None
     license = "NRL"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
+
+    _cmake = None
+    _protolib = {"cci.20210118": "49197511df68e26176313a49cef9e39b3eda3134"}
 
     @property
     def _source_subfolder(self):
@@ -33,13 +34,9 @@ class NormConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
-        protolib_filename = os.path.join(self.recipe_folder, 'protolib.yml')
-        with open(protolib_filename, 'r') as protolib_stream:
-            protolib_data = yaml.load(protolib_stream)
-            self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = protolib_data["protolib"][self.version]["commit"]
-            self._cmake.configure()
-            return self._cmake
+        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = self._protolib[self.version]
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
