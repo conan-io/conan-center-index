@@ -59,15 +59,22 @@ class NormConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        if self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*proto*")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "norm"
         self.cpp_info.names["cmake_find_package_multi"] = "norm"
         self.cpp_info.libs = tools.collect_libs(self)
-        if(self.settings.os == "Windows"):
+
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("NORM_USE_DLL")
+
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs = [
                 "ws2_32", "iphlpapi", "user32", "gdi32", "Advapi32", "ntdll"]
         else:
             self.cpp_info.system_libs = ["pthread"]
-        if(self.settings.os == "Linux"):
+
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "rt"])
