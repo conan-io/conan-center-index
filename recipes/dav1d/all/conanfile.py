@@ -23,7 +23,7 @@ class Dav1dConan(ConanFile):
         "fPIC": True,
         "bit_depth": "all",
         "with_tools": True,
-        "assembly": False,
+        "assembly": True,
         "with_avx512": False
     }
     settings = "os", "arch", "compiler", "build_type"
