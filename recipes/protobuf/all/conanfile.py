@@ -77,8 +77,7 @@ class ProtobufConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             if self.settings.os == "Android":
-                # self._cmake.definitions["CMAKE_CXX_STANDARD_LIBRARIES"] = "liblog.so"   # TODO better?
-                # TODO should protoc built for build machine arch?
+                # TODO how to tell cmake to add NDK's "log" library?
                 self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
                 self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = False
             self._cmake.configure(build_folder=self._build_subfolder)

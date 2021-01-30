@@ -100,8 +100,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
         if self.options.dnn:
-            self.requires("protobuf/3.13.0")  # TODO no protoc for this version available yet
-            # self.requires("protobuf/3.9.1")  # TODO older version only because of build req version
+            self.requires("protobuf/3.13.0")
         if self.options.contrib:
             self.requires("freetype/2.10.4")
             self.requires("harfbuzz/2.7.2")
@@ -114,8 +113,7 @@ class OpenCVConan(ConanFile):
 
     def build_requirements(self):
         if  tools.cross_building(self.settings) and self.options.dnn:
-            self.build_requires("protobuf-compiler/3.13.0")  # TODO same package as both requires doesn't work?
-            # self.build_requires("protoc_installer/3.9.1@bincrafters/stable")  # TODO need a clean, new solution for this
+            self.build_requires("protobuf-compiler/3.13.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0])
