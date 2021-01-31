@@ -1,6 +1,7 @@
 import os
 
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibbacktraceConan(ConanFile):
@@ -25,8 +26,9 @@ class LibbacktraceConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("libbacktrace doesn't support compiler: {} on OS: {}.".
-                                            format(self.settings.compiler, self.settings.os))
+            raise ConanInvalidConfiguration(
+                "libbacktrace doesn't support compiler: {} on OS: {}.".format(
+                    self.settings.compiler, self.settings.os))
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
