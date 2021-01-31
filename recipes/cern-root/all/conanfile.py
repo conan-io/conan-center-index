@@ -92,8 +92,8 @@ class CernRootConan(ConanFile):
         }
 
     def configure(self):
+        del self.settings.compiler.libcxx
         self._enforce_minimum_compiler_version()
-        self._enforce_libcxx_requirements()
 
     def _enforce_minimum_compiler_version(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -115,14 +115,6 @@ class CernRootConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
-
-    def _enforce_libcxx_requirements(self):
-        compiler = self.settings.compiler
-        libcxx = compiler.get_safe("libcxx")
-        if libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration(
-                '{} requires "compiler.libcxx=libstdc++11".'.format(self.name)
-            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
