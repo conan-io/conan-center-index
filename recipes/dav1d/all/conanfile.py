@@ -95,6 +95,7 @@ class Dav1dConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             # https://github.com/mesonbuild/meson/issues/7378
