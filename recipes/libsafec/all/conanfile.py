@@ -5,8 +5,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class SafeCLibConan(ConanFile):
-    name = "safeclib"
+class LibSafeCConan(ConanFile):
+    name = "libsafec"
     description = "This library implements the secure C11 Annex K[^5] functions" \
             " on top of most libc implementations, which are missing from them."
     url = "https://github.com/conan-io/conan-center-index"
@@ -31,7 +31,7 @@ class SafeCLibConan(ConanFile):
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                "safeclib doesn't support compiler: {} on OS: {}.".format(
+                "libsafec doesn't support compiler: {} on OS: {}.".format(
                     self.settings.compiler, self.settings.os))
         if self.options.shared:
             del self.options.fPIC
@@ -40,7 +40,7 @@ class SafeCLibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*")[0]
+        extracted_dir = glob.glob("safeclib-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
