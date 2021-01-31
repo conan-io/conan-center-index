@@ -80,6 +80,10 @@ class ProtobufConan(ConanFile):
                 # TODO how to tell cmake to add NDK's "log" library?
                 self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
                 self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = False
+            if self.settings.os == "iOS":
+                # TODO does not compile yet
+                self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
+                self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
