@@ -92,6 +92,7 @@ class CernRootConan(ConanFile):
 
     def configure(self):
         self._enforce_minimum_compiler_version()
+        self._enforce_libcxx_requirements()
 
     def _enforce_minimum_compiler_version(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -113,6 +114,16 @@ class CernRootConan(ConanFile):
                         self.settings.compiler.version,
                     )
                 )
+
+    def _enforce_libcxx_requirements(self):
+        compiler = self.settings.compiler
+        libcxx = compiler.get_safe("libcxx")
+        # ROOT doesn't currently build with libc++.
+        # This restriction may be lifted in future if the problems are fixed upstream 
+        if libcxx and libcxx == "libc++":
+            raise ConanInvalidConfiguration(
+                '{} is incompatible with libc++".'.format(self.name)
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
