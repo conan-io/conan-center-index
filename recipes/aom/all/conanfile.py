@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.29.1"
 
@@ -41,6 +42,23 @@ class Aom(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+
+        # Check compiler version
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version.value)
+
+        minimal_version = {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "6"
+        }
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+        elif compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
+
 
     def build_requirements(self):
         if self.options.assembly:
