@@ -3,16 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 void
 error_callback_create(void* data, const char* msg, int errnum)
 {
-    fprintf(stderr, "%s", msg);
+    printf("%s", msg);
     if (errnum > 0)
-        fprintf(stderr, ": %s", strerror(errnum));
-    fprintf(stderr, "\n");
-    exit(EXIT_FAILURE);
+        printf(": %s", strerror(errnum));
+    exit(0);
 }
 
 int
