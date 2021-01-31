@@ -42,6 +42,9 @@ class Dav1dConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+            # debug builds with assembly often causes linker hangs or LNK1000
+            self.options.assembly = False
 
     def configure(self):
         if self.options.shared:
