@@ -258,11 +258,7 @@ class CernRootConan(ConanFile):
 
     @property
     def _cmake_cxx_standard(self):
-        compileropt = self.settings.compiler.get_safe("cppstd")
-        if compileropt:
-            return str(compileropt)
-        else:
-            return "11"
+        return str(self.settings.compiler.get_safe("cppstd", "11"))
 
     @property
     def _pyrootopt(self):
