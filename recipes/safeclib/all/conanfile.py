@@ -74,8 +74,7 @@ class SafeCLibConan(ConanFile):
             ext = "so" if self.options.shared else "a"
             tools.rename("libsafec-{}.{}".format(self.version, ext), "libsafec.{}".format(ext))
             tools.rmdir("pkgconfig")
-            for f in glob.glob("*.la"):
-                os.unlink(f)
+            tools.remove_files_by_mask(".", "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["safec"]
