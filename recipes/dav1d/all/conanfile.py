@@ -7,7 +7,7 @@ class Dav1dConan(ConanFile):
     name = "dav1d"
     description = "dav1d is a new AV1 cross-platform decoder, open-source, and focused on speed, size and correctness."
     homepage = "https://www.videolan.org/projects/dav1d.html"
-    topics = ("conan", "av1", "codec", "video", "encoding")
+    topics = ("conan", "av1", "codec", "video", "decoding")
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     options = {
