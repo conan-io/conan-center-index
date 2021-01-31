@@ -18,7 +18,6 @@ class CppUTestConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "verbose": [True, False],
         "use_std_c_lib": ["ON", "OFF"],
         "use_std_cpp_lib": ["ON", "OFF"],
         "use_cpp11": ["ON", "OFF"],
@@ -29,7 +28,6 @@ class CppUTestConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "verbose": False,
         "use_std_c_lib": "ON",
         "use_std_cpp_lib": "ON",
         "use_cpp11": "ON",
@@ -71,7 +69,6 @@ class CppUTestConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = self.options.verbose
         self._cmake.definitions["STD_C"] = self.options.use_std_c_lib
         self._cmake.definitions["STD_CPP"] = self.options.use_std_cpp_lib
         self._cmake.definitions["C++11"] = self.options.use_cpp11
