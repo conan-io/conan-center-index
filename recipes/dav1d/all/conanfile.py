@@ -55,7 +55,7 @@ class Dav1dConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        # Meson versionssince 0.51.0 do not work with autodetect symbol prefix
+        # Meson versions since 0.51.0 do not work with autodetect symbol prefix
         # so the nasm build is broken
         # See upstream bug https://github.com/mesonbuild/meson/issues/5482
         self.build_requires("meson/0.51.0")
