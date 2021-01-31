@@ -12,7 +12,7 @@ class OpenclIcdLoaderConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
