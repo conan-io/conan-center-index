@@ -173,8 +173,11 @@ class Stlab(ConanFile):
         self.copy("stlab/*", src=self._source_subfolder, dst='include/')
 
     def package_id(self):
+        ConanFile.package_id(self)
         self.info.header_only()
-
+        self.info.options.boost_optional = "ANY"
+        self.info.options.boost_variant = "ANY"
+        
     def package_info(self):
         coroutines_value = 1 if self.options.coroutines else 0
 
