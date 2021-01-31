@@ -8,7 +8,7 @@ Avoid trailing white-space characters, if possible
 
 ## Quotes
 
-If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency in preferred.
+If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency is preferred.
 
 ## Order of methods and attributes
 
@@ -34,4 +34,19 @@ Prefer the following order of documented methods in python code (`conanfile.py`,
 - deploy
 - test
 
-the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the `package` in `conanfile.py`.
+the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
+`package` in `conanfile.py`.
+
+## Test Package
+
+### Minimalistic Source Code
+
+The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instatiation of objects to ensure linkage
+and dependencies are correct.
+
+### Verifying Components
+
+When components are defined in the `packge_info` in `conanfile.py` tthe following conditions are desired
+
+- use the `cmake_find_package` or `cmake_find_package_multi` generators in `test_package/conanfile.py`
+- corresponding call to `find_package()` with the components _explicitly_ used in `target_link_libraries`
