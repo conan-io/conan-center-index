@@ -27,11 +27,23 @@ class Stlab(ConanFile):
         "task_system": "auto",
     }
 
-
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
-    requires = 'boost/1.69.0'
+    def _use_boost(self):
+        return self.options.boost_optional or self.options.boost_variant
+
+    def _requires_libdispatch(self):
+        # On macOS it is not necessary to use the libdispatch conan package, because the library is 
+        # included in the OS.
+        return self.options.task_system == "libdispatch" and self.settings.os != "Macos"
+
+    def requirements(self):
+        if self._use_boost():
+            self.requires("boost/1.75.0")
+
+        if self._requires_libdispatch():
+            self.requires("libdispatch/5.3.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
