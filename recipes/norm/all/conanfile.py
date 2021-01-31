@@ -25,7 +25,6 @@ class NormConan(ConanFile):
     }
 
     _cmake = None
-    _protolib = {"cci.20210130": "49197511df68e26176313a49cef9e39b3eda3134"}
 
     @property
     def _source_subfolder(self):
@@ -36,17 +35,13 @@ class NormConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = self.name + "-" + \
-            os.path.splitext(os.path.basename(url))[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = self._protolib[self.version]
+        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = "./protolib"
         self._cmake.configure()
         return self._cmake
 
