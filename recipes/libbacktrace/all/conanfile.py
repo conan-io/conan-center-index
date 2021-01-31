@@ -1,6 +1,6 @@
 import os
 
-from conans import AutoToolsBuildEnvironment, ConanFile
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 
 
 class LibbacktraceConan(ConanFile):
@@ -37,7 +37,7 @@ class LibbacktraceConan(ConanFile):
     def _autotools(self):
         if self.__autotools:
             return self.__autotools
-        self.__autotools = AutoToolsBuildEnvironment(self)
+        self.__autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
