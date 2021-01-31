@@ -59,9 +59,7 @@ class LibbacktraceConan(ConanFile):
     def package(self):
         self._autotools.install()
         self.copy("LICENSE", dst="licenses")
-        la = os.path.join(self.package_folder, "lib", "libbacktrace.la")
-        if os.path.exists(la):
-            os.unlink(la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["backtrace"]
