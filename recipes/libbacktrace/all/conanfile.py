@@ -1,3 +1,5 @@
+import os
+
 from conans import AutoToolsBuildEnvironment, ConanFile
 
 
@@ -49,6 +51,9 @@ class LibbacktraceConan(ConanFile):
     def package(self):
         self._autotools.install()
         self.copy("LICENSE", dst="licenses")
+        la = os.path.join(self.package_folder, "lib", "libbacktrace.la")
+        if os.path.exists(la):
+            os.unlink(la)
 
     def package_info(self):
         self.cpp_info.libs = ["backtrace"]
