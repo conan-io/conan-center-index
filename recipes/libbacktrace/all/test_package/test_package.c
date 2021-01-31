@@ -18,7 +18,7 @@ error_callback(void* data, const char* msg, int errnum)
 int
 simple_callback(void* data, uintptr_t pc)
 {
-    printf("0x%016lu\n", pc);
+    printf("0x%016lx\n", pc);
     return 0;
 }
 
