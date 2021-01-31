@@ -64,8 +64,6 @@ class LibSafeCConan(ConanFile):
             tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
             self._autotools.make()
-            if self.should_test and tools.get_env("CONAN_RUN_TESTS", True):
-                self._autotools.make(target="check")
 
     def package(self):
         with tools.chdir(self._source_subfolder):
