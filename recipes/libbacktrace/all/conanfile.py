@@ -15,6 +15,8 @@ class LibbacktraceConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    build_requires = "autoconf/2.69", "libtool/2.4.6"
+
     __autotools = None
 
     def config_options(self):
@@ -22,6 +24,9 @@ class LibbacktraceConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("libbacktrace doesn't support compiler: {} on OS: {}.".
+                                            format(self.settings.compiler, self.settings.os))
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -37,8 +42,8 @@ class LibbacktraceConan(ConanFile):
     def _autotools(self):
         if self.__autotools:
             return self.__autotools
-        self.run("autoreconf -fiv")
-        self.__autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self.run("autoreconf -fiv", run_environment=True)
+        self.__autotools = AutoToolsBuildEnvironment(self)
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
