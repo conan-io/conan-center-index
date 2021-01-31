@@ -1,4 +1,4 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, ConanFile
 
 
 class LibbacktraceConan(ConanFile):
@@ -13,12 +13,6 @@ class LibbacktraceConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    scm = {
-        "type": "git",
-        "url": "https://github.com/ianlancetaylor/libbacktrace.git",
-        "revision": "master",
-    }
-
     __autotools = None
 
     def config_options(self):
@@ -30,6 +24,12 @@ class LibbacktraceConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    @property
+    def scm(self):
+        source = {"type": "git"}
+        source.update(**self.conan_data["sources"][self.version])
+        return source
 
     @property
     def _autotools(self):
