@@ -63,10 +63,9 @@ class LibavrocppConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def requirements(self):
-        self.requires("boost/[>=1.38.0]")
+        self.requires("boost/[1.75.0]")
 
     def build_requirements(self):
-        self.build_requires("boost/[>=1.38.0]")
         if self.options.with_snappy:
             self.build_requires("snappy/1.1.8")
 
@@ -85,9 +84,7 @@ class LibavrocppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.components["avrocpp"].libs = ["avrocpp"]
-            self.cpp_info.components["avrocpp"].requires = ["boost::boost"]
-        else:
-            self.cpp_info.components["avrocpp_s"].libs = ["avrocpp_s"]
-            self.cpp_info.components["avrocpp_s"].requires = ["boost::boost"]
+        self.cpp_info.components["avrocpp"].libs = [
+            "avrocpp" if self.options.shared else "avrocpp_s"
+        ]
+        self.cpp_info.components["avrocpp"].requires = ["boost::boost"]
