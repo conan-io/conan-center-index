@@ -177,10 +177,28 @@ class Stlab(ConanFile):
         self.info.header_only()
         self.info.options.boost_optional = "ANY"
         self.info.options.boost_variant = "ANY"
-        
+
     def package_info(self):
         coroutines_value = 1 if self.options.coroutines else 0
 
         self.cpp_info.defines = [
             'STLAB_FUTURE_COROUTINES={}'.format(coroutines_value)
         ]
+
+        if self.options.boost_optional:
+            self.cpp_info.defines.append("STLAB_FORCE_BOOST_OPTIONAL")
+
+        if self.options.boost_variant:
+            self.cpp_info.defines.append("STLAB_FORCE_BOOST_VARIANT")
+
+        if self.options.task_system == "portable":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_PORTABLE")
+        elif self.options.task_system == "libdispatch":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_LIBDISPATCH")
+        elif self.options.task_system == "emscripten":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_EMSRIPTEN")  #Note: there is a typo in Stlab Cmake.
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_EMSCRIPTEN") #Note: for typo fix in later versions
+        elif self.options.task_system == "pnacl":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_PNACL")
+        elif self.options.task_system == "windows":
+            self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_WINDOWS")
