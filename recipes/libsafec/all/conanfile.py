@@ -70,6 +70,7 @@ class LibSafeCConan(ConanFile):
     def package(self):
         with tools.chdir(self._source_subfolder):
             self._autotools.install()
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with tools.chdir(os.path.join(self.package_folder, "lib")):
             ext = "so" if self.options.shared else "a"
             tools.rename("libsafec-{}.{}".format(self.version, ext), "libsafec.{}".format(ext))
