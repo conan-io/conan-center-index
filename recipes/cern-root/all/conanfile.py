@@ -265,7 +265,9 @@ class CernRootConan(ConanFile):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 "Find{}.cmake".format(f),
-                os.path.join(self._source_subfolder, "cmake", "modules"),
+                os.path.join(
+                    self.source_folder, self._source_subfolder, "cmake", "modules"
+                ),
             )
 
     @property
