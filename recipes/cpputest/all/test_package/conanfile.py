@@ -8,10 +8,13 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["WITH_EXTENSIONS"] = self.options["cpputest"].extensions
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run(os.path.join("bin", "test_package"), run_environment=True)
+
+            if self.options["cpputest"].extensions:
+                self.run(os.path.join("bin", "test_package_with_extensions"), run_environment=True)

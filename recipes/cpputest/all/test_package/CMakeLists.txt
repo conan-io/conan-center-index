@@ -6,5 +6,10 @@ conan_basic_setup()
 
 find_package(CppUTest REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CppUTest CppUTestExt)
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package CppUTest)
+
+if(WITH_EXTENSIONS)
+    add_executable(test_package_with_extensions test_package_with_extensions.cpp)
+    target_link_libraries(test_package_with_extensions CppUTest CppUTestExt)
+endif()
