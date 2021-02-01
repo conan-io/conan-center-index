@@ -201,3 +201,6 @@ class Stlab(ConanFile):
             self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_PNACL")
         elif self.options.task_system == "windows":
             self.cpp_info.defines.append("STLAB_FORCE_TASK_SYSTEM_WINDOWS")
+
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
