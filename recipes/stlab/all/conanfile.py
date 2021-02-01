@@ -146,7 +146,7 @@ class Stlab(ConanFile):
         elif self.options.task_system == "emscripten":
             self._configure_task_system_emscripten()
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '17')
 
@@ -159,6 +159,7 @@ class Stlab(ConanFile):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
             raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
+    def configure(self):
         self._fix_boost_components()
 
         if self._use_boost():
