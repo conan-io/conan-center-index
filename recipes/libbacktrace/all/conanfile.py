@@ -42,18 +42,20 @@ class LibbacktraceConan(ConanFile):
 
     @property
     def _autotools(self):
-        if self.__autotools:
-            return self.__autotools
-        self.run("autoreconf -fiv", run_environment=True)
-        self.__autotools = AutoToolsBuildEnvironment(self)
+        if self.__autotools is None:
+            self.__autotools = AutoToolsBuildEnvironment(self)
+        return self.__autotools
+
+    def _autotools_configure(self):
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
             args = ["--disable-shared", "--enable-static"]
-        self.__autotools.configure(args=args)
-        return self.__autotools
+        self._autotools.configure(args=args)
 
     def build(self):
+        self.run("autoreconf -fiv", run_environment=True)
+        self._autotools_configure()
         self._autotools.make()
 
     def package(self):
