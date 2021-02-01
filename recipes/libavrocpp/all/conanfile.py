@@ -42,8 +42,6 @@ class LibavrocppConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        if not self.options.with_snappy:
-            self._cmake.definitions["SNAPPY_ROOT_DIR"] = ""
         if not self.options.shared:
             self._cmake.definitions["AVRO_DYN_LINK"] = ""
         self._cmake.configure(source_folder=self._source_subfolder)
