@@ -13,7 +13,6 @@ class NormConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     license = "NRL"
-    no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
