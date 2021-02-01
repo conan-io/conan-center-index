@@ -55,23 +55,24 @@ class LibSafeCConan(ConanFile):
 
     @property
     def _autotools(self):
-        if self.__autotools:
-            return self.__autotools
+        if self.__autotools is None:
+            self.__autotools = AutoToolsBuildEnvironment(self)
+        return self.__autotools
+
+    def _autotools_configure(self):
         self.run("autoreconf -fiv", run_environment=True)
-        self.__autotools = AutoToolsBuildEnvironment(self)
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
             args = ["--disable-shared", "--enable-static"]
-        args.extend(["--disable-doc", "--disable-dependency-tracking"])
+        args.extend(["--disable-doc", "--disable-Werror"])
         if self.settings.build_type in ("Debug", "RelWithDebInfo"):
             args.append("--enable-debug")
-        args.append("--disable-Werror")
-        self.__autotools.configure(args=args)
-        return self.__autotools
+        self._autotools.configure(args=args)
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            self._autotools_configure()
             self._autotools.make()
 
     def package(self):
