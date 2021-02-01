@@ -71,9 +71,6 @@ class LibSafeCConan(ConanFile):
         return self.__autotools
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "_@SAFEC_API_VERSION@", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "tests", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
         with tools.chdir(self._source_subfolder):
             self._autotools.make()
 
@@ -86,7 +83,7 @@ class LibSafeCConan(ConanFile):
             tools.remove_files_by_mask(".", "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = ["safec"]
+        self.cpp_info.libs = ["safec-{}".format(self.version)]
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
