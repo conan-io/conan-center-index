@@ -46,7 +46,7 @@ and dependencies are correct.
 
 ### Verifying Components
 
-When components are defined in the `packge_info` in `conanfile.py` tthe following conditions are desired
+When components are defined in the `packge_info` in `conanfile.py` the following conditions are desired
 
 - use the `cmake_find_package` or `cmake_find_package_multi` generators in `test_package/conanfile.py`
 - corresponding call to `find_package()` with the components _explicitly_ used in `target_link_libraries`
