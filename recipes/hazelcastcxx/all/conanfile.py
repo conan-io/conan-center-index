@@ -18,8 +18,8 @@ class HazelcastCxx(ConanFile):
         "with_openssl": [True, False]
     }
     default_options = {
-        "shared": True,
-        "static": False,
+        "shared": False,
+        "static": True,
         "fPIC": True,
         "with_openssl": False
     }
