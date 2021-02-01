@@ -64,18 +64,26 @@ class CgltfConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        for header_file in [
-            ["cgltf.h", "#ifdef CGLTF_IMPLEMENTATION"],
-            ["cgltf_write.h", "#ifdef CGLTF_WRITE_IMPLEMENTATION"]
-        ]:
-            header_fullpath = os.path.join(self.package_folder, "include", header_file[0])
-            self._disable_implementation(header_fullpath, header_file[1])
+        for header_file in ["cgltf.h", "cgltf_write.h"]:
+            header_fullpath = os.path.join(self.package_folder, "include", header_file)
+            self._remove_implementation(header_fullpath)
 
     @staticmethod
-    def _disable_implementation(header_fullpath, macro_definition):
-        tools.replace_in_file(header_fullpath,
-                              "{}".format(macro_definition),
-                              "#if 0".format(macro_definition))
+    def _remove_implementation(header_fullpath):
+        header_content = tools.load(header_fullpath)
+        begin = header_content.find("/*\n *\n * Stop now, if you are only interested in the API.")
+        end = header_content.find("/* cgltf is distributed under MIT license:", begin)
+        implementation = header_content[begin:end]
+        tools.replace_in_file(
+            header_fullpath,
+            implementation,
+            (
+                "/**\n"
+                " * Implementation removed by conan during packaging.\n"
+                " * Don't forget to link libs provided in this package.\n"
+                " */\n\n"
+            )
+        )
 
     def package_info(self):
         self.cpp_info.libs = ["cgltf"]
