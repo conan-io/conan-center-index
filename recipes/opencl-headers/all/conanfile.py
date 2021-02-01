@@ -1,6 +1,8 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.28.0"
+
 
 class OpenclHeadersConan(ConanFile):
     name = "opencl-headers"
@@ -25,3 +27,11 @@ class OpenclHeadersConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst=os.path.join("include", "CL"), src=os.path.join(self._source_subfolder, "CL"))
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "OpenCLHeaders"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCLHeaders"
+        self.cpp_info.names["cmake_find_package"] = "OpenCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenCL"
+        self.cpp_info.components["_opencl-headers"].names["cmake_find_package"] = "Headers"
+        self.cpp_info.components["_opencl-headers"].names["cmake_find_package_multi"] = "Headers"
