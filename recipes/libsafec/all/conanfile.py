@@ -66,12 +66,11 @@ class LibSafeCConan(ConanFile):
         args.extend(["--disable-doc", "--disable-dependency-tracking"])
         if self.settings.build_type in ("Debug", "RelWithDebInfo"):
             args.append("--enable-debug")
+        args.append("--disable-Werror")
         self.__autotools.configure(args=args)
         return self.__autotools
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "_@SAFEC_API_VERSION@", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "tests", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
