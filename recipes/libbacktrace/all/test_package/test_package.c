@@ -19,7 +19,7 @@ int
 simple_callback(void* data, uintptr_t pc)
 {
     printf("  0x%016lx\n", pc);
-    return 0;
+    return 1;
 }
 
 int
@@ -28,7 +28,7 @@ main(int argc, char** argv)
     void* state;
 
     state = backtrace_create_state(argv[0], BACKTRACE_SUPPORTS_THREADS, error_callback, NULL);
-    printf("Backtrace:\n");
+    printf("Top stack frame:\n");
     backtrace_simple(state, 0, simple_callback, error_callback, NULL);
     printf("Done\n");
 
