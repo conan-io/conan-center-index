@@ -1,6 +1,6 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, tools
 
 class CgltfConan(ConanFile):
     name = "cgltf"
@@ -9,20 +9,73 @@ class CgltfConan(ConanFile):
     topics = ("conan", "cgltf", "gltf", "header-only")
     homepage = "https://github.com/jkuhlmann/cgltf"
     url = "https://github.com/conan-io/conan-center-index"
-    no_copy_source = True
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    def _create_source_files(self):
+        cgltf_c = (
+            "#define CGLTF_IMPLEMENTATION\n"
+            "#include \"cgltf.h\"\n"
+        )
+        cgltf_write_c = (
+            "#define CGLTF_WRITE_IMPLEMENTATION\n"
+            "#include \"cgltf_write.h\"\n"
+        )
+        tools.save(os.path.join(self.build_folder, self._source_subfolder, "cgltf.c"), cgltf_c)
+        tools.save(os.path.join(self.build_folder, self._source_subfolder, "cgltf_write.c"), cgltf_write_c)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
+
+    def build(self):
+        self._create_source_files()
+        cmake = self._configure_cmake()
+        cmake.build()
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        for header_file in ["cgltf.h", "cgltf_write.h"]:
-            self.copy(header_file, dst="include", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        for header_file in [
+            ["cgltf.h", "#ifdef CGLTF_IMPLEMENTATION\n"],
+            ["cgltf_write.h", "#ifdef CGLTF_WRITE_IMPLEMENTATION\n"]
+        ]:
+            header_fullpath = os.path.join(self.package_folder, "include", header_file[0])
+            self._disable_implementation(header_fullpath, header_file[1])
 
-    def package_id(self):
-        self.info.header_only()
+    @staticmethod
+    def _disable_implementation(header_fullpath, macro_definition):
+        tools.replace_in_file(header_fullpath,
+                              "{}".format(macro_definition),
+                              "#if 0\n".format(macro_definition))
+
+    def package_info(self):
+        self.cpp_info.libs = ["cgltf"]
