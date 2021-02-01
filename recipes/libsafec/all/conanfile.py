@@ -88,6 +88,6 @@ class LibSafeCConan(ConanFile):
         self.cpp_info.libs = ["safec-{}".format(self.version)]
         self.cpp_info.names["pkg_config"] = "libsafec"
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        bin_dir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_dir))
+        self.env_info.PATH.append(bin_dir)
