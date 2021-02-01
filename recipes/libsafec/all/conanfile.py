@@ -83,7 +83,7 @@ class LibSafeCConan(ConanFile):
             tools.remove_files_by_mask(".", "*.la")
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include/libsafec"]
+        self.cpp_info.includedirs.append([os.path.join("include", "libsafec")])
         self.cpp_info.libs = ["safec-{}".format(self.version)]
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
