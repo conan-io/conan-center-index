@@ -62,6 +62,9 @@ class LibSafeCConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "_@SAFEC_API_VERSION@", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "tests", "Makefile.am"), "-@SAFEC_API_VERSION@", "")
         with tools.chdir(self._source_subfolder):
             self._autotools.make()
 
@@ -70,8 +73,6 @@ class LibSafeCConan(ConanFile):
             self._autotools.install()
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with tools.chdir(os.path.join(self.package_folder, "lib")):
-            ext = "so" if self.options.shared else "a"
-            tools.rename("libsafec-{}.{}".format(self.version, ext), "libsafec.{}".format(ext))
             tools.rmdir("pkgconfig")
             tools.remove_files_by_mask(".", "*.la")
 
