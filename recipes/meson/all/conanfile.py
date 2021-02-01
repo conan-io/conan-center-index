@@ -54,3 +54,5 @@ exec "$meson_dir/meson.py" "$@"
 
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
+
+        self.cpp_info.builddirs = [os.path.join("bin", "mesonbuild", "cmake", "data")]
