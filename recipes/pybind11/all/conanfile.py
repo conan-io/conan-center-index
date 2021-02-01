@@ -43,6 +43,9 @@ class PyBind11Conan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"))
+        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11NewTools.cmake"))
+        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Targets.cmake"))
         os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Config.cmake"))
         os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11ConfigVersion.cmake"))
 
