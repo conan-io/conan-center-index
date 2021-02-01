@@ -147,7 +147,6 @@ class Stlab(ConanFile):
             self._configure_task_system_emscripten()
 
     def configure(self):
-        ConanFile.configure(self)
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '17')
 
@@ -173,7 +172,6 @@ class Stlab(ConanFile):
         self.copy("stlab/*", src=self._source_subfolder, dst='include/')
 
     def package_id(self):
-        ConanFile.package_id(self)
         self.info.header_only()
         self.info.options.boost_optional = "ANY"
         self.info.options.boost_variant = "ANY"
