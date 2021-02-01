@@ -11,7 +11,7 @@ class Stlab(ConanFile):
     license = 'BSL-1.0'
     topics = 'conan', 'c++', 'concurrency', 'futures', 'channels'
 
-    settings = 'compiler'
+    settings = "arch", "os", "compiler", "build_type", 
 
     options = {
         "boost_optional": [True, False],
