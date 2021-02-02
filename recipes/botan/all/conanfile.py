@@ -249,9 +249,12 @@ class BotanConan(ConanFile):
         if self.settings.os != "Windows" and self.options.fPIC:
             botan_extra_cxx_flags.append('-fPIC')
 
-        if self.settings.os == "Macos" and self.settings.os.version:
+        if tools.is_apple_os(self.settings.os):
             macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                   self.settings.os.version)
+                                                                   self.settings.get_safe("os.version"),
+                                                                   self.settings.get_safe("os.sdk"),
+                                                                   self.settings.get_safe("os.subsystem"),
+                                                                   self.settings.get_safe("arch"))
             macos_sdk_path = "-isysroot {}".format(tools.XCRun(self.settings).sdk_path)
             botan_extra_cxx_flags.extend([macos_min_version, macos_sdk_path])
 
