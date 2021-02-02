@@ -94,7 +94,7 @@ class GetTextConan(ConanFile):
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
