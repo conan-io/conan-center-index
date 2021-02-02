@@ -47,8 +47,7 @@ class GetTextConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-        libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
+        libiconv_prefix = tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)
         args = ["HELP2MAN=/bin/true",
                 "EMACS=no",
                 "--disable-nls",
