@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from contextlib import contextmanager
 import os
 
 
@@ -43,6 +44,16 @@ class GetTextConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "gettext-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+    @contextmanager
+    def _build_context(self):
+        with tools.chdir(os.path.join(self._source_subfolder)):
+            if self._is_msvc:
+                with tools.vcvars(self.settings):
+                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                        yield
+            else:
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -90,19 +101,15 @@ class GetTextConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                with tools.chdir(os.path.join(self._source_subfolder)):
-                    env_build = self._configure_autotools()
-                    env_build.make()
+        with self._build_context():
+            env_build = self._configure_autotools()
+            env_build.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                with tools.chdir(os.path.join(self._source_subfolder)):
-                    env_build = self._configure_autotools()
-                    env_build.install()
+        with self._build_context():
+            env_build = self._configure_autotools()
+            env_build.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "include"))
