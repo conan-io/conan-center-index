@@ -402,7 +402,11 @@ class LibcurlConan(ConanFile):
 
 
                 arch_flag = "-arch {}".format(configure_arch)
-                ios_min_version = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
+                ios_min_version = tools.apple_deployment_target_flag(self.settings.os,
+                                                                     self.settings.get_safe("os.version"),
+                                                                     self.settings.get_safe("os.sdk"),
+                                                                     self.settings.get_safe("os.subsystem"),
+                                                                     self.settings.get_safe("arch"))
                 extra_flag = "-Werror=partial-availability"
 
                 # if we debug, maybe add a -gdwarf-2 , but why would we want that?
