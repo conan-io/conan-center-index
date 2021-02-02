@@ -93,6 +93,7 @@ class BoostConan(ConanFile):
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
+        "visibility": ["global", "protected", "hidden"],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -122,6 +123,7 @@ class BoostConan(ConanFile):
         "pch": True,
         "extra_b2_flags": "None",
         "i18n_backend": "iconv",
+        "visibility": "hidden",
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -804,6 +806,7 @@ class BoostConan(ConanFile):
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
+        flags.append("visibility=%s" % self.options.visibility)
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
