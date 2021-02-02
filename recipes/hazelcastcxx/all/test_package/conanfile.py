@@ -7,6 +7,12 @@ class TestPackageHazelcastCxx(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     requires = "hazelcastcxx/4.0.0"
 
+    def configure(self):
+        if self.settings.compiler == "gcc":
+            self.settings.compiler.libcxx="libstdc++11"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def build(self):
         cmake = CMake(self)
         cmake.verbose = True
