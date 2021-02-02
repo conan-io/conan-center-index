@@ -370,10 +370,10 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
 
         if self._with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
         elif self._with_iconv:
             self.requires("libiconv/1.16")
 
