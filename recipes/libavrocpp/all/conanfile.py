@@ -18,7 +18,7 @@ class LibavrocppConan(ConanFile):
         "fPIC": [True, False],
         "with_snappy": [True, False],
     }
-    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
+    exports_sources = ["patches/*.patch"]
     default_options = {"shared": False, "fPIC": True, "with_snappy": True}
     generators = "cmake", "cmake_find_package"
 
