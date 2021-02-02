@@ -868,7 +868,10 @@ class BoostConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
                 cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                    self.settings.os.version))
+                                                                    self.settings.get_safe("os.version"),
+                                                                    self.settings.get_safe("os.sdk"),
+                                                                    self.settings.get_safe("os.subsystem"),
+                                                                    self.settings.get_safe("arch")))
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
