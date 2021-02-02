@@ -14,8 +14,6 @@ class GetTextConan(ConanFile):
     settings = "os_build", "arch_build", "compiler"
     exports_sources = ["patches/*.patch"]
 
-    requires = [("libiconv/1.16", "private")]
-
     _autotools = None
 
     @property
@@ -34,6 +32,9 @@ class GetTextConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("libiconv/1.16")
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
@@ -45,7 +46,7 @@ class GetTextConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "gettext-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
- 
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -92,7 +93,7 @@ class GetTextConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)   
+            tools.patch(**patch)
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder)):
