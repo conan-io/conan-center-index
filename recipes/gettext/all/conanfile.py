@@ -22,10 +22,6 @@ class GetTextConan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
-    @property
-    def _make_args(self):
-        return None
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -99,7 +95,7 @@ class GetTextConan(ConanFile):
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
-                    env_build.make(self._make_args)
+                    env_build.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
