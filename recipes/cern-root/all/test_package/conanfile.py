@@ -5,7 +5,7 @@ from conans import CMake, ConanFile, RunEnvironment, tools
 
 class CernRootTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = ("cmake", "cmake_find_package")
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):

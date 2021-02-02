@@ -91,7 +91,6 @@ class CernRootConan(ConanFile):
         }
 
     def configure(self):
-        del self.settings.compiler.libcxx
         self._enforce_minimum_compiler_version()
 
     def _enforce_minimum_compiler_version(self):
@@ -231,6 +230,10 @@ class CernRootConan(ConanFile):
                     "tmva-pymva": "OFF",  # FIXME: switch on if Python CCI package available
                     "xrootd": "OFF",  # FIXME: switch on if xrootd CCI package available
                     "pyroot": self._pyrootopt,
+                    # clad is built with ExternalProject_Add and its 
+                    # COMPILE_DEFINITIONS property is not propagated causing the build to 
+                    # fail on some systems if libcxx != libstdc++11
+                    "clad": "OFF", 
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": cmakelibpath.replace("\\", "/"),
                     "CMAKE_INCLUDE_PATH": cmakeincludepath.replace("\\", "/"),

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(PackageTest CXX)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 find_package(ROOT REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
