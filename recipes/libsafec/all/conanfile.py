@@ -60,7 +60,6 @@ class LibSafeCConan(ConanFile):
         return self.__autotools
 
     def _autotools_configure(self):
-        self.run("autoreconf -fiv", run_environment=True)
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
@@ -72,6 +71,7 @@ class LibSafeCConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv", run_environment=True)
             self._autotools_configure()
             self._autotools.make()
 
