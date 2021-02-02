@@ -11,7 +11,7 @@ class CopperSpiceConan(ConanFile):
         'build_type': ['Debug', 'Release']
     }
     generators = 'cmake_paths'
-    version = '1.7.0'
+    version = '1.7.1'
     license = 'LGPL-2.1-only'
     description = '''
     CopperSpice is a set of individual libraries which can be used to develop cross platform software applications in C++.
