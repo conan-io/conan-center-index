@@ -170,7 +170,7 @@ class LibcurlConan(ConanFile):
            tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20200517")
         elif self._is_win_x_android:
-            self.build_requires("ninja/1.10.1")
+            self.build_requires("ninja/1.10.2")
         elif not tools.os_info.is_windows:
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.3")
