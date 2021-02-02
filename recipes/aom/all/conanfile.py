@@ -63,7 +63,7 @@ class Aom(ConanFile):
     def build_requirements(self):
         if self.options.assembly:
             self.build_requires("nasm/2.15.05")
-        if tools.os_info.is_windows and not tools.which("perl"):
+        if tools.os_info.is_windows:
             self.build_requires("strawberryperl/5.30.0.1")
 
     def source(self):
