@@ -875,8 +875,6 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
                 cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
 
-            cxx_flags.append("-fvisibility=hidden")
-            cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
