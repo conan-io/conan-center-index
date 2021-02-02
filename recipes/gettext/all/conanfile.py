@@ -1,7 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
-import shutil
-import glob
 
 
 class GetTextConan(ConanFile):
@@ -34,6 +32,10 @@ class GetTextConan(ConanFile):
 
     def requirements(self):
         self.requires("libiconv/1.16")
+
+    def package_id(self):
+        self.info.include_build_settings()
+        del self.info.settings.compiler
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -76,7 +78,7 @@ class GetTextConan(ConanFile):
             elif self.settings.arch_build == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "bin", "share", "automake-1.16"))
+            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info["automake"].rootpath, "bin", "share", "automake-1.16"))
             args.extend(["CC=%s/compile cl -nologo" % automake_perldir,
                          "LD=link",
                          "NM=dumpbin -symbols",
@@ -84,7 +86,7 @@ class GetTextConan(ConanFile):
                          "AR=%s/ar-lib lib" % automake_perldir,
                          "RANLIB=:"])
             if rc:
-                args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
+                args.extend(["RC=%s" % rc, "WINDRES=%s" % rc])
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self._is_msvc:
             self._autotools.flags.append("-FS")
@@ -107,17 +109,13 @@ class GetTextConan(ConanFile):
                 with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
                     env_build.install()
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib'))
-        tools.rmdir(os.path.join(self.package_folder, 'include'))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.compiler
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: {}'.format(bindir))
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
 
