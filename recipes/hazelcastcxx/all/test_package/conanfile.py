@@ -8,7 +8,7 @@ class TestPackageHazelcastCxx(ConanFile):
     requires = "hazelcastcxx/4.0.0"
 
     def configure(self):
-        if self.settings.compiler == "gcc":
+        if self.settings.compiler == "gcc" or (self.settings.compiler == "clang" and self.settings.os == "Linux"):
             self.settings.compiler.libcxx="libstdc++11"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
