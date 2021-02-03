@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.verbose = True
         cmake.definitions["AVROCPP_SHARED"] = self.options["libavrocpp"].shared
         cmake.configure()
         cmake.build()
