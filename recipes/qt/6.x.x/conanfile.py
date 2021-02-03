@@ -362,18 +362,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        # FIXME : port to cmake
-        #if self.options.opengl == "no":
-        #    args += ["-no-opengl"]
-        #elif self.options.opengl == "desktop":
-        #    args += ["-opengl desktop"]
-        #elif self.options.opengl == "dynamic":
-        #    args += ["-opengl dynamic"]
-        #
-        #if self.options.with_vulkan:
-        #    args.append("-vulkan")
-        #else:
-        #    args.append("-no-vulkan")
+        self._cmake.definitions["INPUT_opengl"] = self.options.opengl
 
         # openSSL
         if not self.options.openssl:
@@ -384,9 +373,6 @@ class QtConan(ConanFile):
             else:
                 self._cmake.definitions["INPUT_openssl"] = "linked"
 
-        # FIXME: port to cmake
-        # args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
-
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -395,7 +381,9 @@ class QtConan(ConanFile):
                               ("with_pq", "sql_psql"),
                               ("with_odbc", "sql_odbc"),
                               ("gui", "gui"),
-                              ("widgets", "widgets")]:
+                              ("widgets", "widgets"),
+                              ("with_zstd", "zstd"),
+                              ("with_vulkan", "vulkan")]:
             self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
