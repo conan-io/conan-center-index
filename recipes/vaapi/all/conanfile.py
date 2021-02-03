@@ -18,7 +18,7 @@ class SysConfigVAAPIConan(ConanFile):
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
         if not pkg_config.provides:
-            raise ConanException("VDPAU development files aren't available, give up")
+            raise ConanException("VAAPI development files aren't available, give up")
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
         lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
         ldflags = [flag for flag in pkg_config.libs_only_other]
