@@ -16,7 +16,6 @@ class CppUTestConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [False],
         "fPIC": [True, False],
         "use_std_c_lib": ["ON", "OFF"],
         "use_std_cpp_lib": ["ON", "OFF"],
@@ -26,7 +25,6 @@ class CppUTestConan(ConanFile):
         "longlong": ["ON", "OFF"],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "use_std_c_lib": "ON",
         "use_std_cpp_lib": "ON",
@@ -51,8 +49,6 @@ class CppUTestConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         if not self.options.use_std_cpp_lib:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
