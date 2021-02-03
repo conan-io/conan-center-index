@@ -610,7 +610,7 @@ class BoostConan(ConanFile):
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
                 command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
-                if self.options.debug_level:
+                if "debug_level" in self.options:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command, run_environment=True)
@@ -904,7 +904,7 @@ class BoostConan(ConanFile):
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
                       "--abbreviate-paths"])
-        if self.options.debug_level:
+        if "debug_level" in self.options:
             flags.append("-d%d" % self.options.debug_level)
         return flags
 
