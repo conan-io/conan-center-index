@@ -51,6 +51,8 @@ class CppUTestConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.use_std_cpp_lib:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
