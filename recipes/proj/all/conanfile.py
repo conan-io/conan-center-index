@@ -55,9 +55,6 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.74.0")
 
-    def build_requirements(self):
-        self.build_requires("sqlite3/3.34.0")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
