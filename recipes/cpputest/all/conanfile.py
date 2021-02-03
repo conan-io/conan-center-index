@@ -16,7 +16,7 @@ class CppUTestConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
+        "shared": [False],
         "fPIC": [True, False],
         "use_std_c_lib": ["ON", "OFF"],
         "use_std_cpp_lib": ["ON", "OFF"],
