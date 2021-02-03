@@ -1,0 +1,66 @@
+name: intel_media_sdk CI
+
+on:
+  pull_request:
+    paths:
+      - 'recipes/intel_media_sdk/2018R2_1/**'
+      - 'build.py'
+      - '.github/workflows/intel-media-sdk.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'recipes/intel_media_sdk/2018R2_1/**'
+      - 'build.py'
+      - '.github/workflows/intel-media-sdk.yml'
+
+env:
+  CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
+  CONAN_REFERENCE: 'intel_media_sdk/2018R2_1'
+  CONAN_ARCHS: 'x86'
+  IS_PURE_C: true
+
+jobs:
+  intel_media_sdk:
+    strategy:
+      matrix:
+        build: ['windows-2019-release', 'windows-2019-debug']
+        include:
+          - build: 'windows-2019-release'
+            os: 'windows-2019'
+            build_types: 'Release'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MD,MT'
+          - build: 'windows-2019-debug'
+            os: 'windows-2019'
+            build_types: 'Debug'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MDd,MTd'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf false
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: sources
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Build and Optionally Upload
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/intel_media_sdk/2018R2_1
+          build-script: ../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+        env:
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
