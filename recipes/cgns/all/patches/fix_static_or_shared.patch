@@ -1,0 +1,20 @@
+--- a/source_subfolder/src/CMakeLists.txt	2021-02-02 10:35:07.376792980 +0100
++++ b/source_subfolder/src/CMakeLists.txt	2021-02-02 11:00:41.138746824 +0100
+@@ -597,14 +597,15 @@
+   set_target_properties(cgns_shared PROPERTIES SOVERSION "${CGNS_VERSION}")
+ endif(CGNS_BUILD_SHARED)
+ 
+-# Set the install path of the static library
+-install(TARGETS cgns_static ARCHIVE DESTINATION lib)
+ # Set the install path of the shared library
+ if(CGNS_BUILD_SHARED)
+   # for windows, need to install both cgnsdll.dll and cgnsdll.lib
+   install (TARGETS cgns_shared LIBRARY DESTINATION lib
+                                ARCHIVE DESTINATION lib
+                                RUNTIME DESTINATION bin)
++else(CGNS_BUILD_SHARED)
++  # Set the install path of the static library
++  install(TARGETS cgns_static ARCHIVE DESTINATION lib)
+ endif(CGNS_BUILD_SHARED)
+ 
+ # Set the install path of the header files
