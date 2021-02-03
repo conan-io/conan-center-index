@@ -58,8 +58,6 @@ class CppUTestConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        # tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-        #                       "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         cmake = self._configure_cmake()
         cmake.build()
 
