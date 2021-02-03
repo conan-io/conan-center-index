@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(PackageTest CXX)
 
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package PUBLIC ${CONAN_LIBS})
-set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
+target_link_libraries(test_package PUBLIC CONAN_PKG::hazelcastcxx)
