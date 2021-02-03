@@ -180,13 +180,7 @@ class Libxml2Conan(ConanFile):
             value = ("--with-%s" % name) if value else ("--without-%s" % name)
             configure_args.append(value)
 
-        # Disable --build when building for iPhoneSimulator. The configure script halts on
-        # not knowing if it should cross-compile.
-        build = None
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
-
-        self._autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def _patch_sources(self):
