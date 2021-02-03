@@ -20,7 +20,7 @@ class qt(Generator):
 
 
 class QtConan(ConanFile):
-    _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc", "qtrepotools", "qtqa",
+    _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
     "qtwayland","qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat"]
 
     generators = "pkg_config", "cmake_find_package", "cmake"
@@ -174,11 +174,9 @@ class QtConan(ConanFile):
                     submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
 
         for m in submodules_tree:
-            self.output.info(m)
-            assert(m == "qtbase" or m in self._submodules)
+            assert(m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules)
 
         for m in self._submodules:
-            self.output.info(m)
             assert(m in submodules_tree)
 
         def _enablemodule(mod):
