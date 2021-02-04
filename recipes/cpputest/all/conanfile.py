@@ -21,7 +21,7 @@ class CppUTestConan(ConanFile):
         "use_std_cpp_lib": ["ON", "OFF"],
         "use_cpp11": ["ON", "OFF"],
         "detect_mem_leaks": ["ON", "OFF"],
-        "extensions": ["ON", "OFF"],
+        "with_extensions": ["ON", "OFF"],
         "longlong": ["ON", "OFF"],
     }
     default_options = {
@@ -30,7 +30,7 @@ class CppUTestConan(ConanFile):
         "use_std_cpp_lib": "ON",
         "use_cpp11": "ON",
         "detect_mem_leaks": "ON",
-        "extensions": "ON",
+        "with_extensions": "ON",
         "longlong": "ON",
     }
 
@@ -69,7 +69,7 @@ class CppUTestConan(ConanFile):
         self._cmake.definitions["STD_CPP"] = self.options.use_std_cpp_lib
         self._cmake.definitions["C++11"] = self.options.use_cpp11
         self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_mem_leaks
-        self._cmake.definitions["EXTENSIONS"] = self.options.extensions
+        self._cmake.definitions["EXTENSIONS"] = self.options.with_extensions
         self._cmake.definitions["LONGLONG"] = self.options.longlong
         self._cmake.definitions["COVERAGE"] = "OFF"
         self._cmake.definitions["TESTS"] = "OFF"
@@ -92,7 +92,7 @@ class CppUTestConan(ConanFile):
         self.cpp_info.components["CppUTest"].names["cmake_find_package_multi"] = "CppUTest"
         self.cpp_info.components["CppUTest"].libs = ["CppUTest"]
 
-        if self.options.extensions:
+        if self.options.with_extensions:
             self.cpp_info.components["CppUTestExt"].names["cmake_find_package"] = "CppUTestExt"
             self.cpp_info.components["CppUTestExt"].names["cmake_find_package_multi"] = "CppUTestExt"
             self.cpp_info.components["CppUTestExt"].libs = ["CppUTestExt"]
