@@ -1,5 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+
 
 class HazelcastCxx(ConanFile):
     name = "hazelcastcxx"
@@ -38,12 +40,16 @@ class HazelcastCxx(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def validate(self):
+        if self.settings.os == "Linux" and self.settings.compiler.libcxx!="libstdc++11":
+            raise ConanInvalidConfiguration("Requires settings.compiler.libcxx = libstdc++11")
+
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/[>1.71.0]")
         if self.options.with_openssl:
             self.requires("openssl")
 
