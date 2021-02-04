@@ -113,7 +113,8 @@ class LibVPXConan(ConanFile):
         elif build_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
-        args.append('--target=%s' % target)
+        if tools.cross_building(self):
+            args.append('--target=%s' % target)
         if self.settings.compiler == 'apple-clang':
             if float(str(self.settings.compiler.version)) < 8.0:
                 args.append('--disable-avx512')
