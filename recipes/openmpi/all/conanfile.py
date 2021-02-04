@@ -17,7 +17,9 @@ class OpenMPIConan(ConanFile):
     default_options = {'shared': False, 'fPIC': True, 'fortran': 'no'}
     _source_subfolder = "sources"
 
-    def config(self):
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
