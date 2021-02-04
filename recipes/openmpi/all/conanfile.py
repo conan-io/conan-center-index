@@ -11,7 +11,7 @@ class OpenMPIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "mpi", "openmpi")
     description = "A High Performance Message Passing Library"
-    license = "https://www.open-mpi.org/community/license.php"
+    license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
