@@ -17,21 +17,11 @@ class CppUTestConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "use_std_c_lib": ["ON", "OFF"],
-        "use_std_cpp_lib": ["ON", "OFF"],
-        "use_cpp11": ["ON", "OFF"],
-        "detect_memory_leaks": ["ON", "OFF"],
         "with_extensions": ["ON", "OFF"],
-        "with_longlong": ["ON", "OFF"],
     }
     default_options = {
         "fPIC": True,
-        "use_std_c_lib": "ON",
-        "use_std_cpp_lib": "ON",
-        "use_cpp11": "ON",
-        "detect_memory_leaks": "ON",
         "with_extensions": "ON",
-        "with_longlong": "ON",
     }
 
     _cmake = None
@@ -49,9 +39,7 @@ class CppUTestConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.use_std_cpp_lib:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+        pass
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -65,12 +53,12 @@ class CppUTestConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["STD_C"] = self.options.use_std_c_lib
-        self._cmake.definitions["STD_CPP"] = self.options.use_std_cpp_lib
-        self._cmake.definitions["C++11"] = self.options.use_cpp11
-        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_memory_leaks
+        self._cmake.definitions["STD_C"] = "ON"
+        self._cmake.definitions["STD_CPP"] = "ON"
+        self._cmake.definitions["C++11"] = "ON"
+        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = "ON"
         self._cmake.definitions["EXTENSIONS"] = self.options.with_extensions
-        self._cmake.definitions["LONGLONG"] = self.options.with_longlong
+        self._cmake.definitions["LONGLONG"] = "ON"
         self._cmake.definitions["COVERAGE"] = "OFF"
         self._cmake.definitions["TESTS"] = "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
