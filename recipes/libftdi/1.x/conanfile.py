@@ -6,15 +6,21 @@ from conans.errors import ConanInvalidConfiguration
 class LibFtdiConan(ConanFile):
     name = "libftdi"
     description = "A library to talk to FTDI chips"
-    license = ["GNU LGPL v2.1"]
+    license = "LGPL-2.0-only", "GPLv2-or-later"
     topics = ("conan", "libftdi1")
     homepage = "https://www.intra2net.com/en/developer/libftdi/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+            "shared": [True, False], 
+            "fPIC": [True, False]
+    }
+    default_options = {
+            "shared": False, 
+            "fPIC": True
+    }
     _cmake = None
 
     @property
@@ -31,6 +37,8 @@ class LibFtdiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Building with Visual Studio is not supported")
 
@@ -59,8 +67,8 @@ class LibFtdiConan(ConanFile):
         self.requires("boost/1.75.0")
 
     def build(self):
-        self._patch_cmakelists("")
-        self._patch_cmakelists("ftdipp")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -78,12 +86,12 @@ class LibFtdiConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "LibFTDI1"
         self.cpp_info.names["pkgconfig"] = "libftdi1"
 
-        self.cpp_info.components["ftdi"].names["cmake"] = "libftdi"
+        self.cpp_info.components["ftdi"].names["pkg_config"] = "libftdi1"
         self.cpp_info.components["ftdi"].libs = ["ftdi1"]
         self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
         self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
 
-        self.cpp_info.components["ftdipp"].names["cmake"] = "libftdipp"
+        self.cpp_info.components["ftdipp"].names["pkg_config"] = "libftdi1pp"
         self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
         self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::boost"]
         self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
