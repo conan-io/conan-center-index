@@ -11,5 +11,5 @@ target_link_libraries(test_package CppUTest::CppUTest)
 
 if(WITH_EXTENSIONS)
     add_executable(test_package_with_extensions test_package_with_extensions.cpp)
-    target_link_libraries(test_package_with_extensions CppUTest::CppUTest CppUTestExt)
+    target_link_libraries(test_package_with_extensions CppUTest::CppUTest CppUTest::CppUTestExt)
 endif()

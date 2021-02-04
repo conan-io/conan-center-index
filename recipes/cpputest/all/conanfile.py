@@ -88,7 +88,15 @@ class CppUTestConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "CppUTest"
         self.cpp_info.names["pkg_config"] = "cpputest"
 
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["CppUTest"].names["cmake_find_package"] = "CppUTest"
+        self.cpp_info.components["CppUTest"].names["cmake_find_package_multi"] = "CppUTest"
+        self.cpp_info.components["CppUTest"].libs = ["CppUTest"]
+
+        if self.options.extensions:
+            self.cpp_info.components["CppUTestExt"].names["cmake_find_package"] = "CppUTestExt"
+            self.cpp_info.components["CppUTestExt"].names["cmake_find_package_multi"] = "CppUTestExt"
+            self.cpp_info.components["CppUTestExt"].libs = ["CppUTestExt"]
+
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm"])
         elif self.settings.os in ("Linux", "FreeBSD"):
