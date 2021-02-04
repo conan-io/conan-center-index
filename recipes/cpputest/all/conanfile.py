@@ -96,6 +96,7 @@ class CppUTestConan(ConanFile):
             self.cpp_info.components["CppUTestExt"].names["cmake_find_package"] = "CppUTestExt"
             self.cpp_info.components["CppUTestExt"].names["cmake_find_package_multi"] = "CppUTestExt"
             self.cpp_info.components["CppUTestExt"].libs = ["CppUTestExt"]
+            self.cpp_info.components["CppUTestExt"].requires = ["CppUTest"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm"])
