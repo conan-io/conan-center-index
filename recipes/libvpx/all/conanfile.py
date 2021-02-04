@@ -113,7 +113,7 @@ class LibVPXConan(ConanFile):
         elif build_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
-        if tools.cross_building(self):
+        if tools.cross_building(self) or self.settings.compiler == 'Visual Studio':
             args.append('--target=%s' % target)
         if self.settings.compiler == 'apple-clang':
             if float(str(self.settings.compiler.version)) < 8.0:
