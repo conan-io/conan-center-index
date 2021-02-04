@@ -16,8 +16,8 @@ class LibFtdiConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = (
-            "libusb/1.0.23",
-            "boost/1.74.0"
+            "libusb/1.0.24",
+            "boost/1.75.0"
             )
     _cmake = None
 
@@ -35,19 +35,12 @@ class LibFtdiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos is not supported")
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Building with Visual Studio is not supported")
 
     def build_requirements(self):
         if not tools.which("pkg-config"):
             self.build_requires("pkgconf/1.7.3")
-
-    def _patch_cmakelists(self, subfolder):
-        cmakelists_path = os.path.join(self._source_subfolder, subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists_path, "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR", strict=False)
-        tools.replace_in_file(cmakelists_path, "CMAKE_BINARY_DIR", "PROJECT_BINARY_DIR", strict=False)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -79,10 +72,6 @@ class LibFtdiConan(ConanFile):
         lib_folder = os.path.join(self.package_folder, "lib",)
         tools.rmdir(os.path.join(lib_folder, "cmake"))
         tools.rmdir(os.path.join(lib_folder, "pkgconfig"))
-        # STATIC config creates both static and shared libraries
-        if not self.options.shared:
-            tools.remove_files_by_mask(lib_folder, "*.so*")
-
         os.unlink(os.path.join(self.package_folder, "bin", "libftdi1-config"))
 
     def package_info(self):
