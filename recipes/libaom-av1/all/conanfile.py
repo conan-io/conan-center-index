@@ -4,8 +4,8 @@ from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.29.1"
 
-class Aom(ConanFile):
-    name = "aom"
+class LibaomAv1(ConanFile):
+    name = "libaom-av1"
     description = "AV1 Codec Library"
     topics = ("conan", "av1", "codec", "video", "encoding", "decoding")
     url = "https://github.com/conan-io/conan-center-index"
