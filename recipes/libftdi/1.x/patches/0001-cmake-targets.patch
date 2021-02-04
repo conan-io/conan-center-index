@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5aecafc..f4526cd 100644
+index 5aecafc..3bff6f2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,36 +1,42 @@
+@@ -1,36 +1,49 @@
 -# Project
  project(libftdi1 C)
 +
@@ -20,10 +20,17 @@ index 5aecafc..f4526cd 100644
  endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
  set(CMAKE_COLOR_MAKEFILE ON)
 -cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
++
 +cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-+cmake_policy(SET CMP0057 NEW)
-+cmake_policy(SET CMP0011 NEW)
-+cmake_policy(SET CMP0099 NEW)
++if(POLICY CMP0057)
++    cmake_policy(SET CMP0057 NEW)
++endif()
++if(POLICY CMP0011)
++    cmake_policy(SET CMP0011 NEW)
++endif()
++if(POLICY CMP0099)
++    cmake_policy(SET CMP0099 NEW)
++endif()
  
  add_definitions(-Wall)
  
@@ -56,7 +63,7 @@ index 5aecafc..f4526cd 100644
  endif()
  
  # Set components
-@@ -97,7 +103,7 @@ if ( WIN32 )
+@@ -97,7 +110,7 @@ if ( WIN32 )
    set ( CPACK_NSIS_MODIFY_PATH             ON )
  endif ()
  
@@ -65,7 +72,7 @@ index 5aecafc..f4526cd 100644
  
  set(CPACK_SOURCE_GENERATOR             TGZ)
  set(CPACK_SOURCE_IGNORE_FILES          "\\\\.git;~$;build/")
-@@ -136,7 +142,7 @@ endif ()
+@@ -136,7 +149,7 @@ endif ()
  
  add_subdirectory(src)
  if ( FTDIPP )
@@ -74,7 +81,7 @@ index 5aecafc..f4526cd 100644
    add_subdirectory(ftdipp)
  endif ()
  if ( PYTHON_BINDINGS )
-@@ -150,6 +156,9 @@ if ( EXAMPLES )
+@@ -150,6 +163,9 @@ if ( EXAMPLES )
  endif ()
  add_subdirectory(packages)
  if ( BUILD_TESTS )
@@ -84,7 +91,7 @@ index 5aecafc..f4526cd 100644
    add_subdirectory(test)
  endif ()
  
-@@ -165,8 +174,8 @@ if(${WIN32})
+@@ -165,8 +181,8 @@ if(${WIN32})
     set(libdir      ${CMAKE_INSTALL_PREFIX}/bin)
  endif(${WIN32})
  
@@ -95,7 +102,7 @@ index 5aecafc..f4526cd 100644
  install(FILES ${CMAKE_BINARY_DIR}/libftdi1.pc ${CMAKE_BINARY_DIR}/libftdipp1.pc
          DESTINATION lib${LIB_SUFFIX}/pkgconfig)
  
-@@ -202,30 +211,25 @@ set ( LIBFTDI_VERSION_MINOR ${MINOR_VERSION} )
+@@ -202,30 +218,25 @@ set ( LIBFTDI_VERSION_MINOR ${MINOR_VERSION} )
  
  set ( LIBFTDI_USE_FILE ${CMAKE_INSTALL_PREFIX}/${LIBFTDI_CMAKE_CONFIG_DIR}/UseLibFTDI1.cmake )
  
@@ -145,7 +152,7 @@ index 5aecafc..f4526cd 100644
  
  
  install ( FILES 
-@@ -240,7 +244,7 @@ include(CPack)
+@@ -240,7 +251,7 @@ include(CPack)
  
  message (STATUS "Summary of build options:
  
