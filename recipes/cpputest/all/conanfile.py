@@ -20,7 +20,7 @@ class CppUTestConan(ConanFile):
         "use_std_c_lib": ["ON", "OFF"],
         "use_std_cpp_lib": ["ON", "OFF"],
         "use_cpp11": ["ON", "OFF"],
-        "detect_mem_leaks": ["ON", "OFF"],
+        "detect_memory_leaks": ["ON", "OFF"],
         "with_extensions": ["ON", "OFF"],
         "with_longlong": ["ON", "OFF"],
     }
@@ -29,7 +29,7 @@ class CppUTestConan(ConanFile):
         "use_std_c_lib": "ON",
         "use_std_cpp_lib": "ON",
         "use_cpp11": "ON",
-        "detect_mem_leaks": "ON",
+        "detect_memory_leaks": "ON",
         "with_extensions": "ON",
         "with_longlong": "ON",
     }
@@ -68,7 +68,7 @@ class CppUTestConan(ConanFile):
         self._cmake.definitions["STD_C"] = self.options.use_std_c_lib
         self._cmake.definitions["STD_CPP"] = self.options.use_std_cpp_lib
         self._cmake.definitions["C++11"] = self.options.use_cpp11
-        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_mem_leaks
+        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.detect_memory_leaks
         self._cmake.definitions["EXTENSIONS"] = self.options.with_extensions
         self._cmake.definitions["LONGLONG"] = self.options.with_longlong
         self._cmake.definitions["COVERAGE"] = "OFF"
