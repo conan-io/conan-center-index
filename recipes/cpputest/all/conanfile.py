@@ -99,6 +99,6 @@ class CppUTestConan(ConanFile):
             self.cpp_info.components["CppUTestExt"].requires = ["CppUTest"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winmm"])
+            self.cpp_info.components["CppUTest"].system_libs.extend(["winmm"])
         elif self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["CppUTest"].system_libs = ["pthread"]
