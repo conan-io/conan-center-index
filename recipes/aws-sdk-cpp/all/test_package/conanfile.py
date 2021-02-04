@@ -8,10 +8,7 @@ class AwsSdkCppTestConan(ConanFile):
     generators = "cmake"
 
     def configure(self):
-        self.options["aws-sdk-cpp"].s3 = True
         self.options["aws-sdk-cpp"].logs = True
-        self.options["aws-sdk-cpp"].monitoring = True
-        self.options["aws-sdk-cpp"].transfer = True
 
     def build(self):
         cmake = CMake(self)
