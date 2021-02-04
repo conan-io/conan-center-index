@@ -11,11 +11,22 @@ class OpenMPIConan(ConanFile):
     description = "A High Performance Message Passing Library"
     license = "https://www.open-mpi.org/community/license.php"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "fortran": ['yes', 'mpifh', 'usempi', 'usempi80', 'no']}
-    default_options = {'shared': False, 'fPIC': True, 'fortran': 'no'}
-    _source_subfolder = "sources"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "fortran": ["yes", "mpifh", "usempi", "usempi80", "no"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "fortran": "no"
+    }
+
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         if self.options.shared:
