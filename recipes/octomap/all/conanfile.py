@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class OctomapConan(ConanFile):
     name = "octomap"
@@ -37,6 +38,8 @@ class OctomapConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared and self.settings.compiler.get_safe("runtime") == "MTd":
+            raise ConanInvalidConfiguration("shared octomap doesn't support MTd runtime")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
