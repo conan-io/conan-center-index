@@ -44,29 +44,35 @@ class OpenMPIConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        args = ["--disable-wrapper-rpath", "--disable-wrapper-runpath"]
+        if self.settings.build_type == "Debug":
+            args.append("--enable-debug")
+        if self.options.shared:
+            args.extend(["--enable-shared", "--disable-static"])
+        else:
+            args.extend(["--enable-static", "--disable-shared"])
+        args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
+        args.append("--enable-mpi-fortran={}".format(str(self.options.fortran)))
+        args.append("--with-zlib={}".format(self.deps_cpp_info["zlib"].rootpath))
+        args.append("--with-zlib-libdir={}".format(self.deps_cpp_info["zlib"].lib_paths[0]))
+        args.append("--datarootdir=${prefix}/res")
+        self._autotools.configure(args=args)
+        return self._autotools
+
     def build(self):
         with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.fpic = self.options.fPIC
-            args = ['--disable-wrapper-rpath', '--disable-wrapper-runpath']
-            if self.settings.build_type == 'Debug':
-                args.append('--enable-debug')
-            if self.options.shared:
-                args.extend(['--enable-shared', '--disable-static'])
-            else:
-                args.extend(['--enable-static', '--disable-shared'])
-            args.append('--with-pic' if self.options.fPIC else '--without-pic')
-            args.append('--enable-mpi-fortran=%s' % str(self.options.fortran))
-            args.append('--with-zlib=%s' % self.deps_cpp_info['zlib'].rootpath)
-            args.append('--with-zlib-libdir=%s' % self.deps_cpp_info['zlib'].lib_paths[0])
-            args.append('--datarootdir=${prefix}/res')
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.install()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE", src='sources', dst='licenses')
-
+        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
