@@ -250,7 +250,7 @@ class BotanConan(ConanFile):
             botan_extra_cxx_flags.append('-fPIC')
 
         if tools.is_apple_os(self.settings.os):
-            if self.settings.os.get_safe("version"):
+            if self.settings.get_safe("os.version"):
                 macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
                                                                        self.settings.get_safe("os.version"),
                                                                        self.settings.get_safe("os.sdk"),
