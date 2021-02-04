@@ -15,10 +15,6 @@ class LibFtdiConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = (
-            "libusb/1.0.24",
-            "boost/1.75.0"
-            )
     _cmake = None
 
     @property
@@ -58,6 +54,9 @@ class LibFtdiConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def requirements(self):
+        self.requires("libusb/1.0.24")
+        self.requires("boost/1.75.0")
 
     def build(self):
         self._patch_cmakelists("")
