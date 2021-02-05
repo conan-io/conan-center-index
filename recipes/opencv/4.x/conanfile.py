@@ -48,10 +48,6 @@ class OpenCVConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
     def _contrib_folder(self):
         return "contrib"
 
@@ -258,7 +254,7 @@ class OpenCVConan(ConanFile):
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
 
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
