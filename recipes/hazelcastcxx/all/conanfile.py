@@ -75,6 +75,10 @@ class HazelcastCxx(ConanFile):
         self._cmake.definitions["BUILD_STATIC_LIB"] = self._bool_to_cmake_option(self.options.static)
         self._cmake.definitions["BUILD_SHARED_LIB"] = self._bool_to_cmake_option(self.options.shared)
         if self.settings.compiler == "Visual Studio":
+            if self.settings.build_type == "Debug":
+                self._cmake.definitions["CMAKE_CXX_FLAGS_DEBUG"] = "/EHsc /" + str(self.settings.compiler.runtime)
+            else:
+                self._cmake.definitions["CMAKE_CXX_FLAGS_RELEASE"] = "/EHsc /" + str(self.settings.compiler.runtime)
             self._cmake.definitions["CMAKE_CXX_FLAGS"] = "/EHsc /" + str(self.settings.compiler.runtime)
         self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
