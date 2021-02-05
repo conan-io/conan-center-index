@@ -49,9 +49,6 @@ class GperfConan(ConanFile):
                             "RANLIB=:"])
             elif self.settings.compiler == "gcc" and self.settings.os == "Windows":
                 self._autotools.link_flags.extend(["-static", "-static-libgcc"])
-            elif tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
-                target = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
-                self._autotools.flags.append(target)
 
             self._autotools.configure(args=args)
         return self._autotools
