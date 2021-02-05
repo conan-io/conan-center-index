@@ -21,7 +21,7 @@ class qt(Generator):
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns",
-    "qttranslations", "qtdoc", "qtrepotools", "qtqa", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
+    "qttranslations", "qtdoc", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
@@ -244,6 +244,12 @@ class QtConan(ConanFile):
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
                     submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+
+        for m in submodules_tree:
+            assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s is not present in recipe options : (%s)" % (m, ",".join(self._submodules))
+
+        for m in self._submodules:
+            assert m in submodules_tree, "module %s is not present in qtmodules%s.conf : (%s)" % (m, self.version, ",".join(submodules_tree))
 
         def _enablemodule(mod):
             if mod != "qtbase":
