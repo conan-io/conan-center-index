@@ -22,7 +22,6 @@ class LibaomAv1(ConanFile):
                        "fPIC": True,
                        "assembly": False
                       }
-
     _cmake = None
 
     @property
