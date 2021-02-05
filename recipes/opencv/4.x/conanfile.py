@@ -39,6 +39,9 @@ class OpenCVConan(ConanFile):
                        "with_webp": True,
                        "with_gtk": True,
                        "with_quirc": True}
+
+    short_paths = True
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
