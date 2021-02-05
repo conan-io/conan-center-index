@@ -17,11 +17,11 @@ class CppUTestConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "with_extensions": ["ON", "OFF"],
+        "with_extensions": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "with_extensions": "ON",
+        "with_extensions": True,
     }
 
     _cmake = None
