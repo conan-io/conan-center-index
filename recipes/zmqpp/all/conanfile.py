@@ -40,6 +40,10 @@ class ZmqppConan(ConanFile):
                               "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH1) -iname '*.hpp')")
 
     def validate(self):
+        compiler = self.settings.compiler
+        if compiler.get_safe('cppstd'):
+            tools.check_min_cppstd(self, 11)
+            
         # libstdc++11 is required
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("libstdc++11 required")
