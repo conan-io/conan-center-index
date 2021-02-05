@@ -11,7 +11,7 @@ class LibavrocppConan(ConanFile):
     description = "Avro is a data serialization system."
     homepage = "https://avro.apache.org/"
     topics = ("serialization", "deserialization")
-    exports_sources = ["patches/*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -48,24 +48,12 @@ class LibavrocppConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "project (Avro-cpp)",
-            """project (Avro-cpp)
-               include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-               conan_basic_setup()"""
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "${SNAPPY_LIBRARIES}", "${Snappy_LIBRARIES}"
-        )
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            # self._cmake.verbose = True
             self._cmake.definitions["SNAPPY_ROOT_DIR"] = self.deps_cpp_info["snappy"].rootpath.replace("\\", "/")
-            self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
@@ -84,6 +72,5 @@ class LibavrocppConan(ConanFile):
         target = "avrocpp" if self.options.shared else "avrocpp_s"
         self.cpp_info.components[target].libs = [target]
         self.cpp_info.components[target].requires = ["boost::boost", "snappy::snappy"]
-        # self.cpp_info.components[target].defines.append("AVRO_SOURCE")
         if self.options.shared:
             self.cpp_info.components[target].defines.append("AVRO_DYN_LINK")
