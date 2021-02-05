@@ -39,6 +39,13 @@ class ZmqppConan(ConanFile):
         tools.replace_in_file("source_subfolder/Makefile", "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH) -iname '*.hpp')",
                               "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH1) -iname '*.hpp')")
 
+    def validate(self):
+        # libstdc++11 is required
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
+        if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
+
     def build(self):
         with tools.chdir("source_subfolder"):
             atools = AutoToolsBuildEnvironment(self)
