@@ -41,6 +41,9 @@ class ZuluOpenJDK(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy(pattern="*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
         self.copy(pattern="*", dst="res", src=os.path.join(self._source_subfolder, "conf"))
+        # conf folder is required for security settings, to avoid
+        # java.lang.SecurityException: Can't read cryptographic policy directory: unlimited
+        self.copy(pattern="*", dst="conf", src=os.path.join(self._source_subfolder, "conf"))
         self.copy(pattern="*", dst="licenses", src=os.path.join(self._source_subfolder, "legal"))
         self.copy(pattern="*", dst=os.path.join("lib", "jmods"), src=os.path.join(self._source_subfolder, "jmods"))
 
