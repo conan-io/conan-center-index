@@ -20,6 +20,10 @@ class ZmqppConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "zmqpp-" + self.version
