@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5aecafc..3bff6f2 100644
+index 5aecafc..aa69995 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,36 +1,49 @@
+@@ -1,36 +1,54 @@
 -# Project
  project(libftdi1 C)
 +
@@ -54,16 +54,21 @@ index 5aecafc..3bff6f2 100644
 -find_package ( USB1 REQUIRED )
 -include_directories ( ${LIBUSB_INCLUDE_DIR} )
 +find_package (LibUSB REQUIRED)
++
++if (FTDIPP)
++  find_package(Boost REQUIRED)
++endif()
  
 -# Find Boost
 -if (FTDIPP OR BUILD_TESTS)
 -  find_package( Boost REQUIRED )
-+if (FTDIPP)
-+  find_package(Boost REQUIRED)
++if (APPLE)
++    find_library(APPLE_CF CoreFoundation)
++    find_library(APPLE_IOK IOKit)
  endif()
  
  # Set components
-@@ -97,7 +110,7 @@ if ( WIN32 )
+@@ -97,7 +115,7 @@ if ( WIN32 )
    set ( CPACK_NSIS_MODIFY_PATH             ON )
  endif ()
  
@@ -72,7 +77,7 @@ index 5aecafc..3bff6f2 100644
  
  set(CPACK_SOURCE_GENERATOR             TGZ)
  set(CPACK_SOURCE_IGNORE_FILES          "\\\\.git;~$;build/")
-@@ -136,7 +149,7 @@ endif ()
+@@ -136,7 +154,7 @@ endif ()
  
  add_subdirectory(src)
  if ( FTDIPP )
@@ -81,7 +86,7 @@ index 5aecafc..3bff6f2 100644
    add_subdirectory(ftdipp)
  endif ()
  if ( PYTHON_BINDINGS )
-@@ -150,6 +163,9 @@ if ( EXAMPLES )
+@@ -150,6 +168,9 @@ if ( EXAMPLES )
  endif ()
  add_subdirectory(packages)
  if ( BUILD_TESTS )
@@ -91,7 +96,7 @@ index 5aecafc..3bff6f2 100644
    add_subdirectory(test)
  endif ()
  
-@@ -165,8 +181,8 @@ if(${WIN32})
+@@ -165,8 +186,8 @@ if(${WIN32})
     set(libdir      ${CMAKE_INSTALL_PREFIX}/bin)
  endif(${WIN32})
  
@@ -102,7 +107,7 @@ index 5aecafc..3bff6f2 100644
  install(FILES ${CMAKE_BINARY_DIR}/libftdi1.pc ${CMAKE_BINARY_DIR}/libftdipp1.pc
          DESTINATION lib${LIB_SUFFIX}/pkgconfig)
  
-@@ -202,30 +218,25 @@ set ( LIBFTDI_VERSION_MINOR ${MINOR_VERSION} )
+@@ -202,30 +223,25 @@ set ( LIBFTDI_VERSION_MINOR ${MINOR_VERSION} )
  
  set ( LIBFTDI_USE_FILE ${CMAKE_INSTALL_PREFIX}/${LIBFTDI_CMAKE_CONFIG_DIR}/UseLibFTDI1.cmake )
  
@@ -152,7 +157,7 @@ index 5aecafc..3bff6f2 100644
  
  
  install ( FILES 
-@@ -240,7 +251,7 @@ include(CPack)
+@@ -240,7 +256,7 @@ include(CPack)
  
  message (STATUS "Summary of build options:
  
@@ -632,10 +637,10 @@ index fac5bcc..11e46b4 100644
  					DESTINATION include/${PROJECT_NAME}
  					COMPONENT headers
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 17b3617..ab57f9f 100644
+index 17b3617..3db9729 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,36 +1,44 @@
+@@ -1,36 +1,47 @@
 -# Includes
 -include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}
 -                     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -689,10 +694,13 @@ index 17b3617..ab57f9f 100644
 -# Dependencies
 -target_link_libraries(ftdi1 ${LIBUSB_LIBRARIES})
 +target_link_libraries(ftdi1 PRIVATE LibUSB::LibUSB)
++if (APPLE)
++    target_link_libraries(ftdi1 PRIVATE ${APPLE_CF} ${APPLE_IOK})
++endif()
  
  install ( TARGETS ftdi1
            RUNTIME DESTINATION bin
-@@ -38,17 +46,6 @@ install ( TARGETS ftdi1
+@@ -38,17 +49,6 @@ install ( TARGETS ftdi1
            ARCHIVE DESTINATION lib${LIB_SUFFIX}
          )
  
