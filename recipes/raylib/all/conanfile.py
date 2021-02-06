@@ -98,6 +98,8 @@ class RaylibConan(ConanFile):
         self.cpp_info.builddirs = [self._module_subfolder]
         self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = ["raylib"]
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            self.cpp_info.defines.append("USE_LIBTYPE_SHARED")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
