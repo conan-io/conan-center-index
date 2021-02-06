@@ -14,7 +14,7 @@ class RaylibConan(ConanFile):
     default_options = { "shared": False, "fPIC": True }
 
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -36,6 +36,7 @@ class RaylibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
+        self.requires("glfw/3.3.2")
         self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
@@ -48,6 +49,7 @@ class RaylibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["USE_EXTERNAL_GLFW"] = "ON"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
