@@ -1,7 +1,6 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.28.0"
 
@@ -45,8 +44,6 @@ class GlfwConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.vulkan_static and self.options.shared:
-            raise ConanInvalidConfiguration("While theoretically valid, glfw doesn't allow to link vulkan-loader into shared glfw")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -66,11 +63,16 @@ class GlfwConan(ConanFile):
         # don't force PIC
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
-        # Import lib is not vulkan.lib on Windows
+        # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "list(APPEND glfw_PKG_DEPS \"vulkan\")",
-                                  "list(APPEND glfw_PKG_DEPS \"{}\")".format(self.deps_cpp_info["vulkan-loader"].libs[0]))
+            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            tools.replace_in_file(cmakelists,
+                                  'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
+                                  "")
+            tools.replace_in_file(cmakelists,
+                                  'list(APPEND glfw_PKG_DEPS "vulkan")',
+                                  ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
+                                   'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
     def _configure_cmake(self):
         if not self._cmake:
