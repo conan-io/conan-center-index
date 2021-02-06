@@ -13,10 +13,16 @@ class LibVPXConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    options = {"shared": [True, False],
+                "fPIC": [True, False]}
+    default_options = {'shared': False,
+                       'fPIC': True}
 
     _source_subfolder = "source_subfolder"
+    _arch_options = ['mmx', 'sse', 'sse2', 'sse3', 'ssse3', 'sse4_1', 'avx', 'avx2', 'avx512']
+
+    options.update({name: [True, False] for name in _arch_options})
+    default_options.update({name: 'avx' not in name for name in _arch_options})
 
 
     def configure(self):
@@ -26,6 +32,9 @@ class LibVPXConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if str(self.settings.arch) not in ['x86', 'x86_64']:
+            for name in self._arch_options:
+                delattr(self.options, name)
 
     def build_requirements(self):
         self.build_requires('yasm/1.3.0')
@@ -115,9 +124,10 @@ class LibVPXConan(ConanFile):
         target = "%s-%s-%s" % (arch, os_name, compiler)
         if tools.cross_building(self) or self.settings.compiler == 'Visual Studio':
             args.append('--target=%s' % target)
-        if self.settings.compiler == 'apple-clang':
-            if float(str(self.settings.compiler.version)) < 8.0:
-                args.append('--disable-avx512')
+        if str(self.settings.arch) in ["x86", "x86_64"]:
+            for name in self._arch_options:
+                if not self.options.get_safe(name):
+                    args.append('--disable-%s' % name)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
             env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
             env_build.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
