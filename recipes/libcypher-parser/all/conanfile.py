@@ -16,7 +16,8 @@ class LibcypherparserConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-
+    build_requires = "peg/0.1.18@"
+    
     _autotools = None
 
     @property
