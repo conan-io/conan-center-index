@@ -49,6 +49,9 @@ class RaylibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["CUSTOMIZE_BUILD"] = False # TODO: might be enabled to add a lot of options to enable/disable raylib features
+        self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["USE_EXTERNAL_GLFW"] = "ON"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
