@@ -1,0 +1,4 @@
+sources:
+  "0.6.2":
+    url: "https://github.com/cleishm/libcypher-parser/archive/v0.6.2.tar.gz"
+    sha256: "11a4a1934027caa7cebeb5e265dd127d8f72aa8f5c973c48b2fdedb1b0a00f5d"
