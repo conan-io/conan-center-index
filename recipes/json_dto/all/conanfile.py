@@ -8,7 +8,7 @@ class JsondtoConan(ConanFile):
     homepage = "https://github.com/Stiffstream/json_dto"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A small header-only helper for converting data between json representation and c++ structs"
-    topics = ("JSON", "DTO", "Serialization")
+    topics = ("json", "dto", "serialization")
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
@@ -56,7 +56,7 @@ class JsondtoConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["JSON_DTO_INSTALL"] = True
         self._cmake.definitions["JSON_DTO_FIND_DEPS"] = False
-        self._cmake.configure(source_folder=self._source_subfolder+"/dev/json_dto")
+        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev/json_dto"))
         return self._cmake
 
     def source(self):
@@ -72,7 +72,7 @@ class JsondtoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
-        self.info.settings.clear()
+        self.info.header_only()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "json_dto"
