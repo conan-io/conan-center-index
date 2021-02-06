@@ -375,64 +375,6 @@ class LibcurlConan(ConanFile):
             del autotools_vars["LIBS"]
             self.output.info("Autotools env vars: " + repr(autotools_vars))
 
-        if tools.cross_building(self.settings):
-            if self.settings.os == "iOS":
-                iphoneos = tools.apple_sdk_name(self.settings)
-                ios_dev_target = str(self.settings.os.version).split(".")[0]
-
-                env_cppflags = tools.get_env("CPPFLAGS", "")
-                socket_flags = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
-                if self.settings.arch in ["x86", "x86_64"]:
-                    autotools_vars["CPPFLAGS"] = "-D__IPHONE_OS_VERSION_MIN_REQUIRED={}0000 {} {}".format(
-                        ios_dev_target, socket_flags , env_cppflags)
-                elif self.settings.arch in ["armv7", "armv7s", "armv8"]:
-                    autotools_vars["CPPFLAGS"] = "{} {}".format(socket_flags, env_cppflags)
-                else:
-                    raise ConanInvalidConfiguration("Unsuported iOS arch {}".format(self.settings.arch))
-
-                cc = tools.XCRun(self.settings, iphoneos).cc
-                sysroot = "-isysroot {}".format(tools.XCRun(self.settings, iphoneos).sdk_path)
-
-                if self.settings.arch == "armv8":
-                    configure_arch = "arm64"
-                    configure_host = "arm" #unused, autodetected
-                else:
-                    configure_arch = self.settings.arch
-                    configure_host = self.settings.arch #unused, autodetected
-
-
-                arch_flag = "-arch {}".format(configure_arch)
-                ios_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                     self.settings.get_safe("os.version"),
-                                                                     self.settings.get_safe("os.sdk"),
-                                                                     self.settings.get_safe("os.subsystem"),
-                                                                     self.settings.get_safe("arch"))
-                extra_flag = "-Werror=partial-availability"
-
-                # if we debug, maybe add a -gdwarf-2 , but why would we want that?
-
-                autotools_vars["CC"] = cc
-                autotools_vars["IPHONEOS_DEPLOYMENT_TARGET"] = ios_dev_target
-                env_cflags = tools.get_env("CFLAGS", "")
-                autotools_vars["CFLAGS"] = "{} {} {} {}".format(
-                    sysroot, arch_flag, ios_min_version, env_cflags
-                )
-
-                if self.options.with_ssl == "openssl":
-                    openssl_path = self.deps_cpp_info["openssl"].rootpath
-                    openssl_libdir = self.deps_cpp_info["openssl"].libdirs[0]
-                    autotools_vars["LDFLAGS"] = "{} {} -L{}/{}".format(arch_flag, sysroot, openssl_path, openssl_libdir)
-                elif self.options.with_ssl == "wolfssl":
-                    wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath
-                    wolfssl_libdir = self.deps_cpp_info["wolfssl"].libdirs[0]
-                    autotools_vars["LDFLAGS"] = "{} {} -L{}/{}".format(arch_flag, sysroot, wolfssl_path, wolfssl_libdir)
-                else:
-                    autotools_vars["LDFLAGS"] = "{} {}".format(arch_flag, sysroot)
-
-            elif self.settings.os == "Android":
-                # nothing do to at the moment, this seems to just work
-                pass
-
         return autotools_vars
 
     def _configure_autotools(self):
@@ -452,6 +394,9 @@ class LibcurlConan(ConanFile):
             self._patch_mingw_files()
 
             self._autotools.defines.append("_AMD64_")
+
+        if tools.cross_building(self) and tools.is_apple_os(self.settings.os):
+            self._autotools.defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
 
         configure_args = self._get_configure_command_args()
 
