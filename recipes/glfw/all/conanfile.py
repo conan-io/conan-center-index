@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.28.0"
 
@@ -16,8 +17,16 @@ class GlfwConan(ConanFile):
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
 
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "vulkan_static": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "vulkan_static": False,
+    }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
@@ -36,9 +45,13 @@ class GlfwConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.vulkan_static and self.options.shared:
+            raise ConanInvalidConfiguration("While theoretically valid, glfw doesn't allow to link vulkan-loader into shared glfw")
 
     def requirements(self):
         self.requires("opengl/system")
+        if self.options.vulkan_static:
+            self.requires("vulkan-loader/1.2.162.0")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
@@ -53,6 +66,11 @@ class GlfwConan(ConanFile):
         # don't force PIC
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # Import lib is not vulkan.lib on Windows
+        if self.options.vulkan_static:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "list(APPEND glfw_PKG_DEPS \"vulkan\")",
+                                  "list(APPEND glfw_PKG_DEPS \"{}\")".format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -61,6 +79,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_TESTS"] = False
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             self._cmake.definitions["GLFW_INSTALL"] = True
+            self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
             self._cmake.configure()
