@@ -11,7 +11,7 @@ class LibVPXConan(ConanFile):
     description = "WebM VP8/VP9 Codec SDK"
     topics = ("conan", "vpx", "codec", "web", "VP8", "VP9")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                 "fPIC": [True, False]}
@@ -46,31 +46,6 @@ class LibVPXConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def _fix_sources(self):
-        gen_vcxproj = os.path.join(self._source_subfolder, 'build', 'make', 'gen_msvs_vcxproj.sh')
-        tools.replace_in_file(gen_vcxproj,
-                              '        --help|-h) show_help',
-                              '        --help|-h) show_help\n        ;;\n'
-                              '        -O*) echo "ignoring $opt..."\n')
-        tools.replace_in_file(gen_vcxproj,
-                              '        --help|-h) show_help',
-                              '        --help|-h) show_help\n        ;;\n'
-                              '        -Zi) echo "ignoring $opt..."\n')
-        tools.replace_in_file(gen_vcxproj,
-                              '        --help|-h) show_help',
-                              '        --help|-h) show_help\n        ;;\n'
-                              '        -MD*|-MT*) echo "ignoring $opt (this option is already handled)"\n')
-        # disable warning:
-        # vpx.lib(vpx_src_vpx_image.obj) : MSIL .netmodule or module compiled with /GL found; restarting link
-        # with /LTCG; add /LTCG to the link command line to improve linker performance
-        tools.replace_in_file(gen_vcxproj,
-                              'tag_content WholeProgramOptimization true',
-                              'tag_content WholeProgramOptimization false')
-        msvs_common_sh = os.path.join(self._source_subfolder, "build", "make", "msvs_common.sh")
-        tools.replace_in_file(msvs_common_sh,
-                              'if [ "$(uname -o 2>/dev/null)" = "Cygwin" ] \\',
-                              'if [ "$(uname -o 2>/dev/null)" = "Cygwin" ] || [ "$(uname -o 2>/dev/null)" = "Msys" ]\\')
 
     def _configure_autotools(self):
         win_bash = tools.os_info.is_windows
@@ -134,7 +109,8 @@ class LibVPXConan(ConanFile):
         return env_build
 
     def build(self):
-        self._fix_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
             env_build = self._configure_autotools()
             env_build.make()
