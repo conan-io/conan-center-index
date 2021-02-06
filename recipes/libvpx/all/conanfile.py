@@ -128,10 +128,7 @@ class LibVPXConan(ConanFile):
             elif self.settings.arch == 'x86':
                 libdir = os.path.join(self.package_folder, 'lib', 'Win32')
             shutil.move(os.path.join(libdir, name), os.path.join(self.package_folder, 'lib', 'vpx.lib'))
-        try:
-            shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        except FileNotFoundError:
-            pass
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
