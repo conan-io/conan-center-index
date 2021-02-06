@@ -45,6 +45,11 @@ class RaylibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    def _patch_sources(self):
+        # avoid symbols conflicts with Win SDK
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "core.c"),
+                              "#define GLFW_EXPOSE_NATIVE_WIN32", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -56,6 +61,7 @@ class RaylibConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -96,7 +102,10 @@ class RaylibConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "raylib"
         self.cpp_info.builddirs = [self._module_subfolder]
         self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
-        self.cpp_info.libs = ["raylib"]
+        libname = "raylib"
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            libname += "_static"
+        self.cpp_info.libs = [libname]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines.append("USE_LIBTYPE_SHARED")
         if self.settings.os == "Linux":
