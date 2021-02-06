@@ -70,7 +70,7 @@ class RaylibConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "raylib"
         self.cpp_info.names["cmake_find_package_multi"] = "raylib"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["raylib"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
