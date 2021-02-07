@@ -96,13 +96,6 @@ class LibiconvConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
 
-        #
-        # If you pass --build when building for iPhoneSimulator, the configure script halts.
-        # So, disable passing --build by setting it to False.
-        #
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
-
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         configure_args = []
