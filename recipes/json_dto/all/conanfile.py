@@ -56,7 +56,7 @@ class JsondtoConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["JSON_DTO_INSTALL"] = True
         self._cmake.definitions["JSON_DTO_FIND_DEPS"] = False
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev/json_dto"))
+        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
         return self._cmake
 
     def source(self):
