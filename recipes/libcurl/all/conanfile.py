@@ -249,7 +249,7 @@ class LibcurlConan(ConanFile):
             params.append("--without-wolfssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].lib_paths[0])))
+            params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].rootpath)))
         else:
             params.append("--without-libssh2")
 
@@ -259,7 +259,7 @@ class LibcurlConan(ConanFile):
             params.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib={}".format(tools.unix_path(self.deps_cpp_info["zlib"].lib_paths[0])))
+            params.append("--with-zlib={}".format(tools.unix_path(self.deps_cpp_info["zlib"].rootpath)))
         else:
             params.append("--without-zlib")
 
