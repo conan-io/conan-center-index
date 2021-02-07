@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/SimonCropp/MarkdownSnippets/master/schema.json",
-  "Exclude": [ "recipes" ],
+  "ExcludeDirectories": [ "recipes" ],
   "Convention": "InPlaceOverwrite",
   "TocLevel": 5
 }
