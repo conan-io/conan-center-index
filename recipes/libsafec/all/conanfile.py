@@ -36,6 +36,8 @@ class LibSafeCConan(ConanFile):
             return False
         if compiler == "gcc" and version < "5":
             return False
+        if compiler == "apple-clang" and compiler.libcxx == "libc++":
+            return False
         return True
 
     def configure(self):
