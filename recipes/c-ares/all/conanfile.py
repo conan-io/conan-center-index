@@ -77,7 +77,7 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].system_libs.append("rt")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "Advapi32"])
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
         bin_path = os.path.join(self.package_folder, "bin")
