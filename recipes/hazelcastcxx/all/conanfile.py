@@ -4,9 +4,9 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class HazelcastCxx(ConanFile):
-    name = "hazelcastcxx"
+    name = "hazelcast-cpp-client"
     description = "Hazelcast is C++ API for in memory database."
-    license = "Apache 2.0"
+    license = "Apache-2.0"
     topics = ("conan", "hazelcast", "client", "database", "cache")
     homepage = "https://github.com/hazelcast/hazelcast-cpp-client"
     url = "https://github.com/conan-io/conan-center-index"
@@ -15,13 +15,11 @@ class HazelcastCxx(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "static": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False]
     }
     default_options = {
         "shared": False,
-        "static": True,
         "fPIC": True,
         "with_openssl": False
     }
@@ -49,13 +47,13 @@ class HazelcastCxx(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/[>1.71.0]")
+        self.requires("boost/1.75.0")
         if self.options.with_openssl:
             self.requires("openssl")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hazelcast-cpp-client-" + self.version, self._source_subfolder)
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
         # This small hack might be useful to guarantee proper /MT /MD linkage
         # in MSVC if the packaged project doesn't have variables to set it
         # properly
@@ -70,17 +68,14 @@ conan_basic_setup()''')
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _bool_to_cmake_option(self, value):
-        return "ON" if value else "OFF"
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
-        self._cmake.definitions["WITH_OPENSSL"] = self._bool_to_cmake_option(self.options.with_openssl)
-        self._cmake.definitions["BUILD_STATIC_LIB"] = self._bool_to_cmake_option(self.options.static)
-        self._cmake.definitions["BUILD_SHARED_LIB"] = self._bool_to_cmake_option(self.options.shared)
+        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.static
+        self._cmake.definitions["BUILD_SHARED_LIB"] =self.options.shared
         self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
@@ -91,12 +86,18 @@ conan_basic_setup()''')
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        target = "hazelcastcxx"
         if self.options.with_openssl:
-            self.cpp_info.names["cmake_find_package"] = "hazelcastcxx_ssl"
-            self.cpp_info.names["cmake_find_package_multi"] = "hazelcastcxx_ssl"
-        else:
-            self.cpp_info.names["cmake_find_package"] = "hazelcastcxx"
-            self.cpp_info.names["cmake_find_package_multi"] = "hazelcastcxx"
+            target += "_ssl"
+        if not self.options.shared:
+            target += "_static"
+            
+        self.cpp_info.filenames["cmake_find_package"] = target
+        self.cpp_info.filenames["cmake_find_package_multi"] = target
+        self.cpp_info.names["cmake_find_package"] = "hazelcastcxx"
+        self.cpp_info.names["cmake_find_package_multi"] = "hazelcastcxx"
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")

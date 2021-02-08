@@ -5,7 +5,6 @@ from conans import ConanFile, CMake, tools
 class TestPackageHazelcastCxx(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
-    requires = "hazelcastcxx/[>4.0.0]"
 
     def configure(self):
         if self.settings.compiler.cppstd:
@@ -13,7 +12,6 @@ class TestPackageHazelcastCxx(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
