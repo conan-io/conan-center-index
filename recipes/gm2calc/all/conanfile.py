@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.30.0"
+
 
 class Gm2calcConan(ConanFile):
     name = "gm2calc"
