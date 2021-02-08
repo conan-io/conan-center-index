@@ -267,6 +267,11 @@ class OpenCVConan(ConanFile):
 
     def build(self):
         self._patch_opencv()
+
+        if self.options.with_jpeg2000 == "jasper":
+            if tools.Version(self.version) < "4.5.0" and self.deps_cpp_info["jasper"].version > "2.0.16":
+                raise ConanInvalidConfiguration("OpenCV < 4.5.0 needs an older jasper version, see https://github.com/opencv/opencv/issues/17984")
+
         cmake = self._configure_cmake()
         cmake.build()
 
