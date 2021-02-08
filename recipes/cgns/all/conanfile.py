@@ -78,6 +78,7 @@ class CgnsConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        # FIXME: CGNS does not install under a CMake namespace https://github.com/CGNS/CGNS/blob/7cc605021cc6c278acf2e69c5c3bd69ff5ee504e/src/CMakeLists.txt#L648-L654
         self.cpp_info.names["cmake_find_package"] = "CGNS"
         self.cpp_info.names["cmake_find_package_multi"] = "CGNS"
         self.cpp_info.libs = tools.collect_libs(self)
