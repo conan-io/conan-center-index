@@ -9,7 +9,7 @@ class CgnsConan(ConanFile):
                   "of fluid dynamics equations."
     topics = ("conan", "cgns", "data", "cfd", "fluids")
     homepage = "http://cgns.org/"
-    license = "zlib/libpng"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
