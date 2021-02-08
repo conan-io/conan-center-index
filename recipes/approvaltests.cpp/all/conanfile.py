@@ -14,7 +14,7 @@ class ApprovalTestsCppConan(ConanFile):
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
     options = {
-        "with_boosttest": [True, False], # Should this be: with_boost_unit_test_framework?
+        "with_boosttest": [True, False],
         "with_catch2": [True, False],
         "with_gtest": [True, False],
         "with_doctest": [True, False],
