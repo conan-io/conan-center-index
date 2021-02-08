@@ -30,10 +30,6 @@ class HazelcastCxx(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -56,6 +52,11 @@ class HazelcastCxx(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+        # This small hack fixes the incorrect usage of CMAKE_BINARY_DIR var during config file installation
+        tools.replace_in_file(str(self._source_subfolder) + "/CMakeLists.txt", "${CMAKE_BINARY_DIR}/${name}-config.cmake",
+                              '''${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake''')
+        tools.replace_in_file(str(self._source_subfolder) + "/CMakeLists.txt", "${CMAKE_BINARY_DIR}/${name}-config-version.cmake",
+                              '''${CMAKE_CURRENT_BINARY_DIR}/${name}-config-version.cmake''')
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -70,7 +71,7 @@ class HazelcastCxx(ConanFile):
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def package(self):
