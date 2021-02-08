@@ -29,6 +29,14 @@ class Gm2calcConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("boost/1.75.0")
+        self.requires("eigen/3.3.9")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("GM2Calc-{}".format(self.version), self._source_subfolder)
