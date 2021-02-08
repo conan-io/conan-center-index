@@ -4,6 +4,8 @@ import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.29.1"
+
 
 class LibSafeCConan(ConanFile):
     name = "libsafec"
