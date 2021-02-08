@@ -12,7 +12,6 @@ class Gm2calcConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    build_policy = "missing"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
