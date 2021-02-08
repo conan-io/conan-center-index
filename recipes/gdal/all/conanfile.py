@@ -66,7 +66,7 @@ class GdalConan(ConanFile):
         "with_geos": [True, False],
         # "with_sfcgal": [True, False],
         "with_qhull": [True, False],
-        # "with_opencl": [True, False],
+        "with_opencl": [True, False],
         "with_freexl": [True, False],
         "without_pam": [True, False],
         "with_poppler": [True, False],
@@ -130,7 +130,7 @@ class GdalConan(ConanFile):
         "with_geos": True,
         # "with_sfcgal": False,
         "with_qhull": True,
-        # "with_opencl": False,
+        "with_opencl": False,
         "with_freexl": False,
         "without_pam": False,
         "with_poppler": False,
@@ -308,8 +308,9 @@ class GdalConan(ConanFile):
         #     self.requires("sfcgal/1.3.7")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
-        # if self.options.with_opencl:
-        #     self.requires("opencl-headers/x.x.x")
+        if self.options.with_opencl:
+            self.requires("opencl-headers/2020.06.16")
+            self.requires("opencl-icd-loader/2020.06.16")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_poppler:
@@ -376,6 +377,10 @@ class GdalConan(ConanFile):
             embedded_libs.append(os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"))
         for lib_subdir in embedded_libs:
             tools.rmdir(os.path.join(self._source_subfolder, lib_subdir))
+        # OpenCL headers
+        tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
+                              "#include <OpenCL/OpenCL.h>",
+                              "#include <CL/opencl.h>")
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
@@ -412,6 +417,10 @@ class GdalConan(ConanFile):
             self._replace_in_nmake_opt("#CHARLS_LIB=e:\\work\\GIS\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
         # Inject required systems libs of dependencies
         self._replace_in_nmake_opt("ADD_LIBS	=", "ADD_LIBS={}".format(" ".join([lib + ".lib" for lib in self.deps_cpp_info.system_libs])))
+        # Trick to enable OpenCL (option missing in upstream nmake files)
+        if self.options.with_opencl:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "makefile.vc"),
+                                  "$(GEOS_CFLAGS)", "$(GEOS_CFLAGS) /DHAVE_OPENCL")
 
     def _replace_in_nmake_opt(self, str1, str2):
         tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2)
@@ -654,7 +663,14 @@ class GdalConan(ConanFile):
         args.append("--with-geos={}".format("yes" if self.options.with_geos else "no"))
         args.append("--without-sfcgal") # TODO: to implement when sfcgal lib available
         args.append("--with-qhull={}".format("yes" if self.options.with_qhull else "no"))
-        args.append("--without-opencl") # TODO: to implement when opencl-headers available (and also OpenCL lib?)
+        if self.options.with_opencl:
+            args.extend([
+                "--with-opencl",
+                "--with-opencl-include={}".format(tools.unix_path(self.deps_cpp_info["opencl-headers"].include_paths[0])),
+                "--with-opencl-lib=-L{}".format(tools.unix_path(self.deps_cpp_info["opencl-icd-loader"].lib_paths[0]))
+            ])
+        else:
+            args.append("--without-opencl")
         args.append("--with-freexl={}".format("yes" if self.options.with_freexl else "no"))
         args.append("--with-libjson-c={}".format(tools.unix_path(self.deps_cpp_info["json-c"].rootpath))) # always required !
         if self.options.without_pam:
