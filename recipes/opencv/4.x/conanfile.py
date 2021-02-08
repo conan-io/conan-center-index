@@ -39,7 +39,7 @@ class OpenCVConan(ConanFile):
                        "with_webp": True,
                        "with_gtk": True,
                        "with_quirc": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -82,11 +82,7 @@ class OpenCVConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.5")
         if self.options.with_jpeg2000 == "jasper":
-            if tools.Version(self.version) >= "4.5.0":
-                self.requires("jasper/2.0.21")
-            else:
-                #https://github.com/opencv/opencv/issues/17984
-                self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.21")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.3.1")
         if self.options.with_png:
@@ -119,6 +115,8 @@ class OpenCVConan(ConanFile):
         os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
 
     def _patch_opencv(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib', 'quirc']:
             tools.rmdir(os.path.join(self._source_subfolder, '3rdparty', directory))
         if self.options.with_openexr:
@@ -267,11 +265,6 @@ class OpenCVConan(ConanFile):
 
     def build(self):
         self._patch_opencv()
-
-        if self.options.with_jpeg2000 == "jasper":
-            if tools.Version(self.version) < "4.5.0" and self.deps_cpp_info["jasper"].version > "2.0.16":
-                raise ConanInvalidConfiguration("OpenCV < 4.5.0 needs an older jasper version, see https://github.com/opencv/opencv/issues/17984")
-
         cmake = self._configure_cmake()
         cmake.build()
 
