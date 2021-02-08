@@ -40,7 +40,8 @@ class ZmqppConan(ConanFile):
                               "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH1) -iname '*.hpp')")
 
     def configure(self):
-        self.settings.compiler.libcxx = "libstdc++11"
+        if self.settings.compiler == "clang" or self.settings.compiler == "gcc":
+            self.settings.compiler.libcxx = "libstdc++11"
 
     def validate(self):
         compiler = self.settings.compiler
