@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class HazelcastCxx(ConanFile):
     name = "hazelcast-cpp-client"
-    description = "Hazelcast is C++ API for in memory database."
+    description = "C++ client library for Hazelcast in-memory database."
     license = "Apache-2.0"
     topics = ("conan", "hazelcast", "client", "database", "cache")
     homepage = "https://github.com/hazelcast/hazelcast-cpp-client"
