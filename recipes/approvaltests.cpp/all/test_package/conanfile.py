@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_GTEST"] = True
         if self.options["approvaltests.cpp"].with_doctest:
             cmake.definitions["WITH_DOCTEST"] = True
-        if self.options["approvaltests.cpp"].with_cpputest:
+        if self.options["approvaltests.cpp"].with_cpputest and self._cpputest_supported():
             cmake.definitions["WITH_CPPUTEST"] = True
 
         cmake.configure()
@@ -49,9 +49,12 @@ class TestPackageConan(ConanFile):
         if self.options["approvaltests.cpp"].with_doctest:
             print("Running DocTest")
             self.run(bin_path + "_doctest", run_environment=True)
-        if self.options["approvaltests.cpp"].with_cpputest:
+        if self.options["approvaltests.cpp"].with_cpputest and self._cpputest_supported():
             print("Running CppUTest")
             self.run(bin_path + "_cpputest", run_environment=True)
 
     def _boost_test_supported(self):
         return Version(self.deps_cpp_info["approvaltests.cpp"].version) >= "8.6.0"
+
+    def _cpputest_supported(self):
+        return Version(self.deps_cpp_info["approvaltests.cpp"].version) >= "10.4.0"
