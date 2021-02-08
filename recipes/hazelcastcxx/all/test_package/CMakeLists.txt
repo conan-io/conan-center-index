@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup()
+
+find_package(hazelcastcxx REQUIRED)
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package PUBLIC CONAN_PKG::hazelcastcxx)
+target_link_libraries(test_package PUBLIC hazelcastcxx::hazelcastcxx)

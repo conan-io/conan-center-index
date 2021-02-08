@@ -74,8 +74,8 @@ conan_basic_setup()''')
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.static
-        self._cmake.definitions["BUILD_SHARED_LIB"] =self.options.shared
+        self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
         self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
@@ -86,14 +86,8 @@ conan_basic_setup()''')
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        target = "hazelcastcxx"
-        if self.options.with_openssl:
-            target += "_ssl"
-        if not self.options.shared:
-            target += "_static"
-            
-        self.cpp_info.filenames["cmake_find_package"] = target
-        self.cpp_info.filenames["cmake_find_package_multi"] = target
+        self.cpp_info.filenames["cmake_find_package"] = "hazelcastcxx"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "hazelcastcxx"
         self.cpp_info.names["cmake_find_package"] = "hazelcastcxx"
         self.cpp_info.names["cmake_find_package_multi"] = "hazelcastcxx"
 
