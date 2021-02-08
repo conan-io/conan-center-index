@@ -49,6 +49,10 @@ class ZmqppConan(ConanFile):
         if compiler.get_safe('cppstd'):
             tools.check_min_cppstd(self, 11)
             
+        #TODO: it builds on macOS with " -o *:shared=True"
+        if self.settings.compiler == "apple-clang" and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Apple macOS is not supported yet") 
+
         # libstdc++11 is required
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
