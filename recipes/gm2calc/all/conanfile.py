@@ -59,4 +59,8 @@ class Gm2calcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "GM2Calc"
+        self.cpp_info.names["cmake_find_package_multi"] = "GM2Calc"
+        self.cpp_info.names["pkg_config"] = "gm2calc"
+        self.cpp_info.libs = ["gm2calc"]
+        self.cpp_info.requires = ["boost::headers", "eigen::eigen"]
