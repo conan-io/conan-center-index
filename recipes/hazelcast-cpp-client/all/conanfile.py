@@ -51,7 +51,7 @@ class HazelcastCxx(ConanFile):
     def requirements(self):
         self.requires("boost/1.75.0")
         if self.options.with_openssl:
-            self.requires("openssl")
+            self.requires("openssl/1.1.1i")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -70,7 +70,7 @@ class HazelcastCxx(ConanFile):
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def package(self):
