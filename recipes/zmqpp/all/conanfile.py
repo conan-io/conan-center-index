@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans import AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 class ZmqppConan(ConanFile):
     name = "zmqpp"
