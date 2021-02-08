@@ -43,6 +43,8 @@ class HazelcastCxx(ConanFile):
             raise ConanInvalidConfiguration("Requires settings.compiler.libcxx = libstdc++11")
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
@@ -54,20 +56,12 @@ class HazelcastCxx(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
-        tools.replace_in_file(str(self._source_subfolder) + "/CMakeLists.txt", "LANGUAGES CXX)",
-                              '''LANGUAGES CXX)
-include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
-conan_basic_setup()''')
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
-
 
     def _configure_cmake(self):
         if self._cmake:
