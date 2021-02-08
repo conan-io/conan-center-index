@@ -24,17 +24,8 @@ class LibbacktraceConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property
-    def _supported_compiler(self):
-        compiler = self.settings.compiler
-        if compiler == "Visual Studio":
-            return False
-        if compiler == "apple-clang" and compiler.libcxx == "libc++":
-            return False
-        return True
-
     def configure(self):
-        if not self._supported_compiler:
+        if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
                 "libsafec doesn't support {}/{}".format(
                     self.settings.compiler, self.settings.compiler.version))
