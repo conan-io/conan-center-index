@@ -267,7 +267,7 @@ class GdalConan(ConanFile):
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.24")
+            self.requires("jasper/2.0.25")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         # if self.options.with_fgdb:
@@ -293,7 +293,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.34.1")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -325,15 +325,15 @@ class GdalConan(ConanFile):
         # if self.options.with_armadillo:
         #     self.requires("armadillo/9.880.1")
         if self.options.with_cryptopp:
-            self.requires("cryptopp/8.2.0")
+            self.requires("cryptopp/8.4.0")
         if self.options.with_crypto:
             self.requires("openssl/1.1.1i")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/2.5.3")
+            self.requires("openexr/2.5.4")
         if self.options.get_safe("with_heif"):
-            self.requires("libheif/1.9.1")
+            self.requires("libheif/1.11.0")
 
     def validate(self):
         if self.options.with_qhull and self.options["qhull"].reentrant:
