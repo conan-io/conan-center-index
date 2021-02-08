@@ -10,7 +10,8 @@ class TestPackageConan(ConanFile):
         "approvaltests.cpp:with_boosttest": True,
         "approvaltests.cpp:with_catch2": True,
         "approvaltests.cpp:with_gtest": True,
-        "approvaltests.cpp:with_doctest": True
+        "approvaltests.cpp:with_doctest": True,
+        "approvaltests.cpp:with_cpputest": True
     }
 
 
