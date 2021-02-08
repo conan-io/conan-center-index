@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
@@ -19,6 +20,7 @@ class LibbacktraceConan(ConanFile):
     build_requires = "autoconf/2.69", "libtool/2.4.6"
 
     __autotools = None
+    _source_subfolder = "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -26,19 +28,17 @@ class LibbacktraceConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration(
-                "libsafec doesn't support {}/{}".format(
-                    self.settings.compiler, self.settings.compiler.version))
+            raise ConanInvalidConfiguration("libsafec doesn't support {}/{}".format(
+                self.settings.compiler, self.settings.compiler.version))
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    @property
-    def scm(self):
-        source = {"type": "git"}
-        source.update(**self.conan_data["sources"][self.version])
-        return source
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("libbacktrace-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     @property
     def _autotools(self):
@@ -54,13 +54,15 @@ class LibbacktraceConan(ConanFile):
         self._autotools.configure(args=args)
 
     def build(self):
-        self.run("autoreconf -fiv", run_environment=True)
-        self._autotools_configure()
-        self._autotools.make()
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv", run_environment=True)
+            self._autotools_configure()
+            self._autotools.make()
 
     def package(self):
-        self._autotools.install()
-        self.copy("LICENSE", dst="licenses")
+        with tools.chdir(self._source_subfolder):
+            self._autotools.install()
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
