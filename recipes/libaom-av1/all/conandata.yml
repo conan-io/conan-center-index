@@ -1,0 +1,7 @@
+sources:
+  "2.0.1":
+    url: "https://aomedia.googlesource.com/aom/+archive/b52ee6d44adaef8a08f6984390de050d64df9faa.tar.gz"
+patches:
+  "2.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-msvc-install.patch"
