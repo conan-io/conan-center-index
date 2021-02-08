@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-import os
+import os, shutil
 
 def merge_dicts_for_sdk(a, b):
     res = a.copy()
@@ -195,6 +195,7 @@ class AwsSdkCppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        shutil.rmtree(self._source_subfolder + "/code-generation")
 
     def _configure_cmake(self):
         if self._cmake:
