@@ -2,7 +2,6 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-
 class HazelcastCxx(ConanFile):
     name = "hazelcast-cpp-client"
     description = "C++ client library for Hazelcast in-memory database."
@@ -52,11 +51,6 @@ class HazelcastCxx(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-        # This small hack fixes the incorrect usage of CMAKE_BINARY_DIR var during config file installation
-        tools.replace_in_file(str(self._source_subfolder) + "/CMakeLists.txt", "${CMAKE_BINARY_DIR}/${name}-config.cmake",
-                              '''${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake''')
-        tools.replace_in_file(str(self._source_subfolder) + "/CMakeLists.txt", "${CMAKE_BINARY_DIR}/${name}-config-version.cmake",
-                              '''${CMAKE_CURRENT_BINARY_DIR}/${name}-config-version.cmake''')
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
