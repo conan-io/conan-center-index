@@ -1,7 +1,7 @@
 sources:
   "1.7.3":
     url: "https://git.sr.ht/~kaniini/pkgconf/archive/pkgconf-1.7.3.tar.gz"
-    sha256: "88e93bbd1d4dc81fc08bfc7a39b3eca241aee3131091c9ba0684531ee4d9d2b3"
+    sha256: "8f2c6e9f08adc5773d7fa3c1db1ed03f5fa02ceed037a537ce1195f7c93700ed"
 patches:
   "1.7.3":
     - patch_file: "patches/0001-meson-use-declare-dependencies.patch"
