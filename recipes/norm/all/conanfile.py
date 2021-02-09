@@ -40,7 +40,7 @@ class NormConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = "./protolib"
+        self._cmake.definitions["NORM_CUSTOM_PROTOLIB_VERSION"] = "./protolib" # FIXME: use external protolib when available in CCI
         self._cmake.configure()
         return self._cmake
 
