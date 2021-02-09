@@ -214,7 +214,8 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
