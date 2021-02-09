@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from conans import ConanFile, CMake, tools
 
@@ -77,8 +78,16 @@ class CgnsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        for executable in Path(self.package_folder, "bin").iterdir():
+            executable.unlink()
+
+        Path(self.package_folder, "include", "cgnsBuild.defs").unlink()
+
     def package_info(self):
         # FIXME: CGNS does not install under a CMake namespace https://github.com/CGNS/CGNS/blob/7cc605021cc6c278acf2e69c5c3bd69ff5ee504e/src/CMakeLists.txt#L648-L654
         self.cpp_info.names["cmake_find_package"] = "CGNS"
         self.cpp_info.names["cmake_find_package_multi"] = "CGNS"
-        self.cpp_info.libs = tools.collect_libs(self)
+
+        # Although CGNS defines the targets cgns_static and cgns_shared,
+        # the output name is always cgns
+        self.cpp_info.libs = ["cgns"]
