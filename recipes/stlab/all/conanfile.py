@@ -50,41 +50,6 @@ class Stlab(ConanFile):
         extracted_dir = "libraries-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_boost(self):
-        self.options["boost"].shared = True
-
-        self.options["boost"].without_atomic = True
-        self.options["boost"].without_chrono = True
-        self.options["boost"].without_container = True
-        self.options["boost"].without_context = True
-        self.options["boost"].without_contract = True
-        self.options["boost"].without_coroutine = True
-        self.options["boost"].without_date_time = True
-        self.options["boost"].without_exception = True
-        self.options["boost"].without_fiber = True
-        self.options["boost"].without_filesystem = True
-        self.options["boost"].without_graph = True
-        self.options["boost"].without_graph_parallel = True
-        self.options["boost"].without_iostreams = True
-        self.options["boost"].without_json = True
-        self.options["boost"].without_locale = True
-        self.options["boost"].without_log = True
-        self.options["boost"].without_math = True
-        self.options["boost"].without_mpi = True
-        self.options["boost"].without_nowide = True
-        self.options["boost"].without_program_options = True
-        self.options["boost"].without_python = True
-        self.options["boost"].without_random = True
-        self.options["boost"].without_regex = True
-        self.options["boost"].without_serialization = True
-        self.options["boost"].without_stacktrace = True
-        self.options["boost"].without_system = True
-        self.options["boost"].without_test = True
-        self.options["boost"].without_timer = True
-        self.options["boost"].without_thread = True
-        self.options["boost"].without_type_erasure = True
-        self.options["boost"].without_wave = True
-
     def _fix_boost_components(self):
         if self.settings.os != "Macos": return
         if self.settings.compiler != "apple-clang": return
@@ -109,42 +74,48 @@ class Stlab(ConanFile):
 
         return "portable"
 
-    def _configure_task_system_auto(self):
-        self.options.task_system = self._default_task_system()
-
-    def _configure_task_system_libdispatch(self):
+    def _validate_task_system_libdispatch(self):
         if self.settings.os == "Linux":
             if self.settings.compiler != "clang":
-                self.options.task_system = self._default_task_system()
-                self.output.info("Libdispatch requires Clang compiler on Linux. The task system is changed to {}.".format(self.options.task_system))
-                return
-
+                raise ConanInvalidConfiguration("{}/{} task_system=libdispatch needs Clang compiler when using OS: {}. Use Clang compiler or switch to task_system=portable or task_system=auto".format(self.name, self.version, self.settings.os))
         elif self.settings.os != "Macos":
-            self.options.task_system = self._default_task_system()
-            self.output.info("Libdispatch is not supported on {}. The task system is changed to {}.".format(self.settings.os, self.options.task_system))
-            return
+            raise ConanInvalidConfiguration("{}/{} task_system=libdispatch is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
 
-    def _configure_task_system_windows(self):
+    def _validate_task_system_windows(self):
         if self.settings.os != "Windows":
-            self.options.task_system = self._default_task_system()
             self.output.info("Libdispatch is not supported on {}. The task system is changed to {}.".format(self.settings.os, self.options.task_system))
-            return
+            raise ConanInvalidConfiguration("{}/{} task_system=windows is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
 
-    def _configure_task_system_emscripten(self):
+    def _validate_task_system_emscripten(self):
         if self.settings.os != "Emscripten":
-            self.options.task_system = self._default_task_system()
-            self.output.info("Libdispatch is not supported on {}. The task system is changed to {}.".format(self.settings.os, self.options.task_system))
-            return
+            raise ConanInvalidConfiguration("{}/{} task_system=emscripten is not supported on {}. Try using task_system=auto".format(self.name, self.version, self.settings.os))
 
-    def _configure_task_system(self):
-        if self.options.task_system == "auto":
-            self._configure_task_system_auto()
-        elif self.options.task_system == "libdispatch":
-            self._configure_task_system_libdispatch()
+    def _validate_task_system(self):
+        if self.options.task_system == "libdispatch":
+            self._validate_task_system_libdispatch()
         elif self.options.task_system == "windows":
-            self._configure_task_system_windows()
+            self._validate_task_system_windows()
         elif self.options.task_system == "emscripten":
-            self._configure_task_system_emscripten()
+            self._validate_task_system_emscripten()
+
+    def _validate_boost_components(self):
+        if self.settings.os != "Macos": return
+        if self.settings.compiler != "apple-clang": return
+        if Version(self.settings.compiler.version) >= "12": return
+        if self.options.boost_optional and self.options.boost_variant: return
+        #
+        # On Apple we have to force the usage of boost.variant, because Apple's implementation of C++17 
+        # is not complete.
+        #
+        msg = "Apple-Clang versions less than 12 do not correctly support std::optional or std::variant, so we will use boost::optional and boost::variant instead. "
+        if not self.options.boost_optional and not self.options.boost_variant:
+            msg += "Try -o boost_optional=True -o boost_variant=True"
+        elif not self.options.boost_optional:
+            msg += "Try -o boost_optional=True."
+        else:
+            msg += "Try -o boost_variant=True."
+
+        raise ConanInvalidConfiguration(msg)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -159,13 +130,15 @@ class Stlab(ConanFile):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
             raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
+        self._validate_task_system()
+        self._validate_boost_components()
+
     def configure(self):
         self._fix_boost_components()
 
-        if self._use_boost():
-            self._configure_boost()
+        if self.options.task_system == "auto":
+            self.options.task_system = self._default_task_system()
 
-        self._configure_task_system()
         self.output.info("Stlab Task System: {}.".format(self.options.task_system))
 
     def package(self):
