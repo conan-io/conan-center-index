@@ -59,7 +59,7 @@ class NormConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "norm"
         self.cpp_info.names["cmake_find_package_multi"] = "norm"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["norm", "protokit"]
 
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("NORM_USE_DLL")
