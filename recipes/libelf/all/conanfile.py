@@ -43,6 +43,7 @@ class LibelfConan(ConanFile):
     def build_requirements(self):
         if self.settings.os != "Windows":
             self.build_requires("autoconf/2.69")
+            self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -86,6 +87,14 @@ class LibelfConan(ConanFile):
         if self.settings.os == "Linux" and self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
 
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
         if self.settings.os == "Windows":
             self._build_cmake()
@@ -93,6 +102,12 @@ class LibelfConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
                                   "$(LINK_SHLIB)",
                                   "$(LINK_SHLIB) $(LDFLAGS)")
+            # libelf sources contains really outdated 'config.sub' and
+            # 'config.guess' files. It not allows to build libelf for armv8 arch.
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
             self._build_autotools()
 
     def package(self):
