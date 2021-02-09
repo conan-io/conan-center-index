@@ -31,6 +31,7 @@ class Gm2calcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        print (self.settings)
         if self.options.shared:
             del self.options.fPIC
 
