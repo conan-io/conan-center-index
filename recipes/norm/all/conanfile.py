@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
+required_conan_version = ">=1.22.0"
+
+
 class NormConan(ConanFile):
     name = "norm"
     description = "A reliable multicast transport protocol"
