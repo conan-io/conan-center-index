@@ -44,7 +44,7 @@ class GdalConan(ConanFile):
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
         "with_kea": [True, False],
-        # "with_netcdf": [True, False],
+        "with_netcdf": [True, False],
         "with_jasper": [True, False],
         "with_openjpeg": [True, False],
         # "with_fgdb": [True, False],
@@ -108,7 +108,7 @@ class GdalConan(ConanFile):
         "with_hdf4": False,
         "with_hdf5": False,
         "with_kea": False,
-        # "with_netcdf": False,
+        "with_netcdf": False,
         "with_jasper": False,
         "with_openjpeg": False,
         # "with_fgdb": False,
@@ -264,8 +264,8 @@ class GdalConan(ConanFile):
             self.requires("hdf5/1.12.0")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
-        # if self.options.with_netcdf:
-        #     self.requires("netcdf-c/4.7.4")
+        if self.options.with_netcdf:
+            self.requires("netcdf/4.7.4")
         if self.options.with_jasper:
             self.requires("jasper/2.0.25")
         if self.options.with_openjpeg:
@@ -381,6 +381,11 @@ class GdalConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
                               "#include <OpenCL/OpenCL.h>",
                               "#include <CL/opencl.h>")
+        # Workaround for nc-config not packaged in netcdf recipe (gdal relies on it to check nc4 and hdf4 support in netcdf):
+        if self.options.with_netcdf and self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+                                  "NETCDF_HAS_NC4=no",
+                                  "NETCDF_HAS_NC4=yes")
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
@@ -484,6 +489,13 @@ class GdalConan(ConanFile):
             args.append("PCRE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["pcre"].include_paths)))
         if self.options.with_cfitsio:
             args.append("FITS_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["cfitsio"].include_paths)))
+        if self.options.with_netcdf:
+            args.extend([
+                "NETCDF_SETTING=YES",
+                "NETCDF_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["netcdf"].include_paths))
+            ])
+            if self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
+                args.append("NETCDF_HAS_NC4=YES")
         if self.options.with_curl:
             args.append("CURL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libcurl"].include_paths)))
         if self.options.with_geos:
@@ -627,7 +639,7 @@ class GdalConan(ConanFile):
         args.append("--with-hdf4={}".format("yes" if self.options.with_hdf4 else "no"))
         args.append("--with-hdf5={}".format("yes" if self.options.with_hdf5 else "no"))
         args.append("--with-kea={}".format("yes" if self.options.with_kea else "no"))
-        args.append("--without-netcdf") # TODO: to implement when netcdf-c lib available
+        args.append("--with-netcdf={}".format(tools.unix_path(self.deps_cpp_info["netcdf"].rootpath) if self.options.with_netcdf else "no"))
         args.append("--with-jasper={}".format(tools.unix_path(self.deps_cpp_info["jasper"].rootpath) if self.options.with_jasper else "no"))
         args.append("--with-openjpeg={}".format("yes" if self.options.with_openjpeg else "no"))
         args.append("--without-fgdb") # TODO: to implement when file-geodatabase-api lib available
