@@ -1,3 +1,6 @@
+The CGNS build uses the FindHDF5 module that locates the HDF5 libs by invoking the HDF5 compiler.
+In order to link to the correct libraries provided by conan, the whole logic is removed from the cmake script.
+
 --- a/source_subfolder/CMakeLists.txt	2020-02-14 16:16:46.000000000 +0100
 +++ b/source_subfolder/CMakeLists.txt	2021-02-03 10:50:47.216808026 +0100
 @@ -194,104 +194,8 @@
@@ -103,7 +106,7 @@
 -    message (FATAL_ERROR "HDF5 version must be greater than 1.8.0")
 -  endif (HDF5_VERSION VERSION_LESS "1.8.0")
 +  INCLUDE_DIRECTORIES (${CONAN_INCLUDE_DIRS})
-+  set (HDF5_LIBRARY ${CONAN_LIBS})
++  set (HDF5_LIBRARY CONAN_PKG::hdf5)
  
    set(HDF5_NEED_MPI "OFF" CACHE BOOL "Does the HDF5 library require linking to mpi? (Only true if using parallel HDF5)")
    set(MPI_INC)

@@ -1,3 +1,5 @@
+Enforces that either static or dynamic libs are build
+
 --- a/source_subfolder/src/CMakeLists.txt	2021-02-02 10:35:07.376792980 +0100
 +++ b/source_subfolder/src/CMakeLists.txt	2021-02-02 11:00:41.138746824 +0100
 @@ -597,14 +597,15 @@
