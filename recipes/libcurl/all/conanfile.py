@@ -347,7 +347,7 @@ class LibcurlConan(ConanFile):
     def _build_with_autotools(self):
         with tools.chdir(self._source_subfolder):
             # autoreconf
-            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows, run_environment=True)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
 
             # fix generated autotools files on alle to have relocateable binaries
             if tools.is_apple_os(self.settings.os):
