@@ -29,11 +29,11 @@ class GTestConan(ConanFile):
     def _minimum_compilers_version(self):
         if self.version == "1.8.1":
             return {
-                "Visual Studio": "13"
+                "Visual Studio": "14"
             }
         else:
             return {
-                "Visual Studio": "15",
+                "Visual Studio": "14",
                 "gcc": "5",
                 "clang": "5",
                 "apple-clang": "9.1",
