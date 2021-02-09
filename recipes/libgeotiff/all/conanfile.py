@@ -31,12 +31,14 @@ class LibgeotiffConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("libtiff/4.1.0")
-        self.requires("proj/7.0.0")
+        self.requires("libtiff/4.2.0")
+        self.requires("proj/7.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,10 +66,39 @@ class LibgeotiffConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            {
+                "geotiff_library": "GeoTIFF::GeoTIFF",
+                "geotiff_library": "geotiff::geotiff"
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += (
+                "if(TARGET {aliased} AND NOT TARGET {alias})\n"
+                "    add_library({alias} INTERFACE IMPORTED)\n"
+                "    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})\n"
+                "endif()\n"
+            ).format(alias=alias, aliased=aliased)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
-        self.cpp_info.names["cmake_find_package_multi"] = "GeoTIFF"
+        self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
+        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

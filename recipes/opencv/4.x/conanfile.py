@@ -13,32 +13,39 @@ class OpenCVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "contrib": [True, False],
-               "parallel": [False, "tbb", "openmp"],
-               "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
-               "with_png": [True, False],
-               "with_tiff": [True, False],
-               "with_jpeg2000": [False, "jasper", "openjpeg"],
-               "with_openexr": [True, False],
-               "with_eigen": [True, False],
-               "with_webp": [True, False],
-               "with_gtk": [True, False],
-               "with_quirc": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "parallel": False,
-                       "contrib": False,
-                       "with_jpeg": "libjpeg",
-                       "with_png": True,
-                       "with_tiff": True,
-                       "with_jpeg2000": "jasper",
-                       "with_openexr": True,
-                       "with_eigen": True,
-                       "with_webp": True,
-                       "with_gtk": True,
-                       "with_quirc": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "contrib": [True, False],
+        "parallel": [False, "tbb", "openmp"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jpeg2000": [False, "jasper", "openjpeg"],
+        "with_openexr": [True, False],
+        "with_eigen": [True, False],
+        "with_webp": [True, False],
+        "with_gtk": [True, False],
+        "with_quirc": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "parallel": False,
+        "contrib": False,
+        "with_jpeg": "libjpeg",
+        "with_png": True,
+        "with_tiff": True,
+        "with_jpeg2000": "jasper",
+        "with_openexr": True,
+        "with_eigen": True,
+        "with_webp": True,
+        "with_gtk": True,
+        "with_quirc": True
+    }
+
+    short_paths = True
+
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -80,26 +87,26 @@ class OpenCVConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.21")
+            self.requires("jasper/2.0.24")
         elif self.options.with_jpeg2000 == "openjpeg":
-            self.requires("openjpeg/2.3.1")
+            self.requires("openjpeg/2.4.0")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.3")
+            self.requires("openexr/2.5.4")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.8")
+            self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
-            self.requires("tbb/2020.2")
+            self.requires("tbb/2020.3")
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
         if self.options.contrib:
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.7.2")
+            self.requires("harfbuzz/2.7.4")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
         if self.options.with_quirc:

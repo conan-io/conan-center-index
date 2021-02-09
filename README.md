@@ -16,7 +16,7 @@ This is a list of shortcuts to some interesting topics:
 * **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
 * The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
-
+* There are various community lead innitiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
 
 ### Reporting Issues
 
