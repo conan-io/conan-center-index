@@ -6,6 +6,10 @@
 #include "gm2calc/MSSMNoFV_onshell.hpp"
 #include <iostream>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 gm2calc::MSSMNoFV_onshell setup() {
    gm2calc::MSSMNoFV_onshell model;
 
