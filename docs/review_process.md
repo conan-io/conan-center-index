@@ -123,7 +123,7 @@ If these conditions are fullfilled, the PR is merged (associated issues are auto
 If there is an actual merge to happen (for instance, the recipe changed in PR was already updated in master by the time PR merged), 
 it will introduce a new recipe revision. Therefore, the build should be run one more time, so the master build is launched.
 In reality this could happen frequently enough if there are multiple PRs aiming to update the same recipe (even if they touch different files in the same recipe).
-Such builds, sometimes could takes hours for big packages (like boost), blocking other merges for a while.
+Such builds can takes hours for big packages (like boost), blocking other merges for a while.
 
 ### Upload
 
