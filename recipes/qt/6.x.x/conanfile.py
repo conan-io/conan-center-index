@@ -97,7 +97,6 @@ class QtConan(ConanFile):
     }
     default_options.update({module: False for module in _submodules})
 
-    requires = "zlib/1.2.11"
     short_paths = True
 
     _cmake = None
@@ -190,6 +189,7 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
         if self.options.openssl:
             self.requires("openssl/1.1.1i")
         if self.options.with_pcre2:
