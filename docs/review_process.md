@@ -105,7 +105,7 @@ It doesn't always mean accepting all the suggestions, but at least providing a r
 
 ## Automatic Merges
 
-The bot runs Automatic Merges every 30 minutes. By now, it may only merge a single PR at one shot, so there is a theoretical limit of 48 PRs merged per day (in practice, it's even less for reasons listed below).
+The bot runs Automatic Merges every 30 minutes. Currently, it can only merge a single PR in this timeframe, so there is a theoretical limit of 48 PRs merged per day (in practice, it's even less for reasons listed below).
 PR is selected for the merge only if:
 
 - author is a [beta user](https://github.com/conan-io/conan-center-index/issues)
