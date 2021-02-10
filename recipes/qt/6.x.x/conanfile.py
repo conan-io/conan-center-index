@@ -65,7 +65,9 @@ class QtConan(ConanFile):
     }
     options.update({module: [True, False] for module in _submodules})
 
+    # this significantly speeds up windows builds
     no_copy_source = True
+
     default_options = {
         "shared": False,
         "commercial": False,
@@ -238,6 +240,8 @@ class QtConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
+
+        # patching in source method because of no_copy_source attribute
 
         tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
                         "enable_testing()",
