@@ -78,8 +78,9 @@ class CgnsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for executable in Path(self.package_folder, "bin").iterdir():
-            executable.unlink()
+        for binary in Path(self.package_folder, "bin").iterdir():
+            if binary.suffix is not "dll":
+                binary.unlink()
 
         Path(self.package_folder, "include", "cgnsBuild.defs").unlink()
 
@@ -89,5 +90,5 @@ class CgnsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "CGNS"
 
         # Although CGNS defines the targets cgns_static and cgns_shared,
-        # the output name is always cgns
-        self.cpp_info.libs = ["cgns"]
+        # the output name is always cgns or cgnsdll
+        self.cpp_info.libs = tools.collect_libs(self)
