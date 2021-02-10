@@ -87,7 +87,7 @@ The list includes conan center index contributors who are very active and proven
 - [@gocarlos](https://github.com/gocarlos)
 
 The list is not constant and will change periodically based on contribution.
-That also means you can be included to that list as well - submit PRs and provide reviews in order to be included to the list above.
+That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
 
 ### Rule of 3 reviews
 
