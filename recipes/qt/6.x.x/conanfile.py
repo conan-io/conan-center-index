@@ -74,7 +74,7 @@ class QtConan(ConanFile):
         "openssl": True,
         "with_pcre2": True,
         "with_glib": False,
-        "with_doubleconversion": False,
+        "with_doubleconversion": True,
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
@@ -388,8 +388,7 @@ class QtConan(ConanFile):
 
 
         for opt, conf_arg in [
-                              # FIXME
-                              #("with_doubleconversion", "doubleconversion"),
+                              ("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
                               ("with_harfbuzz", "harfbuzz"),
                               ("with_libjpeg", "jpeg"),
