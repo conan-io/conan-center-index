@@ -15,7 +15,7 @@ In general, reviews are driven by the automated [bot](https://github.com/conan-c
 - merging pull requests
 - closing issues (side effect of merging pull requests)
 - starting CI builds
-- assigning CI status (running/failed/successed)
+- assigning CI status (running/failed/successful)
 
 ## green build
 
