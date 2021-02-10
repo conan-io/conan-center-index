@@ -32,7 +32,7 @@ If you struggle to fix build errors yourself, you always may ask for the help, e
 
 ### Unexpected error
 
-Sometimes, build fails with `Unexecpted error` message. This indicates an infrastracture problem, and usually it's unrelated to the changes within PR itself.
+Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
 Keep in mind CCI is still an early access (consider it beta), and there are still some instabilities. Especially, as we're using lots of various services,
 which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
 So, what to do once `Unexecpted error` was encountered? You may consider rerunning the build, there are several ways to do it:
