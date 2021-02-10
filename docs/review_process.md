@@ -58,7 +58,7 @@ Once you're done with your changes, remember to convert from "Draft" to "Normal"
 
 ## getting PR reviewed
 
-Each PR should be reviewed by several reviewers before it could be merged. It cannot be just reviews from random people, we have two categories of the reviewers:
+Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
 
 ### official reviewers
 
