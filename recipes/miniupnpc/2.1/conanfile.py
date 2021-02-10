@@ -20,6 +20,9 @@ class MiniupnpcConan(ConanFile):
                               '''PROJECT(miniupnpc C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
+        if self.settings.os == "Linux":
+            with_rt_lib = "if (UPNPC_BUILD_SHARED)\n  target_link_libraries(miniupnpc-private INTERFACE rt)\n"
+            tools.replace_in_file("miniupnp/miniupnpc/CMakeLists.txt", "if (UPNPC_BUILD_SHARED)\n", with_rt_lib)
 
     def build(self):
         cmake = CMake(self)
@@ -52,7 +55,7 @@ conan_basic_setup()''')
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["miniupnpc", "ws2_32", "iphlpapi"]
-        else:    
+        else:
             self.cpp_info.libs = ["miniupnpc"]
         if not self.options.shared:
             self.cpp_info.defines.append("MINIUPNP_STATICLIB")
