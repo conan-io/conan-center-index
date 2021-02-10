@@ -52,12 +52,6 @@ class HazelcastCxx(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -67,6 +61,12 @@ class HazelcastCxx(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
         self._cmake.configure()
         return self._cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
