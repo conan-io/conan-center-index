@@ -49,7 +49,7 @@ Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-
 
 It's recommended to rebase your changes on top of the master branch to avoid conflicts.
 Right now, neither GitHub itself nor conan-center-bot notify about merge conflicts, so it's the contributor's responsibility to periodically check for the conflicts.
-Obviously, PRs that have merge conflicts are never merged, and all the conflicts has to be resolved first.
+Obviously, PRs that have merge conflicts are never merged, and all the conflicts have to be resolved first.
 
 ## draft
 
