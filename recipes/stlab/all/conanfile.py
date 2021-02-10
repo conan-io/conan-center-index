@@ -133,12 +133,11 @@ class Stlab(ConanFile):
         self._validate_task_system()
         self._validate_boost_components()
 
-    def configure(self):
-        self._fix_boost_components()
-
+    def config_options(self):
         if self.options.task_system == "auto":
             self.options.task_system = self._default_task_system()
 
+    def configure(self):
         self.output.info("Stlab Task System: {}.".format(self.options.task_system))
 
     def package(self):
