@@ -96,7 +96,7 @@ So, it might be 1 official + 2 community, or 3 official, but it couldn't be just
 
 ### Reviews from others
 
-While reviews from contributors who don't belong neither to official reviewers nor to community reviewers are not counted by the bot, they are still valuable and very helpful, so do not hesistate to provide your reviews.
+All reviews are still valuable and very helpful. Even if you're not listed as an official or community reviewer counted by the bot, your reviews are still welcome, so please do not hesitate to provide them.
 
 ### Addressing review comments
 
