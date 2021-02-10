@@ -79,7 +79,7 @@ class CgnsConan(ConanFile):
         cmake.install()
 
         for binary in Path(self.package_folder, "bin").iterdir():
-            if binary.suffix is not ".dll":
+            if binary.suffix != ".dll":
                 binary.unlink()
 
         Path(self.package_folder, "include", "cgnsBuild.defs").unlink()
