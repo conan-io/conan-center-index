@@ -53,7 +53,7 @@ Obviously, PRs that have merge conflicts are never merged, and all the conflicts
 
 ## draft
 
-Draft pull requests are also never merged. The same applies for `WIP` keyword (stands for `Work in Progress`) in the title - GitHub considers them drafts as well.
+Draft pull requests are also never merged. The same applies for PRs with the `WIP` keyword (stands for `Work in Progress`) in the title - GitHub considers them drafts as well.
 Once you're done with your changes, remember to change from draft and remove WIP keyword from the title.
 
 ## getting PR reviewed
