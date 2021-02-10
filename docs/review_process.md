@@ -35,7 +35,7 @@ If you struggle to fix build errors yourself, you always may ask for the help, e
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
 Keep in mind CCI is still in early access (consider it beta), and there are still some instabilities. Especially, as we're using lots of external services,
 which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
-So, what to do once `Unexecpted error` was encountered? You may consider rerunning the build, there are several ways to do it:
+So, what to do once `Unexpected error` was encountered? You may consider re-running the build, and there are several ways to do it:
 
 - do an empty commit: `git commit --allow-empty`
 - update the last commit: `git commit --amend --no-edit && git push -f`
