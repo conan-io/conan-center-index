@@ -1,7 +1,7 @@
 # Review process
 
 Behind the scenes of conan center index, there is a pretty complicated and heavily automated process to review and merge pull requests.
-As there is a lot of activities by many users and various bots (e.g. bumping versions or updating conventions), many PRs are opened every day.
+As there is a lot of activity from many users and various bots (e.g. bumping versions or updating conventions), many PRs are opened every day.
 CCI tries to make process as smooth and simple as possible for the contributors, 
 but it requires complicated logic under the hood, and sometimes the logic might not look that obvious for the newcomers, 
 so this documment is willing to describe the internal process in the details.
