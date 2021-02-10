@@ -22,7 +22,7 @@ In general, reviews are driven by the automated [bot](https://github.com/conan-c
 The first important prerequisite is ensuring your PR is green (build is successful).
 It requires a bit of patience, because there are many PRs are running, and we're building a lot of configurations for a numerous versions of libraries.
 Keep attention to the error messages from the bot, and address all the build failures.
-Bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
+The bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
 
 - the profile that failed (in other words, the configuration - architecture, operation system, compiler, etc.)
 - failed command line (it might have failed on early stages - e.g. recipe syntax errors, or later stages, like build or test)
