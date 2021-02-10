@@ -109,7 +109,7 @@ The bot runs Automatic Merges every 30 minutes. By now, it may only merge a sing
 PR is selected for the merge only if:
 
 - author is a [beta user](https://github.com/conan-io/conan-center-index/issues)
-- ahthor has signed CLA
+- author has signed CLA
 - PR is not a Draft or WIP
 - PR has a green status (successful build)
 - PR doesn't have merge conflicts with `master` branch
