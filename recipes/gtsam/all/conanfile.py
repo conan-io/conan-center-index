@@ -136,7 +136,7 @@ class gtsamConan(ConanFile):
         self.requires("boost/1.75.0")
         self.requires("eigen/3.3.9")
         if self.options.with_TBB:
-            self.requires("tbb/2020.0")
+            self.requires("tbb/2020.3")
             self.options["tbb"].tbbmalloc = True
         if self.options.install_geographiclib:
             self.requires("geographiclib/1.51")
