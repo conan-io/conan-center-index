@@ -122,19 +122,14 @@ class gtsamConan(ConanFile):
                                   "/MDd ",
                                   "/{} ".format(self.settings.compiler.runtime))
 
+    @property
+    def _required_boost_components(self):
+        return ["date_time", "filesystem", "serialization", "system", "timer", "thread"]
+
     def validate(self):
-        if self.options["boost"].without_serialization:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::serialization")
-        if self.options["boost"].without_filesystem:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::filesystem")
-        if self.options["boost"].without_system:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::system")
-        if self.options["boost"].without_timer:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::timer")
-        if self.options["boost"].without_thread:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::thread")
-        if self.options["boost"].without_date_time:
-            raise ConanInvalidConfiguration("GTSAM can't be built without boost::date_time")
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
 
     def config_options(self):
         if self.settings.os == "Windows":
