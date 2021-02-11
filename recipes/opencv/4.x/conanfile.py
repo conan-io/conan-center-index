@@ -441,7 +441,7 @@ class OpenCVConan(ConanFile):
                             self.cpp_info.components[conan_component].libdirs.append("lib")
                             self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
 
-                if self.settings.os == "iOS":
+                if self.settings.os == "iOS" or tools.os_info.is_macos:
                     if not self.options.shared:
                         if conan_component == "opencv_core":
                             libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
