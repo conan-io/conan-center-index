@@ -82,7 +82,7 @@ class QwtConan(ConanFile):
     def build(self):
         self._patch_qwt_config_files()
 
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             vcvars = tools.vcvars_command(self.settings)
             self.run("{} && qmake {}".format(vcvars, self._source_subfolder), run_environment=True)
             self.run("{} && nmake".format(vcvars))
