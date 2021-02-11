@@ -45,8 +45,8 @@ class PocoConan(ConanFile):
         "PocoJWT": _PocoComponent("enable_jwt", True, ("PocoJSON", "PocoCrypto", ), True),
         "PocoMongoDB": _PocoComponent("enable_mongodb", True, ("PocoNet", ), True),
         "PocoNet": _PocoComponent("enable_net", True, ("PocoFoundation", ), True),
-        "PocoNetSSL": _PocoComponent("enable_netssl", not tools.os_info.is_windows, ("PocoCrypto", "PocoUtil", "PocoNet", ), True),    # also external openssl
-        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", tools.os_info.is_windows, ("PocoNet", "PocoUtil", ), True),
+        "PocoNetSSL": _PocoComponent("enable_netssl", True, ("PocoCrypto", "PocoUtil", "PocoNet", ), True),    # also external openssl
+        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", True, ("PocoNet", "PocoUtil", ), True),
         "PocoPDF": _PocoComponent("enable_pdf", False, ("PocoXML", "PocoUtil", ), True),
         "PocoPageCompiler": _PocoComponent("enable_pagecompiler", False, ("PocoNet", "PocoUtil", ), False),
         "PocoFile2Page": _PocoComponent("enable_pagecompiler_file2page", False, ("PocoNet", "PocoUtil", "PocoXML", "PocoJSON", ), False),
