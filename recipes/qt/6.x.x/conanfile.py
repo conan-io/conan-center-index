@@ -539,12 +539,12 @@ Examples = res/datadir/examples""")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
-                self.cpp_info.system_libs.append("Version")   # "Qt5Cored.lib" require "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
-                self.cpp_info.system_libs.append("Winmm")     # "Qt5Cored.lib" require "__imp_timeSetEvent" which is in "Winmm.lib" library
-                self.cpp_info.system_libs.append("Netapi32")  # "Qt5Cored.lib" require "NetApiBufferFree" which is in "Netapi32.lib" library
-                self.cpp_info.system_libs.append("UserEnv")   # "Qt5Cored.lib" require "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
+                self.cpp_info.system_libs.append("Version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
+                self.cpp_info.system_libs.append("Winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
+                self.cpp_info.system_libs.append("Netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
+                self.cpp_info.system_libs.append("UserEnv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
 
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.extend(["IOKit"])    # "libQt5Core.a" require "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
-                self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
-                self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+                self.cpp_info.frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                self.cpp_info.frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
