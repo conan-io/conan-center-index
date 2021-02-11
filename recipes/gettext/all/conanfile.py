@@ -110,6 +110,8 @@ class GetTextConan(ConanFile):
         with self._build_context():
             env_build = self._configure_autotools()
             env_build.install()
+        os.rename(os.path.join(self.package_folder, "share", "aclocal"),
+                  os.path.join(self.package_folder, "bin", "aclocal"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "include"))
@@ -118,3 +120,7 @@ class GetTextConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        gettext_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal"))
+        self.output.info("Appending ACLOCAL_PATH environment variable: {}".format(gettext_aclocal))
+        self.env_info.ACLOCAL_PATH.append(gettext_aclocal)
