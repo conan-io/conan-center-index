@@ -139,7 +139,7 @@ class gtsamConan(ConanFile):
             self.requires("tbb/2020.0")
             self.options["tbb"].tbbmalloc = True
         if self.options.install_geographiclib:
-            self.requires("geographiclib/1.50.1")
+            self.requires("geographiclib/1.51")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
