@@ -134,7 +134,7 @@ class gtsamConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
-        self.requires("eigen/3.3.8")
+        self.requires("eigen/3.3.9")
         if self.options.with_TBB:
             self.requires("tbb/2020.0")
             self.options["tbb"].tbbmalloc = True
