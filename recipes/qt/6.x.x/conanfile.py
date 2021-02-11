@@ -462,9 +462,12 @@ class QtConan(ConanFile):
                 "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:-Wl,--export-dynamic>",
                 "", strict=False)
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
+            # next lines force cmake package to be in PATH before the one provided by visual studio (vcvars)
+            build_env = tools.RunEnvironment(self).vars if self.settings.compiler == "Visual Studio" else {}
+            build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
+            build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
-                build_env["PATH"] = [os.path.join(self.source_folder, "qt6", "gnuwin32", "bin")]
+                build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
             with tools.environment_append(build_env):
 
                 if tools.os_info.is_macos:
