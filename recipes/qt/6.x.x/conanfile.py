@@ -231,7 +231,7 @@ class QtConan(ConanFile):
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.0.3")
-        if self.options.get_safe("opengl", "no") != "no":
+        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.4.8")
