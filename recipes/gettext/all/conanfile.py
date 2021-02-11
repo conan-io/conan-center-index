@@ -35,10 +35,9 @@ class GetTextConan(ConanFile):
         del self.info.settings.compiler
 
     def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
-        if self._is_msvc:
-            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
