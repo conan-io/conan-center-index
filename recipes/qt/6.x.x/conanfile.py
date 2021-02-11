@@ -468,6 +468,10 @@ class QtConan(ConanFile):
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
                 build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
+            if self.settings.compiler == "Visual Studio":
+                # this avoids cmake using gcc from strawberryperl
+                build_env["CC"] = "cl"
+                build_env["CXX"] = "cl"
             with tools.environment_append(build_env):
 
                 if tools.os_info.is_macos:
