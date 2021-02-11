@@ -169,3 +169,5 @@ class gtsamConan(ConanFile):
             self.cpp_info.requires.append("tbb::tbb")
         if self.options.install_geographiclib:
             self.cpp_info.requires.append("geographiclib::geographiclib")
+        self.cpp_info.names["cmake_find_package"] = "GTSAM"
+        self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
