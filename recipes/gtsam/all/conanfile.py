@@ -163,3 +163,6 @@ class gtsamConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
             self.cpp_info.system_libs = ["dbghelp"]
+        # GTSAM only needs a subset of boost, so we manually specify the requirements list.
+        self.cpp_info.requires = ["eigen::eigen"]
+        self.cpp_info.requires.extend(['boost::serialization', 'boost::filesystem', 'boost::system', 'boost::timer','boost::thread', 'boost::date_time'])
