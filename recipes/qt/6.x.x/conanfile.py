@@ -1,6 +1,5 @@
 import os
 import shutil
-import itertools
 import glob
 
 import configparser
