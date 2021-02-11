@@ -31,8 +31,6 @@ class ZmqppConan(ConanFile):
         extracted_dir = "zmqpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        #self.run("git clone https://github.com/zeromq/zmqpp.git") # dir. will be zmqpp
-
         # zmpqq Makefile uses standard compiler variable name, useful for adding extra libs, so we rename it.
         tools.replace_in_file("source_subfolder/Makefile", "LIBRARY_PATH = $(SRC_PATH)/$(LIBRARY_DIR)",
                               "LIBRARY_PATH1 = $(SRC_PATH)/$(LIBRARY_DIR)\n$(info ENV==$(shell env))")
@@ -68,16 +66,11 @@ class ZmqppConan(ConanFile):
     def build(self):
         with tools.chdir("source_subfolder"):
             atools = AutoToolsBuildEnvironment(self)
-            dir(atools)
-            for property, value in vars(atools).items():
-                print(property, ":", value)
             incpath=':'.join(atools.include_paths)
             libpath=':'.join(atools.library_paths)
             buildVars = atools.vars #add dependencies paths for building
             buildVars["CPLUS_INCLUDE_PATH"]=incpath
             buildVars["LIBRARY_PATH"]=libpath
-            print("buildVars=")
-            print(buildVars)
             atools.make(vars=buildVars)
 
     def package(self):
