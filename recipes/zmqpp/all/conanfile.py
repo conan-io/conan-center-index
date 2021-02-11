@@ -7,6 +7,7 @@ class ZmqppConan(ConanFile):
     name = "zmqpp"
     homepage = "https://github.com/zeromq/zmqpp"
     version = "4.2.0"
+    version_major = 4
     license = "MPLv2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "This C++ binding for 0mq/zmq is a 'high-level' library that hides most of the c-style interface core 0mq provides."
@@ -39,15 +40,18 @@ class ZmqppConan(ConanFile):
                               "ALL_LIBRARY_OBJECTS := $(patsubst $(SRC_PATH)/%.cpp, $(OBJECT_PATH)/%.o, $(shell find $(LIBRARY_PATH1) -iname '*.cpp'))")
         tools.replace_in_file("source_subfolder/Makefile", "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH) -iname '*.hpp')",
                               "ALL_LIBRARY_INCLUDES := $(shell find $(LIBRARY_PATH1) -iname '*.hpp')")
+        
+        # zmpqq Makefile always tries to link both library types                      
+        if self.options.shared == "True":
+            replacement = "main: $(LIBRARY_SHARED)"
+        else:
+            replacement = "main: $(LIBRARY_ARCHIVE)"
+        tools.replace_in_file("source_subfolder/Makefile", "main: $(LIBRARY_SHARED) $(LIBRARY_ARCHIVE)", replacement)
 
     def validate(self):
         compiler = self.settings.compiler
         if compiler.get_safe('cppstd'):
             tools.check_min_cppstd(self, 11)
-            
-        #TODO: it builds on macOS with " -o *:shared=True"
-        if self.settings.compiler == "apple-clang" and self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Apple macOS is not supported yet") 
 
         # libstdc++11 is required
         if self.settings.compiler == "Visual Studio":
@@ -75,11 +79,15 @@ class ZmqppConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include/zmqpp", src=self._source_subfolder + "/src/zmqpp")
-        self.copy("*hello.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        if self.options.shared == "True": # zmqpp doesn't create shared object symlinks
+            if self.settings.os == "Linux":
+                self.copy("*.so*", dst = "lib", keep_path = False)
+                self.run("cd {0}/lib; ln -s libzmqpp.so.{1} libzmqpp.so".format(self.package_folder, self.version_major))
+            elif self.settings.os == "Macos":
+                self.copy("*.dylib", dst = "lib", keep_path = False)
+                self.run("cd {0}/lib; ln -s libzmqpp.{1}.dylib libzmqpp.dylib".format(self.package_folder, self.version_major))
+        else:
+            self.copy("*.a", dst = "lib", keep_path = False)
 
     def package_info(self):
         self.cpp_info.libs = ["zmqpp"]
