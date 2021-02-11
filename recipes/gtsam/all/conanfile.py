@@ -4,6 +4,8 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
+required_conan_version = ">=1.32.0"
+
 class gtsamConan(ConanFile):
     name = "gtsam"
     license = "BSD-3-Clause"
@@ -119,6 +121,20 @@ class gtsamConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MDd ",
                                   "/{} ".format(self.settings.compiler.runtime))
+
+    def validate(self):
+        if self.options["boost"].without_serialization:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::serialization")
+        if self.options["boost"].without_filesystem:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::filesystem")
+        if self.options["boost"].without_system:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::system")
+        if self.options["boost"].without_timer:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::timer")
+        if self.options["boost"].without_thread:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::thread")
+        if self.options["boost"].without_date_time:
+            raise ConanInvalidConfiguration("GTSAM can't be built without boost::date_time")
 
     def config_options(self):
         if self.settings.os == "Windows":
