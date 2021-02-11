@@ -82,7 +82,7 @@ class GetTextConan(ConanFile):
             elif self.settings.arch_build == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info["automake"].rootpath, "bin", "share", "automake-1.16"))
+            automake_perldir = tools.get_env("AUTOMAKE_PERLLIBDIR")
             args.extend(["CC=%s/compile cl -nologo" % automake_perldir,
                          "LD=link",
                          "NM=dumpbin -symbols",
