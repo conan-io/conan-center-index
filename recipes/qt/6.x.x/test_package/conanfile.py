@@ -11,8 +11,6 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("cmake/3.19.1")
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
-            self.build_requires("jom/1.1.3")
         if self._meson_supported():
             self.build_requires("meson/0.56.2")
 
@@ -63,7 +61,7 @@ class TestPackageConan(ConanFile):
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
-                        self.run("jom", run_environment=True)
+                        self.run("nmake", run_environment=True)
                     else:
                         self.run("mingw32-make", run_environment=True)
                 else:
