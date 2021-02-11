@@ -49,7 +49,7 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
-        if tools.Version(self.version) >= "0.4.7" and self.compiler == "apple-clang" and tools.Version(self.compiler.version) < "10.0":
+        if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
 
     def requirements(self):
