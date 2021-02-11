@@ -107,16 +107,17 @@ class XkbcommonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "xkbcommon_full_package" # unofficial, but required to avoid side effects (libxkbcommon component "steals" the default global pkg_config name)
+        self.cpp_info.components["libxkbcommon"].names["pkg_config"] = "xkbcommon"
         self.cpp_info.components["libxkbcommon"].libs = ["xkbcommon"]
-        self.cpp_info.components["libxkbcommon"].name = "xkbcommon"
         self.cpp_info.components["libxkbcommon"].requires = ["xorg::xkeyboard-config"]
         if self.options.with_x11:
+            self.cpp_info.components["libxkbcommon-x11"].names["pkg_config"] = "xkbcommon-x11"
             self.cpp_info.components["libxkbcommon-x11"].libs = ["xkbcommon-x11"]
-            self.cpp_info.components["libxkbcommon-x11"].name = "xkbcommon-x11"
             self.cpp_info.components["libxkbcommon-x11"].requires = ["libxkbcommon", "xorg::xcb", "xorg::xcb-xkb"]
         if self.options.get_safe("xkbregistry"):
+            self.cpp_info.components["libxkbregistry"].names["pkg_config"] = "xkbregistry"
             self.cpp_info.components["libxkbregistry"].libs = ["xkbregistry"]
-            self.cpp_info.components["libxkbregistry"].name = "xkbregistry"
             self.cpp_info.components["libxkbregistry"].requires = ["libxml2::libxml2"]
 
         if tools.Version(self.version) >= "1.0.0":
