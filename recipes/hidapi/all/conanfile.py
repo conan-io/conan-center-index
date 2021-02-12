@@ -47,19 +47,34 @@ class HidapiConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}-{}".format(self.name,self.name, self.version), self._source_subfolder)
 
+    def _configure_autotools(self):
+        if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
+            configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
+            if self.settings.os == "Linux":
+                configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
+            elif self._is_mingw:
+                if self.settings.arch == "x86_64":
+                    configure_args.append("--host=x86_64-w64-mingw32")
+                elif self.settings.arch == "x86":
+                    configure_args.append("--build=i686-w64-mingw32")
+                    configure_args.append("--host=i686-w64-mingw32")
+            self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        return self._autotools
+    
     def build(self):
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                self.build_msvc()
+        if self._is_msvc:
+            self.build_msvc()
         else:
             self.build_unix()
 
     def build_msvc(self):
         msbuild = MSBuild(self)
-        print("%s")
-        print("%s/windows/hidapi.vcxproj" % self._source_subfolder)
         msbuild.build("%s/windows/hidapi.vcxproj" % self._source_subfolder,
                       platforms={'x86': 'x86','x86_64': 'x64'})
+
+    
 
     def build_unix(self):
         self.run("cd %s && ./bootstrap" % self._source_subfolder)
