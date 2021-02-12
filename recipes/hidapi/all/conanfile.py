@@ -12,14 +12,14 @@ class HidapiConan(ConanFile):
     options = {
         "minosx": ['10.7', '10.8', '10.9', '10.10', '10.11'],
         "fPIC": [True, False],
-        "with_libusb": [True, False]
+        "with_libusb": [True, False],
         "shared": [True, False], 
         "enable_udev": [True, False]
     }
     default_options = {
         "minosx": 10.7, 
         "fPIC": True, 
-        "with_libusb": False
+        "with_libusb": False,
         "shared": True,
         "enable_udev": True
     }
