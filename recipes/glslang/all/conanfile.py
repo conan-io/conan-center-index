@@ -56,7 +56,7 @@ class GlslangConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_optimizer:
-            self.requires("spirv-tools/v2020.3")
+            self.requires("spirv-tools/v2020.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

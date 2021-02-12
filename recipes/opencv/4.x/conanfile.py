@@ -13,33 +13,40 @@ class OpenCVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "contrib": [True, False],
-               "parallel": [False, "tbb", "openmp"],
-               "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
-               "with_png": [True, False],
-               "with_tiff": [True, False],
-               "with_jpeg2000": [False, "jasper", "openjpeg"],
-               "with_openexr": [True, False],
-               "with_eigen": [True, False],
-               "with_webp": [True, False],
-               "with_gtk": [True, False],
-               "with_quirc": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "parallel": False,
-                       "contrib": False,
-                       "with_jpeg": "libjpeg",
-                       "with_png": True,
-                       "with_tiff": True,
-                       "with_jpeg2000": "jasper",
-                       "with_openexr": True,
-                       "with_eigen": True,
-                       "with_webp": True,
-                       "with_gtk": True,
-                       "with_quirc": True}
-    exports_sources = "CMakeLists.txt"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "contrib": [True, False],
+        "parallel": [False, "tbb", "openmp"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jpeg2000": [False, "jasper", "openjpeg"],
+        "with_openexr": [True, False],
+        "with_eigen": [True, False],
+        "with_webp": [True, False],
+        "with_gtk": [True, False],
+        "with_quirc": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "parallel": False,
+        "contrib": False,
+        "with_jpeg": "libjpeg",
+        "with_png": True,
+        "with_tiff": True,
+        "with_jpeg2000": "jasper",
+        "with_openexr": True,
+        "with_eigen": True,
+        "with_webp": True,
+        "with_gtk": True,
+        "with_quirc": True
+    }
+
+    short_paths = True
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -82,15 +89,15 @@ class OpenCVConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.23")
+            self.requires("jasper/2.0.25")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.4.0")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.3")
+            self.requires("openexr/2.5.4")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
@@ -115,6 +122,8 @@ class OpenCVConan(ConanFile):
         os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
 
     def _patch_opencv(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib', 'quirc']:
             tools.rmdir(os.path.join(self._source_subfolder, '3rdparty', directory))
         if self.options.with_openexr:
@@ -276,7 +285,7 @@ class OpenCVConan(ConanFile):
                       os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_subfolder, self._module_file),
-            {component["target"]:"OpenCV::{}".format(component["target"]) for component in self._opencv_components}
+            {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
         )
 
     @staticmethod

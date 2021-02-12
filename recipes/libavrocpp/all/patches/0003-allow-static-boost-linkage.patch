@@ -1,0 +1,29 @@
+From 902717b4aa557b60d3450a1397cae728d44ebb07 Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Tue, 2 Feb 2021 20:55:08 -0500
+Subject: [PATCH] allow static linkage to boost
+
+---
+ lang/c++/CMakeLists.txt | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index 435d680e22..770a9e8df5 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -44,14 +44,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+ 
+ if (WIN32 AND NOT CYGWIN AND NOT MSYS)
+     add_definitions (/EHa)
+-    add_definitions (
+-        -DNOMINMAX
+-        -DBOOST_REGEX_DYN_LINK
+-        -DBOOST_FILESYSTEM_DYN_LINK
+-        -DBOOST_SYSTEM_DYN_LINK
+-        -DBOOST_IOSTREAMS_DYN_LINK
+-        -DBOOST_PROGRAM_OPTIONS_DYN_LINK
+-        -DBOOST_ALL_NO_LIB)
++    add_definitions (-DNOMINMAX)
+ else()
+ # Replease c++11 with c++17 below in case C++ 17 should be used
+     add_definitions(-std=c++11 -fPIC)

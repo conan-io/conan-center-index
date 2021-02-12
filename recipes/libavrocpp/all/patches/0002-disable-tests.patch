@@ -1,0 +1,33 @@
+From e0961af7bfb69c1129a0347a8c8ccbd9608098cf Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Tue, 2 Feb 2021 20:29:05 -0500
+Subject: [PATCH] Update CMakeLists.txt
+
+---
+ lang/c++/CMakeLists.txt | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index 69feee5b11..435d680e22 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -160,10 +160,6 @@ target_link_libraries (avrogencpp avrocpp_s ${Boost_LIBRARIES} ${SNAPPY_LIBRARIE
+ enable_testing()
+ 
+ macro (unittest name)
+-    add_executable (${name} test/${name}.cc)
+-    target_link_libraries (${name} avrocpp ${Boost_LIBRARIES} ${SNAPPY_LIBRARIES})
+-    add_test (NAME ${name} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${name})
+ endmacro (unittest)
+ 
+ unittest (buffertest)
+@@ -178,7 +178,7 @@ unittest (JsonTests)
+ unittest (AvrogencppTests)
+ unittest (CompilerTests)
+ 
+-add_dependencies (AvrogencppTests bigrecord_hh bigrecord_r_hh bigrecord2_hh
++add_dependencies (bigrecord_hh bigrecord_r_hh bigrecord2_hh
+     tweet_hh
+     union_array_union_hh union_map_union_hh union_conflict_hh
+     recursive_hh reuse_hh circulardep_hh tree1_hh tree2_hh crossref_hh

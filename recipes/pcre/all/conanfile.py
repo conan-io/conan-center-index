@@ -25,7 +25,8 @@ class PCREConan(ConanFile):
         "with_zlib": [True, False],
         "with_jit": [True, False],
         "with_utf": [True, False],
-        "with_unicode_properties": [True, False]
+        "with_unicode_properties": [True, False],
+        "with_stack_for_recursion": [True, False]
     }
     default_options = {
         "shared": False,
@@ -39,7 +40,8 @@ class PCREConan(ConanFile):
         "with_zlib": True,
         "with_jit": False,
         "with_utf": False,
-        "with_unicode_properties": False
+        "with_unicode_properties": False,
+        "with_stack_for_recursion": True
     }
 
     _cmake = None
@@ -113,6 +115,7 @@ class PCREConan(ConanFile):
         self._cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
         self._cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
         self._cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
+        self._cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
         self._cmake.configure(build_folder=self._build_subfolder)

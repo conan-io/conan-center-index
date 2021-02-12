@@ -64,7 +64,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
@@ -180,13 +180,7 @@ class Libxml2Conan(ConanFile):
             value = ("--with-%s" % name) if value else ("--without-%s" % name)
             configure_args.append(value)
 
-        # Disable --build when building for iPhoneSimulator. The configure script halts on
-        # not knowing if it should cross-compile.
-        build = None
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
-
-        self._autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def _patch_sources(self):
