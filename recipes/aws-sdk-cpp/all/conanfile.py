@@ -69,7 +69,14 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "find_package(Git)", "# find_package(Git")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "sdks.cmake"),
+                "sort_links(EXPORTS)", "# sort_links(EXPORTS)")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
