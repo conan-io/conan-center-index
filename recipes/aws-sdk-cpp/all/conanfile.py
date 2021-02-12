@@ -196,6 +196,7 @@ class AwsSdkCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
         shutil.rmtree(self._source_subfolder + "/code-generation")
+        shutil.rmtree(self._source_subfolder + "/aws-cpp-sdk-core-tests")
 
     def _configure_cmake(self):
         if self._cmake:
