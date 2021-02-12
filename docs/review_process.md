@@ -37,7 +37,6 @@ Keep in mind CCI is still in early access (consider it beta), and there are stil
 which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
 So, what to do once `Unexpected error` was encountered? You may consider re-running the build, and there are several ways to do it:
 
-- do an empty commit: `git commit --allow-empty`
 - update the last commit: `git commit --amend --no-edit && git push -f`
 - close pull request, wait 15 seconds, re-open pull request
 
