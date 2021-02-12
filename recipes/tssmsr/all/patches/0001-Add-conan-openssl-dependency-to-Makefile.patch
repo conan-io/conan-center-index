@@ -1,0 +1,48 @@
+From 73fc74859e3f91a02062311c36cdf85abb2ba13e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9my=20Salim?= <remy.salim@echosens.com>
+Date: Fri, 18 Sep 2020 10:33:07 +0200
+Subject: [PATCH 1/1] Add conan openssl dependency to Makefile
+
+---
+ TSS.CPP/Makefile | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/TSS.CPP/Makefile b/TSS.CPP/Makefile
+index b6d9c83..608b06e 100644
+--- a/TSS.CPP/Makefile
++++ b/TSS.CPP/Makefile
+@@ -3,7 +3,9 @@ CC = g++
+ CFLAGS_DBG = -g -DDEBUG -D_DEBUG
+ CFLAGS_REL = -O2 -DNDEBUG
+ 
+-_CFLAGS = -Wall -std=c++11 -Iinclude
++-include ../../conanbuildinfo.mak
++
++_CFLAGS = -Wall -std=c++11 -Iinclude -I$(CONAN_INCLUDE_DIRS_OPENSSL) -DOPENSSL_NO_SM3
+ CFLAGS_SRC = $(_CFLAGS) -fPIC -D_TPMCPPLIB
+ CFLAGS_SMPL = $(_CFLAGS)
+ 
+@@ -11,8 +13,8 @@ SRCDIR = Src
+ SMPLDIR = Samples
+ BINDIR = bin
+ 
+-TSS_A = $(BINDIR)/tss$(SUFF).a
+-TSS_SO = $(BINDIR)/tss$(SUFF).so
++TSS_A = $(BINDIR)/libtss$(SUFF).a
++TSS_SO = $(BINDIR)/libtss$(SUFF).so
+ SAMPLES = $(BINDIR)/samples
+ 
+ OBJDIR = $(BINDIR)/obj
+@@ -87,7 +89,8 @@ $(DEPFILES_SMPL):
+ 
+ 
+ $(SAMPLES): $(SMPL_OBJS) $(TSS_A)
+-	$(CC) -o $@ $(SMPL_OBJS) $(TSS_A) $(CFLAGS_SMPL) -L/usr/lib -lcrypto -ldl
++	$(CC) -o $@ $(SMPL_OBJS) $(TSS_A) $(CFLAGS_SMPL) -L/usr/lib -lcrypto -ldl \
++	-L$(CONAN_LIB_DIRS_OPENSSL) $(addprefix -l,$(CONAN_LIBS_OPENSSL)) $(addprefix -l,$(CONAN_SYSTEM_LIBS_OPENSSL))
+ 
+ samples: $(SAMPLES)
+ 
+-- 
+2.25.1
+

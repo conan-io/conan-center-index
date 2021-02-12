@@ -1,0 +1,8 @@
+sources:
+  "cci.20201117":
+    url: "https://github.com/microsoft/TSS.MSR/archive/04eba4ac647c5fc2436adbeea49fc3372418de7b.tar.gz"
+    sha256: cfbc77dad59d3bf01e6d18c43946100541690240bed524b13d361073e529b62e
+patches:
+  "cci.20201117":
+    - patch_file: "patches/0001-Add-conan-openssl-dependency-to-Makefile.patch"
+      base_path: "source_subfolder"
