@@ -34,8 +34,8 @@ class SobjectizerConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
-            "gcc": "5",
-            "clang": "4",
+            "gcc": "7",
+            "clang": "6",
             "apple-clang": "8",
             "Visual Studio": "15"
         }
