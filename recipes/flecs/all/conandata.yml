@@ -1,0 +1,4 @@
+sources:
+  "2.3.1":
+    url: "https://github.com/SanderMertens/flecs/archive/v2.3.1.tar.gz"
+    sha256: "b2cd69b3282167295d509deb762e580ad76040ed96ceb4492657bc1e444b8c89"
