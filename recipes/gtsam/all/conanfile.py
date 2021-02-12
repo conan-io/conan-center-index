@@ -98,6 +98,7 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
             self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = True #Set to false to use eigen sources contained in GTSAM
+            self._cmake.definitions["GTSAM_BUILD_TYPE_POSTFIXES"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
