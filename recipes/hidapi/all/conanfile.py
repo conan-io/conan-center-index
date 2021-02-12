@@ -17,7 +17,7 @@ class HidapiConan(ConanFile):
     default_options = {
         "minosx": 10.7, "fPIC": True, "with_libusb": False
     }
-    generators = "pkg_config"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -87,6 +87,8 @@ class HidapiConan(ConanFile):
             autotools.flags.append('-mmacosx-version-min=%s' %
                                    self.options.minosx)
 
+        autotools = self._configure_autotools()
+        autotools.make()
         autotools.configure(self._source_subfolder)
         autotools.make()
         autotools.install()
