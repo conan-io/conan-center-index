@@ -13,9 +13,15 @@ class HidapiConan(ConanFile):
         "minosx": ['10.7', '10.8', '10.9', '10.10', '10.11'],
         "fPIC": [True, False],
         "with_libusb": [True, False]
+        "shared": [True, False], 
+        "enable_udev": [True, False]
     }
     default_options = {
-        "minosx": 10.7, "fPIC": True, "with_libusb": False
+        "minosx": 10.7, 
+        "fPIC": True, 
+        "with_libusb": False
+        "shared": True,
+        "enable_udev": True
     }
     _autotools = None
 
@@ -89,14 +95,13 @@ class HidapiConan(ConanFile):
 
         autotools = self._configure_autotools()
         autotools.make()
-        autotools.configure(self._source_subfolder)
-        autotools.make()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         la_files = {
             os.path.join(self.package_folder, "lib", "libhidapi-hidraw.la"),
-            os.path.join(self.package_folder, "lib", "libhidapi-libusb.la")
+            os.path.join(self.package_folder, "lib", "libhidapi-libusb.la"),
+            os.path.join(self.package_folder, "lib", "libhidapi.la")
         }
         for la_file in la_files:
             if os.path.isfile(la_file):
