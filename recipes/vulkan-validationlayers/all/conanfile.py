@@ -98,7 +98,7 @@ class VulkanValidationLayersConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["INSTALL_TESTS"] = False
         self._cmake.definitions["BUILD_LAYERS"] = True
-        self._cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = False
+        self._cmake.definitions["BUILD_LAYER_SUPPORT_FILES"] = True
         self._cmake.configure()
         return self._cmake
 

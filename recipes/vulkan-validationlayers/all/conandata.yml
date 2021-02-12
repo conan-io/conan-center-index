@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/duplicated-declaration.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/install-location-headers.patch"
+      base_path: "source_subfolder"
