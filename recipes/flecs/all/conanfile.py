@@ -6,11 +6,9 @@ class FlecsConan(ConanFile):
     name = "flecs"
     description = "A fast entity component system (ECS) for C & C++"
     license = "MIT"
-    topics = ("lightweight", "gamedev", "game-engine", "cpp", "data-oriented-design", \
-              "c99", "game-development", "ecs", "entity-component-system", "cpp11", \
-              "simulation-framework", "game-programming", "architectural-patterns", \
-              "indiedev", "gamedev-framework", "data-oriented", "indiegame", "game-dev", \
-              "simulation-engine", "ecs-framework")
+    topics = ("gamedev", "cpp", "data-oriented-design", "c99",
+              "game-development", "ecs", "entity-component-system",
+              "cpp11", "ecs-framework")
     homepage = "https://github.com/SanderMertens/flecs"
     url = "https://github.com/conan-io/conan-center-index"
 
