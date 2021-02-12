@@ -16,12 +16,13 @@ on:
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
+  CONAN_REFERENCE: 'jsoncpp/1.8.3'
 
 jobs:
   jsoncpp:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'macos']
+        build: ['linux-gcc8', 'macos', 'windows-2019-release', 'windows-2019-debug']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
@@ -30,7 +31,6 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_reference: "jsoncpp/1.8.3"
           - build: 'macos'
             os: 'macos-10.15'
             deployment-target: '10.14'
@@ -39,7 +39,20 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'
-            conan_reference: "jsoncpp/1.8.3"
+          - build: 'windows-2019-release'
+            os: 'windows-2019'
+            build_types: 'Release'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MD'
+            archs: 'x86'
+          - build: 'windows-2019-debug'
+            os: 'windows-2019'
+            build_types: 'Debug'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MDd'
+            archs: 'x86'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
@@ -66,7 +79,6 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
-          CONAN_REFERENCE: ${{ matrix.conan_reference }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
