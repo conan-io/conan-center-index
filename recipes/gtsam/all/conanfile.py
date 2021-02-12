@@ -96,7 +96,7 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
-            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False #Use conan-provided geographiclib
+            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = True #Set to false to use eigen sources contained in GTSAM
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -122,7 +122,7 @@ class gtsamConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        return ["date_time", "filesystem", "serialization", "system", "timer", "thread"]
+        return ["serialization", "system", "filesystem", "thread", "date_time", "regex", "timer", "chrono"]
 
     def validate(self):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
@@ -164,12 +164,39 @@ class gtsamConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
-            self.cpp_info.system_libs = ["dbghelp"]
-        # GTSAM only needs a subset of boost, so we manually specify the requirements list.
-        self.cpp_info.requires = ["eigen::eigen", "boost::serialization", "boost::filesystem", "boost::system", "boost::timer", "boost::thread", "boost::date_time"]
-        if self.options.with_TBB:
-            self.cpp_info.requires.append("tbb::tbb")
+
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
+
+        self.cpp_info.components["libgtsam"].libs = ["gtsam"]
+        self.cpp_info.components["libgtsam"].names["cmake_find_package"] = "gtsam"
+        self.cpp_info.components["libgtsam"].names["cmake_find_package_multi"] = "gtsam"
+        self.cpp_info.components["libgtsam"].names["pkg_config"] = "gtsam"
+        self.cpp_info.components["libgtsam"].requires = ["boost::{}".format(component) for component in self._required_boost_components]
+        self.cpp_info.components["libgtsam"].requires.append("eigen::eigen")
+        if self.options.with_TBB:
+            self.cpp_info.components["libgtsam"].requires.append("tbb::tbb")
+        if self.options.support_nested_dissection:
+            self.cpp_info.components["libgtsam"].requires.append("libmetis-gtsam")
+        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
+            self.cpp_info.components["libgtsam"].system_libs = ["dbghelp"]
+
+        if self.options.build_unstable:
+            self.cpp_info.components["libgtsam_unstable"].libs = ["gtsam_unstable"]
+            self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package"] = "gtsam_unstable"
+            self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package_multi"] = "gtsam_unstable"
+            self.cpp_info.components["libgtsam_unstable"].names["pkg_config"] = "gtsam_unstable"
+            self.cpp_info.components["libgtsam_unstable"].requires = ["libgtsam"]
+
+        if self.options.support_nested_dissection:
+            self.cpp_info.components["libmetis-gtsam"].libs = ["metis-gtsam"]
+            self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package"] = "metis-gtsam"
+            self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package_multi"] = "metis-gtsam"
+            self.cpp_info.components["libmetis-gtsam"].names["pkg_config"] = "metis-gtsam"
+
+        if self.options.install_cppunitlite:
+            self.cpp_info.components["CppUnitLite"].libs = ["CppUnitLite"]
+            self.cpp_info.components["CppUnitLite"].names["cmake_find_package"] = "CppUnitLite"
+            self.cpp_info.components["CppUnitLite"].names["cmake_find_package_multi"] = "CppUnitLite"
+            self.cpp_info.components["CppUnitLite"].names["pkg_config"] = "CppUnitLite"
+            self.cpp_info.components["CppUnitLite"].requires = ["boost::boost"]
