@@ -276,7 +276,7 @@ class OpenCVConan(ConanFile):
                       os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_subfolder, self._module_file),
-            {component["target"]:"OpenCV::{}".format(component["target"]) for component in self._opencv_components}
+            {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
         )
 
     @staticmethod
