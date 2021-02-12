@@ -28,7 +28,7 @@ The bot tries to provide all the helpful information needed to understand and re
 - failed command line (it might have failed on early stages - e.g. recipe syntax errors, or later stages, like build or test)
 - logs (contains actual output of the build process - not that some important logs like `configure.log` or `CMakeError.log` are not captured, it's just stdout/stderr)
 
-If you struggle to fix build errors yourself, you always may ask for the help, either by tagging individual users, or by adding label [Help Wanted](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22help+wanted%22).
+If you struggle to fix build errors yourself, you always may ask for the help, either by tagging individual users.
 
 ### Unexpected error
 
