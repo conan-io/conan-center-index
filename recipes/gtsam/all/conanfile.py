@@ -36,8 +36,7 @@ class gtsamConan(ConanFile):
                "build_type_postfixes": [True, False],
                "install_matlab_toolbox": [True, False],
                "install_cython_toolbox": [True, False],
-               "install_cppunitlite": [True, False],
-               "install_geographiclib": [True, False]}
+               "install_cppunitlite": [True, False]}
 
     default_options = {"shared": False,
                        "fPIC": True,
@@ -60,8 +59,7 @@ class gtsamConan(ConanFile):
                         "build_type_postfixes": True,
                         "install_matlab_toolbox": False,
                         "install_cython_toolbox": False,
-                        "install_cppunitlite": True,
-                        "install_geographiclib": False}
+                        "install_cppunitlite": True}
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
     _source_subfolder = "source_subfolder"
@@ -146,8 +144,6 @@ class gtsamConan(ConanFile):
         if self.options.with_TBB:
             self.requires("tbb/2020.3")
             self.options["tbb"].tbbmalloc = True
-        if self.options.install_geographiclib:
-            self.requires("geographiclib/1.51")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -175,7 +171,5 @@ class gtsamConan(ConanFile):
         self.cpp_info.requires = ["eigen::eigen", "boost::serialization", "boost::filesystem", "boost::system", "boost::timer", "boost::thread", "boost::date_time"]
         if self.options.with_TBB:
             self.cpp_info.requires.append("tbb::tbb")
-        if self.options.install_geographiclib:
-            self.cpp_info.requires.append("geographiclib::geographiclib")
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
