@@ -165,7 +165,6 @@ class gtsamConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
 
