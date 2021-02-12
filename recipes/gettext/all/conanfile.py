@@ -72,7 +72,7 @@ class GetTextConan(ConanFile):
         build = None
         host = None
         rc = None
-        args.extend(["--disable-shared", "--disable-static"])
+        args.extend(["--disable-shared", "--enable-static"])
         if self._is_msvc:
             # INSTALL.windows: Native binaries, built using the MS Visual C/C++ tool chain.
             build = False
