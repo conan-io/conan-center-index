@@ -42,7 +42,7 @@ So, what to do once `Unexpected error` was encountered? You may consider re-runn
 - close pull request, wait 15 seconds, re-open pull request
 
 Sometimes it's necessary to restart the build several times.
-If an `Unexpected error` persists, you may assign an [Infrastructure](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3ADocs+label%3Ainfrastructure) label and tag [@jgsogo](https://github.com/jgsogo) and [@danimtb](https://github.com/danimtb) asking for the help with CI.
+If an `Unexpected error` persists, tag [@jgsogo](https://github.com/jgsogo) and [@danimtb](https://github.com/danimtb) asking for the help with CI.
 Alternatively, just [open a new issue](https://github.com/conan-io/conan-center-index/issues/new/choose).
 
 ## avoiding conflicts
