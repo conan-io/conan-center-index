@@ -68,4 +68,7 @@ class NormConan(ConanFile):
             self.cpp_info.system_libs = [
                 "ws2_32", "iphlpapi", "user32", "gdi32", "Advapi32", "ntdll"]
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread", "rt"]
+            self.cpp_info.system_libs = ["dl", "rt"]
+            
+        if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
+            self.cpp_info.system_libs.append("pthread")
