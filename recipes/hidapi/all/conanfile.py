@@ -20,7 +20,7 @@ class HidapiConan(ConanFile):
         "minosx": 10.7, 
         "fPIC": True, 
         "with_libusb": False,
-        "shared": True,
+        "shared": False,
         "enable_udev": True
     }
     _autotools = None
