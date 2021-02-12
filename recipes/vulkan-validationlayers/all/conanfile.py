@@ -122,8 +122,7 @@ class VulkanValidationLayersConan(ConanFile):
             os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
-        if not tools.is_apple_os(self.settings.os):
-            self.cpp_info.libs = ["VkLayer_utils"]
+        self.cpp_info.libs = ["VkLayer_utils"]
 
         manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
