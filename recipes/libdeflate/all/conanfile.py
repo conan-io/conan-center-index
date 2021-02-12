@@ -28,6 +28,11 @@ class LibdeflateConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -44,7 +49,7 @@ class LibdeflateConan(ConanFile):
 
     @property
     def _make_program(self):
-        return tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
+        return tools.unix_path(tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make")))
 
     def _build_make(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "-O2", "")
@@ -57,7 +62,7 @@ class LibdeflateConan(ConanFile):
                 else:
                     suffix = ".so" if self.options.shared else ".a"
                 target = "libdeflate{}".format(suffix)
-                self.run("{0} -f Makefile {1}".format(self._make_program, target))
+                self.run("{0} -f Makefile {1}".format(self._make_program, target), win_bash=tools.os_info.is_windows)
 
     def build(self):
         if self.settings.compiler == "Visual Studio":

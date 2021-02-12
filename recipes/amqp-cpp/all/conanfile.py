@@ -45,7 +45,7 @@ class AmqpcppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -58,7 +58,7 @@ class AmqpcppConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):

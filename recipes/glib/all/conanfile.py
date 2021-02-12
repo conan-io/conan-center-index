@@ -48,6 +48,8 @@ class GLibConan(ConanFile):
                 "glib can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
+        if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
+            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")        
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,7 +60,7 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.1")
+        self.build_requires("meson/0.56.2")
         self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
@@ -96,6 +98,10 @@ class GLibConan(ConanFile):
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
         defs["tests"] = "false"
+
+        if tools.Version(self.version) >= "2.67.0":
+            defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
+
         meson.configure(
             source_folder=self._source_subfolder,
             args=["--wrap-mode=nofallback"],
@@ -242,8 +248,9 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gio-2.0"].system_libs.append("dl")
         self.cpp_info.components["gio-2.0"].requires.extend(
             ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
@@ -276,10 +283,11 @@ class GLibConan(ConanFile):
             self.package_folder, "bin", "glib-compile-schemas"
         )
 
-        self.cpp_info.components["gresource"].libs = []  # this is actualy an executable
-        self.cpp_info.components["gresource"].requires.append(
-            "libelf::libelf"
-        )  # this is actualy an executable
+        self.cpp_info.components["gresource"].libs = []  # this is actually an executable
+        if self.options.get_safe("with_elf", True):
+            self.cpp_info.components["gresource"].requires.append(
+                "libelf::libelf"
+            )  # this is actually an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
