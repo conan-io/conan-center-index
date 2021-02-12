@@ -45,6 +45,8 @@ class ZmqppConan(ConanFile):
         else:
             replacement = "main: $(LIBRARY_ARCHIVE)"
         tools.replace_in_file("source_subfolder/Makefile", "main: $(LIBRARY_SHARED) $(LIBRARY_ARCHIVE)", replacement)
+        # zmpqq Makefile uses standard compiler variable names, and libsodium is used by zmq, required by linker on macOS
+        tools.replace_in_file("source_subfolder/Makefile", "COMMON_LIBS = -lzmq", "COMMON_LIBS = -lzmq -lsodium")
 
     def validate(self):
         compiler = self.settings.compiler
@@ -52,8 +54,8 @@ class ZmqppConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
         #TODO: it builds on local macOS with " -o *:shared=[True|False]"
-        if self.settings.compiler == "apple-clang" and self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Apple macOS is not supported yet") 
+        #if self.settings.compiler == "apple-clang" and self.settings.os == "Macos":
+        #    raise ConanInvalidConfiguration("Apple macOS is not supported yet") 
 
         # libstdc++11 is required
         if self.settings.compiler == "Visual Studio":
