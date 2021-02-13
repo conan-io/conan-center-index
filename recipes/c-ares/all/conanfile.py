@@ -49,6 +49,7 @@ class CAresConan(ConanFile):
         self._cmake.definitions["CARES_SHARED"] = self.options.shared
         self._cmake.definitions["CARES_BUILD_TESTS"] = "OFF"
         self._cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = "OFF"
+        self._cmake.definitions["CARES_BUILD_TOOLS"] = "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
