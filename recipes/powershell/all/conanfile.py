@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class PowershellConan(ConanFile):
     name = "powershell"
@@ -43,6 +45,7 @@ class PowershellConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="bin", src=self._source_subfolder, keep_path=True, symlinks=True)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         self._fix_permissions()
 
     def _fix_permissions(self):
