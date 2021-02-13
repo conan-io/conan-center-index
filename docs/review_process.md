@@ -6,6 +6,17 @@ CCI tries to make process as smooth and simple as possible for the contributors,
 but it requires complicated logic under the hood, and sometimes the logic might not look that obvious for the newcomers, 
 so this document intends to describe the internal process in detail.
 
+<!-- toc -->
+## Contents
+
+  * [conan-center-bot](#conan-center-bot)
+  * [Green Build](#green-build)
+  * [Unexpected error](#unexpected-error)
+  * [Avoiding Conflicts](#avoiding-conflicts)
+  * [Draft](#draft)
+  * [Getting PR Reviewed](#getting-pr-reviewed)
+  * [Automatic Merges](#automatic-merges)<!-- endToc -->
+  
 ## [conan-center-bot](https://github.com/conan-center-bot)
 
 In general, reviews are driven by the automated [bot](https://github.com/conan-center-bot). The bot is responsible for:
