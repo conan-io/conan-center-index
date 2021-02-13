@@ -40,7 +40,7 @@ class SobjectizerConan(ConanFile):
         minimal_version = {
             "gcc": "7",
             "clang": "6",
-            "apple-clang": "8",
+            "apple-clang": "10",
             "Visual Studio": "15"
         }
         compiler = str(self.settings.compiler)
