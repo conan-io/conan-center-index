@@ -1,6 +1,11 @@
 from conans import ConanFile, CMake, tools
 import os, shutil
 
+def merge_dicts_for_sdk(a, b):
+    res = a.copy()
+    res.update(b)
+    return res
+
 class AwsSdkCppConan(ConanFile):
     name = "aws-sdk-cpp"
     license = "Apache-2.0"
@@ -10,17 +15,159 @@ class AwsSdkCppConan(ConanFile):
     topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-
-    options = {
+    sdks = ("access-management",
+            "acm",
+            "alexaforbusiness"
+            "amplify"
+            "apigateway",
+            "application-autoscaling",
+            "appstream",
+            "appsync",
+            "athena",
+            "autoscaling",
+            "batch",
+            "budgets",
+            "chime",
+            "cloud9",
+            "clouddirectory",
+            "cloudformation",
+            "cloudfront",
+            "cloudhsmv2",
+            "cloudsearch",
+            "cloudtrail",
+            "codebuild",
+            "codecommit",
+            "codedeploy",
+            "codepipeline",
+            "codestar",
+            "cognito-identity",
+            "cognito-idp",
+            "cognito-sync",
+            "comprehend",
+            "config",
+            "cur",
+            "datapipeline",
+            "dax",
+            "devicefarm",
+            "directconnect",
+            "discovery",
+            "dlm",
+            "dms",
+            "docdb",
+            "ds",
+            "dynamodb",
+            "dynamodbstreams",
+            "ec2",
+            "ecr",
+            "ecs",
+            "eks",
+            "elasticache",
+            "elasticbeanstalk",
+            "elasticfilesystem",
+            "elasticloadbalancing",
+            "elasticloadbalancingv2",
+            "elasticmapreduce",
+            "elastictranscoder",
+            "email",
+            "es",
+            "events",
+            "firehose",
+            "fms",
+            "fsx",
+            "gamelift",
+            "glacier",
+            "globalaccelerator",
+            "glue",
+            "greengrass",
+            "guardduty",
+            "health",
+            "iam",
+            "identity-management",
+            "importexport",
+            "inspector",
+            "iot-data",
+            "iot-jobs-data",
+            "iot",
+            "kafka",
+            "kinesis",
+            "kinesisanalytics",
+            "kinesisvideo",
+            "kms",
+            "lambda",
+            "lex",
+            "lightsail",
+            "logs",
+            "machinelearnings",
+            "macie",
+            "marketplace-entitlement",
+            "marketplacecommerceanalytics",
+            "mediaconvert",
+            "medialive",
+            "mediapackage",
+            "mediastore",
+            "mediatailor",
+            "meteringmarketplace",
+            "mobileanalytics",
+            "monitoring",
+            "mq",
+            "mturk-requester",
+            "neptune",
+            "opsworks",
+            "opsworkscm",
+            "organizations",
+            "pinpoint",
+            "polly",
+            "pricing",
+            "queues",
+            "quicksight",
+            "ram",
+            "rds",
+            "redshift",
+            "recognition",
+            "resource-groups",
+            "robomaker"
+            "route53",
+            "route53domains",
+            "s3",
+            "sagemaker",
+            "sdb",
+            "serverlessrepo"
+            "servicecatalog",
+            "servicediscovery",
+            "shield",
+            "signer",
+            "sms",
+            "snowball",
+            "sns",
+            "sqs",
+            "ssm",
+            "states",
+            "storagegateway",
+            "sts",
+            "support",
+            "swf",
+            "text-to-speech",
+            "texttract",
+            "transcribe",
+            "transfer",
+            "translate",
+            "waf",
+            "workdocs",
+            "worklink",
+            "workmail",
+            "workspaces",
+            "xray"
+           )
+    options = merge_dicts_for_sdk({ x: [True, False] for x in sdks}, {
             "shared": [True, False],
             "fPIC": [True, False],
             "min_size": [True, False]
-        }
-    default_options = {
+        })
+    default_options = merge_dicts_for_sdk({ x: False for x in sdks}, {
             "shared": False,
             "fPIC": True,
             "min_size": False
-        }
+        })
 
     _cmake = None
 
@@ -57,6 +204,12 @@ class AwsSdkCppConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
+        build_only = list([])
+        for sdk in self.sdks:
+            if getattr(self.options, sdk):
+                build_only.append(sdk)
+        self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
+
         self._cmake.definitions["BUILD_DEPS"] = False
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_TESTING"] = False
@@ -89,170 +242,27 @@ class AwsSdkCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs.extend(["aws-cpp-sdk-core", "aws-c-event-stream", "aws-c-common", "aws-checksums"])
-        sdks = ("access-management",
-                "acm",
-                "alexaforbusiness"
-                "amplify"
-                "apigateway",
-                "application-autoscaling",
-                "appstream",
-                "appsync",
-                "athena",
-                "autoscaling",
-                "batch",
-                "budgets",
-                "chime",
-                "cloud9",
-                "clouddirectory",
-                "cloudformation",
-                "cloudfront",
-                "cloudhsmv2",
-                "cloudsearch",
-                "cloudtrail",
-                "codebuild",
-                "codecommit",
-                "codedeploy",
-                "codepipeline",
-                "codestar",
-                "cognito-identity",
-                "cognito-idp",
-                "cognito-sync",
-                "comprehend",
-                "config",
-                "cur",
-                "datapipeline",
-                "dax",
-                "devicefarm",
-                "directconnect",
-                "discovery",
-                "dlm",
-                "dms",
-                "docdb",
-                "ds",
-                "dynamodb",
-                "dynamodbstreams",
-                "ec2",
-                "ecr",
-                "ecs",
-                "eks",
-                "elasticache",
-                "elasticbeanstalk",
-                "elasticfilesystem",
-                "elasticloadbalancing",
-                "elasticloadbalancingv2",
-                "elasticmapreduce",
-                "elastictranscoder",
-                "email",
-                "es",
-                "events",
-                "firehose",
-                "fms",
-                "fsx",
-                "gamelift",
-                "glacier",
-                "globalaccelerator",
-                "glue",
-                "greengrass",
-                "guardduty",
-                "health",
-                "iam",
-                "identity-management",
-                "importexport",
-                "inspector",
-                "iot-data",
-                "iot-jobs-data",
-                "iot",
-                "kafka",
-                "kinesis",
-                "kinesisanalytics",
-                "kinesisvideo",
-                "kms",
-                "lambda",
-                "lex",
-                "lightsail",
-                "logs",
-                "machinelearnings",
-                "macie",
-                "marketplace-entitlement",
-                "marketplacecommerceanalytics",
-                "mediaconvert",
-                "medialive",
-                "mediapackage",
-                "mediastore",
-                "mediatailor",
-                "meteringmarketplace",
-                "mobileanalytics",
-                "monitoring",
-                "mq",
-                "mturk-requester",
-                "neptune",
-                "opsworks",
-                "opsworkscm",
-                "organizations",
-                "pinpoint",
-                "polly",
-                "pricing",
-                "queues",
-                "quicksight",
-                "ram",
-                "rds",
-                "redshift",
-                "recognition",
-                "resource-groups",
-                "robomaker"
-                "route53",
-                "route53domains",
-                "s3",
-                "sagemaker",
-                "sdb",
-                "serverlessrepo"
-                "servicecatalog",
-                "servicediscovery",
-                "shield",
-                "signer",
-                "sms",
-                "snowball",
-                "sns",
-                "sqs",
-                "ssm",
-                "states",
-                "storagegateway",
-                "sts",
-                "support",
-                "swf",
-                "text-to-speech",
-                "texttract",
-                "transcribe",
-                "transfer",
-                "translate",
-                "waf",
-                "workdocs",
-                "worklink",
-                "workmail",
-                "workspaces",
-                "xray"
-               )
-        for sdk in self.sdks:
-            self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
-            self.cpp_info.components[sdk].includedirs = ["aws-cpp-sdk-" + sdk + "/include"]
-
+        self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = [
                 "aws-c-common::aws-c-common-lib",
                 "aws-c-event-stream::aws-c-event-stream-lib",
                 "zlib::zlib",
                 ]
 
+        for sdk in self.sdks:
+            if getattr(self.options, sdk):
+                self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
+
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
         else:
-            self.cpp_info.components["core"].requires.append("libcurl/7.71.1")
+            self.cpp_info.components["core"].requires.append("libcurl::curl")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.append("atomic")
 
         if not self.settings.os in ["Windows", "Macos"]:
-            self.requires("openssl/1.1.1i")
+            self.cpp_info.components["core"].requires.extend(["openssl::ssl", "openssl::crypto"])
 
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
