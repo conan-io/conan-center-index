@@ -1,0 +1,18 @@
+sources:
+  "7.1.2":
+    url:
+      "Windows":
+        "x86": "https://github.com/PowerShell/PowerShell/releases/download/v7.1.2/PowerShell-7.1.2-win-x86.zip"
+        "x86_64": "https://github.com/PowerShell/PowerShell/releases/download/v7.1.2/PowerShell-7.1.2-win-x64.zip"
+      "Linux":
+        "x86_64": "https://github.com/PowerShell/PowerShell/releases/download/v7.1.2/powershell-7.1.2-linux-x64.tar.gz"
+      "Macos":
+        "x86_64": "https://github.com/PowerShell/PowerShell/releases/download/v7.1.2/powershell-7.1.2-osx-x64.tar.gz"
+    sha256:
+      "Windows":
+        "x86": "63b96dfa3e31b6d885ac21b8df427f1cd2cd747916db5873a120855f1829dc81"
+        "x86_64": "d32856f3406670fa8c3903f33004810fe5c1e568210e8933a22017cee60d38c7"
+      "Linux":
+        "x86_64": "d487ee61c446b168a2773da84b4ce9a4121c1c8f8bc7305de0cb2e080cc705f1"
+      "Macos":
+        "x86_64": "21a5547fa5e46856275c8269866cc0537700a5153813f1d21340c743461d3a12"
