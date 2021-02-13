@@ -1,11 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os, shutil
 
-def merge_dicts_for_sdk(a, b):
-    res = a.copy()
-    res.update(b)
-    return res
-
 class AwsSdkCppConan(ConanFile):
     name = "aws-sdk-cpp"
     license = "Apache-2.0"
@@ -158,16 +153,22 @@ class AwsSdkCppConan(ConanFile):
             "workspaces",
             "xray"
            )
-    options = merge_dicts_for_sdk({ x: [True, False] for x in sdks}, {
-            "shared": [True, False],
-            "fPIC": [True, False],
-            "min_size": [True, False]
-        })
-    default_options = merge_dicts_for_sdk({ x: False for x in sdks}, {
-            "shared": False,
-            "fPIC": True,
-            "min_size": False
-        })
+    options = {
+            **{ x: [True, False] for x in sdks},
+            **{
+                "shared": [True, False],
+                "fPIC": [True, False],
+                "min_size": [True, False],
+                }
+            }
+    default_options = {
+            **{ x: False for x in sdks},
+            **{
+                "shared": False,
+                "fPIC": True,
+                "min_size": False
+                }
+            }
 
     _cmake = None
 
