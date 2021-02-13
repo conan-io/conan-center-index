@@ -36,7 +36,8 @@ class gtsamConan(ConanFile):
                "build_type_postfixes": [True, False],
                "install_matlab_toolbox": [True, False],
                "install_cython_toolbox": [True, False],
-               "install_cppunitlite": [True, False]}
+               "install_cppunitlite": [True, False],
+               "install_geographiclib": [True, False, "depreacted"]}
 
     default_options = {"shared": False,
                        "fPIC": True,
@@ -59,7 +60,9 @@ class gtsamConan(ConanFile):
                         "build_type_postfixes": True,
                         "install_matlab_toolbox": False,
                         "install_cython_toolbox": False,
-                        "install_cppunitlite": True}
+                        "install_cppunitlite": True,
+                        "install_geographiclib": "deprecated"}
+
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
@@ -131,6 +134,8 @@ class gtsamConan(ConanFile):
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
                 raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
+        if self.options.install_geographiclib != "deprecated":
+            self.output.warn("install_geographiclib option is deprecated (GTSAM doesn't use geographiclib). If you want it add is a requirement in your project")
 
     def requirements(self):
         self.requires("boost/1.75.0")
@@ -156,6 +161,9 @@ class gtsamConan(ConanFile):
         self.copy("LICENSE.BSD", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
+
+    def package_id(self):
+        del self.info.options.install_geographiclib
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
