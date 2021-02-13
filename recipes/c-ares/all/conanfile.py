@@ -38,7 +38,6 @@ class CAresConan(ConanFile):
                 self.options.with_tools = False    
 
     def configure(self):
-        print( f'[configure] with_tools option: {self.options.with_tools}')
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
