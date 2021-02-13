@@ -29,6 +29,10 @@ class SobjectizerConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
