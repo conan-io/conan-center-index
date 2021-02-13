@@ -168,7 +168,7 @@ class gtsamConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
 
-        self.cpp_info.components["libgtsam"].libs = ["gtsam"]
+        self.cpp_info.components["libgtsam"].libs = ["libgtsam" if self.settings.os == "Windows" and not self.settings.shared else "gtsam"]
         self.cpp_info.components["libgtsam"].names["cmake_find_package"] = "gtsam"
         self.cpp_info.components["libgtsam"].names["cmake_find_package_multi"] = "gtsam"
         self.cpp_info.components["libgtsam"].names["pkg_config"] = "gtsam"
@@ -182,14 +182,14 @@ class gtsamConan(ConanFile):
             self.cpp_info.components["libgtsam"].system_libs = ["dbghelp"]
 
         if self.options.build_unstable:
-            self.cpp_info.components["libgtsam_unstable"].libs = ["gtsam_unstable"]
+            self.cpp_info.components["libgtsam_unstable"].libs = ["libgtsam_unstable" if self.settings.os == "Windows" and not self.settings.shared else "gtsam_unstable"]
             self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package"] = "gtsam_unstable"
             self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package_multi"] = "gtsam_unstable"
             self.cpp_info.components["libgtsam_unstable"].names["pkg_config"] = "gtsam_unstable"
             self.cpp_info.components["libgtsam_unstable"].requires = ["libgtsam"]
 
         if self.options.support_nested_dissection:
-            self.cpp_info.components["libmetis-gtsam"].libs = ["metis-gtsam"]
+            self.cpp_info.components["libmetis-gtsam"].libs = ["libmetis-gtsam" if self.settings.os == "Windows" and not self.settings.shared else "metis-gtsam"]
             self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package"] = "metis-gtsam"
             self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package_multi"] = "metis-gtsam"
             self.cpp_info.components["libmetis-gtsam"].names["pkg_config"] = "metis-gtsam"
