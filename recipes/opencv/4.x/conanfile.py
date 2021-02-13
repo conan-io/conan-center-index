@@ -89,7 +89,7 @@ class OpenCVConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.24")
+            self.requires("jasper/2.0.25")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.4.0")
         if self.options.with_png:
@@ -283,62 +283,33 @@ class OpenCVConan(ConanFile):
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
             os.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
                       os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
+        )
 
-    def package_info(self):
-        version = self.version.split(".")
-        version = "".join(version) if self.settings.os == "Windows" else ""
-        debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += (
+                "if(TARGET {aliased} AND NOT TARGET {alias})\n"
+                "    add_library({alias} INTERFACE IMPORTED)\n"
+                "    target_link_libraries({alias} INTERFACE {aliased})\n"
+                "endif()\n"
+            ).format(alias=alias, aliased=aliased)
+        tools.save(module_file, content)
 
-        def get_lib_name(module):
-            prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
-            return "%s%s%s%s" % (prefix, module, version, debug)
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
 
-        def add_components(components):
-            # TODO: OpenCV doesn't use cmake target namespace
-            for component in components:
-                conan_component = component["target"]
-                cmake_target = component["target"]
-                lib_name = get_lib_name(component["lib"])
-                requires = component["requires"]
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[conan_component].libs = [lib_name]
-                self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
-                self.cpp_info.components[conan_component].requires = requires
-                if self.settings.os == "Linux":
-                    self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
 
-                if self.settings.os == "Android":
-                    self.cpp_info.components[conan_component].includedirs = [
-                        os.path.join("sdk", "native", "jni", "include")]
-                    self.cpp_info.components[conan_component].system_libs.append("log")
-                    if int(str(self.settings.os.api_level)) > 20:
-                        self.cpp_info.components[conan_component].system_libs.append("mediandk")
-                    if not self.options.shared:
-                        self.cpp_info.components[conan_component].libdirs.append(
-                            os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
-                        if conan_component == "opencv_core":
-                            self.cpp_info.components[conan_component].libdirs.append("lib")
-                            self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
-
-                if self.settings.os == "iOS":
-                    if not self.options.shared:
-                        if conan_component == "opencv_core":
-                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
-                            self.cpp_info.components[conan_component].libs += libs
-
-                # CMake components names
-                conan_component_alias = conan_component + "_alias"
-                cmake_component = component["lib"]
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
-                self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                self.cpp_info.components[conan_component_alias].includedirs.append(os.path.join("include", "opencv4"))
-                self.cpp_info.components[conan_component_alias].libdirs = []
-                self.cpp_info.components[conan_component_alias].resdirs = []
-                self.cpp_info.components[conan_component_alias].bindirs = []
-                self.cpp_info.components[conan_component_alias].frameworkdirs = []
-
+    @property
+    def _opencv_components(self):
         def imageformats_deps():
             components = []
             if self.options.with_jpeg2000:
@@ -375,10 +346,7 @@ class OpenCVConan(ConanFile):
         def xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib else []
 
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
-
-        add_components([
+        opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + parallel() + eigen()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + eigen()},
@@ -392,10 +360,9 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc()},
             {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
-        ])
-
+        ]
         if self.options.contrib:
-            add_components([
+            opencv_components.extend([
                 {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_phase_unwrapping",    "lib": "phase_unwrapping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_plot",                "lib": "plot",                "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
@@ -434,6 +401,69 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen()},
             ])
+        return opencv_components
+
+    def package_info(self):
+        version = self.version.split(".")
+        version = "".join(version) if self.settings.os == "Windows" else ""
+        debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
+
+        def get_lib_name(module):
+            prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
+            return "%s%s%s%s" % (prefix, module, version, debug)
+
+        def add_components(components):
+            for component in components:
+                conan_component = component["target"]
+                cmake_target = component["target"]
+                lib_name = get_lib_name(component["lib"])
+                requires = component["requires"]
+                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
+                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[conan_component].builddirs = [self._module_subfolder]
+                self.cpp_info.components[conan_component].build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+                self.cpp_info.components[conan_component].libs = [lib_name]
+                self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
+                self.cpp_info.components[conan_component].requires = requires
+                if self.settings.os == "Linux":
+                    self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+
+                if self.settings.os == "Android":
+                    self.cpp_info.components[conan_component].includedirs = [
+                        os.path.join("sdk", "native", "jni", "include")]
+                    self.cpp_info.components[conan_component].system_libs.append("log")
+                    if int(str(self.settings.os.api_level)) > 20:
+                        self.cpp_info.components[conan_component].system_libs.append("mediandk")
+                    if not self.options.shared:
+                        self.cpp_info.components[conan_component].libdirs.append(
+                            os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
+                        if conan_component == "opencv_core":
+                            self.cpp_info.components[conan_component].libdirs.append("lib")
+                            self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
+
+                if self.settings.os == "iOS":
+                    if not self.options.shared:
+                        if conan_component == "opencv_core":
+                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
+                            self.cpp_info.components[conan_component].libs += libs
+
+                # CMake components names
+                cmake_component = component["lib"]
+                if cmake_component != cmake_target:
+                    conan_component_alias = conan_component + "_alias"
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                    self.cpp_info.components[conan_component_alias].includedirs.append(os.path.join("include", "opencv4"))
+                    self.cpp_info.components[conan_component_alias].libdirs = []
+                    self.cpp_info.components[conan_component_alias].resdirs = []
+                    self.cpp_info.components[conan_component_alias].bindirs = []
+                    self.cpp_info.components[conan_component_alias].frameworkdirs = []
+
+        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
+
+        add_components(self._opencv_components)
 
         if self.settings.os == "Windows":
             self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
