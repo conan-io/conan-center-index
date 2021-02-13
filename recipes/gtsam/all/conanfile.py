@@ -37,7 +37,7 @@ class gtsamConan(ConanFile):
                "install_matlab_toolbox": [True, False],
                "install_cython_toolbox": [True, False],
                "install_cppunitlite": [True, False],
-               "install_geographiclib": [True, False, "depreacted"]}
+               "install_geographiclib": [True, False, "deprecated"]}
 
     default_options = {"shared": False,
                        "fPIC": True,
