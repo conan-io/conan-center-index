@@ -237,12 +237,23 @@ class AwsSdkCppConan(ConanFile):
             self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
             self.cpp_info.components[sdk].includedirs = ["aws-cpp-sdk-" + sdk + "/include"]
 
+        self.cpp_info.components["core"].requires = [
+                "aws-c-common::aws-c-common-lib",
+                "aws-c-event-stream::aws-c-event-stream-lib",
+                "zlib::zlib",
+                ]
+
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
+            self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
+        else:
+            self.cpp_info.components["core"].requires.append("libcurl/7.71.1")
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("atomic")
+            self.cpp_info.components["core"].system_libs.append("atomic")
+
+        if not self.settings.os in ["Windows", "Macos"]:
+            self.requires("openssl/1.1.1i")
 
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
-            self.cpp_info.system_libs.append(lib_stdcpp)
+            self.cpp_info.components["core"].system_libs.append(lib_stdcpp)
