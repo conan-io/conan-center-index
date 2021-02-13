@@ -12,7 +12,7 @@ class CAresConan(ConanFile):
     topics = ("conan", "c-ares", "dns")
     homepage = "https://c-ares.haxx.se/"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_tools": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -31,7 +31,14 @@ class CAresConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.options.with_tools == None:
+            if self.settings.os == "Windows":
+                self.options.with_tools = True
+            else:
+                self.options.with_tools = False    
+
     def configure(self):
+        print( f'[configure] with_tools option: {self.options.with_tools}')
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
