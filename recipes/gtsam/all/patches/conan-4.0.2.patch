@@ -59,7 +59,7 @@ diff --color -ruN CMakeLists.txt CMakeLists.txt
 -  debug ${Boost_REGEX_LIBRARY_DEBUG}
 +  Boost::serialization
 +  Boost::system
-+  Boost:filesystem
++  Boost::filesystem
 +  Boost::thread
 +  Boost::date_time
 +  Boost::regex
