@@ -60,8 +60,8 @@ class gtsamConan(ConanFile):
                         "install_matlab_toolbox": False,
                         "install_cython_toolbox": False,
                         "install_cppunitlite": True}
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -102,18 +102,11 @@ class gtsamConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def _patch_sources(self): #Needed to build GTSam as a subproject using the conan CMake Wrapper.
-        for cmake in (os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "wrap", "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "cmake", "GtsamPythonWrap.cmake")):
-            tools.replace_in_file(cmake,
-                                  "${CMAKE_SOURCE_DIR}",
-                                  "${GTSAM_SOURCE_DIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
-                              "${CMAKE_BINARY_DIR}",
-                              "${GTSAM_BINARY_DIR}")
-        if self.settings.os == "Windows": #compiler.runtime field only exists on Windows
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        # compiler.runtime field only exists on Windows therefore we patch it on the recipe
+        if self.settings.os == "Windows":
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MD ",
                                   "/{} ".format(self.settings.compiler.runtime))
