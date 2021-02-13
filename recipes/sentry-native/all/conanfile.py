@@ -49,6 +49,8 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
+        if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
+            raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
 
     def requirements(self):
         if self.options.transport == "curl":
@@ -99,7 +101,10 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shlwapi", "dbghelp"]
+            if tools.Version(self.version) >= "0.4.7":
+                self.cpp_info.system_libs.append("Version")
             if self.options.transport == "winhttp":
                 self.cpp_info.system_libs.append("winhttp")
+            
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
