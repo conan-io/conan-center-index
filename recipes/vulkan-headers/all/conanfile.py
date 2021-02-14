@@ -34,6 +34,16 @@ class VulkanHeadersConan(ConanFile):
                        src=os.path.join(self.source_folder, self._source_subfolder, "registry"))
 
     def package_info(self):
-        # TODO: CMake Target should be Vulkan::Headers
-        self.cpp_info.names["cmake_find_package"] = "VulkanHeaders"
-        self.cpp_info.names["cmake_find_package_multi"] = "VulkanHeaders"
+        self.cpp_info.filenames["cmake_find_package"] = "VulkanHeaders"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "VulkanHeaders"
+        self.cpp_info.names["cmake_find_package"] = "Vulkan"
+        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
+        self.cpp_info.components["vulkanheaders"].names["cmake_find_package"] = "Headers"
+        self.cpp_info.components["vulkanheaders"].names["cmake_find_package_multi"] = "Headers"
+        self.cpp_info.components["vulkanheaders"].bindirs = []
+        self.cpp_info.components["vulkanheaders"].libdirs = []
+        self.cpp_info.components["vulkanregistry"].names["cmake_find_package"] = "Registry"
+        self.cpp_info.components["vulkanregistry"].names["cmake_find_package_multi"] = "Registry"
+        self.cpp_info.components["vulkanregistry"].includedirs = [os.path.join("res", "vulkan", "registry")]
+        self.cpp_info.components["vulkanregistry"].bindirs = []
+        self.cpp_info.components["vulkanregistry"].libdirs = []
