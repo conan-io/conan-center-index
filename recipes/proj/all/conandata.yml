@@ -41,6 +41,8 @@ patches:
   "7.0.0":
     - patch_file: "patches/fix-build-gcc-lessthan-5.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/support-libtiff-gt-410.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/fix-cmake-include-dir.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/use-cmake-targets-7.0.x.patch"

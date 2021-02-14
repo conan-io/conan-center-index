@@ -93,6 +93,7 @@ class BoostConan(ConanFile):
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
+        "visibility": ["global", "protected", "hidden"],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -122,6 +123,7 @@ class BoostConan(ConanFile):
         "pch": True,
         "extra_b2_flags": "None",
         "i18n_backend": "iconv",
+        "visibility": "hidden",
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -370,10 +372,10 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
 
         if self._with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
         elif self._with_iconv:
             self.requires("libiconv/1.16")
 
@@ -610,7 +612,7 @@ class BoostConan(ConanFile):
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
                 command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
-                if self.options.debug_level:
+                if "debug_level" in self.options:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command, run_environment=True)
@@ -780,6 +782,7 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
+            flags.append("--disable-icu")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
             flags.append("--disable-icu --disable-iconv")
@@ -803,6 +806,7 @@ class BoostConan(ConanFile):
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
+        flags.append("visibility=%s" % self.options.visibility)
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
@@ -867,15 +871,16 @@ class BoostConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
                 cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                    self.settings.os.version))
+                                                                    self.settings.get_safe("os.version"),
+                                                                    self.settings.get_safe("os.sdk"),
+                                                                    self.settings.get_safe("os.subsystem"),
+                                                                    self.settings.get_safe("arch")))
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
                 cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
 
-            cxx_flags.append("-fvisibility=hidden")
-            cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
@@ -903,7 +908,7 @@ class BoostConan(ConanFile):
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
                       "--abbreviate-paths"])
-        if self.options.debug_level:
+        if "debug_level" in self.options:
             flags.append("-d%d" % self.options.debug_level)
         return flags
 

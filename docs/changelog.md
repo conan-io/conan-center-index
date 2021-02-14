@@ -1,5 +1,24 @@
 # Changelog
 
+### 05-February-2021 - 13:20 CET
+
+ - [job] New job to upgrade Conan version (Windows and Macos workers) #566
+ - [job] New job to validate infrastructure: versions of tools, installed components,... (more checks to be added) #609
+ - [feature] Call external DeleteRepo job to remove repositories from Artifactory after a pull-request is merged #605
+ - [feature] New workflow for pull-requests: use `BuildSingleReference` job and better messages (canary deployment) #602
+ - [engineering] Refactor functions to retrieve information from GitHub API #607
+
+### 27-January-2021 - 09:37 CET
+
+- Feature: PropulateProperties: Notify alert error if there are orphan packages, but keep going #577
+- Feature: Capture output and exit code running Conan commands #578
+- Feature: New job to delete an Artifactory repo #575
+- Fix: AutomaticMerge: Fix alerts when there are no errors #576
+- Fix: PopulateProperties: Do not raise if a property assignment fails, go with the next one #586
+- Fix: Improve packages generated message #579
+- Fix: BuildSingleReference: Add boolean parameter to configure hooks errors #592
+- Fix: Handle scenario where a package doesn't have properties (#603)
+
 ### 30-December-2020 - 13:24 CET
 
 - [feature] BuildSingleReference: Run tests for packages that already exist.

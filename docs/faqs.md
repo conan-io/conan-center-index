@@ -1,7 +1,23 @@
 # FAQs
 
-
 This section gathers the most common questions from the community related to packages and usability of this repository.
+
+<!-- toc -->
+## Contents
+
+  * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
+  * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
+  * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
+  * [Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?](#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
+  * [Are python requires allowed in the `conan-center-index`?](#are-python-requires-allowed-in-the-conan-center-index)
+  * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
+  * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
+  * [Why not x86 binaries?](#why-not-x86-binaries)
+      * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+  * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
+      * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
