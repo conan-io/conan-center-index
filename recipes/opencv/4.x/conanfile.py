@@ -26,6 +26,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": [True, False],
         "with_webp": [True, False],
         "with_gtk": [True, False],
+        "gtk_version": [2,3],
         "with_quirc": [True, False]
     }
     default_options = {
@@ -41,6 +42,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_webp": True,
         "with_gtk": True,
+        "gtk_version" : 2,
         "with_quirc": True
     }
 
@@ -226,8 +228,9 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_XINE"] = False
         self._cmake.definitions["WITH_LAPACK"] = False
 
-        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        self._cmake.definitions["WITH_GTK_2_X"] = self.options.get_safe("with_gtk", False)
+        with_gtk = self.options.get_safe("with_gtk", False)
+        self._cmake.definitions["WITH_GTK"] = with_gtk
+        self._cmake.definitions["WITH_GTK_2_X"] = with_gtk and self.options.gtk_version == 2
         self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
         self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
