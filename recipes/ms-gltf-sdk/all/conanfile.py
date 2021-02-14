@@ -3,8 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class GltfSdkConan(ConanFile):
-    name = "gltf-sdk"
+class MicrosoftGltfSdkConan(ConanFile):
+    name = "ms-gltf-sdk"
     description = "A C++ Deserializer/Serializer for glTF"
     license = "MIT"
     topics = ("conan", "gltf-sdk", "gltf", "serializer", "deserializer")
