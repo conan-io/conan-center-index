@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.32.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
