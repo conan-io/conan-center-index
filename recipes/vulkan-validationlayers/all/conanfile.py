@@ -50,12 +50,16 @@ class VulkanValidationLayersConan(ConanFile):
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def requirements(self):
-        self.requires("spirv-tools/v2020.5")
+        self.requires("spirv-tools/v2020.5", private=True)
         self.requires("vulkan-headers/{}".format(self.version))
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.18.0")
+
+    def validate(self):
+        if self.options["spirv-tools"].shared:
+            raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
