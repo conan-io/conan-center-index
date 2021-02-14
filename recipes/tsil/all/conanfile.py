@@ -29,8 +29,8 @@ class TsilConan(ConanFile):
         return "build_subfolder"
 
     def configure(self):
-        if self.settings.os == "Visual Studio":
-            raise ConanInvalidConfiguration("TSIL does not support Visual Studio")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("TSIL does not support {}".format(self.settings.compiler))
         if self.options.shared:
             del self.options.fPIC
 
