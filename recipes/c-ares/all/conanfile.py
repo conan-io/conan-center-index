@@ -30,6 +30,9 @@ class CAresConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        
+        if self.settings.os == "Windows":
+            self.options.with_tools = False
 
     def configure(self):
         print( f'[configure] with_tools option: {self.options.with_tools}')
