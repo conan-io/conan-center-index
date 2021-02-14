@@ -4,8 +4,6 @@ sources:
     sha256: "8898ab05d0d8dec04fbba03d0ed2e79a1eb5c0382e5c89d4c737b45a6648f7f9"
 patches:
   "1.2.154.0":
-    - patch_file: "patches/cmake-targets.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/duplicated-declaration.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/install-location-headers.patch"
