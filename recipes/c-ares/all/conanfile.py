@@ -35,7 +35,6 @@ class CAresConan(ConanFile):
             del self.options.with_tools
 
     def configure(self):
-        print( f'[configure] with_tools option: {self.options.with_tools}')
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -46,7 +45,6 @@ class CAresConan(ConanFile):
         os.rename("c-ares-cares-{}".format(self.version.replace(".", "_")), self._source_subfolder)
 
     def _cmake_configure(self):
-        print( f'[cmake configure] with_tools option: {self.options.with_tools}')
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
