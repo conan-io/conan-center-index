@@ -31,8 +31,8 @@ class CAresConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         
-        if self.settings.os == "Windows":
-            self.options.with_tools = False
+        if tools.cross_building(self.settings):
+            del self.options.with_tools
 
     def configure(self):
         print( f'[configure] with_tools option: {self.options.with_tools}')
@@ -54,7 +54,7 @@ class CAresConan(ConanFile):
         self._cmake.definitions["CARES_SHARED"] = self.options.shared
         self._cmake.definitions["CARES_BUILD_TESTS"] = "OFF"
         self._cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = "OFF"
-        self._cmake.definitions["CARES_BUILD_TOOLS"] = "OFF"
+        self._cmake.definitions["CARES_BUILD_TOOLS"] = self.options.get_safe("with_tools", False)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
