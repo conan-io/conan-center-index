@@ -13,7 +13,7 @@ class CAresConan(ConanFile):
     homepage = "https://c-ares.haxx.se/"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_tools": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True, "with_tools":True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
@@ -31,13 +31,8 @@ class CAresConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.options.with_tools == None:
-            if self.settings.os == "Windows":
-                self.options.with_tools = True
-            else:
-                self.options.with_tools = False    
-
     def configure(self):
+        print( f'[configure] with_tools option: {self.options.with_tools}')
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -48,6 +43,7 @@ class CAresConan(ConanFile):
         os.rename("c-ares-cares-{}".format(self.version.replace(".", "_")), self._source_subfolder)
 
     def _cmake_configure(self):
+        print( f'[cmake configure] with_tools option: {self.options.with_tools}')
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
