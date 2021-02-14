@@ -13,9 +13,16 @@ class TsilConan(ConanFile):
     description = "Two-loop Self-energy Integral Library"
     topics = ("conan", "high-energy", "physics", "hep", "two-loop", "integrals")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "TSIL_SIZE": ["TSIL_SIZE_LONG", "TSIL_SIZE_DOUBLE"]}
-    default_options = {"shared": False, "fPIC": True, "TSIL_SIZE": "TSIL_SIZE_LONG"}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "TSIL_SIZE": ["TSIL_SIZE_LONG", "TSIL_SIZE_DOUBLE"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "TSIL_SIZE": "TSIL_SIZE_LONG"
+    }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
