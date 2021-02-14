@@ -4,6 +4,8 @@ import glob
 import os
 import shutil
 
+required_conan_version = ">=1.29.1"
+
 
 class VulkanValidationLayersConan(ConanFile):
     name = "vulkan-validationlayers"
@@ -111,7 +113,8 @@ class VulkanValidationLayersConan(ConanFile):
             bin_dir = os.path.join(self.package_folder, "bin")
             lib_dir = os.path.join(self.package_folder, "lib")
             # import lib is useless, validation layer dll is loaded at runtime
-            os.remove(os.path.join(lib_dir, "VkLayer_khronos_validation.lib"))
+            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
+            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.dll.a")
             # move dll and manifest file in bin folder
             tools.mkdir(bin_dir)
             for validation_layer in glob.glob(os.path.join(lib_dir, "VkLayer_khronos_validation.*")):

@@ -6,5 +6,7 @@ patches:
   "1.2.154.0":
     - patch_file: "patches/duplicated-declaration.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-mingw.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/install-location-headers.patch"
       base_path: "source_subfolder"
