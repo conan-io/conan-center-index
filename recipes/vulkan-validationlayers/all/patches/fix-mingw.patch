@@ -21,3 +21,13 @@
      # Applies to all configurations
      add_definitions(-D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
      # Avoid: fatal error C1128: number of sections exceeded object file format limit: compile with /bigobj
+@@ -150,6 +150,9 @@ if(WIN32)
+     # that constructor initializers are now fixed to clear the struct members.
+     add_compile_options("$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,19>>:/wd4351>")
+ else()
++    if(MINGW)
++      add_compile_options("-Wa,-mbig-obj")
++    endif()
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith -Wno-unused-function -Wno-sign-compare")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpointer-arith -Wno-unused-function -Wno-sign-compare")
+ endif()
