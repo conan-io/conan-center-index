@@ -67,7 +67,7 @@ Each PR must be reviewed by several reviewers before it will be merged. It canno
 
 ### Official reviewers
 
-The list includes only official conan developers (JFrog employees):
+The list includes only official Conan developers:
 
 - [@memsharded](https://github.com/memsharded)
 - [@lasote](https://github.com/lasote)
