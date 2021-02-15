@@ -143,4 +143,4 @@ This also blocks further merges until upload is finished. It also explains why n
 [ConanCenter] doesn't directly pull the information from conan-center-index 
 repository.  Instead, it's updated by the conan center CI job as its own step. The metadata from the conan repository is 
 converted to the format the web-front-end understands and then sent to it as a scheduled update. As a result, there may occasionally be delays in updating the web-front-end.
-That may explain the fact there are moments then information is front end doesn't match the actual state on the conan center repository.
+That may explain the fact there are moments when the information showed in the frontend doesn't match the actual state on the ConanCenter repository.
