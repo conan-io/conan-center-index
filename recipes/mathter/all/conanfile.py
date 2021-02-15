@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class MathterConan(ConanFile):
@@ -8,10 +9,29 @@ class MathterConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     description = "Powerful 3D math and small-matrix linear algebra library for games and science."
     topics = ("game-dev", "linear-algebra", "vector-math", "matrix-library")
-    exports_sources = "Mathter/*"
     no_copy_source = True
-    settings = { "cppstd": ["17", "20"] }
+    settings = "compiler"
         
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": 10,
+            "clang": 6,
+            "gcc": 7,
+            "Visual Studio": 16,
+        }
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("mathter requires C++17, which your compiler does not support.")
+        else:
+            self.output.warn("mathter requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Mathter-" + self.version, "sources")
