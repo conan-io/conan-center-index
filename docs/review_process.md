@@ -80,7 +80,7 @@ The list includes only official Conan developers:
 
 ### Community reviewers
 
-The list includes conan center index contributors who are very active and proven to be trusted - they frequently submitted pull requests and provide their own useful reviews:
+The list includes conan-center-index contributors who are very active and proven to be trusted - they frequently submitted pull requests and provide their own useful reviews:
 
 - [@madebr](https://github.com/madebr)
 - [@SpaceIm](https://github.com/SpaceIm)
