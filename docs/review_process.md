@@ -65,7 +65,7 @@ Once you're done with your changes, remember to convert from "Draft" to "Normal"
 
 Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
 
-### official reviewers
+### Official reviewers
 
 The list includes only official conan developers (JFrog employees):
 
