@@ -185,7 +185,6 @@ class gtsamConan(ConanFile):
             self.cpp_info.components["libgtsam_unstable"].libs = ["libgtsam_unstable" if self.settings.os == "Windows" and not self.options.shared else "gtsam_unstable"]
             self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package"] = "gtsam_unstable"
             self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package_multi"] = "gtsam_unstable"
-            self.cpp_info.components["libgtsam_unstable"].names["pkg_config"] = "gtsam_unstable"
             self.cpp_info.components["libgtsam_unstable"].requires = ["libgtsam"]
 
         if self.options.support_nested_dissection:
