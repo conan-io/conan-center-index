@@ -10,9 +10,6 @@ class MathterTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        pass;
-
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
