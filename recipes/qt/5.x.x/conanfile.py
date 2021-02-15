@@ -705,6 +705,9 @@ Examples = bin/datadir/examples""")
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             if os.path.isfile(module):
                 self.cpp_info.build_modules.append(module)
+                self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
+            else:
+                tools.rmdir(os.path.join("lib", "cmake", m))
         self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
 
 
