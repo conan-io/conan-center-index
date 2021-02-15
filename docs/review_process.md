@@ -61,7 +61,7 @@ Obviously, PRs that have merge conflicts are never merged, and all the conflicts
 Draft pull requests are also never merged. The same applies for PRs with the `WIP` keyword (stands for `Work in Progress`) in the title - GitHub considers them drafts as well.
 Once you're done with your changes, remember to convert from "Draft" to "Normal" pull request and remove WIP keyword from the title.
 
-## getting PR reviewed
+## Getting your pull request reviewed
 
 Each PR must be reviewed by several reviewers before it will be merged. It cannot be just reviews from random people, we have two categories of reviewers:
 
