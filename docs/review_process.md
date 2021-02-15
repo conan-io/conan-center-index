@@ -121,7 +121,7 @@ PR is selected for the merge only if:
 - PR has 3 approved reviews (as described above).
 - Master build is not running already (see below)
 
-If these conditions are fullfilled, the PR is merged (associated issues are automatically closed), and then build of master is launched
+If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
 
 ### Merge
 
