@@ -37,7 +37,7 @@ The bot tries to provide all the helpful information needed to understand and re
 - Failed command line (it might have failed on early stages, like recipe syntax errors, hook errors or later stages, like build or test).
 - Logs containing the actual output of the build process (note that some logs like *configure.log* or *CMakeError.log* are not captured, only stdout/stderr).
 
-If you struggle to fix build errors yourself, you always may ask for the help, either by tagging individual users.
+If you struggle to fix build errors yourself, you may want to ask for help from other users by mentioning (`@<user>`) individual users in the pull request comments.
 
 ### Unexpected error
 
