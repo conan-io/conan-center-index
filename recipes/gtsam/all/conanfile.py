@@ -166,6 +166,7 @@ class gtsamConan(ConanFile):
         del self.info.options.install_geographiclib
 
     def package_info(self):
+        # FIXME: official imported targets are not namespaced
         self.cpp_info.names["cmake_find_package"] = "GTSAM"
         self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
 
