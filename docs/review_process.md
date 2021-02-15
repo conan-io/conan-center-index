@@ -117,7 +117,7 @@ PR is selected for the merge only if:
 - Author has signed CLA.
 - PR is not a Draft or WIP.
 - PR has a green status (successful build).
-- PR doesn't have merge conflicts with `master` branch
+- PR doesn't have merge conflicts with `master` branch.
 - PR has 3 approved reviews (rule described above)
 - master build is not running already (see below)
 
