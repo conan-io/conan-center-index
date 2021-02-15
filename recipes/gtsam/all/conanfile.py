@@ -172,7 +172,6 @@ class gtsamConan(ConanFile):
         self.cpp_info.components["libgtsam"].libs = ["libgtsam" if self.settings.os == "Windows" and not self.options.shared else "gtsam"]
         self.cpp_info.components["libgtsam"].names["cmake_find_package"] = "gtsam"
         self.cpp_info.components["libgtsam"].names["cmake_find_package_multi"] = "gtsam"
-        self.cpp_info.components["libgtsam"].names["pkg_config"] = "gtsam"
         self.cpp_info.components["libgtsam"].requires = ["boost::{}".format(component) for component in self._required_boost_components]
         self.cpp_info.components["libgtsam"].requires.append("eigen::eigen")
         if self.options.with_TBB:
