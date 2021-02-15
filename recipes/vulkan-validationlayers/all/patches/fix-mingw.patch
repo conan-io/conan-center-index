@@ -1,3 +1,4 @@
+see https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2549
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -287,6 +287,9 @@ add_library(VkLayer_utils
@@ -26,7 +27,7 @@
      add_compile_options("$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,19>>:/wd4351>")
  else()
 +    if(MINGW)
-+      add_compile_options("-Wa,-mbig-obj")
++        add_compile_options("-Wa,-mbig-obj")
 +    endif()
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith -Wno-unused-function -Wno-sign-compare")
      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpointer-arith -Wno-unused-function -Wno-sign-compare")

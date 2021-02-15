@@ -8,5 +8,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-mingw.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/install-location-headers.patch"
+    - patch_file: "patches/disable-nortti-and-warnings-as-errors.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-installation.patch"
       base_path: "source_subfolder"

@@ -74,21 +74,9 @@ class VulkanValidationLayersConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "add_compile_options(-Werror)", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'add_compile_options("/WX")', "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'add_compile_options("/GR-")', "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "layers", "CMakeLists.txt"),
-                              "install(FILES ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})",
-                              "install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "layers", "CMakeLists.txt"),
-                              "install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})",
-                              "install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET_NAME}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -100,6 +88,7 @@ class VulkanValidationLayersConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
             self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
             self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+        self._cmake.definitions["BUILD_WERROR"] = False
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["INSTALL_TESTS"] = False
         self._cmake.definitions["BUILD_LAYERS"] = True
@@ -111,20 +100,14 @@ class VulkanValidationLayersConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        # Move several files, but it's important to preserve relative path
-        # between module library and manifest json file
         if self.settings.os == "Windows":
-            bin_dir = os.path.join(self.package_folder, "bin")
+            # import lib is useless, validation layers are loaded at runtime
             lib_dir = os.path.join(self.package_folder, "lib")
-            # import lib is useless, validation layer dll is loaded at runtime
             tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.lib")
-            tools.remove_files_by_mask(lib_dir, "VkLayer_khronos_validation.dll.a")
-            # move dll and manifest file in bin folder
-            tools.mkdir(bin_dir)
-            for validation_layer in glob.glob(os.path.join(lib_dir, "VkLayer_khronos_validation.*")):
-                layer_filename = os.path.basename(validation_layer)
-                shutil.move(validation_layer, os.path.join(bin_dir, layer_filename))
+            tools.remove_files_by_mask(lib_dir, "libVkLayer_khronos_validation.dll.a")
         else:
+            # Move json files to res, but keep in mind to preserve relative
+            # path between module library and manifest json file
             os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
