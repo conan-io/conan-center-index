@@ -19,12 +19,12 @@ conan-center-index tries to make the process as smooth and simple as possible fo
 
 In general, reviews are driven by the automated [bot](https://github.com/conan-center-bot). The bot is responsible for:
 
-- adding or removing labels (such as [No Beta User](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3A%22No+Beta+user%22) or [Docs](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3ADocs))
-- writing comments (most of the time, it's a build status, either failure with logs or success)
-- merging pull requests
-- closing issues (side effect of merging pull requests)
-- starting CI builds
-- assigning CI status (running/failed/successful)
+- Adding or removing labels (such as [No Beta User](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3A%22No+Beta+user%22) or [Docs](https://github.com/conan-io/conan-center-index/pulls?q=is%3Apr+is%3Aopen+label%3ADocs)).
+- Writing comments (most of the time, it's a build status, either failure with logs or success).
+- Merging pull requests.
+- Closing issues (after merging pull requests with GitHub keywords).
+- Starting CI builds.
+- Assigning CI status (running/failed/successful).
 
 ## green build
 
