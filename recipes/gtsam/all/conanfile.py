@@ -197,5 +197,4 @@ class gtsamConan(ConanFile):
             self.cpp_info.components["CppUnitLite"].libs = ["CppUnitLite"]
             self.cpp_info.components["CppUnitLite"].names["cmake_find_package"] = "CppUnitLite"
             self.cpp_info.components["CppUnitLite"].names["cmake_find_package_multi"] = "CppUnitLite"
-            self.cpp_info.components["CppUnitLite"].names["pkg_config"] = "CppUnitLite"
             self.cpp_info.components["CppUnitLite"].requires = ["boost::boost"]
