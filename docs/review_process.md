@@ -42,7 +42,7 @@ If you struggle to fix build errors yourself, you may want to ask for help from 
 ### Unexpected error
 
 Sometimes, build fails with `Unexpected error` message. This indicates an infrastructure problem, and usually it's unrelated to the changes within PR itself.
-Keep in mind CCI is still in early access (consider it beta), and there are still some instabilities. Especially, as we're using lots of external services,
+Keep in mind conan-center-index is still in "early access program", and there are still some instabilities. Especially, as we're using lots of external services,
 which might be inaccessible (GitHub API, docker hub, etc.) and may result in intermittent failures.
 So, what to do once `Unexpected error` was encountered? You may consider re-running the build, and there are several ways to do it:
 
