@@ -26,7 +26,7 @@ In general, reviews are driven by the automated [bot](https://github.com/conan-c
 - Starting CI builds.
 - Assigning CI status (running/failed/successful).
 
-## green build
+## Green build
 
 The first important prerequisite is ensuring your PR is green (build is successful).
 It requires a bit of patience, because there are many PRs are running, and we're building a lot of configurations for a numerous versions of libraries.
