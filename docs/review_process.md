@@ -33,7 +33,7 @@ It requires a bit of patience, because there are many PRs are running, and we're
 Keep attention to the error messages from the bot, and address all the build failures.
 The bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
 
-- the profile that failed (in other words, the configuration - architecture, operation system, compiler, etc.)
+- The profile that failed (in other words, the configuration: architecture, operation system, compiler, etc.)
 - failed command line (it might have failed on early stages - e.g. recipe syntax errors, or later stages, like build or test)
 - logs (contains actual output of the build process - not that some important logs like `configure.log` or `CMakeError.log` are not captured, it's just stdout/stderr)
 
