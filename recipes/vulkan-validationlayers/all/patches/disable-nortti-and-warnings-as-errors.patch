@@ -1,7 +1,8 @@
 rtti enabled:
 https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/3a0631bd11f25113d28c65d9984d3f3b486026b4
-no warnings as errors submitted to upstream project (not yet for msvc):
+no warnings as errors submitted to upstream project:
 https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2300
+https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2552
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -118,12 +118,14 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
