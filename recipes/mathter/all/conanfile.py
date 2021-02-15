@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 import os
 
 class MathterConan(ConanFile):
@@ -10,11 +10,12 @@ class MathterConan(ConanFile):
     topics = ("game-dev", "linear-algebra", "vector-math", "matrix-library")
     exports_sources = "Mathter/*"
     no_copy_source = True
-    
+    settings = { "cppstd": ["17", "20"] }
+        
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Mathter-" + self.version, "sources")
-    
+            
     def package(self):
         self.copy("*.hpp", dst="include/Mathter", src="sources/Mathter")
         self.copy("*.natvis", dst="include/Mathter", src="sources/Mathter")
