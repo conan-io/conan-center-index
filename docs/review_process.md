@@ -78,7 +78,7 @@ The list includes only official Conan developers:
 - [@sse4](https://github.com/sse4)
 - [@uilianries](https://github.com/uilianries)
 
-### community reviewers
+### Community reviewers
 
 The list includes conan center index contributors who are very active and proven to be trusted - they frequently submitted pull requests and provide their own useful reviews:
 
