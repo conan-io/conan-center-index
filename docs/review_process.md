@@ -34,7 +34,7 @@ Keep attention to the error messages from the bot, and address all the build fai
 The bot tries to provide all the helpful information needed to understand and reproduce an issue, such as:
 
 - The profile that failed (in other words, the configuration: architecture, operation system, compiler, etc.)
-- failed command line (it might have failed on early stages - e.g. recipe syntax errors, or later stages, like build or test)
+- Failed command line (it might have failed on early stages, like recipe syntax errors, hook errors or later stages, like build or test).
 - logs (contains actual output of the build process - not that some important logs like `configure.log` or `CMakeError.log` are not captured, it's just stdout/stderr)
 
 If you struggle to fix build errors yourself, you always may ask for the help, either by tagging individual users.
