@@ -195,7 +195,7 @@ class gtsamConan(ConanFile):
             self.cpp_info.components["libmetis-gtsam"].names["pkg_config"] = "metis-gtsam"
 
         if self.options.install_cppunitlite:
-            self.cpp_info.components["CppUnitLite"].libs = ["CppUnitLite"]
-            self.cpp_info.components["CppUnitLite"].names["cmake_find_package"] = "CppUnitLite"
-            self.cpp_info.components["CppUnitLite"].names["cmake_find_package_multi"] = "CppUnitLite"
-            self.cpp_info.components["CppUnitLite"].requires = ["boost::boost"]
+            self.cpp_info.components["gtsam_CppUnitLite"].libs = ["CppUnitLite"]
+            self.cpp_info.components["gtsam_CppUnitLite"].names["cmake_find_package"] = "CppUnitLite"
+            self.cpp_info.components["gtsam_CppUnitLite"].names["cmake_find_package_multi"] = "CppUnitLite"
+            self.cpp_info.components["gtsam_CppUnitLite"].requires = ["boost::boost"]
