@@ -9,7 +9,6 @@ class TsilTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options["tsil"].fPIC
         cmake.configure()
         cmake.build()
 
