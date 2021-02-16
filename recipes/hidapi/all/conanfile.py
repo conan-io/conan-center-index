@@ -95,26 +95,11 @@ class HidapiConan(ConanFile):
 
         autotools = self._configure_autotools()
         autotools.make()
+    def package(self):
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        la_files = {
-            os.path.join(self.package_folder, "lib", "libhidapi-hidraw.la"),
-            os.path.join(self.package_folder, "lib", "libhidapi-libusb.la"),
-            os.path.join(self.package_folder, "lib", "libhidapi.la")
-        }
-        for la_file in la_files:
-            if os.path.isfile(la_file):
-                os.remove(la_file)
-
-    def package(self):
-        self.copy("LICENSE*.txt", src=self._source_subfolder, dst="licenses")
-        self.copy("hidapi/*.h", dst="include", src=self._source_subfolder)
-        self.copy("*hidapi.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         if self.settings.os == "Linux":
