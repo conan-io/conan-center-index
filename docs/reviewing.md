@@ -44,6 +44,10 @@ Prefer the following order of documented methods in python code (`conanfile.py`,
 the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
 `package` in `conanfile.py`.
 
+## License Identifiers
+
+The manadatory license attribute of each recipe must **only** of SPDX short Identifiers
+
 ## Test Package
 
 ### Minimalistic Source Code
