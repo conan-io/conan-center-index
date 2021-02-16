@@ -134,7 +134,7 @@ Such builds can take hours for big packages (like boost), blocking other merges 
 ### Upload
 
 Even if there is no new revision introduced, CI still needs to publish artifacts from the internal repository to ConanCenter, and it may also take hours for big enough packages.
-This also blocks further merges until upload is finished. It also explains why new packages are not immediately available for consumption after the merge, and there is a grace period to wait for they availability.
+This also blocks further merges until upload is finished. It also explains why new packages are not immediately available for consumption after the merge, and there is a grace period to wait for their availability.
 
 ### Updating web front end
 
