@@ -8,9 +8,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(Threads REQUIRED)
+find_package(ZeroMQ REQUIRED)
 find_package(zmqpp REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if(ZMQPP_BUILD_SHARED)
+  target_link_libraries(${PROJECT_NAME} zmqpp zmq sodium Threads::Threads)
+else()
+  target_link_libraries(${PROJECT_NAME} zmqpp-static zmq sodium Threads::Threads)
+endif()
 
