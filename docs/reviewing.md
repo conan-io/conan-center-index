@@ -7,7 +7,9 @@ The following policies are preferred during the review, but not mandatory:
 
   * [Trailing white-spaces](#trailing-white-spaces)
   * [Quotes](#quotes)
-  * [Order of methods and attributes](#order-of-methods-and-attributes)<!-- endToc -->
+  * [Order of methods and attributes](#order-of-methods-and-attributes)
+  * [License Attribute](#license-attribute)
+  * [Test Package](#test-package)<!-- endToc -->
 
 ## Trailing white-spaces
 
@@ -44,9 +46,9 @@ Prefer the following order of documented methods in python code (`conanfile.py`,
 the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
 `package` in `conanfile.py`.
 
-## License Identifiers
+## License Attribute
 
-The manadatory license attribute of each recipe must **only** of SPDX short Identifiers
+The manadatory license attribute of each recipe must **only** of [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/)
 
 ## Test Package
 
