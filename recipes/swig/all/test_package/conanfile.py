@@ -15,9 +15,8 @@ class TestPackageConan(ConanFile):
 
     @property
     def _can_build(self):
-        # FIXEM: Fix SWIG Python build with Visual Studio
-        # Have a problem linking final module with Visual Studio. CMake finds
-        # correct Python library, but linker tries to use _d variant and fails.
+        # FIXME: SWIG Python with Visual Studio Debug - unable to find Python library at link
+        # FIXME: SWIG Python with Visual Studio - unable to load generated module in tests
         return self.settings.compiler != "Visual Studio"
 
     def build(self):
