@@ -3,7 +3,7 @@ import os, glob
 
 class HidapiConan(ConanFile):
     name = "hidapi"
-    license = "BSD-Style"
+    license = "GPL-3.0-or-later", "BSD-3-Clause", "HIDAPI"
     homepage = "https://github.com/libusb/hidapi"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "hidapi", "usb", "device","hid")
