@@ -1,0 +1,4 @@
+sources:
+  "1.1.3":
+    url: https://github.com/boost-ext/sml/archive/v1.1.3.tar.gz
+    sha256: 6731aa1b8cd3581d497e0b307578c373257fd3c5b201ce762fdf038dccb686cc
