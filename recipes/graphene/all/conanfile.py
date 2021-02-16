@@ -55,7 +55,10 @@ class LibnameConan(ConanFile):
         meson = Meson(self)
         defs = {}
         defs["gobject_types"] = "true" if self.options.with_glib else "false"
-        defs["introspection"] = "false"
+        if tools.Version(self.version) < "1.10.4":
+            defs["introspection"] = "false"
+        else:
+            defs["introspection"] = "disabled"
         defs["tests"] = "false"
         defs["installed_tests"] = "false"
         defs["gtk_doc"] = "false"
