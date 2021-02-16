@@ -47,6 +47,10 @@ class QuaZIPConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "quazip", "CMakeLists.txt"),
+            "add_library(${QUAZIP_LIB_TARGET_NAME} ${QUAZIP_SOURCES})",
+            "qt5_wrap_cpp(QUAZIP_SOURCES ${QUAZIP_HEADERS})\n"
+            "add_library(${QUAZIP_LIB_TARGET_NAME} ${QUAZIP_SOURCES})")
         cmake = self._configure_cmake()
         cmake.build()
 
