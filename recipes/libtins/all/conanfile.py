@@ -81,4 +81,7 @@ class LibTinsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "libtins"
+        self.cpp_info.names["cmake_find_package_multi"] = "libtins"
+        self.cpp_info.names["pkg_config"] = "libtins"
         self.cpp_info.libs = tools.collect_libs(self)
