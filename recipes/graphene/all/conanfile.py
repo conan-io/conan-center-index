@@ -31,6 +31,9 @@ class LibnameConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "gcc":
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
     
     def build_requirements(self):
         self.build_requires("meson/0.56.2")
