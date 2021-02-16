@@ -119,6 +119,7 @@ PR is selected for the merge only if:
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.
 - PR has 3 approved reviews (as described above).
+- PR does not have any [official reviewers](#official-reviewers) requesting changes
 - Master build is not running already (see below)
 
 If these conditions are fulfilled, the PR is merged (associated issues are automatically closed), and then the build of master is launched.
