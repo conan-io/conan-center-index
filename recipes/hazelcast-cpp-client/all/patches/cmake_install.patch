@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6e0e99ae69..6f867f22d0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -236,8 +236,8 @@ function(add_hazelcast_library name type)
+     # install -config.cmake and -config-version.cmake files
+     install(
+         FILES
+-            ${CMAKE_BINARY_DIR}/${name}-config.cmake
+-            ${CMAKE_BINARY_DIR}/${name}-config-version.cmake
++            ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake
++            ${CMAKE_CURRENT_BINARY_DIR}/${name}-config-version.cmake
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${name}
+     )
+ endfunction()

@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            if "arm" in self.settings.arch:
+            if "arm" in self.settings.arch and not tools.os_info.is_macos:
                 self.test_arm()
             else:
                 bin_path = os.path.join("bin", "test_package")

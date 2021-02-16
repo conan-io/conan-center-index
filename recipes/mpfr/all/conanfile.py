@@ -1,5 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conans.errors import ConanException
 from contextlib import contextmanager
 import os
 import re
@@ -23,7 +23,7 @@ class MpfrConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "exact_int": "mpir",
+        "exact_int": "gmp",
     }
     exports_sources = "CMakeLists.txt.in", "patches/**"
     generators = "cmake"
@@ -44,10 +44,10 @@ class MpfrConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.options.exact_int == "mpir":
+        if self.options.exact_int == "gmp":
+            self.requires("gmp/6.2.1")
+        elif self.options.exact_int == "mpir":
             self.requires("mpir/3.0.0")
-        elif self.options.exact_int == "gmp":
-            self.requires("gmp/6.2.0")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PAH"):
@@ -62,15 +62,14 @@ class MpfrConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-thread-safe",
             "--with-gmp-include={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "include"))),
             "--with-gmp-lib={}".format(tools.unix_path(os.path.join(self.deps_cpp_info[str(self.options.exact_int)].rootpath, "lib"))),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--disable-static"])
         if self.settings.compiler == "clang":
             # warning: optimization flag '-ffloat-store' is not supported
             args.append("mpfr_cv_gcc_floatconv_bug=no")
@@ -143,9 +142,9 @@ class MpfrConan(ConanFile):
             cmakelists_in = tools.load("CMakeLists.txt.in")
             sources, headers, definitions = self._extract_mpfr_autotools_variables()
             tools.save(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), cmakelists_in.format(
-                mpfr_sources = " ".join(sources),
-                mpfr_headers = " ".join(headers),
-                definitions = " ".join(definitions),
+                mpfr_sources=" ".join(sources),
+                mpfr_headers=" ".join(headers),
+                definitions=" ".join(definitions),
             ))
             cmake = self._configure_cmake()
             cmake.build()

@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class OctomapConan(ConanFile):
     name = "octomap"
@@ -9,8 +10,7 @@ class OctomapConan(ConanFile):
     topics = ("conan", "octomap", "octree", "3d", "robotics")
     homepage = "https://github.com/OctoMap/octomap"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,13 +23,13 @@ class OctomapConan(ConanFile):
         "openmp": False
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,6 +38,8 @@ class OctomapConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared and self.settings.compiler.get_safe("runtime") == "MTd":
+            raise ConanInvalidConfiguration("shared octomap doesn't support MTd runtime")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -45,31 +47,37 @@ class OctomapConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake = CMake(self)
-        cmake.definitions["OCTOMAP_OMP"] = self.options.openmp
-        cmake.configure(build_folder=self._build_subfolder)
-        cmake.build(target="octomap" if self.options.shared else "octomap-static")
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["OCTOMAP_OMP"] = self.options.openmp
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeLists.txt"),
                               "SET( BASE_DIR ${CMAKE_SOURCE_DIR} )",
                               "SET( BASE_DIR ${CMAKE_BINARY_DIR} )")
+        compiler_settings = os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake")
         # Do not force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake"),
-                              "ADD_DEFINITIONS(-fPIC)", "")
+        tools.replace_in_file(compiler_settings, "ADD_DEFINITIONS(-fPIC)", "")
+        # No -Werror
+        if tools.Version(self.version) >= "1.9.6":
+            tools.replace_in_file(compiler_settings, "-Werror", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))
-        source_include_dir = os.path.join(self._source_subfolder, "octomap", "include")
-        build_lib_dir = os.path.join(self._build_subfolder, "lib")
-        build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.h", dst="include", src=source_include_dir)
-        self.copy(pattern="*.hxx", dst="include", src=source_include_dir)
-        self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         # TODO: no namespace for CMake imported targets

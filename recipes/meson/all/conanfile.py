@@ -21,7 +21,7 @@ exec "$meson_dir/meson.py" "$@"
 """
 
     def requirements(self):
-        self.requires("ninja/1.10.1")
+        self.requires("ninja/1.10.2")
 
     def package_id(self):
         self.info.header_only()
@@ -54,3 +54,5 @@ exec "$meson_dir/meson.py" "$@"
 
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
+
+        self.cpp_info.builddirs = [os.path.join("bin", "mesonbuild", "cmake", "data")]

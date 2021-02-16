@@ -164,7 +164,11 @@ class LibpqConan(ConanFile):
             else:
                 globs = [os.path.join(self.package_folder, "lib", "*.a")]
         else:
-            globs = [os.path.join(self.package_folder, "lib", "libpq.so*"), os.path.join(self.package_folder, "bin", "*.dll")]
+            globs = [
+                os.path.join(self.package_folder, "lib", "libpq.so*"),
+                os.path.join(self.package_folder, "bin", "*.dll"),
+                os.path.join(self.package_folder, "lib", "libpq*.dylib")
+            ]
         if self.settings.os == "Windows":
             os.unlink(os.path.join(self.package_folder, "lib", "libpq.dll"))
         for globi in globs:
