@@ -1,0 +1,12 @@
+[settings]
+compiler=Visual Studio
+compiler.version=16
+compiler.runtime=MD
+arch=x86
+arch_build=x86
+os=Windows
+os_build=Windows
+
+[env]
+CC=cl
+CXX=cl

@@ -1,0 +1,31 @@
+name: Lint
+
+on:
+  pull_request:
+    paths:
+      - 'builder/**'
+      - '.github/workflows/prospector.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'builder/**'
+      - '.github/workflows/prospector.yml'
+
+jobs:
+  prospector:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setting up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade conan
+        pip install prospector
+    - name: Lint with prospector
+      run: |
+        prospector -F --strictness veryhigh builder
