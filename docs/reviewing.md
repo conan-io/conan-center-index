@@ -7,7 +7,10 @@ The following policies are preferred during the review, but not mandatory:
 
   * [Trailing white-spaces](#trailing-white-spaces)
   * [Quotes](#quotes)
-  * [Order of methods and attributes](#order-of-methods-and-attributes)<!-- endToc -->
+  * [Order of methods and attributes](#order-of-methods-and-attributes)
+  * [Test Package](#test-package)
+    * [Minimalistic Source Code](#minimalistic-source-code)
+    * [Verifying Components](#verifying-components)<!-- endToc -->
 
 ## Trailing white-spaces
 
