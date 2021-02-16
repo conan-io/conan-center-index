@@ -63,8 +63,6 @@ class TsilConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "TSIL"
-        self.cpp_info.names["cmake_find_package_multi"] = "TSIL"
         self.cpp_info.names["pkg_config"] = "tsil"
         self.cpp_info.libs = ["tsil"]
         self.cpp_info.defines.append(str(self.options.TSIL_SIZE))
