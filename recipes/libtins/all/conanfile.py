@@ -21,7 +21,7 @@ class LibTinsConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_cxx11": False,
+        "with_cxx11": True,
         "with_ack_tracker": True
     }
     _cmake = None
