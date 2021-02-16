@@ -53,6 +53,10 @@ the order above resembles the execution order of methods on CI. therefore, for i
 The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instatiation of objects to ensure linkage
 and dependencies are correct.
 
+## License Attribute
+
+The manadatory license attribute of each recipe must **only** of [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/)
+
 ### Verifying Components
 
 When components are defined in the `package_info` in `conanfile.py` the following conditions are desired
