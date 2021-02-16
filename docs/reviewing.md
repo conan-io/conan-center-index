@@ -55,7 +55,7 @@ and dependencies are correct.
 
 ## License Attribute
 
-The manadatory license attribute of each recipe must **only** of [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/)
+The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
 ### Verifying Components
 
