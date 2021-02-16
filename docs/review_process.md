@@ -131,6 +131,7 @@ After merging a pull request, if an actual merge happened (for instance, the rec
 it will introduce a new recipe revision. Therefore, the build should be run one more time, so the master build is launched.
 In reality this could happen frequently enough if there are multiple PRs aiming to update the same recipe (even if they touch different files in the same recipe).
 Such builds can take hours for big packages (like boost), blocking other merges for a while.
+So we really appreciate it if changes in master to the same recipe are already merged into the proposed PR.
 
 ### Upload
 
