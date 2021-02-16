@@ -98,6 +98,7 @@ That also means you can be included in this list as well - submit PRs and provid
 
 At least 3 reviews are required for an approval, and at least one of them has to be from the official reviewers.
 So, it might be 1 official + 2 community, or 3 official, but it couldn't be just 3 community reviews.
+Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
 
 ### Reviews from others
 
