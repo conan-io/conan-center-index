@@ -45,10 +45,6 @@ class TsilConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("tsil-{}".format(self.version), self._source_subfolder)
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -56,6 +52,10 @@ class TsilConan(ConanFile):
         self._cmake.definitions["TSIL_SIZE"] = self.options.TSIL_SIZE
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
