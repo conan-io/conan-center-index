@@ -17,12 +17,16 @@ class LibTinsConan(ConanFile):
         "fPIC": [True, False],
         "with_cxx11": [True, False],
         "with_ack_tracker": [True, False],
+        "with_wpa2": [True, False],
+        "with_dot11": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_cxx11": True,
         "with_ack_tracker": True
+        "with_wpa2": True
+        "with_dot11": True
     }
     _cmake = None
 
@@ -40,14 +44,15 @@ class LibTinsConan(ConanFile):
 
     def requirements(self):
         self.requires("libpcap/1.10.0")
-        self.requires("openssl/1.1.1i")
         if self.options.with_ack_tracker:
             self.requires("boost/1.75.0")
+        if self.options.with_wpa2:
+            self.requires("openssl/1.1.1i")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_cxx11:
+        if self.options.with_cxx11 and self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
     def source(self):
@@ -65,6 +70,8 @@ class LibTinsConan(ConanFile):
         self._cmake.definitions["LIBTINS_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["LIBTINS_ENABLE_CXX11"] = self.options.with_cxx11
         self._cmake.definitions["LIBTINS_ENABLE_ACK_TRACKER"] = self.options.with_ack_tracker
+        self._cmake.definitions["LIBTINS_ENABLE_WPA2"] = self.options.with_wpa2
+        self._cmake.definitions["LIBTINS_ENABLE_DOT11"] = self.options.with_dot11
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
