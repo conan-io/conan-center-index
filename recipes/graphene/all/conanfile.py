@@ -33,12 +33,12 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
     
     def build_requirements(self):
-        self.build_requires("meson/0.56.0")
+        self.build_requires("meson/0.56.2")
         self.build_requires("pkgconf/1.7.3")
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.67.1")
 
     def configure(self):
         if self.options.shared:
