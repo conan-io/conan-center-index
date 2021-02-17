@@ -3,10 +3,11 @@ from conans import ConanFile, CMake, tools
 
 class HelloConan(ConanFile):
     name = "zpp"
-    version = "0.1"
+    version = "1.0.0"
     license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    
+    homepage = "https://github.com/zapproject/zpp"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "<Description of Hello here>"
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
