@@ -11,7 +11,11 @@ class MathterConan(ConanFile):
     topics = ("game-dev", "linear-algebra", "vector-math", "matrix-library")
     no_copy_source = True
     settings = "compiler"
-        
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -34,12 +38,12 @@ class MathterConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Mathter-" + self.version, "sources")
+        os.rename("Mathter-" + self.version, self._source_subfolder)
             
     def package(self):
-        self.copy("*.hpp", dst="include/Mathter", src="sources/Mathter")
-        self.copy("*.natvis", dst="include/Mathter", src="sources/Mathter")
-        self.copy("LICENCE", dst="licenses", src="sources")
+        self.copy("*.hpp", dst=os.path.join("include", "Mathter"), src=os.path.join(self._source_subfolder, "Mathter"))
+        self.copy("*.natvis", dst=os.path.join("include", "Mathter"), src=os.path.join(self._source_subfolder, "Mathter"))
+        self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
