@@ -14,7 +14,7 @@ jobs:
         dotnet tool install --global MarkdownSnippets.Tool
         mdsnippets ${GITHUB_WORKSPACE} \
           --convention InPlaceOverwrite \
-          --exclude-directories 'cmake-build-*' \
+          --exclude-directories 'recipes' \
           --toc-level 5
       shell: bash
     - name: Push changes
