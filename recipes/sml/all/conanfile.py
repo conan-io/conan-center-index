@@ -21,8 +21,9 @@ class SMLConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
-        check_min_cppstd(self, "14")
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
