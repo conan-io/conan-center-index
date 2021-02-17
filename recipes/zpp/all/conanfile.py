@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 
 
 class HelloConan(ConanFile):
@@ -13,15 +13,24 @@ class HelloConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
-    exports_sources = "src/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def source(self):
+        self.run("git clone https://github.com/zapproject/zpp.git")
+        # This small hack might be useful to guarantee proper /MT /MD linkage
+        # in MSVC if the packaged project doesn't have variables to set it
+        # properly
+        tools.replace_in_file("zpp/CMakeLists.txt", "PROJECT(zpp)",
+                              '''PROJECT(zpp)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()''')
+
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="src")
+        cmake.configure(source_folder="zpp")
         cmake.build()
 
         # Explicit way:
@@ -30,12 +39,13 @@ class HelloConan(ConanFile):
         # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
-        self.copy("*.h", dst="include", src="src")
-        self.copy("*.lib", dst="lib", keep_path=False)
+        self.copy("*.h", dst="include", src="zpp")
+        self.copy("*hello.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.dylib*", dst="lib", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
+        self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["hello"]
+        self.cpp_info.libs = ["zpp"]
+
