@@ -4,8 +4,6 @@ from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
-required_conan_version = ">=1.33.0"
-
 
 @total_ordering
 class OpenSSLVersion(object):
@@ -767,14 +765,14 @@ class OpenSSLConan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(module_file):
         content = (
-            "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-            "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})\n"
-            "set(OPENSSL_CRYPTO_LIBRARY ${OpenSSL_Crypto_LIBS})\n"
-            "set(OPENSSL_CRYPTO_LIBRARIES ${OpenSSL_Crypto_LIBS} ${OpenSSL_Crypto_DEPENDENCIES} ${OpenSSL_Crypto_FRAMEWORKS} ${OpenSSL_Crypto_SYSTEM_LIBS})\n"
-            "set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})\n"
-            "set(OPENSSL_SSL_LIBRARIES ${OpenSSL_SSL_LIBS} ${OpenSSL_SSL_DEPENDENCIES} ${OpenSSL_SSL_FRAMEWORKS} ${OpenSSL_SSL_SYSTEM_LIBS})\n"
-            "set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n"
-            "set(OPENSSL_VERSION ${OpenSSL_VERSION})\n"
+            "if(OpenSSL_FOUND)\n  set(OPENSSL_FOUND ${OpenSSL_FOUND})\nendif()\n"
+            "if(OpenSSL_INCLUDE_DIR)\n  set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})\nendif()\n"
+            "if(OpenSSL_Crypto_LIBS)\n  set(OPENSSL_CRYPTO_LIBRARY ${OpenSSL_Crypto_LIBS})\nendif()\n"
+            "if(OpenSSL_Crypto_LIBS)\n  set(OPENSSL_CRYPTO_LIBRARIES ${OpenSSL_Crypto_LIBS} ${OpenSSL_Crypto_DEPENDENCIES} ${OpenSSL_Crypto_FRAMEWORKS} ${OpenSSL_Crypto_SYSTEM_LIBS})\nendif()\n"
+            "if(OpenSSL_SSL_LIBS)\n  set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})\nendif()\n"
+            "if(OpenSSL_SSL_LIBS)\n  set(OPENSSL_SSL_LIBRARIES ${OpenSSL_SSL_LIBS} ${OpenSSL_SSL_DEPENDENCIES} ${OpenSSL_SSL_FRAMEWORKS} ${OpenSSL_SSL_SYSTEM_LIBS})\nendif()\n"
+            "if(OpenSSL_LIBRARIES)\n  set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\nendif()\n"
+            "if(OpenSSL_VERSION)\n  set(OPENSSL_VERSION ${OpenSSL_VERSION})\nendif()\n"
         )
         tools.save(module_file, content)
 
@@ -790,9 +788,9 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         self.cpp_info.components["ssl"].builddirs = [self._module_subfolder]
-        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.components["ssl"].build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.components["crypto"].builddirs = [self._module_subfolder]
-        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.components["crypto"].build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             if self._full_version < "1.1.0":
