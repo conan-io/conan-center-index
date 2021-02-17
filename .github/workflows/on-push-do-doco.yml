@@ -1,9 +1,9 @@
 name: on-push-do-doco
 on:
-  # Only update the docs on main, to reduce the chance of conflicts
+  # Only update the docs on default branch, to reduce the chance of conflicts
   push:
     branches:
-      - main
+      - master
 jobs:
   release:
     runs-on: windows-latest
