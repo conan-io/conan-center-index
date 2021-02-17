@@ -5,7 +5,7 @@ from conans.tools import Version
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     default_options = {
         "approvaltests.cpp:with_boosttest": True,
         "approvaltests.cpp:with_catch2": True,
