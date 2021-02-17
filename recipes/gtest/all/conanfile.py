@@ -19,6 +19,27 @@ class GTestConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     @property
+    def _minimum_cpp_standard(self):
+        if self.version == "1.8.1":
+            return 98
+        else:
+            return 11
+
+    @property
+    def _minimum_compilers_version(self):
+        if self.version == "1.8.1":
+            return {
+                "Visual Studio": "14"
+            }
+        else:
+            return {
+                "Visual Studio": "14",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "9.1",
+            }
+        
+    @property
     def _postfix(self):
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
@@ -29,13 +50,21 @@ class GTestConan(ConanFile):
             del self.options.debug_postfix
 
     def configure(self):
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= "12":
-                raise ConanInvalidConfiguration("Google Test {} does not support Visual Studio <= 12".format(self.version))
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires c++11 support. The current compiler {} {} does not support it.".format(
+                    self.name, self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "googletest-release-" + self.version
+        extracted_dir = glob.glob("googletest-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -78,6 +107,9 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
+        
+        if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
+            self.cpp_info.components["libgtest"].system_libs.append("regex")
 
         if self.options.shared:
             self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
