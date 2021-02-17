@@ -12,7 +12,10 @@ jobs:
     - name: Run MarkdownSnippets
       run: |
         dotnet tool install --global MarkdownSnippets.Tool
-        mdsnippets ${GITHUB_WORKSPACE}
+        mdsnippets ${GITHUB_WORKSPACE} \
+          --convention InPlaceOverwrite \
+          --exclude-directories 'cmake-build-*' \
+          --toc-level 5
       shell: bash
     - name: Push changes
       run: |
