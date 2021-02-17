@@ -55,7 +55,16 @@ class LibTinsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
+        tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "OPENSSL",
+                "OpenSSL"
+        )
+        tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                "OPENSSL",
+                "OpenSSL"
+        )
 
     def _configure_cmake(self):
         if self._cmake:
