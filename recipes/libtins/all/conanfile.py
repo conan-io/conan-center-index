@@ -98,3 +98,5 @@ class LibTinsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "libtins"
         self.cpp_info.names["pkg_config"] = "libtins"
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("TINS_STATIC")
