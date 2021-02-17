@@ -10,7 +10,7 @@ class LibTinsConan(ConanFile):
     license = "BSD-2-Clause"
     topics = ("pcap", "packets", "network", "packet-analyser", "packet-parsing", "libpcap", "sniffing")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
