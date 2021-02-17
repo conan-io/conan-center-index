@@ -90,7 +90,7 @@ class FFTWConan(ConanFile):
         cmake_config_name = "FFTW3" + prec_suffix
         cmake_namespace = "FFTW3"
         cmake_target_name = "fftw3" + prec_suffix
-        pkgconfig_name = "fftw" + prec_suffix
+        pkgconfig_name = "fftw3" + prec_suffix
         lib_name = "fftw3" + prec_suffix
         self.cpp_info.filenames["cmake_find_package"] = cmake_config_name
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_name
