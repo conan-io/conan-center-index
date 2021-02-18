@@ -46,7 +46,7 @@ target_link_libraries(tsil.x tsil m)
 set_target_properties(tsil.x PROPERTIES OUTPUT_NAME "tsil")
 
 if(NOT size)
-  set(size "long") # default
+  set(size CACHE "long") # default
 endif()
 
 if(size STREQUAL "double")
