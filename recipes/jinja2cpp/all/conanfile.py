@@ -37,13 +37,13 @@ class Jinja2cppConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def requirements(self):
-        self.requires("boost/1.74.0")
-        self.requires("expected-lite/0.4.0")
+        self.requires("boost/1.75.0")
+        self.requires("expected-lite/0.5.0")
         self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
-        self.requires("optional-lite/3.2.0")
+        self.requires("optional-lite/3.4.0")
         self.requires("rapidjson/cci.20200410")
-        self.requires("string-view-lite/1.4.0")
-        self.requires("variant-lite/1.2.2")
+        self.requires("string-view-lite/1.6.0")
+        self.requires("variant-lite/2.0.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
