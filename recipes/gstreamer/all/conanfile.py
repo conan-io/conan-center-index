@@ -113,31 +113,26 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstreamer-1.0"].defines.append("GST_STATIC_COMPILATION")
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-1.0"].libdirs = [gst_plugin_path]
                                        
         self.cpp_info.components["gstreamer-base-1.0"].names["pkg_config"] = "gstreamer-base-1.0"
         self.cpp_info.components["gstreamer-base-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-base-1.0"].libs = ["gstbase-1.0"]
         self.cpp_info.components["gstreamer-base-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-base-1.0"].libdirs = [gst_plugin_path]
                                        
         self.cpp_info.components["gstreamer-controller-1.0"].names["pkg_config"] = "gstreamer-controller-1.0"
         self.cpp_info.components["gstreamer-controller-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-controller-1.0"].libs = ["gstcontroller-1.0"]
         self.cpp_info.components["gstreamer-controller-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-controller-1.0"].libdirs = [gst_plugin_path]
                                        
         self.cpp_info.components["gstreamer-net-1.0"].names["pkg_config"] = "gstreamer-net-1.0"
         self.cpp_info.components["gstreamer-net-1.0"].requires = ["gstreamer-1.0", "glib::gio-2.0"]
         self.cpp_info.components["gstreamer-net-1.0"].libs = ["gstnet-1.0"]
         self.cpp_info.components["gstreamer-net-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-net-1.0"].libdirs = [gst_plugin_path]
                                        
         self.cpp_info.components["gstreamer-check-1.0"].names["pkg_config"] = "gstreamer-check-1.0"
         self.cpp_info.components["gstreamer-check-1.0"].requires = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-check-1.0"].libs = ["gstcheck-1.0"]
         self.cpp_info.components["gstreamer-check-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-check-1.0"].libdirs = [gst_plugin_path]
                                        
         # gstcoreelements and gstcoretracers are plugins which should be loaded dynamicaly, and not linked to directly
         if not self.options.shared:
