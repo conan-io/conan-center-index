@@ -27,7 +27,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.66.2")
+        self.requires("glib/2.67.1")
 
     @property
     def _is_msvc(self):
@@ -44,7 +44,7 @@ class GStreamerConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.56.2")
         self.build_requires("pkgconf/1.7.3")
         if self.settings.os == 'Windows':
             self.build_requires("winflexbison/2.5.22")
