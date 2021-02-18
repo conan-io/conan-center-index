@@ -193,28 +193,3 @@ for the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 
 therefore, the full description may look like: `port to Android: update configure.ac adding missing unistd.h header`
 
-## reduce
-
-conan CI runs [special hook](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py#L590) to reduce the `conandata.yml` so it contains information specific only to the given version.
-while it might be surprising for consumers that package built by conan center and package built locally (e.g. via [conan create](https://docs.conan.io/en/latest/reference/commands/creator/create.html)) don't match (have different `conandata.yml`), this approach has its own advantages.
-imagine we have a recipe with conandata like:
-```
-
-sources:
-  1.69.0:
-    url:  "https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2",
-    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
-```
-and now we want to add newer version (1.70.0), so our `conandata.yml` will look like:
-```
-
-sources:
-  1.69.0:
-    url:  "https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2"
-    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
-  1.70.0:
-    url: "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
-    sha256: "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
-```
-as both versions (1.69.0 and 1.70.0) share the same conandata.yml, without a hook, our change would introduce a new revision for 1.69.0.
-but if we want to avoid redundand revisions (and unnecessary rebuilds) while adding new version, we may reduce conandata for 1.69.0 to just contain the minimum amount of the information.
