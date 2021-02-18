@@ -36,7 +36,7 @@ class TsilConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def tsil_size(self):
+    def _tsil_size(self):
         return "TSIL_SIZE_DOUBLE" if self.options.size == "double" else "TSIL_SIZE_LONG"
 
     def configure(self):
