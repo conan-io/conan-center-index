@@ -4,10 +4,6 @@ project(TSIL C)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 set(SOURCE_DIR source_subfolder)
 
 add_library(tsil
