@@ -2,8 +2,6 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-# for f in \*_False \*_True zmqpp_False zmqpp_True ; do t=`echo $f|cut -f1 -d_`; sh=`echo $f|cut -f2 -d_`; echo "\!\!\!DOING: $t $sh \!\!\!"; rm -rf /Users/genya/.conan/data/zmqpp/4.2.0 ./test_package/build && conan create . 4.2.0@  -o "${t}:shared=${sh}" ; otool -L test_package/build/*/bin/test_package ; done
-
 class ZmqppConan(ConanFile):
     name = "zmqpp"
     homepage = "https://github.com/zeromq/zmqpp"
@@ -89,11 +87,10 @@ class ZmqppConan(ConanFile):
 
     def package_info(self):
         #self.cpp_info.libs = ["zmqpp"]
-
         self.cpp_info.names["cmake_find_package"] = "zmqpp"
         self.cpp_info.names["cmake_find_package_multi"] = "zmqpp"
         self.cpp_info.names["pkg_config"] = "libzmqpp"
-        libzmq_target = "libzmqpp" if self.options.shared else "libzmqpp"
+        libzmq_target = "libzmqpp" # if self.options.shared else "libzmqpp-static"
         self.cpp_info.components[libzmq_target].names["cmake_find_package"] = libzmq_target
         self.cpp_info.components[libzmq_target].names["cmake_find_package_multi"] = libzmq_target
         self.cpp_info.components[libzmq_target].libs = tools.collect_libs(self)
