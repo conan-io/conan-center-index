@@ -95,7 +95,7 @@ sources:
             sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-this approach requires a special code within [source](https://docs.conan.io/en/latest/reference/conanfile/methods.html#source) method to handle.
+this approach requires a special code within [build](https://docs.conan.io/en/latest/reference/conanfile/methods.html#build) method to handle.
 
 ## patches
 
