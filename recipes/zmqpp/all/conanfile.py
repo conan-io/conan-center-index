@@ -34,6 +34,8 @@ class ZmqppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("zmqpp-%s" % (self.version), self._source_subfolder)
+        
+    def _patch_sources(self):
         cmakeFile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if self.options.shared == "False": # zmqpp uses different name for static library
             tools.replace_in_file(cmakeFile, "generate_export_header(zmqpp)", "generate_export_header(zmqpp-static)")
@@ -70,6 +72,7 @@ class ZmqppConan(ConanFile):
 #            raise ConanInvalidConfiguration("libstdc++11 required")
 
     def build(self):
+        self._patch_sources()
         self.cmake = CMake(self)
         self.cmake.verbose = True
         self.cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
