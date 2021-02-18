@@ -169,7 +169,7 @@ some projects simply do not accept patches for platforms they don't have a build
 
 `patch_type: conan` indicates the patch that is conan-specific, patches of such kind are usually not welcomed upstream at all, because they provide zero value outside of conan.
 examples of such a patches may include modifications of build system files to allow dependencies provided by conan instead of dependencies provided by projects themselves (e.g. as submodule or just 3rd-party sub-directory) or by the system package manager (rpm/deb).
-such patches, for instance, may contain variables are targets generated only by conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
+such patches, for instance, may contain variables and targets generated only by conan, but not generated normally by the build system (e.g. `CONAN_INCLUDE_DIRS`).
 
 ### patch_source
 
