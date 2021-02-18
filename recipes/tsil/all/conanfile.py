@@ -72,4 +72,4 @@ class TsilConan(ConanFile):
         self.cpp_info.libs = ["tsil"]
         self.cpp_info.defines.append(self._tsil_size)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
