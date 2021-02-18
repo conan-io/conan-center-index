@@ -8,20 +8,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT size)
-  set(size "long") # default
-endif()
-
-if(size STREQUAL "double")
-  add_definitions(-DTSIL_SIZE_DOUBLE)
-elseif(size STREQUAL "long")
-  add_definitions(-DTSIL_SIZE_LONG)
-else()
-  message(FATAL_ERROR "You must set size to either double or long")
-endif()
-
-message(STATUS "Using size: ${size}")
-
 set(SOURCE_DIR source_subfolder)
 
 add_library(tsil
@@ -62,6 +48,20 @@ add_library(tsil
 add_executable(tsil.x ${SOURCE_DIR}/basecalc.c)
 target_link_libraries(tsil.x tsil m)
 set_target_properties(tsil.x PROPERTIES OUTPUT_NAME "tsil")
+
+if(NOT size)
+  set(size "long") # default
+endif()
+
+if(size STREQUAL "double")
+  target_compile_definitions(tsil PUBLIC TSIL_SIZE_DOUBLE)
+elseif(size STREQUAL "long")
+  target_compile_definitions(tsil PUBLIC TSIL_SIZE_LONG)
+else()
+  message(FATAL_ERROR "You must set size to either double or long")
+endif()
+
+message(STATUS "Using size: ${size}")
 
 install(
   FILES
