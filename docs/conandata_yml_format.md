@@ -17,6 +17,7 @@ usually, `url` has a [https](https://tools.ietf.org/html/rfc2660) scheme, but ot
 
 [sha256](https://tools.ietf.org/html/rfc6234) is a preferred method to specify hash sum for the released sources. it allows to check the integrity of sources downloaded.
 you may use an [online service](https://hash.online-convert.com/sha256-generator) to compute `sha256` sum for the given `url`.
+also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](http://www.labtestproject.com/files/win/sha256sum/sha256sum.exe)).
 
 ### sha1
 
@@ -192,4 +193,3 @@ for the `patch_type: conan`, it doesn't make sense to submit patch upstream, so 
 - how exactly does patch achieve that (example - `update configure.ac`)
 
 therefore, the full description may look like: `port to Android: update configure.ac adding missing unistd.h header`
-
