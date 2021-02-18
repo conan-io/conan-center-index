@@ -8,19 +8,19 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT TSIL_SIZE)
-  set(TSIL_SIZE "TSIL_SIZE_LONG") # default
+if(NOT size)
+  set(size "long") # default
 endif()
 
-if(TSIL_SIZE STREQUAL "TSIL_SIZE_DOUBLE")
+if(size STREQUAL "double")
   add_definitions(-DTSIL_SIZE_DOUBLE)
-elseif(TSIL_SIZE STREQUAL "TSIL_SIZE_LONG")
+elseif(size STREQUAL "long")
   add_definitions(-DTSIL_SIZE_LONG)
 else()
-  message(FATAL_ERROR "You must set TSIL_SIZE to either TSIL_SIZE_DOUBLE or TSIL_SIZE_LONG")
+  message(FATAL_ERROR "You must set size to either double or long")
 endif()
 
-message(STATUS "Using ${TSIL_SIZE}")
+message(STATUS "Using size: ${size}")
 
 set(SOURCE_DIR source_subfolder)
 

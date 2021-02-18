@@ -16,12 +16,12 @@ class TsilConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "TSIL_SIZE": ["TSIL_SIZE_LONG", "TSIL_SIZE_DOUBLE"]
+        "size": ["long", "double"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "TSIL_SIZE": "TSIL_SIZE_LONG"
+        "size": "long"
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -34,6 +34,10 @@ class TsilConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def tsil_size(self):
+        return "TSIL_SIZE_DOUBLE" if self.options.size == "double" else "TSIL_SIZE_LONG"
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
@@ -49,7 +53,7 @@ class TsilConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["TSIL_SIZE"] = self.options.TSIL_SIZE
+        self._cmake.definitions["size"] = self.options.size
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -64,6 +68,6 @@ class TsilConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tsil"]
-        self.cpp_info.defines.append(str(self.options.TSIL_SIZE))
+        self.cpp_info.defines.append(self.tsil_size)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("m")
