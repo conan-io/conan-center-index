@@ -50,6 +50,13 @@ class Jinja2cppConan(ConanFile):
         extracted_dir = "Jinja2Cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't force MD for shared lib, allow to honor runtime from profile
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(JINJA2CPP_MSVC_RUNTIME_TYPE \"/MD\")", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -78,8 +85,7 @@ class Jinja2cppConan(ConanFile):
     def build(self):
         if tools.Version(self.deps_cpp_info["fmt"].version) >= "7.0.0":
             raise ConanInvalidConfiguration("jinja2cpp requires fmt < 7.0.0")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
