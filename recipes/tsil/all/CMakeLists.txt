@@ -45,9 +45,8 @@ add_executable(tsil.x ${SOURCE_DIR}/basecalc.c)
 target_link_libraries(tsil.x tsil m)
 set_target_properties(tsil.x PROPERTIES OUTPUT_NAME "tsil")
 
-if(NOT size)
-  set(size CACHE "long") # default
-endif()
+set(size long CACHE STRING "set floating point data size")
+set_property(CACHE size PROPERTY STRINGS long double)
 
 if(size STREQUAL "double")
   target_compile_definitions(tsil PUBLIC TSIL_SIZE_DOUBLE)
