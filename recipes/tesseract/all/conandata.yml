@@ -8,3 +8,5 @@ patches:
        base_path: "source_subfolder"
      - patch_file: "patches/0002-Link-with-targets.patch"
        base_path: "source_subfolder"
+     - patch_file: "patches/0003-Dont-change-locale.patch"
+       base_path: "source_subfolder"
