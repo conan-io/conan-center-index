@@ -70,6 +70,6 @@ class TsilConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tsil"]
-        self.cpp_info.defines.append(self.tsil_size)
+        self.cpp_info.defines.append(self._tsil_size)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("m")
