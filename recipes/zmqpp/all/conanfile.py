@@ -60,9 +60,10 @@ class ZmqppConan(ConanFile):
         if compiler.get_safe('cppstd'):
             tools.check_min_cppstd(self, 11)
 
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
+        
         # libstdc++11 is required
-        #if self.settings.compiler == "Visual Studio":
-        #    raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("libstdc++11 required")
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
