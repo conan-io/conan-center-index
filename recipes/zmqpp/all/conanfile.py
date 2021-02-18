@@ -82,8 +82,9 @@ class ZmqppConan(ConanFile):
         self.cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.cmake.configure()
-        self.cmake.install() #TODO: check packages contents!
+        self.cmake.install()
 
     def package_info(self):
         #self.cpp_info.libs = ["zmqpp"]
