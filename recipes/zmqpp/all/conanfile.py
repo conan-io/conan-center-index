@@ -64,10 +64,10 @@ class ZmqppConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
         
         # libstdc++11 is required
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("libstdc++11 required")
-        if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("libstdc++11 required")
+#        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
+#            raise ConanInvalidConfiguration("libstdc++11 required")
+#        if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+#            raise ConanInvalidConfiguration("libstdc++11 required")
 
     def build(self):
         self.cmake = CMake(self)
