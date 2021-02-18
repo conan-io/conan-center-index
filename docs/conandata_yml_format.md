@@ -103,7 +103,7 @@ sometimes sources provided by project require patching for various reasons. `con
 
 ### patch_file
 
-patch file might be commited to the conan-center-index, near to the conanfile (usuaully, into the `patches` sub-directory). such patch files usually have either `.diff` or `.patch` extension.
+patch file might be committed to the conan-center-index, near to the conanfile (usually, into the `patches` sub-directory). Such patch files usually have either `.diff` or `.patch` extension.
 the recommented way to generate such patches is [git format-patch](https://git-scm.com/docs/git-format-patch). the path to the patch is relative to the directory containing `conandata.yml` and `conanfile.py`.
 
 ### base_path
