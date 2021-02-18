@@ -1,5 +1,4 @@
 import os
-import stat
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanException
 
@@ -30,12 +29,7 @@ class ZlibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-        if not tools.os_info.is_windows:
-            configure_file = os.path.join(self._source_subfolder, "configure")
-            st = os.stat(configure_file)
-            os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
 
     def build(self):
         self._build_zlib()
