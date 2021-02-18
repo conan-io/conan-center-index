@@ -181,7 +181,7 @@ such patches, for instance, may contain variables and targets generated only by 
 - link to the mail list discussion
 - link to the patch itself in another repository (e.g. MSYS, Debian, etc.)
 
-for the `patch_type: portability` there might be no patch source matching the definition above. although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained), in such case link to the conan issue is a valid patch source (if there is no issue, you may create one).
+for the `patch_type: portability` there might be no patch source matching the definition above. although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained), in such case link to the conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 for the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
 
 ### patch_description
