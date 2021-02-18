@@ -48,6 +48,7 @@ class LibiconvConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         archive_name = "{0}-{1}".format(self.name, self.version)
         os.rename(archive_name, self._source_subfolder)
+        self._patch_sources()
 
     @contextmanager
     def _build_context(self):
@@ -115,7 +116,6 @@ class LibiconvConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
