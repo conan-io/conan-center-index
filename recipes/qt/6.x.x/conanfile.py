@@ -34,8 +34,6 @@ class QtConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "commercial": [True, False],
-
         "opengl": ["no", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
@@ -69,7 +67,6 @@ class QtConan(ConanFile):
 
     default_options = {
         "shared": False,
-        "commercial": False,
         "opengl": "desktop",
         "with_vulkan": False,
         "openssl": True,
