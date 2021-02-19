@@ -652,7 +652,8 @@ Examples = bin/datadir/examples""")
             if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+            tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
@@ -694,6 +695,20 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.frameworks.extend(["IOKit"])    # "libQt5Core.a" require "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
+
+        tools.save(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"),
+                    "set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
+                    "set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
+                    "set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
+                    "set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            if os.path.isfile(module):
+                self.cpp_info.build_modules.append(module)
+                self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
+            else:
+                tools.rmdir(os.path.join("lib", "cmake", m))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
 
 
     @staticmethod
