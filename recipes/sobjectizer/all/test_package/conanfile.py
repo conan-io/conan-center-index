@@ -5,10 +5,11 @@ from conans import ConanFile, CMake, tools
 
 class SobjectizerTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["SOBJECTIZER_SHARED"] = self.options["sobjectizer"].shared
         cmake.configure()
         cmake.build()
 
