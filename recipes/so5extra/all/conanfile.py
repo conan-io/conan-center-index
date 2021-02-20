@@ -77,6 +77,6 @@ class So5extraConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "so5extra"
         self.cpp_info.names["cmake_find_package"] = "sobjectizer"
         self.cpp_info.names["cmake_find_package_multi"] = "sobjectizer"
-        self.cpp_info.components["so_5_extra"].name = "so5extra"
+        self.cpp_info.components["so_5_extra"].names["cmake_find_package"] = "so5extra"
+        self.cpp_info.components["so_5_extra"].names["cmake_find_package_multi"] = "so5extra"
         self.cpp_info.components["so_5_extra"].requires = ["sobjectizer::sobjectizer"]
-
