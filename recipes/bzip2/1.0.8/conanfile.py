@@ -98,6 +98,7 @@ class Bzip2Conan(ConanFile):
     @property
     def _module_file(self):
         return "conan-official-{}-variables.cmake".format(self.name)
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "BZip2"
         self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
