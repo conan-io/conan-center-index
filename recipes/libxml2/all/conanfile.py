@@ -246,10 +246,9 @@ class Libxml2Conan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(module_file):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
-        content = """\
+        content = textwrap.dedent("""\
             if(LibXml2_FOUND)
                 set(LIBXML2_FOUND ${LibXml2_FOUND})
-                set(BZIP2_NEED_PREFIX TRUE)
             endif()
             if(LibXml2_INCLUDE_DIR)
                 set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
@@ -265,8 +264,7 @@ class Libxml2Conan(ConanFile):
             if(LibXml2_VERSION)
                 set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
             endif()
-        """
-        content = textwrap.dedent(content)
+        """)
         tools.save(module_file, content)
 
     @property
