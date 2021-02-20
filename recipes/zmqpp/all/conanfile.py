@@ -38,7 +38,7 @@ class ZmqppConan(ConanFile):
     def _patch_sources(self):
         cmakeFile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # zmqpp misses find for sodium
-        tools.replace_in_file(cmakeFile, "enable_testing()", "enable_testing()\n"
+        tools.replace_in_file(cmakeFile, "enable_testing()", "#enable_testing()\n"
                                          "find_package(libsodium REQUIRED)")
         if self.options.shared:
             # zmqpp misses linking to sodium
@@ -64,8 +64,10 @@ class ZmqppConan(ConanFile):
         self.cmake.verbose = True
         self.cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
         self.cmake.definitions["ZMQPP_BUILD_STATIC"] = not self.options.shared
+        self.cmake.definitions["ZMQPP_BUILD_EXAMPLES"] = False
+        self.cmake.definitions["ZMQPP_BUILD_CLIENT"] = False
+        self.cmake.definitions["ZMQPP_BUILD_TESTS"] = False
         self.cmake.configure(build_folder=self._build_subfolder)
-        #self.cmake.configure()
         self.cmake.build()
 
     def package(self):
