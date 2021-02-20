@@ -220,7 +220,7 @@ class Libxml2Conan(ConanFile):
                 os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
-            tools.remove_file_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
@@ -230,7 +230,7 @@ class Libxml2Conan(ConanFile):
 
             os.remove(os.path.join(self.package_folder, "lib", "libxml2.la"))
             for prefix in ["run", "test"]:
-                tools.remove_file_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
             tools.rmdir(os.path.join(self.package_folder, "share"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
