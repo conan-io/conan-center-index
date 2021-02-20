@@ -89,8 +89,10 @@ class Libxml2Conan(ConanFile):
             self.requires("icu/68.2")
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
-            self.build_requires("msys2/20190524")
+        if not self._is_msvc:
+            self.build_requires("pkgconf/1.7.3")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
