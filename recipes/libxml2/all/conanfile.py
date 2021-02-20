@@ -3,6 +3,8 @@ from contextlib import contextmanager
 import glob
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class Libxml2Conan(ConanFile):
     name = "libxml2"
@@ -212,35 +214,29 @@ class Libxml2Conan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         if self._is_msvc:
             self._package_msvc()
+            # remove redundant libraries to avoid confusion
+            if not self.options.shared:
+                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
+            tools.remove_file_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
 
             if self.options.include_utils:
-                autotools.make(["install","xmllint", "xmlcatalog", "xml2-config"])
+                autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
 
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2.la"))
+            for prefix in ["run", "test"]:
+                tools.remove_file_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        for prefix in ["run", "test"]:
-            for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
-                os.remove(test)
         for header in ["win32config.h", "wsockcompat.h"]:
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
                       dst=os.path.join("include", "libxml2"), keep_path=False)
-        if self._is_msvc:
-            # remove redundant libraries to avoid confusion
-            if not self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
-
-            pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
-            for pdb in pdb_files:
-                os.unlink(pdb)
-
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         if self._is_msvc:
