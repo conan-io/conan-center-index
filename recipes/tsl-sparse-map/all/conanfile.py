@@ -32,5 +32,5 @@ class TslSparseMapConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "tsl-sparse-map"
         self.cpp_info.names["cmake_find_package"] = "tsl"
         self.cpp_info.names["cmake_find_package_multi"] = "tsl"
-        self.cpp_info.components["robin_map"].names["cmake_find_package"] = "sparse_map"
-        self.cpp_info.components["robin_map"].names["cmake_find_package_multi"] = "sparse_map"
+        self.cpp_info.components["sparse_map"].names["cmake_find_package"] = "sparse_map"
+        self.cpp_info.components["sparse_map"].names["cmake_find_package_multi"] = "sparse_map"
