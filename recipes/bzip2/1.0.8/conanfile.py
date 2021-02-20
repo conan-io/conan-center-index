@@ -1,4 +1,5 @@
 import os
+import textwrap
 from conans import ConanFile, CMake, tools
 
 
@@ -66,10 +67,43 @@ class Bzip2Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+        )
 
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = """\
+            if(BZip2_FOUND)
+                set(BZIP2_FOUND ${BZip2_FOUND})
+                set(BZIP2_NEED_PREFIX TRUE)
+            endif()
+            if(BZip2_INCLUDE_DIR)
+                set(BZIP2_INCLUDE_DIRS ${BZip2_INCLUDE_DIR})
+                set(BZIP2_INCLUDE_DIR ${BZip2_INCLUDE_DIR})
+            endif()
+            if(BZip2_LIBRARIES)
+                set(BZIP2_LIBRARIES ${BZip2_LIBRARIES})
+            endif()
+            if(BZip2_VERSION)
+                set(BZIP2_VERSION_STRING ${BZip2_VERSION})
+            endif()
+        """
+        content = textwrap.dedent(content)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-variables.cmake".format(self.name)
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "BZip2"
         self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
+        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = ["bz2"]
 
         if self.options.build_executable:
