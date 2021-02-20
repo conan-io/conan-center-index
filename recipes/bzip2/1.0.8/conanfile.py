@@ -50,11 +50,10 @@ class Bzip2Conan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        major = self.version.split(".")[0]
         self._cmake = CMake(self)
         self._cmake.definitions["BZ2_VERSION_STRING"] = self.version
-        self._cmake.definitions["BZ2_VERSION_MAJOR"] = major
-        self._cmake.definitions["BZ2_BUILD_EXE"] = "ON" if self.options.build_executable else "OFF"
+        self._cmake.definitions["BZ2_VERSION_MAJOR"] = tools.Version(self.version).major
+        self._cmake.definitions["BZ2_BUILD_EXE"] = self.options.build_executable
         self._cmake.configure()
         return self._cmake
 

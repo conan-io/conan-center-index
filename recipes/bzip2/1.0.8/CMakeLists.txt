@@ -14,7 +14,7 @@ endif()
 set(SOURCE_SUBFOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 set(BZ2_LIBRARY bz2)
 
-option(BZ2_BUILD_EXE OFF)
+option(BZ2_BUILD_EXE ON)
 
 set(BZ2_TARGETS ${BZ2_LIBRARY})
 
