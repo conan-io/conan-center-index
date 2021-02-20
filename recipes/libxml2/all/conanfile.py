@@ -90,7 +90,8 @@ class Libxml2Conan(ConanFile):
 
     def build_requirements(self):
         if not self._is_msvc:
-            self.build_requires("pkgconf/1.7.3")
+            if self.options.zlib or self.options.lzma or self.options.icu:
+                self.build_requires("pkgconf/1.7.3")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/20200517")
 
