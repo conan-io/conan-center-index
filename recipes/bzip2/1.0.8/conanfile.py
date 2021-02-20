@@ -70,4 +70,9 @@ class Bzip2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "BZip2"
         self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["bz2"]
+
+        if self.options.build_executable:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
