@@ -14,7 +14,7 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Draft](#draft)
   * [Getting PR Reviewed](#getting-pr-reviewed)
   * [Automatic Merges](#automatic-merges)<!-- endToc -->
-  
+
 ## [conan-center-bot](https://github.com/conan-center-bot)
 
 In general, reviews are driven by the automated [bot](https://github.com/conan-center-bot). The bot is responsible for:
@@ -90,6 +90,7 @@ The list includes conan-center-index contributors who are very active and proven
 - [@intelligide](https://github.com/intelligide)
 - [@theirix](https://github.com/theirix)
 - [@gocarlos](https://github.com/gocarlos)
+- [@mathbunnyru](https://github.com/mathbunnyru)
 
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
@@ -127,7 +128,7 @@ If these conditions are fulfilled, the PR is merged (associated issues are autom
 
 ### Merge
 
-After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in master by the time PR merged), 
+After merging a pull request, if an actual merge happened (for instance, the recipe changed in PR was already updated in master by the time PR merged),
 it will introduce a new recipe revision. Therefore, the build should be run one more time, so the master build is launched.
 In reality this could happen frequently enough if there are multiple PRs aiming to update the same recipe (even if they touch different files in the same recipe).
 Such builds can take hours for big packages (like boost), blocking other merges for a while.
@@ -140,7 +141,7 @@ This also blocks further merges until upload is finished. It also explains why n
 
 ### Updating web front end
 
-[ConanCenter](https://conan.io/center/) doesn't directly pull the information from conan-center-index 
-repository.  Instead, it's updated by the conan center CI job as its own step. The metadata from the conan repository is 
+[ConanCenter](https://conan.io/center/) doesn't directly pull the information from conan-center-index
+repository.  Instead, it's updated by the conan center CI job as its own step. The metadata from the conan repository is
 converted to the format the web-front-end understands and then sent to it as a scheduled update. As a result, there may occasionally be delays in updating the web-front-end.
 That may explain the fact there are moments when the information showed in the frontend doesn't match the actual state on the ConanCenter repository.
