@@ -11,50 +11,70 @@ class Libxml2Conan(ConanFile):
     topics = ("XML", "parser", "validation")
     homepage = "https://xmlsoft.org"
     license = "MIT"
-    settings = "os", "arch", "compiler", "build_type"
-    generators = "pkg_config"
 
+    settings = "os", "arch", "compiler", "build_type"
     # from ./configure and ./win32/configure.js
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       'include_utils': True,
-                       "c14n": True,
-                       "catalog": True,
-                       "docbook": True,
-                       "ftp": True,
-                       "http": True,
-                       "html": True,
-                       "iconv": True,
-                       "icu": False,
-                       "iso8859x": True,
-                       "legacy": True,
-                       "mem-debug": False,
-                       "output": True,
-                       "pattern": True,
-                       "push": True,
-                       "python": False,
-                       "reader": True,
-                       "regexps": True,
-                       "run-debug": False,
-                       "sax1": True,
-                       "schemas": True,
-                       "schematron": True,
-                       "threads": True,
-                       "tree": True,
-                       "valid": True,
-                       "writer": True,
-                       "xinclude": True,
-                       "xpath": True,
-                       "xptr": True,
-                       "zlib": True,
-                       "lzma": False,
-                       }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "include_utils": True,
+        "c14n": True,
+        "catalog": True,
+        "docbook": True,
+        "ftp": True,
+        "http": True,
+        "html": True,
+        "iconv": True,
+        "icu": False,
+        "iso8859x": True,
+        "legacy": True,
+        "mem-debug": False,
+        "output": True,
+        "pattern": True,
+        "push": True,
+        "python": False,
+        "reader": True,
+        "regexps": True,
+        "run-debug": False,
+        "sax1": True,
+        "schemas": True,
+        "schematron": True,
+        "threads": True,
+        "tree": True,
+        "valid": True,
+        "writer": True,
+        "xinclude": True,
+        "xpath": True,
+        "xptr": True,
+        "zlib": True,
+        "lzma": False,
+    }
 
     options = {name: [True, False] for name in default_options.keys()}
     _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
 
+    generators = "pkg_config"
     _autotools = None
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return self.settings.compiler == "Visual Studio"
+
+    @property
+    def _is_mingw(self):
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.zlib:
@@ -70,25 +90,9 @@ class Libxml2Conan(ConanFile):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
             self.build_requires("msys2/20190524")
 
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
-    
-    @property
-    def _is_mingw(self):
-        return self.settings.compiler == 'gcc' and self.settings.os == 'Windows'
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     @contextmanager
     def _msvc_build_environment(self):
