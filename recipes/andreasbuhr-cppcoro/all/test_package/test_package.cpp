@@ -1,5 +1,6 @@
-#include <cppcoro/generator.hpp>
+#include <vector>
 #include <iostream>
+#include <cppcoro/generator.hpp>
 
 cppcoro::generator<int> intYielder() {
 	co_yield 0;

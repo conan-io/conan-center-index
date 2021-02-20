@@ -10,7 +10,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
     homepage = "https://github.com/andreasbuhr/cppcoro"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
@@ -56,3 +56,4 @@ class AndreasbuhrCppCoroConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
