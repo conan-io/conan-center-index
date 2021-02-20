@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import textwrap
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -764,34 +765,35 @@ class OpenSSLConan(ConanFile):
 
     @staticmethod
     def _create_cmake_module_variables(module_file):
-        content = (
-            "if(OpenSSL_FOUND)\n"
-            "  set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-            "endif()\n"
-            "if(OpenSSL_INCLUDE_DIR)\n"
-            "  set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})\n"
-            "endif()\n"
-            "if(OpenSSL_Crypto_LIBS)\n"
-            "  set(OPENSSL_CRYPTO_LIBRARY ${OpenSSL_Crypto_LIBS})\n"
-            "  set(OPENSSL_CRYPTO_LIBRARIES ${OpenSSL_Crypto_LIBS}\n"
-            "                               ${OpenSSL_Crypto_DEPENDENCIES}\n"
-            "                               ${OpenSSL_Crypto_FRAMEWORKS}\n"
-            "                               ${OpenSSL_Crypto_SYSTEM_LIBS})\n"
-            "endif()\n"
-            "if(OpenSSL_SSL_LIBS)\n"
-            "  set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})\n"
-            "  set(OPENSSL_SSL_LIBRARIES ${OpenSSL_SSL_LIBS}\n"
-            "                            ${OpenSSL_SSL_DEPENDENCIES}\n"
-            "                            ${OpenSSL_SSL_FRAMEWORKS}\n"
-            "                            ${OpenSSL_SSL_SYSTEM_LIBS})\n"
-            "endif()\n"
-            "if(OpenSSL_LIBRARIES)\n"
-            "  set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n"
-            "endif()\n"
-            "if(OpenSSL_VERSION)\n"
-            "  set(OPENSSL_VERSION ${OpenSSL_VERSION})\n"
-            "endif()\n"
-        )
+        content = """\
+            if(OpenSSL_FOUND)
+                set(OPENSSL_FOUND ${OpenSSL_FOUND})
+            endif()
+            if(OpenSSL_INCLUDE_DIR)
+                set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
+            endif()
+            if(OpenSSL_Crypto_LIBS)
+                set(OPENSSL_CRYPTO_LIBRARY ${OpenSSL_Crypto_LIBS})
+                set(OPENSSL_CRYPTO_LIBRARIES ${OpenSSL_Crypto_LIBS}
+                                             ${OpenSSL_Crypto_DEPENDENCIES}
+                                             ${OpenSSL_Crypto_FRAMEWORKS}
+                                             ${OpenSSL_Crypto_SYSTEM_LIBS})
+            endif()
+            if(OpenSSL_SSL_LIBS)
+                set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
+                set(OPENSSL_SSL_LIBRARIES ${OpenSSL_SSL_LIBS}
+                                          ${OpenSSL_SSL_DEPENDENCIES}
+                                          ${OpenSSL_SSL_FRAMEWORKS}
+                                          ${OpenSSL_SSL_SYSTEM_LIBS})
+            endif()
+            if(OpenSSL_LIBRARIES)
+                set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
+            endif()
+            if(OpenSSL_VERSION)
+                set(OPENSSL_VERSION ${OpenSSL_VERSION})
+            endif()
+        """
+        content = textwrap.dedent(content)
         tools.save(module_file, content)
 
     @property
