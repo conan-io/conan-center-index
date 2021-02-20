@@ -44,30 +44,14 @@ class So5extraConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["SO5EXTRA_INSTALL"] = True
-
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "so_5_extra"))
-        return self._cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-v." + self.version
         os.rename(extracted_dir, self._source_subfolder )
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        self.copy("*.hpp", dst="include/so_5_extra", src=os.path.join(self._source_subfolder, "dev", "so_5_extra"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
