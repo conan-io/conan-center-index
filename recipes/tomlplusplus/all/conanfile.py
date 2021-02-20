@@ -58,12 +58,10 @@ class TomlPlusPlusConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.options.multiple_headers:
-            header_dir = os.path.join(
-                self._source_subfolder, "include", "toml++")
+            header_dir = os.path.join(self._source_subfolder, "include", "toml++")
             self.copy(pattern="*.h", dst="include", src=header_dir)
         else:
-            self.copy(pattern="toml.hpp", dst="include",
-                      src=self._source_subfolder)
+            self.copy(pattern="toml.hpp", dst="include", src=self._source_subfolder)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()

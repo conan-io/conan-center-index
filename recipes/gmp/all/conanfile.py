@@ -69,6 +69,7 @@ class GmpConan(ConanFile):
             os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
             "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
             "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
             "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),

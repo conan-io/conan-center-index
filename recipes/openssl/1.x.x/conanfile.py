@@ -433,16 +433,6 @@ class OpenSSLConan(ConanFile):
     def _get_env_build(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
-            if self.settings.compiler == "apple-clang":
-                # add flags only if not already specified, avoid breaking Catalyst which needs very special flags
-                flags = " ".join(self._env_build.flags)
-                if "-arch" not in flags:
-                    self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
-                if "-isysroot" not in flags:
-                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
-                if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
-                    self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                              self.settings.os.version))
         return self._env_build
 
     @property
@@ -533,11 +523,10 @@ class OpenSSLConan(ConanFile):
 );
 """
         cflags = []
-
+        cxxflags = []
         env_build = self._get_env_build()
-        cflags.extend(env_build.flags)
-        cxxflags = cflags[:]
-        cxxflags.extend(env_build.cxx_flags)
+        cflags.extend(env_build.vars_dict["CFLAGS"])
+        cxxflags.extend(env_build.vars_dict["CXXFLAGS"])
 
         cc = self._tool("CC", "cc")
         cxx = self._tool("CXX", "cxx")
@@ -684,7 +673,7 @@ class OpenSSLConan(ConanFile):
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self._full_version < "1.1.0":
-                cflags = " ".join(self._get_env_build().flags)
+                cflags = " ".join(self._get_env_build().vars_dict["CFLAGS"])
                 env_vars["CC"] = "%s %s" % (self._cc, cflags)
             if self.settings.compiler == "apple-clang":
                 xcrun = tools.XCRun(self.settings)

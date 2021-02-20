@@ -5,6 +5,9 @@ sources:
   "1.10.0":
     url: "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
     sha256: "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb"
+  "cci.20210126":
+    url: "https://github.com/google/googletest/archive/273f8cb059a4e7b089731036392422b5ef489791.tar.gz"
+    sha256: "2937e96827aa44b291d42c4f0ffaa6a7637445822cf873d0fa6a889df84b8628"
 patches:
   "1.8.1":
     - patch_file: "patches/gtest-1.8.1.patch"
@@ -13,4 +16,7 @@ patches:
     - patch_file: "patches/gtest-1.10.0.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/gtest-1.10.0-override.patch"
+      base_path: "source_subfolder"
+  "cci.20210126":
+    - patch_file: "patches/gtest-1.10.0.patch"
       base_path: "source_subfolder"
