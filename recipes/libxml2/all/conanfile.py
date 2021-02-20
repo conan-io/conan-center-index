@@ -73,6 +73,8 @@ class Libxml2Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -165,15 +167,12 @@ class Libxml2Conan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        if not tools.os_info.is_windows:
-            self._autotools.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         # fix rpath
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         configure_args = ['--prefix=%s' % full_install_subfolder]
-        if self._autotools.fpic:
-            configure_args.extend(['--with-pic'])
+        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "without-pic")
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
         else:
