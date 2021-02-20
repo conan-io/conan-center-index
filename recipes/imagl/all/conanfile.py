@@ -14,8 +14,8 @@ class ImaglConan(ConanFile):
     description = "A lightweight library to load image for OpenGL application."
     topics = ("opengl", "texture", "image")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_png": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_png": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_png": [True, False], "with_jpeg": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_png": True, "with_jpeg": True}
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
     _cmake = None
@@ -58,6 +58,8 @@ class ImaglConan(ConanFile):
     def requirements(self):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
+        if self.options.with_jpeg and tools.Version(self.version) >= "0.2.0":
+            self.requires("libjpeg/9d")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -65,6 +67,8 @@ class ImaglConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["SUPPORT_PNG"] = self.options.with_png
+        if tools.Version(self.version) >= "0.2.0":
+            self._cmake.definitions["SUPPORT_JPEG"] = self.options.with_jpeg
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
