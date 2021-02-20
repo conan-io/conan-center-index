@@ -2,6 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuil
 from contextlib import contextmanager
 import glob
 import os
+import textwrap
 
 required_conan_version = ">=1.29.1"
 
@@ -238,6 +239,44 @@ class Libxml2Conan(ConanFile):
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
                       dst=os.path.join("include", "libxml2"), keep_path=False)
 
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
+        content = """\
+            if(LibXml2_FOUND)
+                set(LIBXML2_FOUND ${LibXml2_FOUND})
+                set(BZIP2_NEED_PREFIX TRUE)
+            endif()
+            if(LibXml2_INCLUDE_DIR)
+                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
+                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIR})
+            endif()
+            if(LibXml2_LIBRARIES)
+                set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
+                set(LIBXML2_LIBRARY ${LibXml2_LIBRARIES})
+            endif()
+            if(LibXml2_DEFINITIONS)
+                set(LIBXML2_DEFINITIONS ${LibXml2_DEFINITIONS})
+            endif()
+            if(LibXml2_VERSION)
+                set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
+            endif()
+        """
+        content = textwrap.dedent(content)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-variables.cmake".format(self.name)
+
     def package_info(self):
         if self._is_msvc:
             self.cpp_info.libs = ['libxml2' if self.options.shared else 'libxml2_a']
@@ -257,6 +296,9 @@ class Libxml2Conan(ConanFile):
         elif self.settings.os == "Windows":
             if self.options.ftp or self.options.http:
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
+        # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
+        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
