@@ -168,9 +168,6 @@ class Libxml2Conan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         configure_args = ['--prefix=%s' % full_install_subfolder]
         configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "without-pic")
         if self.options.shared:
@@ -192,6 +189,9 @@ class Libxml2Conan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
+        # fix rpath
+        if self.settings.os == "Macos":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
 
     def build(self):
         self._patch_sources()
