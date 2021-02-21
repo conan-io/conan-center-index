@@ -4,8 +4,9 @@ import glob
 
 class RangelessConan(ConanFile):
     name = "rangeless"
+    description = "c++ LINQ -like library of higher-order functions for data manipulation"
     license = "Public domain"
-    homeback = "https://github.com/ast-al/rangeless"
+    homepage = "https://github.com/ast-al/rangeless"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("range", "linq", "lazy-evaluation", "header-only")
     no_copy_source = True
@@ -13,6 +14,9 @@ class RangelessConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def configure(self):
+        tools.check_min_cppstd(self, "11")
     
     def package_id(self):
         self.info.header_only()
