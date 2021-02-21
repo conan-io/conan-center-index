@@ -14,6 +14,12 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+add_compile_options(
+    -Wno-unguarded-availability-new
+    -Wno-deprecated-declarations
+    -Wno-nonportable-include-path
+)
+
 # PIC required for objects targets linked into shared MoltenVK
 if(BUILD_SHARED_LIBS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
