@@ -14,18 +14,18 @@ class RangelessConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     def configure(self):
-        tools.check_min_cppstd(self, "11")
-    
+        minimal_cpp_standard = "14"
+
     def package_id(self):
         self.info.header_only()
-    
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob(self.name + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
-    
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
