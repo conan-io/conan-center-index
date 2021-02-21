@@ -71,6 +71,7 @@ set(MVK_INSTALL_TARGETS "")
 #   - frameworks: Foundation
 file(GLOB MVK_COMMON_SOURCES ${PROJECT_DIR}/common/*.mm)
 add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
+target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
 
 # MoltenVKShaderConverter
 # * direct dependencies:
