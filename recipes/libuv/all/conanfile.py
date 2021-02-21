@@ -1,6 +1,7 @@
+import glob
+import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
 
 class libuvConan(ConanFile):
@@ -48,7 +49,8 @@ class libuvConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libuv-{}".format(self.version), self._source_subfolder)
+        extracted_dir = glob.glob("libuv-*/")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
