@@ -3,6 +3,9 @@ name: Auto Label Conflicts
 on:
   push:
     branches: [ master ]
+  pull_request:
+    types: [synchronize]
+    branches: [ master ]
 
 jobs:
   auto-label:
