@@ -13,7 +13,10 @@ class PipesConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
+    def configure(self):
+        minimal_cpp_standard = "14"
+
     def package_id(self):
         self.info.header_only()
     
