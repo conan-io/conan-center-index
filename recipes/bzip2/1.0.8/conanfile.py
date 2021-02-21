@@ -71,23 +71,22 @@ class Bzip2Conan(ConanFile):
 
     @staticmethod
     def _create_cmake_module_variables(module_file):
-        content = """\
-            if(BZip2_FOUND)
+        content = textwrap.dedent("""\
+            if(DEFINED BZip2_FOUND)
                 set(BZIP2_FOUND ${BZip2_FOUND})
                 set(BZIP2_NEED_PREFIX TRUE)
             endif()
-            if(BZip2_INCLUDE_DIR)
+            if(DEFINED BZip2_INCLUDE_DIR)
                 set(BZIP2_INCLUDE_DIRS ${BZip2_INCLUDE_DIR})
                 set(BZIP2_INCLUDE_DIR ${BZip2_INCLUDE_DIR})
             endif()
-            if(BZip2_LIBRARIES)
+            if(DEFINED BZip2_LIBRARIES)
                 set(BZIP2_LIBRARIES ${BZip2_LIBRARIES})
             endif()
-            if(BZip2_VERSION)
+            if(DEFINED BZip2_VERSION)
                 set(BZIP2_VERSION_STRING ${BZip2_VERSION})
             endif()
-        """
-        content = textwrap.dedent(content)
+        """)
         tools.save(module_file, content)
 
     @property
