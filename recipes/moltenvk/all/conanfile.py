@@ -86,3 +86,7 @@ class MoltenVKConan(ConanFile):
             self.cpp_info.frameworks.append("IOKit")
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
