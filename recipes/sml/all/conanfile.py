@@ -7,7 +7,7 @@ class SMLConan(ConanFile):
     name = "sml"
     homepage = "https://github.com/boost-ext/sml"
     description = "SML: C++14 State Machine Library"
-    topics = ("state-machine", "boost", "metaprogramming", "design-patterns", "sml")
+    topics = ("state-machine", "metaprogramming", "design-patterns", "sml")
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
