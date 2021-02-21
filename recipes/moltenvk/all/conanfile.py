@@ -34,6 +34,9 @@ class MoltenVKConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
+        # Might depend on MoltenVK version
+        if tools.Version(self.settings.compiler.version) < 11:
+            raise ConanInvalidConfiguration("MoltenVK {} requires macos-sdk 10.15+ (XCode 11 or higher)".format(self.version))
 
     def requirements(self):
         self.requires("cereal/1.3.0")
