@@ -16,8 +16,16 @@ class MoltenVKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "tools": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "tools": True
+    }
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -69,6 +77,7 @@ class MoltenVKConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
         self._cmake.configure()
         return self._cmake
 
@@ -90,6 +99,7 @@ class MoltenVKConan(ConanFile):
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

@@ -10,6 +10,8 @@ if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
     message(FATAL_ERROR "MoltenVK only supports MacOS, iOS and tvOS")
 endif()
 
+option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -59,6 +61,7 @@ else()
 endif()
 
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set(MVK_INSTALL_TARGETS "")
 
 # MoltenVKCommon
 # * direct dependencies:
@@ -89,22 +92,25 @@ target_include_directories(MoltenVKShaderConverter PUBLIC
 #   - external: None
 #   - internal: MoltenVKShaderConverter and MoltenVKCommon
 #   - frameworks: Metal and Foundation
-file(GLOB MVK_SCT_SOURCES
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.cpp
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
-)
-add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
-set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
-target_include_directories(MoltenVKShaderConverterTool PRIVATE
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter
-)
-target_link_libraries(MoltenVKShaderConverterTool PRIVATE
-    MoltenVKCommon
-    MoltenVKShaderConverter
-    ${CONAN_LIBS}
-    ${METAL_FRAMEWORK}
-    ${FOUNDATION_FRAMEWORK}
-)
+if(MVK_BUILD_SHADERCONVERTER_TOOL)
+    file(GLOB MVK_SCT_SOURCES
+        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.cpp
+        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
+    )
+    add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
+    set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
+    target_include_directories(MoltenVKShaderConverterTool PRIVATE
+        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter
+    )
+    target_link_libraries(MoltenVKShaderConverterTool PRIVATE
+        MoltenVKCommon
+        MoltenVKShaderConverter
+        ${CONAN_LIBS}
+        ${METAL_FRAMEWORK}
+        ${FOUNDATION_FRAMEWORK}
+    )
+    list(APPEND MVK_INSTALL_TARGETS MoltenVKShaderConverterTool)
+endif()
 
 # MoltenVK
 # * direct dependencies:
@@ -139,9 +145,10 @@ target_link_libraries(MoltenVK PRIVATE
     ${IOSURFACE_FRAMEWORK}
     ${IO_OR_UI_KIT_FRAMEWORK}
 )
+list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 install(
-    TARGETS MoltenVK MoltenVKShaderConverterTool
+    TARGETS ${MVK_INSTALL_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
