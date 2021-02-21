@@ -175,7 +175,7 @@ class Libxml2Conan(ConanFile):
         self._autotools.libs = []
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         configure_args = ['--prefix=%s' % full_install_subfolder]
-        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "without-pic")
+        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
         else:
