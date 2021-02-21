@@ -21,7 +21,7 @@ If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in 
 
 When extracting sources or performing out-of-source builds, it is preferable to use property attributes for these variables.
 
-```cpp
+```py
 @property
 def _source_subfolder(self):
     return "source_subfolder"
