@@ -63,6 +63,6 @@ class GflagsConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(['shlwapi'])
+            self.cpp_info.system_libs.extend(['shlwapi'])
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "m"])
