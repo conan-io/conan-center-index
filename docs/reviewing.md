@@ -7,7 +7,9 @@ The following policies are preferred during the review, but not mandatory:
 
   * [Trailing white-spaces](#trailing-white-spaces)
   * [Quotes](#quotes)
-  * [Order of methods and attributes](#order-of-methods-and-attributes)<!-- endToc -->
+  * [Order of methods and attributes](#order-of-methods-and-attributes)
+  * [License Attribute](#license-attribute)
+  * [Test Package](#test-package)<!-- endToc -->
 
 ## Trailing white-spaces
 
@@ -64,6 +66,10 @@ the order above resembles the execution order of methods on CI. therefore, for i
 
 The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instatiation of objects to ensure linkage
 and dependencies are correct.
+
+## License Attribute
+
+The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
 
 ### Verifying Components
 

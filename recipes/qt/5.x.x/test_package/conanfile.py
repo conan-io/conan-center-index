@@ -81,7 +81,6 @@ class TestPackageConan(ConanFile):
             if self.settings.os == "Macos":
                 cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
 
-            self.run("moc %s -o moc_greeter.cpp" % os.path.join(self.source_folder, "greeter.h"), run_environment=True)
             cmake.configure()
             cmake.build()
 

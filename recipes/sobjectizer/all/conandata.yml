@@ -1,0 +1,4 @@
+sources:
+  "5.7.2.2":
+    url: "https://github.com/Stiffstream/sobjectizer/archive/v.5.7.2.2.tar.gz"
+    sha256: "85f6cdd10bc4b05b8e7eeff7cd6eb76cc0338810114ba6d517163f143676054f"
