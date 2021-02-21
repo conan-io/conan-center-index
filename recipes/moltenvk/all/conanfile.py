@@ -19,11 +19,13 @@ class MoltenVKConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_spirv_tools": [True, False],
         "tools": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_spirv_tools": True,
         "tools": True
     }
 
@@ -50,8 +52,9 @@ class MoltenVKConan(ConanFile):
         self.requires("cereal/1.3.0")
         self.requires("glslang/8.13.3559")
         self.requires("spirv-cross/20210115")
-        self.requires("spirv-tools/v2020.5")
         self.requires("vulkan-headers/1.2.162.0")
+        if self.options.with_spirv_tools:
+            self.requires("spirv-tools/v2020.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -77,6 +80,7 @@ class MoltenVKConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["MVK_WITH_SPIRV_TOOLS"] = self.options.with_spirv_tools
         self._cmake.definitions["MVK_BUILD_SHADERCONVERTER_TOOL"] = self.options.tools
         self._cmake.configure()
         return self._cmake

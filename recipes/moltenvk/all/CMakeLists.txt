@@ -10,6 +10,7 @@ if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
     message(FATAL_ERROR "MoltenVK only supports MacOS, iOS and tvOS")
 endif()
 
+option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -73,7 +74,7 @@ add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
 
 # MoltenVKShaderConverter
 # * direct dependencies:
-#   - external: spirv-cross, spirv-tools and glslang
+#   - external: spirv-cross, glslang, and spirv-tools (optional)
 #   - internal: MoltenVKCommon
 #   - frameworks: Foundation
 file(GLOB MVK_SC_SOURCES
@@ -86,6 +87,9 @@ target_include_directories(MoltenVKShaderConverter PUBLIC
     ${PROJECT_DIR}/common
     ${PROJECT_DIR}/MoltenVKShaderConverter/common
 )
+if(NOT MVK_WITH_SPIRV_TOOLS)
+    target_compile_definitions(MoltenVKShaderConverter PRIVATE MVK_EXCLUDE_SPIRV_TOOLS)
+endif()
 
 # MoltenVKShaderConverterTool
 # * direct dependencies:
