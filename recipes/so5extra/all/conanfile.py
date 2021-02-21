@@ -9,11 +9,8 @@ class So5extraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A collection of various SObjectizer's extensions."
     topics = ("concurrency", "actor-framework", "actors", "agents", "sobjectizer")
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
