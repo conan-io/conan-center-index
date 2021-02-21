@@ -1,0 +1,4 @@
+sources:
+  "1.1.1":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.1.tar.gz"
+    sha256: "cd1712c571d4155f4143c435c8551a5cb8cbb311ad7fff03595322ab971682c0"
