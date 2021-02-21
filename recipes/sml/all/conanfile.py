@@ -18,10 +18,6 @@ class SMLConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property 
     def _minimum_compilers_version(self): 
         return {
