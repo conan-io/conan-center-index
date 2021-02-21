@@ -8,6 +8,7 @@ class PipesConan(ConanFile):
     topics = ("pipes", "functional-programming")
     homepage = "https://github.com/joboccara/pipes"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "compiler"
     no_copy_source = True
 
     @property
@@ -16,6 +17,8 @@ class PipesConan(ConanFile):
 
     def configure(self):
         minimal_cpp_standard = "14"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
 
     def package_id(self):
         self.info.header_only()
