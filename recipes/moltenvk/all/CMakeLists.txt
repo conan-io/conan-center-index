@@ -69,6 +69,7 @@ file(GLOB MVK_SCT_SOURCES
     ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
 )
 add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
+set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
 target_include_directories(MoltenVKShaderConverterTool PRIVATE
     ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter
 )
