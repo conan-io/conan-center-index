@@ -21,8 +21,23 @@ class SMLConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property 
+    def _minimum_compilers_version(self): 
+    return { 
+        "Visual Studio": "15", 
+        "gcc": "5", 
+        "clang": "5", 
+        "apple-clang": "5.1", 
+    } 
+
     def configure(self):
-        check_min_cppstd(self, "14")
+        if self.settings.compiler.cppstd: 
+            check_min_cppstd(self, "14")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
+        if not minimum_version: 
+            self.output.warn("SML requires C++14. Your compiler is unknown. Assuming it supports C++14.") 
+        elif tools.Version(self.settings.compiler.version) < minimum_version: 
+            raise ConanInvalidConfiguration("SML requires C++14, which your compiler does not support.") 
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
