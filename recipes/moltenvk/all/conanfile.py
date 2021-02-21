@@ -44,9 +44,6 @@ class MoltenVKConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
-        # Might depend on MoltenVK version
-        if tools.Version(self.settings.compiler.version) < 11:
-            raise ConanInvalidConfiguration("MoltenVK {} requires macos-sdk 10.15+ (XCode 11 or higher)".format(self.version))
 
     def requirements(self):
         self.requires("cereal/1.3.0")
@@ -59,6 +56,9 @@ class MoltenVKConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("MoltenVK-" + self.version, self._source_subfolder)
+
+    def package_id(self):
+        del self.info.settings.compiler.version
 
     def _patch_sources(self):
         # Note: All these fixes might be very specific to 1.1.1
@@ -86,6 +86,9 @@ class MoltenVKConan(ConanFile):
         return self._cmake
 
     def build(self):
+        # Might depend on MoltenVK version
+        if tools.Version(self.settings.compiler.version) < 12:
+            raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12+ at build time".format(self.version))
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
