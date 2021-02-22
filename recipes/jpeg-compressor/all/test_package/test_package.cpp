@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     }
 
     free(pBuf);
-    free(pImage_data);
+    // free(pImage_data);
 
 
     return EXIT_SUCCESS;
