@@ -11,9 +11,10 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: mschilde/auto-label-merge-conflicts@master
+      - uses: prince-chrismc/label-merge-conflicts-action@v0.0.1
         with:
-          CONFLICT_LABEL_NAME: "has conflicts"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAX_RETRIES: 5
-          WAIT_MS: 15000
+          conflict_label_name: "has conflicts"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # These are optional incase you need to adjust for the limitations described below
+          max_retries: 5
+          wait_ms: 15000
