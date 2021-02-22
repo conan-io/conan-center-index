@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 class AndreasbuhrCppCoroConan(ConanFile):
     name = "andreasbuhr-cppcoro"
