@@ -205,7 +205,7 @@ class AwsSdkCppConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        build_only = list([])
+        build_only = ['core']
         for sdk in self.sdks:
             if getattr(self.options, sdk):
                 build_only.append(sdk)
