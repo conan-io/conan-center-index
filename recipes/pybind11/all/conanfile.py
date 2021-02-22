@@ -69,5 +69,4 @@ class PyBind11Conan(ConanFile):
 
         def get_path(filename):
             return os.path.join(cmake_base_path, filename)
-        self.cpp_info.build_modules = [get_path("FindPythonLibsNew.cmake"),
-                                       get_path("pybind11Install.cmake")]
+        self.cpp_info.build_modules = [get_path("pybind11Install.cmake")]
