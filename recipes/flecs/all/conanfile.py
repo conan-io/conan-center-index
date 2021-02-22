@@ -38,21 +38,23 @@ class FlecsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()        
+        return self._cmake
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        cmake = CMake(self)
-        cmake.configure()
+        cmake = self._configure_cmake()
         cmake.build(target="flecs" if self.options.shared else "flecs_static")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.lib", dst="lib", src="lib")
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.a", dst="lib", src="lib")
-        self.copy("*.so*", dst="lib", src="lib", symlinks=True)
-        self.copy("*.dylib", dst="lib", src="lib", symlinks=True)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["flecs"] if self.options.shared else ["flecs_static"]
