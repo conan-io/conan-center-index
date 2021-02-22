@@ -21,8 +21,8 @@ class mailioConan(ConanFile):
         "shared": False
     }
     requires = ["boost/1.75.0", "openssl/1.1.1i"]
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt"]
     short_paths = True
     _cmake = None
 
@@ -72,11 +72,18 @@ class mailioConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
-    def build(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
-            tools.patch(**patch)
+    def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
+        tools.replace_in_file(cmakelists, "${CMAKE_BINARY_DIR}/version.hpp", "${PROJECT_BINARY_DIR}/version.hpp")
+
+        # Workaround for casing issues in cmake_find_package generator of openssl recipe
+        tools.replace_in_file(cmakelists, "OPENSSL_FOUND", "OpenSSL_FOUND")
+        tools.replace_in_file(cmakelists, "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
+        tools.replace_in_file(cmakelists, "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
