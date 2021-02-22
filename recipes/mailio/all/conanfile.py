@@ -95,3 +95,4 @@ class mailioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]
