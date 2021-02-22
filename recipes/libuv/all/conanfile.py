@@ -49,8 +49,7 @@ class libuvConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("libuv-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename("libuv-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
