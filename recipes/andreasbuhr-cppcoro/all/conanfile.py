@@ -51,8 +51,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
                 self.name, self.settings.compiler))
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration("{} requires coroutine TS support. The current compiler {} {} does not support it.".format(
+                    self.name, self.settings.compiler, self.settings.compiler.version))
 
         if self.options.shared:
             del self.options.fPIC
