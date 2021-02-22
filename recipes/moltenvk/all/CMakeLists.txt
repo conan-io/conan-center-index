@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(MoltenVK)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
         CMAKE_SYSTEM_NAME STREQUAL "iOS" OR
@@ -15,7 +15,6 @@ option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
 
 # PIC required for objects targets linked into shared MoltenVK
 if(BUILD_SHARED_LIBS)
@@ -55,7 +54,7 @@ else()
     endif()
 endif()
 
-set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 set(MVK_INSTALL_TARGETS "")
 
 # MoltenVKCommon
@@ -63,27 +62,52 @@ set(MVK_INSTALL_TARGETS "")
 #   - external: None
 #   - internal: None
 #   - frameworks: Foundation
-file(GLOB MVK_COMMON_SOURCES ${PROJECT_DIR}/common/*.mm)
+file(GLOB MVK_COMMON_SOURCES ${MVK_DIR}/common/*.mm)
 add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
+target_include_directories(MoltenVKCommon PUBLIC ${MVK_DIR}/common)
 target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
+target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
 
 # MoltenVKShaderConverter
 # * direct dependencies:
 #   - external: spirv-cross, glslang, and spirv-tools (optional)
 #   - internal: MoltenVKCommon
 #   - frameworks: Foundation
-file(GLOB MVK_SC_SOURCES
-    ${PROJECT_DIR}/MoltenVKShaderConverter/common/*.cpp
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*.cpp
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*.mm
+file(GLOB MVK_SC_COMMON_SOURCES ${MVK_DIR}/MoltenVKShaderConverter/common/*.cpp)
+if(MVK_VERSION VERSION_LESS "1.1.0")
+    file(GLOB MVK_SC_CONVERTERS_SOURCES
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*.cpp
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*.mm
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/*.cpp
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/*.mm
+    )
+else()
+    file(GLOB MVK_SC_CONVERTERS_SOURCES
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*.cpp
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*.mm
+    )
+endif()
+add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_COMMON_SOURCES} ${MVK_SC_CONVERTERS_SOURCES})
+target_include_directories(MoltenVKShaderConverter
+    PRIVATE ${MVK_DIR}/MoltenVKShaderConverter/common
+    INTERFACE ${MVK_DIR}/MoltenVKShaderConverter
 )
-add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_SOURCES})
-target_include_directories(MoltenVKShaderConverter PUBLIC
-    ${PROJECT_DIR}/common
-    ${PROJECT_DIR}/MoltenVKShaderConverter/common
+if(MVK_VERSION VERSION_LESS "1.1.0")
+    target_include_directories(MoltenVKShaderConverter PRIVATE
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
+    )
+endif()
+target_link_libraries(MoltenVKShaderConverter
+    PRIVATE
+        CONAN_PKG::glslang
+        MoltenVKCommon
+        ${FOUNDATION_FRAMEWORK}
+    PUBLIC
+        CONAN_PKG::spirv-cross
 )
 if(NOT MVK_WITH_SPIRV_TOOLS)
     target_compile_definitions(MoltenVKShaderConverter PRIVATE MVK_EXCLUDE_SPIRV_TOOLS)
+    target_link_libraries(MoltenVKShaderConverter PRIVATE CONAN_PKG::spirv-tools)
 endif()
 
 # MoltenVKShaderConverterTool
@@ -93,18 +117,27 @@ endif()
 #   - frameworks: Metal and Foundation
 if(MVK_BUILD_SHADERCONVERTER_TOOL)
     file(GLOB MVK_SCT_SOURCES
-        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.cpp
-        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.cpp
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
     )
     add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
     set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
     target_include_directories(MoltenVKShaderConverterTool PRIVATE
-        ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter
+        ${MVK_DIR}/MoltenVKShaderConverter/common
     )
+    if(MVK_VERSION VERSION_LESS "1.1.0")
+        target_include_directories(MoltenVKShaderConverterTool PRIVATE
+            ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter
+            ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter
+        )
+    else()
+        target_include_directories(MoltenVKShaderConverterTool PRIVATE
+            ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter
+        )
+    endif()
     target_link_libraries(MoltenVKShaderConverterTool PRIVATE
         MoltenVKCommon
         MoltenVKShaderConverter
-        ${CONAN_LIBS}
         ${METAL_FRAMEWORK}
         ${FOUNDATION_FRAMEWORK}
     )
@@ -113,37 +146,42 @@ endif()
 
 # MoltenVK
 # * direct dependencies:
-#   - external: cereal, spirv-cross and vulkan-headers
+#   - external: cereal, spirv-cross and vulkan-headers (+ vulkan-portability if moltenvk < 1.1.0)
 #   - internal: MoltenVKShaderConverter and MoltenVKCommon
 #   - frameworks: Foundation, Metal, QuartzCore, AppKit, IOSurface + IOKit (Macos) or UIKit (iOS/tvOS)
 file(GLOB_RECURSE MVK_SOURCES
-    ${PROJECT_DIR}/MoltenVK/*.m
-    ${PROJECT_DIR}/MoltenVK/*.mm
-    ${PROJECT_DIR}/MoltenVK/*.cpp
+    ${MVK_DIR}/MoltenVK/*.m
+    ${MVK_DIR}/MoltenVK/*.mm
+    ${MVK_DIR}/MoltenVK/*.cpp
 )
 add_library(MoltenVK ${MVK_SOURCES})
 target_include_directories(MoltenVK PRIVATE
-    ${PROJECT_DIR}/Common
-    ${PROJECT_DIR}/MoltenVKShaderConverter
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/API
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/Commands
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/GPUObjects
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/Layers
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/OS
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/Utility
-    ${PROJECT_DIR}/MoltenVK/MoltenVK/Vulkan
+    ${MVK_DIR}/MoltenVK/MoltenVK/API
+    ${MVK_DIR}/MoltenVK/MoltenVK/Commands
+    ${MVK_DIR}/MoltenVK/MoltenVK/GPUObjects
+    ${MVK_DIR}/MoltenVK/MoltenVK/Layers
+    ${MVK_DIR}/MoltenVK/MoltenVK/OS
+    ${MVK_DIR}/MoltenVK/MoltenVK/Utility
+    ${MVK_DIR}/MoltenVK/MoltenVK/Vulkan
 )
-target_link_libraries(MoltenVK PRIVATE
-    MoltenVKCommon
-    MoltenVKShaderConverter
-    ${CONAN_LIBS}
-    ${METAL_FRAMEWORK}
-    ${FOUNDATION_FRAMEWORK}
-    ${QUARTZ_CORE_FRAMEWORK}
-    ${APPKIT_FRAMEWORK}
-    ${IOSURFACE_FRAMEWORK}
-    ${IO_OR_UI_KIT_FRAMEWORK}
+target_link_libraries(MoltenVK
+    PRIVATE
+        CONAN_PKG::cereal
+        CONAN_PKG::spirv-cross
+        MoltenVKCommon
+        MoltenVKShaderConverter
+        ${FOUNDATION_FRAMEWORK}
+        ${QUARTZ_CORE_FRAMEWORK}
+        ${APPKIT_FRAMEWORK}
+        ${IO_OR_UI_KIT_FRAMEWORK}
+    PUBLIC
+        CONAN_PKG::vulkan-headers
+        ${METAL_FRAMEWORK}
+        ${IOSURFACE_FRAMEWORK}
 )
+if(MVK_VERSION VERSION_LESS "1.1.0")
+    target_link_libraries(MoltenVK PUBLIC CONAN_PKG::vulkan-portability)
+endif()
 target_compile_options(MoltenVK PRIVATE
     -Wno-unguarded-availability-new
     -Wno-deprecated-declarations
@@ -161,21 +199,30 @@ install(
 
 if(BUILD_SHARED_LIBS)
     install(
-        FILES ${PROJECT_DIR}/MoltenVK/icd/MoltenVK_icd.json
+        FILES ${MVK_DIR}/MoltenVK/icd/MoltenVK_icd.json
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 endif()
 
-file(GLOB MVK_PUBLIC_HEADERS ${PROJECT_DIR}/MoltenVK/MoltenVK/API/*.h)
+file(GLOB MVK_PUBLIC_HEADERS ${MVK_DIR}/MoltenVK/MoltenVK/API/*.h)
 install(
     FILES ${MVK_PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/MoltenVK
 )
 
-file(GLOB MVK_SC_PUBLIC_HEADERS
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*Conversion.h
-    ${PROJECT_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*Converter.h
-)
+if(MVK_VERSION VERSION_LESS "1.1.0")
+    file(GLOB MVK_SC_PUBLIC_HEADERS
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*Conversion.h
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*Converter.h
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/*Conversion.h
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKSPIRVToMSLConverter/*Converter.h
+    )
+else()
+    file(GLOB MVK_SC_PUBLIC_HEADERS
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*Conversion.h
+        ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*Converter.h
+    )
+endif()
 install(
     FILES ${MVK_SC_PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/MoltenVKShaderConverter
