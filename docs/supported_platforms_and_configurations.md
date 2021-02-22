@@ -47,8 +47,8 @@ and **88 for a C library**.
 ## Linux
 
 - Compilers:
-  - GCC versions 4.9, 5, 6, 7, 8, 9
-  - Clang versions 3.9, 4.0, 5.0, 6.0, 7.0, 8, 9
+  - GCC versions 4.9, 5, 6, 7, 8, 9, 10
+  - Clang versions 3.9, 4.0, 5.0, 6.0, 7.0, 8, 9, 10, 11
 - C++ Standard Library (`libcxx`):
   - GCC compiler: `libstdc++`, `libstdc++11`
   - Clang compiler: `libstdc++`, `libc++`
@@ -60,7 +60,7 @@ and **88 for a C library**.
 
 ## MacOS
 
-- Compilers: Apple-clang versions 9.1, 10.0, 11.0 (three latest versions, we will rotate the older when a new compiler version is released)
+- Compilers: Apple-clang versions 9.1, 10.0, 11.0, 12.0 (three latest versions, we will rotate the older when a new compiler version is released)
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
