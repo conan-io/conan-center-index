@@ -189,7 +189,7 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-event-stream/0.1.5")
         self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.71.1")
+            self.requires("libcurl/7.74.0")
         if not self.settings.os in ["Windows", "Macos"]:
             self.requires("openssl/1.1.1i")
 
