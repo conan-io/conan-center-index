@@ -74,13 +74,7 @@ class mailioConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-
         tools.replace_in_file(cmakelists, "${CMAKE_BINARY_DIR}/version.hpp", "${PROJECT_BINARY_DIR}/version.hpp")
-
-        # Workaround for casing issues in cmake_find_package generator of openssl recipe
-        tools.replace_in_file(cmakelists, "OPENSSL_FOUND", "OpenSSL_FOUND")
-        tools.replace_in_file(cmakelists, "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
-        tools.replace_in_file(cmakelists, "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
 
     def build(self):
         self._patch_sources()
