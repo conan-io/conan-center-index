@@ -18,6 +18,7 @@ class FlecsConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
