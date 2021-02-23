@@ -61,8 +61,14 @@ class MoltenVKConan(ConanFile):
     def _spirv_cross_version(self):
         return {
             "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
-            "1.1.0": "20200917", # works with spirv-cross 20200917 only
-        }.get(self.version)
+            "1.1.0": "20200917", # compiles only with spirv-cross 20200917
+            "1.0.44": "20200917", # compiles only with spirv-cross 20200917
+            "1.0.43": "20200519", # compiles only with spirv-cross 20200519
+            "1.0.42": "20200519", # compiles only with spirv-cross 20200519
+            "1.0.41": "20200519", # compiles only with spirv-cross 20200403 or 20200519
+            "1.0.40": "20200519", # compiles only with spirv-cross 20200403 or 20200519
+            "1.0.39": "20200519", # compiles only with spirv-cross 20200403 or 20200519
+        }[self.version]
 
     @property
     def _vulkan_headers_version(self):
@@ -97,7 +103,7 @@ class MoltenVKConan(ConanFile):
             "1.0.19": "1.1.82.0",
             "1.0.18": "1.1.82.0",
             "1.0.17": "1.1.82.0",
-        }.get(self.version)
+        }[self.version]
 
     def package_id(self):
         # MoltenVK >=1.42 requires at least XCode 12.0 (11.4 actually) at build
