@@ -23,7 +23,7 @@ int main(int argc, const char* argv[])
 
     int buf_size = width * height * 3;
     if (buf_size < 1024) buf_size = 1024;
-	void* pBuf = malloc(buf_size);
+    void* pBuf = malloc(buf_size);
     if (!jpge::compress_image_to_jpeg_file_in_memory(pBuf, buf_size, width, height, req_comps, pImage_data))
     {
         std::cerr << "Failed creating JPEG data" << std::endl;
@@ -31,8 +31,7 @@ int main(int argc, const char* argv[])
     }
 
     free(pBuf);
-    // free(pImage_data);
-
+    free(pImage_data);
 
     return EXIT_SUCCESS;
 }
