@@ -42,7 +42,7 @@ class FlecsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure()        
+        self._cmake.configure()
         return self._cmake
 
     def build(self):

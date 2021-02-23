@@ -1,10 +1,4 @@
 sources:
-  "2.3.1":
-    url: "https://github.com/SanderMertens/flecs/archive/v2.3.1.tar.gz"
-    sha256: "b2cd69b3282167295d509deb762e580ad76040ed96ceb4492657bc1e444b8c89"
-patches:
-  "2.3.1":
-    - patch_file: "patches/no-invalid-warnings.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/no-custom-compile-flags.patch"
-      base_path: "source_subfolder"
+  "2.3.2":
+    url: "https://github.com/SanderMertens/flecs/archive/v2.3.2.tar.gz"
+    sha256: "ff2690953941b3f08d4e934e299fa8902e46ce8532edd176388d467ace33eebf"
