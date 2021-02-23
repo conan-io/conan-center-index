@@ -8,10 +8,14 @@ from conans.errors import ConanInvalidConfiguration
 class LiburingConan(ConanFile):
     name = "liburing"
     license = "GPL-2.0-or-later"
-    author = "Ilya Kazakov kazakovilya97@gmail.com"
     homepage = "https://github.com/axboe/liburing"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
+    description = """helpers to setup and
+        teardown io_uring instances, and also a simplified interface for
+        applications that don't need (or want) to deal with the full kernel
+        side implementation."""
+    topics = "conan", "asynchronous io"
 
     options = {
         "fPIC": [True, False],
