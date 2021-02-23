@@ -7,7 +7,8 @@ class ResiprocateConan(ConanFile):
     topics = ("mock", "hippo", "framework")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dascandy/hippomocks"
-    license = "LGPL-2.1 License"
+    license = "LGPL-2.1-or-later"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
