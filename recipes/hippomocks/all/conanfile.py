@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 
-class ResiprocateConan(ConanFile):
+class HippomocksConan(ConanFile):
     name = "hippomocks"
     description = "Single-header mocking framework."
     topics = ("mock", "hippo", "framework")
