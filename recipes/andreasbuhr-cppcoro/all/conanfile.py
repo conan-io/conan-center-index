@@ -35,7 +35,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         return {
             "Visual Studio": "15",
             "gcc": "10",
-            "clang": "5.0",
+            "clang": "8",
             "apple-clang": "10",
         }
 
