@@ -98,7 +98,13 @@ class MoltenVKConan(ConanFile):
         }.get(self.version)
 
     def package_id(self):
-        del self.info.settings.compiler.version
+        # MoltenVK >=1.42 requires at least XCode 12.0 (11.4 actually) at build
+        # time but can be consumed by older compiler versions
+        if tools.Version(self.version) >= "1.0.42":
+            if tools.Version(self.settings.compiler.version) < "12.0":
+                compatible_pkg = self.info.clone()
+                compatible_pkg.settings.compiler.version = "12.0"
+                self.compatible_packages.append(compatible_pkg)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -130,8 +136,9 @@ class MoltenVKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if tools.Version(self.version) >= "1.0.42" and tools.Version(self.settings.compiler.version) < "12":
-            raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12 or higher at build time".format(self.version))
+        if tools.Version(self.version) >= "1.0.42":
+            if tools.Version(self.settings.compiler.version) < "12.0":
+                raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
