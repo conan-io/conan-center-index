@@ -25,11 +25,6 @@ int main() {
         (std::cout << "{").write(it.key(), it.key_size()) << ", " << it.value() << "}" << std::endl;
     }
 
-    // Better, use key_sv() if you compiler provides access to std::string_view.
-    for(auto it = map.begin(); it != map.end(); ++it) {
-        std::cout << "{" << it.key_sv() << ", " << it.value() << "}" << std::endl;
-    }
-
     // Or if you just want the values.
     for(int value: map) {
         std::cout << "{" << value << "}" << std::endl;
