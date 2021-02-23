@@ -55,7 +55,8 @@ class MoltenVKConan(ConanFile):
         if self.options.with_spirv_tools:
             self.requires("spirv-tools/v2020.5")
         if tools.Version(self.version) < "1.1.0":
-            raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability")
+            raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
+            self.requires("vulkan-portability/0.2")
 
     @property
     def _spirv_cross_version(self):
