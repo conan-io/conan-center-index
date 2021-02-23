@@ -6,6 +6,9 @@ class JsonCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
 
+    def requirements(self):
+        self.requires("picojson/1.3.0")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
