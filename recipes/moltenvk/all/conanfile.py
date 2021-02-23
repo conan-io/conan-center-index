@@ -124,30 +124,6 @@ class MoltenVKConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("MoltenVK-" + self.version, self._source_subfolder)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Inject commit hash of spirv-cross
-        mvkdevice_mm = os.path.join(self._source_subfolder, "MoltenVK", "MoltenVK", "GPUObjects", "MVKDevice.mm")
-        if tools.Version(self.version) < "1.0.44":
-            tools.replace_in_file(mvkdevice_mm,
-                                  "#include <SPIRV-Cross/mvkSpirvCrossRevisionDerived.h>",
-                                  "static const char* spirvCrossRevisionString = \"{}\";".format(self._spirv_cross_commit_hash))
-        else:
-            tools.replace_in_file(mvkdevice_mm,
-                                  "#include \"mvkGitRevDerived.h\"",
-                                  "static const char* mvkRevString = \"{}\";".format(self._spirv_cross_commit_hash))
-
-    @property
-    def _spirv_cross_commit_hash(self):
-        return {
-            "20210115": "9acb9ec31f5a8ef80ea6b994bb77be787b08d3d1",
-            "20200917": "8891bd35120ca91c252a66ccfdc3f9a9d03c70cd",
-            "20200629": "b1082c10afe15eef03e8b12d66008388ce2a468c",
-            "20200519": "3c43f055df0d7b6948af64c825bf93beb8ab6418",
-            "20200403": "6637610b16aacfe43c77ad4060da62008a83cd12"
-        }[self.deps_cpp_info["spirv-cross"].version]
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -159,7 +135,8 @@ class MoltenVKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

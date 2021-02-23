@@ -189,6 +189,42 @@ target_compile_options(MoltenVK PRIVATE
 )
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
+# Custom Target to generate internal header file required by MoltenVK target.
+# This header should contain:
+#  - if moltenvk < 1.44 : spirv-cross commit hash in spirvCrossRevisionString variable
+#  - if moltenvk >= 1.44: moltenvk commit hash in mvkRevString variable (but we still
+#    use spirv-cross commit hash, since MoltenVK hash is not available in this context,
+#    and hash value is no really important)
+set(MVK_REVISION_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
+set(MVK_REVISION_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/mvk_hash_generated)
+if(MVK_VERSION VERSION_LESS "1.0.44")
+    set(MVK_REVISION_HEADER ${MVK_REVISION_HEADER_DIR}/SPIRV-Cross/mvkSpirvCrossRevisionDerived.h)
+    set(MVK_REV_VAR_NAME "spirvCrossRevisionString")
+else()
+    set(MVK_REVISION_HEADER ${MVK_REVISION_HEADER_DIR}/mvkGitRevDerived.h)
+    set(MVK_REV_VAR_NAME "mvkRevString")
+endif()
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.in
+    "file(READ @MVK_REVISION_FILE@ MVK_SPIRV_CROSS_GIT_REV)\n"
+    "string(REPLACE \"\\n\" \"\" MVK_SPIRV_CROSS_GIT_REV \${MVK_SPIRV_CROSS_GIT_REV})\n"
+    "file(WRITE @MVK_REVISION_HEADER@ \"static const char* @MVK_REV_VAR_NAME@ = \\\"\${MVK_SPIRV_CROSS_GIT_REV}\\\";\")\n"
+)
+configure_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.in
+    ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.cmake
+    @ONLY
+)
+add_custom_target(mvk-commit-hash-header DEPENDS ${MVK_REVISION_FILE} ${MVK_REVISION_HEADER})
+add_custom_command(
+  COMMENT "Create ${MVK_REVISION_HEADER}"
+  OUTPUT ${MVK_REVISION_HEADER}
+  DEPENDS ${MVK_REVISION_FILE}
+  COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.cmake"
+)
+add_dependencies(MoltenVK mvk-commit-hash-header)
+target_include_directories(MoltenVK PRIVATE ${MVK_REVISION_HEADER_DIR})
+
+# Installation
 install(
     TARGETS ${MVK_INSTALL_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
