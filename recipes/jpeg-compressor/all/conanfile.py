@@ -64,15 +64,13 @@ class JpegCompressorConan(ConanFile):
         license_content = []
         for i in range(4, 20):
             license_content.append(content_lines[i][3:-1])
-        tools.save("LICENCE.txt", "\n".join(license_content))
-
+        return "\n".join(license_content)
 
     def package(self):
-        # self.copy("license.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         self._extract_license()
-        self.copy(pattern="LICENCE.txt", dst="licenses")
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENCE.txt"), self._extract_license())
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
