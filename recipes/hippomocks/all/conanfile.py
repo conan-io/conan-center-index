@@ -24,7 +24,3 @@ class HippomocksConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "HippoMocks"
-        self.cpp_info.names["cmake_find_package_multi"] = "HippoMocks"
