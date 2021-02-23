@@ -20,7 +20,7 @@ class mailioConan(ConanFile):
         "fPIC": True,
         "shared": False
     }
-    requires = ["boost/1.75.0", "openssl/1.1.1i"]
+    requires = ["boost/1.75.0", "openssl/1.1.1j"]
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
     short_paths = True
