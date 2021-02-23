@@ -1,7 +1,8 @@
 import os
-from pathlib import Path
-
 from conans import ConanFile, CMake, tools
+
+
+required_conan_version = ">=1.29.1"
 
 
 class CgnsConan(ConanFile):
