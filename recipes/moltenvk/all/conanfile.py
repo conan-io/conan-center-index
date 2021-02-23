@@ -11,7 +11,7 @@ class MoltenVKConan(ConanFile):
                   "layers a subset of the high-performance, industry-standard " \
                   "Vulkan graphics and compute API over Apple's Metal " \
                   "graphics framework, enabling Vulkan applications to run " \
-                  "on iOS and macOS. "
+                  "on iOS and macOS."
     license = "Apache-2.0"
     topics = ("conan", "moltenvk", "khronos", "vulkan", "metal")
     homepage = "https://github.com/KhronosGroup/MoltenVK"
