@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class MoltenVKConan(ConanFile):
     name = "moltenvk"
@@ -106,6 +108,11 @@ class MoltenVKConan(ConanFile):
                 compatible_pkg.settings.compiler.version = "12.0"
                 self.compatible_packages.append(compatible_pkg)
 
+    def validate(self):
+        if tools.Version(self.version) >= "1.0.42":
+            if tools.Version(self.settings.compiler.version) < "12.0":
+                raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("MoltenVK-" + self.version, self._source_subfolder)
@@ -136,9 +143,6 @@ class MoltenVKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if tools.Version(self.version) >= "1.0.42":
-            if tools.Version(self.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
