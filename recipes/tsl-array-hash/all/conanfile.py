@@ -3,7 +3,7 @@ import os
 
 required_conan_version = ">=1.28.0"
 
-class TslOrderedMapConan(ConanFile):
+class TslArrayHashConan(ConanFile):
     name = "tsl-array-hash"
     license = "MIT"
     description = "C++ implementation of a fast and memory efficient hash map and hash set specialized for strings."
