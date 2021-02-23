@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 
 class JpegCompressorConan(ConanFile):
@@ -39,6 +40,8 @@ class JpegCompressorConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
