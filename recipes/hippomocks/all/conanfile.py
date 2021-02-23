@@ -14,7 +14,6 @@ class ResiprocateConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        self.version = "5.0"
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
