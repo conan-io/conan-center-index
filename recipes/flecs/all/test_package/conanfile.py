@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["FLECS_SHARED"] = self.options["flecs"].shared
         cmake.configure()
         cmake.build()
 
