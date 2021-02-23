@@ -1,0 +1,3 @@
+sources:
+    "0.7":
+        url: https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz
