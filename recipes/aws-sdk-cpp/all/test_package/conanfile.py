@@ -7,9 +7,6 @@ class AwsSdkCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def configure(self):
-        self.options["aws-sdk-cpp"].logs = True
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()

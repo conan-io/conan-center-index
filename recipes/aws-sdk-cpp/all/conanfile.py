@@ -161,14 +161,9 @@ class AwsSdkCppConan(ConanFile):
                 "min_size": [True, False],
                 }
             }
-    default_options = {
-            **{ x: False for x in sdks},
-            **{
-                "shared": False,
-                "fPIC": True,
-                "min_size": False
-                }
-            }
+    default_options = {key: False for key in options.keys()}
+    default_options["fPIC"] = True
+    default_options["logs"] = True
 
     _cmake = None
 
