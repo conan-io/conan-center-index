@@ -53,6 +53,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires coroutine TS support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
+        
+        # Currently clang expects coroutine to be implemented in a certain way (under std::experiemental::), while libstdc++ puts them under std::
+        # There are also other inconsistencies, see https://bugs.llvm.org/show_bug.cgi?id=48172
+        # This should be removed after both gcc and clang implements the final coroutine TS
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration("{} does not support clang with libstdc++. Use libc++ instead.".format(self.name))
 
         if self.options.shared:
             del self.options.fPIC
@@ -77,3 +83,11 @@ class AndreasbuhrCppCoroConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags.append("/await")
+        elif self.settings.compiler == "gcc":
+            self.cpp_info.cxxflags.append("-fcoroutines")
+        elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
+            self.cpp_info.cxxflags.append("-fcoroutines-ts")
