@@ -79,11 +79,11 @@ class CgnsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for binary in Path(self.package_folder, "bin").iterdir():
-            if binary.suffix != ".dll":
-                binary.unlink()
+        for binary in os.listdir(os.path.join(self.package_folder, "bin")):
+            if not binary.endswith(".dll"):
+                os.remove(os.path.join(self.package_folder, "bin", binary))
 
-        Path(self.package_folder, "include", "cgnsBuild.defs").unlink()
+        os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
 
     def package_info(self):
         # FIXME: CGNS does not install under a CMake namespace https://github.com/CGNS/CGNS/blob/7cc605021cc6c278acf2e69c5c3bd69ff5ee504e/src/CMakeLists.txt#L648-L654
