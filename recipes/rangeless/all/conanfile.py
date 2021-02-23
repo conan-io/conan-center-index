@@ -5,7 +5,7 @@ import glob
 class RangelessConan(ConanFile):
     name = "rangeless"
     description = "c++ LINQ -like library of higher-order functions for data manipulation"
-    license = "Public domain"
+    license = "MIT"
     homepage = "https://github.com/ast-al/rangeless"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("range", "linq", "lazy-evaluation", "header-only")
