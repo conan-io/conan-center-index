@@ -12,9 +12,9 @@ class LiburingConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     description = """helpers to setup and
-        teardown io_uring instances, and also a simplified interface for
-        applications that don't need (or want) to deal with the full kernel
-        side implementation."""
+teardown io_uring instances, and also a simplified interface for
+applications that don't need (or want) to deal with the full kernel
+side implementation."""
     topics = "conan", "asynchronous io"
 
     options = {
@@ -48,7 +48,7 @@ class LiburingConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(f"{self.name}-{self.name}-{self.version}",
+        os.rename("{0}-{0}-{1}".format(self.name, self.version),
                   self._source_subfolder)
 
     def configure(self):
@@ -71,7 +71,7 @@ class LiburingConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             install_args = [
-                f"ENABLE_SHARED={1 if self.options.shared else 0}"
+                "ENABLE_SHARED={}".format(1 if self.options.shared else 0)
             ]
             autotools.install(args=install_args)
 
@@ -80,7 +80,7 @@ class LiburingConan(ConanFile):
 
         if self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
-            os.remove(os.path.join(self.package_folder, "lib", "liburing.so"))
+            os.unlink(os.path.join(self.package_folder, "lib", "liburing.so"))
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 os.symlink("liburing.so.1", "liburing.so")
 
