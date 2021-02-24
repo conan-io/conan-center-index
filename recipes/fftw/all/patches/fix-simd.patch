@@ -1,3 +1,4 @@
+https://github.com/FFTW/fftw3/pull/232
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -134,6 +134,7 @@ include (CheckCCompilerFlag)
