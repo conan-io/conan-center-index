@@ -17,7 +17,7 @@ class So5extraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("sobjectizer/5.7.2.2")
+        self.requires("sobjectizer/5.7.2.3")
 
     def configure(self):
         minimal_cpp_standard = "17"
