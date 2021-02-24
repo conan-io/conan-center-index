@@ -163,7 +163,6 @@ class AwsSdkCppConan(ConanFile):
             }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
-    default_options["logs"] = True
 
     _cmake = None
 
