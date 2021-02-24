@@ -1,0 +1,40 @@
+commit a32a0ace562ffc2e535f0681492985c691d68197
+Author: Vladimir Looze <woldemar@mimas.ru>
+Date:   Tue Feb 16 15:41:40 2021 +0300
+
+    T11925: allow upload for staging packages (#270)
+
+commit 28e72d26f2d7adb31d1aaa97b4fe7dd4598729bc
+Author: artem-kamyshev <oemrus@yandex.ru>
+Date:   Wed Feb 10 19:39:05 2021 +0300
+
+    T12953: miniupnpc for win32, vc2019
+
+commit 6b9b479ed85490be3590e6b78450d85e6ee00605
+Author: Konstantin-Ivanov-dssl-ru <78955582+Konstantin-Ivanov-dssl-ru@users.noreply.github.com>
+Date:   Fri Feb 12 18:04:43 2021 +0300
+
+    jsoncpp/1.8.3 on Windows (#274)
+    
+    * Jsoncpp on Windows
+    
+    * CONAN_REFERENCE
+    
+    * Test x86 on x86_x64
+    
+    * Update conanfile.py
+
+commit 9773f1506e2ec3d9601edbed2629b2944bc38a37
+Author: artem-kamyshev <oemrus@yandex.ru>
+Date:   Wed Feb 3 19:01:54 2021 +0300
+
+    Fix autocrlf option for ffmpeg linux/macos github CI
+
+commit ba1252e387ca97b1b5f6b007923f1debef42456f
+Author: artem-kamyshev <oemrus@yandex.ru>
+Date:   Fri Jan 22 15:43:24 2021 +0300
+
+    T11045: minimal build of ffmpeg 3.3.1 win32 on github CI
+    
+    Start from build: ffmpeg + libmfx. After a test we will
+    see if we need any other external libraries.
