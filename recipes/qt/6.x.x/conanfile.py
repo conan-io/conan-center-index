@@ -507,7 +507,8 @@ Examples = res/datadir/examples""")
             if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+            tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
@@ -545,3 +546,17 @@ Examples = res/datadir/examples""")
                 self.cpp_info.frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+
+        tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"),
+                    "set(QT_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
+                    "set(QT_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
+                    "set(QT_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
+                    "set(QT_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            if os.path.isfile(module):
+                self.cpp_info.build_modules.append(module)
+                self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
+            else:
+                tools.rmdir(os.path.join("lib", "cmake", m))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"))

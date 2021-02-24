@@ -6,6 +6,8 @@
 
 HEADERS += greeter.h
 
+RESOURCES = example.qrc
+
 QT -= gui
 
 CONFIG += console

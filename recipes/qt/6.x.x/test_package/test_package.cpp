@@ -2,6 +2,7 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <QFile>
 #include "greeter.h"
 
 int main(int argc, char *argv[]){
@@ -17,6 +18,12 @@ int main(int argc, char *argv[]){
     Greeter* greeter = new Greeter(name, &app);
     QObject::connect(greeter, SIGNAL(finished()), &app, SLOT(quit()));
     QTimer::singleShot(0, greeter, SLOT(run()));
+
+    QFile f(":/resource.txt");
+    if(!f.open(QIODevice::ReadOnly))
+        qFatal("Could not open resource file");
+    qDebug() << "Resource content:" << f.readAll();
+    f.close();
 
     return app.exec();
 }
