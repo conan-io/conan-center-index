@@ -66,8 +66,8 @@ class GTestConan(ConanFile):
                 self.name, self.settings.compiler))
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires {} {}. The current compiler is {} {}.".format(
-                    self.name, self.settings.compiler, min_version, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration("{0} requires {1} {2}. The current compiler is {1} {3}.".format(
+                    self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
