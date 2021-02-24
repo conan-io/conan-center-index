@@ -59,7 +59,6 @@ int main(int argc, char *argv[]) {
 
     jpeg_transform_info transform = {
         .transform = JXFORM_ROT_180,
-//        .perfect = TRUE,
     };
 
     if ((src.image_width % 2) || (dst.image_height % 2)) {
