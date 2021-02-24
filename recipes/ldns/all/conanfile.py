@@ -74,6 +74,9 @@ class ldnsConan(ConanFile):
             "--without-p5-dns-ldns",
         ]
 
+        if self.settings.compiler == "apple-clang":
+            args.append("--with-xcode-sdk={}".format(tools.XCRun(self.settings).sdk_version))
+
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
