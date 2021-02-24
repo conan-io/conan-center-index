@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
@@ -56,8 +57,15 @@ side implementation."""
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
 
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        linux_version_list = platform.release().split(".")
+        if int(linux_version_list[0]) >= 5:
+            if int(linux_version_list[1]) >= 1:
+                del self.settings.compiler.libcxx
+                del self.settings.compiler.cppstd
+                return
+
+        raise ConanInvalidConfiguration(
+            "This linux kernel version does not support io uring")
 
     def build(self):
         with tools.chdir(self._source_subfolder):
