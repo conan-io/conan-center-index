@@ -5,7 +5,6 @@ from conans import ConanFile, CMake, tools
 
 class Bzip2Conan(ConanFile):
     name = "bzip2"
-    version = "1.0.8"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bzip.org"
     license = "bzip2-1.0.8"
@@ -24,7 +23,7 @@ class Bzip2Conan(ConanFile):
         "build_executable": True
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -35,6 +34,7 @@ class Bzip2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        self.license = "bzip2-{}".format(self.version)
 
     def configure(self):
         if self.options.shared:
@@ -58,6 +58,8 @@ class Bzip2Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
