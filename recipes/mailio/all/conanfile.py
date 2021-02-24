@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.30.0"
 
 class mailioConan(ConanFile):
     name = "mailio"
@@ -22,6 +23,7 @@ class mailioConan(ConanFile):
     }
     requires = ["boost/1.75.0", "openssl/1.1.1j"]
     generators = "cmake_find_package"
+    exports_sources = ["patches/**"]
     short_paths = True
     _cmake = None
 
@@ -72,8 +74,9 @@ class mailioConan(ConanFile):
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "${CMAKE_BINARY_DIR}/version.hpp", "${PROJECT_BINARY_DIR}/version.hpp")
+        patches = self.conan_data["patches"][self.version]
+        for patch in patches:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
