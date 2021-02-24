@@ -31,6 +31,8 @@ class GTestConan(ConanFile):
             return {
                 "Visual Studio": "14"
             }
+        elif self.version == "1.10.0":
+            return {}
         else:
             return {
                 "Visual Studio": "14",
@@ -55,12 +57,12 @@ class GTestConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warn("{} recipe lacks information about {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires c++11 support. The current compiler {} {} does not support it.".format(
-                    self.name, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration("{} requires {} {}. The current compiler is {} {}.".format(
+                    self.name, self.settings.compiler, min_version, self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
