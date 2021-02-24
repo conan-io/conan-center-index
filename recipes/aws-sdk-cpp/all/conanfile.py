@@ -185,8 +185,6 @@ class AwsSdkCppConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
             self.requires("libcurl/7.74.0")
-        if not self.settings.os in ["Windows", "Macos"]:
-            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -256,9 +254,6 @@ class AwsSdkCppConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.append("atomic")
-
-        if not self.settings.os in ["Windows", "Macos"]:
-            self.cpp_info.components["core"].requires.extend(["openssl::ssl", "openssl::crypto"])
 
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
