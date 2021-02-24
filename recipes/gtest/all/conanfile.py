@@ -32,13 +32,18 @@ class GTestConan(ConanFile):
                 "Visual Studio": "14"
             }
         elif self.version == "1.10.0":
-            return {}
+            return {
+                "Visual Studio": "14",
+                "gcc": "4.8.1",
+                "clang": "3.3",
+                "apple-clang": "5.0"
+            }
         else:
             return {
                 "Visual Studio": "14",
                 "gcc": "5",
                 "clang": "5",
-                "apple-clang": "9.1",
+                "apple-clang": "9.1"
             }
         
     @property
