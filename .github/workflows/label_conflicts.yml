@@ -2,16 +2,16 @@ name: Auto Label Conflicts
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: prince-chrismc/label-merge-conflicts-action@v0.0.1
+      - uses: prince-chrismc/label-merge-conflicts-action@v0.0.2
         with:
           conflict_label_name: "has conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}
