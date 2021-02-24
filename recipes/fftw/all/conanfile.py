@@ -19,13 +19,15 @@ class FFTWConan(ConanFile):
                "precision": ["double", "single", "longdouble"],
                "openmp": [True, False],
                "threads": [True, False],
-               "combinedthreads": [True, False]}
+               "combinedthreads": [True, False],
+               "SIMD": ["SSE", "SSE2", "AVX", "AVX2", "auto"]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "precision": "double",
                        "openmp": False,
                        "threads": False,
-                       "combinedthreads": False}
+                       "combinedthreads": False,
+                       "SIMD": "auto"}
 
     _cmake = None
 
@@ -69,6 +71,10 @@ class FFTWConan(ConanFile):
         self._cmake.definitions["WITH_COMBINED_THREADS"] = self.options.get_safe("combinedthreads", False)
         self._cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
         self._cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
+        self._cmake.definitions["ENABLE_SSE"] = self.options.SIMD == "SSE"
+        self._cmake.definitions["ENABLE_SSE2"] = self.options.SIMD == "SSE2"
+        self._cmake.definitions["ENABLE_AVX"] = self.options.SIMD == "AVX"
+        self._cmake.definitions["ENABLE_AVX2"] = self.options.SIMD == "AVX2"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
