@@ -25,7 +25,7 @@ class TslHatTrieConan(ConanFile):
 
     def build(self):
         tools.rmdir(os.path.join(self._source_subfolder, "include", "tsl", "array-hash"))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "include", "tsl", "htrie_hash.h"), "array-hash/", "tsl/")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "include", "tsl", "htrie_hash.h"), '#include "array-hash/', '#include "tsl/')
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
