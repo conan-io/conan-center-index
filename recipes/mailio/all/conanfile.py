@@ -22,8 +22,8 @@ class mailioConan(ConanFile):
         "shared": False
     }
     requires = ["boost/1.75.0", "openssl/1.1.1j"]
-    generators = "cmake_find_package"
-    exports_sources = ["patches/**"]
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
     _cmake = None
 
@@ -48,7 +48,7 @@ class mailioConan(ConanFile):
             self._cmake.definitions["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
             self._cmake.definitions["MAILIO_BUILD_DOCUMENTATION"] = False
             self._cmake.definitions["MAILIO_BUILD_EXAMPLES"] = False
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def source(self):
