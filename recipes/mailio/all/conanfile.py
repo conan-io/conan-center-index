@@ -73,13 +73,9 @@ class mailioConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
-    def _patch_sources(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
