@@ -186,7 +186,7 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("libcurl/7.74.0")
         if not self.settings.os in ["Windows", "Macos"]:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
