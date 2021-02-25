@@ -6,7 +6,7 @@ import os
 class LibsmackerConan(ConanFile):
     name = "libsmacker"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://libsmacker.sourceforge.net/#technical"
+    homepage = "http://libsmacker.sourceforge.net"
     topics = ("conan", "libsmacker", "decoding ", "smk", "smacker", "video", "file")
     license = "LGPL-v2.1"
     description = "A C library for decoding .smk Smacker Video files"
