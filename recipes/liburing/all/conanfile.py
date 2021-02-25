@@ -1,5 +1,4 @@
 import os
-import shutil
 import platform
 
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -16,7 +15,7 @@ class LiburingConan(ConanFile):
 teardown io_uring instances, and also a simplified interface for
 applications that don't need (or want) to deal with the full kernel
 side implementation."""
-    topics = "conan", "asynchronous io"
+    topics = ("asynchronous-io", "async", "kernel")
 
     options = {
         "fPIC": [True, False],
@@ -35,12 +34,7 @@ side implementation."""
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        prefix = self.package_folder
-        conf_args = [
-            "--prefix={}".format(prefix),
-        ]
-        self._autotools.configure(
-            args=conf_args, configure_dir=self._source_subfolder)
+        self._autotools.configure(configure_dir=self._source_subfolder)
         return self._autotools
 
     @property
@@ -52,20 +46,16 @@ side implementation."""
         os.rename("{0}-{0}-{1}".format(self.name, self.version),
                   self._source_subfolder)
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
+        if tools.Version(platform.release()) < "5.1":
+            raise ConanInvalidConfiguration(
+                "This linux kernel version does not support io uring")
 
-        linux_version_list = platform.release().split(".")
-        if int(linux_version_list[0]) >= 5:
-            if int(linux_version_list[1]) >= 1:
-                del self.settings.compiler.libcxx
-                del self.settings.compiler.cppstd
-                return
-
-        raise ConanInvalidConfiguration(
-            "This linux kernel version does not support io uring")
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build(self):
         with tools.chdir(self._source_subfolder):
@@ -83,14 +73,15 @@ side implementation."""
             ]
             autotools.install(args=install_args)
 
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.rmtree(os.path.join(self.package_folder, "man"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "man"))
 
         if self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
             os.unlink(os.path.join(self.package_folder, "lib", "liburing.so"))
+            os.unlink(os.path.join(self.package_folder, "lib", "liburing.so.1"))
             with tools.chdir(os.path.join(self.package_folder, "lib")):
-                os.symlink("liburing.so.1", "liburing.so")
+                os.rename("liburing.so.1.0.7", "liburing.so")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["uring"]
