@@ -27,7 +27,23 @@ class HimalayaConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
+    @property 
+    def _minimum_compilers_version(self): 
+        return {
+            "Visual Studio": "15", 
+            "gcc": "5", 
+            "clang": "5", 
+            "apple-clang": "5.1", 
+        } 
+
+    def validate(self):
+        if self.settings.compiler.cppstd: 
+            check_min_cppstd(self, "14")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
+        if not minimum_version: 
+            self.output.warn("Himalaya requires C++14. Your compiler is unknown. Assuming it supports C++14.") 
+        elif tools.Version(self.settings.compiler.version) < minimum_version: 
+            raise ConanInvalidConfiguration("Himalaya requires C++14, which your compiler does not support.") 
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Himalaya does not support {}".format(self.settings.compiler))
 
