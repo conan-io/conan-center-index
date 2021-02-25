@@ -54,7 +54,6 @@ class MicrosoftGltfSdkConan(ConanFile):
 
     def build_requirements(self):
         if not (tools.which("pwsh") or tools.which("powershell")):
-            raise ConanInvalidConfiguration("{} requires powershell at build time.".format(self.name))
             self.build_requires("powershell/7.1.2")
 
     def source(self):
