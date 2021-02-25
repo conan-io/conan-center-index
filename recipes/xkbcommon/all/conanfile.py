@@ -58,7 +58,7 @@ class XkbcommonConan(ConanFile):
             self.requires("libxml2/2.9.10")
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.0")
+        self.build_requires("meson/0.56.2")
         self.build_requires("bison/3.7.1")
 
     def source(self):
