@@ -13,7 +13,7 @@ sources:
     sha256: "f997a81c8cb36618bd4526ea7a02d026c8111d15fbc138c67ba8f4606680d551"
   3.17.03:
     url: "https://github.com/electronicarts/EASTL/archive/3.17.03.tar.gz"
-    sha256: "9ebeef26cdf091877ee348450d2711cd0bb60ae435309126c0adf8fec9a01ea5"
+    sha256: "50a072066e30fda364d482df6733572d8ca440a33825d81254b59a6ca9f4375a"
   3.17.06:
     url: "https://github.com/electronicarts/EASTL/archive/3.17.06.tar.gz"
     sha256: "9ebeef26cdf091877ee348450d2711cd0bb60ae435309126c0adf8fec9a01ea5"
