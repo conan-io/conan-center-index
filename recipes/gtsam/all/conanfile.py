@@ -42,7 +42,7 @@ class gtsamConan(ConanFile):
 
     default_options = {"shared": False,
                        "fPIC": True,
-                        "with_march_native": True,
+                        "with_march_native": False,
                         "use_quaternions": False,
                         "pose3_expmap": False,
                         "rot3_expmap": False,
