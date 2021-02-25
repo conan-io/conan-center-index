@@ -546,12 +546,22 @@ Examples = res/datadir/examples""")
                 self.cpp_info.frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+        
+        extension = ""
+        if self.settings.os == "Windows":
+            extension = ".exe"
+        filecontents = """ \
+                    set(QT_CMAKE_EXPORT_NAMESPACE qt)
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::qmake IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::qmake PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/qmake{0})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::moc IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::moc PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/moc{0})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::rcc IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::rcc PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/rcc{0})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::uic IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::uic PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/uic{0})""".format(extension)
+        tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents) 
 
-        tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"),
-                    "set(QT_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
-                    "set(QT_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
-                    "set(QT_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
-                    "set(QT_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             if os.path.isfile(module):
