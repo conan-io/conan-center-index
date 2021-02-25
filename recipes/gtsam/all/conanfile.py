@@ -17,6 +17,7 @@ class gtsamConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
+               "with_march_native": [True, False],
                "use_quaternions": [True, False],
                "pose3_expmap": [True, False],
                "rot3_expmap": [True, False],
@@ -41,6 +42,7 @@ class gtsamConan(ConanFile):
 
     default_options = {"shared": False,
                        "fPIC": True,
+                        "with_march_native": True,
                         "use_quaternions": False,
                         "pose3_expmap": False,
                         "rot3_expmap": False,
@@ -95,6 +97,7 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_BUILD_DOC_HTML"] = False
             self._cmake.definitions["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
             self._cmake.definitions["GTSAM_BUILD_WRAP"] = self.options.build_wrap
+            self._cmake.definitions["GTSAM_BUILD_WITH_MARCH_NATIVE"] = self.options.with_march_native
             self._cmake.definitions["GTSAM_WRAP_SERIALIZATION"] = self.options.wrap_serialization
             self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
