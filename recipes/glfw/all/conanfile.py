@@ -129,7 +129,7 @@ class GlfwConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "glfw"
         self.cpp_info.names["cmake_find_package_multi"] = "glfw"
         self.cpp_info.names["pkg_config"] = "glfw3"
-        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
