@@ -17,7 +17,6 @@ class XkbcommonConan(ConanFile):
         "with_x11": [True, False],
         "with_wayland": [True, False],
         "xkbregistry": [True, False],
-        "docs": [True, False]
     }
     default_options = {
         "shared": False,
@@ -25,7 +24,6 @@ class XkbcommonConan(ConanFile):
         "with_x11": True,
         "with_wayland": False,
         "xkbregistry": True,
-        "docs": False
     }
 
     generators = "pkg_config"
@@ -73,7 +71,6 @@ class XkbcommonConan(ConanFile):
             return self._meson
         defs={
             "enable-wayland": self.options.with_wayland,
-            "enable-docs": self.options.docs,
             "enable-x11": self.options.with_x11,
             "libdir": os.path.join(self.package_folder, "lib"),
             "default_library": ("shared" if self.options.shared else "static")}
