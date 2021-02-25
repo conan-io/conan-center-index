@@ -47,6 +47,9 @@ class PowershellConan(ConanFile):
         self.copy(pattern="*", dst="bin", src=self._source_subfolder, keep_path=True, symlinks=True)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         self._fix_permissions()
+        if self.settings.os_build == "Linux":
+            os.unlink(os.path.join(self.package_folder, "bin", "libcrypto.so.1.0.0"))
+            os.unlink(os.path.join(self.package_folder, "bin", "libssl.so.1.0.0"))
 
     def _fix_permissions(self):
 
