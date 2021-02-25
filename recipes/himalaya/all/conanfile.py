@@ -34,6 +34,8 @@ class HimalayaConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+    def build_requirements(self):
+        self.build_requires("gfortran/10.2")
 
     def requirements(self):
         self.requires("eigen/3.3.9")
