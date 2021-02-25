@@ -17,9 +17,12 @@
 
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please write a comment
+requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors
+to the new process.
 
-All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This process helps CCI against spam and malicious code.
+All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This
+process helps conan-center-index against spam and malicious code.
 
 The contribution of packages is done via pull requests to the recipes found in this Github repository https://github.com/conan-io/conan-center-index.
 
