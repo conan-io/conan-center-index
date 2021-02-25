@@ -2,6 +2,8 @@ import os
 import textwrap
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class Bzip2Conan(ConanFile):
     name = "bzip2"
@@ -103,7 +105,7 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "BZip2"
         self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = ["bz2"]
 
         if self.options.build_executable:
