@@ -44,6 +44,10 @@ class HimalayaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Himalaya-{}".format(self.version), self._source_subfolder)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "add_executable(example", "# add_executable(example")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "target_link_libraries(example", "# target_link_libraries(example")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
