@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-import glob
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class CubicInterpolationConan(ConanFile):
@@ -24,14 +24,32 @@ class CubicInterpolationConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property 
+    def _minimum_compilers_version(self): 
+        return {
+            "Visual Studio": "15", 
+            "gcc": "5", 
+            "clang": "5", 
+            "apple-clang": "5.1", 
+        } 
+
+    def validate(self):
+        if self.settings.compiler.cppstd: 
+            check_min_cppstd(self, "14")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
+        if not minimum_version: 
+            self.output.warn("CubicInterpolation requires C++14. Your compiler is unknown. Assuming it supports C++14.") 
+        elif tools.Version(self.settings.compiler.version) < minimum_version: 
+            raise ConanInvalidConfiguration("CubicInterpolation requires C++14, which your compiler does not support.") 
+
 	def configure(self):
 	    if self.options.shared:
 	        del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("cubic_interpolation-*/")[0]
-        os.rename(extracted_dir, self._source_folder)
+        extracted_dir = "cubic_interpolation-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
         self.requires("boost/1.75.0")
