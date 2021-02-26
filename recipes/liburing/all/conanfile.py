@@ -46,7 +46,7 @@ side implementation."""
         os.rename("{0}-{0}-{1}".format(self.name, self.version),
                   self._source_subfolder)
 
-    def validate(self):
+    def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
