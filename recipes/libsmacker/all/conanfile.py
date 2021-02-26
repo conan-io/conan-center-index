@@ -2,13 +2,15 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class LibsmackerConan(ConanFile):
     name = "libsmacker"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://libsmacker.sourceforge.net"
     topics = ("conan", "libsmacker", "decoding ", "smk", "smacker", "video", "file")
-    license = "LGPL-v2.1"
+    license = "LGPL-2.1-or-later"
     description = "A C library for decoding .smk Smacker Video files"
     options = {
         "shared": [True, False],
@@ -79,7 +81,7 @@ class LibsmackerConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
