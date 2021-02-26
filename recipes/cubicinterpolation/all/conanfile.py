@@ -6,7 +6,6 @@ class CubicInterpolationConan(ConanFile):
     name = "cubic-interpolation"
     homepage = "https://github.com/MaxSac/cubic_interpolation"
     license = "MIT"
-    author = "Maximilian Sackel mail@maxsac.de"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
