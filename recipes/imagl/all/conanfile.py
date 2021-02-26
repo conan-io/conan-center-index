@@ -66,16 +66,9 @@ class ImaglConan(ConanFile):
                 raise ConanInvalidConfiguration("imagl requires some C++20 features, which your compiler does not support.")
             #Special case for Visual Studio for which conan doesn't known its minor version
             if str(self.settings.compiler) == "Visual Studio":
-                compiler_version = os.getenv("VCToolsVersion")
-                if compiler_version == None:
-                    vs_install_dir = subprocess.run(["{}\\Microsoft Visual Studio\\Installer\\vswhere.exe".format(os.getenv("ProgramFiles(x86)")),
-                        "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-                        "-property", "installationPath", "-latest"], capture_output=True, text=True).stdout.strip()
-                    compiler_version = subprocess.run(['cmd', '/c', '{}\\VC\\Auxiliary\\Build\\vcvarsall.bat'.format(vs_install_dir), 'x64', '>NUL', '&&', 'set', 'VCToolsVersion'],
-                        capture_output=True, text=True).stdout.strip().split('=')[1]
+                env_vars = tools.vcvars_dict(self)
+                compiler_version = env_vars.get("VCToolsVersion", os.getenv("VCToolsVersion"))
                 minimum_version = self._compilers_minimum_version["VCToolsVersion"]
-                print("compiler version is {}".format(compiler_version))
-                print("minimum version is {}".format(minimum_version))
                 if lazy_lt_semver(compiler_version, minimum_version): 
                     raise ConanInvalidConfiguration("imagl requires some C++20 features, which your compiler does not support.")
         else:
