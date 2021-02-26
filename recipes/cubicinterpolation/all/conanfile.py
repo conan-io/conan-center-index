@@ -3,7 +3,7 @@ import glob
 import os
 
 class CubicInterpolationConan(ConanFile):
-    name = "CubicInterpolation"
+    name = "cubic-interpolation"
     homepage = "https://github.com/MaxSac/cubic_interpolation"
     license = "MIT"
     author = "Maximilian Sackel mail@maxsac.de"
