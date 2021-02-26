@@ -37,23 +37,21 @@ class CubicInterpolationConan(ConanFile):
         self.requires("boost/1.75.0")
         self.requires("eigen/3.3.9")
 
+    def _configure_cmake(self):
+    	if self._cmake:
+    	    return self._cmake
+    	self._cmake = CMake(self)
+    	self._cmake.configure()
+    	return self._cmake
+    
     def build(self):
-        self.cmake = CMake(self)
-        self.cmake.configure(source_folder=self._source_folder)
-        self.cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.cmake.install()
-        self.copy("license*", dst="licenses", ignore_case=True, keep_path=False)
-        self.copy("*.h", dst="include", src=f"{self._source_folder}/src")
-        self.copy("*.hpp", dst="include", src="{self._source_folder}/src")
-        self.copy("*.h", dst="include")
-        self.copy("*.hpp", dst="include")
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.dylib*", dst="lib", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)        
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
