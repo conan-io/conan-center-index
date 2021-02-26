@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import subprocess
 
 required_conan_version = ">=1.32.0"
 
@@ -57,12 +56,22 @@ class ImaglConan(ConanFile):
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
+        
+        compiler_version = str(self.settings.compiler.version)
+        if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1:
+            compiler_version = tools.vswhere(requires=["Microsoft.VisualStudio.Component.VC.Tools.x86.x64"],
+                version="[{}.0,{}.0)".format(str(self.settings.compiler.version), int(str(self.settings.compiler.version))+1), latest=True, property_="installationVersion")[0]["installationVersion"]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("imagl requires C++20. Your compiler is unknown. Assuming it supports C++20.")
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("imagl requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), str(self.settings.compiler.version)))
+        elif lazy_lt_semver(compiler_version, minimum_version):
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), compiler_version))
+        else:
+            print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
+        #Special check for clang that can only be linked to libc++
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,6 +89,8 @@ class ImaglConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions['CONAN_CMAKE_CXX_STANDARD'] = "20"
         self._cmake.definitions["STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["SUPPORT_PNG"] = self.options.with_png
         if self._supports_jpeg:
