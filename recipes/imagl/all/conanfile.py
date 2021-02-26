@@ -58,7 +58,7 @@ class ImaglConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
         
         compiler_version = str(self.settings.compiler.version)
-        if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1:
+        if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1 and int(str(self.settings.compiler.version)) >= 16:
             compiler_version = tools.vswhere(requires=["Microsoft.VisualStudio.Component.VC.Tools.x86.x64"],
                 version="[{}.0,{}.0)".format(str(self.settings.compiler.version), int(str(self.settings.compiler.version))+1), latest=True, property_="installationVersion")[0]["installationVersion"]
 
