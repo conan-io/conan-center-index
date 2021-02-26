@@ -32,13 +32,12 @@ class ImaglConan(ConanFile):
     def _compilers_minimum_version(self):
         minimum_versions = {
                 "gcc": "9",
-                "Visual Studio": "16",
-                "VCToolsVersion": "14.22",
+                "Visual Studio": "16.2",
                 "clang": "10",
                 "apple-clang": "11"
         }
         if tools.Version(self.version) <= "0.1.1" or tools.Version(self.version) == "0.2.0":
-            minimum_versions["VCToolsVersion"] = "14.25"
+            minimum_versions["Visual Studio"] = "16.5"
         return minimum_versions
 
     @property
@@ -60,19 +59,10 @@ class ImaglConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        compiler_version = str(self.settings.compiler.version)
-        if minimum_version:
-            if lazy_lt_semver(compiler_version, minimum_version): 
-                raise ConanInvalidConfiguration("imagl requires some C++20 features, which your compiler does not support.")
-            #Special case for Visual Studio for which conan doesn't known its minor version
-            if str(self.settings.compiler) == "Visual Studio":
-                env_vars = tools.vcvars_dict(self)
-                compiler_version = env_vars.get("VCToolsVersion", os.getenv("VCToolsVersion"))
-                minimum_version = self._compilers_minimum_version["VCToolsVersion"]
-                if lazy_lt_semver(compiler_version, minimum_version): 
-                    raise ConanInvalidConfiguration("imagl requires some C++20 features, which your compiler does not support.")
-        else:
+        if not minimum_version:
             self.output.warn("imagl requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), str(self.settings.compiler.version)))
 
     def config_options(self):
         if self.settings.os == "Windows":
