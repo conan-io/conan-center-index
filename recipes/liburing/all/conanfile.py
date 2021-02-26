@@ -81,7 +81,8 @@ side implementation."""
             os.unlink(os.path.join(self.package_folder, "lib", "liburing.so"))
             os.unlink(os.path.join(self.package_folder, "lib", "liburing.so.1"))
             with tools.chdir(os.path.join(self.package_folder, "lib")):
-                os.rename("liburing.so.1.0.7", "liburing.so")
+                os.rename("liburing.so.1.{}".format(
+                    self.version), "liburing.so")
 
     def package_info(self):
         self.cpp_info.libs = ["uring"]
