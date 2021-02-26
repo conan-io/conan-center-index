@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException
 import os
 
 required_conan_version = ">=1.32.0"
@@ -59,8 +60,11 @@ class ImaglConan(ConanFile):
         
         compiler_version = str(self.settings.compiler.version)
         if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1 and int(str(self.settings.compiler.version)) >= 16:
-            compiler_version = tools.vswhere(requires=["Microsoft.VisualStudio.Component.VC.Tools.x86.x64"],
-                version="[{}.0,{}.0)".format(str(self.settings.compiler.version), int(str(self.settings.compiler.version))+1), latest=True, property_="installationVersion")[0]["installationVersion"]
+            try:
+                compiler_version = tools.vswhere(requires=["Microsoft.VisualStudio.Component.VC.Tools.x86.x64"],
+                    version="[{}.0,{}.0)".format(str(self.settings.compiler.version), int(str(self.settings.compiler.version))+1), latest=True, property_="installationVersion")[0]["installationVersion"]
+            except ConanException:
+                raise ConanInvalidConfiguration("Your Visual Studio compiler seems not to be installed in a common way. It is not supported.")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
