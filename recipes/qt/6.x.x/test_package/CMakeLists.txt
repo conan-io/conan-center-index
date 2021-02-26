@@ -10,9 +10,8 @@ conan_set_libcxx()
 conan_output_dirs_setup()
 
 find_package(qt REQUIRED CONFIG)
-
-set(SOURCES test_package.cpp)
-qt6_wrap_cpp(SOURCES greeter.h)
+set(CMAKE_AUTOMOC 1)
+set(SOURCES test_package.cpp greeter.h)
 qt6_add_resources(SOURCES example.qrc)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
