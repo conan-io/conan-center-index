@@ -17,7 +17,7 @@ class CubicInterpolationConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake_find_package"
     _source_folder = "source_folder"
-    exports_sources = "*"
+    exports_sources = ["CMakeLists.txt"]
 
     def config_options(self):
         if self.settings.os == "Windows":
