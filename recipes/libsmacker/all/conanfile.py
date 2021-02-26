@@ -66,6 +66,8 @@ class LibsmackerConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self,win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
