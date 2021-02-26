@@ -87,6 +87,8 @@ class CunitConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
