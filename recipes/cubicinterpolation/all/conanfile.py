@@ -18,6 +18,7 @@ class CubicInterpolationConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
     exports_sources = ["CMakeLists.txt"]
+	_cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
