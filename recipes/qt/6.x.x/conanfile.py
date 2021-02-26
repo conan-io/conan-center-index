@@ -572,6 +572,7 @@ if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::uic)
 endif()""".format(extension, int(self.version.split(".")[0]), int(self.version.split(".")[1]))
         tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
 
+        self.cpp_info.builddirs.append(os.path.join("res","archdatadir","bin"))
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             if os.path.isfile(module):
