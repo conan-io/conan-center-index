@@ -5,7 +5,6 @@ import os
 class CubicInterpolationConan(ConanFile):
     name = "CubicInterpolation"
     homepage = "https://github.com/MaxSac/cubic_interpolation"
-    version = "0.1"
     license = "MIT"
     author = "Maximilian Sackel mail@maxsac.de"
     url = "https://github.com/conan-io/conan-center-index"
