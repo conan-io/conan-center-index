@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class LibgeotiffConan(ConanFile):
     name = "libgeotiff"
@@ -98,7 +100,9 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        module_rel_path = os.path.join(self._module_subfolder, self._module_file)
+        self.cpp_info.build_modules["cmake_find_package"] = [module_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_rel_path]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
