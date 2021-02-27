@@ -10,7 +10,6 @@ class WaylandConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wayland.freedesktop.org"
     license = "MIT"
-    generators = "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,14 +25,16 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
+    generators = "pkg_config"
+    _meson = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    _meson = None
 
     def requirements(self):
         if self.options.enable_libraries:
@@ -43,7 +44,7 @@ class WaylandConan(ConanFile):
         self.requires("expat/2.2.10")
 
     def build_requirements(self):
-        self.build_requires('meson/0.54.2')
+        self.build_requires("meson/0.57.1")
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -89,7 +90,7 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-server"].names["pkg_config"] = "wayland-server"
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
             self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
-            
+
             self.cpp_info.components["wayland-client"].libs = ["wayland-client"]
             self.cpp_info.components["wayland-client"].names["pkg_config"] = "wayland-client"
             self.cpp_info.components["wayland-client"].requires = ["libffi::libffi"]
