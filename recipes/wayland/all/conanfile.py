@@ -63,13 +63,20 @@ class WaylandConan(ConanFile):
 
     def _configure_meson(self):
         if not self._meson:
+            defs = {
+                "libraries": "true" if self.options.enable_libraries else "false",
+                "dtd_validation": "true" if self.options.enable_dtd_validation else "false",
+                "documentation": "false",
+            }
+            if tools.Version(self.version) >= "1.18.91":
+                defs.update({"scanner": "true"})
             self._meson = Meson(self)
-            self._meson.configure(source_folder= self._source_subfolder, build_folder=self._build_subfolder, defs={
-                'libraries': 'true' if self.options.enable_libraries else 'false',
-                'dtd_validation': 'true' if self.options.enable_dtd_validation else 'false',
-                'documentation': 'false',
-            },
-            args=['--datadir=%s' % os.path.join(self.package_folder, "res")])
+            self._meson.configure(
+                source_folder=self._source_subfolder,
+                build_folder=self._build_subfolder,
+                defs=defs,
+                args=["--datadir={}".format(os.path.join(self.package_folder, "res"))]
+            )
         return self._meson
 
     def build(self):
