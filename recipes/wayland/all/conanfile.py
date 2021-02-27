@@ -36,6 +36,12 @@ class WaylandConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
+
     def requirements(self):
         if self.options.enable_libraries:
             self.requires("libffi/3.3")
@@ -46,17 +52,14 @@ class WaylandConan(ConanFile):
     def build_requirements(self):
         self.build_requires("meson/0.57.1")
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "wayland-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), "subdir('tests')", "#subdir('tests')")
+
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "subdir('tests')", "#subdir('tests')")
 
     def _configure_meson(self):
         if not self._meson:
@@ -70,6 +73,7 @@ class WaylandConan(ConanFile):
         return self._meson
 
     def build(self):
+        self._patch_sources()
         meson = self._configure_meson()
         meson.build()
 
