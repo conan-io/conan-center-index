@@ -36,7 +36,6 @@ class CAFConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
             if self.settings.arch == "x86":
                 del self.options.openssl
 
@@ -49,6 +48,8 @@ class CAFConan(ConanFile):
             self.requires("openssl/1.1.1j")
 
     def configure(self):
+        if not self._is_static and self.settings.os == "Windows":
+            raise ConanInvalidConfiguiration("Shared libraries are not supported on Windows")
         if self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version.value) < "4.8":
                 raise ConanInvalidConfiguration("g++ >= 4.8 is required, yours is %s" % self.settings.compiler.version)
@@ -76,8 +77,9 @@ class CAFConan(ConanFile):
                     self._cmake.definitions[define] = "OFF"
             if tools.os_info.is_macos and self.settings.arch == "x86":
                 self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "i386"
-            self._cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
-            self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
+            if self.version == "0.17.6":
+                self._cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
+                self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
             self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level
             if self.settings.os == 'Windows':
                 self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
@@ -92,7 +94,7 @@ class CAFConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if "patches" in self.conan_data:
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
         cmake = self._cmake_configure()
