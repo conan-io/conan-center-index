@@ -23,7 +23,7 @@
 +MPD_BIN_CXXFLAGS_SHARED = /W4 /nologo $(OPT_SHARED) $(PGOFLAGS) $(CONAN_LDFLAGS)
  
  MPD_LDXXFLAGS= /DLL /MANIFEST $(LDXXFLAGS)
-@@ -38,12 +38,12 @@
+@@ -38,11 +38,11 @@
  SHARED_OBJS = .objs\decimal.obj
  
  
@@ -37,8 +37,14 @@
  	-@if exist $@ del $(LIBSHARED_CXX)
  	link $(MPD_LDXXFLAGS) /out:$(LIBSHARED_CXX) /implib:$(LIBIMPORT_CXX) /LIBPATH:$(SRCDIR) $(SHARED_OBJS) $(LIBIMPORT)
  	mt -manifest $(LIBSHARED_CXX).manifest -outputresource:$(LIBSHARED_CXX);2
- 
- 
+@@ -51,2 +51,2 @@
+ decimal.obj:\
+-Makefile decimal.cc decimal.hh
++Makefile.vc decimal.cc decimal.hh
+@@ -55,2 +55,2 @@
+ .objs\decimal.obj:\
+-Makefile decimal.cc decimal.hh
++Makefile.vc decimal.cc decimal.hh
 --- libmpdec/Makefile.vc
 +++ libmpdec/Makefile.vc
 @@ -36,12 +36,12 @@

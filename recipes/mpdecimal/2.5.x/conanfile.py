@@ -71,23 +71,29 @@ class MpdecimalConan(ConanFile):
         shutil.copy(os.path.join(libmpdec_folder, "Makefile.vc"), os.path.join(libmpdec_folder, "Makefile"))
 
         autotools = AutoToolsBuildEnvironment(self)
+        mpdec_extra_flags = []
+        mpdecxx_extra_flags = []
+        if tools.Version(self.version) >= "2.5.1":
+            if self.options.shared:
+                mpdec_extra_flags = ["-DMPDECIMAL_DLL"]
+                mpdecxx_extra_flags = ["-DLIBMPDECXX_DLL"]
 
         mpdec_target = "libmpdec-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
         mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
 
-        builds = [(libmpdec_folder, mpdec_target)]
+        builds = [[libmpdec_folder, mpdec_target, mpdec_extra_flags] ]
         if self.options.cxx:
-            builds.append((libmpdecpp_folder, mpdecpp_target))
+            builds.append([libmpdecpp_folder, mpdecpp_target, mpdecxx_extra_flags])
         with tools.vcvars(self.settings):
-            for build_dir, target in builds:
+            for build_dir, target, extra_flags in builds:
                 with tools.chdir(build_dir):
                     self.run("""nmake /nologo /f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_CXXFLAGS="{cxxflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                         target=target,
-                        machine="ppro" if self.settings.arch == "x86" else "x64",
+                        machine={"x86": "pro", "x86_64": "x64"}[str(self.settings.arch)],  # FIXME: else, use ansi32 and ansi64
                         debug="1" if self.settings.build_type == "Debug" else "0",
                         dll="1" if self.options.shared else "0",
-                        cflags=" ".join(autotools.flags),
-                        cxxflags=" ".join(autotools.cxx_flags),
+                        cflags=" ".join(autotools.flags + extra_flags),
+                        cxxflags=" ".join(autotools.cxx_flags + extra_flags),
                         ldflags=" ".join(autotools.link_flags),
                     ))
 
@@ -126,7 +132,7 @@ class MpdecimalConan(ConanFile):
     def _target_names(self):
         libsuffix = self._shared_suffix if self.options.shared else ".a"
         versionsuffix = ".{}".format(self.version) if self.options.shared else ""
-        suffix = "{}{}".format(versionsuffix, libsuffix) if tools.is_apple_os(self.settings.os) else "{}{}".format(libsuffix, versionsuffix)
+        suffix = "{}{}".format(versionsuffix, libsuffix) if tools.is_apple_os(self.settings.os) or self.settings.os == "Windows" else "{}{}".format(libsuffix, versionsuffix)
         return "libmpdec{}".format(suffix), "libmpdec++{}".format(suffix)
 
     def build(self):
@@ -181,7 +187,10 @@ class MpdecimalConan(ConanFile):
         self.cpp_info.components["libmpdecimal"].libs = ["{}mpdec{}".format(*lib_pre_suf)]
         if self.options.shared:
             if self.settings.compiler == "Visual Studio":
-                self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
+                if tools.Version(self.version) >= "2.5.1":
+                    self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
+                else:
+                    self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
         else:
             if self.settings.os == "Linux":
                 self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
@@ -189,3 +198,6 @@ class MpdecimalConan(ConanFile):
         if self.options.cxx:
             self.cpp_info.components["libmpdecimal++"].libs = ["{}mpdec++{}".format(*lib_pre_suf)]
             self.cpp_info.components["libmpdecimal++"].requires = ["libmpdecimal"]
+            if self.options.shared:
+                if tools.Version(self.version) >= "2.5.1":
+                    self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]

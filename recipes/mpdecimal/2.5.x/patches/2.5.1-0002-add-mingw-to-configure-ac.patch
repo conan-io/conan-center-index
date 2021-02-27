@@ -9,17 +9,17 @@
  case $ac_sys_system in
 +    *windows*|*w64*)
 +        LIBNAME="libmpdec.dll"
-+        LIBSONAME="libmpdec-2.dll"
-+        LIBSHARED="libmpdec-2.5.0.dll"
++        LIBSONAME="libmpdec.2.dll"
++        LIBSHARED="libmpdec.2.5.1.dll"
 +        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
 +        ;;
      darwin*|Darwin*)
-@@ -232,2 +232,8 @@
+@@ -232,2 +238,8 @@
  case $ac_sys_system in
 +    *windows*|*w64*)
 +        LIBNAME="libmpdec.dll"
-+        LIBSONAME="libmpdec-2.dll"
-+        LIBSHARED="libmpdec-2.5.0.dll"
++        LIBSONAME="libmpdec.2.dll"
++        LIBSHARED="libmpdec.2.5.1.dll"
 +        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
 +        ;;
      darwin*|Darwin*)
