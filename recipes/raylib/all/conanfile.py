@@ -40,7 +40,7 @@ class RaylibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("glfw/3.3.2")
+        self.requires("glfw/3.3.3")
         self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
