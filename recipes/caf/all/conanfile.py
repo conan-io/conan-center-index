@@ -49,7 +49,7 @@ class CAFConan(ConanFile):
 
     def configure(self):
         if not self._is_static and self.settings.os == "Windows":
-            raise ConanInvalidConfiguiration("Shared libraries are not supported on Windows")
+            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         if self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version.value) < "4.8":
                 raise ConanInvalidConfiguration("g++ >= 4.8 is required, yours is %s" % self.settings.compiler.version)
