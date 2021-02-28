@@ -21,7 +21,13 @@ class BenchmarkConan(ConanFile):
         "enable_exceptions": [True, False],
         "build_32_bits": [True, False]
     }
-    default_options = {"shared": False, "fPIC": True, "enable_lto": False, "enable_exceptions": True, "build_32_bits": False}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_lto": False,
+        "enable_exceptions": True,
+        "build_32_bits": False
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
