@@ -71,6 +71,12 @@ class SimdjsonConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        simd_flags_file = os.path.join(self._source_subfolder, "cmake", "simdjson-flags.cmake")
+        tools.replace_in_file(simd_flags_file, "target_compile_options(simdjson-internal-flags INTERFACE -fPIC)", "")
+        tools.replace_in_file(simd_flags_file, "-Werror", "")
+        tools.replace_in_file(simd_flags_file, "/WX", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -83,6 +89,7 @@ class SimdjsonConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
