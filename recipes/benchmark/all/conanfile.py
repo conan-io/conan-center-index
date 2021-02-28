@@ -19,14 +19,12 @@ class BenchmarkConan(ConanFile):
         "fPIC": [True, False],
         "enable_lto": [True, False],
         "enable_exceptions": [True, False],
-        "build_32_bits": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_lto": False,
         "enable_exceptions": True,
-        "build_32_bits": False
     }
 
     _source_subfolder = "source_subfolder"
@@ -58,7 +56,6 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
         self._cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
-        self._cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if self.options.build_32_bits else "OFF"
 
         if self.settings.os != "Windows":
             if tools.cross_building(self.settings):
