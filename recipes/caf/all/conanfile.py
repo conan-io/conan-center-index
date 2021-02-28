@@ -51,6 +51,9 @@ class CAFConan(ConanFile):
         if not self._is_static and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         compiler_version = Version(self.settings.compiler.version.value)
+        # Will remove after https://github.com/actor-framework/actor-framework/issues/1226 fixed
+        if self.version != "0.17.6" and self.settings.compiler == "clang" and compiler_version == "5":
+            raise ConanInvalidConfiguration("caf 0.18.0+ not supported on clang 5")
         if self.version != "0.17.6" and \
             (self.settings.compiler == "gcc" and compiler_version < "7") or \
                 (self.settings.compiler == "clang" and compiler_version < "5") or \
@@ -73,20 +76,21 @@ class CAFConan(ConanFile):
     def _cmake_configure(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11" if self.version == "0.17.6" else "17"
-            self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
-            self._cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
             if self.version == "0.17.6":
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
+                self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
+                self._cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
                 for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
                     self._cmake.definitions[define] = "ON"
+                self._cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
+                self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
             else:
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = "17"
+                self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self._has_openssl
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
             if tools.os_info.is_macos and self.settings.arch == "x86":
                 self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "i386"
-            if self.version == "0.17.6":
-                self._cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
-                self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
             self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level
             if self.settings.os == 'Windows':
                 self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True

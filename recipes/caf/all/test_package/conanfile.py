@@ -12,7 +12,6 @@ class TestPackageConan(ConanFile):
         version_str = next(iter(self.requires.values())).ref.version
         cmake = CMake(self)
         cmake.definitions["CMAKE_CXX_STANDARD"] = "11" if version_str == "0.17.6" else "17"
-        cmake.definitions["CAF_INIT_GLOBAL"] = "OFF" if version_str == "0.17.6" else "ON"
         cmake.configure()
         cmake.build()
 
