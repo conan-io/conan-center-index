@@ -54,6 +54,7 @@ class CAFConan(ConanFile):
         if self.version != "0.17.6" and \
             (self.settings.compiler == "gcc" and compiler_version < "7") or \
                 (self.settings.compiler == "clang" and compiler_version < "4") or \
+                (self.settings.compiler == "apple-clang" and compiler_version < "10") or \
                 (self.settings.compiler == "Visual Studio" and compiler_version < "16"):
             raise ConanInvalidConfiguration("caf 0.18.0+ requires a C++17 compiler")
         if self.settings.compiler == "gcc":
