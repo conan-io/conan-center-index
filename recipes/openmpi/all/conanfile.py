@@ -39,6 +39,7 @@ class OpenMPIConan(ConanFile):
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
     def requirements(self):
+        # FIXME : self.requires("libevent/2.1.12") - try to use libevent from conan
         self.requires("zlib/1.2.11")
 
     def source(self):
