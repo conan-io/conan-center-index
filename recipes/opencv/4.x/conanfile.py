@@ -457,7 +457,7 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
                     self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
                     self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                    self.cpp_info.components[conan_component_alias].includedirs.append(os.path.join("include", "opencv4"))
+                    self.cpp_info.components[conan_component_alias].includedirs = []
                     self.cpp_info.components[conan_component_alias].libdirs = []
                     self.cpp_info.components[conan_component_alias].resdirs = []
                     self.cpp_info.components[conan_component_alias].bindirs = []
