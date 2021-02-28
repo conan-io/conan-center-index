@@ -50,17 +50,23 @@ class CAFConan(ConanFile):
     def configure(self):
         if not self._is_static and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
+        compiler_version = Version(self.settings.compiler.version.value)
+        if self.version != "0.17.6" and \
+            (self.settings.compiler == "gcc" and compiler_version < "7") or \
+                (self.settings.compiler == "clang" and compiler_version < "4") or \
+                (self.settings.compiler == "Visual Studio" and compiler_version < "16"):
+            raise ConanInvalidConfiguration("caf 0.18.0+ requires a C++17 compiler")
         if self.settings.compiler == "gcc":
-            if Version(self.settings.compiler.version.value) < "4.8":
+            if compiler_version < "4.8":
                 raise ConanInvalidConfiguration("g++ >= 4.8 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "4.0":
+        elif self.settings.compiler == "clang" and compiler_version < "4.0":
             raise ConanInvalidConfiguration("clang >= 4.0 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) < "9.0":
+        elif self.settings.compiler == "apple-clang" and compiler_version < "9.0":
             raise ConanInvalidConfiguration("clang >= 9.0 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) > "10.0" and \
+        elif self.settings.compiler == "apple-clang" and compiler_version > "10.0" and \
                 self.settings.arch == 'x86':
             raise ConanInvalidConfiguration("clang >= 11.0 does not support x86")
-        elif self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "15":
+        elif self.settings.compiler == "Visual Studio" and compiler_version < "15":
             raise ConanInvalidConfiguration("Visual Studio >= 15 is required, yours is %s" % self.settings.compiler.version)
 
     def _cmake_configure(self):
