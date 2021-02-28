@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+
 class CubicInterpolationConan(ConanFile):
     name = "cubic-interpolation"
     homepage = "https://github.com/MaxSac/cubic_interpolation"
@@ -18,33 +19,40 @@ class CubicInterpolationConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
     exports_sources = ["CMakeLists.txt"]
-	_cmake = None
+    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property 
-    def _minimum_compilers_version(self): 
+    @property
+    def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15", 
-            "gcc": "5", 
-            "clang": "5", 
-            "apple-clang": "5.1", 
-        } 
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1",
+        }
 
-    def validate(self):
-        if self.settings.compiler.cppstd: 
-            check_min_cppstd(self, "14")
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
-        if not minimum_version: 
-            self.output.warn("CubicInterpolation requires C++14. Your compiler is unknown. Assuming it supports C++14.") 
-        elif tools.Version(self.settings.compiler.version) < minimum_version: 
-            raise ConanInvalidConfiguration("CubicInterpolation requires C++14, which your compiler does not support.") 
+        def validate(self):
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, "14")
 
-	def configure(self):
-	    if self.options.shared:
-	        del self.options.fPIC
+        minimum_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler), False
+        )
+        if not minimum_version:
+            self.output.warn(
+                "CubicInterpolation requires C++14. Your compiler is unknown. Assuming it supports C++14."
+            )
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                "CubicInterpolation requires C++14, which your compiler does not support."
+            )
+
+        def configure(self):
+            if self.options.shared:
+                del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -56,18 +64,18 @@ class CubicInterpolationConan(ConanFile):
         self.requires("eigen/3.3.9")
 
     def _configure_cmake(self):
-    	if self._cmake:
-    	    return self._cmake
-    	self._cmake = CMake(self)
-    	self._cmake.configure()
-    	return self._cmake
-    
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)        
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
