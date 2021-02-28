@@ -60,7 +60,6 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
         self._cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if self.options.build_32_bits else "OFF"
 
-        # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
         if self.settings.os != "Windows":
             if tools.cross_building(self.settings):
                 self._cmake.definitions["HAVE_STD_REGEX"] = False
