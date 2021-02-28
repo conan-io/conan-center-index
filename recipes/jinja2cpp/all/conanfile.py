@@ -124,6 +124,8 @@ class Jinja2cppConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "jinja2cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "jinja2cpp"
         self.cpp_info.builddirs.append(self._module_subfolder)
         module_rel_path = os.path.join(self._module_subfolder, self._module_file)
         self.cpp_info.build_modules["cmake_find_package"] = [module_rel_path]
