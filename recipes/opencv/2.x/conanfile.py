@@ -55,10 +55,6 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self.settings.os == "Linux":
-            self.build_requires("gtk/system")
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg:
@@ -66,15 +62,19 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.25")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.2")
+            self.requires("openexr/2.5.5")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.7")
+            self.requires("eigen/3.3.9")
         if self.options.with_tbb:
-            self.requires("tbb/2020.2")
+            self.requires("tbb/2020.3")
+
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            self.build_requires("gtk/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
