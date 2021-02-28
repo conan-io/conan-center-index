@@ -96,7 +96,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.4")
+            self.requires("openexr/2.5.5")
         if self.options.with_tiff:
             self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
