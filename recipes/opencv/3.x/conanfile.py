@@ -85,20 +85,20 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.25")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.2")
+            self.requires("openexr/2.5.5")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.8")
+            self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
-            self.requires("tbb/2020.2")
+            self.requires("tbb/2020.3")
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
         if self.options.contrib:
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.7.2")
+            self.requires("harfbuzz/2.7.4")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
         if self.options.get_safe("with_gtk"):
