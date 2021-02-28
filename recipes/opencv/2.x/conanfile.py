@@ -32,7 +32,8 @@ class OpenCVConan(ConanFile):
                        "with_openexr": True,
                        "with_eigen": True,
                        "with_tbb": False}
-    exports_sources = "CMakeLists.txt"
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -81,6 +82,8 @@ class OpenCVConan(ConanFile):
         os.rename("opencv-{}".format(self.version), self._source_subfolder)
 
     def _patch_opencv(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
         # allow to find conan-supplied OpenEXR
         if self.options.with_openexr:
