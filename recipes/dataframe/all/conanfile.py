@@ -20,6 +20,9 @@ class DataFrameConan(ConanFile):
         "financial-data-analysis",
         "trading-strategies",
         "machine-learning",
+        "trading-algorithms",
+        "financial-engineering",
+        "large-data",
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {
