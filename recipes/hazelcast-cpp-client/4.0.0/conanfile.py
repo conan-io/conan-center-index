@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-class HazelcastCppClient(ConanFile):
+class HazelcastCxx(ConanFile):
     name = "hazelcast-cpp-client"
     description = "C++ client library for Hazelcast in-memory database."
     license = "Apache-2.0"
@@ -57,7 +57,8 @@ class HazelcastCppClient(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
@@ -74,10 +75,10 @@ class HazelcastCppClient(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "hazelcast-cpp-client"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "hazelcast-cpp-client"
-        self.cpp_info.names["cmake_find_package"] = "hazelcast-cpp-client"
-        self.cpp_info.names["cmake_find_package_multi"] = "hazelcast-cpp-client"
+        self.cpp_info.filenames["cmake_find_package"] = "hazelcastcxx"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "hazelcastcxx"
+        self.cpp_info.names["cmake_find_package"] = "hazelcastcxx"
+        self.cpp_info.names["cmake_find_package_multi"] = "hazelcastcxx"
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
