@@ -50,9 +50,9 @@ class CubicInterpolationConan(ConanFile):
                 "CubicInterpolation requires C++14, which your compiler does not support."
             )
 
-        def configure(self):
-            if self.options.shared:
-                del self.options.fPIC
+            def configure(self):
+                if self.options.shared:
+                    del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -78,6 +78,17 @@ class CubicInterpolationConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        _cmake_files = os.path.join(
+            self.package_folder, "lib", "cmake", "CubicInterpolation"
+        )
+        for _f in os.listdir(_cmake_files):
+            os.unlink(os.path.join(_cmake_files, _f))
+        os.rmdir(
+            os.path.join(
+                self.package_folder, "lib", "cmake", "CubicInterpolation"
+            )
+        )
+        os.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
