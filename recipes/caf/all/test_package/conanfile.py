@@ -1,6 +1,5 @@
-import sys
-
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
 
 

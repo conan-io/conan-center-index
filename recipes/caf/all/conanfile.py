@@ -25,16 +25,15 @@ class CAFConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _cmake = None
 
-
     @property
     def _has_openssl(self):
-        return 'openssl' in self.options.values.keys() and self.options.openssl
+        return 'with_openssl' in self.options.values.keys() and self.options.with_openssl
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             if self.settings.arch == "x86":
-                del self.options.openssl
+                del self.options.with_openssl
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -45,10 +44,10 @@ class CAFConan(ConanFile):
             self.requires("openssl/1.1.1j")
 
     def configure(self):
-        if not self._is_static and self.settings.os == "Windows":
+        if self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         compiler_version = Version(self.settings.compiler.version.value)
-        if self.version != "0.17.6" and \
+        if Version(self.version) > "0.17.6" and \
             (self.settings.compiler == "gcc" and compiler_version < "7") or \
                 (self.settings.compiler == "clang" and compiler_version < "6") or \
                 (self.settings.compiler == "apple-clang" and compiler_version < "10") or \
@@ -70,14 +69,14 @@ class CAFConan(ConanFile):
     def _cmake_configure(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            if self.version == "0.17.6":
+            if Version(self.version) <= "0.17.6":
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
                 self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
                 self._cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
                 for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
                     self._cmake.definitions[define] = "ON"
-                self._cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
-                self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
+                self._cmake.definitions["CAF_BUILD_STATIC"] = not self.options.shared
+                self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = not self.options.shared
             else:
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = "17"
                 self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self._has_openssl
@@ -111,7 +110,7 @@ class CAFConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        suffix = "_static" if self._is_static and self.version == "0.17.6" else ""
+        suffix = "_static" if not self.options.shared and Version(self.version) <= "0.17.6" else ""
 
         self.cpp_info.names["cmake_find_package"] = "CAF"
         self.cpp_info.names["cmake_find_package_multi"] = "CAF"
