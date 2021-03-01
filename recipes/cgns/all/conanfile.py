@@ -60,8 +60,13 @@ class CgnsConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["CGNS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_ENABLE_TESTS"] = False
+        self._cmake.definitions["CGNS_BUILD_TESTING"] = False
+        self._cmake.definitions["CGNS_ENABLE_FORTRAN"] = False
         self._cmake.definitions["CGNS_ENABLE_HDF5"] = self.options.with_hdf5
+        self._cmake.definitions["CGNS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_USE_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_BUILD_CGNSTOOLS"] = False
         self._cmake.configure()
 
         return self._cmake
@@ -71,7 +76,7 @@ class CgnsConan(ConanFile):
             tools.patch(**patch)
 
         cmake = self._configure_cmake()
-        cmake.build()
+        cmake.build(target="cgns_shared" if self.options.shared else "cgns_static")
 
     def package(self):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
@@ -79,17 +84,9 @@ class CgnsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for binary in os.listdir(os.path.join(self.package_folder, "bin")):
-            if not binary.endswith(".dll"):
-                os.remove(os.path.join(self.package_folder, "bin", binary))
-
         os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
 
     def package_info(self):
-        # FIXME: CGNS does not install under a CMake namespace https://github.com/CGNS/CGNS/blob/7cc605021cc6c278acf2e69c5c3bd69ff5ee504e/src/CMakeLists.txt#L648-L654
-        self.cpp_info.names["cmake_find_package"] = "CGNS"
-        self.cpp_info.names["cmake_find_package_multi"] = "CGNS"
-
-        # Although CGNS defines the targets cgns_static and cgns_shared,
-        # the output name is always cgns or cgnsdll
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cgnsdll" if self.settings.os == "Windows" and self.options.shared else "cgns"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines = ["CGNSDLL=__declspec(dllimport)"] # we could instead define USE_DLL but it's too generic
