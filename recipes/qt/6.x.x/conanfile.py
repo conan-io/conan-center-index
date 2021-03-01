@@ -124,6 +124,8 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
+        if self.settings.os != "Linux":
+            self.options.qtwayland = False
 
     def configure(self):
 
@@ -232,6 +234,8 @@ class QtConan(ConanFile):
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.4.8")
+        if self.options.qtwayland:
+            self.requires("wayland/1.18.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
