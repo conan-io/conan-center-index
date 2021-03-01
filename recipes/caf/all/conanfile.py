@@ -18,7 +18,7 @@ class CAFConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "log_level": ["ERROR", "WARNING", "INFO", "DEBUG", "TRACE", "QUIET"],
-        "openssl": [True, False]
+        "with_openssl": [True, False]
     }
     default_options = {"shared": False, "fPIC": True, "log_level": "QUIET", "openssl": True}
     _source_subfolder = "source_subfolder"
