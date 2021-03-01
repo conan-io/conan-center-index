@@ -60,8 +60,13 @@ class CgnsConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["CGNS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_ENABLE_TESTS"] = False
+        self._cmake.definitions["CGNS_BUILD_TESTING"] = False
+        self._cmake.definitions["CGNS_ENABLE_FORTRAN"] = False
         self._cmake.definitions["CGNS_ENABLE_HDF5"] = self.options.with_hdf5
+        self._cmake.definitions["CGNS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_USE_SHARED"] = self.options.shared
+        self._cmake.definitions["CGNS_BUILD_CGNSTOOLS"] = False
         self._cmake.configure()
 
         return self._cmake
@@ -71,17 +76,13 @@ class CgnsConan(ConanFile):
             tools.patch(**patch)
 
         cmake = self._configure_cmake()
-        cmake.build()
+        cmake.build(target="cgns_shared" if self.options.shared else "cgns_static")
 
     def package(self):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
 
         cmake = self._configure_cmake()
         cmake.install()
-
-        for binary in os.listdir(os.path.join(self.package_folder, "bin")):
-            if not binary.endswith(".dll"):
-                os.remove(os.path.join(self.package_folder, "bin", binary))
 
         os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
 

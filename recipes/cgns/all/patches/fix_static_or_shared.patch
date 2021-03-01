@@ -1,22 +1,22 @@
-Enforces that either static or dynamic libs are build
+Enforces that either static or dynamic libs are built
 
---- a/source_subfolder/src/CMakeLists.txt	2021-02-02 10:35:07.376792980 +0100
-+++ b/source_subfolder/src/CMakeLists.txt	2021-02-02 11:00:41.138746824 +0100
-@@ -597,14 +597,15 @@
-   set_target_properties(cgns_shared PROPERTIES SOVERSION "${CGNS_VERSION}")
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -598,7 +598,9 @@ if(CGNS_BUILD_SHARED)
  endif(CGNS_BUILD_SHARED)
  
--# Set the install path of the static library
--install(TARGETS cgns_static ARCHIVE DESTINATION lib)
+ # Set the install path of the static library
++if(NOT CGNS_BUILD_SHARED)
+ install(TARGETS cgns_static ARCHIVE DESTINATION lib)
++endif()
  # Set the install path of the shared library
  if(CGNS_BUILD_SHARED)
    # for windows, need to install both cgnsdll.dll and cgnsdll.lib
-   install (TARGETS cgns_shared LIBRARY DESTINATION lib
-                                ARCHIVE DESTINATION lib
-                                RUNTIME DESTINATION bin)
-+else(CGNS_BUILD_SHARED)
-+  # Set the install path of the static library
-+  install(TARGETS cgns_static ARCHIVE DESTINATION lib)
- endif(CGNS_BUILD_SHARED)
+@@ -650,7 +652,6 @@ install(FILES ${headers}
+ # Tools #
+ #########
  
- # Set the install path of the header files
+-add_subdirectory(tools)
+ 
+ #########
+ # Tests #
