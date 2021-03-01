@@ -4,7 +4,7 @@ import os
 
 
 class CubicInterpolationConan(ConanFile):
-    name = "cubic-interpolation"
+    name = "cubicinterpolation"
     homepage = "https://github.com/MaxSac/cubic_interpolation"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
