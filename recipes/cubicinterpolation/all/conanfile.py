@@ -34,9 +34,9 @@ class CubicInterpolationConan(ConanFile):
             "apple-clang": "5.1",
         }
 
-        def validate(self):
-            if self.settings.compiler.cppstd:
-                check_min_cppstd(self, "14")
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "14")
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
@@ -50,9 +50,9 @@ class CubicInterpolationConan(ConanFile):
                 "CubicInterpolation requires C++14, which your compiler does not support."
             )
 
-            def configure(self):
-                if self.options.shared:
-                    del self.options.fPIC
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
