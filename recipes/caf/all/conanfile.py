@@ -120,8 +120,8 @@ class CAFConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "CAF"
         self.cpp_info.names["cmake_find_package_multi"] = "CAF"
 
-        self.cpp_info.components["core"].names["pkg_config"] = f"caf_core{suffix}"
-        self.cpp_info.components["core"].libs = [f"caf_core{suffix}"]
+        self.cpp_info.components["core"].names["pkg_config"] = "caf_core{}".format(suffix)
+        self.cpp_info.components["core"].libs = ["caf_core{}".format(suffix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs = ["pthread", "m"]
 
