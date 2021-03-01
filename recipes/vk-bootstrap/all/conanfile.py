@@ -29,7 +29,7 @@ class VkBootstrapConan(ConanFile):
             "gcc": "5",
             "Visual Studio": "15",
             "clang": "3.7" if tools.stdcpp_library(self) == "stdc++" else "6",
-            "apple-clang": "5.1",
+            "apple-clang": "10",
         }
 
     def config_options(self):
