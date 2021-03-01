@@ -10,7 +10,7 @@ class CAFConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/actor-framework/actor-framework"
     topics = "conan", "caf", "actor-framework", "actor-model", "pattern-matching", "actors"
-    license = "BSD-3-Clause, BSL-1.0"
+    license = "BSD-3-Clause", "BSL-1.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
