@@ -125,8 +125,8 @@ class CAFConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs = ["pthread", "m"]
 
-        self.cpp_info.components["io"].names["pkg_config"] = f"caf_io{suffix}"
-        self.cpp_info.components["io"].libs = [f"caf_io{suffix}"]
+        self.cpp_info.components["io"].names["pkg_config"] = "caf_io{}".format(suffix)
+        self.cpp_info.components["io"].libs = ["caf_io{}".format(suffix)]
         self.cpp_info.components["io"].requires = ["core"]
         if self.settings.os == "Windows":
             self.cpp_info.components["io"].system_libs = ["ws2_32", "iphlpapi", "psapi"]
