@@ -9,10 +9,10 @@ conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
 
-find_package(qt REQUIRED CONFIG)
+find_package(Qt6 REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h moc_greeter.cpp)
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
-target_link_libraries(${PROJECT_NAME} qt::qt)
+target_link_libraries(${PROJECT_NAME} Qt6::Core)
