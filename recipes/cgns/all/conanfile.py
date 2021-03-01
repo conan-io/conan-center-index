@@ -86,6 +86,4 @@ class CgnsConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "include", "cgnsBuild.defs"))
 
     def package_info(self):
-        # Although CGNS defines the targets cgns_static and cgns_shared,
-        # the output name is always cgns or cgnsdll
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cgnsdll" if self.settings.os == "Windows" and self.options.shared else "cgns"]
