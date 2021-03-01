@@ -177,3 +177,4 @@ class PCREConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             return name + "d"
         return name
+
