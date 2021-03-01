@@ -67,12 +67,15 @@ class OcctConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
+
     def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0":
             raise ConanInvalidConfiguration("Clang 6.0 is not supported.")
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
             raise ConanInvalidConfiguration("Visual Studio 14 is not supported.")
+        if self.settings.compiler == "Visual Studio" and \
+           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
+            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -105,7 +108,7 @@ class OcctConan(ConanFile):
                          "adm/cmake/occt_toolkit.cmake"),
             """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug RelWithDebInfo
-             DESTINATION "${INSTALL_DIR_BIN}\${OCCT_INSTALL_BIN_LETTER}")""",
+             DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
             "")
 
         tools.replace_in_file(
