@@ -88,3 +88,5 @@ class CgnsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["cgnsdll" if self.settings.os == "Windows" and self.options.shared else "cgns"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines = ["CGNSDLL=__declspec(dllimport)"] # we could instead define USE_DLL but it's too generic
