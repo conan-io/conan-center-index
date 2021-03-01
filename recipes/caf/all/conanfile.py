@@ -51,12 +51,9 @@ class CAFConan(ConanFile):
         if not self._is_static and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         compiler_version = Version(self.settings.compiler.version.value)
-        # Will remove after https://github.com/actor-framework/actor-framework/issues/1226 fixed
-        if self.version != "0.17.6" and self.settings.compiler == "clang" and compiler_version == "5":
-            raise ConanInvalidConfiguration("caf 0.18.0+ not supported on clang 5")
         if self.version != "0.17.6" and \
             (self.settings.compiler == "gcc" and compiler_version < "7") or \
-                (self.settings.compiler == "clang" and compiler_version < "5") or \
+                (self.settings.compiler == "clang" and compiler_version < "6") or \
                 (self.settings.compiler == "apple-clang" and compiler_version < "10") or \
                 (self.settings.compiler == "Visual Studio" and compiler_version < "16"):
             raise ConanInvalidConfiguration("caf 0.18.0+ requires a C++17 compiler")
