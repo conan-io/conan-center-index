@@ -25,9 +25,6 @@ class CAFConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _cmake = None
 
-    @property
-    def _is_static(self):
-        return 'shared' not in self.options.values.keys() or not self.options.shared
 
     @property
     def _has_openssl(self):
