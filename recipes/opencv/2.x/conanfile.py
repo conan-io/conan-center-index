@@ -14,24 +14,30 @@ class OpenCVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_jpeg": [True, False],
-               "with_png": [True, False],
-               "with_tiff": [True, False],
-               "with_jasper": [True, False],
-               "with_openexr": [True, False],
-               "with_eigen": [True, False],
-               "with_tbb": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_jpeg": True,
-                       "with_png": True,
-                       "with_tiff": True,
-                       "with_jasper": True,
-                       "with_openexr": True,
-                       "with_eigen": True,
-                       "with_tbb": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_jpeg": [True, False],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jasper": [True, False],
+        "with_openexr": [True, False],
+        "with_eigen": [True, False],
+        "with_tbb": [True, False],
+        "with_gtk": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_jpeg": True,
+        "with_png": True,
+        "with_tiff": True,
+        "with_jasper": True,
+        "with_openexr": True,
+        "with_eigen": True,
+        "with_tbb": False,
+        "with_gtk": True,
+    }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
@@ -48,6 +54,8 @@ class OpenCVConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.with_gtk
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -72,10 +80,8 @@ class OpenCVConan(ConanFile):
             self.requires("eigen/3.3.9")
         if self.options.with_tbb:
             self.requires("tbb/2020.3")
-
-    def build_requirements(self):
-        if self.settings.os == "Linux":
-            self.build_requires("gtk/system")
+        if self.options.get_safe("with_gtk"):
+            self.requires("gtk/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -154,6 +160,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENCL"] = False
         self._cmake.definitions["WITH_CUDA"] = False
 
+        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
         self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
         self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
@@ -229,11 +236,14 @@ class OpenCVConan(ConanFile):
         def tbb():
             return ["tbb::tbb"] if self.options.with_tbb else []
 
+        def gtk():
+            return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
+
         opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + tbb()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + tbb()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + tbb()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + tbb() + imageformats_deps()},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + tbb() + gtk() + imageformats_deps()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui"] + tbb()},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"] + tbb()},
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + tbb()},
