@@ -1,0 +1,112 @@
+The CGNS build uses the FindHDF5 module that locates the HDF5 libs by invoking the HDF5 compiler.
+In order to link to the correct libraries provided by conan, the whole logic is removed from the cmake script.
+
+--- a/source_subfolder/CMakeLists.txt	2020-02-14 16:16:46.000000000 +0100
++++ b/source_subfolder/CMakeLists.txt	2021-02-03 10:50:47.216808026 +0100
+@@ -194,104 +194,8 @@
+ option(CGNS_ENABLE_HDF5 "Enable or disable HDF5 interface" "OFF")
+ if (CGNS_ENABLE_HDF5)
+ 
+-  if (CGNS_BUILD_SHARED)
+-    set (FIND_HDF_COMPONENTS C shared)
+-  else (CGNS_BUILD_SHARED)
+-    set (FIND_HDF_COMPONENTS C static)
+-  endif (CGNS_BUILD_SHARED)
+-  message (STATUS "HDF5 find comps: ${FIND_HDF_COMPONENTS}")
+-
+-  #set (SEARCH_PACKAGE_NAME ${HDF5_PACKAGE_NAME})
+-  set (SEARCH_PACKAGE_NAME "hdf5")
+-
+-  find_package (HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS ${FIND_HDF_COMPONENTS})
+-  message (STATUS "HDF5 C libs:${HDF5_FOUND} static:${HDF5_static_C_FOUND} and shared:${HDF5_shared_C_FOUND}")
+-  if (HDF5_FOUND)
+-    add_executable (h5dump IMPORTED)
+-    if (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
+-      set (FIND_HDF_COMPONENTS C)
+-
+-      find_package (HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS ${FIND_HDF_COMPONENTS})
+-      message (STATUS "HDF5 libs:${HDF5_FOUND} C:${HDF5_C_FOUND}")
+-      set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
+-      if (HDF5_BUILD_SHARED_LIBS)
+-        add_definitions (-DH5_BUILT_AS_DYNAMIC_LIB)
+-      else (HDF5_BUILD_SHARED_LIBS)
+-        add_definitions (-DH5_BUILT_AS_STATIC_LIB)
+-      endif (HDF5_BUILD_SHARED_LIBS)
+-      if (BUILD_SHARED_LIBS AND WIN32)
+-        set_property (TARGET h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dumpdll")
+-      else (BUILD_SHARED_LIBS AND WIN32)
+-        set_property (TARGET h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump")
+-      endif (BUILD_SHARED_LIBS AND WIN32)
+-    else (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
+-      if (BUILD_SHARED_LIBS AND HDF5_shared_C_FOUND)
+-        set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_SHARED_LIBRARY})
+-      else (HDF5_static_C_FOUND)
+-        set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_STATIC_LIBRARY})
+-      endif (BUILD_SHARED_LIBS AND HDF5_shared_C_FOUND)
+-      set_property (TARGET h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump")
+-    endif (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
+-    set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump>)
+-
+-    set (HDF5_HAVE_H5PUBCONF_H 1)
+-    set (HDF5_HAVE_HDF5 1)
+-    set (HDF5_HDF5_HEADER "h5pubconf.h")
+-    set (HDF5_INCLUDE_DIR_GEN ${HDF5_INCLUDE_DIR})
+-    message (STATUS "HDF5-${HDF5_VERSION_STRING} found: INC=${HDF5_INCLUDE_DIR} TOOLS=${HDF5_TOOLS_DIR}")
+-  else (HDF5_FOUND)
+-    find_package (HDF5) # Legacy find
+-#Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
+-    set(HDF5_TOOLS_DIR ${HDF5_LIBRARY_DIRS}/../bin)
+-#Legacy find_package does not set HDF5_BUILD_SHARED_LIBS, so we set it here
+-    if (CGNS_BUILD_SHARED AND EXISTS "${HDF5_LIBRARY_DIRS}/libhdf5${CMAKE_SHARED_LIBRARY_SUFFIX}")
+-      set (HDF5_BUILD_SHARED_LIBS 1)
+-      add_definitions (-DH5_BUILT_AS_DYNAMIC_LIB)
+-    else ()
+-      set (HDF5_BUILD_SHARED_LIBS 0)
+-      add_definitions (-DH5_BUILT_AS_STATIC_LIB)
+-    endif ()
+-    set (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
+-
+-    add_executable (h5dump IMPORTED)
+-    set_property (TARGET h5dump PROPERTY IMPORTED_LOCATION "${HDF5_TOOLS_DIR}/h5dump")
+-    set (HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump>)
+-  endif (HDF5_FOUND)
+-  set (HDF5_PACKAGE_NAME ${SEARCH_PACKAGE_NAME})
+-
+-  if (HDF5_FOUND)
+-    set (HDF5_HAVE_H5PUBCONF_H 1)
+-    set (HDF5_HAVE_HDF5 1)
+-    set (HDF5_HDF5_HEADER "h5pubconf.h")
+-    set (HDF5_INCLUDE_DIR_GEN ${HDF5_INCLUDE_DIR})
+-    message (STATUS "HDF5-${HDF5_VERSION_STRING} found: INC=${HDF5_INCLUDE_DIR} TOOLS=${HDF5_TOOLS_DIR} HDF5_BUILD_SHARED_LIBS=${HDF5_BUILD_SHARED_LIBS}")
+-    INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
+-    set (HDF5_LIBRARY ${LINK_LIBS})
+-    message (STATUS "HDF5 link libs: ${LINK_LIBS}")
+-  else (HDF5_FOUND)
+-    message (FATAL_ERROR " HDF5 was specified but was not found")
+-  endif (HDF5_FOUND)
+-
+-  set(HDF5_NEED_ZLIB "OFF" CACHE BOOL "Does the HDF5 library require linking to zlib?")
+-  if(HDF5_NEED_ZLIB)
+-    find_library(ZLIB_LIBRARY z)
+-    mark_as_advanced(CLEAR ZLIB_LIBRARY)
+-  else (HDF5_NEED_ZLIB)
+-    mark_as_advanced(FORCE ZLIB_LIBRARY)
+-  endif(HDF5_NEED_ZLIB)
+-
+-  set(HDF5_NEED_SZIP "OFF" CACHE BOOL "Does the HDF5 library require linking to zlib?")
+-  if (HDF5_NEED_SZIP)
+-    find_library(SZIP_LIBRARY szip)
+-    mark_as_advanced(CLEAR SZIP_LIBRARY)
+-  else (HDF5_NEED_SZIP)
+-    mark_as_advanced(FORCE SZIP_LIBRARY)
+-  endif (HDF5_NEED_SZIP)
+-
+-  # Check if HDF5 version is 1.8 or greater
+-  if (HDF5_VERSION VERSION_LESS "1.8.0")
+-    message (FATAL_ERROR "HDF5 version must be greater than 1.8.0")
+-  endif (HDF5_VERSION VERSION_LESS "1.8.0")
++  INCLUDE_DIRECTORIES (${CONAN_INCLUDE_DIRS})
++  set (HDF5_LIBRARY CONAN_PKG::hdf5)
+ 
+   set(HDF5_NEED_MPI "OFF" CACHE BOOL "Does the HDF5 library require linking to mpi? (Only true if using parallel HDF5)")
+   set(MPI_INC)
