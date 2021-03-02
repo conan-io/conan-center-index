@@ -27,7 +27,7 @@ class Mosquitto(ConanFile):
                        "clients": False,
                        "broker": False,
                        "apps": False,
-                       "cjson": False,
+                       "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
                        "build_cpp": True,
                        "websockets": False,
     }
@@ -46,9 +46,6 @@ class Mosquitto(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
-        if tools.Version(self.version) > "2.0.6":
-            self.options["cjson"] = True
 
     def configure(self):
         if self.options.shared:
