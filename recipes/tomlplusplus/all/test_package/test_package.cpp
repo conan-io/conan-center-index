@@ -1,4 +1,9 @@
+#ifndef TOMLMULTIHEADER
 #include <toml.hpp>
+#else
+#include <toml++/toml.h>
+#endif
+
 #include <fstream> //required for toml::parse_file()
 #include <iostream>
 
