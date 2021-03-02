@@ -1,3 +1,5 @@
+see https://github.com/KhronosGroup/MoltenVK/pull/1287
+
 --- a/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h
 +++ b/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h
 @@ -22,7 +22,7 @@
