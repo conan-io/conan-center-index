@@ -25,46 +25,55 @@ class CAFConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _cmake = None
 
-    @property
-    def _has_openssl(self):
-        return 'with_openssl' in self.options.values.keys() and self.options.with_openssl
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.arch == "x86":
-                del self.options.with_openssl
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("actor-framework-" + self.version, self._source_subfolder)
 
     def requirements(self):
-        if self._has_openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1j")
 
-    def configure(self):
-        if self.options.shared and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
-        compiler_version = Version(self.settings.compiler.version.value)
-        if Version(self.version) > "0.17.6" and \
-            (self.settings.compiler == "gcc" and compiler_version < "7") or \
-                (self.settings.compiler == "clang" and compiler_version < "6") or \
-                (self.settings.compiler == "apple-clang" and compiler_version < "10") or \
-                (self.settings.compiler == "Visual Studio" and compiler_version < "16"):
-            raise ConanInvalidConfiguration("caf 0.18.0+ requires a C++17 compiler")
-        if self.settings.compiler == "gcc":
-            if compiler_version < "4.8":
-                raise ConanInvalidConfiguration("g++ >= 4.8 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "clang" and compiler_version < "4.0":
-            raise ConanInvalidConfiguration("clang >= 4.0 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "apple-clang" and compiler_version < "9.0":
-            raise ConanInvalidConfiguration("clang >= 9.0 is required, yours is %s" % self.settings.compiler.version)
-        elif self.settings.compiler == "apple-clang" and compiler_version > "10.0" and \
+    def _minimum_compilers_version(self, cppstd):
+        standards = {
+            "11": {
+                "Visual Studio": "15",
+                "gcc": "4.8",
+                "clang": "4",
+                "apple-clang": "9",
+            },
+            "17": {
+                "Visual Studio": "16",
+                "gcc": "7",
+                "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
+                "apple-clang": "10",
+            },
+        }
+        return standards.get(cppstd) or {}
+
+    def validate(self):
+        cppstd = "11" if Version(self.version) <= "0.17.6" else "17"
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, cppstd)
+        min_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, cppstd, self.settings.compiler, self.settings.compiler.version))
+
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) > "10.0" and \
                 self.settings.arch == 'x86':
             raise ConanInvalidConfiguration("clang >= 11.0 does not support x86")
-        elif self.settings.compiler == "Visual Studio" and compiler_version < "15":
-            raise ConanInvalidConfiguration("Visual Studio >= 15 is required, yours is %s" % self.settings.compiler.version)
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
+        if self.options.with_openssl and self.settings.os == "Windows" and self.settings.arch == "x86":
+            raise ConanInvalidConfiguration("OpenSSL is not supported for Windows x86")
 
     def _cmake_configure(self):
         if not self._cmake:
@@ -72,14 +81,14 @@ class CAFConan(ConanFile):
             if Version(self.version) <= "0.17.6":
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
                 self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
-                self._cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
+                self._cmake.definitions["CAF_NO_OPENSSL"] = not self.options.with_openssl
                 for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
                     self._cmake.definitions[define] = "ON"
                 self._cmake.definitions["CAF_BUILD_STATIC"] = not self.options.shared
                 self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = not self.options.shared
             else:
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = "17"
-                self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self._has_openssl
+                self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
             if tools.os_info.is_macos and self.settings.arch == "x86":
@@ -126,7 +135,7 @@ class CAFConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["io"].system_libs = ["ws2_32", "iphlpapi", "psapi"]
 
-        if self._has_openssl:
+        if self.options.with_openssl:
             self.cpp_info.components["openssl"].names["pkg_config"] = f"caf_openssl{suffix}"
             self.cpp_info.components["openssl"].libs = [f"caf_openssl{suffix}"]
             self.cpp_info.components["openssl"].requires = ["io", "openssl::openssl"]
