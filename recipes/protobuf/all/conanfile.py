@@ -45,6 +45,10 @@ class ProtobufConan(ConanFile):
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
+    @property
+    def _can_disable_rtti(self):
+        return tools.Version(self.version) >= "3.15.4"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self.version
@@ -53,12 +57,10 @@ class ProtobufConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._can_disable_rtti:
+            del self.options.with_rtti
 
     def configure(self):
-        if not self.options.with_rtti:
-            if tools.Version(self.version) < "3.15.4":
-                raise ConanInvalidConfiguration("Disabling RTTI is only possible for versions 3.15.4+")
-
         if self.options.shared:
             del self.options.fPIC
 
@@ -88,7 +90,8 @@ class ProtobufConan(ConanFile):
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
             self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
             self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
-            self._cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
+            if self._can_disable_rtti:
+                self._cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
