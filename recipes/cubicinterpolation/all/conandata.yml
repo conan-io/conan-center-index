@@ -1,4 +1,4 @@
 sources:
-  "0.1.1":
-    url: "https://github.com/MaxSac/cubic_interpolation/archive/v0.1.1.tar.gz"
-    sha256: "cc71c9dcc8d47ac7346c13b6f8aa6e4ab5ad2076c8591634c875a4a9b32a50dd"
+  "0.1.2":
+    url: "https://github.com/MaxSac/cubic_interpolation/archive/v0.1.2.tar.gz"
+    sha256: "61f0b940a33378dd02ec346a51a587b10c52b5a45f02a854f20cbaee49259ec1"
