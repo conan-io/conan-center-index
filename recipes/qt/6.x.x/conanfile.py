@@ -540,6 +540,16 @@ Examples = res/datadir/examples""")
                 requires.append("Core")
             self.cpp_info.components[module].requires = requires
 
+        def _create_plugin(pluginname, libname, type, requires):
+            assert pluginname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
+            self.cpp_info.components[pluginname].names["cmake_find_package"] = pluginname
+            self.cpp_info.components[pluginname].libs = [libname + libsuffix]
+            self.cpp_info.components[pluginname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
+            self.cpp_info.components[pluginname].includedirs = []
+            if "Core" not in requires:
+                requires.append("Core")
+            self.cpp_info.components[pluginname].requires = requires
+
         core_reqs = ["zlib::zlib"]
         if self.options.with_pcre2:
             core_reqs.append("pcre2::pcre2")
@@ -566,12 +576,12 @@ Examples = res/datadir/examples""")
                 gui_reqs.append("opengl::opengl")
             _create_module("Gui", gui_reqs)
         if self.options.with_sqlite3:
-            _create_module("QSQLiteDriverPlugin", ["sqlite3::sqlite3"])
+            _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
-            _create_module("QPSQLDriverPlugin", ["libpq::libpq"])
+            _create_plugin("QPSQLDriverPlugin", "qsqlpsql", "sqldrivers", ["libpq::libpq"])
         if self.options.with_odbc:
             if self.settings.os != "Windows":
-                _create_module("QODBCDriverPlugin", ["odbc::odbc"])
+                _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
         _create_module("Network", ["openssl::openssl"] if self.options.openssl else [])
         _create_module("PrintSupport", ["Gui", "Widgets"])
         _create_module("Sql")
@@ -600,6 +610,8 @@ Examples = res/datadir/examples""")
 
         if self.options.qttools:
             _create_module("UiPlugin", ["Gui", "Widgets"])
+            self.cpp_info.components["UiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
+            self.cpp_info.components["UiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
