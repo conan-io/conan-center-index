@@ -1,0 +1,24 @@
+diff -u a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,7 @@
+ 
+ 
+ cmake_minimum_required(VERSION 2.8.12)
++project(zmqpp)
+ enable_testing()
+ 
+ # prepare C++11
+@@ -145,7 +146,11 @@
+ endif() # WIN32
+ 
+ include(GenerateExportHeader)
+-generate_export_header(zmqpp)
++if(ZMQPP_BUILD_SHARED)
++  generate_export_header(zmqpp)
++elseif(ZMQPP_BUILD_STATIC)
++  generate_export_header(zmqpp-static BASE_NAME zmqpp)
++endif()
+ include_directories(${CMAKE_CURRENT_BINARY_DIR})
+ 
+ # Examples

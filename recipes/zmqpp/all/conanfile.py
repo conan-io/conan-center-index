@@ -8,12 +8,12 @@ class ZmqppConan(ConanFile):
     license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     description = "This C++ binding for 0mq/zmq is a 'high-level' library that hides most of the c-style interface core 0mq provides."
-    topics = ("conan", "zmq", "0mq", "ZeroMQ", "message-queue", "asynchronous")
+    topics = ("conan", "zmq", "0mq", "zeromq", "message-queue", "asynchronous")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = ["cmake", "cmake_find_package"]
 
     @property
     def _source_subfolder(self):
@@ -36,20 +36,8 @@ class ZmqppConan(ConanFile):
         os.rename("zmqpp-%s" % (self.version), self._source_subfolder)
 
     def _patch_sources(self):
-        cmakeFile = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # zmqpp misses find for sodium
-        tools.replace_in_file(cmakeFile, "enable_testing()", "#enable_testing()\n"
-                                         "find_package(libsodium REQUIRED)")
-        if self.options.shared:
-            # zmqpp misses linking to sodium
-            tools.replace_in_file(cmakeFile, "set( LIB_TO_LINK_TO_EXAMPLES zmqpp )",
-                                             "set( LIB_TO_LINK_TO_EXAMPLES zmqpp )\n"
-                                             "target_link_libraries(zmqpp sodium)")
-        else:
-            # zmqpp uses different name for static library
-            tools.replace_in_file(cmakeFile, "generate_export_header(zmqpp)", "generate_export_header(zmqpp-static)")
-            tools.replace_in_file(cmakeFile, "${CMAKE_CURRENT_BINARY_DIR}/zmqpp_export.h",
-                                             "${CMAKE_CURRENT_BINARY_DIR}/zmqpp-static_export.h")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def validate(self):
         compiler = self.settings.compiler
