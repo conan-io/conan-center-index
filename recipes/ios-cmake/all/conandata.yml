@@ -2,3 +2,6 @@ sources:
   "3.1.2":
     url: "https://github.com/leetal/ios-cmake/archive/3.1.2.zip"
     sha256: "040f7de9a1b418540e1463d1c6fcd11e338ab723b9b4b660b7e7a2997f0a119b"
+  "4.0.0":
+    url: "https://github.com/leetal/ios-cmake/archive/4.0.0.zip"
+    sha256: "2e0dcf00cd46ae808d85666ce4ce38ecd8875925588647295d41e97c874ad0b3"
