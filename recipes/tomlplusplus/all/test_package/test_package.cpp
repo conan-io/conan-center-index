@@ -1,8 +1,5 @@
-#ifndef TOMLMULTIHEADER
-#include <toml.hpp>
-#else
-#include <toml++/toml.h>
-#endif
+#include <toml.hpp> // Single header
+#include <toml++/toml.h> // Multiple Headers
 
 #include <fstream> //required for toml::parse_file()
 #include <iostream>

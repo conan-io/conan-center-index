@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["TOMLMULTIHEADER"] = self.options["tomlplusplus"].multiple_headers
         cmake.configure()
         cmake.build()
 
