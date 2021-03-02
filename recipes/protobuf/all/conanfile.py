@@ -1,5 +1,4 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -17,8 +16,20 @@ class ProtobufConan(ConanFile):
     generators = "cmake"
     short_paths = True
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False], "lite": [True, False], "with_rtti": [True, False]}
-    default_options = {"with_zlib": False, "shared": False, "fPIC": True, "lite": False, "with_rtti": True}
+    options = {
+        "fPIC": [True, False],
+        "lite": [True, False],
+        "shared": [True, False],
+        "with_rtti": [True, False],
+        "with_zlib": [True, False]
+    }
+    default_options = {
+        "fPIC": True,
+        "lite": False,
+        "shared": False,
+        "with_rtti": True,
+        "with_zlib": False
+    }
 
     _cmake = None
 
