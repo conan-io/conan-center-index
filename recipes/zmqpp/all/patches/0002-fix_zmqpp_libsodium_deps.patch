@@ -1,0 +1,41 @@
+diff -u a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,7 +13,8 @@
+ 
+ cmake_minimum_required(VERSION 2.8.12)
+ project(zmqpp)
+-enable_testing()
++#enable_testing()
++find_package(libsodium REQUIRED)
+ 
+ # prepare C++11
+ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+@@ -115,11 +116,11 @@
+       # If libzmq was not installed through CMake, the static binary is libzmq.a not libzmq-static.a
+       find_library(ZEROMQ_LIBRARY_STATIC libzmq.a PATHS ${ZEROMQ_LIB_DIR})
+     endif()
+-    target_link_libraries( zmqpp-static ${ZEROMQ_LIBRARY_STATIC})
++    target_link_libraries( zmqpp-static ${ZEROMQ_LIBRARY_STATIC} sodium)
+   else()
+     # libzmq-static is the name of the target from
+     # libzmq's CMake
+-    target_link_libraries(zmqpp-static libzmq-static)
++    target_link_libraries(zmqpp-static libzmq-static sodium)
+   endif()
+   list( APPEND INSTALL_TARGET_LIST zmqpp-static)
+   set( LIB_TO_LINK_TO_EXAMPLES zmqpp-static )
+@@ -130,11 +131,11 @@
+   add_library( zmqpp SHARED ${LIBZMQPP_SOURCES})
+   if (NOT ZMQPP_LIBZMQ_CMAKE)
+     find_library(ZEROMQ_LIBRARY_SHARED ${ZMQPP_LIBZMQ_NAME_SHARED} PATHS ${ZEROMQ_LIB_DIR})
+-    target_link_libraries( zmqpp ${ZEROMQ_LIBRARY_SHARED} )
++    target_link_libraries( zmqpp ${ZEROMQ_LIBRARY_SHARED} libsodium::libsodium)
+   else()
+     # libzmq is the name of the target from
+     # libzmq's CMake
+-    target_link_libraries(zmqpp libzmq)
++    target_link_libraries(zmqpp libzmq libsodium::libsodium)
+   endif()
+   list( APPEND INSTALL_TARGET_LIST zmqpp)
+   set( LIB_TO_LINK_TO_EXAMPLES zmqpp )

@@ -37,6 +37,7 @@ class ZmqppConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            print(patch)
             tools.patch(**patch)
 
     def validate(self):
