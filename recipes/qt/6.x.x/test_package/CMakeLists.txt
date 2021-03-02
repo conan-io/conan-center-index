@@ -14,7 +14,7 @@ set(CMAKE_AUTOMOC 1)
 set(SOURCES test_package.cpp greeter.h)
 qt6_add_resources(SOURCES example.qrc)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} test_package.cpp greeter.h example.qrc)
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
