@@ -5,9 +5,9 @@ import os
 
 class B2Conan(ConanFile):
     name = "b2"
-    homepage = "https://boostorg.github.io/build/"
+    homepage = "https://www.bfgroup.xyz/b2/"
     description = "B2 makes it easy to build C++ projects, everywhere."
-    topics = ("conan", "installer", "boost", "builder")
+    topics = ("conan", "installer", "builder")
     license = "BSL-1.0"
     settings = "os", "arch"
     url = "https://github.com/conan-io/conan-center-index"
@@ -53,7 +53,7 @@ class B2Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "build-" + \
+        extracted_dir = "b2-" + \
             os.path.basename(self.conan_data["sources"][self.version]['url']).replace(
                 ".tar.gz", "")
         os.rename(extracted_dir, "source")
