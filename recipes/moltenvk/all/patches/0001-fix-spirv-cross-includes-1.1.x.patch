@@ -5,7 +5,7 @@
  #include "MVKOSExtensions.h"
  #include "MVKBaseObject.h"
 -#include <SPIRV-Cross/spirv_msl.hpp>
-+#include <spirv_cross/spirv_msl.hpp>
++#include <spirv_msl.hpp>
  #include <unordered_map>
  
  #import <Metal/Metal.h>
@@ -16,7 +16,7 @@
  #include "SPIRVSupport.h"
  #include "MVKStrings.h"
 -#include <SPIRV-Cross/spirv.hpp>
-+#include <spirv_cross/spirv.hpp>
++#include <spirv.hpp>
  #include <ostream>
  
  #import <CoreFoundation/CFByteOrder.h>
@@ -30,10 +30,10 @@
 -#include <SPIRV-Cross/spirv_common.hpp>
 -#include <SPIRV-Cross/spirv_parser.hpp>
 -#include <SPIRV-Cross/spirv_reflect.hpp>
-+#include <spirv_cross/spirv.hpp>
-+#include <spirv_cross/spirv_common.hpp>
-+#include <spirv_cross/spirv_parser.hpp>
-+#include <spirv_cross/spirv_reflect.hpp>
++#include <spirv.hpp>
++#include <spirv_common.hpp>
++#include <spirv_parser.hpp>
++#include <spirv_reflect.hpp>
  #include <string>
  #include <vector>
  
@@ -45,8 +45,8 @@
  
 -#include <SPIRV-Cross/spirv.hpp>
 -#include <SPIRV-Cross/spirv_msl.hpp>
-+#include <spirv_cross/spirv.hpp>
-+#include <spirv_cross/spirv_msl.hpp>
++#include <spirv.hpp>
++#include <spirv_msl.hpp>
  #include <string>
  #include <vector>
  #include <unordered_map>
