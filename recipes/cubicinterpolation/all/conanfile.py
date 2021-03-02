@@ -50,8 +50,8 @@ class CubicInterpolationConan(ConanFile):
                 "CubicInterpolation requires C++14, which your compiler does not support."
             )
 
-         if self.settings.os == "Windows":
-              raise ConanInvalidConfiguration("This library is not compatible with Windows")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("This library is not compatible with Windows")
 
 
     def configure(self):
