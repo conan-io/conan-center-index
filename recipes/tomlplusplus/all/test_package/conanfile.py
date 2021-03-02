@@ -8,6 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if tools.Version(self.deps_cpp_info["tomlplusplus"].version) < "1.3.0":
+            cmake.definitions["TOMLPP_BUILD_SINGLE_ONLY"] = True
         cmake.configure()
         cmake.build()
 
