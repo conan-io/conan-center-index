@@ -27,7 +27,7 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options["qt"].shared
 
     def _cmake_multi_supported(self):
-        return self.settings.compiler != "Visual Studio" or not self.options["qt"].shared or self.settings.build_type != "Debug"
+        return True
 
     def _build_with_qmake(self):
         if not self._qmake_supported():
