@@ -3,6 +3,7 @@ cmake
 virtualrunenv
 
 [requires]
+c-ares/1.15.0
 miniupnpc/2.1
 jsoncpp/1.8.3
 bzip2/1.0.8
