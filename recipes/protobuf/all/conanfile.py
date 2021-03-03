@@ -110,17 +110,18 @@ class ProtobufConan(ConanFile):
         # (even with virtualrunenv, this fix might be required due to SIP)
         # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
         if tools.is_apple_os(self.settings.os):
-            protobuf_lib_path = (# from cmake generator
-                                 "${CONAN_LIB_DIRS}:"
-                                 # from cmake_find_package generator
-                                 "${Protobuf_LIB_DIRS}:"
-                                 # from cmake_find_package_multi generator
-                                 "${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}")
+            tools.replace_in_file(
+                protobuf_config_cmake,
+                "add_custom_command(",
+                ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
+                 "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH ${CUSTOM_DYLD_LIBRARY_PATH})\n"
+                 "add_custom_command(")
+            )
             tools.replace_in_file(
                 protobuf_config_cmake,
                 "COMMAND  protobuf::protoc",
-                ("COMMAND export DYLD_LIBRARY_PATH={}\n"
-                 "COMMAND protobuf::protoc").format(protobuf_lib_path),
+                ("COMMAND export DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\n"
+                 "COMMAND protobuf::protoc")
             )
 
         # Disable a potential warning in protobuf-module.cmake.in
