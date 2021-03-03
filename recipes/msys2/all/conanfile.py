@@ -7,7 +7,9 @@ import subprocess
 try:
     import ctypes
     from ctypes import wintypes
-except ImportError, ValueError:
+except ImportError:
+    pass
+except ValueError:
     pass
 
 class lock:
