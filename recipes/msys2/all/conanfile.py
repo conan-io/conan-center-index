@@ -106,14 +106,14 @@ class MSYS2Conan(ConanFile):
                 # update pacman separately first
                 self.run('where bash')
                 self.run('bash --version')  # check bash version, just in case...
-                self.run('bash -l -c "pacman --debug --noconfirm -Sydd pacman"')
+                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm -Sydd pacman"')
 
                 # https://www.msys2.org/docs/ci/
-                self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
+                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
                 self._kill_pacman()
-                self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Normal update
+                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm --ask 20 -Syuu"')  # Normal update
                 self._kill_pacman()
-                self.run('bash -l -c "pacman --debug -Rc dash --noconfirm"')
+                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug -Rc dash --noconfirm"')
             except ConanException:
                 self.run('bash -l -c "cat /var/log/pacman.log || echo nolog"')
                 raise
