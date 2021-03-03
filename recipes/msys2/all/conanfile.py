@@ -132,21 +132,17 @@ class MSYS2Conan(ConanFile):
                 err = subprocess.PIPE
 
             if os.path.exists(taskkill_exe):
-                taskkill_cmd1 = taskkill_exe + " /f /t /im pacman.exe"
-                taskkill_cmd2 = taskkill_exe + " /f /im gpg-agent.exe"
-                taskkill_cmd3 = taskkill_exe + " /f /im dirmngr.exe"
-
-                taskkill_cmd4 = taskkill_exe + ' /fi "MODULES eq msys-2.0.dll"'
-
-                try:
-                    proc = subprocess.Popen(taskkill_cmd1, stdout=out, stderr=err, bufsize=1)
-                    proc = subprocess.Popen(taskkill_cmd2, stdout=out, stderr=err, bufsize=1)
-                    proc = subprocess.Popen(taskkill_cmd3, stdout=out, stderr=err, bufsize=1)
-
-                    proc = subprocess.Popen(taskkill_cmd4, stdout=out, stderr=err, bufsize=1)
-                except OSError as e:
-                    if e.errno == errno.ENOENT:
-                        raise ConanException("Cannot kill pacman")
+                taskkill_cmds = [taskkill_exe + " /f /t /im pacman.exe",
+                                 taskkill_exe + " /f /im gpg-agent.exe",
+                                 taskkill_exe + " /f /im dirmngr.exe",
+                                 taskkill_exe + ' /fi "MODULES eq msys-2.0.dll"']
+                for taskkill_cmd in taskkill_cmds:
+                    try:
+                        proc = subprocess.Popen(taskkill_cmd, stdout=out, stderr=err, bufsize=1)
+                        proc.wait()
+                    except OSError as e:
+                        if e.errno == errno.ENOENT:
+                            raise ConanException("Cannot kill pacman")
 
     @property
     def _msys_dir(self):
