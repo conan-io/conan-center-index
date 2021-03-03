@@ -23,7 +23,6 @@ class CubicInterpolationConan(ConanFile):
         "fPIC": True
     }
 
-    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
 
