@@ -1,6 +1,9 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
+
 
 class LibkmlConan(ConanFile):
     name = "libkml"
@@ -34,8 +37,8 @@ class LibkmlConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.73.0")
-        self.requires("expat/2.2.9")
+        self.requires("boost/1.75.0")
+        self.requires("expat/2.2.10")
         self.requires("minizip/1.2.11")
         self.requires("uriparser/0.9.4")
         self.requires("zlib/1.2.11")
@@ -64,37 +67,80 @@ class LibkmlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                "kmlbase": "LibKML::kmlbase",
+                "kmlxsd": "LibKML::kmlxsd",
+                "kmldom": "LibKML::kmldom",
+                "kmlengine": "LibKML::kmlengine",
+                "kmlconvenience": "LibKML::kmlconvenience",
+                "kmlregionator": "LibKML::kmlregionator",
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        # TODO:
-        # - do not export LibKML:: namespace
-        # - libkml depends on boost header only
         self.cpp_info.names["cmake_find_package"] = "LibKML"
         self.cpp_info.names["cmake_find_package_multi"] = "LibKML"
-        # kmlbase
-        self.cpp_info.components["kmlbase"].libs = ["kmlbase"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["kmlbase"].system_libs.append("m")
-        self.cpp_info.components["kmlbase"].requires = [
-            "boost::boost", "expat::expat", "minizip::minizip",
-            "uriparser::uriparser", "zlib::zlib"
-        ]
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["kmlbase"].defines.append("LIBKML_DLL")
-        # kmlxsd
-        self.cpp_info.components["kmlxsd"].libs = ["kmlxsd"]
-        self.cpp_info.components["kmlxsd"].requires = ["boost::boost", "kmlbase"]
-        # kmldom
-        self.cpp_info.components["kmldom"].libs = ["kmldom"]
-        self.cpp_info.components["kmldom"].requires = ["boost::boost", "kmlbase"]
-        # kmlengine
-        self.cpp_info.components["kmlengine"].libs = ["kmlengine"]
-        self.cpp_info.components["kmlengine"].requires = ["boost::boost", "kmldom", "kmlbase"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["kmlengine"].system_libs.append("m")
-        # kmlconvenience
-        self.cpp_info.components["kmlconvenience"].libs = ["kmlconvenience"]
-        self.cpp_info.components["kmlconvenience"].requires = ["boost::boost", "kmlengine", "kmldom", "kmlbase"]
-        # kmlregionator
-        self.cpp_info.components["kmlregionator"].libs = ["kmlregionator"]
-        self.cpp_info.components["kmlregionator"].requires = ["kmlconvenience", "kmlengine", "kmldom", "kmlbase"]
+        self.cpp_info.names["pkg_config"] = "libkml"
+
+        self._register_components({
+            "kmlbase": {
+                "defines": ["LIBKML_DLL"] if self.settings.os == "Windows" and self.options.shared else [],
+                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "requires": ["boost::headers", "expat::expat", "minizip::minizip",
+                             "uriparser::uriparser", "zlib::zlib"],
+            },
+            "kmlxsd": {
+                "requires": ["boost::headers", "kmlbase"],
+            },
+            "kmldom": {
+                "requires": ["boost::headers", "kmlbase"],
+            },
+            "kmlengine": {
+                "system_libs": ["m"] if self.settings.os == "Linux" else [],
+                "requires": ["boost::headers", "kmldom", "kmlbase"],
+            },
+            "kmlconvenience": {
+                "requires": ["boost::headers", "kmlengine", "kmldom", "kmlbase"],
+            },
+            "kmlregionator": {
+                "requires": ["kmlconvenience", "kmlengine", "kmldom", "kmlbase"],
+            },
+        })
+
+    def _register_components(self, components):
+        for comp_cmake_lib_name, values in components.items():
+            defines = values.get("defines", [])
+            system_libs = values.get("system_libs", [])
+            requires = values.get("requires", [])
+            self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package"] = comp_cmake_lib_name
+            self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package_multi"] = comp_cmake_lib_name
+            self.cpp_info.components[comp_cmake_lib_name].builddirs.append(self._module_subfolder)
+            self.cpp_info.components[comp_cmake_lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components[comp_cmake_lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components[comp_cmake_lib_name].libs = [comp_cmake_lib_name]
+            self.cpp_info.components[comp_cmake_lib_name].defines = defines
+            self.cpp_info.components[comp_cmake_lib_name].system_libs = system_libs
+            self.cpp_info.components[comp_cmake_lib_name].requires = requires
