@@ -29,7 +29,7 @@ class LibX264Conan(ConanFile):
         return "source_subfolder"
 
     def build_requirements(self):
-        self.build_requires("nasm/2.13.02")
+        self.build_requires("nasm/2.15.05")
         if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
             self.build_requires("msys2/20190524")
 
