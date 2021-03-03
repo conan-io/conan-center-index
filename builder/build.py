@@ -131,5 +131,5 @@ if __name__ == '__main__':
     print_section('Uploading packages')
     if installed:
         conan_run(['upload',
-                   '--confirm', '--force', '--all',
+                   '--confirm', '--all',
                    '-r', UPLOAD_REMOTE, '*'])
