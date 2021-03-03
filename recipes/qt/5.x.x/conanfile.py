@@ -263,7 +263,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         if self.options.with_pcre2:
             self.requires("pcre2/10.35")
 
