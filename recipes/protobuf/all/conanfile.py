@@ -42,7 +42,7 @@ class ProtobufConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-            if self.settings.os == "Windows" and self.settings.compiler in ["Visual Studio", "clang"] and "MT" in self.settings.compiler.runtime:
+            if self.settings.compiler.get_safe("runtime") in ["MT", "MTd"]:
                 raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         if self.settings.compiler == "Visual Studio":
