@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 
-try
+try:
     import ctypes
     from ctypes import wintypes
 except ImportError:
