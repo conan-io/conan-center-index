@@ -8,9 +8,9 @@ class CubicInterpolationTestConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        self.cmake = CMake(self)
-        self.cmake.configure()
-        self.cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):

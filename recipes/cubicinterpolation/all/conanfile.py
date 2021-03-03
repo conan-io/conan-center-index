@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class CubicInterpolationConan(ConanFile):
     name = "cubicinterpolation"
@@ -34,9 +36,16 @@ class CubicInterpolationConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    @property
+    def _required_boost_components(self):
+        return ["filesystem", "math", "serialization"]
+
     def validate(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, "14")
+            tools.check_min_cppstd(self, "14")
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
@@ -71,6 +80,8 @@ class CubicInterpolationConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_EXAMPLE"] = False
+        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
@@ -82,17 +93,10 @@ class CubicInterpolationConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        _cmake_files = os.path.join(
-            self.package_folder, "lib", "cmake", "CubicInterpolation"
-        )
-        for _f in os.listdir(_cmake_files):
-            os.unlink(os.path.join(_cmake_files, _f))
-        os.rmdir(
-            os.path.join(
-                self.package_folder, "lib", "cmake", "CubicInterpolation"
-            )
-        )
-        os.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "CubicInterpolation"
+        self.cpp_info.names["cmake_find_package_multi"] = "CubicInterpolation"
+        self.cpp_info.libs = ["CubicInterpolation"]
+        self.cpp_info.requires = ["boost::headers", "boost::filesystem", "boost::math", "boost::serialization", "eigen::eigen"]
