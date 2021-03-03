@@ -114,7 +114,7 @@ class ProtobufConan(ConanFile):
                 protobuf_config_cmake,
                 "add_custom_command(",
                 ("set(CUSTOM_DYLD_LIBRARY_PATH ${CONAN_LIB_DIRS} ${Protobuf_LIB_DIRS} ${Protobuf_LIB_DIRS_RELEASE} ${Protobuf_LIB_DIRS_DEBUG} ${Protobuf_LIB_DIRS_RELWITHDEBINFO} ${Protobuf_LIB_DIRS_MINSIZEREL})\n"
-                 "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH ${CUSTOM_DYLD_LIBRARY_PATH})\n"
+                 "string(REPLACE \";\" \":\" CUSTOM_DYLD_LIBRARY_PATH \"${CUSTOM_DYLD_LIBRARY_PATH}\")\n"
                  "add_custom_command(")
             )
             tools.replace_in_file(
