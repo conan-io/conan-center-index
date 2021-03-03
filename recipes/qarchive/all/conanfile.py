@@ -28,6 +28,14 @@ class qarchiveConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        # TODO Remove this once conan CCI build images have cmake 3.17 installed
+        # This is safe since the minimum version was bumped only to have the LibArchive::LibArchive
+        # target exposed by FindLibArchive, which was introduced in cmake 3.17.
+        # Since we use conan's FindLibArchive we can revert the minimum version bump.
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "CMAKE_MINIMUM_REQUIRED( VERSION 3.17)",
+            "CMAKE_MINIMUM_REQUIRED( VERSION 3.2)")
+
         # Use conan's qt
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "find_package(Qt5Core)",
