@@ -139,7 +139,6 @@ class MSYS2Conan(ConanFile):
                 self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
                 self._kill_pacman()
                 self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Normal update
-                raise Exception("break")
                 self._kill_pacman()
                 self.run('bash -l -c "pacman --debug -Rc dash --noconfirm"')
             except ConanException:
