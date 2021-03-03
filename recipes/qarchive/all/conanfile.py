@@ -83,6 +83,10 @@ class qarchiveConan(ConanFile):
             '''
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("libarchive/3.4.0")
         self.requires("qt/5.15.2")
