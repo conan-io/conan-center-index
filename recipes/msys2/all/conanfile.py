@@ -4,8 +4,11 @@ import os
 import shutil
 import subprocess
 
-import ctypes
-from ctypes import wintypes
+try
+    import ctypes
+    from ctypes import wintypes
+except ImportError:
+    pass
 
 class lock:
     def __init__(self):
