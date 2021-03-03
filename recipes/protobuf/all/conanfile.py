@@ -183,11 +183,9 @@ class ProtobufConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
-        self.cpp_info.components["libprotobuf"].builddirs = [
-            self._cmake_install_base_path,
-        ]
+        self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
 
-        self.cpp_info.components["libprotobuf"].builddirs = [self._cmake_install_base_path]
+        self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
         self.cpp_info.components["libprotobuf"].build_modules.extend([
             os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
@@ -215,7 +213,7 @@ class ProtobufConan(ConanFile):
                 if self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
 
-            self.cpp_info.components["libprotobuf-lite"].builddirs = [self._cmake_install_base_path]
+            self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
             self.cpp_info.components["libprotobuf-lite"].build_modules.extend([
                 os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
                 os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
