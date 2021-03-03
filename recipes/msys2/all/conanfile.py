@@ -4,6 +4,30 @@ import os
 import shutil
 import subprocess
 
+import ctypes
+from ctypes import wintypes
+
+class lock:
+    def __init__(self):
+        self.handle = ctypes.windll.kernel32.CreateMutexA(None, 0, "Global\\ConanMSYS2".encode())
+        if not self.handle:
+            raise ctypes.WinError()
+
+    def __enter__(self):
+        status = ctypes.windll.kernel32.WaitForSingleObject(self.handle, 0xFFFFFFFF)
+        if status not in [0, 0x80]:
+            raise ctypes.WinError()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        status = ctypes.windll.kernel32.ReleaseMutex(self.handle)
+        if not status:
+            raise ctypes.WinError()
+
+    def close(self):
+        ctypes.windll.kernel32.CloseHandle(self.handle)
+
+    __del__ = close
+
 
 class MSYS2Conan(ConanFile):
     name = "msys2"
@@ -104,16 +128,15 @@ class MSYS2Conan(ConanFile):
                 self._kill_pacman()
                 # https://www.msys2.org/news/   see  2020-05-31 - Update may fail with "could not open file"
                 # update pacman separately first
-                self.run('where bash')
-                self.run('bash --version')  # check bash version, just in case...
-                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm -Sydd pacman"')
+                self.run('bash -l -c "pacman --debug --noconfirm -Sydd pacman"')
 
                 # https://www.msys2.org/docs/ci/
-                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
+                self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
                 self._kill_pacman()
-                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug --noconfirm --ask 20 -Syuu"')  # Normal update
+                self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Normal update
+                raise Exception("break")
                 self._kill_pacman()
-                self.run('bash -l -c "GPGME_DEBUG=9 pacman --debug -Rc dash --noconfirm"')
+                self.run('bash -l -c "pacman --debug -Rc dash --noconfirm"')
             except ConanException:
                 self.run('bash -l -c "cat /var/log/pacman.log || echo nolog"')
                 raise
@@ -155,6 +178,10 @@ class MSYS2Conan(ConanFile):
         self._download_keyring()
 
     def build(self):
+        with lock():
+            self._do_build()
+
+    def _do_build(self):
         packages = []
         if self.options.packages:
             packages.extend(str(self.options.packages).split(","))
@@ -163,7 +190,7 @@ class MSYS2Conan(ConanFile):
 
         if (tools.Version(self.version) < "20210105"):
             self._install_pacman_keyring()
-            
+
         self._update_pacman()
 
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
