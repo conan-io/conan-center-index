@@ -1,11 +1,10 @@
-name: on-push-do-doco
+name: docs_markdown_toc
 on:
-  # Only update the docs on default branch, to reduce the chance of conflicts
   push:
     branches:
       - master
 jobs:
-  release:
+  docs_markdown_toc:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,12 +16,10 @@ jobs:
           --exclude-directories 'recipes' \
           --toc-level 5
       shell: bash
-    - name: Push changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "[docs] Regenerate tables of contents" -a  || echo "nothing to commit"
-        remote="https://${GITHUB_ACTOR}:${{secrets.GITHUB_TOKEN}}@github.com/${GITHUB_REPOSITORY}.git"
-        branch="${GITHUB_REF:11}"
-        git push "${remote}" ${branch} || echo "nothing to push"
-      shell: bash
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        branch: action-doc-toc
+        commit-message: "[docs] Regenerate tables of contents"
+        title: "[docs] Regenerate tables of contents"
+        body: "Automatic update of the documentation TOCs."
