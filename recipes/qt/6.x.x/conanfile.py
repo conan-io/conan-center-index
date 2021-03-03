@@ -624,7 +624,7 @@ Examples = res/datadir/examples""")
         if self.options.qtquick3d:
             _create_module("Quick3DUtils", ["Gui"])
             _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
-            _create_module("Quick3DRuntimeRender", ["Gui", "Quick" "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
+            _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
         if self.options.qtquickcontrols2:
