@@ -34,12 +34,6 @@ class ProtobufConan(ConanFile):
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
-
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,9 +49,15 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = self.name + "-" + self.version
+        os.rename(extracted_folder, self._source_subfolder)
 
     @property
     def _cmake_install_base_path(self):
