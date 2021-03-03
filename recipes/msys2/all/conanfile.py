@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration, ConanException
+import fnmatch
 import os
 import shutil
 import subprocess
@@ -72,7 +73,7 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _keyring_subfolder(self):
-        return os.path.join(self.source_folder, "keyring")
+        return os.path.join(self.package_folder, "bin", "keyring")
 
     @property
     def _keyring_file(self):
@@ -173,15 +174,22 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        return "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
+        subdir = "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
+        return os.path.join(self.package_folder, "bin", subdir)
 
     def source(self):
-        arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
-        filename = self._download(**self.conan_data["sources"][self.version][arch])
+        # sources are different per configuration - do download in build
+        pass
+
+    def _do_source(self):
+        filename = self._download(**self.conan_data["sources"][self.version][str(self.settings.arch)])
         tools.unzip(filename)
         self._download_keyring()
 
     def build(self):
+        os.makedirs(os.path.join(self.package_folder, "bin"))
+        with tools.chdir(os.path.join(self.package_folder, "bin")):
+            self._do_source()
         with lock():
             self._do_build()
 
@@ -220,12 +228,18 @@ class MSYS2Conan(ConanFile):
         excludes = None
         if self.options.exclude_files:
             excludes = tuple(str(self.options.exclude_files).split(","))
-        self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
-        shutil.copytree(os.path.join(self.package_folder, "bin", "usr", "share", "licenses"),
+        #self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
+        for exclude in excludes:
+            for root, _, filenames in os.walk(self._msys_dir):
+                for filename in filenames:
+                    fullname = os.path.join(root, filename)
+                    if fnmatch.fnmatch(fullname, exclude):
+                        os.unlink(fullname)
+        shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        msys_root = os.path.join(self.package_folder, "bin")
+        msys_root = self._msys_dir
         msys_bin = os.path.join(msys_root, "usr", "bin")
 
         self.output.info("Creating MSYS_ROOT env var : %s" % msys_root)
