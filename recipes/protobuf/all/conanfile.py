@@ -51,9 +51,6 @@ class ProtobufConan(ConanFile):
             if self.settings.os == "Windows" and self.settings.compiler in ["Visual Studio", "clang"] and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
-            if tools.is_apple_os(self.settings.os):
-                raise ConanInvalidConfiguration("Protobuf could not be built as shared library for Mac.")
-
         if self.settings.compiler == "Visual Studio":
             if Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
@@ -83,57 +80,61 @@ class ProtobufConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        find_protoc = """
-
-# Find the protobuf compiler within the paths added by Conan, for use below.
-find_program(PROTOC_PROGRAM protoc)
-if(NOT PROTOC_PROGRAM)
-    set(PROTOC_PROGRAM "protoc")
-endif()
-"""
+        # Inject relocatable protobuf::protoc target in protobuf-config.cmake.in
+        # TODO: some of the following logic might be disabled when conan will
+        #       allow to create executable imported targets in package_info()
+        protobuf_config_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in")
 
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
+            protobuf_config_cmake,
             "@_protobuf_FIND_ZLIB@",
-            "# CONAN PATCH _protobuf_FIND_ZLIB@"
+            "# BEGIN CONAN PATCH\n#_protobuf_FIND_ZLIB@\n# END CONAN PATCH"
         )
+
+        exe_ext = ".exe" if self.settings.os == "Windows" else ""
+        protoc_filename = "protoc" + exe_ext
+        module_folder_depth = len(os.path.normpath(self._cmake_install_base_path).split(os.path.sep))
+        protoc_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), protoc_filename)
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
+            protobuf_config_cmake,
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
-            "# CONAN PATCH include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")" + find_protoc
+            ("if(NOT TARGET protobuf::protoc)\n"
+             "  add_executable(protobuf::protoc IMPORTED)\n"
+             "  get_filename_component(PROTOC_FULL_PATH \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\" ABSOLUTE)\n"
+             "  set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{PROTOC_FULL_PATH}})\n"
+             "endif()"
+            ).format(protoc_rel_path=protoc_rel_path)
         )
 
-        if tools.Version(self.version) < "3.12.0":
+        # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
+        # (even with virtualrunenv, this fix might be required due to SIP)
+        # Only works with cmake, cmake_find_package or cmake_find_package_multi generators
+        if tools.is_apple_os(self.settings.os):
+            protobuf_lib_path = (# from cmake generator
+                                 "${CONAN_LIB_DIRS}:"
+                                 # from cmake_find_package generator
+                                 "${Protobuf_LIB_DIRS}:"
+                                 # from cmake_find_package_multi generator
+                                 "${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}")
             tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-                """COMMAND  protobuf::protoc
-      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
-      DEPENDS ${_abs_file} protobuf::protoc""",
-                """COMMAND "${CMAKE_COMMAND}"
-      ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" ${PROTOC_PROGRAM} --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
-      DEPENDS ${_abs_file} USES_TERMINAL"""
-            )
-        else:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-                """COMMAND  protobuf::protoc
-      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_protobuf_include_path} ${_abs_file}
-      DEPENDS ${_abs_file} protobuf::protoc""",
-                """COMMAND "${CMAKE_COMMAND}"
-      ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" ${PROTOC_PROGRAM} --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_protobuf_include_path} ${_abs_file}
-      DEPENDS ${_abs_file} USES_TERMINAL"""
+                protobuf_config_cmake,
+                "COMMAND  protobuf::protoc",
+                ("COMMAND export DYLD_LIBRARY_PATH={}\n"
+                 "COMMAND protobuf::protoc").format(protobuf_lib_path),
             )
 
+        # Disable a potential warning in protobuf-module.cmake.in
+        # TODO: remove this patch? Is it really useful?
+        protobuf_module_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in")
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
-            'if(DEFINED Protobuf_SRC_ROOT_FOLDER)',
-            """if(0)
-if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
+            protobuf_module_cmake,
+            "if(DEFINED Protobuf_SRC_ROOT_FOLDER)",
+            "if(0)\nif(DEFINED Protobuf_SRC_ROOT_FOLDER)",
         )
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
-            '# Define upper case versions of output variables',
-            'endif()',
+            protobuf_module_cmake,
+            "# Define upper case versions of output variables",
+            "endif()",
         )
 
     def build(self):
@@ -195,9 +196,6 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         self.cpp_info.components["libprotoc"].name = "libprotoc"
         self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
         self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
-
-        self.cpp_info.components["protoc"].name = "protoc"
-        self.cpp_info.components["protoc"].requires.extend(["libprotoc", "libprotobuf"])
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
