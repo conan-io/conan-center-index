@@ -20,7 +20,7 @@ class CubicInterpolationConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     _source_subfolder = "source_subfolder"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     _cmake = None
 
     def config_options(self):
@@ -59,8 +59,8 @@ class CubicInterpolationConan(ConanFile):
                 "CubicInterpolation requires C++14, which your compiler does not support."
             )
 
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("This library is not compatible with Windows")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("cubicinterpolation shared is not supported with Visual Studio")
 
 
     def configure(self):
@@ -86,6 +86,8 @@ class CubicInterpolationConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
