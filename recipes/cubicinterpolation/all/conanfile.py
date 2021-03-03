@@ -12,20 +12,36 @@ class CubicInterpolationConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
+
+    exports_sources = "patches/**"
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
-    exports_sources = ["CMakeLists.txt"]
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("boost/1.75.0")
+        self.requires("eigen/3.3.9")
 
     @property
     def _minimum_compilers_version(self):
@@ -44,6 +60,7 @@ class CubicInterpolationConan(ConanFile):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
+
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
 
@@ -59,22 +76,13 @@ class CubicInterpolationConan(ConanFile):
                 "CubicInterpolation requires C++14, which your compiler does not support."
             )
 
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("This library is not compatible with Windows")
-
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("cubicinterpolation shared is not supported with Visual Studio")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "cubic_interpolation-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("eigen/3.3.9")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -86,6 +94,8 @@ class CubicInterpolationConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
