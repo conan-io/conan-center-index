@@ -528,7 +528,12 @@ Examples = res/datadir/examples""")
     def package_info(self):
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
 
-        libsuffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        libsuffix = ""
+        if self.settings.build_type == "Debug":
+            if self.settings.os == "Windows":
+                libsuffix = "d"
+            if tools.is_apple_os(self.settings.os):
+                libsuffix = "_debug"
 
         def _create_module(module, requires=[]):
             assert module not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
