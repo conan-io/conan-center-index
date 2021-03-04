@@ -37,7 +37,6 @@ class ZmqppConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            print(patch)
             tools.patch(**patch)
 
     def validate(self):
@@ -65,7 +64,6 @@ class ZmqppConan(ConanFile):
         self.cmake.install()
 
     def package_info(self):
-        #self.cpp_info.libs = ["zmqpp"]
         self.cpp_info.names["cmake_find_package"] = "zmqpp"
         self.cpp_info.names["cmake_find_package_multi"] = "zmqpp"
         self.cpp_info.names["pkg_config"] = "libzmqpp"
