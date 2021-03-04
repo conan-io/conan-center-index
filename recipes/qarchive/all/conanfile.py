@@ -36,11 +36,10 @@ class qarchiveConan(ConanFile):
             "CMAKE_MINIMUM_REQUIRED( VERSION 3.17)",
             "CMAKE_MINIMUM_REQUIRED( VERSION 3.2)")
 
-        # -Wextra is a GCC flag, cmake errors out on different compilers
-        if self.settings.compiler != "gcc":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                """set(CMAKE_CXX_FLAGS "-Wall -Wextra")""",
-                """set(CMAKE_CXX_FLAGS "-Wall")""")
+        # -Wextra is a GCC flag, cmake errors out on different compilers. On master this flags have been removed
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            """set(CMAKE_CXX_FLAGS "-Wall -Wextra")""",
+            "")
 
         # Use conan's qt
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
