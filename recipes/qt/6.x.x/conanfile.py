@@ -550,26 +550,30 @@ Examples = res/datadir/examples""")
         extension = ""
         if self.settings.os == "Windows":
             extension = ".exe"
-        filecontents = """\
-set(QT_CMAKE_EXPORT_NAMESPACE Qt6)
-set(QT_VERSION_MAJOR {1})
-set(QT_VERSION_MINOR {2})
-if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::qmake)
-    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::qmake IMPORTED)
-    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::qmake PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/qmake{0})
+        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
+        filecontents += "set(QT_VERSION_MAJOR %d)\n" % int(self.version.split(".")[0])
+        filecontents += "set(QT_VERSION_MINOR %d)\n" % int(self.version.split(".")[1])
+        filecontents += "set(QT_VERSION_PATCH %d)\n" % int(self.version.split(".")[2])
+        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
+        targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
+        if self.options.gui:
+            targets.append("qvkgen")
+        if self.options.widgets:
+            targets.append("uic")
+        if self.options.qttools:
+            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
+            targest.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+        if self.options.qtshadertools:
+            targets.append("qsb")
+        if self.options.qtdeclarative:
+            targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+        for target in targets:
+            filecontents.append("""if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
+    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} IMPORTED)
+    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{1}{0})
 endif()
-if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::moc)
-    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::moc IMPORTED)
-    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::moc PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/moc{0})
-endif()
-if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::rcc)
-    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::rcc IMPORTED)
-    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::rcc PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/rcc{0})
-endif()
-if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::uic)
-    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::uic IMPORTED)
-    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::uic PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/uic{0})
-endif()""".format(extension, int(self.version.split(".")[0]), int(self.version.split(".")[1]))
+""".format(extension, target)
         tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
 
         self.cpp_info.builddirs.append(os.path.join("res","archdatadir","bin"))
