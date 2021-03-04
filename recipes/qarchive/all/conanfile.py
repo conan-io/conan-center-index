@@ -41,6 +41,16 @@ class qarchiveConan(ConanFile):
             """set(CMAKE_CXX_FLAGS "-Wall -Wextra")""",
             "")
 
+        # Remove CMAKE_CXX_FLAGS_DEBUG and CMAKE_CXX_FLAGS_RELEASE flags
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            """set(CMAKE_CXX_FLAGS_DEBUG "-g")""",
+            "")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            """set(CMAKE_CXX_FLAGS_RELEASE "-O3")""",
+            "")
+
+
         # Use conan's qt
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "find_package(Qt5Core)",
