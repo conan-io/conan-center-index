@@ -1,8 +1,6 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+import os
 
 
 class ProtobufConan(ConanFile):
@@ -13,13 +11,25 @@ class ProtobufConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_zlib": [True, False],
+        "lite": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_zlib": False,
+        "lite": False,
+    }
+
+    short_paths = True
+
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
-    short_paths = True
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False], "lite": [True, False]}
-    default_options = {"with_zlib": False, "shared": False, "fPIC": True, "lite": False}
-
     _cmake = None
 
     @property
@@ -46,7 +56,7 @@ class ProtobufConan(ConanFile):
                 raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) < "14":
+            if tools.Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
 
