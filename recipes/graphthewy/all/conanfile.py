@@ -21,9 +21,9 @@ class GraphthewyConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16.3",
-            "gcc": "10",
-            "clang": "10",
+            "Visual Studio": "15.7",
+            "gcc": "7",
+            "clang": "7",
             "apple-clang": "10"
     }
 
@@ -33,7 +33,7 @@ class GraphthewyConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 20)
+            tools.check_min_cppstd(self, 17)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
