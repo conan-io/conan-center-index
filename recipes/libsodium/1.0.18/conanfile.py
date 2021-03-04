@@ -149,6 +149,11 @@ class LibsodiumConan(ConanFile):
             self._build_autotools_neutrino(configure_args)
         else:
             raise ConanInvalidConfiguration("Unsupported os for libsodium: {}".format(self.settings.os))
+            
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared and "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with MT(d) runtime")
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
