@@ -178,6 +178,7 @@ class ProtobufConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "protobuf"
         self.cpp_info.names["cmake_find_package_multi"] = "protobuf"
+        self.cpp_info.names["pkg_config"] = "protobuf_full_package" # unofficial, but required to avoid side effects (libprotobuf component "steals" the default global pkg_config name)
 
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
