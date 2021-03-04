@@ -93,7 +93,7 @@ class ProtobufConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # Inject relocatable protobuf::protoc target in protobuf-config.cmake.in
+        # Provide relocatable protobuf::protoc target and Protobuf_PROTOC_EXECUTABLE cache variable
         # TODO: some of the following logic might be disabled when conan will
         #       allow to create executable imported targets in package_info()
         protobuf_config_cmake = os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in")
@@ -111,10 +111,11 @@ class ProtobufConan(ConanFile):
         tools.replace_in_file(
             protobuf_config_cmake,
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
-            ("if(NOT TARGET protobuf::protoc)\n"
-             "  add_executable(protobuf::protoc IMPORTED)\n"
-             "  get_filename_component(PROTOC_FULL_PATH \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\" ABSOLUTE)\n"
-             "  set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{PROTOC_FULL_PATH}})\n"
+            ("get_filename_component(PROTOC_FULL_PATH \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\" ABSOLUTE)\n"
+             "set(Protobuf_PROTOC_EXECUTABLE ${{PROTOC_FULL_PATH}} CACHE FILEPATH \"The protoc compiler\")\n"
+             "if(NOT TARGET protobuf::protoc)\n"
+             "    add_executable(protobuf::protoc IMPORTED)\n"
+             "    set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})\n"
              "endif()"
             ).format(protoc_rel_path=protoc_rel_path)
         )
@@ -133,7 +134,7 @@ class ProtobufConan(ConanFile):
             tools.replace_in_file(
                 protobuf_config_cmake,
                 "COMMAND  protobuf::protoc",
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" ${PROTOC_FULL_PATH}"
+                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" ${Protobuf_PROTOC_EXECUTABLE}"
             )
 
         # Disable a potential warning in protobuf-module.cmake.in
