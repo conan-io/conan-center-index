@@ -562,14 +562,15 @@ Examples = res/datadir/examples""")
             targets.append("uic")
         if self.options.qttools:
             targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
-            targest.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
         for target in targets:
-            filecontents.append("""if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
+            filecontents += """\
+if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} IMPORTED)
     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{1}{0})
 endif()
