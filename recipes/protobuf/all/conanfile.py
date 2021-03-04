@@ -120,8 +120,7 @@ class ProtobufConan(ConanFile):
             tools.replace_in_file(
                 protobuf_config_cmake,
                 "COMMAND  protobuf::protoc",
-                ("COMMAND export DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\n"
-                 "COMMAND protobuf::protoc")
+                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" ${PROTOC_FULL_PATH}"
             )
 
         # Disable a potential warning in protobuf-module.cmake.in
