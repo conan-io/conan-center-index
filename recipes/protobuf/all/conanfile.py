@@ -22,7 +22,7 @@ class ProtobufConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_zlib": False,
+        "with_zlib": True,
         "lite": False,
     }
 
