@@ -52,7 +52,7 @@ class ProtobufConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-            if self.settings.compiler.get_safe("runtime") in ["MT", "MTd"]:
+            if str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
                 raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         if self.settings.compiler == "Visual Studio":
@@ -81,8 +81,8 @@ class ProtobufConan(ConanFile):
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
             self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
             self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
+            if self.settings.compiler.get_safe("runtime"):
+                self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime) in ["MT", "MTd", "static"]
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
