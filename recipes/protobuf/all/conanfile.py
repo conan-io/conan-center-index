@@ -80,7 +80,8 @@ class ProtobufConan(ConanFile):
             self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
             self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
-            self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
+            if tools.Version(self.version) >= "3.14.0":
+                self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
             if self.settings.compiler.get_safe("runtime"):
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime) in ["MT", "MTd", "static"]
             self._cmake.configure(build_folder=self._build_subfolder)
