@@ -25,13 +25,6 @@ class LibmediainfoConan(ConanFile):
         "fPIC": True,
     }
 
-    requires = (
-        "libcurl/7.69.1",
-        "libzen/0.4.38",
-        "tinyxml2/8.0.0",
-        "zlib/1.2.11",
-    )
-
     _cmake = None
 
     @property
@@ -45,6 +38,12 @@ class LibmediainfoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("libcurl/7.75.0")
+        self.requires("libzen/0.4.38")
+        self.requires("tinyxml2/8.0.0")
+        self.requires("zlib/1.2.11")
 
     def validate(self):
         if not self.options["libzen"].enable_unicode:
