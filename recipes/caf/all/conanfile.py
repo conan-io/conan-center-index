@@ -92,13 +92,8 @@ class CAFConan(ConanFile):
                 self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
-            if tools.os_info.is_macos and self.settings.arch == "x86":
-                self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "i386"
             self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level
-            if self.settings.os == 'Windows':
-                self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
-                self._cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = True
-            elif self.settings.compiler == 'clang':
+            if self.settings.compiler == 'clang':
                 self._cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread -ldl"
             else:
                 self._cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread"
