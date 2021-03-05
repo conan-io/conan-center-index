@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 import os
 import textwrap
 
@@ -12,11 +12,8 @@ class CppZmqConan(ConanFile):
     license = "MIT"
     topics = ("conan", "cppzmq", "zmq-cpp", "zmq", "cpp-bind")
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "compiler", "build_type", "arch"
 
-    _cmake = None
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -32,31 +29,9 @@ class CppZmqConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("cppzmq-{}".format(self.version), self._source_subfolder)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CPPZMQ_BUILD_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("zmq*.hpp", dst="include", src=self._source_subfolder)
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {
