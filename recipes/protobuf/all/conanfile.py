@@ -90,10 +90,6 @@ class ProtobufConan(ConanFile):
                 self._cmake.definitions["protobuf_DISABLE_RTTI"] = False # TODO: create an option for 3.15.4+?
             if self.settings.compiler.get_safe("runtime"):
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime) in ["MT", "MTd", "static"]
-            if self.settings.compiler == "clang":
-                # Required at least for 3.15.4
-                self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wno-invalid-constexpr"
-                self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wno-invalid-constexpr"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
