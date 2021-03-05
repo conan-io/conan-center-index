@@ -39,11 +39,6 @@ class qarchiveConan(ConanFile):
             "CMAKE_MINIMUM_REQUIRED( VERSION 3.17)",
             "CMAKE_MINIMUM_REQUIRED( VERSION 3.2)")
 
-        # -Wextra is a GCC flag, cmake errors out on different compilers. On master this flags have been removed
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            """set(CMAKE_CXX_FLAGS "-Wall -Wextra")""",
-            "")
-
         # Remove CMAKE_CXX_FLAGS_DEBUG and CMAKE_CXX_FLAGS_RELEASE flags
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             """set(CMAKE_CXX_FLAGS_DEBUG "-g")""",
@@ -107,10 +102,6 @@ class qarchiveConan(ConanFile):
             add_library(QArchive ${SOURCES})
             '''
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
-
-    def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared builds are not supported on Windows")
 
     def config_options(self):
         if self.settings.os == "Windows":
