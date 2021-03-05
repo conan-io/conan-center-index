@@ -33,7 +33,7 @@ class GobjectIntrospectionConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("%s recipe does not support windows. Contributions are welcome!", self.name)
+            raise ConanInvalidConfiguration("%s recipe does not support windows. Contributions are welcome!" % self.name)
 
     def build_requirements(self):
         self.build_requires("meson/0.56.1")
