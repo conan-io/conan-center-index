@@ -138,7 +138,7 @@ class ProtobufConan(ConanFile):
             tools.replace_in_file(
                 protobuf_config_cmake,
                 "COMMAND  protobuf::protoc",
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" ${Protobuf_PROTOC_EXECUTABLE}"
+                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=${CUSTOM_DYLD_LIBRARY_PATH}\" $<TARGET_FILE:protobuf::protoc>"
             )
 
         # Disable a potential warning in protobuf-module.cmake.in
