@@ -5,7 +5,7 @@ from conans import ConanFile, tools
 
 class GraphthewyConan(ConanFile):
     name = "graphthewy"
-    version = "1.0"
+    version = "1.1"
     license = "EUPL-1.2"
     homepage = "https://github.com/alex-87/graphthewy"
     url = "https://github.com/conan-io/conan-center-index"
