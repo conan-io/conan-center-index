@@ -109,7 +109,7 @@ class qarchiveConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
 
     def configure(self):
-        if self.settings.os == "Windows" and self.option.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Shared builds are not supported on Windows")
 
     def config_options(self):
