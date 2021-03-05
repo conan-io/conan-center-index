@@ -159,24 +159,36 @@ class WtConan(ConanFile):
                         libs.append(l)
             return libs
 
+        # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
+        #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
+        self._cmake.definitions["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
+        if self.options.connector_http:
+            self._cmake.definitions["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
-            self._cmake.definitions["OPENSSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
             self._cmake.definitions["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
             self._cmake.definitions["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
             self._cmake.definitions["OPENSSL_FOUND"] = True
+        if self.options.get_safe("with_sqlite"):
+            self._cmake.definitions["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
+            self._cmake.definitions["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
             self._cmake.definitions["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
             self._cmake.definitions["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             self._cmake.definitions["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             self._cmake.definitions["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
+            self._cmake.definitions["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
             self._cmake.definitions["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
             self._cmake.definitions["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
             self._cmake.definitions["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
+            self._cmake.definitions["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
             self._cmake.definitions["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
             self._cmake.definitions["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
             self._cmake.definitions["ODBC_FOUND"] = True
+        if self.options.get_safe("with_unwind"):
+            self._cmake.definitions["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
         if self.settings.os == "Windows":
             self._cmake.definitions["CONNECTOR_FCGI"] = False
             self._cmake.definitions["CONNECTOR_ISAPI"] = self.options.connector_isapi
