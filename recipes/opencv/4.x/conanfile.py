@@ -27,7 +27,11 @@ class OpenCVConan(ConanFile):
         "with_eigen": [True, False],
         "with_webp": [True, False],
         "with_gtk": [True, False],
-        "with_quirc": [True, False]
+        "with_quirc": [True, False],
+        "with_freetype": [True, False],
+        "with_harfbuzz": [True, False],
+        "with_glog": [True, False],
+        "with_gflags": [True, False]
     }
     default_options = {
         "shared": False,
@@ -42,7 +46,11 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_webp": True,
         "with_gtk": True,
-        "with_quirc": True
+        "with_quirc": True,
+        "with_freetype": False,
+        "with_harfbuzz": False,
+        "with_glog": False,
+        "with_gflags": False,
     }
 
     short_paths = True
@@ -77,11 +85,17 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.contrib:
+            self.options.with_freetype = False
+            self.options.with_harfbuzz = False
+            self.options.with_glog = False
+            self.options.with_gflags = False
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
+
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -106,10 +120,14 @@ class OpenCVConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
         if self.options.contrib:
-            self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.7.4")
-            self.requires("gflags/2.2.2")
-            self.requires("glog/0.4.0")
+            if self.options.with_freetype:
+                self.requires("freetype/2.10.4")
+            if self.options.with_harfbuzz:
+                self.requires("harfbuzz/2.7.4")
+            if self.options.with_gflags:
+                self.requires("gflags/2.2.2")
+            if self.options.with_glog:
+                self.requires("glog/0.4.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
@@ -342,7 +360,16 @@ class OpenCVConan(ConanFile):
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
         def freetype():
-            return ["freetype::freetype"] if self.options.contrib else []
+            return ["freetype::freetype"] if self.options.with_freetype else []
+
+        def harfbuzz():
+            return ["harfbuzz::harfbuzz"] if self.options.with_freetype else []
+
+        def glog():
+            return ["glog::glog"] if self.options.with_glog else []
+
+        def gflags():
+            return ["gflags::gflags"] if self.options.with_gflags else []
 
         def xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib else []
@@ -372,7 +399,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_surface_matching",    "lib": "surface_matching",    "requires": ["opencv_core", "opencv_flann"] + eigen()},
                 {"target": "opencv_xphoto",              "lib": "xphoto",              "requires": ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen()},
                 {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
-                {"target": "opencv_freetype",            "lib": "freetype",            "requires": ["opencv_core", "opencv_imgproc", "freetype::freetype", "harfbuzz::harfbuzz"] + eigen()},
+                {"target": "opencv_freetype",            "lib": "freetype",            "requires": ["opencv_core", "opencv_imgproc"] + freetype() + harfbuzz() + eigen()},
                 {"target": "opencv_fuzzy",               "lib": "fuzzy",               "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_hfs",                 "lib": "hfs",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_img_hash",            "lib": "img_hash",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
@@ -394,9 +421,9 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_dpm",                 "lib": "dpm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui", "opencv_objdetect"] + eigen()},
                 {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_calib3d", "opencv_objdetect"] + eigen()},
                 {"target": "opencv_optflow",             "lib": "optflow",             "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_video", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video", "opencv_ximgproc"] + eigen()},
-                {"target": "opencv_sfm",                 "lib": "sfm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_shape", "opencv_xfeatures2d", "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen()},
-                {"target": "correspondence",             "lib": "correspondence",      "requires": ["glog::glog", "multiview"] + eigen()},
-                {"target": "multiview",                  "lib": "multiview",           "requires": ["glog::glog", "numeric"] + eigen()},
+                {"target": "opencv_sfm",                 "lib": "sfm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_shape", "opencv_xfeatures2d", "correspondence", "multiview", "numeric"] + glog() + gflags() + eigen()},
+                {"target": "correspondence",             "lib": "correspondence",      "requires": ["multiview"] + glog() + eigen()},
+                {"target": "multiview",                  "lib": "multiview",           "requires": ["numeric"] + glog() + eigen()},
                 {"target": "numeric",                    "lib": "numeric",             "requires": eigen()},
                 {"target": "opencv_superres",            "lib": "superres",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video", "opencv_ximgproc", "opencv_optflow"] + eigen()},
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen()},
