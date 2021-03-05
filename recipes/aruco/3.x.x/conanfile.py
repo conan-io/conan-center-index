@@ -38,12 +38,6 @@ class LibnameConan(ConanFile):
         self.requires("eigen/3.3.9")
         self.requires("zlib/1.2.11")
 
-        self.options[
-            "opencv"
-        ].shared = (
-            self.options.shared
-        )  # For some reason, this is not automagically inherited from self.options.shared
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
