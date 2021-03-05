@@ -55,11 +55,12 @@ class CAFConan(ConanFile):
         }
         return standards.get(cppstd) or {}
 
+    @property
+    def _cppstd(self):
+        return "11" if Version(self.version) <= "0.17.6" else "17"
+
     def validate(self):
-        cppstd = "11" if Version(self.version) <= "0.17.6" else "17"
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, cppstd)
-        min_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler))
+        min_version = self._minimum_compilers_version(self._cppstd).get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
@@ -79,8 +80,8 @@ class CAFConan(ConanFile):
     def _cmake_configure(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cppstd
             if Version(self.version) <= "0.17.6":
-                self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
                 self._cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
                 self._cmake.definitions["CAF_NO_OPENSSL"] = not self.options.with_openssl
                 for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
@@ -88,7 +89,6 @@ class CAFConan(ConanFile):
                 self._cmake.definitions["CAF_BUILD_STATIC"] = not self.options.shared
                 self._cmake.definitions["CAF_BUILD_STATIC_ONLY"] = not self.options.shared
             else:
-                self._cmake.definitions["CMAKE_CXX_STANDARD"] = "17"
                 self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
