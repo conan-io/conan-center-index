@@ -46,6 +46,10 @@ class LibmediainfoConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        if not self.options["libzen"].enable_unicode:
+            raise ConanInvalidConfiguration("This package requires libzen with unicode support")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("MediaInfoLib", self._source_subfolder)
@@ -67,8 +71,6 @@ class LibmediainfoConan(ConanFile):
         tools.replace_in_file("FindTinyXML.cmake", "tinyxml2_LIBRARIES", "TinyXML_LIBRARIES")
 
     def build(self):
-        if not self.options["libzen"].enable_unicode:
-            raise ConanInvalidConfiguration("This package requires libzen with unicode support")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
