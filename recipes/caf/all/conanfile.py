@@ -49,6 +49,7 @@ class CAFConan(ConanFile):
                 "Visual Studio": "16",
                 "gcc": "7",
                 "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
+                                # see https://github.com/actor-framework/actor-framework/issues/1226
                 "apple-clang": "10",
             },
         }
