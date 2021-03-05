@@ -76,6 +76,7 @@ class qarchiveConan(ConanFile):
             	    include/qarchivediskextractor_p.hpp
             	    include/qarchiveutils_p.hpp
             	    include/qarchiveioreader_p.hpp
+            	    include/qarchive_global.hpp
             	    )
             '''
 
@@ -95,6 +96,7 @@ class qarchiveConan(ConanFile):
             	include/qarchivediskextractor_p.hpp
             	include/qarchiveutils_p.hpp
             	include/qarchiveioreader_p.hpp
+            	include/qarchive_global.hpp
                 )
 
             qt5_wrap_cpp(SOURCES ${SOURCES})
