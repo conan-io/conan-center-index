@@ -40,13 +40,12 @@ class VolkConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def requirements(self):      
+    def requirements(self):
         self.requires("vulkan-headers/" + self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        commithash, _ = os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))
-        os.rename("volk-{}".format(commithash), self._source_subfolder)
+        os.rename("volk-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
