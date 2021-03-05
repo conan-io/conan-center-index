@@ -35,7 +35,7 @@ class LibnameConan(ConanFile):
 
     def requirements(self):
         self.requires("opencv/4.5.1")
-        self.requires("eigen/3.3.8")
+        self.requires("eigen/3.3.9")
         self.requires("zlib/1.2.11")
 
         self.options[
