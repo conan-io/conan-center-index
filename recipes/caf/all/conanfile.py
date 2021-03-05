@@ -17,10 +17,10 @@ class CAFConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "log_level": ["ERROR", "WARNING", "INFO", "DEBUG", "TRACE", "QUIET"],
+        "log_level": ["error", "warning", "info", "debug", "trace", "quiet"],
         "with_openssl": [True, False]
     }
-    default_options = {"shared": False, "fPIC": True, "log_level": "QUIET", "with_openssl": True}
+    default_options = {"shared": False, "fPIC": True, "log_level": "quiet", "with_openssl": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -67,7 +67,7 @@ class CAFConan(ConanFile):
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, cppstd, self.settings.compiler, self.settings.compiler.version))
+                    self.name, self._cppstd, self.settings.compiler, self.settings.compiler.version))
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) > "10.0" and \
                 self.settings.arch == 'x86':
@@ -92,7 +92,7 @@ class CAFConan(ConanFile):
                 self._cmake.definitions["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
-            self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level
+            self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level.value.upper()
             if self.settings.compiler == 'clang':
                 self._cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread -ldl"
             else:
