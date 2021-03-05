@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 from textwrap import dedent
 
 class qarchiveConan(ConanFile):
@@ -51,7 +52,6 @@ class qarchiveConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             """set(CMAKE_CXX_FLAGS_RELEASE "-O3")""",
             "")
-
 
         # Use conan's qt
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -107,6 +107,10 @@ class qarchiveConan(ConanFile):
             add_library(QArchive ${SOURCES})
             '''
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
+
+    def configure(self):
+        if self.settings.os == "Windows" and self.option.shared:
+            raise ConanInvalidConfiguration("Shared builds are not supported on Windows")
 
     def config_options(self):
         if self.settings.os == "Windows":
