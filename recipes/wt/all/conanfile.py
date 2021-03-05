@@ -3,7 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.32.0"
+
 
 class WtConan(ConanFile):
     name = "wt"
@@ -110,8 +111,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.5.0")
 
-    # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
-    def _validate_dependency_graph(self):
+    def validate(self):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
@@ -187,7 +187,6 @@ class WtConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._validate_dependency_graph()
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(OpenSSL)", "#find_package(OpenSSL)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
