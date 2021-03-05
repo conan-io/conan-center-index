@@ -31,7 +31,9 @@ class OpenCVConan(ConanFile):
         "with_freetype": [True, False],
         "with_harfbuzz": [True, False],
         "with_glog": [True, False],
-        "with_gflags": [True, False]
+        "with_gflags": [True, False],
+        "with_cuda": [True, False],
+        "with_cublas": [True, False]
     }
     default_options = {
         "shared": False,
@@ -51,6 +53,8 @@ class OpenCVConan(ConanFile):
         "with_harfbuzz": False,
         "with_glog": False,
         "with_gflags": False,
+        "with_cuda": False,
+        "with_cublas": False
     }
 
     short_paths = True
@@ -86,10 +90,14 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if not self.options.contrib:
-            self.options.with_freetype = False
-            self.options.with_harfbuzz = False
-            self.options.with_glog = False
-            self.options.with_gflags = False
+            del self.options.with_freetype
+            del self.options.with_harfbuzz
+            del self.options.with_glog
+            del self.options.with_gflags
+            if self.options.with_cuda:
+                raise ConanInvalidConfiguration("contrib must be enabled for cuda")
+        if not self.options.with_cuda:
+            del self.options.with_cublas
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
@@ -119,15 +127,14 @@ class OpenCVConan(ConanFile):
             self.requires("tbb/2020.3")
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
-        if self.options.contrib:
-            if self.options.with_freetype:
-                self.requires("freetype/2.10.4")
-            if self.options.with_harfbuzz:
-                self.requires("harfbuzz/2.7.4")
-            if self.options.with_gflags:
-                self.requires("gflags/2.2.2")
-            if self.options.with_glog:
-                self.requires("glog/0.4.0")
+        if self.options.get_safe("with_freetype"):
+            self.requires("freetype/2.10.4")
+        if self.options.get_safe("with_harfbuzz"):
+            self.requires("harfbuzz/2.7.4")
+        if self.options.get_safe("with_gflags"):
+            self.requires("gflags/2.2.2")
+        if self.options.get_safe("with_glog"):
+            self.requires("glog/0.4.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
@@ -155,6 +162,27 @@ class OpenCVConan(ConanFile):
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
+
+    def _gather_libs(self, p):
+        libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
+        if not getattr(self.options[p],'shared', False):
+            for dep in self.deps_cpp_info[p].public_deps:
+                libs += self._gather_libs(dep)
+        return libs
+
+    def _gather_lib_paths(self, p):
+        lib_paths = self.deps_cpp_info[p].lib_paths
+        if not getattr(self.options[p],'shared', False):
+            for dep in self.deps_cpp_info[p].public_deps:
+                lib_paths += self._gather_lib_paths(dep)
+        return lib_paths
+
+    def _gather_include_paths(self, p):
+        include_paths = self.deps_cpp_info[p].include_paths
+        if not getattr(self.options[p],'shared', False):
+            for dep in self.deps_cpp_info[p].public_deps:
+                include_paths += self._gather_include_paths(dep)
+        return include_paths
 
     def _configure_cmake(self):
         if self._cmake:
@@ -262,6 +290,21 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
         if self.options.contrib:
             self._cmake.definitions['OPENCV_EXTRA_MODULES_PATH'] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
+        # OpenCV doesn't use find_package for freetype & harfbuzz, so let's specify them
+        if self.options.get_safe("with_freetype"):
+            self._cmake.definitions['FREETYPE_FOUND'] = True
+            self._cmake.definitions['FREETYPE_INCLUDE_DIRS'] = ';'.join(self._gather_include_paths('freetype'))
+            self._cmake.definitions['FREETYPE_LIBRARIES'] = ';'.join(self._gather_libs('freetype'))
+        if self.options.get_safe("with_harfbuzz"):
+            self._cmake.definitions['HARFBUZZ_FOUND'] = True
+            self._cmake.definitions['HARFBUZZ_INCLUDE_DIRS'] = ';'.join(self._gather_include_paths('harfbuzz'))
+            self._cmake.definitions['HARFBUZZ_LIBRARIES'] = ';'.join(self._gather_libs('harfbuzz'))
+        if self.options.get_safe("with_gflags"):
+            self._cmake.definitions['GFLAGS_INCLUDE_DIR_HINTS'] = ';'.join(self._gather_include_paths('gflags'))
+            self._cmake.definitions['GFLAGS_LIBRARY_DIR_HINTS'] = ';'.join(self._gather_lib_paths('gflags'))
+        if self.options.get_safe("with_glog"):
+            self._cmake.definitions['GLOG_INCLUDE_DIR_HINTS'] = ';'.join(self._gather_include_paths('glog'))
+            self._cmake.definitions['GLOG_LIBRARY_DIR_HINTS'] = ';'.join(self._gather_lib_paths('glog'))
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath
         if self.options.with_jpeg2000 == "openjpeg":
@@ -272,6 +315,11 @@ class OpenCVConan(ConanFile):
         if self.options.parallel:
             self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
+        self._cmake.definitions["WITH_CUDA"] = self.options.with_cuda
+        if self.options.with_cuda:
+            # This allows compilation on older GCC/NVCC, otherwise build errors.
+            self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
+        self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
@@ -360,16 +408,16 @@ class OpenCVConan(ConanFile):
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
         def freetype():
-            return ["freetype::freetype"] if self.options.with_freetype else []
+            return ["freetype::freetype"] if self.options.get_safe("with_freetype") else []
 
         def harfbuzz():
-            return ["harfbuzz::harfbuzz"] if self.options.with_freetype else []
+            return ["harfbuzz::harfbuzz"] if self.options.get_safe("with_harfbuzz") else []
 
         def glog():
-            return ["glog::glog"] if self.options.with_glog else []
+            return ["glog::glog"] if self.options.get_safe("with_glog") else []
 
         def gflags():
-            return ["gflags::gflags"] if self.options.with_gflags else []
+            return ["gflags::gflags"] if self.options.get_safe("with_gflags") else []
 
         def xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib else []
@@ -429,6 +477,23 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen()},
                 {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen()},
             ])
+
+        if self.options.with_cuda:
+            opencv_components.extend([
+                {"target": "opencv_cudaarithm",     "lib": "cudaarithm",        "requires": ["opencv_core"] + eigen()},
+                {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",        "requires": ["opencv_core", "opencv_video"] + eigen()},
+                {"target": "opencv_cudacodec",      "lib": "cudacodec",         "requires": ["opencv_core"] + eigen()},
+                {"target": "opencv_features2d",     "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen()},
+                {"target": "opencv_cudafilters",    "lib": "cudafilters",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_cudalegacy",     "lib": "cudalegacy",        "requires": ["opencv_core", "opencv_video"] + eigen()},
+                {"target": "opencv_cudaobjdetect",  "lib": "cudaobjdetect",     "requires": ["opencv_core", "opencv_objdetect"] + eigen()},
+                {"target": "opencv_cudaoptflow",    "lib": "cudaoptflow",       "requires": ["opencv_core"] + eigen()},
+                {"target": "opencv_cudastereo",     "lib": "cudastereo",        "requires": ["opencv_core", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_cudawarping",    "lib": "cudawarping",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_cudev",          "lib": "cudev",             "requires": [] + eigen()},
+            ])
+
         return opencv_components
 
     def package_info(self):
