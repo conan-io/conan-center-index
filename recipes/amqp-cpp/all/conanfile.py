@@ -42,6 +42,10 @@ class AmqpcppConan(ConanFile):
             del self.options.fPIC
             del self.options.linux_tcp_module
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
             self.requires("openssl/1.1.1j")
