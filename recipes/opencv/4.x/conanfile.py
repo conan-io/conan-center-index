@@ -231,9 +231,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_ADE"] = False
         self._cmake.definitions["WITH_ARAVIS"] = False
         self._cmake.definitions["WITH_CLP"] = False
-        self._cmake.definitions["WITH_CUDA"] = False
         self._cmake.definitions["WITH_CUFFT"] = False
-        self._cmake.definitions["WITH_CUBLAS"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
         self._cmake.definitions["WITH_FFMPEG"] = False
         self._cmake.definitions["WITH_GSTREAMER"] = False
@@ -254,7 +252,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENCLAMDFFT"] = False
         self._cmake.definitions["WITH_OPENCL_SVM"] = False
         self._cmake.definitions["WITH_OPENGL"] = False
-        self._cmake.definitions["WITH_OPENJPEG"] = False
         self._cmake.definitions["WITH_OPENMP"] = False
         self._cmake.definitions["WITH_OPENNI"] = False
         self._cmake.definitions["WITH_OPENNI2"] = False
