@@ -19,6 +19,7 @@ class OpenblasConan(ConanFile):
         "fPIC": [True, False],
         "build_lapack": [True, False],
         "use_thread": [True, False],
+        "use_openmp": [True, False],
         "dynamic_arch": [True, False],
     }
     default_options = {
@@ -26,6 +27,7 @@ class OpenblasConan(ConanFile):
         "fPIC": True,
         "build_lapack": False,
         "use_thread": True,
+        "use_openmp": False,
         "dynamic_arch": False
     }
     exports_sources = ["CMakeLists.txt"]
@@ -52,8 +54,20 @@ class OpenblasConan(ConanFile):
 
         self._cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         self._cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+
+        # This is a workaround to fix building lapack error
+        if self.options.build_lapack
+            self._cmake.definitions["CMAKE_Fortran_USE_RESPONSE_FILE_FOR_OBJECTS"] = self.options.build_lapack
         self._cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
         self._cmake.definitions["USE_THREAD"] = self.options.use_thread
+        if self.settings.compiler != "gcc":
+            self._cmake.definitions["USE_OPENMP"] = False
+            self.output.warn("Compiler does not support OpenMP.")
+        else:
+            self._cmake.definitions["USE_OPENMP"] = self.options.use_openmp and self.options.use_thread
+        if self.options.use_openmp:
+            self.output.warn("Building with openmp support requires a OpenMP library and OpenMP can only be linked as a shared object.")
+            self.options.shared = True
 
         # Required for safe concurrent calls to OpenBLAS routines
         self._cmake.definitions["USE_LOCKING"] = not self.options.use_thread
@@ -87,6 +101,7 @@ class OpenblasConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
         self.cpp_info.names["pkg_config"] = "openblas"
         cmake_component_name = "pthread" if self.options.use_thread else "serial"
+        cmake_component_name = "openmp" if self.options.use_openmp else "pthread"
         self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["pkg_config"] = "openblas"
@@ -97,6 +112,8 @@ class OpenblasConan(ConanFile):
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
             if self.options.build_lapack:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
+            if self.options.use_openmp:
+                self.cpp_info.components["openblas_component"].system_libs.append("openmp")
 
         self.output.info("Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder))
         self.env_info.OpenBLAS_HOME = self.package_folder
