@@ -21,6 +21,8 @@ class LibSELinuxConan(ConanFile):
         return _sepol_subfolder, _selinux_subfolder
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux":
