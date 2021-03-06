@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 
 
@@ -223,8 +224,17 @@ class ITKConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
+        # Do not remove UseITK.cmake and *.h.in files
+        for cmake_files in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
+            if os.path.basename(cmake_files) != "UseITK.cmake":
+                os.remove(cmake_files)
+
+    @property
+    def _cmake_module_dir(self):
+        version = tools.Version(self.version)
+        return os.path.join("lib", "cmake/ITK-{}.{}".format(version.major, version.minor))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)  # FIXME: correct order?
@@ -236,3 +246,6 @@ class ITKConan(ConanFile):
         # FIXME: use conan components
         self.cpp_info.names["cmake_find_package"] = "ITK"
         self.cpp_info.names["cmake_find_package_multi"] = "ITK"
+
+        self.cpp_info.builddirs.append(self._cmake_module_dir)
+        self.cpp_info.build_modules = [os.path.join(self._cmake_module_dir, "UseITK.cmake")]
