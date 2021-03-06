@@ -18,10 +18,10 @@ class DCMTKConan(ConanFile):
         "charset_conversion": [None, "libiconv", "icu"],
         "with_libxml2": [True, False],
         "with_zlib": [True, False],
-        "with_openjpeg": [True, False],
+        "with_openjpeg": [True, False, "deprecated"],
         "with_openssl": [True, False],
         "with_libpng": [True, False],
-        "with_libsndfile": [True, False],
+        "with_libsndfile": [True, False, "deprecated"],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
     }
@@ -33,10 +33,10 @@ class DCMTKConan(ConanFile):
         "charset_conversion": "libiconv",
         "with_libxml2": True,
         "with_zlib": True,
-        "with_openjpeg": False,
+        "with_openjpeg": "deprecated",
         "with_openssl": True,
         "with_libpng": True,
-        "with_libsndfile": False,
+        "with_libsndfile": "deprecated",
         "with_libtiff": True,
         "with_tcpwrappers": False,
     }
@@ -63,8 +63,10 @@ class DCMTKConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.with_tcpwrappers
         # Looking into source code, it appears that OpenJPEG and libsndfile are not used
-        del self.options.with_openjpeg
-        del self.options.with_libsndfile
+        if self.options.with_openjpeg != "deprecated":
+            self.output.warn("with_openjpeg option is deprecated, do not use anymore")
+        if self.options.with_libsndfile != "deprecated":
+            self.output.warn("with_libsndfile option is deprecated, do not use anymore")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -80,18 +82,18 @@ class DCMTKConan(ConanFile):
             self.requires("libxml2/2.9.10")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.get_safe("with_openjpeg"):
-            self.requires("openjpeg/2.3.1")
         if self.options.with_openssl:
             self.requires("openssl/1.0.2u")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
-        if self.options.get_safe("with_libsndfile"):
-            self.requires("libsndfile/1.0.28")
         if self.options.with_libtiff:
             self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
+
+    def package_id(self):
+        del self.info.options.with_openjpeg
+        del self.info.options.with_libsndfile
 
     def _configure_cmake(self):
         if self._cmake:
@@ -106,18 +108,14 @@ class DCMTKConan(ConanFile):
         if self.options.charset_conversion == "libiconv":
             self._cmake.definitions["WITH_LIBICONVINC"] = self.deps_cpp_info["libiconv"].rootpath
         self._cmake.definitions["DCMTK_WITH_ICU"] = self.options.charset_conversion == "icu"
-        self._cmake.definitions["DCMTK_WITH_OPENJPEG"] = self.options.get_safe("with_openjpeg", False)
-        if self.options.get_safe("with_openjpeg"):
-            self._cmake.definitions["WITH_OPENJPEGINC"] = self.deps_cpp_info["openjpeg"].rootpath
+        self._cmake.definitions["DCMTK_WITH_OPENJPEG"] = False
         self._cmake.definitions["DCMTK_WITH_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
             self._cmake.definitions["WITH_OPENSSLINC"] = self.deps_cpp_info["openssl"].rootpath
         self._cmake.definitions["DCMTK_WITH_PNG"] = self.options.with_libpng
         if self.options.with_libpng:
             self._cmake.definitions["WITH_LIBPNGINC"] = self.deps_cpp_info["libpng"].rootpath
-        self._cmake.definitions["DCMTK_WITH_SNDFILE"] = self.options.get_safe("with_libsndfile", False)
-        if self.options.get_safe("with_libsndfile"):
-            self._cmake.definitions["WITH_SNDFILEINC"] = self.deps_cpp_info["libsndfile"].rootpath
+        self._cmake.definitions["DCMTK_WITH_SNDFILE"] = False
         self._cmake.definitions["DCMTK_WITH_THREADS"] = self.options.with_multithreading
         self._cmake.definitions["DCMTK_WITH_TIFF"] = self.options.with_libtiff
         if self.options.with_libtiff:
