@@ -38,7 +38,6 @@ class ITKConan(ConanFile):
 
     # TODO: Some packages can be added as optional, but they are not in CCI:
     # - mkl
-    # - fftw
     # - vtk
 
     def config_options(self):
