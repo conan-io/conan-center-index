@@ -75,7 +75,7 @@ class DCMTKConan(ConanFile):
         if self.options.charset_conversion == "libiconv":
             self.requires("libiconv/1.16")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/67.1")
+            self.requires("icu/68.2")
         if self.options.with_libxml2:
             self.requires("libxml2/2.9.10")
         if self.options.with_zlib:
@@ -89,7 +89,7 @@ class DCMTKConan(ConanFile):
         if self.options.get_safe("with_libsndfile"):
             self.requires("libsndfile/1.0.28")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
 
