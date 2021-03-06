@@ -236,7 +236,7 @@ class ITKConan(ConanFile):
     @property
     def _cmake_module_dir(self):
         version = tools.Version(self.version)
-        return os.path.join("lib", "cmake/ITK-{}.{}".format(version.major, version.minor))
+        return os.path.join("lib", "cmake", "ITK-{}.{}".format(version.major, version.minor))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)  # FIXME: correct order?
