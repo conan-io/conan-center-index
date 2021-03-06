@@ -23,6 +23,10 @@ patches:
   "2.9":
     - patch_file: patches/0001-fix-fno-common-2.9.patch
       base_path: libsepol-2.9
+    - patch_file: patches/0002-remove-cil_mem_error_handler.patch
+      base_path: libsepol-2.9
   "3.0":
     - patch_file: patches/0001-fix-fno-common-3.0.patch
+      base_path: libsepol-3.0
+    - patch_file: patches/0002-remove-cil_mem_error_handler.patch
       base_path: libsepol-3.0
