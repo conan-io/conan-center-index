@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class ITKConan(ConanFile):
     name = "itk"
@@ -66,6 +68,11 @@ class ITKConan(ConanFile):
         self.requires("libpng/1.6.37")
         self.requires("openjpeg/2.3.1")
         self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.options.shared and not self.options["hdf5"].shared:
+            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
+                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -212,9 +219,6 @@ class ITKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.shared and not self.options["hdf5"].shared:
-            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
-                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
