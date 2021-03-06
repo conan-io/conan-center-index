@@ -83,6 +83,8 @@ class DCMTKConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_openssl:
+            # FIXME: Bump openssl. dcmtk build files have a logic to detect
+            #        various openssl API but for some reason it fails with 1.1 API
             self.requires("openssl/1.0.2u")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
