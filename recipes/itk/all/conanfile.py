@@ -40,7 +40,6 @@ class ITKConan(ConanFile):
     # - mkl
     # - fftw
     # - vtk
-    # - opencv
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,6 +65,7 @@ class ITKConan(ConanFile):
         self.requires("icu/68.2")
         self.requires("libtiff/4.2.0")
         self.requires("libpng/1.6.37")
+        self.requires("opencv/4.5.1")
         self.requires("openjpeg/2.4.0")
         self.requires("zlib/1.2.11")
 
@@ -117,8 +117,6 @@ class ITKConan(ConanFile):
         self._cmake.definitions["Module_ITKMINC"] = False
         self._cmake.definitions["Module_ITKIOMINC"] = False
         self._cmake.definitions["Module_ITKV3Compatibility"] = False
-
-        self._cmake.definitions["Module_ITKVideoBridgeOpenCV"] = False
 
         self._cmake.definitions["Module_ITKDCMTK"] = True
         self._cmake.definitions["Module_ITKIODCMTK"] = True
@@ -199,6 +197,7 @@ class ITKConan(ConanFile):
         self._cmake.definitions["Module_ITKSmoothing"] = True
         self._cmake.definitions["Module_ITKSpatialFunction"] = True
         self._cmake.definitions["Module_ITKThresholding"] = True
+        self._cmake.definitions["Module_ITKVideoBridgeOpenCV"] = True
         self._cmake.definitions["Module_ITKVideoCore"] = True
         self._cmake.definitions["Module_ITKVideoFiltering"] = True
         self._cmake.definitions["Module_ITKVideoIO"] = False
