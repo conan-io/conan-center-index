@@ -63,4 +63,9 @@ class LibSELinuxConan(ConanFile):
             self.copy(pattern="*.a", dst="lib", src=library, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["selinux", "sepol"]
+        self.cpp_info.components["selinux"].names["pkg_config"] = "libselinux"
+        self.cpp_info.components["selinux"].libs = ["selinux"]
+        self.cpp_info.components["selinux"].requires = ["sepol"]
+
+        self.cpp_info.components["sepol"].names["pkg_config"] = "libsepol"
+        self.cpp_info.components["sepol"].libs = ["sepol"]
