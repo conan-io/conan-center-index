@@ -14,6 +14,8 @@ class LibSELinuxConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    exports_sources = "patches/**"
+
     def _get_subfolders(self):
         _sepol_subfolder = "libsepol-%s" % self.version
         _selinux_subfolder = "libselinux-%s" % self.version
@@ -46,6 +48,8 @@ class LibSELinuxConan(ConanFile):
         return "1"
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         _sepol_subfolder, _selinux_subfolder = self._get_subfolders()
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
                                 self.deps_cpp_info["pcre2"].includedirs[0])

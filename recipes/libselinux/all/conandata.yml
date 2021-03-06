@@ -19,3 +19,10 @@ sources:
       sha256: "df758ef1d9d4811051dd901ea6b029ae334ffd7c671c128beb16bce1e25ac161"
     - url: "https://github.com/SELinuxProject/selinux/releases/download/3.2/libsepol-3.2.tar.gz"
       sha256: "dfc7f662af8000116e56a01de6a0394ed79be1b34b999e551346233c5dd19508"
+patches:
+  "2.9":
+    - patch_file: patches/0001-fix-fno-common-2.9.patch
+      base_path: libsepol-2.9
+  "3.0":
+    - patch_file: patches/0001-fix-fno-common-3.0.patch
+      base_path: libsepol-3.0
