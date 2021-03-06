@@ -1,7 +1,10 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
+
 
 class OctomapConan(ConanFile):
     name = "octomap"
@@ -78,19 +81,62 @@ class OctomapConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                self._octomath_target: "octomap::{}".format(self._octomath_target),
+                self._octomap_target: "octomap::{}".format(self._octomap_target),
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _octomath_target(self):
+        return "octomath" if self.options.shared else "octomath-static"
+
+    @property
+    def _octomap_target(self):
+        return "octomap" if self.options.shared else "octomap-static"
 
     def package_info(self):
-        # TODO: no namespace for CMake imported targets
+        self.cpp_info.names["cmake_find_package"] = "octomap"
+        self.cpp_info.names["cmake_find_package_multi"] = "octomap"
+        self.cpp_info.names["pkg_config"] = "octomap"
+
         # octomath
-        octomath_cmake = "octomath" if self.options.shared else "octomath-static"
-        self.cpp_info.components["octomath"].names["cmake_find_package"] = octomath_cmake
-        self.cpp_info.components["octomath"].names["cmake_find_package_multi"] = octomath_cmake
+        self.cpp_info.components["octomath"].names["cmake_find_package"] = self._octomath_target
+        self.cpp_info.components["octomath"].names["cmake_find_package_multi"] = self._octomath_target
+        self.cpp_info.components["octomath"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["octomath"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["octomath"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["octomath"].libs = ["octomath"]
         if self.settings.os == "Linux":
             self.cpp_info.components["octomath"].system_libs.append("m")
         # octomap
-        octomap_cmake = "octomap" if self.options.shared else "octomap-static"
-        self.cpp_info.components["octomaplib"].names["cmake_find_package"] = octomap_cmake
-        self.cpp_info.components["octomaplib"].names["cmake_find_package_multi"] = octomap_cmake
+        self.cpp_info.components["octomaplib"].names["cmake_find_package"] = self._octomap_target
+        self.cpp_info.components["octomaplib"].names["cmake_find_package_multi"] = self._octomap_target
+        self.cpp_info.components["octomaplib"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["octomaplib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["octomaplib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["octomaplib"].libs = ["octomap"]
         self.cpp_info.components["octomaplib"].requires = ["octomath"]
