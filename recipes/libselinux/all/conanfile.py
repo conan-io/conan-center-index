@@ -14,7 +14,6 @@ class LibSELinuxConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = ("pcre2/10.33",)
 
     def _get_subfolders(self):
         _sepol_subfolder = "libsepol-%s" % self.version
@@ -26,6 +25,9 @@ class LibSELinuxConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux is supported")
+
+    def requirements(self):
+        self.requires("pcre2/10.36")
 
     def build_requirements(self):
         self.build_requires("flex/2.6.4")
