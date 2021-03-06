@@ -1,7 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
 class LibSELinuxConan(ConanFile):
