@@ -588,12 +588,13 @@ Examples = res/datadir/examples""")
             if self.settings.os != "Windows":
                 _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
         _create_module("Network", ["openssl::openssl"] if self.options.openssl else [])
-        _create_module("PrintSupport", ["Gui", "Widgets"])
         _create_module("Sql")
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
-        if self.options.get_safe("opengl", "no") != "no":
+        if self.options.gui and self.options.widgets:
+            _create_module("PrintSupport", ["Gui", "Widgets"])
+        if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
@@ -607,13 +608,15 @@ Examples = res/datadir/examples""")
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
             _create_module("QmlModels", ["Qml"])
-            _create_module("Quick", ["Gui", "Qml", "QmlModels"])
-            _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
-            _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
+            if self.options.gui:
+                _create_module("Quick", ["Gui", "Qml", "QmlModels"])
+                if self.options.widgets:
+                    _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
+                _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
             _create_module("QuickTest", ["Test"])
 
-        if self.options.qttools:
+        if self.options.qttools and self.options.gui and self.options.widgets:
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["UiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["UiPlugin"].libdirs = []
@@ -621,24 +624,25 @@ Examples = res/datadir/examples""")
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
-        if self.options.qtquick3d:
+        if self.options.qtquick3d and self.options.gui:
             _create_module("Quick3DUtils", ["Gui"])
             _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.qtquickcontrols2:
+        if self.options.qtquickcontrols2 and self.options.gui:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
-        if self.options.qtshadertools:
+        if self.options.qtshadertools and self.options.gui:
             _create_module("ShaderTools", ["Gui"])
 
-        if self.options.qtsvg:
+        if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
-            _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
+            if self.options.widgets:
+                _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
-        if self.options.qtwayland:
+        if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
