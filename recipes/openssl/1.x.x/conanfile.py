@@ -436,9 +436,14 @@ class OpenSSLConan(ConanFile):
             self._env_build = AutoToolsBuildEnvironment(self)
         return self._env_build
 
+    def _get_default_openssl_dir(self):
+        if self.settings.os == "Linux" and self._full_version >= "1.1.0":
+            return "/etc/ssl"
+        return os.path.join(self.package_folder, "res")
+
     @property
     def _configure_args(self):
-        openssldir = self.options.openssldir if self.options.openssldir else os.path.join(self.package_folder, "res")
+        openssldir = self.options.openssldir or self._get_default_openssl_dir()
         prefix = tools.unix_path(self.package_folder) if self._win_bash else self.package_folder
         openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
         args = [
