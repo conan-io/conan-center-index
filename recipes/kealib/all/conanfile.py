@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.32.0"
+
 
 class KealibConan(ConanFile):
     name = "kealib"
@@ -39,7 +41,7 @@ class KealibConan(ConanFile):
     def requirements(self):
         self.requires("hdf5/1.12.0")
 
-    def _validate_dependency_graph(self):
+    def validate(self):
         if not (self.options["hdf5"].enable_cxx and self.options["hdf5"].hl):
             raise ConanInvalidConfiguration("kealib requires hdf5 with cxx and hl enabled.")
 
@@ -58,7 +60,6 @@ class KealibConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._validate_dependency_graph()
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
