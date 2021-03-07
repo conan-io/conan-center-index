@@ -229,19 +229,22 @@ class ITKConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
         # Do not remove UseITK.cmake and *.h.in files
-        for cmake_files in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
-            if os.path.basename(cmake_files) != "UseITK.cmake":
-                os.remove(cmake_files)
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
+            if os.path.basename(cmake_file) != "UseITK.cmake":
+                os.remove(cmake_file)
 
     @property
     def _cmake_module_dir(self):
-        version = tools.Version(self.version)
-        return os.path.join("lib", "cmake", "ITK-{}.{}".format(version.major, version.minor))
+        return os.path.join("lib", "cmake", self._itk_subdir)
+
+    @property
+    def _itk_subdir(self):
+        v = tools.Version(self.version)
+        return "ITK-{}.{}".format(v.major, v.minor)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)  # FIXME: correct order?
-        v = tools.Version(self.version)
-        self.cpp_info.includedirs.append(os.path.join("include", "ITK-{}.{}".format(v.major, v.minor)))
+        self.cpp_info.includedirs.append(os.path.join("include", self._itk_subdir))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
 
