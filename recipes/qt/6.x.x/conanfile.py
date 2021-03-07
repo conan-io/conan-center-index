@@ -535,25 +535,35 @@ Examples = res/datadir/examples""")
             if tools.is_apple_os(self.settings.os):
                 libsuffix = "_debug"
 
+        def _get_corrected_reqs(requires):
+            reqs = []
+            for r in requires:
+                reqs.append(r if "::" in r else "qt%s" % r)
+            return reqs
+
         def _create_module(module, requires=[]):
-            assert module not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
-            self.cpp_info.components[module].names["cmake_find_package"] = module
-            self.cpp_info.components[module].libs = ["Qt6%s%s" % (module, libsuffix)]
-            self.cpp_info.components[module].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
-            self.cpp_info.components[module].defines = ["QT_%s_LIB" % module.upper()]
+            componentname = "qt%s" % module
+            assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
+            self.cpp_info.components[componentname].names["cmake_find_package"] = module
+            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
+            self.cpp_info.components[componentname].libs = ["Qt6%s%s" % (module, libsuffix)]
+            self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
+            self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
                 requires.append("Core")
-            self.cpp_info.components[module].requires = requires
+            self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
         def _create_plugin(pluginname, libname, type, requires):
-            assert pluginname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
-            self.cpp_info.components[pluginname].names["cmake_find_package"] = pluginname
-            self.cpp_info.components[pluginname].libs = [libname + libsuffix]
-            self.cpp_info.components[pluginname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
-            self.cpp_info.components[pluginname].includedirs = []
+            componentname = "qt%s" % pluginname
+            assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
+            self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
+            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
+            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
-            self.cpp_info.components[pluginname].requires = requires
+            self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
         core_reqs = ["zlib::zlib"]
         if self.options.with_pcre2:
@@ -564,7 +574,7 @@ Examples = res/datadir/examples""")
             core_reqs.append("icu::icu")
 
         _create_module("Core", core_reqs)
-        self.cpp_info.components["Core"].libs.append("Qt6Core_qobject%s" % libsuffix)
+        self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
             gui_reqs = []
             if self.options.with_freetype:
@@ -618,8 +628,8 @@ Examples = res/datadir/examples""")
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             _create_module("UiPlugin", ["Gui", "Widgets"])
-            self.cpp_info.components["UiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
-            self.cpp_info.components["UiPlugin"].libdirs = []
+            self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
+            self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
@@ -649,14 +659,14 @@ Examples = res/datadir/examples""")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
-                self.cpp_info.components["Core"].system_libs.append("Version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
-                self.cpp_info.components["Core"].system_libs.append("Winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
-                self.cpp_info.components["Core"].system_libs.append("Netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
-                self.cpp_info.components["Core"].system_libs.append("UserEnv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
-                self.cpp_info.components["Core"].system_libs.append("Ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
 
 
             if self.settings.os == "Macos":
-                self.cpp_info.components["Core"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
-                self.cpp_info.components["Core"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
-                self.cpp_info.components["Core"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
