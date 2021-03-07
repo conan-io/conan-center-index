@@ -35,3 +35,6 @@ class BooleanLiteConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "nonstd"
         self.cpp_info.components["jthreadlite"].names["cmake_find_package"] = "jthread-lite"
         self.cpp_info.components["jthreadlite"].names["cmake_find_package_multi"] = "jthread-lite"
+        if not self.settings.os == "Windows":
+            self.cpp_info.cxxflags = ["-pthread"]
+            self.cpp_info.system_libs.extend(["pthread"])

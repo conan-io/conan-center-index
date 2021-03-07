@@ -11,11 +11,6 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def package_info(self):
-        if not self.settings.os == "Windows":
-            self.cpp_info.cxxflags = ["-pthread"]
-            self.cpp_info.system_libs.extend(["pthread"])
-
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
