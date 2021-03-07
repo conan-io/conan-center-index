@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
     def package_info(self):
         if not self.settings.os == "Windows":
             self.cpp_info.cxxflags = ["-pthread"]
+            self.cpp_info.system_libs.extend(["pthread"])
 
     def test(self):
         if not tools.cross_building(self.settings):
