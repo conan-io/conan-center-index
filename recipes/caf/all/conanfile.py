@@ -93,12 +93,6 @@ class CAFConan(ConanFile):
                 for define in ["CAF_ENABLE_EXAMPLES", "CAF_ENABLE_TOOLS", "CAF_ENABLE_TESTING"]:
                     self._cmake.definitions[define] = "OFF"
             self._cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level.value.upper()
-            if self.settings.compiler == 'clang':
-                self._cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread -ldl"
-            else:
-                self._cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread"
-                if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.0":
-                    self._cmake.definitions["CMAKE_SHARED_LINKER_FLAGS"] = "-pthread"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -120,18 +114,15 @@ class CAFConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "CAF"
         self.cpp_info.names["cmake_find_package_multi"] = "CAF"
 
-        self.cpp_info.components["core"].names["pkg_config"] = "caf_core{}".format(suffix)
         self.cpp_info.components["core"].libs = ["caf_core{}".format(suffix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs = ["pthread", "m"]
 
-        self.cpp_info.components["io"].names["pkg_config"] = "caf_io{}".format(suffix)
         self.cpp_info.components["io"].libs = ["caf_io{}".format(suffix)]
         self.cpp_info.components["io"].requires = ["core"]
         if self.settings.os == "Windows":
             self.cpp_info.components["io"].system_libs = ["ws2_32", "iphlpapi", "psapi"]
 
         if self.options.with_openssl:
-            self.cpp_info.components["openssl"].names["pkg_config"] = f"caf_openssl{suffix}"
             self.cpp_info.components["openssl"].libs = [f"caf_openssl{suffix}"]
             self.cpp_info.components["openssl"].requires = ["io", "openssl::openssl"]
