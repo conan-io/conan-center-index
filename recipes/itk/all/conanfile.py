@@ -53,6 +53,9 @@ class ITKConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("itk does not support this compiler")
 
+        if self.options.shared:
+            self.options["hdf5"].shared = True
+
     def requirements(self):
         self.requires("libjpeg/9d")
         self.requires("dcmtk/3.6.5")
