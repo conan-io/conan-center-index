@@ -37,5 +37,5 @@ class JthreadLiteConan(ConanFile):
         self.cpp_info.components["jthreadlite"].names["cmake_find_package"] = "jthread-lite"
         self.cpp_info.components["jthreadlite"].names["cmake_find_package_multi"] = "jthread-lite"
         if not self.settings.os == "Windows":
-            self.cpp_info.cxxflags = ["-pthread"]
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.components["jthreadlite"].cxxflags = ["-pthread"]
+            self.cpp_info.components["jthreadlite"].system_libs = ["pthread"]
