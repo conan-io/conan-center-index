@@ -9,3 +9,7 @@ find_package(jthread-lite REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} nonstd::jthread-lite)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+
+if ( UNIX )
+    target_link_libraries ( ${PROJECT_NAME} PRIVATE pthread )
+endif()
