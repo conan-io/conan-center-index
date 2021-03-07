@@ -3,12 +3,13 @@ from conans import ConanFile, tools
 
 required_conan_version = ">=1.28.0"
 
-class BooleanLiteConan(ConanFile):
+class JthreadLiteConan(ConanFile):
     name = "jthread-lite"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/jthread-lite"
     description = "jthread lite - C++20's jthread for C++11 and later in a single-file header-only library "
     topics = ("conan", "jthread-lite", "jthread", "cpp11")
+    settings = "os"
     license = "BSL-1.0"
     no_copy_source = True
 
