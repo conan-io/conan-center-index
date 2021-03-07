@@ -121,11 +121,13 @@ class CAFConan(ConanFile):
         self.cpp_info.components["core"].libs = ["caf_core{}".format(suffix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs = ["pthread", "m"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["io"].system_libs = ["iphlpapi"]
 
         self.cpp_info.components["io"].libs = ["caf_io{}".format(suffix)]
         self.cpp_info.components["io"].requires = ["core"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["io"].system_libs = ["ws2_32", "iphlpapi", "psapi"]
+            self.cpp_info.components["io"].system_libs = ["ws2_32", "psapi"]
 
         if self.options.with_openssl:
             self.cpp_info.components["openssl"].libs = [f"caf_openssl{suffix}"]
