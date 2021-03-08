@@ -118,17 +118,23 @@ class CAFConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "CAF"
         self.cpp_info.names["cmake_find_package_multi"] = "CAF"
 
-        self.cpp_info.components["core"].libs = ["caf_core{}".format(suffix)]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["core"].system_libs = ["pthread", "m"]
+        self.cpp_info.components["caf_core"].names["cmake_find_package"] = "core"
+        self.cpp_info.components["caf_core"].names["cmake_find_package_multi"] = "core"
+        self.cpp_info.components["caf_core"].libs = ["caf_core{}".format(suffix)]
         if self.settings.os == "Windows":
-            self.cpp_info.components["io"].system_libs = ["iphlpapi"]
+            self.cpp_info.components["caf_core"].system_libs = ["iphlpapi"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.components["caf_core"].system_libs = ["pthread", "m"]
 
-        self.cpp_info.components["io"].libs = ["caf_io{}".format(suffix)]
-        self.cpp_info.components["io"].requires = ["core"]
+        self.cpp_info.components["caf_io"].names["cmake_find_package"] = "io"
+        self.cpp_info.components["caf_io"].names["cmake_find_package_multi"] = "io"
+        self.cpp_info.components["caf_io"].libs = ["caf_io{}".format(suffix)]
+        self.cpp_info.components["caf_io"].requires = ["caf_core"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["io"].system_libs = ["ws2_32", "psapi"]
+            self.cpp_info.components["caf_io"].system_libs = ["ws2_32"]
 
         if self.options.with_openssl:
-            self.cpp_info.components["openssl"].libs = [f"caf_openssl{suffix}"]
-            self.cpp_info.components["openssl"].requires = ["io", "openssl::openssl"]
+            self.cpp_info.components["caf_openssl"].names["cmake_find_package"] = "openssl"
+            self.cpp_info.components["caf_openssl"].names["cmake_find_package_multi"] = "openssl"
+            self.cpp_info.components["caf_openssl"].libs = ["caf_openssl{}".format(suffix)]
+            self.cpp_info.components["caf_openssl"].requires = ["caf_io", "openssl::openssl"]
