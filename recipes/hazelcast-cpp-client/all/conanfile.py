@@ -6,7 +6,7 @@ class HazelcastCppClient(ConanFile):
     name = "hazelcast-cpp-client"
     description = "C++ client library for Hazelcast in-memory database."
     license = "Apache-2.0"
-    topics = ("conan", "hazelcast", "client", "database", "cache")
+    topics = ("conan", "hazelcast", "client", "database", "cache", "in-memory", "distributed", "computing", "ssl")
     homepage = "https://github.com/hazelcast/hazelcast-cpp-client"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -29,12 +29,16 @@ class HazelcastCppClient(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _cmake_name(self):
+        return "hazelcastcxx" if tools.Version(self.version) <= "4.0.0" else "hazelcast-cpp-client"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os == "Linux" and self.settings.compiler.libcxx!="libstdc++11":
+        if self.settings.os == "Linux" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("Requires settings.compiler.libcxx = libstdc++11")
 
     def configure(self):
@@ -46,7 +50,7 @@ class HazelcastCppClient(ConanFile):
     def requirements(self):
         self.requires("boost/1.75.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,7 +61,11 @@ class HazelcastCppClient(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        if tools.Version(self.version) <= "4.0.0":
+            self._cmake.definitions["BUILD_STATIC_LIB"] = not self.options.shared
+            self._cmake.definitions["BUILD_SHARED_LIB"] = self.options.shared
+        else:
+            self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
@@ -74,10 +82,10 @@ class HazelcastCppClient(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "hazelcast-cpp-client"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "hazelcast-cpp-client"
-        self.cpp_info.names["cmake_find_package"] = "hazelcast-cpp-client"
-        self.cpp_info.names["cmake_find_package_multi"] = "hazelcast-cpp-client"
+        self.cpp_info.filenames["cmake_find_package"] = self._cmake_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = self._cmake_name
+        self.cpp_info.names["cmake_find_package"] = self._cmake_name
+        self.cpp_info.names["cmake_find_package_multi"] = self._cmake_name
 
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
