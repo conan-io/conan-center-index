@@ -105,6 +105,26 @@ class qarchiveConan(ConanFile):
             '''
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
 
+
+        # Fix install paths
+        old = '''\
+            install(TARGETS
+            	QArchive
+            	EXPORT QArchiveTargets
+              DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+            '''
+
+        new = '''\
+            install(TARGETS
+	            QArchive
+	            EXPORT QArchiveTargets
+                ARCHIVE DESTINATION lib
+                LIBRARY DESTINATION lib
+                RUNTIME DESTINATION bin
+                )
+            '''
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
