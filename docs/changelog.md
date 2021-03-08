@@ -1,5 +1,19 @@
 # Changelog
 
+### 05-March-2021 - 15:28 CET
+
+- [feature] Stop generating packages for apple-clang 9.1.
+- [feature] Raise error if `ConanInvalidConfiguration` is raised from `build()` method.
+- [feature] BuildSingleReference: All PRs use the new workflow.
+- [feature] Allow modifications in the *.github* folder for GitHub bots and actions.
+- [feature] Use BuildSingleReference job to build packages (if needed) during a merge.
+- [feature] BuildSingleReference: Add build environment property to packages.
+- [feature] Tapaholes: Delete repositories after running jobs.
+- [feature] AutomaticMerge: Add information to the description of the job.
+- [feature] Add new "CleanupArtifactory" job to remove repositories of unmerged PRs.
+- [feature] PopulateProperties: Remove packages after using them to compute properties.
+- [fix] Add timeout and retry flags to all `curl` commands to avoid intermittent job failures.
+
 ### 22-February-2021 - 10:42 CET
 
 - [feature] Add new profiles to generate new compiler configurations in pull requests:
