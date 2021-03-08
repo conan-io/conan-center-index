@@ -37,10 +37,6 @@ class HazelcastCppClient(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os == "Linux" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("Requires settings.compiler.libcxx = libstdc++11")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
