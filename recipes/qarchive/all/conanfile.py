@@ -25,8 +25,6 @@ class qarchiveConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            if self.settings.os == "Windows" and self.options.shared:
-                self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             self._cmake.configure()
         return self._cmake
 
