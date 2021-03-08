@@ -24,7 +24,7 @@ class OnnxConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -56,6 +56,8 @@ class OnnxConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # No warnings as errors for Visual Studio also
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/WX", "")
 
