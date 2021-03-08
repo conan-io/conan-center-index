@@ -60,7 +60,7 @@ and **88 for a C library**.
 
 ## MacOS
 
-- Compilers: Apple-clang versions 9.1, 10.0, 11.0, 12.0 (three latest versions, we will rotate the older when a new compiler version is released)
+- Compilers: Apple-clang versions 10.0, 11.0, 12.0 (three latest versions, we will rotate the older when a new compiler version is released)
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
