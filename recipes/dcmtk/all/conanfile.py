@@ -269,15 +269,14 @@ class DCMTKConan(ConanFile):
                 self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
                 self.cpp_info.components[target_lib].requires = requires
 
-                if target_lib == "ofstd":
-                    if self.settings.os == "Windows":
-                        self.cpp_info.components[target_lib].system_libs.extend([
-                            "iphlpapi", "ws2_32", "netapi32", "wsock32"
-                        ])
-                    elif self.settings.os == "Linux":
-                        self.cpp_info.components[target_lib].system_libs.append("m")
-                        if self.options.with_multithreading:
-                            self.cpp_info.components[target_lib].system_libs.append("pthread")
+            if self.settings.os == "Windows":
+                self.cpp_info.components["ofstd"].system_libs.extend([
+                    "iphlpapi", "ws2_32", "netapi32", "wsock32"
+                ])
+            elif self.settings.os == "Linux":
+                self.cpp_info.components["ofstd"].system_libs.append("m")
+                if self.options.with_multithreading:
+                    self.cpp_info.components["ofstd"].system_libs.append("pthread")
 
         register_components(self._dcmtk_components)
 
