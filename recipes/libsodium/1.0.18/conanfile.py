@@ -84,7 +84,7 @@ class LibsodiumConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=self._vs_configuration)
 
-    def _build_autotools_impl(self, configure_args):
+    def _build_autotools_impl(self, configure_args, host_arch=None):
         win_bash = False
         if self._is_mingw:
             win_bash = True
@@ -92,7 +92,11 @@ class LibsodiumConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
         if self._is_mingw:
             self.run("autoreconf -i", cwd=self._source_subfolder, win_bash=win_bash)
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder, host=False)
+        host = None
+        if host_arch:
+            host = False
+            configure_args.append("--host=%s" % host_arch)
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder, host=host)
         autotools.make(args=["-j%s" % str(tools.cpu_count())])
         autotools.install()
 
@@ -104,20 +108,17 @@ class LibsodiumConan(ConanFile):
 
     def _build_autotools_android(self, configure_args):
         host_arch = "%s-linux-%s" % (tools.to_android_abi(self.settings.arch), self._android_id_str)
-        configure_args.append("--host=%s" % host_arch)
-        self._build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args, host_arch)
 
     def _build_autotools_mingw(self, configure_args):
         arch = "i686" if self.settings.arch == "x86" else self.settings.arch
         host_arch = "%s-w64-mingw32" % arch
-        configure_args.append("--host=%s" % host_arch)
-        self._build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args, host_arch)
 
     def _build_autotools_darwin(self, configure_args):
         os = "ios" if self.settings.os == "iOS" else "darwin"
         host_arch = "%s-apple-%s" % (self.settings.arch, os)
-        configure_args.append("--host=%s" % host_arch)
-        self._build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args, host_arch)
 
     def _build_autotools_neutrino(self, configure_args):
         neutrino_archs = {"x86_64":"x86_64-pc", "x86":"i586-pc", "armv7":"arm-unknown", "armv8": "aarch64-unknown"}
@@ -127,8 +128,7 @@ class LibsodiumConan(ConanFile):
                 host_arch += "eabi"
         else:
             raise ConanInvalidConfiguration("Unsupported arch or Neutrino version for libsodium: {} {}".format(self.settings.os, self.settings.arch))
-        configure_args.append("--host=%s" % host_arch)
-        self._build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args, host_arch)
 
     def _build_autotools(self):
         absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
