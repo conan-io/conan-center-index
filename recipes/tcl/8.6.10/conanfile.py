@@ -88,8 +88,8 @@ class TclConan(ConanFile):
         win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
         # do not treat nmake build warnings as errors
         tools.replace_in_file(win_rules_vc, "cwarn = $(cwarn) -WX", "")
-        # disable whole program optimization
-        # to be portable across different MSVC versions.
+        # disable whole program optimization to be portable across different MSVC versions.
+        # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
         tools.replace_in_file(
             win_rules_vc,
             "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
