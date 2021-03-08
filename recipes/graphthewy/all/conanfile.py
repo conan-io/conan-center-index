@@ -35,6 +35,13 @@ class GraphthewyConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
 
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version:
+                if tools.Version(self.settings.compiler.version) < minimum_version:
+                    raise ConanInvalidConfiguration("graphthewy requires C++17, which your compiler does not support.")
+            else:
+                self.output.warn("graphthewy requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", "include/graphthewy", keep_path=False)
