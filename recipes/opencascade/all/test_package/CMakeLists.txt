@@ -5,10 +5,10 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 # Test components
-find_package(OpenCASCADE COMPONENTS ModelingData CONFIG)
+find_package(OpenCASCADE COMPONENTS FoundationClasses ModelingData ModelingAlgorithms CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} TKBRep)
+target_link_libraries(${PROJECT_NAME} TKMath TKGeomBase TKTopAlgo TKBRep)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 # Test global conan target
