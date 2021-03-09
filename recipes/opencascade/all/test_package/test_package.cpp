@@ -1,9 +1,10 @@
-#include <iostream>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <TopoDS_Edge.hxx>
 #include <GC_MakeCircle.hxx>
 #include <gce_MakeCirc.hxx>
 #include <gp_Circ.hxx>
+
+#include <iostream>
 
 int main() {
     gp_Pnt pc(0, 0, 0);
