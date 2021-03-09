@@ -4,7 +4,7 @@ import os
 import shutil
 
 
-class OcctConan(ConanFile):
+class OpenCascadeConan(ConanFile):
     name = "opencascade"
     description = """a software development platform providing services for 3D
         surface and solid modeling, CAD data exchange, and visualization."""
