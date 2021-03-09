@@ -202,7 +202,7 @@ class OpenCascadeConan(ConanFile):
                 tk for tk in reversed(modules_tks[module])
                 if tk in libs]
             if index > 0:
-                self.cpp_info.components[module].requires = list(modules[:index-1])
+                self.cpp_info.components[module].requires = list(modules[:index])
 
         # 3rd-party requirements taken from https://dev.opencascade.org/doc/overview/html/index.html#intro_req_libs
         self.cpp_info.components["Draw"].requires.extend(
