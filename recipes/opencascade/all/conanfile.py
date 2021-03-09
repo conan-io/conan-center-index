@@ -165,7 +165,7 @@ class OpenCascadeConan(ConanFile):
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {target: "OpenCASCADE::{}".format(target) for module in self._modules_toolkits for target in module}
+            {target: "OpenCASCADE::{}".format(target) for module in self._modules_toolkits.values() for target in module}
         )
 
     @staticmethod
