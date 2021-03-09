@@ -10,7 +10,9 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
-  * [Test Package](#test-package)<!-- endToc -->
+  * [Test Package](#test-package)
+    * [Minimalistic Source Code](#minimalistic-source-code)
+    * [Verifying Components](#verifying-components)<!-- endToc -->
 
 ## Trailing white-spaces
 

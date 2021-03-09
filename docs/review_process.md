@@ -8,12 +8,20 @@ conan-center-index tries to make the process as smooth and simple as possible fo
 ## Contents
 
   * [conan-center-bot](#conan-center-bot)
-  * [Green Build](#green-build)
-  * [Unexpected error](#unexpected-error)
-  * [Avoiding Conflicts](#avoiding-conflicts)
+  * [Green build](#green-build)
+    * [Unexpected error](#unexpected-error)
+  * [Avoiding conflicts](#avoiding-conflicts)
   * [Draft](#draft)
-  * [Getting PR Reviewed](#getting-pr-reviewed)
-  * [Automatic Merges](#automatic-merges)<!-- endToc -->
+  * [Getting your pull request reviewed](#getting-your-pull-request-reviewed)
+    * [Official reviewers](#official-reviewers)
+    * [Community reviewers](#community-reviewers)
+    * [Rule of 3 reviews](#rule-of-3-reviews)
+    * [Reviews from others](#reviews-from-others)
+    * [Addressing review comments](#addressing-review-comments)
+  * [Automatic Merges](#automatic-merges)
+    * [Merge](#merge)
+    * [Upload](#upload)
+    * [Updating web front end](#updating-web-front-end)<!-- endToc -->
 
 ## [conan-center-bot](https://github.com/conan-center-bot)
 
