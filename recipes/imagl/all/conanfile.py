@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.errors import ConanException
 import os
+import subprocess
 
 required_conan_version = ">=1.32.0"
 
@@ -57,6 +58,21 @@ class ImaglConan(ConanFile):
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
+
+        def get_libcxx_majorver():
+            tmp_file = subprocess.run(['mktemp'], text=True, capture_output=True).stdout.strip()
+            src_test = """
+                #include <iostream>
+                #ifndef _LIBCPP_VERSION
+                #  define _LIBCPP_VERSION 0
+                #endif
+                int main() {
+                    std::cout << _LIBCPP_VERSION << '\\n';
+                }
+            """
+            subprocess.run(['clang++', '-stdlib=libc++', '-x', 'c++', '-dM', '-o', tmp_file, '-'], input=src_test, text=True).check_returncode()
+            libcxx_ver = int(int(subprocess.run([tmp_file], text=True, capture_output=True).stdout.strip()) / 1000)
+            return libcxx_ver
         
         compiler_version = str(self.settings.compiler.version)
         if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1 and int(str(self.settings.compiler.version)) >= 16:
@@ -71,6 +87,8 @@ class ImaglConan(ConanFile):
             self.output.warn("imagl requires C++20. Your compiler is unknown. Assuming it supports C++20.")
         elif lazy_lt_semver(compiler_version, minimum_version):
             raise ConanInvalidConfiguration("imagl requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), compiler_version))
+        elif str(self.settings.compiler) == "clang" and lazy_lt_semver(str(get_libcxx_majorver()), minimum_version):
+            raise ConanInvalidConfiguration("imagl requires libc++ minimum version {}. Your libc++ is version {}".format(minimum_version, get_libcxx_majorver()))
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
         #Special check for clang that can only be linked to libc++
