@@ -197,8 +197,15 @@ class OcctConan(ConanFile):
         libs = set(tools.collect_libs(self))
         modules = self._modules
         modules_tks = self._modules_toolkits
-        tks = [tk
-               for module in reversed(modules)
-               for tk in reversed(modules_tks[module])
-               if tk in libs]
-        self.cpp_info.libs = tks
+        for (index, module) in enumerate(modules):
+            self.cpp_info.components[module].libs = [
+                tk for tk in reversed(modules_tks[module])
+                if tk in libs]
+            if index > 0:
+                self.cpp_info.components[module].requires = list(modules[:index-1])
+
+        # 3rd-party requirements taken from https://dev.opencascade.org/doc/overview/html/index.html#intro_req_libs
+        self.cpp_info.components["Draw"].requires.extend(
+            ["tcl::tcl", "tk::tk"])
+        self.cpp_info.components["Visualization"].requires.extend(
+            ["freetype::freetype", "opengl::opengl"])
