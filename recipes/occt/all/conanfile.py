@@ -5,7 +5,7 @@ import shutil
 
 
 class OcctConan(ConanFile):
-    name = "occt"
+    name = "opencascade"
     description = """a software development platform providing services for 3D
         surface and solid modeling, CAD data exchange, and visualization."""
     homepage = "https://github.com/Open-Cascade-SAS/OCCT"
@@ -79,7 +79,7 @@ class OcctConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.upper() + "-" + \
+        extracted_dir = "OCCT-" + \
             self.version.replace(".", "_")
         tools.rename(extracted_dir, self._source_subfolder)
 
@@ -192,6 +192,8 @@ class OcctConan(ConanFile):
             self._replace_package_folder("bini", "bin")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "OpenCASCADE"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenCASCADE"
         libs = set(tools.collect_libs(self))
         modules = self._modules
         modules_tks = self._modules_toolkits
