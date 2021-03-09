@@ -17,7 +17,7 @@ class XkbcommonConan(ConanFile):
         "with_x11": [True, False],
         "with_wayland": [True, False],
         "xkbregistry": [True, False],
-        "docs": [True, False]
+        "docs": [True, False, "deprecated"]
     }
     default_options = {
         "shared": False,
@@ -25,7 +25,7 @@ class XkbcommonConan(ConanFile):
         "with_x11": True,
         "with_wayland": False,
         "xkbregistry": True,
-        "docs": False
+        "docs": "deprecated"
     }
 
     generators = "pkg_config"
@@ -51,6 +51,8 @@ class XkbcommonConan(ConanFile):
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
+        if self.options.docs != "deprecated":
+            self.output.warn("'docs' option is deprecated. Do not use.")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -60,7 +62,7 @@ class XkbcommonConan(ConanFile):
             self.requires("libxml2/2.9.10")
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.0")
+        self.build_requires("meson/0.56.2")
         self.build_requires("bison/3.7.1")
 
     def source(self):
@@ -73,7 +75,7 @@ class XkbcommonConan(ConanFile):
             return self._meson
         defs={
             "enable-wayland": self.options.with_wayland,
-            "enable-docs": self.options.docs,
+            "enable-docs": False,
             "enable-x11": self.options.with_x11,
             "libdir": os.path.join(self.package_folder, "lib"),
             "default_library": ("shared" if self.options.shared else "static")}
@@ -105,6 +107,9 @@ class XkbcommonConan(ConanFile):
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+    def package_id(self):
+        del self.info.options.docs
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xkbcommon_full_package" # unofficial, but required to avoid side effects (libxkbcommon component "steals" the default global pkg_config name)

@@ -1,6 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class Jinja2cppConan(ConanFile):
@@ -104,12 +107,12 @@ class Jinja2cppConan(ConanFile):
     def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += (
-                "if(TARGET {aliased} AND NOT TARGET {alias})\n"
-                "    add_library({alias} INTERFACE IMPORTED)\n"
-                "    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})\n"
-                "endif()\n"
-            ).format(alias=alias, aliased=aliased)
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
 
     @property
@@ -121,6 +124,10 @@ class Jinja2cppConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
-        self.cpp_info.builddirs = [self._module_subfolder]
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.names["cmake_find_package"] = "jinja2cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "jinja2cpp"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        module_rel_path = os.path.join(self._module_subfolder, self._module_file)
+        self.cpp_info.build_modules["cmake_find_package"] = [module_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_rel_path]
         self.cpp_info.libs = ["jinja2cpp"]

@@ -34,15 +34,9 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("opencv/4.5.0")
-        self.requires("eigen/3.3.8")
+        self.requires("opencv/4.5.1")
+        self.requires("eigen/3.3.9")
         self.requires("zlib/1.2.11")
-
-        self.options[
-            "opencv"
-        ].shared = (
-            self.options.shared
-        )  # For some reason, this is not automagically inherited from self.options.shared
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
