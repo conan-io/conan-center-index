@@ -590,6 +590,12 @@ Examples = res/datadir/examples""")
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.with_harfbuzz:
+                gui_reqs.append("harfbuzz::harfbuzz")
+            if self.options.with_libjpeg == "libjpeg-turbo":
+                gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
+            if self.options.with_libjpeg == "libjpeg":
+                gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
