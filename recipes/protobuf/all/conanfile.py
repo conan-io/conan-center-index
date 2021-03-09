@@ -74,6 +74,11 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
+
+        if self.settings.compiler == "clang":
+           if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
+                raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
