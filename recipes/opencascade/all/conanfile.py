@@ -154,7 +154,7 @@ class OpenCascadeConan(ConanFile):
             src=self._source_subfolder,
             dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.build_type == "Debug":
             self._replace_package_folder("libd", "lib")
             self._replace_package_folder("bind", "bin")
