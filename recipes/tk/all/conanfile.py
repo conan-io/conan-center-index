@@ -86,9 +86,16 @@ class TkConan(ConanFile):
         win_makefile_in = os.path.join(self._get_configure_folder("win"), "Makefile.in")
         tools.replace_in_file(win_makefile_in, "\nTCL_GENERIC_DIR", "\n#TCL_GENERIC_DIR")
 
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "win", "rules.vc"),
+        win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
+        tools.replace_in_file(win_rules_vc,
                               "\ncwarn = $(cwarn) -WX",
                               "\n# cwarn = $(cwarn) -WX")
+        # disable whole program optimization to be portable across different MSVC versions.
+        # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
+        tools.replace_in_file(
+            win_rules_vc,
+            "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
+            "# OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL")
 
     def _get_default_build_system(self):
         if tools.is_apple_os(self.settings.os):
