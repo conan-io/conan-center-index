@@ -55,28 +55,29 @@ class OpenCascadeConan(ConanFile):
         tools.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            cmakelists,
             "project (OCCT)",
             '''project (OCCT)
                 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
                 conan_basic_setup(TARGETS)''')
 
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            cmakelists,
             "${3RDPARTY_INCLUDE_DIRS}",
             "${CONAN_INCLUDE_DIRS}")
 
+        occ_toolkit_cmake = os.path.join(self._source_subfolder, "adm",
+                                         "cmake", "occt_toolkit.cmake")
         tools.replace_in_file(
-            os.path.join(self._source_subfolder,
-                         "adm/cmake/occt_toolkit.cmake"),
+            occ_toolkit_cmake,
             "${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}",
             """${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}
             CONAN_PKG::tcl CONAN_PKG::tk CONAN_PKG::freetype""")
 
         tools.replace_in_file(
-            os.path.join(self._source_subfolder,
-                         "adm/cmake/occt_toolkit.cmake"),
+            occ_toolkit_cmake,
             """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug RelWithDebInfo
              DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
@@ -84,21 +85,21 @@ class OpenCascadeConan(ConanFile):
 
         tools.replace_in_file(
             os.path.join(self._source_subfolder,
-                         "src/Font/Font_FontMgr.cxx"),
+                         "src", "Font", "Font_FontMgr.cxx"),
             "#pragma comment (lib, \"freetype.lib\")",
             "")
 
         tcl_libs = self.deps_cpp_info["tcl"].libs
         tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "adm/cmake/tcl.cmake"),
+            os.path.join(self._source_subfolder, "adm", "cmake", "tcl.cmake"),
             "${CSF_TclLibs}",
             tcl_lib)
 
         tk_libs = self.deps_cpp_info["tk"].libs
         tk_lib = next(filter(lambda lib: "tk8" in lib, tk_libs))
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "adm/cmake/tk.cmake"),
+            os.path.join(self._source_subfolder, "adm", "cmake", "tk.cmake"),
             "${CSF_TclTkLibs}",
             tk_lib)
 
