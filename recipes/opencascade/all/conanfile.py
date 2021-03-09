@@ -6,20 +6,18 @@ import shutil
 
 class OpenCascadeConan(ConanFile):
     name = "opencascade"
-    description = """a software development platform providing services for 3D
-        surface and solid modeling, CAD data exchange, and visualization."""
+    description = "A software development platform providing services for 3D " \
+                  "surface and solid modeling, CAD data exchange, and visualization."
     homepage = "https://github.com/Open-Cascade-SAS/OCCT"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
-    topics = ("3D", "modeling")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
     generators = "cmake"
-    requires = [("tcl/8.6.10"),
-                ("tk/8.6.10"),
-                ("freetype/2.10.4"),
-                ("opengl/system")]
     _cmake = None
 
     @property
@@ -68,6 +66,12 @@ class OpenCascadeConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("tcl/8.6.10")
+        self.requires("tk/8.6.10")
+        self.requires("freetype/2.10.4")
+        self.requires("opengl/system")
+
     def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0":
             raise ConanInvalidConfiguration("Clang 6.0 is not supported.")
@@ -81,8 +85,7 @@ class OpenCascadeConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "OCCT-" + \
-            self.version.replace(".", "_")
+        extracted_dir = "OCCT-" + self.version.replace(".", "_")
         tools.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
