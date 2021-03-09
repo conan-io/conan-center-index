@@ -8,7 +8,7 @@ class OpenCascadeConan(ConanFile):
     name = "opencascade"
     description = "A software development platform providing services for 3D " \
                   "surface and solid modeling, CAD data exchange, and visualization."
-    homepage = "https://www.opencascade.com/"
+    homepage = "https://dev.opencascade.org"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
     topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
