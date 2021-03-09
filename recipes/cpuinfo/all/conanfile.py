@@ -18,10 +18,12 @@ class CpuinfoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "log_level": ["default", "debug", "info", "warning", "error", "fatal", "none"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "log_level": "default",
     }
 
     exports_sources = "CMakeLists.txt"
@@ -61,7 +63,7 @@ class CpuinfoConan(ConanFile):
         # cpuinfo
         self._cmake.definitions["CPUINFO_LIBRARY_TYPE"] = "default"
         self._cmake.definitions["CPUINFO_RUNTIME_TYPE"] = "default"
-        self._cmake.definitions["CPUINFO_LOG_LEVEL"] = "default"
+        self._cmake.definitions["CPUINFO_LOG_LEVEL"] = self.options.log_level
         self._cmake.definitions["CPUINFO_BUILD_TOOLS"] = False
         self._cmake.definitions["CPUINFO_BUILD_UNIT_TESTS"] = False
         self._cmake.definitions["CPUINFO_BUILD_MOCK_TESTS"] = False
