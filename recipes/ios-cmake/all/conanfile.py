@@ -16,10 +16,11 @@ class IosCMakeConan(ConanFile):
         "enable_visibility": [True, False],
         "enable_strict_try_compile": [True, False],
         "toolchain_target": ["auto", "OS", "OS64", "OS64COMBINED",
-                       "SIMULATOR", "SIMULATOR64",
+                       "SIMULATOR", "SIMULATOR64", "SIMULATORARM64",
                        "TVOS", "TVOSCOMBINED",
                        "SIMULATOR_TVOS", "WATCHOS",
-                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS"]
+                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS",
+                       "MAC", "MAC_ARM64", "MAC_CATALYST", "MAC_CATALYST_ARM64"]
     }
     default_options = {
         "enable_bitcode": True,
