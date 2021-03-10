@@ -32,7 +32,8 @@ class GraphthewyConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        tools.check_min_cppstd(self, "17")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
