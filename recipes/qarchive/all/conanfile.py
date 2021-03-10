@@ -15,7 +15,7 @@ class qarchiveConan(ConanFile):
     default_options = {'shared': False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     topics = ("conan", "qt", "Qt", "compress", "libarchive")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
     @property
@@ -28,81 +28,6 @@ class qarchiveConan(ConanFile):
             self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        # TODO Remove this once Conan CCI build images have cmake 3.17 installed
-        # This is safe since the minimum version was bumped only to have the LibArchive::LibArchive
-        # target exposed by FindLibArchive, which was introduced in cmake 3.17.
-        # Since we use conan's FindLibArchive we can revert the minimum version bump.
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "CMAKE_MINIMUM_REQUIRED( VERSION 3.17)",
-            "CMAKE_MINIMUM_REQUIRED( VERSION 3.2)")
-
-        # Remove CMAKE_CXX_FLAGS_DEBUG and CMAKE_CXX_FLAGS_RELEASE flags
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            """set(CMAKE_CXX_FLAGS_DEBUG "-g")""",
-            "")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            """set(CMAKE_CXX_FLAGS_RELEASE "-O3")""",
-            "")
-
-        # Use conan's qt
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "find_package(Qt5Core)",
-            "find_package(qt REQUIRED COMPONENTS Core)")
-
-        # TODO Once components support is available on qt, link only to qt::Core
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)",
-            "target_link_libraries(QArchive PUBLIC qt::qt LibArchive::LibArchive)")
-
-        # Manually invoke MOC on QArchive sources since it doesn't get invoked automatically
-        # when using conan's qt.
-        old = '''\
-            add_library(QArchive
-            	    src/qarchivediskcompressor.cc
-            	    src/qarchivediskextractor.cc
-            	    src/qarchive_enums.cc
-            	    src/qarchivediskcompressor_p.cc
-            	    src/qarchivediskextractor_p.cc
-            	    src/qarchiveutils_p.cc
-            	    src/qarchiveioreader_p.cc
-            	    include/qarchivediskcompressor.hpp
-            	    include/qarchivediskextractor.hpp
-            	    include/qarchive_enums.hpp
-            	    include/qarchivediskcompressor_p.hpp
-            	    include/qarchivediskextractor_p.hpp
-            	    include/qarchiveutils_p.hpp
-            	    include/qarchiveioreader_p.hpp
-            	    include/qarchive_global.hpp
-            	    )
-            '''
-
-        new = '''\
-            set(SOURCES
-            	src/qarchivediskcompressor.cc
-            	src/qarchivediskextractor.cc
-            	src/qarchive_enums.cc
-            	src/qarchivediskcompressor_p.cc
-            	src/qarchivediskextractor_p.cc
-            	src/qarchiveutils_p.cc
-            	src/qarchiveioreader_p.cc
-            	include/qarchivediskcompressor.hpp
-            	include/qarchivediskextractor.hpp
-            	include/qarchive_enums.hpp
-            	include/qarchivediskcompressor_p.hpp
-            	include/qarchivediskextractor_p.hpp
-            	include/qarchiveutils_p.hpp
-            	include/qarchiveioreader_p.hpp
-            	include/qarchive_global.hpp
-                )
-
-            qt5_wrap_cpp(SOURCES ${SOURCES})
-
-            add_library(QArchive ${SOURCES})
-            '''
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -110,6 +35,9 @@ class qarchiveConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.19.6")
 
     def requirements(self):
         self.requires("libarchive/3.4.0")
@@ -121,7 +49,8 @@ class qarchiveConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

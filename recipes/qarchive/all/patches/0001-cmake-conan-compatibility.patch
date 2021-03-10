@@ -1,0 +1,72 @@
+--- CMakeLists.txt	2021-03-08 15:56:55.000000000 -0300
++++ CMakeLists_fix.txt	2021-03-09 22:08:29.715545030 -0300
+@@ -11,13 +11,11 @@
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ set(CMAKE_AUTOMOC ON)
+ 
+-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+ option(QARCHIVE_STATIC "Static Build of QArchive" ON)
+ 
+ # Find the QtCore library and libarchive.
+-find_package(LibArchive)
+-find_package(Qt5Core)
++find_package(LibArchive REQUIRED)
++find_package(qt REQUIRED COMPONENTS Core)
+ 
+ # cmake macros used
+ include(GNUInstallDirs)
+@@ -45,23 +43,27 @@
+ 	add_subdirectory(examples/disk_extractor_with_QIODevice)
+ endif()
+ 
+-add_library(QArchive
+-	    src/qarchivediskcompressor.cc
+-	    src/qarchivediskextractor.cc
+-	    src/qarchive_enums.cc
+-	    src/qarchivediskcompressor_p.cc
+-	    src/qarchivediskextractor_p.cc
+-	    src/qarchiveutils_p.cc
+-	    src/qarchiveioreader_p.cc
+-	    include/qarchivediskcompressor.hpp
+-	    include/qarchivediskextractor.hpp
+-	    include/qarchive_enums.hpp
+-	    include/qarchivediskcompressor_p.hpp
+-	    include/qarchivediskextractor_p.hpp
+-	    include/qarchiveutils_p.hpp
+-	    include/qarchiveioreader_p.hpp
+-	    include/qarchive_global.hpp
+-	    )
++set(SOURCES
++	src/qarchivediskcompressor.cc
++	src/qarchivediskextractor.cc
++	src/qarchive_enums.cc
++	src/qarchivediskcompressor_p.cc
++	src/qarchivediskextractor_p.cc
++	src/qarchiveutils_p.cc
++	src/qarchiveioreader_p.cc
++	include/qarchivediskcompressor.hpp
++	include/qarchivediskextractor.hpp
++	include/qarchive_enums.hpp
++	include/qarchivediskcompressor_p.hpp
++	include/qarchivediskextractor_p.hpp
++	include/qarchiveutils_p.hpp
++	include/qarchiveioreader_p.hpp
++	include/qarchive_global.hpp
++    )
++
++qt5_wrap_cpp(SOURCES ${SOURCES})
++
++add_library(QArchive ${SOURCES})
+ 
+ SET(toinstall)
+ list(APPEND toinstall
+@@ -73,7 +75,7 @@
+     ${PROJECT_BINARY_DIR}/config.h
+ )	
+ 
+-target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
++target_link_libraries(QArchive PUBLIC qt::qt LibArchive::LibArchive)
+ target_include_directories(QArchive INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include>")
+ target_include_directories(QArchive INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/QArchive>" )
+ 
