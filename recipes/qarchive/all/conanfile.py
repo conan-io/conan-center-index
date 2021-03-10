@@ -107,6 +107,10 @@ class qarchiveConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("libarchive/3.4.0")
         self.requires("qt/5.15.2")
