@@ -47,6 +47,10 @@ class TkConan(ConanFile):
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/20200517")
 
+    def validate(self):
+        if self.options["tcl"].shared != self.options.shared:
+            raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("tk{}".format(self.version), self._source_subfolder)
@@ -185,8 +189,6 @@ class TkConan(ConanFile):
     def build(self):
         self._patch_sources()
 
-        if self.options["tcl"].shared != self.options.shared:
-            raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
         if self.settings.compiler == "Visual Studio":
             self._build_nmake()
         else:
