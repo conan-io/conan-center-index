@@ -1,3 +1,4 @@
+https://github.com/zeromq/zmqpp/commit/05ad2f3255e5d74febbd1e17663bbfc2ded46c18
 diff -u a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
