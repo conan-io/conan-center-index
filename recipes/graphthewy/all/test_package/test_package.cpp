@@ -1,8 +1,6 @@
 #include <graphthewy/GraphthewyModel.hpp>
 #include <graphthewy/GraphthewyCycle.hpp>
 
-#define GRAPH_CYCLE(gc_name, graph_name) graphthewy::GraphCycle<graphthewy::UndirectedGraph, GRAPH_TEMPTYPE> gc_name(graph_name);
-
 int main(int argc, char** arvg)
 {
     graphthewy::UndirectedGraph<int>(g);
