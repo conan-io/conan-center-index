@@ -1,0 +1,17 @@
+[settings]
+os_build=Linux
+arch_build=x86_64
+os=Linux
+arch=hi3536
+compiler=gcc
+compiler.version=4.8
+compiler.libcxx=libstdc++
+build_type=Release
+
+[build_requires]
+toolchain-hi3536/0.1@trassir/sdkARM
+
+[env]
+  CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon-vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"
+CXXFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon-vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"
+ LDFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon-vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"

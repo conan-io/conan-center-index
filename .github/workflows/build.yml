@@ -37,23 +37,19 @@ jobs:
             os: 'ubuntu-latest'
             docker_image: 'trassiross/conan-gcc8'
             conan_txt: 'trassir/lnvr-gcc8/conanfile.txt'
-            conan_profile: 'trassir/lnvr-gcc8/conanprofile'
-            build_type: 'Release'
+            conan_profile: 'trassir/lnvr-gcc8/conanprofile.release'
           - build: 'windows-2019-release'
             os: 'windows-2019'
             conan_txt: 'trassir/win32-vc16/conanfile.txt'
             conan_profile: 'trassir/win32-vc16/conanprofile.release'
-            build_type: 'Release'
           - build: 'windows-2019-debug'
             os: 'windows-2019'
             conan_txt: 'trassir/win32-vc16/conanfile.txt'
             conan_profile: 'trassir/win32-vc16/conanprofile.debug'
-            build_type: 'Debug'
           - build: 'macos-release'
             os: 'macos-10.15'
             conan_txt: 'trassir/mac-clang11/conanfile.txt'
             conan_profile: 'trassir/mac-clang11/conanprofile.release'
-            build_type: 'Release'
             deployment-target: '10.14'
             xcode_version: '11.4'
     runs-on: ${{ matrix.os }}
@@ -77,7 +73,6 @@ jobs:
           PYTHONUNBUFFERED: "true"
           CONAN_TXT: ${{ matrix.conan_txt }}
           CONAN_PROFILE: ${{ matrix.conan_profile }}
-          CONAN_BUILD_TYPE: ${{ matrix.build_type }}
           CONAN_DOCKER_IMAGE: ${{ matrix.docker_image }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer

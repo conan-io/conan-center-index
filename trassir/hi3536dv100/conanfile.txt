@@ -1,0 +1,9 @@
+[generators]
+cmake
+virtualenv
+
+[requires]
+zlib/1.2.8@trassir/sdkARM
+
+[options]
+zlib:shared=True

@@ -3,3 +3,4 @@ compiler=gcc
 compiler.version=4.8
 arch=x86_64
 os=Linux
+build_type=Debug

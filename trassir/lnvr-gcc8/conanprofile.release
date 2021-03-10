@@ -1,0 +1,9 @@
+[settings]
+arch=x86_64
+arch_build=x86_64
+compiler=gcc
+compiler.version=8
+compiler.libcxx=libstdc++
+os=Linux
+os_build=Linux
+build_type=Release

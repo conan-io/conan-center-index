@@ -1,12 +1,12 @@
 [settings]
 compiler=Visual Studio
-compiler.version=16
-compiler.runtime=MD
+compiler.version=12
+compiler.runtime=MDd
 arch=x86
 arch_build=x86
 os=Windows
 os_build=Windows
-build_type=Release
+build_type=Debug
 
 [env]
 CC=cl

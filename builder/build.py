@@ -7,6 +7,21 @@ from environment import prepare_environment
 from conan_tools import ConanfileTxt, list_installed_packages, conan_run
 
 
+def remove_artifctory_deps_from_txt(filename):
+    def wanted_line(line):
+        if 'trassir/stable' in line.decode('utf-8'):
+            return False
+        return True
+    conanfile_contents = []
+    with open(filename, 'rb') as txt:
+        conanfile_contents = txt.read().splitlines()
+    conanfile_contents = list(filter(wanted_line, conanfile_contents))
+    with open(filename, 'wb') as txt:
+        for line in conanfile_contents:
+            txt.write(line)
+            txt.write('\n'.encode('utf-8'))
+
+
 def print_section(message):
     print('=' * 80)
     print('   ' + message)
@@ -108,17 +123,19 @@ if __name__ == '__main__':
     for _, package in conanfile_txt_head.packages.items():
         package.export()
 
-    print_section('Building packages from {txt} for {profile} - {build_type}'
+    print_section('Building packages from {txt} for {profile}'
                   .format(
                       txt=environ['CONAN_TXT'],
-                      profile=environ['CONAN_PROFILE'],
-                      build_type=environ['CONAN_BUILD_TYPE']
+                      profile=environ['CONAN_PROFILE']
                   ))
+
+    # TODO: remove this once bintray and artifactory are merged
+    remove_artifctory_deps_from_txt(path.join('sources', environ['CONAN_TXT']))
+
     conan_run(['install',
                path.join('sources', environ['CONAN_TXT']),
                '-if', 'install_dir',
                '-pr', path.join('sources', environ['CONAN_PROFILE']),
-               '-s', 'build_type={bt}'.format(bt=environ['CONAN_BUILD_TYPE']),
                '--build', 'missing'])
 
     print_section('Enumerating installed packages')

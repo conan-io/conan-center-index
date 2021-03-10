@@ -1,0 +1,17 @@
+[settings]
+os_build=Linux
+arch_build=x86_64
+os=Linux
+arch=hi3536dv100
+compiler=gcc
+compiler.version=6
+compiler.libcxx=libstdc++11
+build_type=Debug
+
+[build_requires]
+toolchain-hi3536dv100/0.1@trassir/sdkARM
+
+[env]
+  CFLAGS="-mcpu=cortex-a7 -mfloat-abi=softfp -mfpu=vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"
+CXXFLAGS="-mcpu=cortex-a7 -mfloat-abi=softfp -mfpu=vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"
+ LDFLAGS="-mcpu=cortex-a7 -mfloat-abi=softfp -mfpu=vfpv4 -mno-unaligned-access -fno-aggressive-loop-optimizations"

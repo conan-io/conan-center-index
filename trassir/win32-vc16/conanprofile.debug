@@ -6,6 +6,7 @@ arch=x86
 arch_build=x86
 os=Windows
 os_build=Windows
+build_type=Debug
 
 [env]
 CC=cl

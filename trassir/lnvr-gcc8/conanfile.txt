@@ -47,7 +47,7 @@ libalsa/1.1.9
 libdrm/2.4.100
 libelf/0.8.13
 libiconv/1.15
-libjpeg/9d
+libjpeg/9d.dssl1
 libjpeg-turbo/2.0.4
 libpciaccess/0.16 # GHA: noexport
 libpthread-stubs/0.1 # GHA: noexport

@@ -1,6 +1,6 @@
 [settings]
 compiler=Visual Studio
-compiler.version=16
+compiler.version=12
 compiler.runtime=MD
 arch=x86
 arch_build=x86

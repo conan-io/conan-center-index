@@ -36,7 +36,7 @@ class LibjpegConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("jpeg-" + self.version, self._source_subfolder)
+        os.rename(("jpeg-" + self.version).split(".dssl")[0], self._source_subfolder)
 
     def _build_nmake(self):
         shutil.copy("Win32.Mak", os.path.join(self._source_subfolder, "Win32.Mak"))
@@ -114,6 +114,11 @@ class LibjpegConan(ConanFile):
 
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
+
+            if self.settings.os == "Macos" and self.options.shared:
+                self.run("install_name_tool -id libjpeg.9.dylib {}".format(
+                    os.path.join(self.package_folder, "lib", "libjpeg.9.dylib")
+                    ))
 
             bindir = os.path.join(self.package_folder, "bin")
             for file in os.listdir(bindir):

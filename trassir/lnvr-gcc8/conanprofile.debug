@@ -6,3 +6,4 @@ compiler.version=8
 compiler.libcxx=libstdc++
 os=Linux
 os_build=Linux
+build_type=Debug
