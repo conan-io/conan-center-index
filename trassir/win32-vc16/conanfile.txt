@@ -3,6 +3,7 @@ cmake
 virtualrunenv
 
 [requires]
+boost/1.69.0
 c-ares/1.15.0
 bzip2/1.0.8
 ffmpeg/3.3.1
