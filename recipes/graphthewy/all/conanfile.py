@@ -49,7 +49,7 @@ class GraphthewyConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst=os.path.join("include", "graphthewy"), src=self._source_subfolder)
+        self.copy("*.hpp", dst=os.path.join("include", "graphthewy"), src=self._source_subfolder, keep_path=False)
 
     def package_id(self):
         self.info.header_only()
