@@ -329,3 +329,5 @@ class OpenCascadeConan(ConanFile):
                     self.cpp_info.components[conan_component_target_name].requires.extend(["freetype::freetype", "opengl::opengl"])
                 elif component == "Draw":
                     self.cpp_info.components[conan_component_target_name].requires.extend(["tcl::tcl", "tk::tk"])
+                if tools.os_info.is_posix and target_lib == "TKernel":
+                    self.cpp_info.components[conan_component_target_name].system_libs.append("pthread")
