@@ -70,7 +70,7 @@ class ImaglConan(ConanFile):
                     std::cout << _LIBCPP_VERSION << '\\n';
                 }
             """
-            subprocess.run(['clang++', '-stdlib=libc++', '-x', 'c++', '-dM', '-o', tmp_file, '-'], input=src_test, text=True).check_returncode()
+            subprocess.run([os.environ['CXX'], '-stdlib=libc++', '-x', 'c++', '-dM', '-o', tmp_file, '-'], input=src_test, text=True).check_returncode()
             libcxx_ver = int(int(subprocess.run([tmp_file], text=True, capture_output=True).stdout.strip()) / 1000)
             return libcxx_ver
         
