@@ -70,10 +70,14 @@ class ImaglConan(ConanFile):
                     std::cout << _LIBCPP_VERSION << '\\n';
                 }
             """
-            subprocess.run(['/usr/bin/clang++', '-stdlib=libc++', '-x', 'c++', '-dM', '-o', tmp_file, '-'], input=src_test, text=True).check_returncode()
+            subprocess.run([os.environ['CXX'], '-stdlib=libc++', '-x', 'c++', '-dM', '-o', tmp_file, '-'], input=src_test, text=True).check_returncode()
             libcxx_ver = int(int(subprocess.run([tmp_file], text=True, capture_output=True).stdout.strip()) / 1000)
             return libcxx_ver
         
+        #Special check for clang that can only be linked to libc++
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
+
         compiler_version = str(self.settings.compiler.version)
         if str(self.settings.compiler) == "Visual Studio" and str(self.settings.compiler.version).find(".") == -1 and int(str(self.settings.compiler.version)) >= 16:
             try:
@@ -91,9 +95,6 @@ class ImaglConan(ConanFile):
             raise ConanInvalidConfiguration("imagl requires libc++ minimum version {}. Your libc++ is version {}".format(minimum_version, get_libcxx_majorver()))
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
-        #Special check for clang that can only be linked to libc++
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
-            raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
 
     def config_options(self):
         if self.settings.os == "Windows":
