@@ -16,14 +16,17 @@ jobs:
                 pullRequests(first:100, states: OPEN) {
                   nodes {
                     id
+                    headRefOid
                     mergeCommit {
                       changedFiles
                       commitUrl
+                      oid 
                     }
                     mergeable
                     potentialMergeCommit {
                       changedFiles
                       commitUrl
+                      oid 
                     }
                   }
                   pageInfo  {
@@ -36,6 +39,8 @@ jobs:
               owner: context.repo.owner,
               name: context.repo.repo
             }
+            await github.graphql(query, variables)
+            await setTimeout(() => {}, 15000)
             const result = await github.graphql(query, variables)
             console.log(result)
             console.log(result.repository.pullRequests.nodes)
