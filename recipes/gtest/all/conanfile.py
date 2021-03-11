@@ -31,12 +31,19 @@ class GTestConan(ConanFile):
             return {
                 "Visual Studio": "14"
             }
+        elif self.version == "1.10.0":
+            return {
+                "Visual Studio": "14",
+                "gcc": "4.8.1",
+                "clang": "3.3",
+                "apple-clang": "5.0"
+            }
         else:
             return {
                 "Visual Studio": "14",
                 "gcc": "5",
                 "clang": "5",
-                "apple-clang": "9.1",
+                "apple-clang": "9.1"
             }
         
     @property
@@ -54,13 +61,20 @@ class GTestConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
+
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warn("{} recipe lacks information about {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires c++11 support. The current compiler {} {} does not support it.".format(
-                    self.name, self.settings.compiler, self.settings.compiler.version))
+            if lazy_lt_semver(str(self.settings.compiler.version), min_version):
+                raise ConanInvalidConfiguration("{0} requires {1} {2}. The current compiler is {1} {3}.".format(
+                    self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

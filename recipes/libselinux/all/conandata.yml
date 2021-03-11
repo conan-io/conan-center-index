@@ -14,3 +14,19 @@ sources:
       sha256: "ea5dcbb4d859e3f999c26a13c630da2f16dff9462e3cc8cb7b458ac157d112e7"
     - url: "https://github.com/SELinuxProject/selinux/releases/download/20200710/libsepol-3.1.tar.gz"
       sha256: "ae6778d01443fdd38cd30eeee846494e19f4d407b09872580372f4aa4bf8a3cc"
+  "3.2":
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.2/libselinux-3.2.tar.gz"
+      sha256: "df758ef1d9d4811051dd901ea6b029ae334ffd7c671c128beb16bce1e25ac161"
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.2/libsepol-3.2.tar.gz"
+      sha256: "dfc7f662af8000116e56a01de6a0394ed79be1b34b999e551346233c5dd19508"
+patches:
+  "2.9":
+    - patch_file: patches/0001-fix-fno-common-2.9.patch
+      base_path: libsepol-2.9
+    - patch_file: patches/0002-remove-cil_mem_error_handler.patch
+      base_path: libsepol-2.9
+  "3.0":
+    - patch_file: patches/0001-fix-fno-common-3.0.patch
+      base_path: libsepol-3.0
+    - patch_file: patches/0002-remove-cil_mem_error_handler.patch
+      base_path: libsepol-3.0

@@ -18,9 +18,14 @@ class BenchmarkConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_lto": [True, False],
-        "enable_exceptions": [True, False]
+        "enable_exceptions": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "enable_lto": False, "enable_exceptions": True}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_lto": False,
+        "enable_exceptions": True,
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -52,14 +57,11 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
 
-        # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
         if self.settings.os != "Windows":
             if tools.cross_building(self.settings):
                 self._cmake.definitions["HAVE_STD_REGEX"] = False
                 self._cmake.definitions["HAVE_POSIX_REGEX"] = False
                 self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
-            else:
-                self._cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
             self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
         else:
             self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"

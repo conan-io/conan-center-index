@@ -13,49 +13,36 @@ endif()
 option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+
+set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set(MVK_INSTALL_TARGETS "")
 
 # PIC required for objects targets linked into shared MoltenVK
 if(BUILD_SHARED_LIBS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-# Required Apple Frameworks
-find_library(METAL_FRAMEWORK Metal)
-if(NOT METAL_FRAMEWORK)
-    message(FATAL_ERROR "Metal framework not found")
-endif()
-find_library(FOUNDATION_FRAMEWORK Foundation)
-if(NOT FOUNDATION_FRAMEWORK)
-    message(FATAL_ERROR "Foundation framework not found")
-endif()
-find_library(QUARTZ_CORE_FRAMEWORK QuartzCore)
-if(NOT QUARTZ_CORE_FRAMEWORK)
-    message(FATAL_ERROR "QuartzCore framework not found")
-endif()
-find_library(APPKIT_FRAMEWORK AppKit)
-if(NOT APPKIT_FRAMEWORK)
-    message(FATAL_ERROR "AppKit framework not found")
-endif()
-find_library(IOSURFACE_FRAMEWORK IOSurface)
-if(NOT IOSURFACE_FRAMEWORK)
-    message(FATAL_ERROR "IOSurface framework not found")
-endif()
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_library(IO_OR_UI_KIT_FRAMEWORK IOKit)
-    if(NOT IO_OR_UI_KIT_FRAMEWORK)
-        message(FATAL_ERROR "IOKit framework not found")
+# Find mandatory Apple Frameworks
+function(find_library_required foundVar framework)
+    find_library(${foundVar} ${framework})
+    if(NOT ${foundVar})
+        message(FATAL_ERROR "${framework} framework not found")
     endif()
-else()
-    find_library(IO_OR_UI_KIT_FRAMEWORK UIKit)
-    if(NOT IO_OR_UI_KIT_FRAMEWORK)
-        message(FATAL_ERROR "UIKit framework not found")
-    endif()
-endif()
+endfunction()
 
-set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-set(MVK_INSTALL_TARGETS "")
+find_library_required(METAL_FRAMEWORK Metal)
+find_library_required(FOUNDATION_FRAMEWORK Foundation)
+find_library_required(QUARTZ_CORE_FRAMEWORK QuartzCore)
+find_library_required(APPKIT_FRAMEWORK AppKit)
+find_library_required(IOSURFACE_FRAMEWORK IOSurface)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    find_library_required(IO_OR_UI_KIT_FRAMEWORK IOKit)
+else()
+    find_library_required(IO_OR_UI_KIT_FRAMEWORK UIKit)
+endif()
 
 # MoltenVKCommon
 # * direct dependencies:
@@ -195,34 +182,31 @@ list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 #  - if moltenvk >= 1.44: moltenvk commit hash in mvkRevString variable (but we still
 #    use spirv-cross commit hash, since MoltenVK hash is not available in this context,
 #    and hash value is no really important)
-set(MVK_REVISION_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
-set(MVK_REVISION_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/mvk_hash_generated)
+set(MVK_REV_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
+set(MVK_REV_HEADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/mvk_hash_generated)
 if(MVK_VERSION VERSION_LESS "1.0.44")
-    set(MVK_REVISION_HEADER ${MVK_REVISION_HEADER_DIR}/SPIRV-Cross/mvkSpirvCrossRevisionDerived.h)
+    set(MVK_REV_HEADER ${MVK_REV_HEADER_DIR}/SPIRV-Cross/mvkSpirvCrossRevisionDerived.h)
     set(MVK_REV_VAR_NAME "spirvCrossRevisionString")
 else()
-    set(MVK_REVISION_HEADER ${MVK_REVISION_HEADER_DIR}/mvkGitRevDerived.h)
+    set(MVK_REV_HEADER ${MVK_REV_HEADER_DIR}/mvkGitRevDerived.h)
     set(MVK_REV_VAR_NAME "mvkRevString")
 endif()
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.in
-    "file(READ @MVK_REVISION_FILE@ MVK_SPIRV_CROSS_GIT_REV)\n"
+set(MVK_REV_DEFINES -DMVK_REV_FILE=${MVK_REV_FILE} -DMVK_REV_HEADER=${MVK_REV_HEADER} -DMVK_REV_VAR_NAME=${MVK_REV_VAR_NAME})
+set(MVK_REV_GEN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.cmake")
+file(WRITE ${MVK_REV_GEN_SCRIPT}
+    "file(READ \${MVK_REV_FILE} MVK_SPIRV_CROSS_GIT_REV)\n"
     "string(REPLACE \"\\n\" \"\" MVK_SPIRV_CROSS_GIT_REV \${MVK_SPIRV_CROSS_GIT_REV})\n"
-    "file(WRITE @MVK_REVISION_HEADER@ \"static const char* @MVK_REV_VAR_NAME@ = \\\"\${MVK_SPIRV_CROSS_GIT_REV}\\\";\")\n"
+    "file(WRITE \${MVK_REV_HEADER} \"static const char* \${MVK_REV_VAR_NAME} = \\\"\${MVK_SPIRV_CROSS_GIT_REV}\\\";\")\n"
 )
-configure_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.in
-    ${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.cmake
-    @ONLY
-)
-add_custom_target(mvk-commit-hash-header DEPENDS ${MVK_REVISION_FILE} ${MVK_REVISION_HEADER})
+add_custom_target(mvk-commit-hash-header DEPENDS ${MVK_REV_HEADER})
 add_custom_command(
-  COMMENT "Create ${MVK_REVISION_HEADER}"
-  OUTPUT ${MVK_REVISION_HEADER}
-  DEPENDS ${MVK_REVISION_FILE}
-  COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/mvk_git_hash_generator.cmake"
+    COMMENT "Create ${MVK_REV_HEADER}"
+    OUTPUT ${MVK_REV_HEADER}
+    DEPENDS ${MVK_REV_FILE}
+    COMMAND ${CMAKE_COMMAND} ${MVK_REV_DEFINES} -P ${MVK_REV_GEN_SCRIPT}
 )
 add_dependencies(MoltenVK mvk-commit-hash-header)
-target_include_directories(MoltenVK PRIVATE ${MVK_REVISION_HEADER_DIR})
+target_include_directories(MoltenVK PRIVATE ${MVK_REV_HEADER_DIR})
 
 # Installation
 install(

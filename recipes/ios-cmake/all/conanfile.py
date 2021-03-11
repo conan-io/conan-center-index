@@ -16,10 +16,11 @@ class IosCMakeConan(ConanFile):
         "enable_visibility": [True, False],
         "enable_strict_try_compile": [True, False],
         "toolchain_target": ["auto", "OS", "OS64", "OS64COMBINED",
-                       "SIMULATOR", "SIMULATOR64",
+                       "SIMULATOR", "SIMULATOR64", "SIMULATORARM64",
                        "TVOS", "TVOSCOMBINED",
                        "SIMULATOR_TVOS", "WATCHOS",
-                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS"]
+                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS",
+                       "MAC", "MAC_ARM64", "MAC_CATALYST", "MAC_CATALYST_ARM64"]
     }
     default_options = {
         "enable_bitcode": True,
@@ -144,5 +145,5 @@ class IosCMakeConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-        # TODO , since we have 2 profles I am not sure that this is still required
+        # TODO , since we have 2 profiles I am not sure that this is still required
         # since this will always be / has to be  a build profile

@@ -10,7 +10,7 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = ["cmake", "cmake_find_package"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "api_prefix": "ANY"}
     default_options = {'shared': False, 'fPIC': True, "api_prefix": None}
