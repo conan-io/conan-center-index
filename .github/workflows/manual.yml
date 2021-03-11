@@ -48,7 +48,7 @@ jobs:
             
             console.log('----')
             
-            const head = github.repos.getCommit({
+            const head = await github.repos.getCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: result.repository.pullRequests.nodes[0].headRefOid,
@@ -57,7 +57,7 @@ jobs:
             
             console.log('----')
                         
-            const mergeCommit = github.repos.getCommit({
+            const mergeCommit = await github.repos.getCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: result.repository.pullRequests.nodes[0].potentialMergeCommit.oid,
