@@ -1,0 +1,12 @@
+name: Potential Conflicts
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - run: git log -m -l --name-only --pretty="format:" ${{ github.sha }}
