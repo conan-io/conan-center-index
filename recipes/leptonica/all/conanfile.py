@@ -35,7 +35,7 @@ class LeptonicaConan(ConanFile):
         "with_webp": True
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
@@ -83,22 +83,16 @@ class LeptonicaConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
-        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
-        # upstream uses obsolete FOO_LIBRARY that is not generated
-        # by cmake_find_package generator (upstream PR 456)
-        if tools.Version(self.version) <= "1.78.0":
-            for dep in ("GIF", "TIFF", "PNG", "JPEG", "ZLIB"):
-                tools.replace_in_file(cmakelists_src,
-                                      dep + "_LIBRARY",
-                                      dep + "_LIBRARIES")
+        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
+        cmake_configure = os.path.join(self._source_subfolder, "cmake", "Configure.cmake")
 
         # Fix installation
         tools.replace_in_file(cmakelists_src, "${CMAKE_BINARY_DIR}", "${PROJECT_BINARY_DIR}")
 
         # Honor options
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        cmake_configure = os.path.join(self._source_subfolder, "cmake", "Configure.cmake")
         if not self.options.with_zlib:
             tools.replace_in_file(cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (ZLIB_FOUND)", "if(0)")
