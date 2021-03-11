@@ -38,6 +38,7 @@ zlib/1.2.11
 
 
 # version lock for indirect dependencies
+b2/4.2.0
 expat/2.2.9
 fontconfig/2.13.91
 freetype/2.10.1
