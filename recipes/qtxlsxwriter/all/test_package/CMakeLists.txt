@@ -6,6 +6,10 @@ conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} example.cpp)
 
+# workaround to deal with the error:
+# "Qt requires a C++11 compiler and yours does not seem to be that."
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${CONAN_INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${CONAN_LIB_DIRS})
 
