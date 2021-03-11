@@ -145,5 +145,5 @@ class IosCMakeConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-        # TODO , since we have 2 profles I am not sure that this is still required
+        # TODO , since we have 2 profiles I am not sure that this is still required
         # since this will always be / has to be  a build profile
