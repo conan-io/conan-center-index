@@ -88,6 +88,13 @@ class OpenCascadeConan(ConanFile):
                          "src", "Font", "Font_FontMgr.cxx"),
             "#pragma comment (lib, \"freetype.lib\")",
             "")
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder,
+                        "src", "Draw", "Draw.cxx"),
+            """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
+#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
+            ""
+        )
 
         tcl_libs = self.deps_cpp_info["tcl"].libs
         tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
