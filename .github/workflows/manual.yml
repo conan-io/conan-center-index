@@ -65,7 +65,7 @@ jobs:
             });
             console.log(mergeCommit.data)
             
-            head.forEach((diff, index) => {
+            head.data.forEach((diff, index) => {
               console.log(diff.sha, " == ", mergeCommit.data.files[index].sha)
             })
             
