@@ -16,10 +16,15 @@ jobs:
                 pullRequests(first:100, states: OPEN) {
                   nodes {
                     id
-                    mergeCommit
+                    mergeCommit {
+                      changedFiles
+                      commitUrl
+                    }
                     mergeable
-                    mergeStateStatus
-                    potentialMergeCommit
+                    potentialMergeCommit {
+                      changedFiles
+                      commitUrl
+                    }
                   }
                   pageInfo  {
                     hasNextPage
