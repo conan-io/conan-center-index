@@ -1,0 +1,18 @@
+name: Auto Label Conflicts
+on:
+  push:
+    branches: [master]
+  pull_request_target:
+    branches: [master]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: prince-chrismc/label-merge-conflicts-action@v1
+        with:
+          conflict_label_name: "has conflicts"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          max_retries: 5
+          wait_ms: 10000
+          detect_merge_changes: true
