@@ -53,7 +53,7 @@ jobs:
               repo: context.repo.repo,
               ref: result.repository.pullRequests.nodes[0].headRefOid,
             });
-            console.log(head)
+            console.log(head.data)
             
             console.log('----')
                         
@@ -62,9 +62,9 @@ jobs:
               repo: context.repo.repo,
               ref: result.repository.pullRequests.nodes[0].potentialMergeCommit.oid,
             });
-            console.log(mergeCommit)
+            console.log(mergeCommit.data)
             
-            head.files.forEach((diff, index) => {
-              console.log(diff.sha, " == ", mergeCommit.files[index].sha)
+            head.data.files.forEach((diff, index) => {
+              console.log(diff.sha, " == ", mergeCommit.data.files[index].sha)
             })
             
