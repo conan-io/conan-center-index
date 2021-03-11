@@ -526,6 +526,7 @@ Examples = res/datadir/examples""")
                 self.info.settings.compiler.runtime = "MT/MTd"
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
 
         libsuffix = ""
