@@ -13,9 +13,16 @@ jobs:
           script: |
             const query = `query($owner:String!, $name:String!) {
               repository(owner:$owner, name:$name){
-                pullRequests(first:100) {
+                pullRequests(first:100, states: OPEN) {
                   nodes {
                     id
+                    mergeCommit
+                    mergeable
+                    mergeStateStatus
+                    potentialMergeCommit
+                  }
+                  pageInfo  {
+                    hasNextPage
                   }
                 }
               }
