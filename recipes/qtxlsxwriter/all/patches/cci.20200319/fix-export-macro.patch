@@ -1,0 +1,13 @@
+diff --git src/xlsx/xlsxglobal.h b/src/xlsx/xlsxglobal.h
+index 24d6b60..08ddd51 100644
+--- a/src/xlsx/xlsxglobal.h
++++ b/src/xlsx/xlsxglobal.h
+@@ -30,7 +30,7 @@
+ #define QT_END_NAMESPACE_XLSX }
+ #define QTXLSX_USE_NAMESPACE using namespace QXlsx;
+ 
+-#if !defined(QT_STATIC) && !defined(XLSX_NO_LIB)
++#if !defined(QTXLSX_STATIC)
+ #if defined(QT_BUILD_XLSX_LIB)
+ #define Q_XLSX_EXPORT Q_DECL_EXPORT
+ #else

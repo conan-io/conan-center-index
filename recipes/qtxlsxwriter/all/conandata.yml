@@ -1,0 +1,8 @@
+sources:
+  "cci.20200319":
+    url: "https://github.com/dbzhang800/QtXlsxWriter/archive/40610a55cb6eaf07b988d4b7af0b65e37571f83c.zip"
+    sha256: "22858c5cff026885de64d8a68eb9e24bb0ef94d969a8f2612c7f099265b2a2e2"
+patches:
+  "cci.20200319":
+    - base_path: "source_subfolder"
+      patch_file: "patches/cci.20200319/fix-export-macro.patch"
