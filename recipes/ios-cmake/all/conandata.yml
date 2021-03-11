@@ -8,3 +8,6 @@ sources:
   "4.1.1":
     url: "https://github.com/leetal/ios-cmake/archive/4.1.1.zip"
     sha256: "4011d4b363f5905041c424d11b185e99eb516c9d1c5f6d193b1d9a4b6907500e"
+  "4.2.0":
+    url: "https://github.com/leetal/ios-cmake/archive/4.2.0.zip"
+    sha256: "abcae0619751dd46d825f0f341d9a5c1a13bbe8fa84f9a62f09652087f64f87f"
