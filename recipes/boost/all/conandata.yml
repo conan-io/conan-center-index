@@ -33,6 +33,8 @@ patches:
       base_path: "boost_1_69_0"
     - patch_file: "patches/support_msvc_2019.patch"
       base_path: "boost_1_69_0"
+    - patch_file: "patches/DSSL_JIRA_GRAB3032.patch"
+      base_path: "boost_1_69_0"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "boost_1_70_0"
@@ -46,6 +48,8 @@ patches:
       base_path: "boost_1_70_0"
     - patch_file: "patches/solaris_pthread_data.patch"
       base_path: "boost_1_70_0"
+    - patch_file: "patches/DSSL_JIRA_GRAB3032.patch"
+      base_path: "boost_1_70_0"
   1.71.0:
     - patch_file: "patches/bcp_namespace_issues_1_71.patch"
       base_path: "boost_1_71_0"
@@ -56,6 +60,8 @@ patches:
     - patch_file: "patches/python_base_prefix.patch"
       base_path: "boost_1_71_0"
     - patch_file: "patches/solaris_pthread_data.patch"
+      base_path: "boost_1_71_0"
+    - patch_file: "patches/DSSL_JIRA_GRAB3032.patch"
       base_path: "boost_1_71_0"
   1.72.0:
     - patch_file: "patches/bcp_namespace_issues_1_72.patch"
@@ -69,4 +75,6 @@ patches:
     - patch_file: "patches/solaris_pthread_data.patch"
       base_path: "boost_1_72_0"
     - patch_file: "patches/0001-revert-cease-dependence-on-range.patch"
+      base_path: "boost_1_72_0"
+    - patch_file: "patches/DSSL_JIRA_GRAB3032.patch"
       base_path: "boost_1_72_0"

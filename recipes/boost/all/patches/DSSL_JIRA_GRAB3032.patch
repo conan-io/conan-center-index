@@ -1,0 +1,13 @@
+DSSL JIRA GRAB-3032: use default serial port's baudrate 115200 if the device did not provide it
+diff -Naur a/boost/asio/detail/impl/win_iocp_serial_port_service.ipp b/boost/asio/detail/impl/win_iocp_serial_port_service.ipp
+--- a/boost/asio/detail/impl/win_iocp_serial_port_service.ipp	2018-12-05 22:58:15 +0300
++++ b/boost/asio/detail/impl/win_iocp_serial_port_service.ipp	2021-03-10 14:45:01 +0300
+@@ -85,6 +85,8 @@
+   dcb.fDsrSensitivity = FALSE;
+   dcb.fNull = FALSE; // Do not ignore NULL characters.
+   dcb.fAbortOnError = FALSE; // Ignore serial framing errors.
++  if (dcb.BaudRate == 0)
++    dcb.BaudRate = 115200;
+   if (!::SetCommState(handle, &dcb))
+   {
+     DWORD last_error = ::GetLastError();
