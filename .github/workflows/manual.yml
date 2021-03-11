@@ -11,9 +11,9 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const query = `query($owner:String!, $name:String!, $label:String!) {
+            const query = `query($owner:String!, $name:String!) {
               repository(owner:$owner, name:$name){
-                issues(first:100) {
+                pullRequests(first:100) {
                   nodes {
                     id
                   }
@@ -22,8 +22,7 @@ jobs:
             }`;
             const variables = {
               owner: context.repo.owner,
-              name: context.repo.repo,
-              label: 'wontfix'
+              name: context.repo.repo
             }
             const result = await github.graphql(query, variables)
             console.log(result)
