@@ -45,3 +45,23 @@ jobs:
             const result = await github.graphql(query, variables)
             console.log(result)
             console.log(result.repository.pullRequests.nodes)
+            
+            console.log('----')
+            
+            const head = github.repos.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: result.repository.pullRequests.nodes[0].headRefOid,
+            });
+            console.log(head)
+            
+            console.log('----')
+                        
+            const mergeCommit = github.repos.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: result.repository.pullRequests.nodes[0].potentialMergeCommit.oid,
+            });
+            console.log(mergeCommit)
+            
+            
