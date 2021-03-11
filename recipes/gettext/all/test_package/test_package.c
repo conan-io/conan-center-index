@@ -1,26 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <locale.h>
-#include <libintl.h>
 
-int main(int argc, char * const argv[])
-{
-	if (argc < 2)
-		return -1;
-	if(!bindtextdomain("conan", argv[1]))
-	{
-		printf("Warning: Could not bind text domain\n");
-	}
-	if(!textdomain("conan"))
-	{
-		printf("Warning: Could not set text domain\n");
-	}
-	if(!setlocale(LC_ALL, ""))
-	{
-		printf("Warning: could not set locale\n");
-	}
-	const char * lang = getenv("LANG");
-	lang = lang ? lang : "";
-	printf("hello in %s: %s\n", lang, gettext("hello"));
-    return 0;
+#include <libintl.h>
+#include <locale.h>
+
+#define _(STRING) gettext(STRING)
+
+int main(int argc, char* argv[]) {
+    const char* result = NULL;
+    if (argc < 2) {
+        printf("You must pass locale folder.\n");
+        return EXIT_FAILURE;
+    }
+
+    result = setlocale(LC_MESSAGES,"");
+    printf("LOCALE: %s\n", result);
+    result = setlocale(LC_CTYPE,"");
+    printf("LOCALE: %s\n", result);
+
+    result = bindtextdomain("hello", argv[1]);
+    printf("BIND TEXT DOMAIN: %s\n", result);
+
+    result = textdomain("hello");
+    printf("TEXT DOMAIN: %s\n", result);
+
+    const char * lang = getenv("LANG");
+    printf("'Hello World' in '%s': '%s'.\n", lang, _("Hello World"));
+
+    return EXIT_SUCCESS;
 }
