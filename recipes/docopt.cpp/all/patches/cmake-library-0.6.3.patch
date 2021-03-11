@@ -35,12 +35,8 @@
  endif()
  
  if(USE_BOOST_REGEX)
-@@ -79,12 +72,9 @@ if(USE_BOOST_REGEX)
- 	# This is needed on Linux, where linking a static library into docopt.so
- 	# fails because boost static libs are not compiled with -fPIC
- 	set(Boost_USE_STATIC_LIBS OFF)
--    find_package(Boost 1.53 REQUIRED COMPONENTS regex)
-+    find_package(boost 1.53 REQUIRED COMPONENTS regex)
+@@ -82,9 +75,6 @@ if(USE_BOOST_REGEX)
+     find_package(Boost 1.53 REQUIRED COMPONENTS regex)
      include_directories(${Boost_INCLUDE_DIRS})
      target_link_libraries(docopt ${Boost_LIBRARIES})
 -	if(WITH_STATIC)
