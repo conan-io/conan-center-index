@@ -2,6 +2,7 @@ name: Potential Conflicts
 
 on:
   push:
+  workflow_dispatch: {}
 
 jobs:
   list-issues:
