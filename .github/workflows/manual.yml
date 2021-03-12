@@ -45,28 +45,37 @@ jobs:
             await github.graphql(query, variables)
             await setTimeout(() => {}, 15000)
             const result = await github.graphql(query, variables)
+            
+            core.startGroup('🔎 Gather Pull Request Data')
             console.log(result)
             console.log(result.repository.pullRequests.nodes)
+            core.endGroup()
             
-            console.log('----')
-            
-            const head = await github.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: result.repository.pullRequests.nodes[0].number,
-            });
-            console.log(head)
-            
-            console.log('----')
-                        
-            const mergeCommit = await github.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: result.repository.pullRequests.nodes[0].potentialMergeCommit.oid,
-            });
-            console.log(mergeCommit.data)
-            
-            head.data.forEach((diff, index) => {
-              console.log(diff.sha, " == ", mergeCommit.data.files[index].sha)
-            })
-            
+            for(const prNode of result.repository.pullRequests.nodes) {            
+              core.startGroup(`🔎 Inspecting PR #${prNode.number} for soft changes`)
+              const head = await github.pulls.listFiles({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNode.number,
+              });
+              console.log(head.data)
+              console.log('----')
+
+              const mergeCommit = await github.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: prNode.potentialMergeCommit.oid,
+              });
+              console.log(mergeCommit.data)
+
+              let hasSoftChanges = false;
+              head.data.forEach((diff, index) => {
+                console.log(diff.sha, " == ", mergeCommit.data.files[index].sha)
+                hasSoftChanges = hasSoftChanges || diff.sha === mergeCommit.data.files[index].sha
+              })
+              core.endGroup()
+              
+              if (hasSoftChanges) {
+                core.warning(`#${prNode.number} has soft changes`)
+              }
+            }
