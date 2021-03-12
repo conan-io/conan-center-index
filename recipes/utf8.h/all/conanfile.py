@@ -1,5 +1,5 @@
 import os
-import re
+import glob
 from conans import ConanFile, tools
 
 
@@ -18,9 +18,7 @@ class Utf8HConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]['url']
-        m = re.match(r'.*/([0-9a-f]+)\.tar.gz', url)
-        extracted_dir = self.name + "-" + m[1]
+        extracted_dir = glob.glob("utf8.h-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
