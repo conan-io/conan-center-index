@@ -15,22 +15,18 @@ class TinyAesCConan(ConanFile):
     topics = ("encryption", "crypto", "AES")
 
     settings = "os", "compiler", "build_type", "arch"
+
     _options_dict = {
         # enable AES128
         "AES128": [True, False],
-
         # enable AES192
         "AES192": [True, False],
-
         # enable AES256
         "AES256": [True, False],
-
         # enable AES encryption in CBC-mode of operation
         "CBC": [True, False],
-
         # enable the basic ECB 16-byte block algorithm
         "ECB": [True, False],
-
         # enable encryption in counter-mode
         "CTR": [True, False],
     }
