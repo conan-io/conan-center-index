@@ -10,6 +10,7 @@ class PortableFileDialogsConan(ConanFile):
     description = "Portable GUI dialogs library, C++11, single-header"
     topics = ("conan", "gui", "dialogs")
     no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
