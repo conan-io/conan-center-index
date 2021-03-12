@@ -11,6 +11,7 @@ class NativefiledialogConan(ConanFile):
     description = "A tiny, neat C library that portably invokes native file open and save dialogs."
     topics = ("conan", "dialog", "gui")
     settings = "os", "compiler", "build_type", "arch"
+    generators = "pkg_config",
     
     @property
     def _source_subfolder(self):
@@ -18,7 +19,7 @@ class NativefiledialogConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("gtk/system")
+            self.requires("gtk/3.24.24")
 
     def build_requirements(self):
         self.build_requires("premake/5.0.0-alpha15")
@@ -64,7 +65,8 @@ class NativefiledialogConan(ConanFile):
 
     def package(self):
         if self.settings.compiler == "Visual Studio":
-            self.copy("*nfd.lib", dst="lib", src=self._source_subfolder, keep_path=False)
+            self.copy("*nfd_d.lib" if self.settings.build_type == "Debug" else "*nfd.lib",
+                      dst="lib", src=self._source_subfolder, keep_path=False)
         else:
             self.copy("*nfd.a", dst="lib", src=self._source_subfolder, keep_path=False)
         self.copy("*nfd.h", dst="include", src=self._source_subfolder, keep_path=False)
