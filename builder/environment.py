@@ -65,7 +65,7 @@ def prepare_environment():
               .format(branch=environ['GITHUB_HEAD_REF']))
         upload_remote = 'github-staging'
     else:
-        upload_remote = 'github-public'
+        upload_remote = 'github-stable'
     print('Will upload to {remote}'.format(remote=upload_remote))
 
     return upload_remote
