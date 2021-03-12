@@ -32,6 +32,7 @@ opencv/2.4.13.5
 qt/5.14.1
 qtwebkit/5.212.0-alpha4
 #sip/4.19.3
+signalr-qt/0.1
 
 # global zlib dependency (override for openssl and curl)
 zlib/1.2.11
