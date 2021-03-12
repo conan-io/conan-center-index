@@ -89,6 +89,7 @@ class LeptonicaConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
         cmake_configure = os.path.join(self._source_subfolder, "cmake", "Configure.cmake")
 
@@ -112,9 +113,13 @@ class LeptonicaConan(ConanFile):
             tools.replace_in_file(cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (TIFF_FOUND)", "if(0)")
         if not self.options.with_openjpeg:
+            tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
             tools.replace_in_file(cmakelists_src, "if (JP2K_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (JP2K_FOUND)", "if(0)")
         if not self.options.with_webp:
+            tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
+            if tools.Version(self.version) >= "1.79.0":
+                tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
             tools.replace_in_file(cmakelists_src, "if (WEBP_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (WEBP_FOUND)", "if(0)")
 
