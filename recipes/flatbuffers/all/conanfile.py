@@ -62,7 +62,7 @@ class FlatbuffersConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
-        del self.options.options_from_context
+        del self.info.options.options_from_context
         if self._header_only and not self.options.flatc:
             self.info.header_only()
 
