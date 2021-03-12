@@ -4,12 +4,19 @@ from os import environ
 from conan_tools import conan_run
 
 
+def conan_add_remote(name=None, url=None, username=None, password=None):
+    conan_run(['remote', 'add', name, url, 'True'])
+    if username and password:
+        conan_run(['user', '--password', password, '--remote', name, username])
+
+
 def prepare_environment():
     # fork main repo and set these variables to have own repo for development
     custom_remotes = \
         'REMOTES_STAGING' in environ and environ['REMOTES_STAGING'] and \
         'REMOTES_MASTER' in environ and environ['REMOTES_MASTER'] and \
-        'REMOTES_UPLOAD_USER' in environ and environ['REMOTES_UPLOAD_USER']
+        'REMOTES_USERNAME' in environ and environ['REMOTES_USERNAME'] and \
+        'REMOTES_PASSWORD' in environ and environ['REMOTES_PASSWORD']
 
     # these interfere with conan commands
     if 'CONAN_USERNAME' in environ:
@@ -22,47 +29,43 @@ def prepare_environment():
 
     conan_run(['remote', 'clean'])
 
-    trassir_org = 'https://api.bintray.com/conan/trassir/'
+    def artifactory_repo(repo):
+        return 'https://artifactory.trassir.com/artifactory/api/conan/' + repo
+
+    official_prefix = ''
     if custom_remotes:
-        # allow download from official repos
-        conan_run(['remote', 'add', 'org-trassir-staging',
-                   trassir_org + 'conan-staging', 'True'])
-        conan_run(['remote', 'add', 'org-trassir-public',
-                   trassir_org + 'conan-public', 'True'])
-        conan_run(['remote', 'add', 'conan-center',
-                   'https://conan.bintray.com', 'True'])
-        # use unofficial repos for dev repo
-        conan_run(['remote', 'add', 'trassir-staging',
-                   environ['REMOTES_STAGING'], 'True'])
-        conan_run(['remote', 'add', 'trassir-public',
-                   environ['REMOTES_MASTER'], 'True'])
-    else:
-        conan_run(['remote', 'add', 'trassir-staging',
-                   trassir_org + 'conan-staging', 'True'])
-        conan_run(['remote', 'add', 'trassir-public',
-                   trassir_org + 'conan-public', 'True'])
-        conan_run(['remote', 'add', 'conan-center',
-                   'https://conan.bintray.com', 'True'])
+        official_prefix = 'official-'
+
+    conan_add_remote(name=official_prefix + 'github-staging',
+                     url=artifactory_repo('github-staging'),
+                     username=environ['LDAP_USERNAME'],
+                     password=environ['LDAP_PASSWORD'])
+    conan_add_remote(name=official_prefix + 'github-stable',
+                     url=artifactory_repo('github-stable'),
+                     username=environ['LDAP_USERNAME'],
+                     password=environ['LDAP_PASSWORD'])
+    conan_add_remote(name='conan-center', url='https://conan.bintray.com')
+
+    if custom_remotes:
+        conan_add_remote(name='github-staging',
+                         url=environ['REMOTES_STAGING'],
+                         username=environ['REMOTES_USERNAME'],
+                         password=environ['REMOTES_PASSWORD'])
+        conan_add_remote(name='github-stable',
+                         url=environ['REMOTES_MASTER'],
+                         username=environ['REMOTES_USERNAME'],
+                         password=environ['REMOTES_PASSWORD'])
 
     print('Remotes ready:')
     conan_run(['remote', 'list'])
+    conan_run(['user'])
 
     if 'GITHUB_HEAD_REF' in environ and environ['GITHUB_HEAD_REF'] != '':
         print('Detected staging branch `{branch}`'
               .format(branch=environ['GITHUB_HEAD_REF']))
-        upload_remote = 'trassir-staging'
+        upload_remote = 'github-staging'
     else:
-        upload_remote = 'trassir-public'
+        upload_remote = 'github-public'
     print('Will upload to {remote}'.format(remote=upload_remote))
-
-    if 'CONAN_PASSWORD' in environ:
-        if custom_remotes:
-            conan_run(['user', '--password', environ['CONAN_PASSWORD'],
-                       '--remote', upload_remote,
-                       environ['REMOTES_UPLOAD_USER']])
-        else:
-            conan_run(['user', '--password', environ['CONAN_PASSWORD'],
-                       '--remote', upload_remote,
-                       'trassir-ci-bot'])
 
     return upload_remote
