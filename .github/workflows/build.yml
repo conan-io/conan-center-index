@@ -17,10 +17,12 @@ on:
       - '.github/workflows/build.yml'
 
 env:
-  CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+  LDAP_USERNAME: ${{ secrets.LDAP_USERNAME }}
+  LDAP_PASSWORD: ${{ secrets.LDAP_PASSWORD }}
+  REMOTES_USERNAME: ${{ secrets.CUSTOM_USERNAME }}
+  REMOTES_PASSWORD: ${{ secrets.CUSTOM_PASSWORD }}
   REMOTES_MASTER: ${{ secrets.REMOTES_MASTER }}
   REMOTES_STAGING: ${{ secrets.REMOTES_STAGING }}
-  REMOTES_UPLOAD_USER: ${{ secrets.REMOTES_UPLOAD_USER }}
   IS_PURE_C: true
 
 jobs:
