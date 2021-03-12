@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class NativefiledialogConan(ConanFile):
@@ -25,6 +26,9 @@ class NativefiledialogConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("architecture %s is not supported" % self.settings.arch)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -54,6 +58,7 @@ class NativefiledialogConan(ConanFile):
                 msbuild.build("NativeFileDialog.sln")
             else:
                 config = "debug" if self.settings.build_type == "Debug" else "release"
+                config += "_x86" if self.settings.arch == "x86" else "_x64"
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=["config=%s" % config])
 
