@@ -18,7 +18,7 @@ class NumCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
