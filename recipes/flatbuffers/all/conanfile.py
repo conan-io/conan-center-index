@@ -2,6 +2,7 @@ import glob
 import os
 import shutil
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.28.0"
 
@@ -21,7 +22,8 @@ class FlatbuffersConan(ConanFile):
                "flatbuffers": [True, False],
                "options_from_context": [True, False, "deprecated"]}
     default_options = {"shared": False,
-                       "fPIC": True, "header_only": False,
+                       "fPIC": True, 
+                       "header_only": False,
                        "flatc": True,
                        "flatbuffers": True,
                        "options_from_context": "deprecated"}
@@ -60,6 +62,11 @@ class FlatbuffersConan(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+
+    def validate(self):
+        # FIXME: Static building on Macos fails with 'ld: library not found for -lcrt0.o'
+        if self.settings.os == "Macos" and self.version == '1.12.0' and not self.options.shared and self.options.flatc:
+            raise ConanInvalidConfiguration("Static building in Macos is not supported for 'flatc' (disable with option -o flatbuffers:flatc=False)")
 
     def package_id(self):
         del self.info.options.options_from_context
