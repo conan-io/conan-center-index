@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.32.0"
 
 
 class CppItertoolsConan(ConanFile):
@@ -28,7 +28,8 @@ class CppItertoolsConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def validate(self):
-        # Requires C++17
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
         minimal_version = {
             "Visual Studio": "16",
             "gcc": "7.3",
