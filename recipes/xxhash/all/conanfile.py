@@ -9,6 +9,17 @@ class XxHash(ConanFile):
     description = "Extremely fast non-cryptographic hash algorithm"
     topics = ("conan", "hash", "algorithm", "fast", "checksum", "hash-functions")
     license = "BSD-2-Clause"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     @property
     def _source_subfolder(self):
