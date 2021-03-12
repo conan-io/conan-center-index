@@ -96,30 +96,54 @@ class LeptonicaConan(ConanFile):
         # Fix installation
         tools.replace_in_file(cmakelists_src, "${CMAKE_BINARY_DIR}", "${PROJECT_BINARY_DIR}")
 
-        # Honor options
+        # Honor options and inject dependencies definitions
+        # TODO: submit a patch upstream
+        ## zlib
+        tools.replace_in_file(cmakelists_src, "${ZLIB_LIBRARIES}", "ZLIB::ZLIB")
         if not self.options.with_zlib:
             tools.replace_in_file(cmakelists_src, "if (ZLIB_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (ZLIB_FOUND)", "if(0)")
+        ## giflib
+        tools.replace_in_file(cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
             tools.replace_in_file(cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (GIF_FOUND)", "if(0)")
+        ## libjpeg
+        tools.replace_in_file(cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
         if not self.options.with_jpeg:
             tools.replace_in_file(cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (JPEG_FOUND)", "if(0)")
+        ## libpng
+        tools.replace_in_file(cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
         if not self.options.with_png:
             tools.replace_in_file(cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (PNG_FOUND)", "if(0)")
+        ## libtiff
+        tools.replace_in_file(cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
         if not self.options.with_tiff:
             tools.replace_in_file(cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (TIFF_FOUND)", "if(0)")
+        ## We have to be more aggressive with dependencies found with pkgconfig
+        ## Injection of libdirs is ensured by conan_basic_setup()
+        ## openjpeg
+        tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
+        tools.replace_in_file(cmakelists_src,
+                              "if (JP2K_FOUND)",
+                              "if (JP2K_FOUND)\n"
+                              "target_compile_definitions(leptonica PRIVATE ${JP2K_CFLAGS_OTHER})")
         if not self.options.with_openjpeg:
-            tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
             tools.replace_in_file(cmakelists_src, "if (JP2K_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (JP2K_FOUND)", "if(0)")
+        ## libwebp
+        tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
+        tools.replace_in_file(cmakelists_src,
+                              "if (WEBP_FOUND)",
+                              "if (WEBP_FOUND)\n"
+                              "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
+        tools.replace_in_file(cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
+        if tools.Version(self.version) >= "1.79.0":
+            tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
         if not self.options.with_webp:
-            tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
-            if tools.Version(self.version) >= "1.79.0":
-                tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
             tools.replace_in_file(cmakelists_src, "if (WEBP_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (WEBP_FOUND)", "if(0)")
 
