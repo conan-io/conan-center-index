@@ -15,6 +15,10 @@ class PortableFileDialogsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
