@@ -52,7 +52,7 @@ class CppItertoolsConan(ConanFile):
             self.requires('boost/1.75.0')
 
     def package(self):
-        self.copy("*.hpp", dst="include/cppitertools", src=os.path.join(self._source_subfolder), excludes=('examples/**', 'test/**'))
+        self.copy("*.hpp", dst=os.path.join("include", "cppitertools"), src=self._source_subfolder, excludes=('examples/**', 'test/**'))
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
