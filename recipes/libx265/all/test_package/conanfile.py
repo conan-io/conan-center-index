@@ -11,6 +11,11 @@ class TestPackageConan(ConanFile):
 
     @property
     def _test_shared_library(self):
+        # shared library linking with static libnuma is not supported
+        if "with_numa" in self.options["libx265"] and \
+                bool(self.options["libx265"].with_numa) and \
+                not bool(self.options["libnuma"].shared):
+            return False
         try:
             return self.options["libx265"].fPIC
         except ConanException:

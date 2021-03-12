@@ -4,6 +4,9 @@ from collections import namedtuple, OrderedDict
 import os
 
 
+required_conan_version = ">=1.32.0"
+
+
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
@@ -95,6 +98,7 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.enable_netssl
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
@@ -104,7 +108,7 @@ class PocoConan(ConanFile):
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
 
-    def configure(self):
+    def validate(self):
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.settings.compiler == "Visual Studio":
@@ -119,27 +123,30 @@ class PocoConan(ConanFile):
                         continue
                     if not self.options.get_safe(self._poco_component_tree[compdep].option, False):
                         raise ConanInvalidConfiguration("option {} requires also option {}".format(compopt.option, self._poco_component_tree[compdep].option))
+        if self.options.enable_data_sqlite:
+            if self.options["sqlite3"].threadsafe == 0:
+                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
 
     def requirements(self):
-        self.requires("pcre/8.41")
+        self.requires("pcre/8.44")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
             self.requires("expat/2.2.10")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.34.0")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.enable_netssl or \
+        if self.options.get_safe("enable_netssl", False) or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.7")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/11.5")
+            self.requires("libpq/13.1")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
             self.requires('apr-util/1.6.1')
@@ -186,9 +193,6 @@ class PocoConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.enable_data_sqlite:
-            if self.options["sqlite3"].threadsafe == 0:
-                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()

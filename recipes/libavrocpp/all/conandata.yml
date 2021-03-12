@@ -1,0 +1,14 @@
+sources:
+  "1.10.1":
+    url: "https://github.com/apache/avro/archive/release-1.10.1.tar.gz"
+    sha256: "8fd1f850ce37e60835e6d8335c0027a959aaa316773da8a9660f7d33a66ac142"
+patches:
+  "1.10.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-add-iterator-include.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-disable-tests.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-allow-static-boost-linkage.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-fix-windows-shared-installation.patch"

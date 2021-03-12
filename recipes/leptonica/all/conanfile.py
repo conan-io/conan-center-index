@@ -38,17 +38,17 @@ class LeptonicaConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_gif:
-            self.requires("giflib/5.1.4")
+            self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.3.1")
+            self.requires("openjpeg/2.4.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.0.3")
+            self.requires("libwebp/1.1.0")
 
     def config_options(self):
         if self.settings.os == "Windows":

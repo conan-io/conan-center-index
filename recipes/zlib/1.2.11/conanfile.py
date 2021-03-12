@@ -1,6 +1,5 @@
 import os
-import stat
-from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, CMake
 from conans.errors import ConanException
 
 
@@ -30,51 +29,12 @@ class ZlibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-        if not tools.os_info.is_windows:
-            configure_file = os.path.join(self._source_subfolder, "configure")
-            st = os.stat(configure_file)
-            os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
 
     def build(self):
         self._build_zlib()
         if self.options.minizip:
             self._build_minizip()
-
-    @property
-    def _use_autotools(self):
-        if str(self.settings.os) in ["iOS", "watchOS", "tvOS"]:
-            return False # use a cmake toolchain .... or, find out the special CHOST settings zlib requires, but ...
-        return self.settings.os == "Linux" or tools.is_apple_os(self.settings.os)
-        # ... the  question is, why not always go with cmake and forget about the automake distaster?
-        # this woulds simplify this recipe enorm
-
-    def _build_zlib_autotools(self):
-        env_build = AutoToolsBuildEnvironment(self)
-
-        # configure passes CFLAGS to linker, should be LDFLAGS
-        tools.replace_in_file("../configure", "$LDSHARED $SFLAGS", "$LDSHARED $LDFLAGS")
-        # same thing in Makefile.in, when building tests/example executables
-        tools.replace_in_file("../Makefile.in", "$(CC) $(CFLAGS) -o", "$(CC) $(LDFLAGS) -o")
-
-        # we need to build only libraries without test example and minigzip
-        if self.options.shared:
-            make_target = "libz.%s.dylib" % self.version \
-                if tools.is_apple_os(self.settings.os) else "libz.so.%s" % self.version
-        else:
-            make_target = "libz.a"
-
-        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
-            target = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
-            env_build.flags.append(target)
-
-        env = {}
-        if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
-            env = {"CC": "clang", "CXX": "clang++"}
-        with tools.environment_append(env):
-            env_build.configure("../", build=False, host=False, target=False)
-            env_build.make(target=make_target)
 
     def _build_zlib_cmake(self):
         cmake = CMake(self)
@@ -107,10 +67,7 @@ class ZlibConan(ConanFile):
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
             tools.mkdir("_build")
             with tools.chdir("_build"):
-                if self._use_autotools:
-                    self._build_zlib_autotools()
-                else:
-                    self._build_zlib_cmake()
+                self._build_zlib_cmake()
 
     def _build_minizip(self):
         minizip_dir = os.path.join(self._source_subfolder, 'contrib', 'minizip')

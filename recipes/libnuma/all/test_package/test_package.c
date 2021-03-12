@@ -1,5 +1,7 @@
 #include <numa.h>
+#include <stdio.h>
 
 int main() {
-  (void)numa_available();
+  printf("numa available: %d\n", numa_available());
+  return 0;
 }

@@ -1,13 +1,13 @@
 sources:
   "4.0.0":
-    sha256: af615141c14858b67d71a278896523d3df0da0ff3c6495b6acf0ae2e8b44dd92
-    url: https://github.com/boostorg/build/archive/4.0.0.tar.gz
+    sha256: f59bd90bd4d68b44005a83a60d3d933d3768fc5a5b51e45a0462e6f4b81caa8a
+    url: https://github.com/bfgroup/b2/archive/4.0.0.tar.gz
   "4.0.1":
-    sha256: 9ea9edb115fa0b0a82eaf4f00a4e348df9c3b1b891c3db32823ae5e27f284c07
-    url: https://github.com/boostorg/build/archive/4.0.1.tar.gz
+    sha256: ebdfb38b3938dba4c2548b2b7f4ca48e209beef9a376a78742bcd75769a9d68f
+    url: https://github.com/bfgroup/b2/archive/4.0.1.tar.gz
   "4.1.0":
-    sha256: e1513cf8ad83e7343f8c21207b3f4cb6c2e4561685d66fe80c4fc612a1c5a55a
-    url: https://github.com/boostorg/build/archive/4.1.0.tar.gz
+    sha256: eb562b14677e3ad3619bb67e6be6ea97d5dbe34780bbc47bed4cdda3177835c8
+    url: https://github.com/bfgroup/b2/archive/4.1.0.tar.gz
   "4.2.0":
-    sha256: affab7cd6329270a1488a9856eefc2cd6db4da8af430e82acb552945973c2939
-    url: https://github.com/boostorg/build/archive/4.2.0.tar.gz
+    sha256: 00e3425e0419688ea61ecbbcd106ce168e334f0acdcc2f4a4ead084f03cd4b60
+    url: https://github.com/bfgroup/b2/archive/4.2.0.tar.gz

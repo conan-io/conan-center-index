@@ -16,8 +16,16 @@ class GlfwConan(ConanFile):
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
 
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "vulkan_static": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "vulkan_static": False,
+    }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
@@ -39,6 +47,8 @@ class GlfwConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
+        if self.options.vulkan_static:
+            self.requires("vulkan-loader/1.2.162.0")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
@@ -53,6 +63,16 @@ class GlfwConan(ConanFile):
         # don't force PIC
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE ON", "")
+        # Allow to link vulkan-loader into shared glfw
+        if self.options.vulkan_static:
+            cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+            tools.replace_in_file(cmakelists,
+                                  'message(FATAL_ERROR "You are trying to link the Vulkan loader static library into the GLFW shared library")',
+                                  "")
+            tools.replace_in_file(cmakelists,
+                                  'list(APPEND glfw_PKG_DEPS "vulkan")',
+                                  ('list(APPEND glfw_PKG_DEPS "vulkan")\n'
+                                   'list(APPEND glfw_LIBRARIES "{}")').format(self.deps_cpp_info["vulkan-loader"].libs[0]))
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -61,6 +81,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_TESTS"] = False
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             self._cmake.definitions["GLFW_INSTALL"] = True
+            self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
             self._cmake.configure()
@@ -89,7 +110,7 @@ class GlfwConan(ConanFile):
             content += (
                 "if(TARGET {aliased} AND NOT TARGET {alias})\n"
                 "    add_library({alias} INTERFACE IMPORTED)\n"
-                "    target_link_libraries({alias} INTERFACE {aliased})\n"
+                "    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})\n"
                 "endif()\n"
             ).format(alias=alias, aliased=aliased)
         tools.save(module_file, content)
@@ -108,7 +129,7 @@ class GlfwConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "glfw"
         self.cpp_info.names["cmake_find_package_multi"] = "glfw"
         self.cpp_info.names["pkg_config"] = "glfw3"
-        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":

@@ -1,0 +1,13 @@
+Use generated cmake module files
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -221,7 +221,7 @@ else()
+         pkg_check_modules(Leptonica REQUIRED lept>=${MINIMUM_LEPTONICA_VERSION})
+         link_directories(${Leptonica_LIBRARY_DIRS})
+     else()
+-        find_package(Leptonica ${MINIMUM_LEPTONICA_VERSION} REQUIRED CONFIG)
++        find_package(Leptonica ${MINIMUM_LEPTONICA_VERSION} REQUIRED)
+     endif()
+     if (NOT Leptonica_FOUND)
+         message(FATAL_ERROR "Cannot find required library Leptonica. Quitting!")

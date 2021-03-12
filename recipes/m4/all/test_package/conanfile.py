@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows:
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def build(self):
         tools.save(self._m4_input_path, M4_CONTENTS)

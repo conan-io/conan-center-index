@@ -13,7 +13,6 @@ class LibX264Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "bit_depth": [8, 10, "all"]}
     default_options = {'shared': False, 'fPIC': True, 'bit_depth': 'all'}
-    build_requires = "nasm/2.13.02"
     _override_env = {}
     _autotools = None
 
@@ -30,8 +29,9 @@ class LibX264Conan(ConanFile):
         return "source_subfolder"
 
     def build_requirements(self):
+        self.build_requires("nasm/2.15.05")
         if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def config_options(self):
         if self.settings.os == 'Windows':

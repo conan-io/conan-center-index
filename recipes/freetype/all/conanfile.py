@@ -1,6 +1,9 @@
 from conans import ConanFile, CMake, tools
 import os
 import shutil
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class FreetypeConan(ConanFile):
@@ -127,6 +130,34 @@ conan_staticlibs="{staticlibs}"
         self.copy("LICENSE.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                "freetype": "Freetype::Freetype",
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     @staticmethod
     def _chmod_plus_x(filename):
@@ -145,6 +176,8 @@ conan_staticlibs="{staticlibs}"
         self._chmod_plus_x(freetype_config)
         # cmake's FindFreetype.cmake module with imported target: Freetype::Freetype
         self.cpp_info.names["cmake_find_package"] = "Freetype"
-        # freetype creates freetype-config.cmake with imported target: freetype
-        self.cpp_info.names["cmake_find_package_multi"] = "freetype" # TODO: CMake config file has a non namespaced imported target named 'freetype'
+        self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
+        self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "freetype2"

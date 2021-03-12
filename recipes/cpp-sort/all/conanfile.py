@@ -30,7 +30,7 @@ class CppSortConan(ConanFile):
             "gcc": "5.5"
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
