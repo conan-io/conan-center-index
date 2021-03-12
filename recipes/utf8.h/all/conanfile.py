@@ -2,7 +2,6 @@ import os
 import re
 from conans import ConanFile, tools
 
-required_conan_version = ">=1.28.0"
 
 class Utf8HConan(ConanFile):
     name = "utf8.h"
