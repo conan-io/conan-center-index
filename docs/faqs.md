@@ -106,3 +106,30 @@ There are some recipes in `conan-center-index` that provide packages that contai
 We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
 
 Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
+
+## How can I get the same recipe-revision when building locally?
+
+conan CI runs [special hook](https://github.com/conan-io/hooks/blob/master/hooks/conan-center.py#L590) to reduce the `conandata.yml` so it contains information specific only to the given version.
+while it might be surprising for consumers that package built by conan center and package built locally (e.g. via [conan create](https://docs.conan.io/en/latest/reference/commands/creator/create.html)) don't match (have different `conandata.yml`), this approach has its own advantages.
+imagine we have a recipe with conandata like:
+```
+
+sources:
+  1.69.0:
+    url:  "https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2",
+    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
+```
+and now we want to add newer version (1.70.0), so our `conandata.yml` will look like:
+```
+
+sources:
+  1.69.0:
+    url:  "https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2"
+    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
+  1.70.0:
+    url: "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
+    sha256: "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
+```
+as both versions (1.69.0 and 1.70.0) share the same conandata.yml, without a hook, our change would introduce a new revision for 1.69.0.
+but if we want to avoid redundand revisions (and unnecessary rebuilds) while adding new version, we may reduce conandata for 1.69.0 to just contain the minimum amount of the information.
+
