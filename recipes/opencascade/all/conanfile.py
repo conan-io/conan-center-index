@@ -45,9 +45,6 @@ class OpenCascadeConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio 14 is not supported.")
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "15":
             raise ConanInvalidConfiguration("Visual Studio 15 is not supported.")
-        if self.settings.compiler == "Visual Studio" and \
-           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
-            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
