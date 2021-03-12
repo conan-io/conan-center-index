@@ -18,11 +18,13 @@ class FlatbuffersConan(ConanFile):
                "fPIC": [True, False],
                "header_only": [True, False],
                "flatc": [True, False],
-               "flatbuffers": [True, False]}
+               "flatbuffers": [True, False],
+               "options_from_context": [True, False, "deprecated"]}
     default_options = {"shared": False,
                        "fPIC": True, "header_only": False,
                        "flatc": True,
-                       "flatbuffers": True}
+                       "flatbuffers": True,
+                       "options_from_context": "deprecated"}
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
@@ -41,6 +43,9 @@ class FlatbuffersConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.options.options_from_context != "deprecated":
+            self.output.warn("Option 'options_from_context' is deprecated.")
+
         if not self.options.flatbuffers:
             del self.options.header_only
             self._header_only = False
@@ -57,6 +62,7 @@ class FlatbuffersConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
+        del self.options.options_from_context
         if self._header_only and not self.options.flatc:
             self.info.header_only()
 
