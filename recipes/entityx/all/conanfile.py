@@ -57,8 +57,9 @@ class EntityXConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENTITYX_BUILD_SHARED"] = "1" if self.options.shared else "0"
-        self._cmake.definitions["ENTITYX_BUILD_TESTING"] = "0"
+        self._cmake.definitions["ENTITYX_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ENTITYX_BUILD_TESTING"] = False
+        self._cmake.definitions["ENTITYX_RUN_BENCHMARKS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -70,8 +71,6 @@ class EntityXConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        # Missing dll in windows, will submit a patch upstream to CMake install
-        self.copy("*entity*.dll", src=self._build_subfolder, dst="bin", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
