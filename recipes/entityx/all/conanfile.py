@@ -11,7 +11,7 @@ class EntityXConan(ConanFile):
     name = "entityx"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alecthomas/entityx/"
-    topics = ("entity", "conan")
+    topics = ("entity", "c++11", "type-safe", "component", "conan")
     license = "MIT"
     description = "EntityX is an EC system that uses C++11 features to provide type-safe component management, event delivery, etc."
     settings = "os", "compiler", "build_type", "arch"
