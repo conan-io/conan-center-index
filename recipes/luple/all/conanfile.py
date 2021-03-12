@@ -2,6 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
 
 class LupleConan(ConanFile):
     name = "luple"
