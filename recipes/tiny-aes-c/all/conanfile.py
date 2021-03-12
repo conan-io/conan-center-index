@@ -86,6 +86,7 @@ class TinyAesCConan(ConanFile):
         self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
         self.copy(pattern="*.hpp", dst="include", src=self._source_subfolder)
         self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
