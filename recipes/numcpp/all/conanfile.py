@@ -23,9 +23,10 @@ class NumCppConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
         minimal_version = {
-            "gcc": "6.5",
-            "clang": "6",
-            "Visual Studio": "15"
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "10",
+            "Visual Studio": "14"
         }
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
