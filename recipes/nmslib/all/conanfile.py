@@ -12,7 +12,10 @@ class Nmslib(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
+
+    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,9 +31,11 @@ class Nmslib(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=os.path.join(self._source_subfolder, "similarity_search"))
-        return cmake
+        if self._cmake is None:
+            cmake = CMake(self)
+            cmake.configure()
+            self._cmake = cmake
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
