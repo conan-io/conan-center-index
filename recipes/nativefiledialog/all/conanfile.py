@@ -19,7 +19,7 @@ class NativefiledialogConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("gtk/3.24.24")
+            self.requires("gtk/system")
 
     def build_requirements(self):
         self.build_requires("premake/5.0.0-alpha15")
@@ -30,6 +30,10 @@ class NativefiledialogConan(ConanFile):
 
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("architecture %s is not supported" % self.settings.arch)
+
+    def config_options(self):
+        if self.settings.os == "Linux":
+            self.options["gtk"].version = 3
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
