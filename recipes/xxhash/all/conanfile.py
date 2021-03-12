@@ -50,5 +50,3 @@ class XxHash(ConanFile):
         self.cpp_info.components["main"].names["cmake_find_package"] = "xxhash"
         self.cpp_info.components["main"].names["cmake_find_package_multi"] = "sxxhash"
         self.cpp_info.components["main"].libs = ["xxhash"]
-        self.cpp_info.components["main"].names["cmake_find_package_multi"] = "sxxhash"
-        # self.cpp_info.components["xxhsum"].libs = ["xxhsum"]
