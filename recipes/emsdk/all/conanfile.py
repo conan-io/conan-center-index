@@ -13,7 +13,7 @@ class Recipe(ConanFile):
     topics = ("conan", "emsdk", "emscripten", "installer", "sdk")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emscripten-core/emsdk"
-    license = "MIT"
+    license = "MIT/Expat"
     settings = "os", "arch"
 
     short_paths = True
@@ -63,7 +63,7 @@ class Recipe(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            # En Macos estos install fallan como una escopeta de feria
+            # These installs fail a lot (at least in MacOS, so adding a function and retrying)
             self.run('{} list'.format(self._emsdk_exec))
             if self._node_version:
                 self._install_tool('node-' + self._node_version, 'node')
