@@ -163,26 +163,6 @@ class OpenCVConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
-    def _gather_libs(self, p):
-        libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-        if not getattr(self.options[p],'shared', False):
-            for dep in self.deps_cpp_info[p].public_deps:
-                libs += self._gather_libs(dep)
-        return libs
-
-    def _gather_lib_paths(self, p):
-        lib_paths = self.deps_cpp_info[p].lib_paths
-        if not getattr(self.options[p],'shared', False):
-            for dep in self.deps_cpp_info[p].public_deps:
-                lib_paths += self._gather_lib_paths(dep)
-        return lib_paths
-
-    def _gather_include_paths(self, p):
-        include_paths = self.deps_cpp_info[p].include_paths
-        if not getattr(self.options[p],'shared', False):
-            for dep in self.deps_cpp_info[p].public_deps:
-                include_paths += self._gather_include_paths(dep)
-        return include_paths
 
     def _configure_cmake(self):
         if self._cmake:
@@ -285,23 +265,10 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+
         if self.options.contrib:
             self._cmake.definitions['OPENCV_EXTRA_MODULES_PATH'] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
-        # OpenCV doesn't use find_package for freetype & harfbuzz, so let's specify them
-        if self.options.get_safe("with_freetype"):
-            self._cmake.definitions['FREETYPE_FOUND'] = True
-            self._cmake.definitions['FREETYPE_INCLUDE_DIRS'] = ';'.join(self._gather_include_paths('freetype'))
-            self._cmake.definitions['FREETYPE_LIBRARIES'] = ';'.join(self._gather_libs('freetype'))
-        if self.options.get_safe("with_harfbuzz"):
-            self._cmake.definitions['HARFBUZZ_FOUND'] = True
-            self._cmake.definitions['HARFBUZZ_INCLUDE_DIRS'] = ';'.join(self._gather_include_paths('harfbuzz'))
-            self._cmake.definitions['HARFBUZZ_LIBRARIES'] = ';'.join(self._gather_libs('harfbuzz'))
-        if self.options.get_safe("with_gflags"):
-            self._cmake.definitions['GFLAGS_INCLUDE_DIR_HINTS'] = ';'.join(self._gather_include_paths('gflags'))
-            self._cmake.definitions['GFLAGS_LIBRARY_DIR_HINTS'] = ';'.join(self._gather_lib_paths('gflags'))
-        if self.options.get_safe("with_glog"):
-            self._cmake.definitions['GLOG_INCLUDE_DIR_HINTS'] = ';'.join(self._gather_include_paths('glog'))
-            self._cmake.definitions['GLOG_LIBRARY_DIR_HINTS'] = ';'.join(self._gather_lib_paths('glog'))
+
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath
         if self.options.with_jpeg2000 == "openjpeg":
