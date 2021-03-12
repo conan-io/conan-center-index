@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class Nmslib(ConanFile):
@@ -16,6 +17,10 @@ class Nmslib(ConanFile):
     generators = "cmake"
 
     _cmake = None
+
+    def validate(self):
+        if self.settings.compier == "Visual Studio" and self.settings.compiler.version == "14":
+            raise ConanInvalidConfiguration("Builds fail for VS 14")  # TODO: add reason in message -> unsupported?
 
     def config_options(self):
         if self.settings.os == "Windows":
