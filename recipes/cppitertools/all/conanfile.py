@@ -9,7 +9,7 @@ class CppItertoolsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ryanhaining/cppitertools"
     description = "Implementation of python itertools and builtin iteration functions for C++17"
-    topics = ("cpp17", "span", "span-implementations")
+    topics = ("cpp17", "iter", "itertools")
     license = "BSD-2-Clause"
     no_copy_source = True
 
