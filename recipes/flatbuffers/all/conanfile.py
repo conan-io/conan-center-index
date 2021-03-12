@@ -18,13 +18,11 @@ class FlatbuffersConan(ConanFile):
                "fPIC": [True, False],
                "header_only": [True, False],
                "flatc": [True, False],
-               "flatbuffers": [True, False],
-               "options_from_context": [True, False]}
+               "flatbuffers": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True, "header_only": False,
                        "flatc": True,
-                       "flatbuffers": True,
-                       "options_from_context": True}
+                       "flatbuffers": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
@@ -42,13 +40,6 @@ class FlatbuffersConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        # Detect if host or build context
-        if self.options.options_from_context:
-            settings_target = getattr(self, 'settings_target', None)
-            self.options.flatc = settings_target is not None
-            self.options.flatbuffers = settings_target is None
-        del self.options.options_from_context
 
         if not self.options.flatbuffers:
             del self.options.header_only
