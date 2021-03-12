@@ -3,6 +3,7 @@ import os
 import glob
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
 
 class NumCppConan(ConanFile):
     name = "numcpp"
