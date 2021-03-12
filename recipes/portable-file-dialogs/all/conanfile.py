@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 
 
 class PortableFileDialogsConan(ConanFile):
+    name = "portable-file-dialogs"
     license = "WTFPL"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/samhocevar/portable-file-dialogs"
