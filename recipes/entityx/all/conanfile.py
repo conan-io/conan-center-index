@@ -50,8 +50,8 @@ class EntityXConan(ConanFile):
         os.rename("entityx-" + self.version, self._source_subfolder)
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared library do not export all symbols")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("entityx shared library does not export all symbols with Visual Studio")
 
     def _configure_cmake(self):
         if self._cmake:
