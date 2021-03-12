@@ -4,6 +4,7 @@
 ## Contents
 
   * [Introduction](#introduction)
+    * [Build Images](#build-images)
   * [Windows](#windows)
   * [Linux](#linux)
   * [MacOS](#macos)<!-- endToc -->
