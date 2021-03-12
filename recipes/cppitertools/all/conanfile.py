@@ -30,11 +30,12 @@ class CppItertoolsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
+
         minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6.0",
-            "apple-clang": "10.0"
+            "Visual Studio": "15",
+            "gcc": "5.2",
+            "clang": "5.0",
+            "apple-clang": "9.1"
         }
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
