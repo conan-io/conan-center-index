@@ -1,0 +1,4 @@
+sources:
+  "1.1.2":
+    url: "https://github.com/alecthomas/entityx/archive/1.1.2.tar.gz"
+    sha256: "7705235bcb6d25e7eec5d6dbcad143a29834ee3de79d8da02ea2d10ecde35ea9"
