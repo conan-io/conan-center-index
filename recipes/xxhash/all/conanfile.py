@@ -49,6 +49,9 @@ class XxHash(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.components["main"].names["cmake_find_package"] = "xxhash"
-        self.cpp_info.components["main"].names["cmake_find_package_multi"] = "sxxhash"
-        self.cpp_info.components["main"].libs = ["xxhash"]
+        self.cpp_info.names["cmake_find_package"] = "xxHash"
+        self.cpp_info.names["cmake_find_package_multi"] = "xxHash"
+        self.cpp_info.names["pkg_config"] = "libxxhash"
+        self.cpp_info.components["libxxhash"].names["cmake_find_package"] = "xxhash"
+        self.cpp_info.components["libxxhash"].names["cmake_find_package_multi"] = "xxhash"
+        self.cpp_info.components["libxxhash"].libs = ["xxhash"]
