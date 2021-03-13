@@ -46,8 +46,6 @@ class TinyAesCConan(ConanFile):
         "cbc": True,
         "ecb": True,
         "ctr": True,
-        "shared": False,
-        "fPIC": True,
     }
 
     exports_sources = ["CMakeLists.txt"]
