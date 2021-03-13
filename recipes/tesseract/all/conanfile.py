@@ -162,7 +162,7 @@ class TesseractConan(ConanFile):
         self.cpp_info.components["libtesseract"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["libtesseract"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libtesseract"].libs = [self._libname]
         self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive"]
         if self.options.shared:
             self.cpp_info.components["libtesseract"].defines = ["TESS_IMPORTS"]
@@ -174,3 +174,13 @@ class TesseractConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+    @property
+    def _libname(self):
+        suffix = ""
+        if self.settings.os == "Windows":
+            v = tools.Version(self.version)
+            suffix += "{}{}".format(v.major, v.minor)
+            if self.settings.build_type == "Debug":
+                suffix += "d"
+        return "tesseract" + suffix
