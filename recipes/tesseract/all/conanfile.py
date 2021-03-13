@@ -124,7 +124,7 @@ class TesseractConan(ConanFile):
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"libtesseract": "Tesseract::Tesseract"}
+            {"libtesseract": "Tesseract::libtesseract"}
         )
 
     @staticmethod
@@ -149,19 +149,27 @@ class TesseractConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        # Official CMake imported target is:
+        # - libtesseract if < 5.0.0
+        # - Tesseract::libtesseract if >= 5.0.0 (not yet released)
+        # We provide both targets
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "tesseract"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].names["cmake_find_package_multi"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].names["pkg_config"] = "tesseract"
+        self.cpp_info.components["libtesseract"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["libtesseract"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive"]
         if self.options.shared:
-            self.cpp_info.defines = ["TESS_IMPORTS"]
+            self.cpp_info.components["libtesseract"].defines = ["TESS_IMPORTS"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["libtesseract"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32"]
+            self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
