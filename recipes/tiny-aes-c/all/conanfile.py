@@ -89,5 +89,3 @@ class TinyAesCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
-        self.cpp_info.names["cmake_find_package"] = "tiny-aes"
-        self.cpp_info.names["cmake_find_package_multi"] = "tiny-aes"
