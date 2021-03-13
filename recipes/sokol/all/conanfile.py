@@ -24,7 +24,6 @@ class SokolConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder,"util"))
 
     def package_id(self):
         self.info.header_only()
