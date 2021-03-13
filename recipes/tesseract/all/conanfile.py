@@ -117,7 +117,6 @@ class TesseractConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         # required for 5.0
