@@ -79,5 +79,6 @@ class EntityXConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "entityx"
         debug = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["entityx{}".format(debug)]
