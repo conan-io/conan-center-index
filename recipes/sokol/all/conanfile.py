@@ -9,7 +9,7 @@ class SokolConan(ConanFile):
     topics = ("sokol", "graphics", "3d")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/floooh/sokol"
-    license = "ZLIB"
+    license = "Zlib"
     no_copy_source = True
 
     @property
