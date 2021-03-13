@@ -15,7 +15,7 @@ class TesseractConan(ConanFile):
     license = "Apache-2.0"
     homepage = "https://github.com/tesseract-ocr/tesseract"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
