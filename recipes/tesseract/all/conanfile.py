@@ -14,20 +14,25 @@ class TesseractConan(ConanFile):
     topics = ("conan", "ocr", "image", "multimedia", "graphics")
     license = "Apache-2.0"
     homepage = "https://github.com/tesseract-ocr/tesseract"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_auto_optimize": [True, False],
+        "with_march_native": [True, False],
+        "with_training": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_auto_optimize": False,
+        "with_march_native": False,
+        "with_training": False
+    }
+
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_auto_optimize": [True, False],
-               "with_march_native": [True, False],
-               "with_training": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_auto_optimize": False,
-                       "with_march_native": False,
-                       "with_training": False}
-
     _cmake = None
 
     @property
@@ -37,15 +42,6 @@ class TesseractConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def requirements(self):
-        self.requires("leptonica/1.80.0")
-        self.requires("libarchive/3.5.1")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,6 +69,15 @@ class TesseractConan(ConanFile):
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
         elif compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
+
+    def requirements(self):
+        self.requires("leptonica/1.80.0")
+        self.requires("libarchive/3.5.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
