@@ -1,7 +1,10 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class TesseractConan(ConanFile):
@@ -109,27 +112,47 @@ class TesseractConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        # remove man pages
-        tools.rmdir(os.path.join(self.package_folder, 'share', 'man'))
-        # remove pkgconfig
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        # remove cmake
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         # required for 5.0
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"libtesseract": "Tesseract::Tesseract"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
-
-        self.cpp_info.components["libtesseract"].libs = tools.collect_libs(self)
-        self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive" ]
-
-        self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
-        self.cpp_info.components["libtesseract"].names["cmake_find_package_multi"] = "libtesseract"
-        self.cpp_info.components["libtesseract"].names["pkg_config"] = "libtesseract"
-
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "tesseract"
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.components["libtesseract"].system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread"]
         elif self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
+            self.cpp_info.system_libs = ["ws2_32"]
