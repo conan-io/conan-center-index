@@ -15,30 +15,39 @@ class TinyAesCConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
 
-    _options_dict = {
-        # enable AES128
-        "AES128": [True, False],
-        # enable AES192
-        "AES192": [True, False],
-        # enable AES256
-        "AES256": [True, False],
-        # enable AES encryption in CBC-mode of operation
-        "CBC": [True, False],
-        # enable the basic ECB 16-byte block algorithm
-        "ECB": [True, False],
-        # enable encryption in counter-mode
-        "CTR": [True, False],
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
     }
 
-    options = _options_dict
+    _options_dict = {
+        # enable AES128
+        "aes128": [True, False],
+        # enable AES192
+        "aes192": [True, False],
+        # enable AES256
+        "aes256": [True, False],
+        # enable AES encryption in CBC-mode of operation
+        "cbc": [True, False],
+        # enable the basic ECB 16-byte block algorithm
+        "ecb": [True, False],
+        # enable encryption in counter-mode
+        "ctr": [True, False],
+    }
+
+    options.update(_options_dict)
 
     default_options = {
-        "AES128": True,
-        "AES192": False,
-        "AES256": False,
-        "CBC": True,
-        "ECB": True,
-        "CTR": True
+        "shared": False,
+        "fPIC": True,
+        "aes128": True,
+        "aes192": False,
+        "aes256": False,
+        "cbc": True,
+        "ecb": True,
+        "ctr": True,
+        "shared": False,
+        "fPIC": True,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -53,15 +62,17 @@ class TinyAesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
+    def validate(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        
-    def validate(self):
-        if not self.options.CBC and not self.options.ECB and not self.options.CTR:
+
+        if self.options.shared:
+            del self.options.fPIC
+
+        if not self.options.cbc and not self.options.ecb and not self.options.ctr:
             raise ConanInvalidConfiguration("Need to at least specify one of CBC, ECB or CTR modes")
 
-        if not self.options.AES128 and not self.options.AES192 and not self.options.AES256:
+        if not self.options.aes128 and not self.options.aes192 and not self.options.aes256:
             raise ConanInvalidConfiguration("Need to at least specify one of AES{128, 192, 256} modes")
 
     def source(self):
@@ -89,6 +100,9 @@ class TinyAesCConan(ConanFile):
         self.copy(pattern="*.hpp", dst="include", src=self._source_subfolder)
         self.copy(pattern="*.a", dst="lib", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
