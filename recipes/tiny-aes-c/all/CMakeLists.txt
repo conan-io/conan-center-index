@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.4)
 project(cmake_wrapper)
 
 if(WIN32 AND BUILD_SHARED_LIBS)
