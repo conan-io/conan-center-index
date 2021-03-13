@@ -38,8 +38,8 @@ class SimdjsonConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7.4",
-            "Visual Studio": "15.7",
+            "gcc": "8",
+            "Visual Studio": "16",
             "clang": "6",
             "apple-clang": "9.4",
         }
