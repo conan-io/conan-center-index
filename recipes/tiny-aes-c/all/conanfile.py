@@ -60,13 +60,17 @@ class TinyAesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-        if self.options.shared:
-            del self.options.fPIC
-
+    def validate(self):
         if not self.options.cbc and not self.options.ecb and not self.options.ctr:
             raise ConanInvalidConfiguration("Need to at least specify one of CBC, ECB or CTR modes")
 
