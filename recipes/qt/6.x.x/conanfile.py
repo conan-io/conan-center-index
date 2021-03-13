@@ -1,6 +1,7 @@
 import os
 import shutil
 import glob
+import textwrap
 
 import configparser
 from conans import ConanFile, tools, RunEnvironment, CMake
@@ -493,19 +494,19 @@ class QtConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write("""[Paths]
-Prefix = ..
-ArchData = res/archdatadir
-HostData = res/archdatadir
-Data = res/datadir
-Sysconf = res/sysconfdir
-LibraryExecutables = res/archdatadir/bin
-Plugins = res/archdatadir/plugins
-Imports = res/archdatadir/imports
-Qml2Imports = res/archdatadir/qml
-Translations = res/datadir/translations
-Documentation = res/datadir/doc
-Examples = res/datadir/examples""")
+            f.write(textwrap.dedent("""[Paths]
+                Prefix = ..
+                ArchData = res/archdatadir
+                HostData = res/archdatadir
+                Data = res/datadir
+                Sysconf = res/sysconfdir
+                LibraryExecutables = res/archdatadir/bin
+                Plugins = res/archdatadir/plugins
+                Imports = res/archdatadir/imports
+                Qml2Imports = res/archdatadir/qml
+                Translations = res/datadir/translations
+                Documentation = res/datadir/doc
+                Examples = res/datadir/examples"""))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
@@ -700,12 +701,12 @@ Examples = res/datadir/examples""")
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
         for target in targets:
-            filecontents += """\
-if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
-    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} IMPORTED)
-    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{1}{0})
-endif()
-""".format(extension, target)
+            filecontents += textwrap.dedent("""\
+                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
+                add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} IMPORTED)
+                set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{1}{0})
+                endif()
+                """.format(extension, target))
         tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
 
         self.cpp_info.components["Qt6Core"].builddirs.append(os.path.join("res","archdatadir","bin"))
