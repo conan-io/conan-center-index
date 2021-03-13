@@ -702,11 +702,11 @@ class QtConan(ConanFile):
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
         for target in targets:
             filecontents += textwrap.dedent("""\
-                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{1})
-                add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} IMPORTED)
-                set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{1} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{1}{0})
+                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
+                set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
                 endif()
-                """.format(extension, target))
+                """.format(target, extension))
         tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
 
         self.cpp_info.components["Qt6Core"].builddirs.append(os.path.join("res","archdatadir","bin"))
