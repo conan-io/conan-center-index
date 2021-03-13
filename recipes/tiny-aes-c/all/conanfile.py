@@ -7,7 +7,6 @@ required_conan_version = ">=1.32.0"
 
 class TinyAesCConan(ConanFile):
     name = "tiny-aes-c"
-    version = "1.0.0"
     license = "Unlicense"
     homepage = "https://github.com/kokke/tiny-AES-c"
     url = "https://github.com/conan-io/conan-center-index"
