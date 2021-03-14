@@ -703,8 +703,8 @@ class QtConan(ConanFile):
         for target in targets:
             filecontents += textwrap.dedent("""\
                 if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
-                add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
-                set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
