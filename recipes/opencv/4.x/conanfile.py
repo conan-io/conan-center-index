@@ -27,6 +27,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": [True, False],
         "with_webp": [True, False],
         "with_gtk": [True, False],
+        "with_ffmpeg": [True, False],
         "with_quirc": [True, False]
     }
     default_options = {
@@ -42,6 +43,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_webp": True,
         "with_gtk": True,
+        "with_ffmpeg": False,
         "with_quirc": True
     }
 
@@ -189,7 +191,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CUFFT"] = False
         self._cmake.definitions["WITH_CUBLAS"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
-        self._cmake.definitions["WITH_FFMPEG"] = False
+        self._cmake.definitions["WITH_FFMPEG"] = self.options.with_ffmpeg
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
         self._cmake.definitions["WITH_HPX"] = False

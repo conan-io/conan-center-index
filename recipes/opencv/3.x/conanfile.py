@@ -25,6 +25,7 @@ class OpenCVConan(ConanFile):
                "with_openexr": [True, False],
                "with_eigen": [True, False],
                "with_webp": [True, False],
+               "with_ffmpeg": [True, False],
                "with_gtk": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
@@ -37,6 +38,7 @@ class OpenCVConan(ConanFile):
                        "with_openexr": True,
                        "with_eigen": True,
                        "with_webp": True,
+                       "with_ffmpeg": False,
                        "with_gtk": True}
 
     short_paths = True
@@ -174,7 +176,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CUFFT"] = False
         self._cmake.definitions["WITH_CUBLAS"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
-        self._cmake.definitions["WITH_FFMPEG"] = False
+        self._cmake.definitions["WITH_FFMPEG"] = self.options.with_ffmpeg
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_OPENCL"] = False
         self._cmake.definitions["WITH_CUDA"] = False
