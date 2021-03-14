@@ -17,6 +17,12 @@ sources:
       "https://www.openssl.org/source/openssl-1.0.2u.tar.gz",
       "https://www.openssl.org/source/old/openssl-1.0.2u.tar.gz"
     ]
+  1.1.0g:
+    sha256: de4d501267da39310905cb6dc8c6121f7a2cad45a7707f76df828fe1b85073af
+    url: [
+      "https://www.openssl.org/source/openssl-1.1.0g.tar.gz",
+      "https://www.openssl.org/source/old/openssl-1.1.0g.tar.gz"
+    ]
   1.1.0k:
     sha256: efa4965f4f773574d6cbda1cf874dbbe455ab1c0d4f906115f867d30444470b1
     url: [
