@@ -2,7 +2,7 @@ from conans import ConanFile, VisualStudioBuildEnvironment, CMake, tools
 
 class CbindgenTestConan(ConanFile):
     name = "pact_mock_server_ffi"
-    version = "0.0.17"
+    version = "0.0.16"
     description = "Pact/Rust FFI bindings"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/pact-foundation/pact-reference"
@@ -34,11 +34,13 @@ class CbindgenTestConan(ConanFile):
                 % (str(self.version))), "include/pact_mock_server_ffi.h")
         tools.download(("https://github.com/pact-foundation/pact-reference/releases/download/libpact_mock_server_ffi-v%s/pact_mock_server_ffi-c.h"
                 % (str(self.version))), "include/pact_mock_server_ffi-c.h")
+        tools.download("https://raw.githubusercontent.com/pact-foundation/pact-reference/master/LICENSE", "MIT")
 
     def package(self):
         self.copy("libpact_mock_server_ffi*.a", "lib", "")
         self.copy("pact_mock_server_ffi*.lib", "lib", "")
         self.copy("*.h", "", "")
+        self.copy("MIT", "licenses", "")
 
     def package_info(self):  # still very useful for package consumers
         self.cpp_info.libs = ["pact_mock_server_ffi"]
