@@ -1,0 +1,4 @@
+sources:
+  "0.0.16":
+    url: "https://github.com/pact-foundation/pact-reference/archive/libpact_mock_server_ffi-v0.0.16.zip"
+    sha256: "6ded4e300787eda247cbe86bbb658c462f06cbe4a8a181759aaa471b85c5a9fa"
