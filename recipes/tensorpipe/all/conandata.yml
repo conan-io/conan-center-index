@@ -1,0 +1,8 @@
+sources:
+  "cci.20210309":
+    url: "https://github.com/pytorch/tensorpipe/archive/777832fec33859cec8a1d6cd4452d9927477d6a6.zip"
+    sha256: "3a2277ae099d151bf9180b1da51aaafdea3b557937b4862044e180ed3a24e314"
+patches:
+  "cci.20210309":
+    - patch_file: "patches/0001-missing-includes.patch"
+      base_path: "source_subfolder"
