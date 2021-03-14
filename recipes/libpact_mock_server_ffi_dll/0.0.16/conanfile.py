@@ -1,6 +1,6 @@
 from conans import ConanFile, VisualStudioBuildEnvironment, CMake, tools
 
-class CbindgenTestConan(ConanFile):
+class PactMockServerFfiConan(ConanFile):
     name = "pact_mock_server_ffi_dll"
     version = "0.0.16"
     description = "Pact/Rust FFI bindings (DLL/Shared Lib)"

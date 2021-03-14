@@ -2,7 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
-class CbindgentestTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     requires = "openssl/1.1.1d"
