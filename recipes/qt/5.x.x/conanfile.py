@@ -661,6 +661,15 @@ Examples = bin/datadir/examples""")
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
+        tools.save(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"),
+                    "set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
+                    "set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
+                    "set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
+                    "set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            if not os.path.isfile(module):
+                tools.rmdir(os.path.join("lib", "cmake", m))
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -696,19 +705,14 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        tools.save(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"),
-                    "set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
-                    "set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
-                    "set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
-                    "set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             if os.path.isfile(module):
-                self.cpp_info.build_modules.append(module)
+                self.cpp_info.build_modules["cmake_find_package"].append(module)
+                self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
                 self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
-            else:
-                tools.rmdir(os.path.join("lib", "cmake", m))
-        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
+        self.cpp_info.build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
 
 
     @staticmethod
