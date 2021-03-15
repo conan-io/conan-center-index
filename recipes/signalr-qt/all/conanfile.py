@@ -88,12 +88,7 @@ class SignalrQtConan(ConanFile):
                 make = "make"
             self.run("%s install" % make)
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
         self._build_with_qmake()
         self._build_with_make()
         self._install_with_make()
