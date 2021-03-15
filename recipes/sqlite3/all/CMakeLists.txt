@@ -127,17 +127,21 @@ if(ENABLE_FTS5)
     endif()
 endif()
 
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(DIRECTORY source_subfolder/ DESTINATION include
+install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
     add_executable(sqlite3-bin source_subfolder/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
     set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
-    install(TARGETS sqlite3-bin RUNTIME DESTINATION bin)
+    install(TARGETS sqlite3-bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
 endif()
