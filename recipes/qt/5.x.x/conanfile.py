@@ -630,6 +630,10 @@ class QtConan(ConanFile):
                     }) if tools.os_info.is_macos else tools.no_op():
                         self.run(self._make_program(), run_environment=True)
 
+    @property
+    def _cmake_executables_file(self):
+        return os.path.join("lib", "cmake", "Qt5Core", "executables.cmake")
+
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
@@ -661,16 +665,18 @@ Examples = bin/datadir/examples""")
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
-        tools.save(os.path.join(self.package_folder,"lib", "cmake", "Qt5Core", "extras.cmake"),
+
+        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
+            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
+            if not os.path.isfile(module):
+                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
+
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file),
                     textwrap.dedent("""\
                         set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)
                         set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)
                         set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)
                         set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)"""))
-        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
-            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
-            if not os.path.isfile(module):
-                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -711,8 +717,8 @@ Examples = bin/datadir/examples""")
             self.cpp_info.build_modules["cmake_find_package"].append(module)
             self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
-        self.cpp_info.build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
-        self.cpp_info.build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
+        self.cpp_info.build_modules["cmake_find_package"].append(self._cmake_executables_file)
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
 
 
     @staticmethod
