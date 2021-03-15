@@ -18,15 +18,8 @@ class TinyAesCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-    }
-
-    _options_dict = {
-        # enable AES128
-        "aes128": [True, False],
-        # enable AES192
-        "aes192": [True, False],
-        # enable AES256
-        "aes256": [True, False],
+        # AES128, AES192 or AES256
+        "aes_block_size": ["AES128", "AES192", "AES256"],
         # enable AES encryption in CBC-mode of operation
         "cbc": [True, False],
         # enable the basic ECB 16-byte block algorithm
@@ -35,14 +28,10 @@ class TinyAesCConan(ConanFile):
         "ctr": [True, False],
     }
 
-    options.update(_options_dict)
-
     default_options = {
         "shared": False,
         "fPIC": True,
-        "aes128": True,
-        "aes192": False,
-        "aes256": False,
+        "aes_block_size": "AES128",
         "cbc": True,
         "ecb": True,
         "ctr": True,
@@ -74,9 +63,6 @@ class TinyAesCConan(ConanFile):
         if not self.options.cbc and not self.options.ecb and not self.options.ctr:
             raise ConanInvalidConfiguration("Need to at least specify one of CBC, ECB or CTR modes")
 
-        if not self.options.aes128 and not self.options.aes192 and not self.options.aes256:
-            raise ConanInvalidConfiguration("Need to at least specify one of AES{128, 192, 256} modes")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "tiny-AES-c-" + self.version
@@ -86,9 +72,6 @@ class TinyAesCConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        for key in self._options_dict.keys():
-            if self.options[key]:
-                self._cmake.definitions["CMAKE_CFLAGS"].append(key)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -108,3 +91,10 @@ class TinyAesCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
+        self.cpp_info.defines.append(str(self.options.aes_block_size))
+        if self.options.cbc:
+            self.cpp_info.defines.append("CBC")
+        if self.options.ecb:
+            self.cpp_info.defines.append("ECB")
+        if self.options.ctr:
+            self.cpp_info.defines.append("CTR")
