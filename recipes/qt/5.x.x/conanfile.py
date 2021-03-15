@@ -671,12 +671,14 @@ Examples = bin/datadir/examples""")
             if not os.path.isfile(module):
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
-        tools.save(os.path.join(self.package_folder, self._cmake_executables_file),
-                    textwrap.dedent("""\
-                        set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)
-                        set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)
-                        set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)
-                        set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)"""))
+        cmake_executables_variables = textwrap.dedent("""\
+            set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)
+            set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)
+            set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)""")
+        if self.options.widgets:
+            cmake_executables_variables += "\nset(Qt5Widgets_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)"
+
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), cmake_executables_variables)
 
     def package_id(self):
         del self.info.options.cross_compile
