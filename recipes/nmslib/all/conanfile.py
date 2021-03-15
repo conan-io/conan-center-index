@@ -54,3 +54,5 @@ class Nmslib(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["NonMetricSpaceLib"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
