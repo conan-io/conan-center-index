@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.7)
 project(sqlite3 C)
 
 include(conanbuildinfo.cmake)
