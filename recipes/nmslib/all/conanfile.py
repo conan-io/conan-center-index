@@ -38,6 +38,7 @@ class Nmslib(ConanFile):
     def _configure_cmake(self):
         if self._cmake is None:
             cmake = CMake(self)
+            cmake.definitions["WITHOUT_TESTS"] = True
             cmake.configure()
             self._cmake = cmake
         return self._cmake
