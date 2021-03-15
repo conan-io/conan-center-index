@@ -104,16 +104,6 @@ class TensorpipeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        self.copy("tensorpipe.h",
-                  dst=os.path.join("include", "tensorpipe"),
-                  src=os.path.join(self._source_subfolder, "tensorpipe"))
-        self.copy("config.h",
-                  dst=os.path.join("include", "tensorpipe"),
-                  src=os.path.join(self._source_subfolder, "tensorpipe"))
-        for subfolder in ["channel", "common", "core", "transport", "util"]:
-            self.copy("*.h",
-                      dst=os.path.join("include", "tensorpipe", subfolder),
-                      src=os.path.join(self._source_subfolder, "tensorpipe", subfolder))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"tensorpipe": "Tensorpipe::Tensorpipe"}

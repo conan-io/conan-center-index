@@ -1,0 +1,73 @@
+see https://github.com/pytorch/tensorpipe/pull/319
+
+--- a/tensorpipe/CMakeLists.txt
++++ b/tensorpipe/CMakeLists.txt
+@@ -209,3 +209,68 @@ install(TARGETS tensorpipe
+         EXPORT TensorpipeTargets
+         LIBRARY DESTINATION ${TP_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${TP_INSTALL_LIBDIR})
++
++### Public headers
++
++set(TP_PUBLIC_HEADERS
++  tensorpipe.h
++  channel/context.h
++  channel/cpu_context.h
++  channel/error.h
++  channel/basic/factory.h
++  channel/mpt/factory.h
++  channel/xth/factory.h
++  common/cpu_buffer.h
++  common/error.h
++  core/buffer.h
++  core/context.h
++  core/error.h
++  core/listener.h
++  core/message.h
++  core/pipe.h
++  transport/context.h
++  transport/error.h
++  transport/uv/error.h
++  transport/uv/factory.h
++  transport/uv/utility.h
++)
++
++if(TP_ENABLE_CMA)
++  set(TP_PUBLIC_HEADERS ${TP_PUBLIC_HEADERS} channel/cma/factory.h)
++endif()
++
++if(TP_USE_CUDA)
++  set(TP_PUBLIC_HEADERS ${TP_PUBLIC_HEADERS}
++    channel/cuda_context.h
++    channel/cuda_basic/factory.h
++    channel/cuda_gdr/error.h
++    channel/cuda_gdr/factory.h
++    channel/cuda_xth/factory.h
++    common/cuda_buffer.h
++  )
++
++  if(TP_ENABLE_CUDA_IPC)
++    set(TP_PUBLIC_HEADERS ${TP_PUBLIC_HEADERS} channel/cuda_ipc/factory.h)
++  endif()
++endif()
++
++if(TP_ENABLE_SHM)
++  set(TP_PUBLIC_HEADERS ${TP_PUBLIC_HEADERS} transport/shm/factory.h)
++endif()
++
++if(TP_ENABLE_IBV)
++  set(TP_PUBLIC_HEADERS ${TP_PUBLIC_HEADERS}
++    transport/ibv/error.h
++    transport/ibv/factory.h
++    transport/ibv/utility.h
++  )
++endif()
++
++foreach(_header_file ${TP_PUBLIC_HEADERS})
++  get_filename_component(_TP_HEADER_SUBDIR "${_header_file}" DIRECTORY)
++  install(FILES ${_header_file}
++          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tensorpipe/${_TP_HEADER_SUBDIR})
++endforeach()
++
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.h
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tensorpipe)
