@@ -632,7 +632,7 @@ class QtConan(ConanFile):
 
     @property
     def _cmake_executables_file(self):
-        return os.path.join("lib", "cmake", "Qt5Core", "executables.cmake")
+        return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
 
     def package(self):
         with tools.chdir("build_folder"):
