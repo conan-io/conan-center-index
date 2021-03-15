@@ -73,4 +73,4 @@ class NativefiledialogConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = [libname]
+        self.cpp_info.libs = ["nfd_d" if self.settings.build_type == "Debug" else "nfd"]
