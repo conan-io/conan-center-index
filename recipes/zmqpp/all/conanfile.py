@@ -14,6 +14,7 @@ class ZmqppConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = ["cmake", "cmake_find_package"]
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -28,7 +29,6 @@ class ZmqppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsodium/1.0.18")
         self.requires("zeromq/4.3.3")
 
     def source(self):
@@ -46,29 +46,29 @@ class ZmqppConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ZMQPP_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["ZMQPP_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["ZMQPP_BUILD_CLIENT"] = False
+        self._cmake.definitions["ZMQPP_BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
     def build(self):
         self._patch_sources()
-        self.cmake = CMake(self)
-        self.cmake.verbose = True
-        self.cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
-        self.cmake.definitions["ZMQPP_BUILD_STATIC"] = not self.options.shared
-        self.cmake.definitions["ZMQPP_BUILD_EXAMPLES"] = False
-        self.cmake.definitions["ZMQPP_BUILD_CLIENT"] = False
-        self.cmake.definitions["ZMQPP_BUILD_TESTS"] = False
-        self.cmake.configure(build_folder=self._build_subfolder)
-        self.cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.cmake.configure()
-        self.cmake.install()
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "zmqpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "zmqpp"
         self.cpp_info.names["pkg_config"] = "libzmqpp"
-        libzmq_target = "libzmqpp" if self.options.shared else "libzmqpp-static"
-        self.cpp_info.components[libzmq_target].names["cmake_find_package"] = libzmq_target
-        self.cpp_info.components[libzmq_target].names["cmake_find_package_multi"] = libzmq_target
-        self.cpp_info.components[libzmq_target].libs = tools.collect_libs(self)
-        self.cpp_info.components[libzmq_target].requires = ["libsodium::libsodium", "zeromq::zeromq"]
+        self.cpp_info.libs = tools.collect_libs(self)
+
