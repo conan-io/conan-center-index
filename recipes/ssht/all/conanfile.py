@@ -1,5 +1,8 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from glob import glob
+import os
+
 
 
 class SshtConan(ConanFile):
@@ -13,54 +16,43 @@ class SshtConan(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
     requires = "fftw/3.3.9"
-    generators = "cmake"
-    exports_sources = [
-        "src/c/*",
-        "include/ssht/*.h",
-        "tests/CMakeLists.txt",
-        "tests/*.c",
-        "tests/*.h",
-        "CMakeLists.txt",
-        "cmake/*.cmake",
-    ]
+    generators = "cmake", "cmake_find_package", "cmake_paths"
+    exports_sources = ["CMakeLists.txt"]
 
     @property
-    def _src_dir(self):
-        return f"{self.name}-{self.version}"
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    def configure(self):
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def config_options(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("SSHT requires C99 support for complex numbers.")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob('ssht-*/')[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
     @property
     def cmake(self):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
-            self._cmake.definitions["tests"] = True
-            self._cmake.definitions["conan_deps"] = True
+            self._cmake.definitions["tests"] = False
             self._cmake.definitions["python"] = False
-            self._cmake.definitions["CONAN_CENTER"] = True
-            self._cmake.configure(build_folder="build", source_folder=self._src_dir)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        from pathlib import Path
-
-        path = Path(self.source_folder)
-        build = Path(self.source_folder) / "build"
-        build.mkdir(exist_ok=True)
-        (path / "conanbuildinfo.cmake").rename(path / "build" / "conanbuildinfo.cmake")
         self.cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._src_dir)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["ssht"]
-        self.cpp_info.builddirs = ["lib/cmake/ssht"]
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])

@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class SshtTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def configure(self):
         del self.settings.compiler.libcxx
