@@ -81,6 +81,7 @@ class FreetypeConan(ConanFile):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if tools.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
         tools.replace_in_file(cmakelists, find_harfbuzz, "")
+        tools.replace_in_file(cmakelists, "if (HARFBUZZ_FOUND)", "if(0)")
         if not self.options.with_png:
             tools.replace_in_file(cmakelists, "find_package(PNG)", "")
             tools.replace_in_file(cmakelists, "if (PNG_FOUND)", "if(0)")
