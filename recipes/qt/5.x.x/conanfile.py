@@ -675,10 +675,13 @@ Examples = bin/datadir/examples""")
         extension = ""
         if self.settings.os == "Windows":
             extension = ".exe"
-        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt5)\n"
-        filecontents += "set(QT_VERSION_MAJOR %d)\n" % int(self.version.split(".")[0])
-        filecontents += "set(QT_VERSION_MINOR %d)\n" % int(self.version.split(".")[1])
-        filecontents += "set(QT_VERSION_PATCH %d)\n" % int(self.version.split(".")[2])
+        v = tools.Version(self.version)
+        filecontents = textwrap.dedent("""\
+            set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
+            set(QT_VERSION_MAJOR {major})
+            set(QT_VERSION_MINOR {minor})
+            set(QT_VERSION_PATCH {patch})
+        """.format(major=v.major, minor=v.minor, patch=v.patch))
         targets = {}
         targets["Core"] = ["moc", "rcc", "qmake"]
         targets["DBus"] = ["qdbuscpp2xml", "qdbusxml2cpp"]
@@ -694,12 +697,12 @@ Examples = bin/datadir/examples""")
         for namespace, targets in targets.items():
             for target in targets:
                 filecontents += textwrap.dedent("""\
-                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
-                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
-                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
-                        set(Qt5{2}_{3}_EXECUTABLE ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
+                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
+                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{target}{ext})
+                        set(Qt5{namespace}_{uppercase_target}_EXECUTABLE ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
                     endif()
-                    """.format(target, extension, namespace, target.upper()))
+                    """.format(target=target, ext=extension, namespace=namespace, uppercase_target=target.upper()))
 
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
