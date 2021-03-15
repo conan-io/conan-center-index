@@ -30,25 +30,63 @@ class SignalrQtConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("AMQP-CPP-" + self.version, self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-            del self.options.linux_tcp_module
+        os.rename("signalr-qt-" + self.version, self._source_subfolder)
 
     def requirements(self):
         self.requires.add("qt/5.14.1")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["AMQP-CPP_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["AMQP-CPP_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module") or False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def _build_with_qmake(self):
+        tools.mkdir("qmake_folder")
+        with tools.chdir("qmake_folder"):
+            self.output.info("Building with qmake")
+
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                args = [self.source_folder, "DESTDIR=bin"]
+
+                def _getenvpath(var):
+                    val = os.getenv(var)
+                    if val and tools.os_info.is_windows:
+                        val = val.replace("\\", "/")
+                        os.environ[var] = val
+                    return val
+
+                value = _getenvpath('CC')
+                if value:
+                    args += ['QMAKE_CC=' + value,
+                             'QMAKE_LINK_C=' + value,
+                             'QMAKE_LINK_C_SHLIB=' + value]
+
+                value = _getenvpath('CXX')
+                if value:
+                    args += ['QMAKE_CXX=' + value,
+                             'QMAKE_LINK=' + value,
+                             'QMAKE_LINK_SHLIB=' + value]
+
+                self.run("qmake %s" % " ".join(args), run_environment=True)
+
+    def _build_with_make(self):
+        with tools.chdir("qmake_folder"):
+            self.output.info("Building with make")
+            if tools.os_info.is_windows:
+                if self.settings.compiler == "Visual Studio":
+                    make = "jom"
+                else:
+                    make = "mingw32-make"
+            else:
+                make = "make"
+            self.run(make, run_environment=True)
+
+    def _install_with_make(self):
+        with tools.chdir("qmake_folder"):
+            self.output.info("Building with make")
+            if tools.os_info.is_windows:
+                if self.settings.compiler == "Visual Studio":
+                    make = "jom"
+                else:
+                    make = "mingw32-make"
+            else:
+                make = "make"
+            self.run("%s install" % make)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -56,21 +94,13 @@ class SignalrQtConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.install()
+        self._build_with_qmake()
+        self._build_with_make()
+        self._install_with_make()
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
-
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        self._install_with_make()
+        self.copy("README.md", src=self._source_subfolder, dst=".", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "amqpcpp"
-        self.cpp_info.names["cmake_find_package"] = "amqpcpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "amqpcpp"
-        self.cpp_info.libs = ["amqpcpp"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread"]
+        self.cpp_info.libs = ["signalr-qt"]
