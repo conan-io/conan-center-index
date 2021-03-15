@@ -2,7 +2,7 @@ import os
 import shutil
 import itertools
 import glob
-
+import textwrap
 import configparser
 from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -661,15 +661,16 @@ Examples = bin/datadir/examples""")
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
-        tools.save(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"),
-                    "set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)\n"
-                    "set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)\n"
-                    "set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)\n"
-                    "set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)")
-        for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+        tools.save(os.path.join(self.package_folder,"lib", "cmake", "Qt5Core", "extras.cmake"),
+                    textwrap.dedent("""\
+                        set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)
+                        set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)
+                        set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)
+                        set(Qt5Core_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)"""))
+        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
+            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             if not os.path.isfile(module):
-                tools.rmdir(os.path.join("lib", "cmake", m))
+                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
     def package_id(self):
         del self.info.options.cross_compile
