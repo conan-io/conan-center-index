@@ -1,0 +1,4 @@
+sources:
+  "0.1":
+    sha256: 1e8ed210abb89104cd0277fa014a94c559640d2c2a2e4a69eeb1b2d641a30b30
+    url: https://github.com/p3root/signalr-qt/archive/0.1.tar.gz
