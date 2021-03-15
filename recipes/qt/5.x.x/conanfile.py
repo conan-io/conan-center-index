@@ -707,10 +707,9 @@ Examples = bin/datadir/examples""")
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
-            if os.path.isfile(module):
-                self.cpp_info.build_modules["cmake_find_package"].append(module)
-                self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
-                self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
+            self.cpp_info.build_modules["cmake_find_package"].append(module)
+            self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
         self.cpp_info.build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
         self.cpp_info.build_modules["cmake_find_package_multi"].append(os.path.join("lib", "cmake", "Qt5Core", "extras.cmake"))
 
