@@ -671,14 +671,37 @@ Examples = bin/datadir/examples""")
             if not os.path.isfile(module):
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
-        cmake_executables_variables = textwrap.dedent("""\
-            set(Qt5Core_QMAKE_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/qmake)
-            set(Qt5Core_MOC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/moc)
-            set(Qt5Core_RCC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/rcc)""")
-        if self.options.widgets:
-            cmake_executables_variables += "\nset(Qt5Widgets_UIC_EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/../../../bin/uic)"
 
-        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), cmake_executables_variables)
+        extension = ""
+        if self.settings.os == "Windows":
+            extension = ".exe"
+        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt5)\n"
+        filecontents += "set(QT_VERSION_MAJOR %d)\n" % int(self.version.split(".")[0])
+        filecontents += "set(QT_VERSION_MINOR %d)\n" % int(self.version.split(".")[1])
+        filecontents += "set(QT_VERSION_PATCH %d)\n" % int(self.version.split(".")[2])
+        targets = {}
+        targets["Core"] = ["moc", "rcc", "qmake"]
+        targets["DBus"] = ["qdbuscpp2xml", "qdbusxml2cpp"]
+        if self.options.widgets:
+            targets["Widgets"] = ["uic"]
+        if self.options.qttools:
+            targets["Tools"] = ["qhelpgenerator", "qcollectiongenerator", "qdoc", "qtattributionsscanner"]
+            targets[""] = ["lconvert", "lrelease", "lupdate"]
+        if self.options.qtremoteobjects:
+            targets["RemoteObjects"] = ["repc"]
+        if self.options.qtscxml:
+            targets["Scxml"] = ["qscxmlc"]
+        for namespace, targets in targets.items():
+            for target in targets:
+                filecontents += textwrap.dedent("""\
+                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
+                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
+                        set(Qt5{2}_{3}_EXECUTABLE ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                    endif()
+                    """.format(target, extension, namespace, target.upper()))
+
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
     def package_id(self):
         del self.info.options.cross_compile
