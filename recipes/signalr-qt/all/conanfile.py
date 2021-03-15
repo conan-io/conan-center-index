@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import json
 
 
 class SignalrQtConan(ConanFile):
@@ -16,8 +17,9 @@ class SignalrQtConan(ConanFile):
     default_options = {
         "shared": True
     }
-    generators = "qmake"
+    generators = "json"
 
+    current_dir = os.path.abspath(os.path.dirname(__file__))
     _cmake = None
 
     @property
@@ -29,19 +31,30 @@ class SignalrQtConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("signalr-qt-" + self.version, self._source_subfolder)
+        sha256 = self.conan_data["sources"][self.version]["sha256"]
+        url = self.conan_data["sources"][self.version]["url"]
+        tools.get(url, sha256=sha256)
+        os.rename("signalr-qt-%s" % self.version, self._source_subfolder)
 
     def requirements(self):
         self.requires.add("qt/5.14.1")
 
+    def _find_qmake(self):
+        buildinfo = json.load(open(os.path.join(self.current_dir, "conanbuildinfo.json")))
+        for dep in buildinfo["dependencies"]:
+            if dep["name"] != "qt":
+                continue
+            for bin in dep["bin_paths"]:
+                return(os.path.join(bin, "qmake"))
+        return "qmake"
+
     def _build_with_qmake(self):
-        tools.mkdir("qmake_folder")
-        with tools.chdir("qmake_folder"):
+        qmake = self._find_qmake()
+        with tools.chdir(self._source_subfolder):
             self.output.info("Building with qmake")
 
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                args = [self.source_folder, "DESTDIR=bin"]
+                args = [self._source_subfolder, "DESTDIR=bin"]
 
                 def _getenvpath(var):
                     val = os.getenv(var)
@@ -62,10 +75,10 @@ class SignalrQtConan(ConanFile):
                              'QMAKE_LINK=' + value,
                              'QMAKE_LINK_SHLIB=' + value]
 
-                self.run("qmake %s" % " ".join(args), run_environment=True)
+                self.run("%s %s" % (qmake, " ".join(args)), run_environment=True)
 
     def _build_with_make(self):
-        with tools.chdir("qmake_folder"):
+        with tools.chdir(self._source_subfolder):
             self.output.info("Building with make")
             if tools.os_info.is_windows:
                 if self.settings.compiler == "Visual Studio":
@@ -77,8 +90,8 @@ class SignalrQtConan(ConanFile):
             self.run(make, run_environment=True)
 
     def _install_with_make(self):
-        with tools.chdir("qmake_folder"):
-            self.output.info("Building with make")
+        with tools.chdir(self._source_subfolder):
+            self.output.info("Installing with make")
             if tools.os_info.is_windows:
                 if self.settings.compiler == "Visual Studio":
                     make = "jom"
