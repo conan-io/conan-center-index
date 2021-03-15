@@ -1,7 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
@@ -136,6 +138,30 @@ class ConanSqlite3(ConanFile):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
         cmake = self._configure_cmake()
         cmake.install()
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            if(DEFINED SQLite_INCLUDE_DIRS)
+                set(SQLite3_INCLUDE_DIRS ${SQLite_INCLUDE_DIRS})
+            endif()
+            if(DEFINED SQLite_LIBRARIES)
+                set(SQLite3_LIBRARIES ${SQLite_LIBRARIES})
+            endif()
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
@@ -144,6 +170,8 @@ class ConanSqlite3(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
         self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
         self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threadsafe:
