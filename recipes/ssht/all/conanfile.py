@@ -4,12 +4,12 @@ from conans.errors import ConanInvalidConfiguration
 
 class SshtConan(ConanFile):
     name = "ssht"
-    license = "GPL-3.0"
+    license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/astro-informatics/ssht"
     description = "Fast spin spherical harmonic transforms"
     settings = "os", "arch", "compiler", "build_type"
-    topics = ("Physics", "Astrophysics", "Radio Interferometry")
+    topics = ("physics", "astrophysics", "radio interferometry")
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
     requires = "fftw/3.3.9"
@@ -31,7 +31,6 @@ class SshtConan(ConanFile):
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("SSHT requires C99 support for complex numbers.")
-        self.options["fftw"].fPIC = self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
@@ -54,7 +53,6 @@ class SshtConan(ConanFile):
         build.mkdir(exist_ok=True)
         (path / "conanbuildinfo.cmake").rename(path / "build" / "conanbuildinfo.cmake")
         self.cmake.build()
-        self.cmake.test()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._src_dir)
