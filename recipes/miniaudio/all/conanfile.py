@@ -32,6 +32,14 @@ class MiniaudioConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        self.cpp_info.names["cmake_find_package"] = "Miniaudio"
+        self.cpp_info.names["cmake_find_package_multi"] = "Miniaudio"
+        self.cpp_info.components["miniaudiolib"].names[
+            "cmake_find_package"
+        ] = "miniaudio"
+        self.cpp_info.components["miniaudiolib"].names[
+            "cmake_find_package_multi"
+        ] = "miniaudio"
 
     def package_id(self):
         self.info.header_only()
