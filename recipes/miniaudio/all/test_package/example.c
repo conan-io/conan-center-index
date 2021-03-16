@@ -47,7 +47,5 @@ int main(int argc, char **argv) {
 
   ma_context_uninit(&context);
 
-  (void)argc;
-  (void)argv;
   return 0;
 }
