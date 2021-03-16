@@ -10,6 +10,7 @@ bzip2/1.0.8
 ffmpeg/3.3.1
 intel_media_sdk/2018R2_1
 jsoncpp/1.8.3
+leveldb/1.22
 libjpeg/9d.dssl1
 libpng/1.6.37
 miniupnpc/2.1
