@@ -95,7 +95,7 @@ class SignalrQtConan(ConanFile):
     def package(self):
         self.copy("README.md", src=self._source_subfolder, dst=".", keep_path=False)
         self.copy("*.h", src=self._source_subfolder, dst=".")
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False, symlinks=True)
             self.copy("*.dll", src=self._source_subfolder, dst="lib", keep_path=False, symlinks=True)
         else:
