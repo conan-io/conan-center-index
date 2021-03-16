@@ -205,6 +205,8 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
+        if self.settings.os == "Android":
+            self.cpp_info.components["libprotobuf"].system_libs.append("log")
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
@@ -235,6 +237,8 @@ class ProtobufConan(ConanFile):
             if self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
+            if self.settings.os == "Android":
+                self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
 
             self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
             self.cpp_info.components["libprotobuf-lite"].build_modules = [
