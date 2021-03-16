@@ -25,12 +25,10 @@ class MiniaudioConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(
-            pattern="miniaudio.h", dst="include/miniaudio", src=self._source_subfolder
-        )
+        self.copy(pattern="miniaudio.h", dst="include", src=self._source_subfolder)
         self.copy(
             pattern="stb_vorbis.c",
-            dst="include/miniaudio/extras",
+            dst="include/extras",
             src=os.path.join(self._source_subfolder, "extras"),
         )
         self.copy(
@@ -40,12 +38,12 @@ class MiniaudioConan(ConanFile):
         )
         self.copy(
             pattern="ma_speex_resampler.h",
-            dst="include/miniaudio/extras/speex_resampler/",
+            dst="include/extras/speex_resampler/",
             src=os.path.join(self._source_subfolder, "extras/speex_resampler/"),
         )
         self.copy(
             pattern="*.*",
-            dst="include/miniaudio/extras/speex_resampler/thirdparty",
+            dst="include/extras/speex_resampler/thirdparty",
             src=os.path.join(
                 self._source_subfolder, "extras/speex_resampler/thirdparty"
             ),
