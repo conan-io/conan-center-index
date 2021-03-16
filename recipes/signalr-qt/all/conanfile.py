@@ -19,7 +19,6 @@ class SignalrQtConan(ConanFile):
     }
     generators = "json"
 
-    current_dir = os.path.abspath(os.path.dirname(__file__))
     _cmake = None
 
     @property
@@ -40,7 +39,7 @@ class SignalrQtConan(ConanFile):
         self.requires.add("qt/5.14.1")
 
     def _find_qmake(self):
-        buildinfo = json.load("conanbuildinfo.json")
+        buildinfo = json.load(open("conanbuildinfo.json"))
         for dep in buildinfo["dependencies"]:
             if dep["name"] != "qt":
                 continue
