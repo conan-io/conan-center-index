@@ -1,5 +1,8 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.32.0"
 
 
 class SleefConan(ConanFile):
@@ -44,6 +47,10 @@ class SleefConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("shared sleef not supported on Windows, it produces runtime errors")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
