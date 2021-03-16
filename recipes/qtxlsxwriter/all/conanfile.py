@@ -51,7 +51,7 @@ class QtXlsxWriterConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/5.15.2", private=False)
+        self.requires("qt/5.15.2")
 
     def generate(self):
         tc = CMakeToolchain(self)
