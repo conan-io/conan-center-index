@@ -32,6 +32,11 @@ class MiniaudioConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("dl")
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(
+                ["CoreFoundation", "CoreAudio", "AudioUnit"]
+            )
+            self.cpp_info.defines.append("MA_NO_RUNTIME_LINKING=1")
 
     def package_id(self):
         self.info.header_only()
