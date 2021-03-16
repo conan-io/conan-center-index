@@ -76,6 +76,16 @@ class GinkgoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Ginkgo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
-        self.cpp_info.libs = tools.collect_libs(self)
+        debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+
+        self.cpp_info.components["reference"].libs = [
+            "ginkgo_reference" + debug_suffix]
+        self.cpp_info.components["cuda"].libs = ["ginkgo_cuda" + debug_suffix]
+        self.cpp_info.components["hip"].libs = ["ginkgo_hip" + debug_suffix]
+
+        self.cpp_info.components["omp"].libs = ["ginkgo_omp" + debug_suffix]
+        self.cpp_info.components["omp"].requires = ["cuda", "hip"]
+
+        self.cpp_info.components["core"].libs = ["ginkgo" + debug_suffix]
+        self.cpp_info.components["core"].requires = [
+            "reference", "omp", "cuda", "hip"]
