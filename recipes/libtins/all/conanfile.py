@@ -45,7 +45,7 @@ class LibTinsConan(ConanFile):
         if self.options.with_ack_tracker:
             self.requires("boost/1.75.0")
         if self.options.with_wpa2:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def configure(self):
         if self.options.shared:
