@@ -29,6 +29,10 @@ class PangoConan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
+    
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
 
     def config_options(self):
         if self.settings.os == "Windows":
