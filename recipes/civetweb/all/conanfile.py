@@ -59,7 +59,7 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
