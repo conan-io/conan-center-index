@@ -9,7 +9,14 @@ class GinkgoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "High-performance linear algebra library for manycore systems, with a focus on sparse solution of linear systems."
     topics = ("hpc", "linear-algebra")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = {"os": None,
+                "compiler": {"Visual Studio": {"version": ["16"]},
+                             "gcc": {"version": ["5.4", "5.5", "6", "6.1", "6.2", "6.3", "6.4", "6.5",
+                                                 "7", "7.1", "7.2", "7.3", "7.4", "7.5", "8", "8.1", "8.2", "8.3", "8.4",
+                                                 "9", "9.1", "9.2", "9.3", "10", "10.1"]},
+                             "clang": {"version": ["3.9", "4.0", "5.0", "6.0", "7.0", "7.1", "8", "9", "10", "11"]},
+                             "apple-clang": {"version": ["10.0", "11.0", "12.0"]},
+                             "intel": {"version": ["18", "19"]}}, "build_type": None, "arch": None}
     options = {"shared": [True, False], "fPIC": [True, False], "openmp": [
         True, False], "cuda": [True, False]}
     default_options = {"shared": False, "fPIC": False,
