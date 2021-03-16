@@ -8,7 +8,7 @@ class QtXlsxWriterConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dbzhang800/QtXlsxWriter"
-    description = "A library that can read and write Excel files"
+    description = ".xlsx file reader and writer for Qt5"
     topics = ("qtxlsxwriter", "excel", "xlsx", "conan-recipe")
 
     settings = "os", "compiler", "build_type", "arch"
@@ -24,7 +24,6 @@ class QtXlsxWriterConan(ConanFile):
     generators = "CMakeDeps"
     exports_sources = [
         "CMakeLists.txt",
-        os.path.join("cmake", "*"),
         os.path.join("patches", "*"),
         os.path.join("src", "CMakeLists.txt")
     ]
