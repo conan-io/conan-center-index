@@ -48,6 +48,11 @@ class MiniaudioConan(ConanFile):
                 self._source_subfolder, "extras/speex_resampler/thirdparty"
             ),
         )
+        self.copy(
+            pattern="miniaudio.*",
+            dst="include/extras/miniaudio_split",
+            src=os.path.join(self._source_subfolder, "extras/miniaudio_split"),
+        )
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
