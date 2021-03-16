@@ -13,10 +13,19 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CONAN_INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${CONAN_LIB_DIRS})
 
+# get the actual library file name of the Qt GUI module (for ex. it can be `Qt5Gui_debug`)
+foreach(lib ${CONAN_LIBS})
+    string(FIND ${lib} "Qt5Gui" qtgui_found)
+    if(NOT (qtgui_found EQUAL -1))
+        set(qtgui_name ${lib})
+        break()
+    endif()
+endforeach()
+
 # place qt::Gui before qt::Core (important for some toolchains)
 # since the current qt recipe provides an incorrect order of libraries
 target_link_libraries(${PROJECT_NAME}
-    Qt5Gui
+    ${qtgui_name}
     ${CONAN_LIBS}
 )
 
