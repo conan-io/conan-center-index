@@ -69,11 +69,6 @@ class CivetwebConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("civetweb-%s" % self.version, self._source_subfolder)
 
-    def _patch_sources(self):
-        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
-        tools.replace_in_file(cmakelists_src, "${OPENSSL_INCLUDE_DIR}", "${OpenSSL_INCLUDE_DIR}")
-        tools.replace_in_file(cmakelists_src, "${OPENSSL_LIBRARIES}", "OpenSSL::SSL OpenSSL::Crypto")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -93,7 +88,6 @@ class CivetwebConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
