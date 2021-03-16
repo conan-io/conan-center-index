@@ -5,6 +5,8 @@ import glob
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 class PangoConan(ConanFile):
     name = "pango"
     license = "LGPL-2.0-and-later"
@@ -32,7 +34,7 @@ class PangoConan(ConanFile):
     
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
+            raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
 
     def config_options(self):
         if self.settings.os == "Windows":
