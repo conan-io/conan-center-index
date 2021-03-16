@@ -73,10 +73,10 @@ class LibnameConan(ConanFile):
             self.build_requires("sassc/3.6.1")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.0")
-        self.requires("glib/2.67.0")
+        self.requires("gdk-pixbuf/2.42.2")
+        self.requires("glib/2.67.1")
         if self.settings.compiler != "Visual Studio":
-            self.requires("cairo/1.17.2")
+            self.requires("cairo/1.17.4")
         if self._gtk4:
             self.requires("graphene/1.10.2")
         if self.settings.os == "Linux":
@@ -92,7 +92,7 @@ class LibnameConan(ConanFile):
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
-        self.requires("libepoxy/1.5.4")
+        self.requires("libepoxy/1.5.5")
         if self.options.with_pango:
             self.requires("pango/1.48.0")
 
