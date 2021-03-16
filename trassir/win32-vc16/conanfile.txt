@@ -8,6 +8,9 @@ boost/1.69.0
 c-ares/1.15.0
 bzip2/1.0.8
 ffmpeg/3.3.1
+gflags/2.2.2
+glog/0.4.0
+hdf5/1.10.6
 intel_media_sdk/2018R2_1
 jsoncpp/1.8.3
 leveldb/1.22
@@ -31,7 +34,7 @@ caffe:shared=False
 curl:shared=True
 facesdk:shared=True
 ffmpeg:shared=True
-gflags:shared=False
+gflags:shared=True
 glog:shared=True
 hdf5:shared=True
 hidapi:shared=True
