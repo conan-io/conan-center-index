@@ -40,7 +40,7 @@ class SignalrQtConan(ConanFile):
         self.requires.add("qt/5.14.1")
 
     def _find_qmake(self):
-        buildinfo = json.load(open(os.path.join(self.current_dir, "conanbuildinfo.json")))
+        buildinfo = json.load("conanbuildinfo.json")
         for dep in buildinfo["dependencies"]:
             if dep["name"] != "qt":
                 continue
