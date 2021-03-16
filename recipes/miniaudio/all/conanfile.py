@@ -9,7 +9,7 @@ class MiniaudioConan(ConanFile):
     topics = ("conan", "miniaudio", "header-only", "sound")
     homepage = "https://github.com/mackron/miniaudio"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Unlicense"
+    license = ["Unlicense", "MIT-0"]
     settings = "os", "compiler", "build_type", "arch"
 
     no_copy_source = True
