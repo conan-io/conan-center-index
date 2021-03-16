@@ -53,7 +53,7 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.57.1")
 
     def requirements(self):
         if self.options.with_freetype:
@@ -66,7 +66,7 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
         self.requires("harfbuzz/2.7.4")
-        self.requires("glib/2.67.1")
+        self.requires("glib/2.67.6")
         self.requires("fribidi/1.0.9")
 
     def source(self):
