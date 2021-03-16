@@ -27,5 +27,11 @@ class MiniaudioConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="miniaudio.h", dst="include", src=self._source_subfolder)
 
+    def package_info(self):
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.system_libs.extend(["m", "pthread"])
+
     def package_id(self):
         self.info.header_only()
