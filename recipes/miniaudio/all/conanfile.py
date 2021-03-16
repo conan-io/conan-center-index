@@ -28,10 +28,10 @@ class MiniaudioConan(ConanFile):
         self.copy(pattern="miniaudio.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
-        elif self.settings.os == "Macos":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("dl")
         self.cpp_info.names["cmake_find_package"] = "Miniaudio"
         self.cpp_info.names["cmake_find_package_multi"] = "Miniaudio"
         self.cpp_info.components["miniaudiolib"].names[
