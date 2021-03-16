@@ -44,16 +44,16 @@ class SignalrQtConan(ConanFile):
             if dep["name"] != "qt":
                 continue
             for bin in dep["bin_paths"]:
-                return(os.path.join(bin, "qmake"))
+                return os.path.join(bin, "qmake")
         return "qmake"
 
     def _build_with_qmake(self):
         qmake = self._find_qmake()
-        with tools.chdir(self._source_subfolder):
+        with tools.chdir(self.source_folder):
             self.output.info("Building with qmake")
 
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                args = [self._source_subfolder, "DESTDIR=bin"]
+                args = [os.path.join(self.build_folder, self._source_subfolder)]
 
                 def _getenvpath(var):
                     val = os.getenv(var)
@@ -77,7 +77,7 @@ class SignalrQtConan(ConanFile):
                 self.run("%s %s" % (qmake, " ".join(args)), run_environment=True)
 
     def _build_with_make(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.chdir(self.source_folder):
             self.output.info("Building with make")
             if tools.os_info.is_windows:
                 if self.settings.compiler == "Visual Studio":
@@ -88,26 +88,14 @@ class SignalrQtConan(ConanFile):
                 make = "make"
             self.run(make, run_environment=True)
 
-    def _install_with_make(self):
-        with tools.chdir(self._source_subfolder):
-            self.output.info("Installing with make")
-            if tools.os_info.is_windows:
-                if self.settings.compiler == "Visual Studio":
-                    make = "jom"
-                else:
-                    make = "mingw32-make"
-            else:
-                make = "make"
-            self.run("%s install" % make)
-
     def build(self):
         self._build_with_qmake()
         self._build_with_make()
-        self._install_with_make()
 
     def package(self):
-        self._install_with_make()
         self.copy("README.md", src=self._source_subfolder, dst=".", keep_path=False)
+        self.copy("*.h", src=self._source_subfolder, dst=".")
+        self.copy("*.so*", src=self._source_subfolder, dst="lib", keep_path=False, symlinks=True)
 
     def package_info(self):
         self.cpp_info.libs = ["signalr-qt"]
