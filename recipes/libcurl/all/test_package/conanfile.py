@@ -23,6 +23,8 @@ class TestPackageConan(ConanFile):
             self.test_arm()
         elif tools.cross_building(self.settings) and self.settings.os == "Windows":
             self.test_mingw_cross()
+        elif tools.cross_building(self.settings):
+            return
         else:
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
