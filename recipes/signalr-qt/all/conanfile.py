@@ -25,15 +25,16 @@ class SignalrQtConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def source(self):
-        sha256 = self.conan_data["sources"][self.version]["sha256"]
         url = self.conan_data["sources"][self.version]["url"]
-        tools.get(url, sha256=sha256)
-        os.rename("signalr-qt-%s" % self.version, self._source_subfolder)
+        signalr_hash = self.conan_data["sources"][self.version]["signalr_hash"]
+        qthttpserver_hash = self.conan_data["sources"][self.version]["qthttpserver_hash"]
+        qtwebsockets_hash = self.conan_data["sources"][self.version]["qtwebsockets_hash"]
+
+        self.run("git clone --recursive %s %s" % (url, self._source_subfolder))
+        self.run("cd %s && git checkout %s" % (self._source_subfolder, signalr_hash))
+        self.run("cd %s/ThirdParty/QtWebSockets && git checkout %s" % (self._source_subfolder, qtwebsockets_hash))
+        self.run("cd %s/ThirdParty/QHttpServer && git checkout %s" % (self._source_subfolder, qthttpserver_hash))
 
     def requirements(self):
         self.requires.add("qt/5.14.1")
@@ -94,10 +95,13 @@ class SignalrQtConan(ConanFile):
 
     def package(self):
         self.copy("README.md", src=self._source_subfolder, dst=".", keep_path=False)
-        self.copy("*.h", src=self._source_subfolder, dst=".", keep_path=True)
+        self.copy("*.h",
+                  src=os.path.join(self._source_subfolder, "SignalRLibraries/SignalRClient"),
+                  dst="include", 
+                  keep_path=True)
         if self.settings.os == "Windows":
             self.copy("*.lib", src="", dst="lib", keep_path=False, symlinks=True)
-            self.copy("*.dll", src="", dst="lib", keep_path=False, symlinks=True)
+            self.copy("*.dll", src="", dst="bin", keep_path=False, symlinks=True)
         else:
             self.copy("*.so*", src="", dst="lib", keep_path=False, symlinks=True)
 
