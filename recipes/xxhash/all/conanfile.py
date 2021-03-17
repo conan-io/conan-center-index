@@ -48,6 +48,7 @@ class XxHash(ConanFile):
         if self._cmake is None:
             self._cmake = CMake(self)
             self._cmake.definitions["XXHASH_BUNDLED_MODE"] = False
+            self._cmake.definitions["XXHASH_BUILD_XXHSUM"] = self.options.utility
             self._cmake.configure()
         return self._cmake
 
