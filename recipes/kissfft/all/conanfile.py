@@ -37,6 +37,11 @@ class KissfftConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
