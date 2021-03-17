@@ -47,7 +47,7 @@ class KissfftConan(ConanFile):
         cmake.definitions["KISSFFT_TOOLS"] = False
         cmake.definitions["KISSFFT_DATATYPE"] = self.options.datatype
         cmake.definitions["KISSFFT_USE_ALLOCA"] = self.options.use_alloca
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         self._cmake = cmake
         return self._cmake
 
