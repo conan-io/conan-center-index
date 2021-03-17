@@ -1,0 +1,32 @@
+#pragma once
+
+#ifndef __FFT_ALLOC_H_6EB7137E_0A63_4508_BED0_8F1051651D88__
+#define __FFT_ALLOC_H_6EB7137E_0A63_4508_BED0_8F1051651D88__
+
+#include "fft_export.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+FFT_EXPORT int *alloc_1d_int(int n1);
+FFT_EXPORT void free_1d_int(int *i);
+FFT_EXPORT double *alloc_1d_double(int n1);
+FFT_EXPORT void free_1d_double(double *d);
+FFT_EXPORT int **alloc_2d_int(int n1, int n2);
+FFT_EXPORT void free_2d_int(int **ii);
+FFT_EXPORT double **alloc_2d_double(int n1, int n2);
+FFT_EXPORT void free_2d_double(double **dd);
+FFT_EXPORT int ***alloc_3d_int(int n1, int n2, int n3);
+FFT_EXPORT void free_3d_int(int ***iii);
+FFT_EXPORT double ***alloc_3d_double(int n1, int n2, int n3);
+FFT_EXPORT void free_3d_double(double ***ddd);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __FFT_ALLOC_H_6EB7137E_0A63_4508_BED0_8F1051651D88__ */
