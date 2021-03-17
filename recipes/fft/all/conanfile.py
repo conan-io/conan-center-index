@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class FftConan(ConanFile):
     name = "fft"
-    license = ""
+    license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html"
     description = "This is a package to calculate Discrete Fourier/Cosine/Sine Transforms of 2,3-dimensional sequences of length 2^N."
