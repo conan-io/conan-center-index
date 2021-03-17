@@ -14,6 +14,7 @@ class LibsodiumConan(ConanFile):
     topics = ("sodium", "libsodium", "encryption", "signature", "hashing")
     generators  = "cmake"
     _source_subfolder = "source_subfolder"
+    short_paths = True
 
     options = {
         "shared" : [True, False],
