@@ -86,3 +86,5 @@ class FftConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
                 self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
