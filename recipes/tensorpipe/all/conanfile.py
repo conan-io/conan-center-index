@@ -94,13 +94,15 @@ class TensorpipeConan(ConanFile):
         return self._cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.run_environment(self):
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        with tools.run_environment(self):
+            cmake = self._configure_cmake()
+            cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
