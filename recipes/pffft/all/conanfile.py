@@ -48,6 +48,8 @@ class ConanPffft(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs.extend(["pffft"])
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
  
     def package(self):
         header = tools.load(os.path.join(self._source_subfolder, "pffft.h"))
