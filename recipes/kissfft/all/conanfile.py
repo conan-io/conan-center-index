@@ -48,6 +48,13 @@ class KissfftConan(ConanFile):
         return cmake
 
     def build(self):
+        # Cannot extract major (ABI) version from Makefile
+        # no idea why doesn't it work on CCI?
+        major, minor, patch = self.version.split(".")
+        makefile = "KFVER_MAJOR = %s\n" % major
+        makefile += "KFVER_MINOR = %s\n" % minor
+        makefile += "KFVER_PATCH = %s\n" % patch
+        tools.save(os.path.join(self._source_subfolder, "Makefile"), makefile)
         cmake = self._configure_cmake()
         cmake.build()
 
