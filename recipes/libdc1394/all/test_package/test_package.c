@@ -21,7 +21,7 @@ int main()
 	{
 		fprintf(stderr, "failed to enumerate cameras!\n");
 		dc1394_free(dc1394);
-		fprintf(stderr, "This is a test package, so ignore! (better luck next time)");
+		fprintf(stderr, "This is a test package, so ignore! (better luck next time)\n");
 		return EXIT_SUCCESS;
 	}
 	if (cameras->num == 0)
