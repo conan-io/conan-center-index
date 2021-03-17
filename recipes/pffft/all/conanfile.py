@@ -38,6 +38,10 @@ class ConanPffft(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
