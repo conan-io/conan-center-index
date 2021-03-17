@@ -7,7 +7,8 @@ class ImaglTestConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self)
+        generator = "Ninja" if str(self.settings.compiler) == "Visual Studio" else None
+        cmake = CMake(self, generator=generator)
         cmake.configure()
         cmake.build()
 
