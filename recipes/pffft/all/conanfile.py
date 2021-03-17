@@ -46,6 +46,9 @@ class ConanPffft(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def package_info(self):
+        self.cpp_info.libs.extend(["pffft"])
+ 
     def package(self):
         header = tools.load(os.path.join(self._source_subfolder, "pffft.h"))
         license_content = header[: header.find("*/", 1)]
