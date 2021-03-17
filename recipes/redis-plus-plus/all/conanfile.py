@@ -100,7 +100,7 @@ class RedisPlusPlusConan(ConanFile):
 
         suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.components["redis++lib"].libs = ["redis++" + suffix]
-        self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredislib"]
+        self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
         if self.options.with_tls:
             self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
         if self.settings.os in ["Linux", "FreeBSD"]:
