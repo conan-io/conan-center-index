@@ -20,6 +20,7 @@ class KissfftConan(ConanFile):
                        "use_alloca": False}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake",
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -37,6 +38,8 @@ class KissfftConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
         cmake = CMake(self)
         cmake.definitions["KISSFFT_PKGCONFIG"] = False
         cmake.definitions["KISSFFT_STATIC"] = not self.options.shared
@@ -45,21 +48,10 @@ class KissfftConan(ConanFile):
         cmake.definitions["KISSFFT_DATATYPE"] = self.options.datatype
         cmake.definitions["KISSFFT_USE_ALLOCA"] = self.options.use_alloca
         cmake.configure()
-        return cmake
+        self._cmake = cmake
+        return self._cmake
 
     def build(self):
-        # Cannot extract major (ABI) version from Makefile
-        # no idea why doesn't it work on CCI?
-        major, minor, patch = self.version.split(".")
-        makefile = "KFVER_MAJOR = %s\n" % major
-        makefile += "KFVER_MINOR = %s\n" % minor
-        makefile += "KFVER_PATCH = %s\n" % patch
-        # debug!
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "file(READ Makefile _MAKEFILE_CONTENTS)",
-                              'file(READ Makefile _MAKEFILE_CONTENTS)\n'
-                              'message(STATUS "_MAKEFILE_CONTENTS ${_MAKEFILE_CONTENTS}")')
-        tools.save(os.path.join(self._source_subfolder, "Makefile"), makefile)
         cmake = self._configure_cmake()
         cmake.build()
 
