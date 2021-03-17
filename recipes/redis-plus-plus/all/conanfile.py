@@ -103,3 +103,5 @@ class RedisPlusPlusConan(ConanFile):
         self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredislib"]
         if self.options.with_tls:
             self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
