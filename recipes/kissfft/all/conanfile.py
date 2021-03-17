@@ -65,3 +65,5 @@ class KissfftConan(ConanFile):
         self.cpp_info.libs = ["kissfft-%s" % self.options.datatype]
         if self.options.shared:
             self.cpp_info.defines.append("KISS_FFT_SHARED")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
