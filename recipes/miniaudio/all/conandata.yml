@@ -1,0 +1,4 @@
+sources:
+  "0.10.32":
+    url: https://github.com/mackron/miniaudio/archive/d06d4983d3ff512690eb37f5edd25bf96f8f3764.tar.gz
+    sha256: 1FB7784AA6BC1C8138376C966BBDB444FF51CE04EF4289067BC59FB163CF38EA
