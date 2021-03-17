@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.errors import ConanException
 import os
-import subprocess
 
 required_conan_version = ">=1.32.0"
 
