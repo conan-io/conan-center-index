@@ -70,3 +70,8 @@ class XxHash(ConanFile):
         self.cpp_info.components["libxxhash"].names["cmake_find_package"] = "xxhash"
         self.cpp_info.components["libxxhash"].names["cmake_find_package_multi"] = "xxhash"
         self.cpp_info.components["libxxhash"].libs = ["xxhash"]
+
+        if self.options.utility:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
