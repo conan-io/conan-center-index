@@ -32,11 +32,6 @@ class MiniaudioConan(ConanFile):
             src=os.path.join(self._source_subfolder, "extras"),
         )
         self.copy(
-            pattern="README.md",
-            dst="licenses",
-            src=os.path.join(self._source_subfolder, "extras/speex_resampler/"),
-        )
-        self.copy(
             pattern="ma_speex_resampler.h",
             dst="include/extras/speex_resampler/",
             src=os.path.join(self._source_subfolder, "extras/speex_resampler/"),
