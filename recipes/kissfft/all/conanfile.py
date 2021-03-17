@@ -12,7 +12,7 @@ class KissfftConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "datatype": ["float", "double", "int16_t", "int32_t", "SIMD"],
+               "datatype": ["float", "double", "int16_t", "int32_t", "simd"],
                "use_alloca": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
