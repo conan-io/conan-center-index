@@ -14,7 +14,7 @@ endif()
 if(MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
 else()
-  target_link_libraries(${PROJECT_NAME} PRIVATE m)
+  target_link_libraries(${PROJECT_NAME} PUBLIC m)
 endif()
 
 install(
