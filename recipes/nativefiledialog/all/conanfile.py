@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class NativefiledialogConan(ConanFile):
     name = "nativefiledialog"
-    license = "ZLIB"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mlabbe/nativefiledialog"
     description = "A tiny, neat C library that portably invokes native file open and save dialogs."
