@@ -10,8 +10,16 @@ class XxHash(ConanFile):
     topics = ("conan", "hash", "algorithm", "fast", "checksum", "hash-functions")
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "utility": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "utility": True,
+    }
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
 
