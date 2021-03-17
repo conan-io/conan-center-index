@@ -26,6 +26,7 @@ class Libdc1394Conan(ConanFile):
                 args = ["--disable-static", "--enable-shared"]
             else:
                 args = ["--disable-shared", "--enable-static"]
+            args.extend(["--disable-examples"])
             self._env_build.configure(args=args)
         return self._env_build
 
