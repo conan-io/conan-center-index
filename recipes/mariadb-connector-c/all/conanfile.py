@@ -73,9 +73,13 @@ class MariadbConnectorcConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "${ZLIB_LIBRARY}",
-                              "${ZLIB_LIBRARIES}")
+        root_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
+        tools.replace_in_file(
+            root_cmake,
+            "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
+            "SET(SSL_LIBRARIES ${OpenSSL_LIBRARIES})"
+        )
 
     def _configure_cmake(self):
         if self._cmake:
