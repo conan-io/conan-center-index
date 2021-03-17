@@ -39,7 +39,7 @@ class LeptonicaConan(ConanFile):
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -75,10 +75,6 @@ class LeptonicaConan(ConanFile):
             self.requires("openjpeg/2.4.0")
         if self.options.with_webp:
             self.requires("libwebp/1.1.0")
-
-    def build_requirements(self):
-        if self.options.with_webp or self.options.with_openjpeg:
-            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -123,29 +119,28 @@ class LeptonicaConan(ConanFile):
         if not self.options.with_tiff:
             tools.replace_in_file(cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (TIFF_FOUND)", "if(0)")
+        ## openjpeg && libwebp
         ## We have to be more aggressive with dependencies found with pkgconfig
-        ## Injection of libdirs is ensured by conan_basic_setup()
-        ## openjpeg
-        tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
-        tools.replace_in_file(cmakelists_src,
-                              "if (JP2K_FOUND)",
-                              "if (JP2K_FOUND)\n"
-                              "target_compile_definitions(leptonica PRIVATE ${JP2K_CFLAGS_OTHER})")
-        if not self.options.with_openjpeg:
+        ## We can't completly rely on pkgconf because it might fail on Macos if pkgconf shared
+        openjpeg_webp_found = ""
+        if self.options.with_openjpeg:
+            openjpeg_webp_found += "set(JP2K_FOUND TRUE)\n"
+            tools.replace_in_file(cmakelists_src, "${JP2K_LIBRARIES}", "CONAN_PKG::openjpeg")
+        else:
             tools.replace_in_file(cmakelists_src, "if (JP2K_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (JP2K_FOUND)", "if(0)")
-        ## libwebp
-        tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
-        tools.replace_in_file(cmakelists_src,
-                              "if (WEBP_FOUND)",
-                              "if (WEBP_FOUND)\n"
-                              "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
-        tools.replace_in_file(cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
-        if tools.Version(self.version) >= "1.79.0":
-            tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
-        if not self.options.with_webp:
+        if self.options.with_webp:
+            openjpeg_webp_found += "set(WEBP_FOUND TRUE)\n"
+            tools.replace_in_file(cmakelists_src, "${WEBP_LIBRARIES}", "CONAN_PKG::libwebp")
+        else:
             tools.replace_in_file(cmakelists_src, "if (WEBP_FOUND)", "if(0)")
             tools.replace_in_file(cmake_configure, "if (WEBP_FOUND)", "if(0)")
+        tools.replace_in_file(cmakelists, "find_package(PkgConfig)", openjpeg_webp_found)
+        tools.replace_in_file(cmakelists, "if (PKG_CONFIG_FOUND)", "if(0)")
+        tools.replace_in_file(cmakelists, "if(NOT JP2K)", "if(0)")
+        tools.replace_in_file(cmakelists, "if(NOT WEBP)", "if(0)")
+        if tools.Version(self.version) >= "1.79.0":
+            tools.replace_in_file(cmakelists, "if(NOT WEBPMUX)", "if(0)")
 
         # Remove detection of fmemopen() on macOS < 10.13
         # CheckFunctionExists will find it in the link library.
