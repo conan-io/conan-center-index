@@ -8,7 +8,7 @@ class KissfftConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mborgerding/kissfft"
     description = "a Fast Fourier Transform (FFT) library that tries to Keep it Simple, Stupid"
-    topics = ("conan",)
+    topics = ("fft", "kiss", "frequency-domain", "fast-fourier-transform")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
