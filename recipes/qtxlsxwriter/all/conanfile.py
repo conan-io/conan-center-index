@@ -1,4 +1,4 @@
-import os, glob, shutil
+import os, glob
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conans import ConanFile, tools
 
@@ -24,8 +24,7 @@ class QtXlsxWriterConan(ConanFile):
     generators = "CMakeDeps"
     exports_sources = [
         "CMakeLists.txt",
-        os.path.join("patches", "*"),
-        os.path.join("src", "CMakeLists.txt")
+        os.path.join("patches", "*")
     ]
 
     _cmake = None
@@ -38,7 +37,7 @@ class QtXlsxWriterConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def config_options(self):
@@ -65,8 +64,6 @@ class QtXlsxWriterConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("QtXlsxWriter-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
-        shutil.copy("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
-        shutil.copy(os.path.join("src", "CMakeLists.txt"), os.path.join(self._source_subfolder, "src", "CMakeLists.txt"))
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
