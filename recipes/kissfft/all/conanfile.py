@@ -54,6 +54,11 @@ class KissfftConan(ConanFile):
         makefile = "KFVER_MAJOR = %s\n" % major
         makefile += "KFVER_MINOR = %s\n" % minor
         makefile += "KFVER_PATCH = %s\n" % patch
+        # debug!
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "file(READ Makefile _MAKEFILE_CONTENTS)",
+                              'file(READ Makefile _MAKEFILE_CONTENTS)\n'
+                              'message(STATUS "_MAKEFILE_CONTENTS ${_MAKEFILE_CONTENTS}")')
         tools.save(os.path.join(self._source_subfolder, "Makefile"), makefile)
         cmake = self._configure_cmake()
         cmake.build()
