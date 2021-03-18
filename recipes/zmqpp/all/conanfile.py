@@ -13,7 +13,7 @@ class ZmqppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = ["cmake", "cmake_find_package"]
+    generators = "cmake"
     _cmake = None
 
     @property
