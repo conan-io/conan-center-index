@@ -472,6 +472,8 @@ class QtConan(ConanFile):
             build_env["MAKEFLAGS"] = "j%d" % tools.cpu_count()
             build_env["PKG_CONFIG_PATH"] = [self.build_folder]
             if self.settings.os == "Windows":
+                if not "PATH" in build_env:
+                    build_env["PATH"] = []
                 build_env["PATH"].append(os.path.join(self.source_folder, "qt6", "gnuwin32", "bin"))
             if self.settings.compiler == "Visual Studio":
                 # this avoids cmake using gcc from strawberryperl
