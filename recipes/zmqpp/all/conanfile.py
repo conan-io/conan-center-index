@@ -38,6 +38,10 @@ class ZmqppConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Link to CMake targets, far more robust since zeromq may have dependencies
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_STATIC}", "CONAN_PKG::zeromq")
+        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_SHARED}", "CONAN_PKG::zeromq")
 
     def validate(self):
         compiler = self.settings.compiler
@@ -50,6 +54,7 @@ class ZmqppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ZMQPP_LIBZMQ_CMAKE"] = False
         self._cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ZMQPP_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZMQPP_BUILD_EXAMPLES"] = False
