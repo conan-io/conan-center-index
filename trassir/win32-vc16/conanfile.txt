@@ -22,7 +22,6 @@ openal/1.20.1
 opencv/2.4.13.5
 openh264/1.7.0
 protobuf/3.9.1
-protoc/3.9.1.dssl1
 snappy/1.1.8
 xz_utils/5.2.4
 zlib/1.2.11
@@ -55,7 +54,7 @@ opencv:openexr=False
 opencv:tiff=False
 OpenSSL:shared=True
 pjsip:shared=False
-protobuf:shared=False
+protobuf:shared=True
 sdl:shared=True
 signalr-qt:shared=True
 zlib:shared=True
