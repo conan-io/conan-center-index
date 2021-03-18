@@ -85,8 +85,14 @@ class mFASTConan(ConanFile):
 
         tools.mkdir(os.path.join(self.package_folder, self._new_mfast_config_dir))
         self._extract_fasttypegentarget_macro()
+
         tools.rmdir(os.path.join(self.package_folder, self._old_mfast_config_dir))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.options.shared:
+            tools.remove_files_by_mask(
+                os.path.join(self.package_folder, "lib"),
+                "*_static*" if self.settings.os == "Windows" else "*.a"
+            )
 
         # TODO: several CMake variables should also be emulated (casing issues):
         #       [ ] MFAST_INCLUDE_DIR         - include directories for mFAST
@@ -214,6 +220,8 @@ class mFASTConan(ConanFile):
             ]
             self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
+            if self.options.shared:
+                self.cpp_info.components[conan_comp].defines = ["MFAST_DYN_LINK"]
 
             # Also provide alias component for find_package(mFAST COMPONENTS ...) if static:
             comp = values["comp"]
