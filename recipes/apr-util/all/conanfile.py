@@ -4,6 +4,9 @@ import glob
 import os
 
 
+required_conan_version = ">=1.32.0"
+
+
 class AprUtilConan(ConanFile):
     name = "apr-util"
     description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
@@ -105,6 +108,10 @@ class AprUtilConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
+    def validate(self):
+        if self.options.shared != self.options["apr"].shared:
+            raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -152,9 +159,6 @@ class AprUtilConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.shared != self.options["apr"].shared:
-            raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
-
         self._patch_sources()
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()
