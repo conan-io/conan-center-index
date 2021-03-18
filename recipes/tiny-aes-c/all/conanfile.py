@@ -40,6 +40,7 @@ class TinyAesCConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
+    _cflags = []
 
     @property
     def _source_subfolder(self):
@@ -72,6 +73,22 @@ class TinyAesCConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+
+        self._cflags.append("{}=1".format(str(self.options.aes_block_size)))
+        if not self.options.cbc:
+            self._cflags.append("CBC=0")
+        if not self.options.ecb:
+            self._cflags.append("ECB=0")
+        if not self.options.ctr:
+            self._cflags.append("CTR=0")
+
+        self._cmake.definitions["CMAKE_C_FLAGS"] = " ".join("-D{}".format(flag) for flag in self._cflags)
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -91,10 +108,5 @@ class TinyAesCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
-        self.cpp_info.defines.append(str(self.options.aes_block_size))
-        if self.options.cbc:
-            self.cpp_info.defines.append("CBC")
-        if self.options.ecb:
-            self.cpp_info.defines.append("ECB")
-        if self.options.ctr:
-            self.cpp_info.defines.append("CTR")
+        for flag in self._cflags:
+            self.cpp_info.defines.append(flag)
