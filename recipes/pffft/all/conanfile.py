@@ -14,8 +14,8 @@ class ConanPffft(ConanFile):
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
     exports_sources = ["CMakeLists.txt"]
-    options = {"disable_simd": [True, False]}
-    default_options = {"disable_simd": False}
+    options = {"disable_simd": [True, False], "fPIC": [True, False]}
+    default_options = {"disable_simd": False, "fPIC": True}
 
     _cmake = None
 
@@ -38,6 +38,10 @@ class ConanPffft(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
@@ -50,7 +54,7 @@ class ConanPffft(ConanFile):
         self.cpp_info.libs.extend(["pffft"])
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
- 
+
     def package(self):
         header = tools.load(os.path.join(self._source_subfolder, "pffft.h"))
         license_content = header[: header.find("*/", 1)]
