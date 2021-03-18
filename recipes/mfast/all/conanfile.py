@@ -163,7 +163,7 @@ class mFASTConan(ConanFile):
     @property
     def _mfast_lib_components(self):
         # TODO: improve accuracy of external requirements of each component
-        suffix = "" if self.options.shared else "_static"
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         return {
             "libmfast": {
                 "comp": "mfast",
