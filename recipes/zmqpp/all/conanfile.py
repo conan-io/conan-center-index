@@ -80,4 +80,5 @@ class ZmqppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libzmqpp"
         self.cpp_info.libs = ["zmqpp" if self.options.shared else "zmqpp-static"]
-
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
