@@ -1,0 +1,54 @@
+name: LNVR GCC-8 Release
+
+on:
+  pull_request:
+    paths:
+      - 'recipes/**'
+      - 'builder/**'
+      - '.github/workflows/lnvr-gcc8-release.yml'
+      - 'trassir/lnvr-gcc8/conanfile.txt'
+      - 'trassir/lnvr-gcc8/conanprofile.release'
+
+  push:
+    branches:
+      - master
+    paths:
+      - 'recipes/**'
+      - 'builder/**'
+      - '.github/workflows/lnvr-gcc8-release.yml'
+      - 'trassir/lnvr-gcc8/conanfile.txt'
+      - 'trassir/lnvr-gcc8/conanprofile.release'
+
+env:
+  LDAP_USERNAME: ${{ secrets.LDAP_USERNAME }}
+  LDAP_PASSWORD: ${{ secrets.LDAP_PASSWORD }}
+  REMOTES_USERNAME: ${{ secrets.CUSTOM_USERNAME }}
+  REMOTES_PASSWORD: ${{ secrets.CUSTOM_PASSWORD }}
+  REMOTES_MASTER: ${{ secrets.REMOTES_MASTER }}
+  REMOTES_STAGING: ${{ secrets.REMOTES_STAGING }}
+  IS_PURE_C: true
+
+jobs:
+  conan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf false
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: sources
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Build and Upload
+        run: |
+          pip install --upgrade conan
+          python sources/builder/build.py
+        env:
+          PYTHONUNBUFFERED: "true"
+          CONAN_TXT: trassir/lnvr-gcc8/conanfile.txt
+          CONAN_PROFILE: trassir/lnvr-gcc8/conanprofile.release
+          CONAN_DOCKER_IMAGE: trassiross/conan-gcc8

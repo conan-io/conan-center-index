@@ -1,0 +1,55 @@
+name: Mac Clang-11 Release
+
+on:
+  pull_request:
+    paths:
+      - 'recipes/**'
+      - 'builder/**'
+      - '.github/workflows/mac-clang11-release.yml'
+      - 'trassir/mac-clang11/conanfile.txt'
+      - 'trassir/mac-clang11/conanprofile.release'
+
+  push:
+    branches:
+      - master
+    paths:
+      - 'recipes/**'
+      - 'builder/**'
+      - '.github/workflows/mac-clang11-release.yml'
+      - 'trassir/mac-clang11/conanfile.txt'
+      - 'trassir/mac-clang11/conanprofile.release'
+
+env:
+  LDAP_USERNAME: ${{ secrets.LDAP_USERNAME }}
+  LDAP_PASSWORD: ${{ secrets.LDAP_PASSWORD }}
+  REMOTES_USERNAME: ${{ secrets.CUSTOM_USERNAME }}
+  REMOTES_PASSWORD: ${{ secrets.CUSTOM_PASSWORD }}
+  REMOTES_MASTER: ${{ secrets.REMOTES_MASTER }}
+  REMOTES_STAGING: ${{ secrets.REMOTES_STAGING }}
+  IS_PURE_C: true
+
+jobs:
+  conan:
+    runs-on: macos-10.15
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf false
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: sources
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Build and Upload
+        run: |
+          pip install --upgrade conan
+          python sources/builder/build.py
+        env:
+          PYTHONUNBUFFERED: "true"
+          CONAN_TXT: trassir/mac-clang11/conanfile.txt
+          CONAN_PROFILE: trassir/mac-clang11/conanprofile.release
+          MACOSX_DEPLOYMENT_TARGET: 10.14
+          DEVELOPER_DIR: /Applications/Xcode_11.4.app/Contents/Developer
