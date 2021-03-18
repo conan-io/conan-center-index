@@ -47,8 +47,8 @@ class ProtocConanFile(ConanFile):
     def imports(self):
         # when built with protobuf:shared=True, protoc will require its libraries to run
         # so we copy those from protobuf package
-        self.copy("*.so.*", dst="lib", src="lib", root_package="protobuf")
-        self.copy("*.dll", dst="bin", src="bin", root_package="protobuf")
+        self.copy("*.so.*", dst="lib", src="lib")
+        self.copy("*.dll", dst="bin", src="bin")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
