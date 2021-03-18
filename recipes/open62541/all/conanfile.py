@@ -90,10 +90,10 @@ class Open62541Conan(ConanFile):
             elif self.options.encryption == "mbedtls-gpl":
                 self.requires("mbedtls/2.16.3-gpl")
             elif self.options.encryption == "openssl":
-                self.requires("openssl/1.1.1g")
+                self.requires("openssl/1.1.1j")
 
             if self.options.web_socket:
-                self.requires("libwebsockets/4.0.15")
+                self.requires("libwebsockets/4.1.6")
         else:
             if self.options.encryption == "mbedtls-apache":
                 self.requires("mbedtls/2.16.3-apache")
