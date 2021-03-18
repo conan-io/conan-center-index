@@ -5,7 +5,6 @@ import os
 class ProtocConanFile(ConanFile):
     _base_name = "protobuf"
     name = "protoc"
-    version = "3.9.1"
     description = "Protocol Buffers - Google's data interchange format"
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/bincrafters/conan-protobuf"
@@ -24,7 +23,7 @@ class ProtocConanFile(ConanFile):
     settings = "os_build", "arch_build", "compiler", "arch"
 
     def build_requirements(self):
-        self.build_requires("protobuf/{}".format(self.version))
+        self.build_requires("protobuf/{}".format(self.version.split(".dssl")[0]))
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -41,26 +40,22 @@ class ProtocConanFile(ConanFile):
         cmake.build()
 
     def source(self):
-        sha256 = "98e615d592d237f94db8bf033fba78cd404d979b0b70351a9e5aaff725398357"
-        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version), sha256=sha256)
-        extracted_dir = self._base_name + "-" + self.version
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self._base_name + "-" + self.version.split(".dssl")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def imports(self):
         # when built with protobuf:shared=True, protoc will require its libraries to run
         # so we copy those from protobuf package
-        if tools.os_info.is_linux:
-            # `ldd` shows dependencies named like libprotoc.so.3.9.1.0
-            self.protobuf_dylib_mask = "*.so.*"
-        else:
-            assert False, "protoc package was not checked on your system"
-        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib", root_package="protobuf")
+        self.copy("*.so.*", dst="lib", src="lib", root_package="protobuf")
+        self.copy("*.dll", dst="bin", src="bin", root_package="protobuf")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib")
+        self.copy("*.so.*", dst="lib", src="lib")
+        self.copy("*.dll", dst="bin", src="bin")
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
