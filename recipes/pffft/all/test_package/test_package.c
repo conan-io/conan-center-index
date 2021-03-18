@@ -4,6 +4,6 @@
 int main() {
 
     int s = pffft_simd_size();
-    printf(s);
+    printf("%d\n",s);
     return 0;
 }
