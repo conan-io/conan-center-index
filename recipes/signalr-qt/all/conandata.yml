@@ -1,0 +1,6 @@
+sources:
+  "0.1":
+    url: https://github.com/p3root/signalr-qt.git
+    signalr_hash: d8c96f1
+    qthttpserver_hash: ef8190e
+    qtwebsockets_hash: d9ef188
