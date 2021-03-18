@@ -75,7 +75,7 @@ mesa/19.3.1
 odbc/2.3.7
 openh264/1.7.0
 protobuf/3.9.1
-protoc/3.9.1
+protoc/3.9.1.dssl1
 sqlite3/3.31.0
 util-macros/1.19.2 # GHA: noexport
 xcb-proto/1.13 # GHA: noexport
