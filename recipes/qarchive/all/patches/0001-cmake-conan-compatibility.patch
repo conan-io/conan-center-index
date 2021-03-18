@@ -16,51 +16,6 @@
  
  # cmake macros used
  include(GNUInstallDirs)
-@@ -45,23 +43,27 @@
- 	add_subdirectory(examples/disk_extractor_with_QIODevice)
- endif()
- 
--add_library(QArchive
--	    src/qarchivediskcompressor.cc
--	    src/qarchivediskextractor.cc
--	    src/qarchive_enums.cc
--	    src/qarchivediskcompressor_p.cc
--	    src/qarchivediskextractor_p.cc
--	    src/qarchiveutils_p.cc
--	    src/qarchiveioreader_p.cc
--	    include/qarchivediskcompressor.hpp
--	    include/qarchivediskextractor.hpp
--	    include/qarchive_enums.hpp
--	    include/qarchivediskcompressor_p.hpp
--	    include/qarchivediskextractor_p.hpp
--	    include/qarchiveutils_p.hpp
--	    include/qarchiveioreader_p.hpp
--	    include/qarchive_global.hpp
--	    )
-+set(SOURCES
-+	src/qarchivediskcompressor.cc
-+	src/qarchivediskextractor.cc
-+	src/qarchive_enums.cc
-+	src/qarchivediskcompressor_p.cc
-+	src/qarchivediskextractor_p.cc
-+	src/qarchiveutils_p.cc
-+	src/qarchiveioreader_p.cc
-+	include/qarchivediskcompressor.hpp
-+	include/qarchivediskextractor.hpp
-+	include/qarchive_enums.hpp
-+	include/qarchivediskcompressor_p.hpp
-+	include/qarchivediskextractor_p.hpp
-+	include/qarchiveutils_p.hpp
-+	include/qarchiveioreader_p.hpp
-+	include/qarchive_global.hpp
-+    )
-+
-+qt5_wrap_cpp(SOURCES ${SOURCES})
-+
-+add_library(QArchive ${SOURCES})
- 
- SET(toinstall)
- list(APPEND toinstall
 @@ -73,7 +75,7 @@
      ${PROJECT_BINARY_DIR}/config.h
  )	
