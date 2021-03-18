@@ -41,7 +41,7 @@ class ProtocConanFile(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self._base_name + self.version.split(".dssl")[0]
+        extracted_dir = self._base_name + "-" + self.version.split(".dssl")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def imports(self):
