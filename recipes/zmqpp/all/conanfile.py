@@ -41,8 +41,6 @@ class ZmqppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
