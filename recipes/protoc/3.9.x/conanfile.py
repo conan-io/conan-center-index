@@ -47,15 +47,15 @@ class ProtocConanFile(ConanFile):
     def imports(self):
         # when built with protobuf:shared=True, protoc will require its libraries to run
         # so we copy those from protobuf package
-        self.copy("*.so.*", dst="lib", src="lib")
-        self.copy("*.dll", dst="bin", src="bin")
+        self.copy("*.so.*", dst="lib", src="lib", root_package="protobuf")
+        self.copy("*.dll", dst="bin", src="bin", root_package="protobuf")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*.so.*", dst="lib", src="lib", root_package="protobuf")
-        self.copy("*.dll", dst="bin", src="bin", root_package="protobuf")
+        self.copy("*.so.*", dst="lib", src="lib")
+        self.copy("*.dll", dst="bin", src="bin")
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
