@@ -98,7 +98,7 @@ class mFASTConan(ConanFile):
         self._prepend_exec_target_in_fasttypegentarget()
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._lib_targets_module_file),
-            {values["lib"]:"mFAST::{}".format(values["lib"]) for values in self._mfast_lib_components.values()}
+            {values["target"]:"mFAST::{}".format(values["target"]) for values in self._mfast_lib_components.values()}
         )
 
     @property
@@ -163,26 +163,31 @@ class mFASTConan(ConanFile):
     @property
     def _mfast_lib_components(self):
         # TODO: improve accuracy of external requirements of each component
-        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        target_suffix = "_static" if not self.options.shared else ""
+        lib_suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         return {
             "libmfast": {
                 "comp": "mfast",
-                "lib": "mfast" + suffix,
+                "target": "mfast" + target_suffix,
+                "lib": "mfast" + lib_suffix,
                 "requires": ["boost::boost"]
             },
             "mfast_coder": {
                 "comp": "mfast_coder",
-                "lib": "mfast_coder" + suffix,
+                "target": "mfast_coder" + target_suffix,
+                "lib": "mfast_coder" + lib_suffix,
                 "requires": ["libmfast", "boost::boost"]
             },
             "mfast_xml_parser": {
                 "comp": "mfast_xml_parser",
-                "lib": "mfast_xml_parser" + suffix,
+                "target": "mfast_xml_parser" + target_suffix,
+                "lib": "mfast_xml_parser" + lib_suffix,
                 "requires": ["libmfast", "boost::boost", "tinyxml2::tinyxml2"]
             },
             "mfast_json": {
                 "comp": "mfast_json",
-                "lib": "mfast_json" + suffix,
+                "target": "mfast_json" + target_suffix,
+                "lib": "mfast_json" + lib_suffix,
                 "requires": ["libmfast", "boost::boost"]
             }
         }
@@ -192,10 +197,11 @@ class mFASTConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "mFAST"
 
         for conan_comp, values in self._mfast_lib_components.items():
-            target_lib = values["lib"]
+            target = values["target"]
+            lib = values["lib"]
             requires = values["requires"]
-            self.cpp_info.components[conan_comp].names["cmake_find_package"] = target_lib
-            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = target_lib
+            self.cpp_info.components[conan_comp].names["cmake_find_package"] = target
+            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = target
             self.cpp_info.components[conan_comp].builddirs.append(self._new_mfast_config_dir)
             self.cpp_info.components[conan_comp].build_modules["cmake"] = [self._fast_type_gen_target_file]
             self.cpp_info.components[conan_comp].build_modules["cmake_find_package"] = [
@@ -206,14 +212,14 @@ class mFASTConan(ConanFile):
                 self._lib_targets_module_file,
                 self._fast_type_gen_target_file
             ]
-            self.cpp_info.components[conan_comp].libs = [target_lib]
+            self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
             if self.options.shared:
                 self.cpp_info.components[conan_comp].defines = ["MFAST_DYN_LINK"]
 
             # Also provide alias component for find_package(mFAST COMPONENTS ...) if static:
             comp = values["comp"]
-            if comp != target_lib:
+            if comp != target:
                 conan_comp_alias = conan_comp + "_alias"
                 self.cpp_info.components[conan_comp_alias].names["cmake_find_package"] = comp
                 self.cpp_info.components[conan_comp_alias].names["cmake_find_package_multi"] = comp
