@@ -27,11 +27,14 @@ class SignalrQtConan(ConanFile):
 
     def source(self):
         url = self.conan_data["sources"][self.version]["url"]
-        signalr_hash = self.conan_data["sources"][self.version]["hash"]
+        signalr_hash = self.conan_data["sources"][self.version]["signalr_hash"]
+        qthttpserver_hash = self.conan_data["sources"][self.version]["qthttpserver_hash"]
+        qtwebsockets_hash = self.conan_data["sources"][self.version]["qtwebsockets_hash"]
 
-        # we need no submodules due to license limitations
-        self.run("git clone %s %s" % (url, self._source_subfolder))
+        self.run("git clone --recursive %s %s" % (url, self._source_subfolder))
         self.run("cd %s && git checkout %s" % (self._source_subfolder, signalr_hash))
+        self.run("cd %s/ThirdParty/QtWebSockets && git checkout %s" % (self._source_subfolder, qtwebsockets_hash))
+        self.run("cd %s/ThirdParty/QHttpServer && git checkout %s" % (self._source_subfolder, qthttpserver_hash))
 
     def requirements(self):
         self.requires.add("qt/5.14.1")
