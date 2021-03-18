@@ -84,11 +84,7 @@ class mFASTConan(ConanFile):
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
 
         tools.mkdir(os.path.join(self.package_folder, self._new_mfast_config_dir))
-        shutil.move(
-            os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
-            os.path.join(self.package_folder, self._fast_type_gen_target_file)
-        )
-
+        self._extract_fasttypegentarget_macro()
         tools.rmdir(os.path.join(self.package_folder, self._old_mfast_config_dir))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -98,8 +94,8 @@ class mFASTConan(ConanFile):
         #       [ ] MFAST_LIBRARIES           - libraries to link against
         #       [ ] MFAST_COMPONENTS          - installed components
         #       [ ] MFAST_<component>_LIBRARY - particular component library
-        #       [x] MFAST_EXECUTABLE          - the fast_type_gen executable => done in _prepend_exec_target_in_fast_type_gen()
-        self._prepend_exec_target_in_fast_type_gen()
+        #       [x] MFAST_EXECUTABLE          - the fast_type_gen executable => done in _prepend_exec_target_in_fasttypegentarget()
+        self._prepend_exec_target_in_fasttypegentarget()
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._lib_targets_module_file),
             {values["lib"]:"mFAST::{}".format(values["lib"]) for values in self._mfast_lib_components.values()}
@@ -117,7 +113,20 @@ class mFASTConan(ConanFile):
     def _fast_type_gen_target_file(self):
         return os.path.join(self._new_mfast_config_dir, "FastTypeGenTarget.cmake")
 
-    def _prepend_exec_target_in_fast_type_gen(self):
+    def _extract_fasttypegentarget_macro(self):
+        if self.version == "1.2.1":
+            config_file_content = tools.load(os.path.join(self.package_folder, self._old_mfast_config_dir, "mFASTConfig.cmake"))
+            begin = config_file_content.find("macro(FASTTYPEGEN_TARGET Name)")
+            end = config_file_content.find("endmacro()", begin) + len("endmacro()")
+            macro_str = config_file_content[begin:end]
+            tools.save(os.path.join(self.package_folder, self._fast_type_gen_target_file), macro_str)
+        else:
+            shutil.move(
+                os.path.join(self.package_folder, self._old_mfast_config_dir, "FastTypeGenTarget.cmake"),
+                os.path.join(self.package_folder, self._fast_type_gen_target_file)
+            )
+
+    def _prepend_exec_target_in_fasttypegentarget(self):
         extension = ".exe" if self.settings.os == "Windows" else ""
         fast_type_filename = "fast_type_gen" + extension
         module_folder_depth = len(os.path.normpath(self._new_mfast_config_dir).split(os.path.sep))
