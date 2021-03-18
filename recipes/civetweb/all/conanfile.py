@@ -84,6 +84,7 @@ class CivetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
         self._cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
         self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
+        self._cmake.definitions["CIVETWEB_CXX_ENABLE_LTO"] = False
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
