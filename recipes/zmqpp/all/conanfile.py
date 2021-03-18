@@ -2,6 +2,9 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
+
 class ZmqppConan(ConanFile):
     name = "zmqpp"
     homepage = "https://github.com/zeromq/zmqpp"
@@ -35,6 +38,12 @@ class ZmqppConan(ConanFile):
     def requirements(self):
         self.requires("zeromq/4.3.3")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("zmqpp-%s" % (self.version), self._source_subfolder)
@@ -46,13 +55,6 @@ class ZmqppConan(ConanFile):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_STATIC}", "CONAN_PKG::zeromq")
         tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_SHARED}", "CONAN_PKG::zeromq")
-
-    def validate(self):
-        compiler = self.settings.compiler
-        if compiler.get_safe('cppstd'):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
 
     def _configure_cmake(self):
         if self._cmake:
