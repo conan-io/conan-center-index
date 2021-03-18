@@ -92,9 +92,9 @@ static int test_encrypt_cbc(void)
 
     if (0 == memcmp((char*) out, (char*) in, 64)) {
         printf("SUCCESS!\n");
-	return(0);
+	    return(0);
     } else {
         printf("FAILURE!\n");
-	return(1);
+	    return(1);
     }
 }
