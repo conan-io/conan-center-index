@@ -110,6 +110,8 @@ class TheoraConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.install()
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
