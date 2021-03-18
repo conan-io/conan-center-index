@@ -214,8 +214,6 @@ class mFASTConan(ConanFile):
             ]
             self.cpp_info.components[conan_comp].libs = [lib]
             self.cpp_info.components[conan_comp].requires = requires
-            if self.options.shared:
-                self.cpp_info.components[conan_comp].defines = ["MFAST_DYN_LINK"]
 
             # Also provide alias component for find_package(mFAST COMPONENTS ...) if static:
             comp = values["comp"]
