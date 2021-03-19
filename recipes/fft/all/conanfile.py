@@ -41,6 +41,8 @@ class FftConan(ConanFile):
         if not self.options.threads:
             del self.options.max_threads
             del self.options.threads_begin_n
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
     
     def validate(self):
         def _is_power_of_two(n):
@@ -52,10 +54,6 @@ class FftConan(ConanFile):
             raise ConanInvalidConfiguration("threads_begin_n must be an integer")
         if not _is_power_of_two(int(self.options.max_threads.value)):
             raise ConanInvalidConfiguration("max_threads must be a power of 2")
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
         cmake = CMake(self)
