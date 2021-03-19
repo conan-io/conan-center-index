@@ -567,6 +567,7 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime = "MT/MTd"
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Qt6"
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
 
         libsuffix = ""
@@ -579,11 +580,11 @@ class QtConan(ConanFile):
         def _get_corrected_reqs(requires):
             reqs = []
             for r in requires:
-                reqs.append(r if "::" in r else "Qt6%s" % r)
+                reqs.append(r if "::" in r else "qt%s" % r)
             return reqs
 
         def _create_module(module, requires=[]):
-            componentname = "Qt6%s" % module
+            componentname = "qt%s" % module
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
@@ -595,7 +596,7 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
         def _create_plugin(pluginname, libname, type, requires):
-            componentname = "Qt6%s" % pluginname
+            componentname = "qt%s" % pluginname
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
@@ -615,7 +616,7 @@ class QtConan(ConanFile):
             core_reqs.append("icu::icu")
 
         _create_module("Core", core_reqs)
-        self.cpp_info.components["Qt6Core"].libs.append("Qt6Core_qobject%s" % libsuffix)
+        self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
             gui_reqs = []
             if self.options.with_freetype:
@@ -675,8 +676,8 @@ class QtConan(ConanFile):
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             _create_module("UiPlugin", ["Gui", "Widgets"])
-            self.cpp_info.components["Qt6UiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
-            self.cpp_info.components["Qt6UiPlugin"].libdirs = []
+            self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
+            self.cpp_info.components["qtUiPlugin"].libdirs = []
             _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
@@ -706,21 +707,26 @@ class QtConan(ConanFile):
 
         if not self.options.shared:
             if self.settings.os == "Windows":
-                self.cpp_info.components["Qt6Core"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
-                self.cpp_info.components["Qt6Core"].system_libs.append("winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
-                self.cpp_info.components["Qt6Core"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
-                self.cpp_info.components["Qt6Core"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
-                self.cpp_info.components["Qt6Core"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
+                self.cpp_info.components["qtNetwork"].system_libs.append("DnsApi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
 
 
             if self.settings.os == "Macos":
-                self.cpp_info.components["Qt6Core"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
-                self.cpp_info.components["Qt6Core"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
-                self.cpp_info.components["Qt6Core"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        self.cpp_info.components["Qt6Core"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
-            self.cpp_info.components[m].build_modules.append(module)
-            self.cpp_info.components[m].builddirs.append(os.path.join("lib", "cmake", m))
-        self.cpp_info.components["Qt6Core"].build_modules.append(self._cmake_executables_file)
+            component_name = m.replace("Qt6", "qt")
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
