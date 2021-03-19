@@ -12,12 +12,17 @@ class TgbotConan(ConanFile):
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True, "shared": False}
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False]
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False
+    }
 
     generators = "cmake", "cmake_find_package"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
+    exports_sources = ['CMakeLists.txt']
 
     _cmake = None
 
@@ -36,9 +41,9 @@ class TgbotConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/1.74.0")
-        self.requires("libcurl/7.72.0")
-        self.requires("openssl/1.1.1h")
+        self.requires("boost/1.75.0")
+        self.requires("libcurl/7.75.0")
+        self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -46,12 +51,12 @@ class TgbotConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         # Don't force PIC
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
-                              "")
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+            ""
+        )
 
     def _configure_cmake(self):
         if self._cmake:
