@@ -34,7 +34,7 @@ class TestPackageConan(ConanFile):
 
     def test_arm(self):
         file_ext = "so" if self.options["libcurl"].shared else "a"
-        lib_path = os.path.join(self.deps_cpp_info["libcurl"].libdirs[0], "libcurl.%s" % file_ext)
+        lib_path = os.path.join(self.deps_cpp_info["libcurl"].lib_paths[0], "libcurl.%s" % file_ext)
         output = subprocess.check_output(["readelf", "-h", lib_path]).decode()
 
         if "armv8" in self.settings.arch:
