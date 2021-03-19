@@ -2,6 +2,9 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
+
 class ZmqppConan(ConanFile):
     name = "zmqpp"
     homepage = "https://github.com/zeromq/zmqpp"
@@ -13,7 +16,7 @@ class ZmqppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = ["cmake", "cmake_find_package"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -25,11 +28,19 @@ class ZmqppConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
         self.requires("zeromq/4.3.3")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -38,18 +49,16 @@ class ZmqppConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-    def validate(self):
-        compiler = self.settings.compiler
-        if compiler.get_safe('cppstd'):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio compiler is not supported")
+        # Link to CMake targets, far more robust since zeromq may have dependencies
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_STATIC}", "CONAN_PKG::zeromq")
+        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_SHARED}", "CONAN_PKG::zeromq")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ZMQPP_LIBZMQ_CMAKE"] = False
         self._cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ZMQPP_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ZMQPP_BUILD_EXAMPLES"] = False
@@ -70,5 +79,6 @@ class ZmqppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libzmqpp"
-        self.cpp_info.libs = tools.collect_libs(self)
-
+        self.cpp_info.libs = ["zmqpp" if self.options.shared else "zmqpp-static"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
