@@ -1,7 +1,8 @@
-#define CGLTF_IMPLEMENTATION
+#define CGLTF_IMPLEMENTATION // can be defined or not
 #include <cgltf.h>
 
 #include <cstdio>
+#include <cstdlib>
 
 // Performs matrix-vector multiplication, as in (4x4) * (4x1) = (4x1)
 static void transform(const cgltf_float matrix[16], const cgltf_float source[4], cgltf_float target[4]) {

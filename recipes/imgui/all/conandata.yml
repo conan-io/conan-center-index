@@ -20,3 +20,6 @@ sources:
   "1.80":
     url: "https://github.com/ocornut/imgui/archive/v1.80.tar.gz"
     sha256: "d7e4e1c7233409018437a646680316040e6977b9a635c02da93d172baad94ce9"
+  "1.81":
+    url: "https://github.com/ocornut/imgui/archive/v1.81.tar.gz"
+    sha256: "f7c619e03a06c0f25e8f47262dbc32d61fd033d2c91796812bf0f8c94fca78fb"

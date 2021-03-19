@@ -1,4 +1,7 @@
 sources:
+  "0.51.0":
+    url: "https://github.com/mesonbuild/meson/archive/0.51.0.tar.gz"
+    sha256: "ec1e3942215a858d82c3d2e095d18adcf1ede94a34144662643d88db4dcb5263"
   "0.51.2":
     url: "https://github.com/mesonbuild/meson/archive/0.51.2.tar.gz"
     sha256: "96871cf62c9cf2b212e2f38aa3e543323403b1314fd3835e14120ef837c00f01"
@@ -50,3 +53,9 @@ sources:
   "0.56.2":
     url: "https://github.com/mesonbuild/meson/archive/0.56.2.tar.gz"
     sha256: "aaae961c3413033789248ffe6762589e80b6cf487c334d0b808e31a32c48f35f"
+  "0.57.0":
+    url: "https://github.com/mesonbuild/meson/archive/0.57.0.tar.gz"
+    sha256: "fd26a27c1a509240c668ebd29d280649d9239cf8684ead51d5cb499d1e1188bd"
+  "0.57.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.57.1.tar.gz"
+    sha256: "0c043c9b5350e9087cd4f6becf6c0d10b1d618ca3f919e0dcca2cdf342360d5d"

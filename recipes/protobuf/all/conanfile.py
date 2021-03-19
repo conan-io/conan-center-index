@@ -1,5 +1,4 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -17,8 +16,20 @@ class ProtobufConan(ConanFile):
     generators = "cmake"
     short_paths = True
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False], "lite": [True, False]}
-    default_options = {"with_zlib": False, "shared": False, "fPIC": True, "lite": False}
+    options = {
+        "fPIC": [True, False],
+        "lite": [True, False],
+        "shared": [True, False],
+        "with_rtti": [True, False],
+        "with_zlib": [True, False]
+    }
+    default_options = {
+        "fPIC": True,
+        "lite": False,
+        "shared": False,
+        "with_rtti": True,
+        "with_zlib": False
+    }
 
     _cmake = None
 
@@ -34,15 +45,20 @@ class ProtobufConan(ConanFile):
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
+    @property
+    def _can_disable_rtti(self):
+        return tools.Version(self.version) >= "3.15.4"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._can_disable_rtti:
+            del self.options.with_rtti
 
     def configure(self):
         if self.options.shared:
@@ -58,6 +74,11 @@ class ProtobufConan(ConanFile):
             if Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
+
+        if self.settings.compiler == "clang":
+           if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
+                raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -74,6 +95,8 @@ class ProtobufConan(ConanFile):
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
             self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
             self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
+            if self._can_disable_rtti:
+                self._cmake.definitions["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
@@ -86,7 +109,7 @@ class ProtobufConan(ConanFile):
         find_protoc = """
 
 # Find the protobuf compiler within the paths added by Conan, for use below.
-find_program(PROTOC_PROGRAM protoc)
+find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
 if(NOT PROTOC_PROGRAM)
     set(PROTOC_PROGRAM "protoc")
 endif()
@@ -177,6 +200,8 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
             self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
+        if self.settings.os == "Android":
+            self.cpp_info.components["libprotobuf"].system_libs.append("log")
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
@@ -215,6 +240,8 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
             if self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
+            if self.settings.os == "Android":
+                self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
 
             self.cpp_info.components["libprotobuf-lite"].builddirs = [self._cmake_install_base_path]
             self.cpp_info.components["libprotobuf-lite"].build_modules.extend([

@@ -58,6 +58,16 @@ class CryptoPPConan(ConanFile):
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         tools.rmdir(src_folder)
 
+    def _patch_sources(self):
+        if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
+            shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
+                            os.path.join(self._source_subfolder, "cpu-features.h"))
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Honor fPIC option
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -73,11 +83,7 @@ class CryptoPPConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
-            shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
-                            os.path.join(self._source_subfolder, "cpu-features.h"))
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

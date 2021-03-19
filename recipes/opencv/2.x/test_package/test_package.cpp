@@ -1,67 +1,164 @@
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+// Example taken from samples/cpp/tutorial_code/core/Matrix/Drawing_1.cpp
 
-#include <iostream>
-#include <cstdlib>
+/**
+ * @file Drawing_1.cpp
+ * @brief Simple sample code
+ */
+
+#include <opencv2/core/core.hpp>
+
+#define w 400
 
 using namespace cv;
 
-/** Global variables */
-String face_cascade_name = "haarcascades/haarcascade_frontalface_alt.xml";
-String eyes_cascade_name = "haarcascades/haarcascade_eye_tree_eyeglasses.xml";
-CascadeClassifier face_cascade;
-CascadeClassifier eyes_cascade;
-std::string window_name = "Capture - Face detection";
-RNG rng(12345);
+/// Function headers
+void MyEllipse( Mat img, double angle );
+void MyFilledCircle( Mat img, Point center );
+void MyPolygon( Mat img );
+void MyLine( Mat img, Point start, Point end );
 
-void faceDetection( Mat frame ) {
-    std::vector<Rect> faces;
-    Mat frame_gray;
+/**
+ * @function main
+ * @brief Main function
+ */
+int main( void ){
 
-    cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
-    equalizeHist( frame_gray, frame_gray );
+  /// Windows names
+  char atom_window[] = "Drawing 1: Atom";
+  char rook_window[] = "Drawing 2: Rook";
 
-    face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+  /// Create black empty images
+  Mat atom_image = Mat::zeros( w, w, CV_8UC3 );
+  Mat rook_image = Mat::zeros( w, w, CV_8UC3 );
 
-    for (size_t i = 0; i < faces.size(); i++) {
-        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
-        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+  /// 1. Draw a simple atom:
+  /// -----------------------
 
-        Mat faceROI = frame_gray( faces[i] );
-        std::vector<Rect> eyes;
+  /// 1.a. Creating ellipses
+  MyEllipse( atom_image, 90 );
+  MyEllipse( atom_image, 0 );
+  MyEllipse( atom_image, 45 );
+  MyEllipse( atom_image, -45 );
 
-        eyes_cascade.detectMultiScale(faceROI, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
+  /// 1.b. Creating circles
+  MyFilledCircle( atom_image, Point( w/2, w/2) );
 
-        for (size_t j = 0; j < eyes.size(); j++) {
-            Point center( faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5 );
-            int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-            circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
-        }
-    }
+  /// 2. Draw a rook
+  /// ------------------
+
+  /// 2.a. Create a convex polygon
+  MyPolygon( rook_image );
+
+  /// 2.b. Creating rectangles
+  rectangle( rook_image,
+         Point( 0, 7*w/8 ),
+         Point( w, w),
+         Scalar( 0, 255, 255 ),
+         -1,
+         8 );
+
+  /// 2.c. Create a few lines
+  MyLine( rook_image, Point( 0, 15*w/16 ), Point( w, 15*w/16 ) );
+  MyLine( rook_image, Point( w/4, 7*w/8 ), Point( w/4, w ) );
+  MyLine( rook_image, Point( w/2, 7*w/8 ), Point( w/2, w ) );
+  MyLine( rook_image, Point( 3*w/4, 7*w/8 ), Point( 3*w/4, w ) );
+
+  return(0);
 }
 
+/// Function Declaration
 
-int main( int argc, const char** argv ) {
-    CvCapture* capture;
+/**
+ * @function MyEllipse
+ * @brief Draw a fixed-size ellipse with different angles
+ */
+void MyEllipse( Mat img, double angle )
+{
+  int thickness = 2;
+  int lineType = 8;
 
-    const String res_folder = String(argv[1]) + "/";
-    face_cascade_name.insert(0, res_folder);
-    eyes_cascade_name.insert(0, res_folder);
+  ellipse( img,
+       Point( w/2, w/2 ),
+       Size( w/4, w/16 ),
+       angle,
+       0,
+       360,
+       Scalar( 255, 0, 0 ),
+       thickness,
+       lineType );
+}
 
-    if (!face_cascade.load(face_cascade_name)) {
-        std::cerr << "--(!)Error loading" << std::endl;
-        return EXIT_FAILURE;
-    }
-    if (!eyes_cascade.load(eyes_cascade_name)) {
-        std::cerr << "--(!)Error loading" << std::endl;
-        return EXIT_FAILURE;
-    }
+/**
+ * @function MyFilledCircle
+ * @brief Draw a fixed-size filled circle
+ */
+void MyFilledCircle( Mat img, Point center )
+{
+  int thickness = -1;
+  int lineType = 8;
 
-    Mat frame = imread(argv[2]);
-    if (!frame.empty()) {
-        faceDetection(frame);
-    }
+  circle( img,
+      center,
+      w/32,
+      Scalar( 0, 0, 255 ),
+      thickness,
+      lineType );
+}
 
-    return EXIT_SUCCESS;
+/**
+ * @function MyPolygon
+ * @function Draw a simple concave polygon (rook)
+ */
+void MyPolygon( Mat img )
+{
+  int lineType = 8;
+
+  /** Create some points */
+  Point rook_points[1][20];
+  rook_points[0][0]  = Point(    w/4,   7*w/8 );
+  rook_points[0][1]  = Point(  3*w/4,   7*w/8 );
+  rook_points[0][2]  = Point(  3*w/4,  13*w/16 );
+  rook_points[0][3]  = Point( 11*w/16, 13*w/16 );
+  rook_points[0][4]  = Point( 19*w/32,  3*w/8 );
+  rook_points[0][5]  = Point(  3*w/4,   3*w/8 );
+  rook_points[0][6]  = Point(  3*w/4,     w/8 );
+  rook_points[0][7]  = Point( 26*w/40,    w/8 );
+  rook_points[0][8]  = Point( 26*w/40,    w/4 );
+  rook_points[0][9]  = Point( 22*w/40,    w/4 );
+  rook_points[0][10] = Point( 22*w/40,    w/8 );
+  rook_points[0][11] = Point( 18*w/40,    w/8 );
+  rook_points[0][12] = Point( 18*w/40,    w/4 );
+  rook_points[0][13] = Point( 14*w/40,    w/4 );
+  rook_points[0][14] = Point( 14*w/40,    w/8 );
+  rook_points[0][15] = Point(    w/4,     w/8 );
+  rook_points[0][16] = Point(    w/4,   3*w/8 );
+  rook_points[0][17] = Point( 13*w/32,  3*w/8 );
+  rook_points[0][18] = Point(  5*w/16, 13*w/16 );
+  rook_points[0][19] = Point(    w/4,  13*w/16 );
+
+  const Point* ppt[1] = { rook_points[0] };
+  int npt[] = { 20 };
+
+  fillPoly( img,
+        ppt,
+        npt,
+            1,
+        Scalar( 255, 255, 255 ),
+        lineType );
+}
+
+/**
+ * @function MyLine
+ * @brief Draw a simple line
+ */
+void MyLine( Mat img, Point start, Point end )
+{
+  int thickness = 2;
+  int lineType = 8;
+  line( img,
+    start,
+    end,
+    Scalar( 0, 0, 0 ),
+    thickness,
+    lineType );
 }

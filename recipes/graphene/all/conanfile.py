@@ -31,14 +31,17 @@ class LibnameConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "gcc":
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("graphene does not support GCC before 5.0")
     
     def build_requirements(self):
-        self.build_requires("meson/0.56.0")
+        self.build_requires("meson/0.57.1")
         self.build_requires("pkgconf/1.7.3")
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.67.6")
 
     def configure(self):
         if self.options.shared:
@@ -55,7 +58,10 @@ class LibnameConan(ConanFile):
         meson = Meson(self)
         defs = {}
         defs["gobject_types"] = "true" if self.options.with_glib else "false"
-        defs["introspection"] = "false"
+        if tools.Version(self.version) < "1.10.4":
+            defs["introspection"] = "false"
+        else:
+            defs["introspection"] = "disabled"
         defs["tests"] = "false"
         defs["installed_tests"] = "false"
         defs["gtk_doc"] = "false"
