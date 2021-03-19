@@ -9,6 +9,7 @@ class AwsSdkCppConan(ConanFile):
     description = "AWS SDK for C++"
     topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     sdks = ("access-management",
             "acm",
@@ -212,7 +213,7 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
