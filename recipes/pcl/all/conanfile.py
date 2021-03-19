@@ -1,75 +1,46 @@
-import os
-from glob import glob
-from itertools import chain
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
-class PclConanRecipe(ConanFile):
+class PclConan(ConanFile):
     name = "pcl"
     description = "Point Cloud Library"
     license = "BSD-3-Clause"
     homepage = "https://pointclouds.org/"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("pointcloud", "computer-vision", "point-cloud")
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_openmp": [True, False],
+        "with_png": [True, False],
+        "with_qhull": [True, False],
         "with_cuda": [True, False],
         "with_tools": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openmp": False,
+        "with_png": True,
+        "with_qhull": True,
         "with_cuda": False,
         "with_tools": False,
-        "qhull:reentrant": False
     }
-    requires = ("boost/1.74.0",
-                "eigen/3.3.8",
-                "flann/1.9.1",
-                "libpng/1.6.37",
-                "qhull/7.3.2")
-    generators = ["cmake", "cmake_find_package"]
+
     exports = ["CMakeLists.txt"]
+    generators = ["cmake", "cmake_find_package", "cmake_find_package_multi"]
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _version_suffix(self):
-        semver = tools.Version(self.version)
-        return "{}.{}".format(semver.major, semver.minor)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
-        cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(
-            cmake_lists,
-            """set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})""",
-            """list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")"""
-        )
-        tools.replace_in_file(
-            cmake_lists,
-            "find_package(FLANN 1.7.0 REQUIRED)",
-            "find_package(Flann REQUIRED)"
-        )
-        # Temporary hack for https://github.com/conan-io/conan/issues/8206
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "pcl_find_boost.cmake"),
-                "find_package(Boost 1.55.0 QUIET COMPONENTS serialization mpi)",
-                "find_package(Boost 1.55.0 QUIET OPTIONAL_COMPONENTS serialization)"
-        )
-        for folder in ["search", "kdtree"]:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, folder, "CMakeLists.txt"),
-                "FLANN::FLANN", "Flann::Flann"
-            )
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -110,28 +81,60 @@ class PclConanRecipe(ConanFile):
                         (version, minimum_version))
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         self._check_msvc()
         self._check_cxx_standard()
         self._check_libcxx_compatibility()
-        if self.options["qhull"].reentrant:
-            self.output.warn(
-                "Qhull is set to link the reentrant library. If you experience linking errors, try setting "
-                "qhull:reentrant=False")
+        if self.options.with_qhull:
+            self.options["qhull"].reentrant = False
+
+    def requirements(self):
+        self.requires("boost/1.75.0")
+        self.requires("eigen/3.3.9")
+        self.requires("flann/1.9.1")
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self.options.with_qhull:
+            self.requires("qhull/8.0.1")
+
+    def validate(self):
+        if self.options.with_qhull and self.options["qhull"].reentrant:
+            raise ConanInvalidConfiguration("pcl requires non-reentrant qhull, you must set qhull:reentrant=False")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
+
+    def _patch_sources(self):
+        cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # Eigen already included by conan_basic_setup(), we don't want that PCL custom FindEigen injects a system installed eigen
+        tools.replace_in_file(cmake_lists, "find_package(Eigen 3.1 REQUIRED)", "")
+        # Flann already handled in CMake wrapper
+        tools.replace_in_file(cmake_lists, "find_package(FLANN 1.7.0 REQUIRED)", "")
+        # Qhull already handled in CMake wrapper
+        tools.replace_in_file(cmake_lists, "find_package(Qhull)", "")
+        # Temporary hack for https://github.com/conan-io/conan/issues/8206
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "pcl_find_boost.cmake"),
+                "find_package(Boost 1.55.0 QUIET COMPONENTS serialization mpi)",
+                "find_package(Boost 1.55.0 QUIET OPTIONAL_COMPONENTS serialization)"
+        )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         cmake_definitions = {
-            "CONAN_PCL_VERSION": self.version,
             "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
         }
 
         pcl_config = {
             "BUILD_tools": self.options.with_tools,
+            "WITH_OPENMP": self.options.with_openmp,
             "WITH_LIBUSB": False,
-            "WITH_PNG": True,
-            "WITH_QHULL": True,
+            "WITH_PNG": self.options.with_png,
+            "WITH_QHULL": self.options.with_qhull,
             "WITH_CUDA": self.options.with_cuda,
             "WITH_VTK": False,
             "WITH_PCAP": False,
@@ -143,8 +146,6 @@ class PclConanRecipe(ConanFile):
             "WITH_DSSDK": False,
             "WITH_RSSDK": False,
             "PCL_SHARED_LIBS": self.options.shared,
-            "FLANN_USE_STATIC": not self.options["flann"].shared,
-            "QHULL_USE_STATIC": not self.options["qhull"].shared
         }
         pcl_features = {
             "BUILD_kdtree": True,
@@ -174,82 +175,136 @@ class PclConanRecipe(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-
-    def _remove_vs_runtime_files(self):
-        patterns = [os.path.join(self.package_folder, "bin", pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
-        runtime_files = chain.from_iterable(glob(pattern) for pattern in patterns)
-        for runtime_file in runtime_files:
-            try:
-                os.remove(runtime_file)
-            except Exception as ex:
-                self.output.warn("Could not remove vs runtime file {}, {}".format(runtime_file, ex))
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            self._remove_vs_runtime_files()
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), pattern)
+
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {self._target_from_name(component):"PCL::{}".format(self._target_from_name(component)) for component in self._pcl_components.keys()}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @staticmethod
+    def _target_from_name(name):
+        return "PCL_{}_LIBRARIES".format(name.upper())
+
+    @property
+    def _pcl_components(self):
+        def png():
+            return ["libpng::libpng"] if self.options.with_png else []
+
+        def qhull():
+            return ["qhull::qhull"] if self.options.with_qhull else []
+
+        return {
+            "common": {"requires": ["eigen::eigen", "boost::boost"]},
+            "kdtree": {"requires": ["common", "flann::flann"]},
+            "octree": {"requires": ["common"]},
+            "search": {"requires": ["common", "kdtree", "octree", "flann::flann"]},
+            "sample_consensus": {"requires": ["common", "search"]},
+            "filters": {"requires": ["common", "sample_consensus", "search", "kdtree", "octree"]},
+            "2d": {"requires": ["common", "filters"], "header_only": True},
+            "geometry": {"requires": ["common"], "header_only": True},
+            "io": {"requires": ["common", "octree"] + png(), "extra_libs": ["io_ply"]},
+            "features": {"requires": ["common", "search", "kdtree", "octree", "filters", "2d"]},
+            "ml": {"requires": ["common"]},
+            "segmentation": {"requires": ["common", "geometry", "search", "sample_consensus", "kdtree", "octree", "features", "filters", "ml"]},
+            "surface": {"requires": ["common", "search", "kdtree", "octree"] + qhull()},
+            "registration": {"requires": ["common", "octree", "kdtree", "search", "sample_consensus", "features", "filters"]},
+            "keypoints": {"requires": ["common", "search", "kdtree", "octree", "features", "filters"]},
+            "tracking": {"requires": ["common", "search", "kdtree", "filters", "octree"]},
+            "recognition": {"requires": ["common", "io", "search", "kdtree", "octree", "features", "filters", "registration", "sample_consensus", "ml"]},
+            "stereo": {"requires": ["common", "io"]}
+        }
+
+    @property
+    def _version_suffix(self):
+        semver = tools.Version(self.version)
+        return "{}.{}".format(semver.major, semver.minor)
 
     def _lib_name(self, lib):
         if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
             return "pcl_{}d".format(lib)
         return "pcl_{}".format(lib)
 
-    def _update_components(self, name, dependencies, header_only=False, extra_libs=None):
-        if not extra_libs:
-            extra_libs = []
-        if not header_only:
-            self.cpp_info.components[name].libs = [self._lib_name(lib) for lib in [name] + extra_libs]
-        self.cpp_info.components[name].includedirs = ["include/pcl-{}".format(self._version_suffix)]
-        self.cpp_info.components[name].name = "PCL_{}_LIBRARIES".format(name.upper())
-        self.cpp_info.components[name].names["pkg_config"] = "pcl_{}-{}".format(name, self._version_suffix)
-        self.cpp_info.components[name].requires = dependencies
-
     def package_info(self):
-        pcl_common = "common"
-        pcl_kdtree = "kdtree"
-        pcl_octree = "octree"
-        pcl_search = "search"
-        pcl_sample_consensus = "sample_consensus"
-        pcl_filters = "filters"
-        pcl_2d = "2d"
-        pcl_geometry = "geometry"
-        pcl_io = "io"
-        pcl_features = "features"
-        pcl_ml = "ml"
-        pcl_segmentation = "segmentation"
-        pcl_surface = "surface"
-        pcl_registration = "registration"
-        pcl_keypoints = "keypoints"
-        pcl_tracking = "tracking"
-        pcl_recognition = "recognition"
-        pcl_stereo = "stereo"
-
         self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["pkg_config"] = "PCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
 
-        self._update_components(pcl_common, ["eigen::eigen", "boost::boost"])
-        self._update_components(pcl_kdtree, [pcl_common, "flann::flann"])
-        self._update_components(pcl_octree, [pcl_common])
-        self._update_components(pcl_search, [pcl_common, pcl_kdtree, pcl_octree, "flann::flann"])
-        self._update_components(pcl_sample_consensus, [pcl_common, pcl_search])
-        self._update_components(pcl_filters, [pcl_common, pcl_sample_consensus, pcl_search, pcl_kdtree, pcl_octree])
-        self._update_components(pcl_2d, [pcl_common, pcl_filters], header_only=True)
-        self._update_components(pcl_geometry, [pcl_common], header_only=True)
-        self._update_components(pcl_io, [pcl_common, pcl_octree, "libpng::libpng"], extra_libs=["io_ply"])
-        self._update_components(pcl_features, [pcl_common,pcl_search, pcl_kdtree, pcl_octree, pcl_filters, pcl_2d])
-        self._update_components(pcl_ml, [pcl_common])
-        self._update_components(pcl_segmentation, [pcl_common, pcl_geometry, pcl_search, pcl_sample_consensus, pcl_kdtree, pcl_octree, pcl_features, pcl_filters, pcl_ml])
-        self._update_components(pcl_surface, [pcl_common, pcl_search, pcl_kdtree, pcl_octree, "qhull::qhull"])
-        self._update_components(pcl_registration, [pcl_common, pcl_octree, pcl_kdtree, pcl_search, pcl_sample_consensus, pcl_features, pcl_filters])
-        self._update_components(pcl_keypoints, [pcl_common, pcl_search, pcl_kdtree, pcl_octree, pcl_features, pcl_filters])
-        self._update_components(pcl_tracking, [pcl_common, pcl_search, pcl_kdtree, pcl_filters, pcl_octree])
-        self._update_components(pcl_recognition, [pcl_common, pcl_io, pcl_search, pcl_kdtree, pcl_octree, pcl_features, pcl_filters, pcl_registration, pcl_sample_consensus, pcl_ml])
-        self._update_components(pcl_stereo, [pcl_common, pcl_io])
+        def _update_components(components):
+            for comp, values in components.items():
+                target = self._target_from_name(comp)
+                self.cpp_info.components[comp].names["cmake_find_package"] = target
+                self.cpp_info.components[comp].names["cmake_find_package_multi"] = target
+                self.cpp_info.components[comp].builddirs.append(self._module_subfolder)
+                self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                self.cpp_info.components[comp].names["pkg_config"] = "pcl_{}-{}".format(comp, self._version_suffix)
+                self.cpp_info.components[comp].includedirs = [os.path.join("include", "pcl-{}".format(self._version_suffix))]
+                if not values.get("header_only", False):
+                    libs = [comp] + values.get("extra_libs", [])
+                    self.cpp_info.components[comp].libs = [self._lib_name(lib) for lib in libs]
+                self.cpp_info.components[comp].requires = values["requires"]
+
+                # also provide alias components to allow find_package(PCL COMPONENTS common kdtree) for example
+                alias_component = "pcl_{}_alias".format(comp)
+                self.cpp_info.components[alias_component].names["cmake_find_package"] = comp
+                self.cpp_info.components[alias_component].names["cmake_find_package_multi"] = comp
+                self.cpp_info.components[alias_component].requires = [comp]
+                self.cpp_info.components[alias_component].includedirs = []
+                self.cpp_info.components[alias_component].libdirs = []
+                self.cpp_info.components[alias_component].bindirs = []
+
+        _update_components(self._pcl_components)
+
+        if not self.options.shared:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["common"].system_libs.append("pthread")
+            if self.options.with_openmp:
+                if self.settings.os == "Linux":
+                    if self.settings.compiler == "gcc":
+                        self.cpp_info.components["common"].sharedlinkflags.append("-fopenmp")
+                        self.cpp_info.components["common"].exelinkflags.append("-fopenmp")
+                elif self.settings.os == "Windows":
+                    if self.settings.compiler == "Visual Studio":
+                        self.cpp_info.components["common"].system_libs.append("delayimp")
+                    elif self.settings.compiler == "gcc":
+                        self.cpp_info.components["common"].system_libs.append("gomp")
+
+        if self.options.with_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
