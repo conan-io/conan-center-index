@@ -166,10 +166,6 @@ class LibarchiveConan(ConanFile):
             tools.replace_in_file(cmakelists_path, "BZIP2_FOUND", "BZip2_FOUND")
             tools.replace_in_file(cmakelists_path, "BZIP2_INCLUDE_DIR", "BZip2_INCLUDE_DIR")
             tools.replace_in_file(cmakelists_path, "BZIP2_LIBRARIES", "BZip2_LIBRARIES")
-        if self.options.with_libxml2:
-            tools.replace_in_file(cmakelists_path, "LIBXML2_FOUND", "LibXml2_FOUND")
-            tools.replace_in_file(cmakelists_path, "LIBXML2_INCLUDE_DIR", "LibXml2_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "LIBXML2_LIBRARIES", "LibXml2_LIBRARIES")
         if self.options.with_openssl:
             tools.replace_in_file(cmakelists_path,
                                   "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
