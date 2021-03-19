@@ -521,10 +521,10 @@ class QtConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
         
-        for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
+            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             if not os.path.isfile(module):
-                tools.rmdir(os.path.join("lib", "cmake", m))
+                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":
