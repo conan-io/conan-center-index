@@ -19,13 +19,13 @@ class LibFlannConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_hdf5": [True, False],
-        "remove_embedded_lz4":  [True, False]
+        "no_embedded_lz4":  [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_hdf5": False,
-        "remove_embedded_lz4": True
+        "no_embedded_lz4": True
     }
 
     _cmake = None
@@ -47,7 +47,7 @@ class LibFlannConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.remove_embedded_lz4:
+        if self.options.no_embedded_lz4:
             self.requires("lz4/1.9.2")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.0")
@@ -58,7 +58,7 @@ class LibFlannConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
-        if self.options.remove_embedded_lz4:
+        if self.options.no_embedded_lz4:
             for patch in self.conan_data.get("patches", {}).get(self.version, {}):
                 tools.patch(**patch)
         # Workaround issue with empty sources for a CMake target
@@ -75,7 +75,7 @@ class LibFlannConan(ConanFile):
             'add_library(flann SHARED "")',
             'add_library(flann SHARED empty.cpp)'
         )
-        if self.options.remove_embedded_lz4:
+        if self.options.no_embedded_lz4:
             # remove embeded lz4
             tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
 
@@ -132,7 +132,7 @@ class LibFlannConan(ConanFile):
         self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
-        if self.options.remove_embedded_lz4:
+        if self.options.no_embedded_lz4:
             self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
         if self.options.with_hdf5:
             self.cpp_info.components["flann_cpp"].requires = ["hdf5::hdf5"]
