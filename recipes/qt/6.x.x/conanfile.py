@@ -489,6 +489,9 @@ class QtConan(ConanFile):
                 }) if tools.os_info.is_macos else tools.no_op():
                     with tools.run_environment(self):
                         cmake.build()
+    @property
+    def _cmake_executables_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
     def package(self):
         cmake = self._configure_cmake()
@@ -517,6 +520,42 @@ class QtConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
+        
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            if not os.path.isfile(module):
+                tools.rmdir(os.path.join("lib", "cmake", m))
+
+        extension = ""
+        if self.settings.os == "Windows":
+            extension = ".exe"
+        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
+        filecontents += "set(QT_VERSION_MAJOR %d)\n" % int(self.version.split(".")[0])
+        filecontents += "set(QT_VERSION_MINOR %d)\n" % int(self.version.split(".")[1])
+        filecontents += "set(QT_VERSION_PATCH %d)\n" % int(self.version.split(".")[2])
+        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
+        targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
+        if self.options.gui:
+            targets.append("qvkgen")
+        if self.options.widgets:
+            targets.append("uic")
+        if self.options.qttools:
+            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
+            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+        if self.options.qtshadertools:
+            targets.append("qsb")
+        if self.options.qtdeclarative:
+            targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+        for target in targets:
+            filecontents += textwrap.dedent("""\
+                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
+                endif()
+                """.format(target, extension))
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -679,42 +718,9 @@ class QtConan(ConanFile):
                 self.cpp_info.components["Qt6Core"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["Qt6Core"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        extension = ""
-        if self.settings.os == "Windows":
-            extension = ".exe"
-        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
-        filecontents += "set(QT_VERSION_MAJOR %d)\n" % int(self.version.split(".")[0])
-        filecontents += "set(QT_VERSION_MINOR %d)\n" % int(self.version.split(".")[1])
-        filecontents += "set(QT_VERSION_PATCH %d)\n" % int(self.version.split(".")[2])
-        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
-        targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
-        if self.options.gui:
-            targets.append("qvkgen")
-        if self.options.widgets:
-            targets.append("uic")
-        if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
-            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
-        if self.options.qtshadertools:
-            targets.append("qsb")
-        if self.options.qtdeclarative:
-            targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
-        for target in targets:
-            filecontents += textwrap.dedent("""\
-                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
-                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
-                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
-                endif()
-                """.format(target, extension))
-        tools.save(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"), filecontents)
-
         self.cpp_info.components["Qt6Core"].builddirs.append(os.path.join("res","archdatadir","bin"))
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
-            if os.path.isfile(module):
-                self.cpp_info.components[m].build_modules.append(module)
-                self.cpp_info.components[m].builddirs.append(os.path.join("lib", "cmake", m))
-            else:
-                tools.rmdir(os.path.join("lib", "cmake", m))
-        self.cpp_info.components["Qt6Core"].build_modules.append(os.path.join("lib", "cmake", "Qt6Core", "extras.cmake"))
+            self.cpp_info.components[m].build_modules.append(module)
+            self.cpp_info.components[m].builddirs.append(os.path.join("lib", "cmake", m))
+        self.cpp_info.components["Qt6Core"].build_modules.append(self._cmake_executables_file)
