@@ -16,8 +16,8 @@ class LibgeotiffConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "rpath": "ANY"}
+    default_options = {"shared": False, "fPIC": True, "rpath": None}
 
     _cmake = None
 
@@ -59,6 +59,9 @@ class LibgeotiffConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_UTILITIES"] = False
         self._cmake.definitions["WITH_TOWGS84"] = True
+        if self.options.rpath is not None:
+            self._cmake.definitions["CMAKE_BUILD_WITH_INSTALL_RPATH"] = True
+            self._cmake.definitions["CMAKE_INSTALL_RPATH"] = self.options.rpath
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
