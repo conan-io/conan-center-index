@@ -37,7 +37,7 @@ class TestPackageConan(ConanFile):
             self.output.info("Building with qmake")
 
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                args = ["'{}'".format(self.source_folder), "DESTDIR=bin"]
+                args = [self.source_folder, "DESTDIR=bin"]
 
                 def _getenvpath(var):
                     val = os.getenv(var)
