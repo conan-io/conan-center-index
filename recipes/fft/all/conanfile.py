@@ -48,12 +48,13 @@ class FftConan(ConanFile):
         def _is_power_of_two(n):
             return (n != 0) and (n & (n-1) == 0)
 
-        if not self.options.max_threads.value.isdigit():
-            raise ConanInvalidConfiguration("max_threads must be an integer")
-        if not self.options.threads_begin_n.value.isdigit():
-            raise ConanInvalidConfiguration("threads_begin_n must be an integer")
-        if not _is_power_of_two(int(self.options.max_threads.value)):
-            raise ConanInvalidConfiguration("max_threads must be a power of 2")
+        if self.options.threads:
+            if not self.options.max_threads.value.isdigit():
+                raise ConanInvalidConfiguration("max_threads must be an integer")
+            if not self.options.threads_begin_n.value.isdigit():
+                raise ConanInvalidConfiguration("threads_begin_n must be an integer")
+            if not _is_power_of_two(int(self.options.max_threads.value)):
+                raise ConanInvalidConfiguration("max_threads must be a power of 2")
 
     def _configure_cmake(self):
         cmake = CMake(self)
