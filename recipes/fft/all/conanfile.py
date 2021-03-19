@@ -38,6 +38,8 @@ class FftConan(ConanFile):
             del self.options.fPIC
     
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.threads:
             del self.options.max_threads
             del self.options.threads_begin_n
