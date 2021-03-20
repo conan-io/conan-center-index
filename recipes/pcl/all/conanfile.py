@@ -87,6 +87,8 @@ class PclConan(ConanFile):
         self._check_cxx_standard()
         self._check_libcxx_compatibility()
         if self.options.with_qhull:
+            # TODO: pcl might switch to reentrant qhull in the next release:
+            #       don't forget to check https://github.com/PointCloudLibrary/pcl/pull/4540 when you bump pcl version
             self.options["qhull"].reentrant = False
 
     def requirements(self):
