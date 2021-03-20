@@ -180,8 +180,8 @@ class AwsSdkCppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
             if (self.settings.compiler == "gcc"
-                    and tools.Version(self.settings.compiler.version) < "5.0"):
-                raise ConanInvalidConfiguration("""Doesn't support gcc4.9 / shared.
+                    and tools.Version(self.settings.compiler.version) < "6.0"):
+                raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
 
     def requirements(self):
