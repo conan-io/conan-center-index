@@ -20,3 +20,6 @@ sources:
   "0.8.2":
     url: "https://github.com/lemire/simdjson/archive/v0.8.2.tar.gz"
     sha256: "6540b7fe5d7cb37afdf8be487b2c6abf31a503fe6709c581d2b198b0016cc5fc"
+  "0.9.1":
+    url: "https://github.com/lemire/simdjson/archive/v0.9.1.tar.gz"
+    sha256: "05a78fc9410ae2f4febb5855ecb44defb956c3a23c73a77eb590aa7a5a8eb09d"
