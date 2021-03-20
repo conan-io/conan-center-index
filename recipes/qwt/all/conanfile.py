@@ -4,7 +4,7 @@ from conans import ConanFile, tools
 
 class QwtConan(ConanFile):
     name = "qwt"
-    license = "Qwt License, Version 1.0"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
     topics = ("conan", "archive", "compression")
