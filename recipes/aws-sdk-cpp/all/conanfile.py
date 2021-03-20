@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os, shutil
 
 class AwsSdkCppConan(ConanFile):
@@ -178,6 +179,10 @@ class AwsSdkCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if (self.settings.compiler == "gcc"
+                    and tools.Version(self.settings.compiler.version) < "5.0"):
+                raise ConanInvalidConfiguration("""Doesn't support gcc4.9 / shared.
+                See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
 
     def requirements(self):
         self.requires("aws-c-common/0.4.25")
