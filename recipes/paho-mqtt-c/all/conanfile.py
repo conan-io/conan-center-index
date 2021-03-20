@@ -1,28 +1,34 @@
-import os
-import glob
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.29.1"
+
 
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
-    topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
+    topics = ("mqtt", "iot", "eclipse", "ssl", "tls", "paho", "c")
     license = "EPL-2.0"
     description = "Eclipse Paho MQTT C client library for Linux, Windows and MacOS"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "ssl": [True, False],
-               "samples": [True, False],
-               "asynchronous": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "ssl": True,
-                       "asynchronous" : True,
-                       "samples": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "ssl": [True, False],
+        "asynchronous": [True, False],
+        "samples": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "ssl": True,
+        "asynchronous": True,
+        "samples": False
+    }
 
     _cmake = None
 
@@ -93,8 +99,7 @@ class PahoMqttcConan(ConanFile):
         for lib_pattern in ["*paho-mqtt3as*", "*paho-mqtt3cs*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
                             "*paho-mqtt3as-static*", "*paho-mqtt3cs-static*", "*paho-mqtt3c-static*", "*paho-mqtt3a-static*"]:
             if not self._lib_target in lib_pattern:
-                for lib_file in glob.glob(os.path.join(self.package_folder, "lib", lib_pattern)):
-                    os.remove(lib_file)
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), lib_pattern)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
@@ -117,6 +122,7 @@ class PahoMqttcConan(ConanFile):
                 self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c"])
             else:
                 self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "pthread"])
+
         if self.options.ssl:
             self.cpp_info.components["_paho-mqtt-c"].requires = ["openssl::openssl"]
 
