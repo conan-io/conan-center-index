@@ -9,25 +9,7 @@ class GinkgoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "High-performance linear algebra library for manycore systems, with a focus on sparse solution of linear systems."
     topics = ("hpc", "linear-algebra")
-    settings = {"os": None,
-                "compiler": {"Visual Studio": {"runtime": None, "toolset": None,
-                                               "version": ["16"]},
-                             "gcc": {"exception": None, "libcxx": None,
-                                     "threads": None,
-                                     "version": [
-                                         "5.4", "5.5", "6", "6.1", "6.2", "6.3",
-                                         "6.4", "6.5", "7", "7.1", "7.2", "7.3",
-                                         "7.4", "7.5", "8", "8.1", "8.2", "8.3",
-                                         "8.4", "9", "9.1", "9.2", "9.3", "10",
-                                         "10.1"]},
-                             "clang": {"runtime": None, "libcxx": None,
-                                       "version": [
-                                           "3.9", "4.0", "5.0", "6.0", "7.0",
-                                           "7.1", "8", "9", "10", "11"]},
-                             "apple-clang": {"libcxx": None, "version": [
-                                                 "10.0", "11.0", "12.0"]},
-                             "intel": {"version": ["18", "19"]}},
-                "build_type": None, "arch": None}
+    settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "openmp": [
         True, False], "cuda": [True, False]}
     default_options = {"shared": False, "fPIC": False,
@@ -44,6 +26,33 @@ class GinkgoConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "5.4",
+            "clang": "3.9",
+            "apple-clang": "10.0",
+            "intel": "18"
+        }
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
     def config_options(self):
         if self.settings.os == "Windows":
