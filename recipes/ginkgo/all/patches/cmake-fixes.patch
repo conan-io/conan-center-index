@@ -1,3 +1,7 @@
+Based on the upstream PRs
+https://github.com/ginkgo-project/ginkgo/pull/713
+https://github.com/ginkgo-project/ginkgo/pull/720
+---
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index e75f7d6..63685f2 100644
 --- a/CMakeLists.txt
@@ -29,16 +33,38 @@ index 0348f95..3b8be0f 100644
  # NOTE: we do not export benchmarks, examples, tests or devel tools
  #     so `third_party` libraries are currently unneeded.
 diff --git a/cmake/install_helpers.cmake b/cmake/install_helpers.cmake
-index ba7ea3f..7cc3ba8 100644
+index 70d6905f51..c62aa57916 100644
 --- a/cmake/install_helpers.cmake
 +++ b/cmake/install_helpers.cmake
-@@ -14,16 +14,11 @@ function(ginkgo_install_library name subdir)
+@@ -2,28 +2,29 @@ include(CMakePackageConfigHelpers)
+ include(GNUInstallDirs)
+ 
+ 
+-set(GINKGO_INSTALL_INCLUDE_DIR "include")
+-set(GINKGO_INSTALL_LIBRARY_DIR "lib")
+-set(GINKGO_INSTALL_PKGCONFIG_DIR "lib/pkgconfig")
+-set(GINKGO_INSTALL_CONFIG_DIR "lib/cmake/Ginkgo")
+-set(GINKGO_INSTALL_MODULE_DIR "lib/cmake/Ginkgo/Modules")
++set(GINKGO_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
++set(GINKGO_INSTALL_LIBRARY_DIR "${CMAKE_INSTALL_LIBDIR}")
++set(GINKGO_INSTALL_RUNTIME_DIR "${CMAKE_INSTALL_BINDIR}")
++set(GINKGO_INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
++set(GINKGO_INSTALL_CONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Ginkgo")
++set(GINKGO_INSTALL_MODULE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Ginkgo/Modules")
+ 
+ function(ginkgo_install_library name subdir)
+-    
++
+     if (WIN32 OR CYGWIN)
          # dll is considered as runtime
          install(TARGETS "${name}"
              EXPORT Ginkgo
 -            LIBRARY DESTINATION ${GINKGO_INSTALL_LIBRARY_DIR}
 -            ARCHIVE DESTINATION ${GINKGO_INSTALL_LIBRARY_DIR}
 -            RUNTIME DESTINATION ${GINKGO_INSTALL_LIBRARY_DIR}
++            LIBRARY DESTINATION "${GINKGO_INSTALL_LIBRARY_DIR}"
++            ARCHIVE DESTINATION "${GINKGO_INSTALL_LIBRARY_DIR}"
++            RUNTIME DESTINATION "${GINKGO_INSTALL_RUNTIME_DIR}"
              )
      else ()
          # install .so and .a files
@@ -46,6 +72,8 @@ index ba7ea3f..7cc3ba8 100644
              EXPORT Ginkgo
 -            LIBRARY DESTINATION ${GINKGO_INSTALL_LIBRARY_DIR}
 -            ARCHIVE DESTINATION ${GINKGO_INSTALL_LIBRARY_DIR}
++            LIBRARY DESTINATION "${GINKGO_INSTALL_LIBRARY_DIR}"
++            ARCHIVE DESTINATION "${GINKGO_INSTALL_LIBRARY_DIR}"
          )
      endif ()
  endfunction()

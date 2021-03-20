@@ -1,3 +1,5 @@
+Based on the upstream PR https://github.com/ginkgo-project/ginkgo/pull/665
+---
 diff --git a/core/base/iterator_factory.hpp b/core/base/iterator_factory.hpp
 index b7efd21dfe..5e4bddeb17 100644
 --- a/core/base/iterator_factory.hpp
