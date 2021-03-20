@@ -28,7 +28,7 @@ class FakeItConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "fakeit-" + self.version
+        extracted_dir = "FakeIt-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
