@@ -193,7 +193,7 @@ class PclConan(ConanFile):
 
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {self._target_from_name(component):"PCL::{}".format(self._target_from_name(component)) for component in self._pcl_components.keys()}
+            {"PCL_{}_LIBRARIES".format(comp.upper()): "PCL::{}".format(comp) for comp in self._pcl_components.keys()}
         )
 
     @staticmethod
@@ -216,10 +216,6 @@ class PclConan(ConanFile):
     @property
     def _module_subfolder(self):
         return os.path.join("lib", "cmake")
-
-    @staticmethod
-    def _target_from_name(name):
-        return "PCL_{}_LIBRARIES".format(name.upper())
 
     @property
     def _pcl_components(self):
@@ -266,9 +262,8 @@ class PclConan(ConanFile):
 
         def _update_components(components):
             for comp, values in components.items():
-                target = self._target_from_name(comp)
-                self.cpp_info.components[comp].names["cmake_find_package"] = target
-                self.cpp_info.components[comp].names["cmake_find_package_multi"] = target
+                self.cpp_info.components[comp].names["cmake_find_package"] = comp
+                self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
                 self.cpp_info.components[comp].builddirs.append(self._module_subfolder)
                 self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
                 self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
@@ -278,15 +273,6 @@ class PclConan(ConanFile):
                     libs = [comp] + values.get("extra_libs", [])
                     self.cpp_info.components[comp].libs = [self._lib_name(lib) for lib in libs]
                 self.cpp_info.components[comp].requires = values["requires"]
-
-                # also provide alias components to allow find_package(PCL COMPONENTS common kdtree) for example
-                alias_component = "pcl_{}_alias".format(comp)
-                self.cpp_info.components[alias_component].names["cmake_find_package"] = comp
-                self.cpp_info.components[alias_component].names["cmake_find_package_multi"] = comp
-                self.cpp_info.components[alias_component].requires = [comp]
-                self.cpp_info.components[alias_component].includedirs = []
-                self.cpp_info.components[alias_component].libdirs = []
-                self.cpp_info.components[alias_component].bindirs = []
 
         _update_components(self._pcl_components)
 
