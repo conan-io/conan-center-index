@@ -109,3 +109,7 @@ class GinkgoConan(ConanFile):
         self.cpp_info.components["core"].libs = ["ginkgo" + debug_suffix]
         self.cpp_info.components["core"].requires = [
             "reference", "omp", "cuda", "hip"]
+
+        self.cpp_info.names["cmake_find_package"] = "Ginkgo"
+        self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
+        self.cpp_info.names["pkg_config"] = "ginkgo"
