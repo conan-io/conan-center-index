@@ -98,7 +98,7 @@ class PahoMqttcConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "MQTTVersion*")
 
         # Remove the extra version that do not match the options
-        for lib_pattern in ["*paho-mqtt3as*", "*paho-mqtt3cs*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
+        for lib_pattern in ["*paho-mqtt3as.*", "*paho-mqtt3cs.*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
                             "*paho-mqtt3as-static*", "*paho-mqtt3cs-static*", "*paho-mqtt3c-static*", "*paho-mqtt3a-static*"]:
             if not self._lib_target in lib_pattern:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), lib_pattern)
