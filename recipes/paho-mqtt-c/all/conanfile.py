@@ -84,11 +84,7 @@ class PahoMqttcConan(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        if self.version in ['1.3.0', '1.3.1']:
-            eplfile = "epl-v10"
-        else:
-            eplfile = "epl-v20" # EPL changed to V2
-        self.copy(eplfile, src=self._source_subfolder, dst="licenses")
+        self.copy(self._epl_file, src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
@@ -125,6 +121,10 @@ class PahoMqttcConan(ConanFile):
 
         if self.options.ssl:
             self.cpp_info.components["_paho-mqtt-c"].requires = ["openssl::openssl"]
+
+    @property
+    def _epl_file(self):
+        return "epl-v10" if self.version in ['1.3.0', '1.3.1'] else "epl-v20" # EPL changed to V2
 
     @property
     def _cmake_target(self):
