@@ -1,5 +1,3 @@
-diff --git a/src/mfast/CMakeLists.txt b/src/mfast/CMakeLists.txt
-index 0ced56e..8609d16 100644
 --- a/src/mfast/CMakeLists.txt
 +++ b/src/mfast/CMakeLists.txt
 @@ -11,6 +11,7 @@ set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_heade
@@ -18,8 +16,14 @@ index 0ced56e..8609d16 100644
  
    if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
      target_compile_definitions(mfast INTERFACE "-DMFAST_DYN_LINK")
-diff --git a/src/mfast/coder/CMakeLists.txt b/src/mfast/coder/CMakeLists.txt
-index 7211a3f..08565b0 100644
+@@ -42,6 +44,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS mfast
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+           LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast CACHE INTERNAL "")
 --- a/src/mfast/coder/CMakeLists.txt
 +++ b/src/mfast/coder/CMakeLists.txt
 @@ -18,7 +18,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -40,8 +44,14 @@ index 7211a3f..08565b0 100644
    set_target_properties(mfast_coder PROPERTIES
                          VERSION "${MFAST_VERSION}"
                          SOVERSION "${MFAST_SOVERSION}")
-diff --git a/src/mfast/json/CMakeLists.txt b/src/mfast/json/CMakeLists.txt
-index 2018f37..e160b2a 100644
+@@ -55,6 +55,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS mfast_coder
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+           LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast_coder CACHE INTERNAL "")
 --- a/src/mfast/json/CMakeLists.txt
 +++ b/src/mfast/json/CMakeLists.txt
 @@ -9,7 +9,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -62,8 +72,14 @@ index 2018f37..e160b2a 100644
    set_target_properties(mfast_json PROPERTIES
                          VERSION "${MFAST_VERSION}"
                          SOVERSION "${MFAST_SOVERSION}")
-diff --git a/src/mfast/xml_parser/CMakeLists.txt b/src/mfast/xml_parser/CMakeLists.txt
-index afb05d8..8c73bfa 100644
+@@ -46,6 +46,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS mfast_json
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+           LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast_json CACHE INTERNAL "")
 --- a/src/mfast/xml_parser/CMakeLists.txt
 +++ b/src/mfast/xml_parser/CMakeLists.txt
 @@ -6,12 +6,11 @@ file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current
@@ -81,12 +97,19 @@ index afb05d8..8c73bfa 100644
  
  if (UNIX)
    set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
-@@ -39,7 +38,7 @@ if (BUILD_SHARED_LIBS)
-     set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
-   endif()
+@@ -30,6 +29,7 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE I
  
--  target_link_libraries(mfast_xml_parser mfast)
+ if (BUILD_SHARED_LIBS)
+   add_library(mfast_xml_parser SHARED ${mfast_xml_parser_SRCS})
 +  target_link_libraries(mfast_xml_parser mfast ${CONAN_LIBS})
-   set_target_properties(mfast_xml_parser PROPERTIES
-                         LINKER_LANGUAGE CXX
-                         VERSION "${MFAST_VERSION}"
+ 
+   if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+     target_compile_definitions(mfast_xml_parser INTERFACE "-DMFAST_DYN_LINK")
+@@ -51,6 +51,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS mfast_xml_parser
+           EXPORT  mFASTTargets
+           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
++          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+           LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+ 
+   set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast_xml_parser CACHE INTERNAL "")
