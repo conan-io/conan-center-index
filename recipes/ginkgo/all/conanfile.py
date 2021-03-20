@@ -49,6 +49,10 @@ class GinkgoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -66,8 +70,6 @@ class GinkgoConan(ConanFile):
         self._cmake.definitions["GINKGO_BUILD_CUDA"] = self.options.cuda
         self._cmake.definitions["GINKGO_BUILD_HIP"] = False
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        if "fPIC" in self.options:
-            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.fPIC
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
