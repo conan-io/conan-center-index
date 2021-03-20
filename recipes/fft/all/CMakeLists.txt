@@ -12,7 +12,9 @@ set(HEADERS "alloc.h;fft.h;fft2.h;fft3.h;dct.h;${CMAKE_CURRENT_BINARY_DIR}/fft_e
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  PUBLIC_HEADER "${HEADERS}"
+  C_VISIBILITY_PRESET hidden)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(THREADS)
