@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_install)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 find_package(Ginkgo REQUIRED)
 
 add_executable(test_install test_install.cpp)
