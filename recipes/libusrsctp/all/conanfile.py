@@ -70,9 +70,6 @@ class LibusrsctpConan(ConanFile):
                       os.path.join(self.package_folder, "lib", "usrsctp.lib"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "usrsctp"
-        self.cpp_info.names["cmake_find_package_multi"] = "usrsctp"
-        self.cpp_info.names["pkg_config"] = "usrsctp"
         self.cpp_info.names["pkg_config"] = "usrsctp"
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(['ws2_32', 'iphlpapi'])
