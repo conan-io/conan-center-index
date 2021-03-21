@@ -126,6 +126,7 @@ class AwsSdkCppConan(ConanFile):
             "route53",
             "route53domains",
             "s3",
+            "s3-encryption",
             "sagemaker",
             "sdb",
             "serverlessrepo"
@@ -165,7 +166,14 @@ class AwsSdkCppConan(ConanFile):
             }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
+    default_options["access-management"] = True
+    default_options["identity-management"] = True
+    default_options["queues"] = True
+    default_options["transfer"] = True
+    default_options["s3-encryption"] = True
+    default_options["text-to-speech"] = True
 
+    short_paths = True
     _cmake = None
 
     @property
@@ -185,9 +193,7 @@ class AwsSdkCppConan(ConanFile):
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
 
     def requirements(self):
-        self.requires("aws-c-common/0.4.25")
         self.requires("aws-c-event-stream/0.1.5")
-        self.requires("zlib/1.2.11")
         if self.settings.os != "Windows":
             self.requires("libcurl/7.74.0")
 
@@ -237,11 +243,7 @@ class AwsSdkCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = [
-                "aws-c-common::aws-c-common-lib",
-                "aws-c-event-stream::aws-c-event-stream-lib",
-                "zlib::zlib",
-                ]
+        self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
 
         for sdk in self.sdks:
             if getattr(self.options, sdk):
