@@ -65,9 +65,6 @@ class LibusrsctpConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "usrsctp_import.lib"),
-                      os.path.join(self.package_folder, "lib", "usrsctp.lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "usrsctp"
