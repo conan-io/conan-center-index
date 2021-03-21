@@ -32,3 +32,6 @@ sources:
   "3.35.1":
     sha256: "79c0429cf881beedec10af1cccfe74a849edf7d1cb40265a5f257d384754d5ea"
     url: "https://sqlite.org/2021/sqlite-amalgamation-3350100.zip"
+  "3.35.2":
+    sha256: "140f148941f5f3069402fcc9bdaf94cf6ffbca2064909fe1656415f1a082cc52"
+    url: "https://sqlite.org/2021/sqlite-amalgamation-3350200.zip"
