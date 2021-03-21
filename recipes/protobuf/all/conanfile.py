@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 
 class ProtobufConan(ConanFile):
@@ -120,16 +121,22 @@ class ProtobufConan(ConanFile):
         protoc_filename = "protoc" + exe_ext
         module_folder_depth = len(os.path.normpath(self._cmake_install_base_path).split(os.path.sep))
         protoc_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), protoc_filename)
+        protoc_target = textwrap.dedent("""\
+            if(NOT TARGET protobuf::protoc)
+                find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
+                if(NOT PROTOC_PROGRAM)
+                    set(PROTOC_PROGRAM \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\")
+                endif()
+                get_filename_component(PROTOC_PROGRAM \"${{PROTOC_PROGRAM}}\" ABSOLUTE)
+                set(Protobuf_PROTOC_EXECUTABLE ${{PROTOC_PROGRAM}} CACHE FILEPATH \"The protoc compiler\")
+                add_executable(protobuf::protoc IMPORTED)
+                set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})
+            endif()
+        """.format(protoc_rel_path=protoc_rel_path))
         tools.replace_in_file(
             protobuf_config_cmake,
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
-            ("get_filename_component(PROTOC_FULL_PATH \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\" ABSOLUTE)\n"
-             "set(Protobuf_PROTOC_EXECUTABLE ${{PROTOC_FULL_PATH}} CACHE FILEPATH \"The protoc compiler\")\n"
-             "if(NOT TARGET protobuf::protoc)\n"
-             "    add_executable(protobuf::protoc IMPORTED)\n"
-             "    set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})\n"
-             "endif()"
-            ).format(protoc_rel_path=protoc_rel_path)
+            protoc_target
         )
 
         # Set DYLD_LIBRARY_PATH in command line to avoid issues with shared protobuf
