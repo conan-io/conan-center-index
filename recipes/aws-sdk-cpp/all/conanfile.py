@@ -239,6 +239,7 @@ class AwsSdkCppConan(ConanFile):
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
