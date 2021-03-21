@@ -45,7 +45,7 @@ class LibTinsConan(ConanFile):
         if self.options.with_ack_tracker:
             self.requires("boost/1.75.0")
         if self.options.with_wpa2:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def configure(self):
         if self.options.shared:
@@ -55,14 +55,6 @@ class LibTinsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def _patch_sources(self):
-        # Workaround for casing issues in cmake_find_package generator of openssl recipe
-        top_cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        src_cmakelists = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
-        tools.replace_in_file(top_cmakelists, "OPENSSL_FOUND", "OpenSSL_FOUND")
-        tools.replace_in_file(src_cmakelists, "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
-        tools.replace_in_file(src_cmakelists, "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -81,7 +73,6 @@ class LibTinsConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

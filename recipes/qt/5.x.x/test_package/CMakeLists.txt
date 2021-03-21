@@ -11,11 +11,10 @@ conan_output_dirs_setup()
 
 find_package(qt REQUIRED CONFIG)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-set(SOURCES test_package.cpp)
-qt5_wrap_cpp(SOURCES greeter.h)
-
-qt5_add_resources(SOURCES example.qrc)
+set(SOURCES test_package.cpp greeter.h example.qrc)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
