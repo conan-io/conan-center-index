@@ -54,7 +54,7 @@ class AwsSdkCppConan(ConanFile):
             "ds",
             "dynamodb",
             "dynamodbstreams",
-#             "ec2", # FIXME: 4401 We found it takes too much RAM
+            "ec2",
             "ecr",
             "ecs",
             "eks",
