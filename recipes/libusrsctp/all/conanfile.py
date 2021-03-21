@@ -14,7 +14,7 @@ class LibusrsctpConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     _cmake = None
@@ -38,6 +38,10 @@ class LibusrsctpConan(ConanFile):
         extracted_dir = "usrsctp-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -50,6 +54,7 @@ class LibusrsctpConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -68,4 +73,4 @@ class LibusrsctpConan(ConanFile):
             self.cpp_info.system_libs.extend(['ws2_32', 'iphlpapi'])
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['pthread'])
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["usrsctp"]
