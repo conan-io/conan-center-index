@@ -246,7 +246,9 @@ class AwsSdkCppConan(ConanFile):
 
         for sdk in self.sdks:
             if getattr(self.options, sdk):
-                self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
+                self.cpp_info.components["aws-sdk-cpp-" + sdk].libs = ["aws-cpp-sdk-" + sdk]
+                self.cpp_info.components["aws-sdk-cpp-" + sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
+                self.cpp_info.components["aws-sdk-cpp-" + sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
