@@ -12,7 +12,7 @@ void test()
     const auto b = Iota(d, 3);
     
     std::cout << "(0 + 1) + (0 + 1 + 2) = "
-    	<< GetLane(SumOfLanes(a + b)) << '\n';
+        << GetLane(SumOfLanes(a + b)) << '\n';
 }
 
 } // namespace HWY_NAMESPACE
@@ -20,6 +20,6 @@ HWY_AFTER_NAMESPACE();
 
 int main()
 {
-	HWY_NAMESPACE::test();
+    HWY_NAMESPACE::test();
     return 0;
 }
