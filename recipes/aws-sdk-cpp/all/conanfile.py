@@ -10,7 +10,7 @@ class AwsSdkCppConan(ConanFile):
     description = "AWS SDK for C++"
     topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     sdks = ("access-management",
             "acm",
@@ -221,14 +221,9 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "find_package(Git)", "# find_package(Git")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "sdks.cmake"),
-                "sort_links(EXPORTS)", "# sort_links(EXPORTS)")
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
