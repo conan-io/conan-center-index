@@ -8,7 +8,7 @@ class AwsSdkCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aws/aws-sdk-cpp"
     description = "AWS SDK for C++"
-    topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
+    topics = ("aws", "cpp", "cross-platform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
