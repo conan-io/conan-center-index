@@ -72,4 +72,5 @@ class LibusrsctpConan(ConanFile):
             self.cpp_info.system_libs.extend(['ws2_32', 'iphlpapi'])
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['pthread'])
-        self.cpp_info.libs = ["usrsctp"]
+        suffix = "_import" if self.settings.os == "Windows" and self.options.shared else ""
+        self.cpp_info.libs = ["usrsctp" + suffix]
