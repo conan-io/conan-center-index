@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os, shutil
+import os
 
 class AwsSdkCppConan(ConanFile):
     name = "aws-sdk-cpp"
@@ -195,8 +195,8 @@ class AwsSdkCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
         # Keeping these unused folders make the source copy fail on Windows
-        shutil.rmtree(self._source_subfolder + "/code-generation/generator")
-        shutil.rmtree(self._source_subfolder + "/aws-cpp-sdk-core-tests")
+        tools.rmdir(os.path.join(self._source_subfolder, "code-generation", "generator"))
+        tools.rmdir(os.path.join(self._source_subfolder, "aws-cpp-sdk-core-tests"))
 
     def _configure_cmake(self):
         if self._cmake:
