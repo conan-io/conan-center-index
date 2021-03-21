@@ -11,7 +11,7 @@ class AwsSdkCppConan(ConanFile):
     topics = ("aws", "cpp", "crossplateform", "amazon", "cloud")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     sdks = ("access-management",
             "acm",
             "alexaforbusiness"
