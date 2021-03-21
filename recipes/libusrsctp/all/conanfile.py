@@ -50,6 +50,8 @@ class LibusrsctpConan(ConanFile):
         self._cmake.definitions["sctp_werror"] = False
         self._cmake.definitions["sctp_build_shared_lib"] = self.options.shared
         self._cmake.definitions["sctp_build_programs"] = False
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+          self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
@@ -63,6 +65,9 @@ class LibusrsctpConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "usrsctp_import.lib"),
+                      os.path.join(self.package_folder, "lib", "usrsctp.lib"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "usrsctp"
