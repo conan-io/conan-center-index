@@ -21,6 +21,10 @@ class HighwayConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -48,5 +52,4 @@ class HighwayConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Highway"
         self.cpp_info.names["cmake_find_package_multi"] = "Highway"
-
         self.cpp_info.libs = tools.collect_libs(self)
