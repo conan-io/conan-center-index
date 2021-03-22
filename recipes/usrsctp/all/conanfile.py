@@ -2,8 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class LibusrsctpConan(ConanFile):
-    name = "libusrsctp"
+class UsrsctpConan(ConanFile):
+    name = "usrsctp"
     license = "BSD-3-Clause"
     homepage = "https://github.com/sctplab/usrsctp"
     url = "https://github.com/conan-io/conan-center-index"
