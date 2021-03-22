@@ -42,8 +42,12 @@ class GinkgoConan(ConanFile):
             "intel": "18"
         }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
-        if (self.settings.os == "Windows") or self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
