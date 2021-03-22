@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class DlpackConan(ConanFile):
     name = "dlpack"
