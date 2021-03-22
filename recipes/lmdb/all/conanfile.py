@@ -12,6 +12,8 @@ class LMDBConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -30,9 +32,9 @@ class LMDBConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.configure()
-        return cmake
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
