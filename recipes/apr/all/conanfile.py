@@ -1,7 +1,7 @@
 import os
 import re
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 
 class AprConan(ConanFile):
@@ -37,6 +37,11 @@ class AprConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+        if (self.settings.compiler == "apple-clang" and
+            tools.Version(self.settings.compiler.version) == "12" and
+            self.version == "1.7.0"):
+            raise ConanInvalidConfiguration("apr does not (yet) support apple-clang 12")
 
     @property
     def _source_subfolder(self):

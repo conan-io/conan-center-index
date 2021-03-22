@@ -10,7 +10,7 @@ class SwigConan(ConanFile):
     homepage = "http://www.swig.org"
     license = "GPL-3.0-or-later"
     topics = ("conan", "swig", "python", "java", "wrapper")
-    exports_sources = "patches/**"
+    exports_sources = "patches/**", "cmake/*"
     settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
@@ -109,6 +109,7 @@ class SwigConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
+        self.copy("*", src="cmake", dst=self._module_subfolder)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
@@ -117,10 +118,19 @@ class SwigConan(ConanFile):
     def _swiglibdir(self):
         return os.path.join(self.package_folder, "bin", "swiglib").replace("\\", "/")
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
+
     def package_info(self):
-        # FIXME: Don't set cmake_find_package name because conan cmake generators do not define SWIG_EXECUTABLE
-        # self.cpp_info.names["cmake_find_package"] = "SWIG"
-        # self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
+        self.cpp_info.names["cmake_find_package"] = "SWIG"
+        self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
+        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

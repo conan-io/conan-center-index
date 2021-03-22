@@ -2,3 +2,6 @@ sources:
   "20200131":
     url: "https://github.com/emil-e/rapidcheck/archive/258d907da00a0855f92c963d8f76eef115531716.zip"
     sha256: "87bfbdceaa09e7aaaf70b2efd0078e93323dd8abdad48c57e9f23bfd84174a75"
+  "20210107":
+    url: "https://github.com/emil-e/rapidcheck/archive/37bcab858dfc398634d409c973363088703ba96e.zip"
+    sha256: "35433d0417fb945abe2b56b720b03d6d92da1188e760c50662c243dac42a6717"

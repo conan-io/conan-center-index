@@ -16,19 +16,24 @@ class JwtCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _supports_generic_json(self):
+        return tools.Version(self.version) >= "0.5.0"
+
     def requirements(self):
-        self.requires("picojson/1.3.0")
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1j")
+        if not self._supports_generic_json:
+            self.requires("picojson/1.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def package(self):
-        header_dir = os.path.join(self._source_subfolder, "include", "")
+        header_dir = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="jwt-cpp/*.h", dst="include", src=header_dir, keep_path=True)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 

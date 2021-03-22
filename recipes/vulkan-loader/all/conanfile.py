@@ -30,7 +30,7 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": False,
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "pkg_config"
     _cmake = None
 
@@ -87,6 +87,8 @@ class VulkanLoaderConan(ConanFile):
         os.rename(glob.glob("Vulkan-Loader-*")[0], self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")

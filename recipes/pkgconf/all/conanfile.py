@@ -1,6 +1,7 @@
 from conans import ConanFile, Meson, tools
-import glob
 import os
+
+required_conan_version = ">= 1.29.1"
 
 
 class PkgConfConan(ConanFile):
@@ -43,10 +44,10 @@ class PkgConfConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pkgconf-pkgconf-{}".format(self.version), self._source_subfolder)
+        os.rename("pkgconf-{}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.1")
+        self.build_requires("meson/0.56.2")
 
     @property
     def _sharedstatedir(self):
@@ -82,12 +83,10 @@ class PkgConfConan(ConanFile):
         meson.install()
 
         if self.settings.compiler == "Visual Studio":
-            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-                os.unlink(pdb)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
             if not self.options.shared:
                 os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-
 
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),

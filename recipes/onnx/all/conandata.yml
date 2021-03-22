@@ -1,0 +1,8 @@
+sources:
+  "1.8.1":
+    url: "https://github.com/onnx/onnx/archive/v1.8.1.tar.gz"
+    sha256: "0054c7eeed97e8ee43921c3f944b0450782a081d910a14b3b6e662bc87065192"
+patches:
+  "1.8.1":
+    - patch_file: "patches/fix-concurrent-proto3-remove.patch"
+      base_path: "source_subfolder"

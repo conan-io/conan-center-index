@@ -1,8 +1,11 @@
 import os
 import fnmatch
+import textwrap
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+
+required_conan_version = ">=1.33.0"
 
 
 @total_ordering
@@ -435,9 +438,14 @@ class OpenSSLConan(ConanFile):
             self._env_build = AutoToolsBuildEnvironment(self)
         return self._env_build
 
+    def _get_default_openssl_dir(self):
+        if self.settings.os == "Linux" and self._full_version >= "1.1.0":
+            return "/etc/ssl"
+        return os.path.join(self.package_folder, "res")
+
     @property
     def _configure_args(self):
-        openssldir = self.options.openssldir if self.options.openssldir else os.path.join(self.package_folder, "res")
+        openssldir = self.options.openssldir or self._get_default_openssl_dir()
         prefix = tools.unix_path(self.package_folder) if self._win_bash else self.package_folder
         openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
         args = [
@@ -758,9 +766,58 @@ class OpenSSLConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            if(DEFINED OpenSSL_FOUND)
+                set(OPENSSL_FOUND ${OpenSSL_FOUND})
+            endif()
+            if(DEFINED OpenSSL_INCLUDE_DIR)
+                set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIR})
+            endif()
+            if(DEFINED OpenSSL_Crypto_LIBS)
+                set(OPENSSL_CRYPTO_LIBRARY ${OpenSSL_Crypto_LIBS})
+                set(OPENSSL_CRYPTO_LIBRARIES ${OpenSSL_Crypto_LIBS}
+                                             ${OpenSSL_Crypto_DEPENDENCIES}
+                                             ${OpenSSL_Crypto_FRAMEWORKS}
+                                             ${OpenSSL_Crypto_SYSTEM_LIBS})
+            endif()
+            if(DEFINED OpenSSL_SSL_LIBS)
+                set(OPENSSL_SSL_LIBRARY ${OpenSSL_SSL_LIBS})
+                set(OPENSSL_SSL_LIBRARIES ${OpenSSL_SSL_LIBS}
+                                          ${OpenSSL_SSL_DEPENDENCIES}
+                                          ${OpenSSL_SSL_FRAMEWORKS}
+                                          ${OpenSSL_SSL_SYSTEM_LIBS})
+            endif()
+            if(DEFINED OpenSSL_LIBRARIES)
+                set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})
+            endif()
+            if(DEFINED OpenSSL_VERSION)
+                set(OPENSSL_VERSION ${OpenSSL_VERSION})
+            endif()
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
+        self.cpp_info.components["ssl"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             if self._full_version < "1.1.0":
@@ -781,7 +838,7 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.components["crypto"].system_libs.append("dl")
+            self.cpp_info.components["crypto"].system_libs.extend(["dl", "rt"])
             self.cpp_info.components["ssl"].system_libs.append("dl")
             if not self.options.no_threads:
                 self.cpp_info.components["crypto"].system_libs.append("pthread")

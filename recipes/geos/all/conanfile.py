@@ -58,6 +58,8 @@ class GeosConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.Version(self.version) >= "3.9.1":
+            self._cmake.definitions["BUILD_BENCHMARKS"] = False
         self._cmake.definitions["DISABLE_GEOS_INLINE"] = not self.options.inline
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)

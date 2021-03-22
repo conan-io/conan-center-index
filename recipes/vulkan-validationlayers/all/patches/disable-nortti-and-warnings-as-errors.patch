@@ -1,0 +1,34 @@
+rtti enabled:
+https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/3a0631bd11f25113d28c65d9984d3f3b486026b4
+no warnings as errors submitted to upstream project:
+https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2300
+https://github.com/KhronosGroup/Vulkan-ValidationLayers/pull/2552
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -118,12 +118,14 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+                         -fvisibility=hidden)
+ 
+     # Treat warnings as errors for versions of GCC and c++11-compliant Clang versions that are shipped on Ubuntu 18.04 or older.
++    if(BUILD_WERROR)
+     if((CMAKE_COMPILER_IS_GNUCXX AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.3.0)) OR
+        (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND
+         (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0.0) AND
+         (CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 7.0.0)))
+         add_compile_options(-Werror)
+     endif()
++    endif()
+ 
+     set(CMAKE_C_STANDARD 99)
+     set(CMAKE_CXX_STANDARD 11)
+@@ -136,9 +138,9 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+     endif()
+ elseif(MSVC)
+     # Treat warnings as errors
++    if(BUILD_WERROR)
+     add_compile_options("/WX")
+-    # Disable RTTI
+-    add_compile_options("/GR-")
++    endif()
+     # Warn about nested declarations
+     add_compile_options("/w34456")
+     # Warn about potentially uninitialized variables
