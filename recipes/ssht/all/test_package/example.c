@@ -1,9 +1,7 @@
-#include <ssht/ssht.h>
+#include <ssht/ssht_sampling.h>
 
 int main(int argc, char *argv[])
 {
-  int i = 0;
-  ssht_sampling_elm2ind(&i, 3, 2);
-
+  ssht_sampling_weight_mw(5);
   return 0;
 }
