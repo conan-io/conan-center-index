@@ -27,7 +27,9 @@ class LMDBConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure()
         return cmake
@@ -43,3 +45,5 @@ class LMDBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lmdb"]
+        bindir = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bindir)
