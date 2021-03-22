@@ -50,8 +50,6 @@ class UsrsctpConan(ConanFile):
         self._cmake.definitions["sctp_werror"] = False
         self._cmake.definitions["sctp_build_shared_lib"] = self.options.shared
         self._cmake.definitions["sctp_build_programs"] = False
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
