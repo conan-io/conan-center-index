@@ -50,11 +50,18 @@ class TinyAesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _config_cflags(self):
+        self._cflags.append("{}=1".format(str(self.options.aes_block_size)))
+        self._cflags.append("CBC={}".format(1 if self.options.cbc else 0))
+        self._cflags.append("ECB={}".format(1 if self.options.ecb else 0))
+        self._cflags.append("CTR={}".format(1 if self.options.ctr else 0))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        self._config_cflags()
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -73,22 +80,7 @@ class TinyAesCConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-
-        self._cflags.append("{}=1".format(str(self.options.aes_block_size)))
-        if not self.options.cbc:
-            self._cflags.append("CBC=0")
-        if not self.options.ecb:
-            self._cflags.append("ECB=0")
-        if not self.options.ctr:
-            self._cflags.append("CTR=0")
-
         self._cmake.definitions["CMAKE_C_FLAGS"] = " ".join("-D{}".format(flag) for flag in self._cflags)
-
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
