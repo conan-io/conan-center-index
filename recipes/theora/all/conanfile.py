@@ -92,11 +92,16 @@ class TheoraConan(ConanFile):
             tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32', 'VS2008')):
-            target = 'libtheora' if self.options.shared else 'libtheora_static'
-            sln = 'libtheora_dynamic.sln' if self.options.shared else 'libtheora_static.sln'
+        with tools.chdir(os.path.join(self._source_subfolder, 'win32', 'VS2008', 'libtheora')):
+            proj = 'libtheora_dynamic' if self.options.shared else 'libtheora_static'
             msbuild = MSBuild(self)
-            msbuild.build(sln, platforms={'x86': 'Win32', 'x86_64': 'x64'}, targets=[target])
+            try:
+                # upgrade .vcproj
+                msbuild.build(proj + '.vcproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
+            except:
+                # build .vcxproj
+                sln = 'libtheora_dynamic.vcxproj' if self.options.shared else 'libtheora_static.vcxproj'
+                msbuild.build(proj + '.vcxproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
