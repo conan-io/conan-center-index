@@ -531,9 +531,9 @@ class QtConan(ConanFile):
             extension = ".exe"
         filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
         ver = tools.Version(self.version)
-        filecontents += "set(QT_VERSION_MAJOR %d)\n" % ver.major)
-        filecontents += "set(QT_VERSION_MINOR %d)\n" % ver.minor)
-        filecontents += "set(QT_VERSION_PATCH %d)\n" % ver.patch)
+        filecontents += "set(QT_VERSION_MAJOR %d)\n" % ver.major
+        filecontents += "set(QT_VERSION_MINOR %d)\n" % ver.minor
+        filecontents += "set(QT_VERSION_PATCH %d)\n" % ver.patch
         targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
         targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
