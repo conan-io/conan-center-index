@@ -6,10 +6,6 @@ class QwtTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def configure(self):
-        if not self.options["qwt"].get_safe("fPIC"):
-            del self.options.fPIC
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
