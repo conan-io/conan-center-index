@@ -365,14 +365,28 @@ class AwsSdkCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "AWSSDK"
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
+        self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
 
         for sdk in self.sdks:
             if getattr(self.options, sdk):
-                self.cpp_info.components["aws-sdk-cpp-" + sdk].libs = ["aws-cpp-sdk-" + sdk]
-                self.cpp_info.components["aws-sdk-cpp-" + sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
-                self.cpp_info.components["aws-sdk-cpp-" + sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
+                self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
+                self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
+                self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
+                self.cpp_info.components[sdk].names["pkg_config"] = "aws-sdk-cpp-" + sdk
+                
+                # alias name to support find_package(AWSSDK COMPONENTS s3 kms ...)
+                component_alias = "aws-sdk-cpp-{}_alias".format(sdk)
+                self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
+                self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
+                self.cpp_info.components[component_alias].requires = [sdk]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
