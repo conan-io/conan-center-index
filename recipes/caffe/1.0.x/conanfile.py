@@ -62,7 +62,7 @@ class CaffeConan(ConanFile):
             self.requires.add("opencv/2.4.13.5")
         if self.options.with_leveldb:
             self.requires.add("leveldb/1.22")
-        self.options.with_lmdb
+        if self.options.with_lmdb:
             self.requires.add("lmdb/0.9.28")
 
 
