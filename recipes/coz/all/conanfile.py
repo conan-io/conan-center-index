@@ -50,6 +50,7 @@ class CozConan(ConanFile):
 
     def package(self):
         self._cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Coz"
