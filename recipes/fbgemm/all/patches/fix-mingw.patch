@@ -1,0 +1,167 @@
+--- a/bench/AlignedVec.h
++++ b/bench/AlignedVec.h
+@@ -100,7 +100,7 @@ class aligned_allocator {
+     // Mallocator wraps malloc().
+     void* pv = nullptr;
+     int ret;
+-#ifdef _MSC_VER
++#ifdef _WIN32
+     pv = _aligned_malloc(n * sizeof(T), Alignment);
+     ret = 0;
+ #else
+@@ -118,7 +118,7 @@ class aligned_allocator {
+   }
+ 
+   void deallocate(T* const p, const std::size_t /*n*/) const {
+-#ifdef _MSC_VER
++#ifdef _WIN32
+     _aligned_free(p);
+ #else
+     free(p);
+--- a/src/FbgemmFP16UKernelsIntrinsicAvx2.cc
++++ b/src/FbgemmFP16UKernelsIntrinsicAvx2.cc
+@@ -5,7 +5,7 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
+-#ifdef _MSC_VER
++#ifdef _WIN32
+ #include <immintrin.h>
+ #include "./FbgemmFP16UKernelsAvx2.h"
+ 
+@@ -112,4 +112,4 @@ void NOINLINE gemmkernel_6x2_Avx2_fp16_fA0fB0fC0(GemmParamsFP16* gp) {
+ }
+ 
+ } // namespace fbgemm
+-#endif // _MSC_VER
++#endif // _WIN32
+--- a/src/FbgemmFP16UKernelsIntrinsicAvx512.cc
++++ b/src/FbgemmFP16UKernelsIntrinsicAvx512.cc
+@@ -5,7 +5,7 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
+-#ifdef _MSC_VER
++#ifdef _WIN32
+ #include <immintrin.h>
+ #include "./FbgemmFP16UKernelsAvx512.h"
+ 
+@@ -137,4 +137,4 @@ void NOINLINE gemmkernel_14x2_Avx512_fp16_fA0fB0fC0(GemmParamsFP16* gp) {
+ }
+ 
+ } // namespace fbgemm
+-#endif // _MSC_VER
++#endif // _WIN32
+--- a/src/FbgemmFP16UKernelsIntrinsicAvx512_256.cc
++++ b/src/FbgemmFP16UKernelsIntrinsicAvx512_256.cc
+@@ -5,7 +5,7 @@
+  * LICENSE file in the root directory of this source tree.
+  */
+ 
+-#ifdef _MSC_VER
++#ifdef _WIN32
+ #include <immintrin.h>
+ #include "./FbgemmFP16UKernelsAvx512_256.h"
+ 
+@@ -118,4 +118,4 @@ void NOINLINE gemmkernel_14x2_Avx512_256_fp16_fA0fB0fC0(GemmParamsFP16* gp) {
+ }
+ 
+ } // namespace fbgemm
+-#endif // _MSC_VER
++#endif // _WIN32
+--- a/src/FbgemmI8Spmdm.cc
++++ b/src/FbgemmI8Spmdm.cc
+@@ -75,7 +75,7 @@ void CompressedSparseColumn::SpMDM(
+ // resnet/resnext so we are keeping arrays with dynamic size for gcc/clang and
+ // dynamically allocated memory for MSVC even though dynamically allocated
+ // memory works for all compilers.
+-#ifdef _MSC_VER
++#ifdef _WIN32
+   uint8_t* A_buffer =
+       static_cast<uint8_t*>(fbgemmAlignedAlloc(64, K * 32 * sizeof(uint8_t)));
+   int32_t* C_buffer =
+@@ -94,7 +94,7 @@ void CompressedSparseColumn::SpMDM(
+     // The cost of transpose is O(K*N) and we do O(NNZ*N) multiplications.
+     // If NNZ/K is small, it's not worth doing transpose so we just use this
+     // scalar loop.
+-#ifdef _MSC_VER
++#ifdef _WIN32
+     int32_t* C_temp = static_cast<int32_t*>(
+         fbgemmAlignedAlloc(64, block.row_size * sizeof(int32_t)));
+ #else
+@@ -158,7 +158,7 @@ void CompressedSparseColumn::SpMDM(
+         }
+       } // for each column of B
+     }
+-#ifdef _MSC_VER
++#ifdef _WIN32
+     fbgemmAlignedFree(A_buffer);
+     fbgemmAlignedFree(C_buffer);
+     fbgemmAlignedFree(C_temp);
+@@ -179,7 +179,7 @@ void CompressedSparseColumn::SpMDM(
+   for (int i1 = block.row_start; i1 < i_end; i1 += 32) {
+     // Transpose 32 x K submatrix of A
+     if (i_end - i1 < 32) {
+-#ifdef _MSC_VER
++#ifdef _WIN32
+       uint8_t* A_temp_buffer = static_cast<uint8_t*>(
+           fbgemmAlignedAlloc(64, K * 32 * sizeof(uint8_t)));
+ #else
+@@ -200,7 +200,7 @@ void CompressedSparseColumn::SpMDM(
+       for (int i2 = (i_end - i1) / 8 * 8; i2 < 32; i2 += 8) {
+         transpose_8rows(K, A_temp_buffer + i2 * K, K, A_buffer + i2, 32);
+       }
+-#ifdef _MSC_VER
++#ifdef _WIN32
+       fbgemmAlignedFree(A_temp_buffer);
+ #endif
+     } else {
+@@ -280,7 +280,7 @@ void CompressedSparseColumn::SpMDM(
+   spmdm_run_time += (dt);
+   t_start = std::chrono::high_resolution_clock::now();
+ #endif
+-#ifdef _MSC_VER
++#ifdef _WIN32
+   fbgemmAlignedFree(A_buffer);
+   fbgemmAlignedFree(C_buffer);
+ #endif
+--- a/src/QuantUtilsAvx2.cc
++++ b/src/QuantUtilsAvx2.cc
+@@ -27,7 +27,7 @@ void QuantizeAvx2(
+     T* dst,
+     int len,
+     const TensorQuantizationParams& qparams) {
+-#if defined(__AVX2__) && (defined(__FMA__) || defined(_MSC_VER))
++#if defined(__AVX2__) && (defined(__FMA__) || defined(_WIN32))
+   constexpr int VLEN = 8;
+   constexpr int32_t min_val = std::numeric_limits<T>::min();
+   constexpr int32_t max_val = std::numeric_limits<T>::max();
+@@ -162,7 +162,7 @@ void NO_SANITIZE("address") FusedQuantizeDequantizeAvx2(
+   float inverse_scale = 1.f / qparams.scale;
+   constexpr int32_t min_val = std::numeric_limits<T>::min();
+   constexpr int32_t max_val = std::numeric_limits<T>::max();
+-#if defined(__AVX2__) && (defined(__FMA__) || defined(_MSC_VER))
++#if defined(__AVX2__) && (defined(__FMA__) || defined(_WIN32))
+ 
+   constexpr int VLEN = 8;
+   // This is the largest int32 value less than int32_max
+--- a/src/Utils.cc
++++ b/src/Utils.cc
+@@ -392,7 +392,7 @@ void* fbgemmAlignedAlloc(
+     bool raiseException /*=false*/) {
+   void* aligned_mem = nullptr;
+   int ret;
+-#ifdef _MSC_VER
++#ifdef _WIN32
+   aligned_mem = _aligned_malloc(size, align);
+   ret = 0;
+ #else
+@@ -406,7 +406,7 @@ void* fbgemmAlignedAlloc(
+ }
+ 
+ void fbgemmAlignedFree(void* p) {
+-#ifdef _MSC_VER
++#ifdef _WIN32
+   _aligned_free(p);
+ #else
+   free(p);
