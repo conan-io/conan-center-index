@@ -88,6 +88,4 @@ install(TARGETS ${QTXLSXWRITER_TARGET_NAME}
 	PUBLIC_HEADER DESTINATION include
 )
 
-install(FILES source_subfolder/LICENSE DESTINATION licenses)
-
 set_property(GLOBAL PROPERTY AUTOGEN_SOURCE_GROUP "Generated Files")

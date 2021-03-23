@@ -1,4 +1,4 @@
-import os, glob
+import os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conans import ConanFile, tools
 
@@ -53,17 +53,20 @@ class QtXlsxWriterConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PROJECT_VERSION"] = "0.3.0"
-        tc.variables["PROJECT_VERSION_MAJOR"] = "0"
-        tc.variables["PROJECT_VERSION_MINOR"] = "3"
-        tc.variables["PROJECT_VERSION_PATCH"] = "0"
+        version = tools.Version(self.version)
+        tc.variables["PROJECT_VERSION"] = version
+        tc.variables["PROJECT_VERSION_MAJOR"] = version.major
+        tc.variables["PROJECT_VERSION_MINOR"] = version.minor
+        tc.variables["PROJECT_VERSION_PATCH"] = version.patch
         tc.variables["QT_ROOT"] = self.deps_cpp_info["qt"].rootpath.replace("\\", "/")
         tc.generate()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("QtXlsxWriter-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        for source in self.conan_data["sources"][self.version]:
+            url = source["url"]
+            filename = url.rsplit("/", 1)[-1]
+            tools.download(url, filename, sha256=source["sha256"])
+        tools.unzip(os.path.join(self.source_folder, "v0.3.0.zip"), self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -74,6 +77,7 @@ class QtXlsxWriterConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("LICENSE", dst="licenses")
 
     def package_info(self):
         if not self.options.shared:
