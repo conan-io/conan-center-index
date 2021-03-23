@@ -11,17 +11,16 @@ class Kirigami2Conan(ConanFile):
     homepage = "https://develop.kde.org/frameworks/kirigami/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package"
-    requires = ["qt/5.15.2", "extra-cmake-modules/5.80.0"]
-    exports_sources = "CMakeLists.txt"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    generators = "cmake", "cmake_find_package_multi"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def build_requirements(self):
+        self.build_requires("qt/5.15.2")
+        self.build_requires("extra-cmake-modules/5.80.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -30,7 +29,7 @@ class Kirigami2Conan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
