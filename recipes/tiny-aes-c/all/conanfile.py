@@ -99,5 +99,4 @@ class TinyAesCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tiny-aes"]
-        for flag in self._cflags:
-            self.cpp_info.defines.append(flag)
+        self.cpp_info.defines = self._cflags
