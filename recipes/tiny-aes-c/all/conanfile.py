@@ -40,7 +40,6 @@ class TinyAesCConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
-    _cflags = []
 
     @property
     def _source_subfolder(self):
