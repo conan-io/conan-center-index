@@ -15,8 +15,6 @@ class CaffeConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    version = "1.0.windows"
-
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_gpu": [True, False],
