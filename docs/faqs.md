@@ -146,3 +146,5 @@ def package_id(self):
 ```
 
 This is the safest way, users will be warned of deprecation and their projects will not risk breaking.
+As aditional examples, take a look on follow recipes: [dcmtk](https://github.com/conan-io/conan-center-index/blob/5e6089005f0bb66cd16db7b0e5f37f5081c7820c/recipes/dcmtk/all/conanfile.py#L24), [gtsam](https://github.com/conan-io/conan-center-index/blob/f7f18ab050e5d97fac70932b0ba4c115a930958c/recipes/gtsam/all/conanfile.py#L40)
+and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c82564199fdd9ca2f95231693c1a7136a/recipes/libcurl/all/conanfile.py#L24).
