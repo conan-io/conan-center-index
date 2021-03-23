@@ -41,13 +41,14 @@ class SpdlogConan(ConanFile):
         if self.options.header_only:
             del self.options.shared
             del self.options.fPIC
-        elif self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("libstdc++11 required")
-        elif self.settings.os == "Windows" and self.options.shared and Version(self.version) < "1.6.0":
-            raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
-        if self.settings.os != "Windows" and \
-           (self.options.wchar_support or self.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is only supported under windows")
+        if self.settings.os == "Windows":
+            if self.options.shared and Version(self.version) < "1.6.0":
+                raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
+        else:
+            if (self.options.wchar_support or self.options.wchar_filenames):
+                raise ConanInvalidConfiguration("wchar is only supported under windows")
+            if self.settings.compiler.libcxx != "libstdc++11"
+                raise ConanInvalidConfiguration("libstdc++11 required")
         if self.settings.compiler == "Visual Studio" and self.options.get_safe("shared", False) and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
