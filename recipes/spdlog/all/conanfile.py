@@ -41,6 +41,8 @@ class SpdlogConan(ConanFile):
         if self.options.header_only:
             del self.options.shared
             del self.options.fPIC
+        elif self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
         elif self.settings.os == "Windows" and self.options.shared and Version(self.version) < "1.6.0":
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
         if self.settings.os != "Windows" and \
