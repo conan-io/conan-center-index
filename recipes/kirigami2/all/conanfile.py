@@ -16,6 +16,10 @@ class Kirigami2Conan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
