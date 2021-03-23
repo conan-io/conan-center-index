@@ -20,18 +20,13 @@ class ConanFileDefault(ConanFile):
         "with_zlib": [True, False],
         "with_libevent": [True, False],
         "with_openssl": [True, False],
-        "with_boost_functional": [True, False],
-        "with_boost_smart_ptr": [True, False],
         "with_boost_static": [True, False],
-        "with_boostthreads": [True, False],
-        "with_stdthreads": [True, False],
         "with_c_glib": [True, False],
         "with_cpp": [True, False],
         "with_java": [True, False],
         "with_python": [True, False],
         "with_qt": [True, False],
         "with_haskell": [True, False],
-        "with_plugin": [True, False]
     }
     default_options = {
         "shared": False,
@@ -39,18 +34,13 @@ class ConanFileDefault(ConanFile):
         "with_zlib": True,
         "with_libevent": True,
         "with_openssl": True,
-        "with_boost_functional": False,
-        "with_boost_smart_ptr": False,
         "with_boost_static": False,
-        "with_boostthreads": False,
-        "with_stdthreads": True,
         "with_c_glib": False,
         "with_cpp": True,
         "with_java": False,
         "with_python": False,
         "with_qt": False,
         "with_haskell": False,
-        "with_plugin": False
     }
     short_paths = True
 
@@ -105,16 +95,12 @@ class ConanFileDefault(ConanFile):
         for option, value in self.options.items():
             self._cmake.definitions[option.upper()] = value
 
-        # Make thrift use correct thread lib (see repo/build/cmake/config.h.in)
-        self._cmake.definitions["USE_STD_THREAD"] = self.options.with_stdthreads
-        self._cmake.definitions["USE_BOOST_THREAD"] = self.options.with_boostthreads
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
         self._cmake.definitions["BUILD_LIBRARIES"] = True
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TUTORIALS"] = False
 
         if self.settings.compiler == "Visual Studio":
