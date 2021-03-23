@@ -1,0 +1,27 @@
+commit 14d6aa01a3aa71d3c72dcd728a1bcc59d1bccfc7 (HEAD -> hotfix/fix-install-coz-option, coz-klimkin/hotfix/fix-install-coz-option)
+Author: Alexey Klimkin <klimkin@gmail.com>
+Date:   Mon Mar 22 20:23:46 2021 -0700
+
+    Fix an issue libcoz not picking-up INSTALL_COZ option
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7329632..0728b80 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,6 +14,8 @@ find_package(libelfin REQUIRED)
+ 
+ add_compile_options(-gdwarf-3)
+ 
++option(INSTALL_COZ "Enable installation of coz. (Projects embedding coz may want to turn this OFF.)" ON)
++
+ add_subdirectory(libcoz)
+ 
+ option(BUILD_BENCHMARKS "Build benchmarks" OFF)
+@@ -26,7 +28,6 @@ if(BUILD_BENCHMARKS)
+     add_subdirectory(benchmarks)
+ endif()
+ 
+-option(INSTALL_COZ "Enable installation of coz. (Projects embedding coz may want to turn this OFF.)" ON)
+ if(INSTALL_COZ)
+     include(GNUInstallDirs)
+     install(PROGRAMS coz DESTINATION bin)

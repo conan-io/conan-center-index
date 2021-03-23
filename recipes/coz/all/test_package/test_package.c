@@ -1,4 +1,4 @@
-#include <coz/coz.h>
+#include <coz.h>
 #include <stdio.h>
 
 int

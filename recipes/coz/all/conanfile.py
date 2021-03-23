@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -16,9 +17,8 @@ class CozConan(ConanFile):
 
     requires = "libelfin/0.3"
     exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
-    _cmake = None
     _source_subfolder = "source_subfolder"
 
     def configure(self):
@@ -31,25 +31,25 @@ class CozConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = glob.glob(self.name + "-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    __cmake = None
+
+    @property
+    def _cmake(self):
+        if self.__cmake is None:
+            self.__cmake = CMake(self)
+        return self.__cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+        self._cmake.configure()
+        self._cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
+        self._cmake.install()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Coz"

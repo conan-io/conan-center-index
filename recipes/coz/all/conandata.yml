@@ -1,10 +1,8 @@
 sources:
-  "0.2.2":
-    url: "https://github.com/plasma-umass/coz/archive/0.2.2.tar.gz"
-    sha256: "5e671c5b7e2920e295d2da793e5eb4d60b36889fd86c9dc40cacfe0d3ec24d0f"
+  "cci.20210322":
+    url: "https://github.com/plasma-umass/coz/archive/2e6c4a1a1c054e24479009e5561edeebce075dba.zip"
+    sha256: "359353a5757b215418820212891bce4b9ab427a48e565ffcb84f0cc0818dd144"
 patches:
-  "0.2.2":
-    - patch_file: "patches/gettid.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/python.patch"
+  "cci.20210322":
+    - patch_file: "patches/install-fix.patch"
       base_path: "source_subfolder"
