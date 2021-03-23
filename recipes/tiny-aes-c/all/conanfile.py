@@ -31,7 +31,7 @@ class TinyAesCConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "aes_block_size": "AES128",
+        "aes_block_size": "aes128",
         "cbc": True,
         "ecb": True,
         "ctr": True,
