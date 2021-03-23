@@ -1,0 +1,4 @@
+sources:
+  "5.80.0":
+    url: "https://download.kde.org/stable/frameworks/5.80/kirigami2-5.80.0.tar.xz"
+    sha256: "228ef76fa69f1d7f89f8f04be93a0528507352f3c97f6d98b6259207b2679272"
