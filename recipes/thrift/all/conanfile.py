@@ -95,7 +95,6 @@ class ConanFileDefault(ConanFile):
 
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
-        self._cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
@@ -154,7 +153,7 @@ class ConanFileDefault(ConanFile):
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
-        self.cpp_info.components["libthrift"].requires.append("boost::boost")
+        self.cpp_info.components["libthrift"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libthrift"].requires.append("openssl::openssl")
         if self.options.with_libevent:
