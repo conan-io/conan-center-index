@@ -122,3 +122,27 @@ There are some recipes in `conan-center-index` that provide packages that contai
 We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
 
 Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
+
+## Can I remove a deprecated option from recipe
+
+No. Changing any option will result in a different package ID and may result a different behavior, the result can break users.
+Instead, you should deprecate the option:
+
+* Add "deprecated" as option value
+* Set "deprecated" as default option
+* Check the option value, if the value is different from "deprecated", raise a warning
+* Remove the option from Package ID
+
+```python
+options = {"foobar": [True, False, "deprecated"]}
+default_options = {"foobar": "deprecated"}
+
+def configure(self):
+    if self.options.foobar != "deprecated":
+        self.out.warn("foobar option is deprecated, do not use anymore.")
+
+def package_id(self):
+    del self.info.options.foobar
+```
+
+This is the safest way, users will be warned of deprecation and their projects will not risk breaking.
