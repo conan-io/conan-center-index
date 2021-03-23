@@ -16,6 +16,10 @@ class Kirigami2Conan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -26,7 +30,7 @@ class Kirigami2Conan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
