@@ -12,9 +12,9 @@ class ZlibConan(ConanFile):
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False, "deprecated"]}
+    default_options = {"shared": False, "fPIC": True, "minizip": "deprecated"}
+    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
     generators = "cmake"
     topics = ("conan", "zlib", "compression")
 
@@ -33,6 +33,12 @@ class ZlibConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.minizip != "deprecated":
+            self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
+
+    def package_id(self):
+        del self.info.options.minizip
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
