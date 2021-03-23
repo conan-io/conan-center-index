@@ -20,7 +20,6 @@ class ConanFileDefault(ConanFile):
         "with_zlib": [True, False],
         "with_libevent": [True, False],
         "with_openssl": [True, False],
-        "with_boost_static": [True, False],
         "with_c_glib": [True, False],
         "with_cpp": [True, False],
         "with_java": [True, False],
@@ -34,7 +33,6 @@ class ConanFileDefault(ConanFile):
         "with_zlib": True,
         "with_libevent": True,
         "with_openssl": True,
-        "with_boost_static": False,
         "with_c_glib": False,
         "with_cpp": True,
         "with_java": False,
@@ -97,6 +95,7 @@ class ConanFileDefault(ConanFile):
 
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
