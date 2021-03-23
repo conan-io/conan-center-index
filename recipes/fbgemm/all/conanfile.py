@@ -27,7 +27,7 @@ class FbgemmConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -62,6 +62,9 @@ class FbgemmConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Don't inject definitions from upstream dependencies
         tools.replace_in_file(cmakelists, "target_compile_definitions(fbgemm_generic PRIVATE ASMJIT_STATIC)", "")

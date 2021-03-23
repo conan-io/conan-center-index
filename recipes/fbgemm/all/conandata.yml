@@ -2,3 +2,7 @@ sources:
   "cci.20210316":
     url: "https://github.com/pytorch/FBGEMM/archive/8ae350d3c132761f2f70a32b90ab27c751130f89.zip"
     sha256: "5b6f1162a26c8e765cdf5e90f2635092120ed5df9e4df3fd623649a6c4299494"
+patches:
+  "cci.20210316":
+    - patch_file: "patches/static-constexpr-initializer.patch"
+      base_path: "source_subfolder"
