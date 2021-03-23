@@ -12,12 +12,19 @@ class ZlibConan(ConanFile):
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "minizip": False}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
     topics = ("conan", "zlib", "compression")
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "_build"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,21 +37,6 @@ class ZlibConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-
-    def build(self):
-        self._build_zlib()
-        if self.options.minizip:
-            self._build_minizip()
-
-    def _build_zlib_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_dir=".")
-        # we need to build only libraries without test example/example64 and minigzip/minigzip64
-        make_target = "zlib" if self.options.shared else "zlibstatic"
-
-        cmake.build(build_dir=".", target=make_target)
-
-    def _build_zlib(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
@@ -65,18 +57,20 @@ class ZlibConan(ConanFile):
                                           '#ifdef HAVE_STDARG_H    '
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
+
+
+    def build(self):
+        with tools.chdir(self._source_subfolder):
+            tools.mkdir(self._build_subfolder)
+            with tools.chdir(self._build_subfolder):
                 self._build_zlib_cmake()
 
-    def _build_minizip(self):
-        minizip_dir = os.path.join(self._source_subfolder, 'contrib', 'minizip')
-        os.rename("CMakeLists_minizip.txt", os.path.join(minizip_dir, 'CMakeLists.txt'))
-        with tools.chdir(minizip_dir):
-            cmake = CMake(self)
-            cmake.configure(source_folder=minizip_dir)
-            cmake.build()
-            cmake.install()
+    def _build_zlib_cmake(self):
+        cmake = CMake(self)
+        cmake.configure(build_dir=".")
+        # we need to build only libraries without test example/example64 and minigzip/minigzip64
+        make_target = "zlib" if self.options.shared else "zlibstatic"
+        cmake.build(build_dir=".", target=make_target)
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
@@ -128,10 +122,6 @@ class ZlibConan(ConanFile):
         self._rename_libraries()
 
     def package_info(self):
-        if self.options.minizip:
-            self.cpp_info.libs.append('minizip')
-            if self.options.shared:
-                self.cpp_info.defines.append('MINIZIP_DLL')
         self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
