@@ -47,7 +47,7 @@ class SpdlogConan(ConanFile):
         else:
             if (self.options.wchar_support or self.options.wchar_filenames):
                 raise ConanInvalidConfiguration("wchar is only supported under windows")
-            if self.settings.compiler.libcxx != "libstdc++11"
+            if self.settings.compiler.libcxx != "libstdc++11":
                 raise ConanInvalidConfiguration("libstdc++11 required")
         if self.settings.compiler == "Visual Studio" and self.options.get_safe("shared", False) and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
