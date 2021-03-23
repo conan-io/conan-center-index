@@ -102,7 +102,6 @@ class TheoraConan(ConanFile):
                 msbuild.build(proj + '.vcproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
             except:
                 # build .vcxproj
-                sln = 'libtheora_dynamic.vcxproj' if self.options.shared else 'libtheora_static.vcxproj'
                 msbuild.build(proj + '.vcxproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
 
     def package(self):
