@@ -91,7 +91,8 @@ class ConanFileDefault(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         for option, value in self.options.items():
-            self._cmake.definitions[option.upper()] = value
+            if option.startswith("with_"):
+                self._cmake.definitions[option.upper()] = value
 
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
