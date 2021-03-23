@@ -6,6 +6,7 @@ virtualrunenv
 b2/4.2.0
 boost/1.69.0
 c-ares/1.15.0
+caffe/1.0.windows
 bzip2/1.0.8
 ffmpeg/3.3.1
 gflags/2.2.2
@@ -20,6 +21,7 @@ lmdb/0.9.28
 miniupnpc/2.1
 nasm/2.14
 openal/1.20.1
+openblas/0.3.7
 opencv/2.4.13.5
 openh264/1.7.0
 protobuf/3.9.1
@@ -34,6 +36,9 @@ axtls:shared=True
 boost:shared=True
 c-ares:shared=False
 caffe:shared=False
+caffe:with_opencv=True
+caffe:with_leveldb=True
+caffe:with_lmdb=True
 curl:shared=True
 facesdk:shared=True
 ffmpeg:shared=True
