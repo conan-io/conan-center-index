@@ -1,0 +1,26 @@
+--- src/caffe/CMakeLists.txt	2020-03-02 20:52:54.000000000 +0300
++++ src/caffe/CMakeLists.v2.txt	2020-03-02 20:53:50.000000000 +0300
+@@ -39,7 +39,9 @@
+                                  PUBLIC
+                                  $<BUILD_INTERFACE:${Caffe_INCLUDE_DIR}>
+                                  $<INSTALL_INTERFACE:include>)
+-target_compile_definitions(caffe ${Caffe_DEFINITIONS})
++if(Caffe_DEFINITIONS)
++  target_compile_definitions(caffe ${Caffe_DEFINITIONS})
++endif()
+ if(Caffe_COMPILE_OPTIONS)
+   target_compile_options(caffe ${Caffe_COMPILE_OPTIONS})
+ endif()
+--- CMakeLists.txt	2020-02-22 17:17:57.000000000 +0300
++++ CMakeLists.new.txt	2020-03-02 18:35:09.000000000 +0300
+@@ -82,7 +82,9 @@
+ 
+   # add definitions to nvcc flags directly
+   set(Caffe_ALL_DEFINITIONS ${Caffe_DEFINITIONS})
+-  list(REMOVE_ITEM Caffe_ALL_DEFINITIONS PRIVATE PUBLIC)
++  if(Caffe_ALL_DEFINITIONS)
++    list(REMOVE_ITEM Caffe_ALL_DEFINITIONS PRIVATE PUBLIC)
++  endif()
+   list(APPEND CUDA_NVCC_FLAGS ${Caffe_ALL_DEFINITIONS})
+ endif()
+ 

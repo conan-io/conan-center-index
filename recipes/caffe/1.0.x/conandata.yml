@@ -1,0 +1,24 @@
+sources:
+  "1.0":
+    url: "https://github.com/BVLC/caffe/archive/1.0.tar.gz"
+    sha256: "71d3c9eb8a183150f965a465824d01fe82826c22505f7aa314f700ace03fa77f"
+patches:
+  "1.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0001-glog.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0002-openblas-libraries.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0003-examples.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0004-summary.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0005-conan-libs.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0006-include-cblas.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0007-link-flags.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0008-cmake-protobuf-case.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0/0009-empty-defs.patch"

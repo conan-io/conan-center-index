@@ -1,0 +1,14 @@
+--- cmake/Targets.cmake	2017-04-15 19:17:48.000000000 +0300
++++ cmake/Targets.new.cmake	2020-02-22 20:01:17.000000000 +0300
+@@ -5,9 +5,9 @@
+   if(BUILD_SHARED_LIBS)
+     set(Caffe_LINK caffe)
+   else()
+-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
++		if(APPLE)
+       set(Caffe_LINK -Wl,-force_load caffe)
+-    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
++		elseif(UNIX)
+       set(Caffe_LINK -Wl,--whole-archive caffe -Wl,--no-whole-archive)
+     endif()
+   endif()

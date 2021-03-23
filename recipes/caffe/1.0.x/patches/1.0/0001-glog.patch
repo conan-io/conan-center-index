@@ -1,0 +1,49 @@
+diff -ru cmake/Dependencies.cmake cmake-de/Dependencies.cmake
+--- cmake/Dependencies.cmake	2017-04-15 19:17:48.000000000 +0300
++++ cmake-de/Dependencies.cmake	2020-02-22 14:11:49.000000000 +0300
+@@ -31,13 +31,13 @@
+ 
+ # ---[ Google-glog
+ include("cmake/External/glog.cmake")
+-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GLOG_INCLUDE_DIRS})
+-list(APPEND Caffe_LINKER_LIBS PUBLIC ${GLOG_LIBRARIES})
++list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${glog_INCLUDE_DIRS})
++list(APPEND Caffe_LINKER_LIBS PUBLIC ${glog_LIBRARIES})
+ 
+ # ---[ Google-gflags
+ include("cmake/External/gflags.cmake")
+-list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GFLAGS_INCLUDE_DIRS})
+-list(APPEND Caffe_LINKER_LIBS PUBLIC ${GFLAGS_LIBRARIES})
++list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${gflags_INCLUDE_DIRS})
++list(APPEND Caffe_LINKER_LIBS PUBLIC ${gflags_LIBRARIES})
+ 
+ # ---[ Google-protobuf
+ include(cmake/ProtoBuf.cmake)
+diff -ru cmake/External/gflags.cmake cmake-de/External/gflags.cmake
+--- cmake/External/gflags.cmake	2017-04-15 19:17:48.000000000 +0300
++++ cmake-de/External/gflags.cmake	2020-02-22 16:44:26.000000000 +0300
+@@ -2,8 +2,8 @@
+   set(__GFLAGS_INCLUDED TRUE)
+ 
+   # use the system-wide gflags if present
+-  find_package(GFlags)
+-  if (GFLAGS_FOUND)
++  find_package(gflags)
++  if (gflags_FOUND)
+     set(GFLAGS_EXTERNAL FALSE)
+   else()
+     # gflags will use pthreads if it's available in the system, so we must link with it
+diff -ru cmake/External/glog.cmake cmake-de/External/glog.cmake
+--- cmake/External/glog.cmake	2017-04-15 19:17:48.000000000 +0300
++++ cmake-de/External/glog.cmake	2020-02-22 16:44:42.000000000 +0300
+@@ -5,8 +5,8 @@
+   set(__GLOG_INCLUDED TRUE)
+ 
+   # try the system-wide glog first
+-  find_package(Glog)
+-  if (GLOG_FOUND)
++  find_package(glog)
++  if (glog_FOUND)
+       set(GLOG_EXTERNAL FALSE)
+   else()
+     # fetch and build glog from github
