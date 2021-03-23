@@ -50,11 +50,14 @@ class TinyAesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _config_cflags(self):
-        self._cflags.append("{}=1".format(str(self.options.aes_block_size)))
-        self._cflags.append("CBC={}".format(1 if self.options.cbc else 0))
-        self._cflags.append("ECB={}".format(1 if self.options.ecb else 0))
-        self._cflags.append("CTR={}".format(1 if self.options.ctr else 0))
+    @property
+    def _cflags(self):
+        return [
+            "{}=1".format(str(self.options.aes_block_size).upper()),
+            "CBC={}".format("1" if self.options.cbc else "0"),
+            "ECB={}".format("1" if self.options.ecb else "0"),
+            "CTR={}".format("1" if self.options.ctr else "0")
+        ]
 
     def config_options(self):
         if self.settings.os == "Windows":
