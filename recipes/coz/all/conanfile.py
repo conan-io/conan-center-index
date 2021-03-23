@@ -43,8 +43,6 @@ class CozConan(ConanFile):
         return self.__cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         self._cmake.configure()
         self._cmake.build()
 
