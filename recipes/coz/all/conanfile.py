@@ -22,7 +22,10 @@ class CozConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        if self.settings.os == "Macos" or self.settings.compiler == "Visual Studio":
+        compiler = self.settings.compiler
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if self.settings.os == "Macos" or compiler == "Visual Studio" or (
+                compiler == "gcc" and compiler_version < "5.0"):
             raise ConanInvalidConfiguration(
                 "coz doesn't support compiler: {} on OS: {}.".format(
                     self.settings.compiler, self.settings.os))
