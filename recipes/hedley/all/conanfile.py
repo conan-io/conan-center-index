@@ -24,6 +24,7 @@ class HedleyConan(ConanFile):
     def package(self):
         include_folder = self._source_subfolder
         self.copy(pattern="*.h", dst="include", src=include_folder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
