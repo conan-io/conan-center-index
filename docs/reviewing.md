@@ -10,6 +10,10 @@ The following policies are preferred during the review, but not mandatory:
   * [Subfolder Properties](#subfolder-properties)
   * [Order of methods and attributes](#order-of-methods-and-attributes)
   * [License Attribute](#license-attribute)
+  * [CMake](#cmake)
+    * [Caching Helper](#caching-helper)
+    * [Build Folder](#build-folder)
+    * [CMake Configure Method](#cmake-configure-method)
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [Verifying Components](#verifying-components)<!-- endToc -->
