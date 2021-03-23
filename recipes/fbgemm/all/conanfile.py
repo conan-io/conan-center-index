@@ -55,6 +55,8 @@ class FbgemmConan(ConanFile):
         if (compiler == "Visual Studio" and compiler_version < "15") or \
            (compiler == "gcc" and compiler_version < "5"):
             raise ConanInvalidConfiguration("fbgemm doesn't support {} {}".format(str(compiler), compiler.version))
+        if compiler == "gcc" and compiler_version.major == "5" and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("fbgemm doesn't support gcc 5 with Debug build type")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
