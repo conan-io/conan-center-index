@@ -1,0 +1,22 @@
+diff -ru cmake/Dependencies.cmake cmake-de/Dependencies.cmake
+--- cmake/Dependencies.cmake	2021-03-23 16:16:50.286285800 +0300
++++ cmake-de/Dependencies.cmake	2021-03-23 16:17:53.986821300 +0300
+@@ -48,17 +48,7 @@
+ include(cmake/ProtoBuf.cmake)
+ 
+ # ---[ HDF5
+-if(MSVC)
+-  # Find HDF5 using it's hdf5-config.cmake file with MSVC
+-  if(DEFINED HDF5_DIR)
+-    list(APPEND CMAKE_MODULE_PATH ${HDF5_DIR})
+-  endif()
+-  find_package(HDF5 COMPONENTS C HL REQUIRED)
+-  set(HDF5_LIBRARIES hdf5-shared)
+-  set(HDF5_HL_LIBRARIES hdf5_hl-shared)
+-else()
+-  find_package(HDF5 COMPONENTS HL REQUIRED)
+-endif()
++find_package(HDF5 COMPONENTS HL REQUIRED)
+ list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
+ list(APPEND Caffe_LINKER_LIBS PUBLIC ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+ 

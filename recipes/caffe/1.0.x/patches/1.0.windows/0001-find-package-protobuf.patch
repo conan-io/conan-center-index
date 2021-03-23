@@ -1,0 +1,18 @@
+diff -ru ./cmake/ProtoBuf.cmake ./cmake-de/ProtoBuf.cmake
+--- ./cmake/ProtoBuf.cmake	2018-01-03 12:20:53.000000000 +0300
++++ ./cmake-de/ProtoBuf.cmake	2021-03-23 14:26:22.680425200 +0300
+@@ -1,13 +1,7 @@
+ # Finds Google Protocol Buffers library and compilers and extends
+ # the standard cmake script with version and python generation support
+ 
+-if(MSVC)
+-  # search using protobuf-config.cmake
+-  find_package( Protobuf REQUIRED NO_MODULE)
+-  set(PROTOBUF_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIRS})
+-else()
+-  find_package( Protobuf REQUIRED )
+-endif()
++find_package( Protobuf REQUIRED )
+ list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${PROTOBUF_INCLUDE_DIR})
+ list(APPEND Caffe_LINKER_LIBS PUBLIC ${PROTOBUF_LIBRARIES})
+ 

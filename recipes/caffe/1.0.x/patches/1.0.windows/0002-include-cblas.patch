@@ -1,0 +1,11 @@
+--- include/caffe/util/mkl_alternate.hpp	2017-04-15 19:17:48.000000000 +0300
++++ include/caffe/util/mkl_alternate.new.hpp	2020-02-22 18:32:50.000000000 +0300
+@@ -11,7 +11,7 @@
+ #include <Accelerate/Accelerate.h>
+ #else
+ extern "C" {
+-#include <cblas.h>
++#include <openblas/cblas.h>
+ }
+ #endif  // USE_ACCELERATE
+ 

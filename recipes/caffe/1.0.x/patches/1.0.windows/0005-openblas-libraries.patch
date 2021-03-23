@@ -1,0 +1,12 @@
+diff -ru cmake/Dependencies.cmake cmake-de/Dependencies.cmake
+--- cmake/Dependencies.cmake	2021-03-23 17:15:52.582738400 +0300
++++ cmake-de/Dependencies.cmake	2021-03-23 17:17:40.859074300 +0300
+@@ -121,7 +121,7 @@
+   elseif(BLAS STREQUAL "Open" OR BLAS STREQUAL "open")
+     find_package(OpenBLAS REQUIRED)
+     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${OpenBLAS_INCLUDE_DIR})
+-    list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenBLAS_LIB})
++    list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenBLAS_LIBRARIES})
+   elseif(BLAS STREQUAL "MKL" OR BLAS STREQUAL "mkl")
+     find_package(MKL REQUIRED)
+     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${MKL_INCLUDE_DIR})
