@@ -6,3 +6,5 @@ patches:
   "cci.20210316":
     - patch_file: "patches/static-constexpr-initializer.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-mingw.patch"
+      base_path: "source_subfolder"
