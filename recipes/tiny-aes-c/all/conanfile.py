@@ -19,7 +19,7 @@ class TinyAesCConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         # AES128, AES192 or AES256
-        "aes_block_size": ["AES128", "AES192", "AES256"],
+        "aes_block_size": ["aes128", "aes192", "aes256"],
         # enable AES encryption in CBC-mode of operation
         "cbc": [True, False],
         # enable the basic ECB 16-byte block algorithm
