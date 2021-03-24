@@ -43,10 +43,15 @@ class CaffeConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
 
     def configure(self):
         if not self.options.with_gpu:
             del self.options.gpu_arch
+            del self.options.gpu_arch_bin
+            del self.options.gpu_arch_ptx
 
     def requirements(self):
         self.requires.add("boost/1.54.0")
