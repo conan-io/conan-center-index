@@ -35,4 +35,4 @@ patches:
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.windows/0004-hdf5-finder.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/1.0.windows/0005-openblas-libraries.patch"
+      patch_file: "patches/1.0.windows/0005-package-name-fixes.patch"

@@ -6,7 +6,7 @@ virtualrunenv
 b2/4.2.0
 boost/1.69.0
 c-ares/1.15.0
-#caffe/1.0.windows
+caffe/1.0.windows
 bzip2/1.0.8
 ffmpeg/3.3.1
 gflags/2.2.2

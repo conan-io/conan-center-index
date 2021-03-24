@@ -1,0 +1,77 @@
+diff -ru cmake/Dependencies.cmake cmake/Dependencies.cmake
+--- cmake/Dependencies.cmake	2021-03-24 13:19:58.746889000 +0300
++++ cmake/Dependencies.cmake	2021-03-24 13:33:56.605374200 +0300
+@@ -55,8 +55,8 @@
+ # ---[ LMDB
+ if(USE_LMDB)
+   find_package(LMDB REQUIRED)
+-  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${LMDB_INCLUDE_DIR})
+-  list(APPEND Caffe_LINKER_LIBS PUBLIC ${LMDB_LIBRARIES})
++  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${lmdb_INCLUDE_DIR})
++  list(APPEND Caffe_LINKER_LIBS PUBLIC ${lmdb_LIBRARIES})
+   list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LMDB)
+   if(ALLOW_LMDB_NOLOCK)
+     list(APPEND Caffe_DEFINITIONS PRIVATE -DALLOW_LMDB_NOLOCK)
+@@ -65,9 +65,9 @@
+ 
+ # ---[ LevelDB
+ if(USE_LEVELDB)
+-  find_package(LevelDB REQUIRED)
+-  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${LevelDB_INCLUDES})
+-  list(APPEND Caffe_LINKER_LIBS PUBLIC ${LevelDB_LIBRARIES})
++  find_package(leveldb REQUIRED)
++  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${leveldb_INCLUDES})
++  list(APPEND Caffe_LINKER_LIBS PUBLIC ${leveldb_LIBRARIES})
+   list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LEVELDB)
+ endif()
+ 
+@@ -99,13 +99,13 @@
+ 
+ # ---[ OpenCV
+ if(USE_OPENCV)
+-  find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs)
+-  if(NOT OpenCV_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
+-    find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc)
++  find_package(opencv QUIET COMPONENTS core highgui imgproc imgcodecs)
++  if(NOT opencv_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
++    find_package(opencv REQUIRED COMPONENTS core highgui imgproc)
+   endif()
+-  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${OpenCV_INCLUDE_DIRS})
+-  list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenCV_LIBS})
+-  message(STATUS "OpenCV found (${OpenCV_CONFIG_PATH})")
++  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${opencv_INCLUDE_DIRS})
++  list(APPEND Caffe_LINKER_LIBS PUBLIC ${opencv_LIBRARIES})
++  message(STATUS "OpenCV found (${opencv_CONFIG_PATH})")
+   list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_OPENCV)
+ endif()
+ 
+@@ -121,7 +121,7 @@
+   elseif(BLAS STREQUAL "Open" OR BLAS STREQUAL "open")
+     find_package(OpenBLAS REQUIRED)
+     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${OpenBLAS_INCLUDE_DIR})
+-    list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenBLAS_LIB})
++    list(APPEND Caffe_LINKER_LIBS PUBLIC ${OpenBLAS_LIBRARIES})
+   elseif(BLAS STREQUAL "MKL" OR BLAS STREQUAL "mkl")
+     find_package(MKL REQUIRED)
+     list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${MKL_INCLUDE_DIR})
+diff -ru cmake/Summary.cmake cmake/Summary.cmake
+--- cmake/Summary.cmake	2018-01-03 12:20:53.000000000 +0300
++++ cmake/Summary.cmake	2021-03-24 13:33:26.149281800 +0300
+@@ -127,14 +127,14 @@
+   caffe_status("  gflags            :   Yes")
+   caffe_status("  protobuf          : " PROTOBUF_FOUND THEN "Yes (ver. ${PROTOBUF_VERSION})" ELSE "No" )
+   if(USE_LMDB)
+-    caffe_status("  lmdb              : " LMDB_FOUND THEN "Yes (ver. ${LMDB_VERSION})" ELSE "No")
++    caffe_status("  lmdb              : " LMDB_FOUND THEN "Yes (ver. ${lmdb_VERSION})" ELSE "No")
+   endif()
+   if(USE_LEVELDB)
+-    caffe_status("  LevelDB           : " LEVELDB_FOUND THEN  "Yes (ver. ${LEVELDB_VERSION})" ELSE "No")
++    caffe_status("  LevelDB           : " LEVELDB_FOUND THEN  "Yes (ver. ${leveldb_VERSION})" ELSE "No")
+     caffe_status("  Snappy            : " SNAPPY_FOUND THEN "Yes (ver. ${Snappy_VERSION})" ELSE "No" )
+   endif()
+   if(USE_OPENCV)
+-    caffe_status("  OpenCV            :   Yes (ver. ${OpenCV_VERSION})")
++    caffe_status("  OpenCV            :   Yes (ver. ${opencv_VERSION})")
+   endif()
+   caffe_status("  CUDA              : " HAVE_CUDA THEN "Yes (ver. ${CUDA_VERSION})" ELSE "No" )
+   caffe_status("")
