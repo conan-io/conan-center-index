@@ -34,6 +34,9 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.options.shared:
+            del self.options.fPIC
+
         if self.options.minizip != "deprecated":
             self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
 
