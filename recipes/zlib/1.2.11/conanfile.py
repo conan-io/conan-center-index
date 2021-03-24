@@ -43,6 +43,8 @@ class ZlibConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+
+    def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
@@ -64,9 +66,6 @@ class ZlibConan(ConanFile):
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
-
-    def build(self):
-        with tools.chdir(self._source_subfolder):
             tools.mkdir(self._build_subfolder)
             with tools.chdir(self._build_subfolder):
                 self._build_zlib_cmake()
