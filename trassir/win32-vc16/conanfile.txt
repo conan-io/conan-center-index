@@ -6,7 +6,7 @@ virtualrunenv
 b2/4.2.0
 boost/1.69.0
 c-ares/1.15.0
-caffe/1.0.windows
+#caffe/1.0.windows
 bzip2/1.0.8
 ffmpeg/3.3.1
 gflags/2.2.2
@@ -17,7 +17,7 @@ jsoncpp/1.8.3
 leveldb/1.22
 libjpeg/9d.dssl1
 libpng/1.6.37
-lmdb/0.9.28
+lmdb/0.9.28.dssl1
 miniupnpc/2.1
 nasm/2.14
 openal/1.20.1
