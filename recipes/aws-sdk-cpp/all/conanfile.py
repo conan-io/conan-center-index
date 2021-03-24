@@ -295,6 +295,14 @@ class AwsSdkCppConan(ConanFile):
     default_options["transfer"] = True
     default_options["s3-encryption"] = True
     default_options["text-to-speech"] = True
+    internal_requirements = {
+            "access-management": ["iam", "cognito-identity"],
+            "identity-management": ["cognito-identity", "sts"],
+            "queues": ["sqs"],
+            "s3-encryption": ["s3", "kms"],
+            "text-to-speech": ["polly"],
+            "transfer": ["s3"]
+        }
 
     short_paths = True
     _cmake = None
@@ -319,6 +327,12 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
             self.requires("libcurl/7.74.0")
+
+    def package_id(self):
+        for sdk in self.sdks:
+            if getattr(self.options, sdk) and sdk in self.internal_requirements:
+                for internal_requirement in self.internal_requirements[sdk]:
+                    setattr(self.options, internal_requirement, True)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -377,11 +391,14 @@ class AwsSdkCppConan(ConanFile):
 
         for sdk in self.sdks:
             if getattr(self.options, sdk):
+                self.cpp_info.components[sdk].requires = ["core"]
+                if sdk in self.internal_requirements:
+                    self.cpp_info.components[sdk].requires.extend(self.internal_requirements[sdk])
                 self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
                 self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
                 self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
                 self.cpp_info.components[sdk].names["pkg_config"] = "aws-sdk-cpp-" + sdk
-                
+
                 # alias name to support find_package(AWSSDK COMPONENTS s3 kms ...)
                 component_alias = "aws-sdk-cpp-{}_alias".format(sdk)
                 self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
