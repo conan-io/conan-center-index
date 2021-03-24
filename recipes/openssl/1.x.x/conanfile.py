@@ -463,7 +463,7 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if self.settings.os == "tvOS" or self.settings.os == "watchOS":
+        if self.settings.os in ["tvOS", "watchOS"]:
             args.append(" -DNO_FORK") # fork is not available on tvOS and watchOS
         if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
