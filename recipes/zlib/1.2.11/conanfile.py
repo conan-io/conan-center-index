@@ -70,6 +70,7 @@ class ZlibConan(ConanFile):
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
     def build(self):
+        self._patch_sources()
         make_target = "zlib" if self.options.shared else "zlibstatic"
         cmake = CMake(self)
         cmake.configure(build_folder=self._build_subfolder)
