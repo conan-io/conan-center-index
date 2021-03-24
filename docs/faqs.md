@@ -125,7 +125,7 @@ Note about `build_type`.- We retain the `build_type` setting to make it possible
 
 ## Can I remove an option from recipe
 
-No. Changing any option will result in a different package ID and may result a different behavior, the result can break users.
+No. Removing any option will result in a missing value, it can break any user who is using it.
 Instead, you should deprecate the option:
 
 * Add "deprecated" as option value
