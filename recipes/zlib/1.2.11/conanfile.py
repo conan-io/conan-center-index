@@ -24,7 +24,7 @@ class ZlibConan(ConanFile):
 
     @property
     def _build_subfolder(self):
-        return "_build"
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,7 +47,7 @@ class ZlibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
@@ -69,16 +69,11 @@ class ZlibConan(ConanFile):
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
-            tools.mkdir(self._build_subfolder)
-            with tools.chdir(self._build_subfolder):
-                self._build_zlib_cmake()
-
-    def _build_zlib_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_dir=".")
-        # we need to build only libraries without test example/example64 and minigzip/minigzip64
+    def build(self):
         make_target = "zlib" if self.options.shared else "zlibstatic"
-        cmake.build(build_dir=".", target=make_target)
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        cmake.build(target=make_target)
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
@@ -101,31 +96,30 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlibstatic.lib")
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
 
-    def package(self):
-        # Extract the License/s from the header to a file
+    def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
             tmp = tools.load("zlib.h")
             license_contents = tmp[2:tmp.find("*/", 1)]
             tools.save("LICENSE", license_contents)
 
-        # Copy the license files
+    def package(self):
+        self._extract_license()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
         # Copy headers
         for header in ["*zlib.h", "*zconf.h"]:
             self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src="_build", keep_path=False)
+            self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
 
         # Copying static and dynamic libs
-        build_dir = os.path.join(self._source_subfolder, "_build")
         if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.dll", dst="bin", src=self._build_subfolder, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=self._build_subfolder, keep_path=False)
         else:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
 
         self._rename_libraries()
 
