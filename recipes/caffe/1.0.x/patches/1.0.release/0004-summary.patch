@@ -1,0 +1,14 @@
+diff -ru cmake/Dependencies.cmake cmake-2/Dependencies.cmake
+diff -ru cmake-de/Summary.cmake cmake-2/Summary.cmake
+--- cmake/Summary.cmake	2017-04-15 19:17:48.000000000 +0300
++++ cmake-2/Summary.cmake	2020-02-22 17:19:57.000000000 +0300
+@@ -175,4 +175,9 @@
+   caffe_status("Install:")
+   caffe_status("  Install path      :   ${CMAKE_INSTALL_PREFIX}")
+   caffe_status("")
++	caffe_status("Flags:")
++	caffe_status("  Include dirs      :   ${Caffe_INCLUDE_DIRS}")
++	caffe_status("  Libs              :   ${Caffe_LINKER_LIBS}")
++	caffe_status("  Definitions       :   ${Caffe_DEFINITIONS}")
++	caffe_status("  Conan libs        :   ${CONAN_LIBS}")
+ endfunction()

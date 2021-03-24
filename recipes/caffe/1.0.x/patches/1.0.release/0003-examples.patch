@@ -1,0 +1,10 @@
+--- CMakeLists.txt	2020-02-22 17:03:18.000000000 +0300
++++ CMakeLists-de.txt	2020-02-22 17:03:29.000000000 +0300
+@@ -90,7 +90,6 @@
+ add_subdirectory(src/gtest)
+ add_subdirectory(src/caffe)
+ add_subdirectory(tools)
+-add_subdirectory(examples)
+ add_subdirectory(python)
+ add_subdirectory(matlab)
+ add_subdirectory(docs)

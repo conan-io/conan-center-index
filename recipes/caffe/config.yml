@@ -1,0 +1,5 @@
+versions:
+  "1.0.release":
+    folder: 1.0.x
+  "1.0.windows":
+    folder: 1.0.x

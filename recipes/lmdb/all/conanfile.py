@@ -46,6 +46,9 @@ class LMDBConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["lmdb"]
+        if self.settings.build_type == "Debug":
+            self.cpp_info.libs = ["lmdbd"]
+        else:
+            self.cpp_info.libs = ["lmdb"]
         bindir = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bindir)

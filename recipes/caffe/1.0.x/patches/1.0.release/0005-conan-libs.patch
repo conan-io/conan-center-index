@@ -1,0 +1,21 @@
+--- src/caffe/CMakeLists.txt	2020-03-02 18:15:36.000000000 +0300
++++ src/caffe/CMakeLists.v1.txt	2020-03-02 20:52:54.000000000 +0300
+@@ -8,6 +8,18 @@
+ target_link_libraries(proto PUBLIC ${PROTOBUF_LIBRARIES})
+ target_include_directories(proto PUBLIC ${PROTOBUF_INCLUDE_DIR})
+ 
++set(Caffe_LINKER_LIBS ${CONAN_LIBS} ${vecLib_LINKER_LIBS})
++if(HAVE_CUDA)
++  if (CUDA_VERSION VERSION_GREATER "9.2")
++    # cublas_device is missing
++    list(APPEND Caffe_LINKER_LIBS PUBLIC ${CUDA_CUDART_LIBRARY} ${CUDA_curand_LIBRARY} ${CUDA_cublas_LIBRARY})
++  else()
++    list(APPEND Caffe_LINKER_LIBS PUBLIC ${CUDA_CUDART_LIBRARY} ${CUDA_curand_LIBRARY} ${CUDA_CUBLAS_LIBRARIES})
++  endif()
++  if (USE_CUDNN)
++    list(APPEND Caffe_LINKER_LIBS PUBLIC ${CUDNN_LIBRARY})
++  endif()
++endif()
+ list(INSERT Caffe_LINKER_LIBS 0 PUBLIC proto) # note, crucial to prepend!
+ 
+ # --[ Caffe library

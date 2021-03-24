@@ -1,0 +1,1 @@
+https://github.com/bincrafters/conan-caffe/commit/2afb2e0df343abdaa8aa585ac0de235657834752
