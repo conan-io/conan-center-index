@@ -463,8 +463,8 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if self.settings.os == "tvOS":
-            args.append(" -DNO_FORK") # fork is not available on tvOS
+        if self.settings.os == "tvOS" or self.settings.os == "watchOS":
+            args.append(" -DNO_FORK") # fork is not available on tvOS and watchOS
         if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
         if self.settings.os == "Emscripten":
@@ -689,8 +689,8 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
                 if self._full_version >= "1.1.0":
-                    if self.settings.os == "tvOS":
-                        tools.patch(patch_file=os.path.join("patches", "1.1.1-tvos.patch"),
+                    if self.settings.os == "tvOS" or self.settings.os == "watchOS":
+                        tools.patch(patch_file=os.path.join("patches", "1.1.1-tvos-watchos.patch"),
                                     base_path=self._source_subfolder)
                     self._create_targets()
                 else:
