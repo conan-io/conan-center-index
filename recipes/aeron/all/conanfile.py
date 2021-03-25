@@ -24,7 +24,7 @@ class AeronConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_aeron_driver": True,
+        "build_aeron_driver": False,
         "build_tests": False,
         "build_samples": False
     }
@@ -115,13 +115,13 @@ class AeronConan(ConanFile):
         self.copy("*.h", dst="include/aeron-archive", src=archive_include_dir)
 
         libs_folder = os.path.join(self.package_folder, "lib")
-        for root, dirs, files in os.walk(libs_folder, topdown=True):
-            for file in files:
-                _, ext = os.path.splitext(file)
-                if ext == '.so' and not self.options.shared:
-                    os.remove(os.path.join(root, file))
-                elif ext == '.a' and self.options.shared:
-                    os.remove(os.path.join(root, file))
+        if self.options.shared:
+            tools.remove_files_by_mask(libs_folder, "*.a")
+            tools.remove_files_by_mask(libs_folder, "*.lib")
+        else:
+            tools.remove_files_by_mask(libs_folder, "*.dll")
+            tools.remove_files_by_mask(libs_folder, "*.so")
+            tools.remove_files_by_mask(libs_folder, "*.dylib")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
