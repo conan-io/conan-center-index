@@ -1,6 +1,7 @@
 import os
 import shutil
 import glob
+import textwrap
 
 import configparser
 from conans import ConanFile, tools, RunEnvironment, CMake
@@ -494,33 +495,74 @@ class QtConan(ConanFile):
                 }) if tools.os_info.is_macos else tools.no_op():
                     with tools.run_environment(self):
                         cmake.build()
+    @property
+    def _cmake_executables_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write("""[Paths]
-Prefix = ..
-ArchData = res/archdatadir
-HostData = res/archdatadir
-Data = res/datadir
-Sysconf = res/sysconfdir
-LibraryExecutables = res/archdatadir/bin
-Plugins = res/archdatadir/plugins
-Imports = res/archdatadir/imports
-Qml2Imports = res/archdatadir/qml
-Translations = res/datadir/translations
-Documentation = res/datadir/doc
-Examples = res/datadir/examples""")
+            f.write(textwrap.dedent("""[Paths]
+                Prefix = ..
+                ArchData = res/archdatadir
+                HostData = res/archdatadir
+                Data = res/datadir
+                Sysconf = res/sysconfdir
+                LibraryExecutables = res/archdatadir/bin
+                Plugins = res/archdatadir/plugins
+                Imports = res/archdatadir/imports
+                Qml2Imports = res/archdatadir/qml
+                Translations = res/datadir/translations
+                Documentation = res/datadir/doc
+                Examples = res/datadir/examples"""))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+            tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
+        
+        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
+            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
+            if not os.path.isfile(module):
+                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
+
+        extension = ""
+        if self.settings.os == "Windows":
+            extension = ".exe"
+        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
+        ver = tools.Version(self.version)
+        filecontents += "set(QT_VERSION_MAJOR %s)\n" % ver.major
+        filecontents += "set(QT_VERSION_MINOR %s)\n" % ver.minor
+        filecontents += "set(QT_VERSION_PATCH %s)\n" % ver.patch
+        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
+        targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
+        if self.options.gui:
+            targets.append("qvkgen")
+        if self.options.widgets:
+            targets.append("uic")
+        if self.options.qttools:
+            targets.extend(["qhelpgenerator", "qtattributionsscanner", "windeployqt"])
+            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+        if self.options.qtshadertools:
+            targets.append("qsb")
+        if self.options.qtdeclarative:
+            targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+        for target in targets:
+            filecontents += textwrap.dedent("""\
+                if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{0})
+                    add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} IMPORTED)
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{0} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{0}{1})
+                endif()
+                """.format(target, extension))
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -596,6 +638,12 @@ Examples = res/datadir/examples""")
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.with_harfbuzz:
+                gui_reqs.append("harfbuzz::harfbuzz")
+            if self.options.with_libjpeg == "libjpeg-turbo":
+                gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
+            if self.options.with_libjpeg == "libjpeg":
+                gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
@@ -671,9 +719,21 @@ Examples = res/datadir/examples""")
                 self.cpp_info.components["qtCore"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
+                self.cpp_info.components["qtNetwork"].system_libs.append("DnsApi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
 
 
             if self.settings.os == "Macos":
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            component_name = m.replace("Qt6", "qt")
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
