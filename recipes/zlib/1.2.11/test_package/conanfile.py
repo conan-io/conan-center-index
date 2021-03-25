@@ -10,7 +10,6 @@ class TestZlibConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_MINIZIP"] = self.options["zlib"].minizip
         cmake.configure()
         cmake.build()
 
@@ -19,5 +18,3 @@ class TestZlibConan(ConanFile):
         assert os.path.exists(os.path.join(self.build_folder, "zlib.pc"))
         if "x86" in self.settings.arch and not tools.cross_building(self.settings):
             self.run(os.path.join("bin", "test"), run_environment=True)
-            if self.options["zlib"].minizip:
-                self.run(os.path.join("bin", "test_minizip"), run_environment=True)
