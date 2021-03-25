@@ -74,9 +74,6 @@ class AeronConan(ConanFile):
         cmake.definitions["BUILD_AERON_ARCHIVE_API"] = True
         cmake.definitions["AERON_ENABLE_NONSTANDARD_OPTIMIZATIONS"] = True
 
-        if self.settings.os != 'Windows':
-            cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
