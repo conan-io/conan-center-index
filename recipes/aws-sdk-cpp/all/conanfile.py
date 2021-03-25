@@ -12,7 +12,7 @@ class AwsSdkCppConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    sdks = ("access-management",
+    _sdks = ("access-management",
             "accessanalyzer",
             "acm",
             "acm-pca",
@@ -280,7 +280,7 @@ class AwsSdkCppConan(ConanFile):
             "xray"
            )
     options = {
-            **{ x: [True, False] for x in sdks},
+            **{ x: [True, False] for x in _sdks},
             **{
                 "shared": [True, False],
                 "fPIC": [True, False],
@@ -295,14 +295,14 @@ class AwsSdkCppConan(ConanFile):
     default_options["transfer"] = True
     default_options["s3-encryption"] = True
     default_options["text-to-speech"] = True
-    internal_requirements = {
+    _internal_requirements = {
             "access-management": ["iam", "cognito-identity"],
             "identity-management": ["cognito-identity", "sts"],
             "queues": ["sqs"],
             "s3-encryption": ["s3", "kms"],
             "text-to-speech": ["polly"],
             "transfer": ["s3"]
-        }
+            }
 
     short_paths = True
     _cmake = None
@@ -329,9 +329,9 @@ class AwsSdkCppConan(ConanFile):
             self.requires("libcurl/7.74.0")
 
     def package_id(self):
-        for hl_comp in self.internal_requirements.keys():
+        for hl_comp in self._internal_requirements.keys():
             if getattr(self.options, hl_comp):
-                for internal_requirement in self.internal_requirements[hl_comp]:
+                for internal_requirement in self._internal_requirements[hl_comp]:
                     setattr(self.info.options, internal_requirement, True)
 
     def source(self):
@@ -347,7 +347,7 @@ class AwsSdkCppConan(ConanFile):
         self._cmake = CMake(self)
 
         build_only = ["core"]
-        for sdk in self.sdks:
+        for sdk in self._sdks:
             if getattr(self.options, sdk):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
@@ -389,11 +389,11 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
 
-        for sdk in self.sdks:
+        for sdk in self._sdks:
             if getattr(self.options, sdk):
                 self.cpp_info.components[sdk].requires = ["core"]
-                if sdk in self.internal_requirements:
-                    self.cpp_info.components[sdk].requires.extend(self.internal_requirements[sdk])
+                if sdk in self._internal_requirements:
+                    self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
                 self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
                 self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
                 self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
