@@ -4,9 +4,9 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-file(GLOB SOURCE_FILES *.cpp)
+find_package(aeron REQUIRED CONFIG)
+find_package(Threads REQUIRED)
 
-find_package(Threads)
-
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} aeron::aeron Threads::Threads)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
