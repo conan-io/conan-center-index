@@ -105,7 +105,7 @@ class AeronConan(ConanFile):
 
         # additional resources
         archive_resources_dir = os.path.join(self._source_subfolder, "aeron-archive", "src", "main", "resources")
-        self.copy("*", dst="resources", src=archive_resources_dir)
+        self.copy("*", dst="res", src=archive_resources_dir)
 
         # archive client headers
         archive_include_dir = os.path.join(self._source_subfolder, "aeron-archive", "src", "main", "cpp", "client")
@@ -130,6 +130,6 @@ class AeronConan(ConanFile):
         # See: https://github.com/real-logic/aeron/blob/23f9ef8c6bd25955c3a64454f4e5d9c4a86c8d5a/CMakeLists.txt#L213
         self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
 
-        resources_folder = os.path.join(self.package_folder, "resources")
+        resources_folder = os.path.join(self.package_folder, "res")
         self.user_info.RESOURCES_DIR = resources_folder
         self.user_info.VERSION = self.version
