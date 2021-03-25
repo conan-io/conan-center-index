@@ -18,4 +18,3 @@ patches:
   "2.3.0":
     - patch_file: "patches/relax-vs-restriction.patch"
       base_path: "source_subfolder"
-
