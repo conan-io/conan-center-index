@@ -17,13 +17,14 @@ add_library(${QTXLSXWRITER_TARGET_NAME}
 	${QTXLSXWRITER_SOURCES}
 )
 
+set(QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}")
 target_include_directories(${QTXLSXWRITER_TARGET_NAME}
 	PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/xlsx>
 		# qtxlsxwriter uses qt private headers
-		$<BUILD_INTERFACE:${QT_ROOT}/include/QtCore/5.15.2>
-		$<BUILD_INTERFACE:${QT_ROOT}/include/QtGui/5.15.2>
-		$<BUILD_INTERFACE:${QT_ROOT}/include/QtGui/5.15.2/QtGui>
+		$<BUILD_INTERFACE:${QT_ROOT}/include/QtCore/${QT_VERSION}>
+		$<BUILD_INTERFACE:${QT_ROOT}/include/QtGui/${QT_VERSION}>
+		$<BUILD_INTERFACE:${QT_ROOT}/include/QtGui/${QT_VERSION}/QtGui>
 	INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/xlsx>
 		$<INSTALL_INTERFACE:include>
