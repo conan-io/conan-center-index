@@ -389,21 +389,27 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
 
-        for sdk in self._sdks:
-            if getattr(self.options, sdk):
-                self.cpp_info.components[sdk].requires = ["core"]
-                if sdk in self._internal_requirements:
-                    self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
-                self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
-                self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
-                self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
-                self.cpp_info.components[sdk].names["pkg_config"] = "aws-sdk-cpp-" + sdk
+        enabled_sdks = [sdk for sdk in self._sdks if getattr(self.options, sdk)]
+        for hl_comp in self._internal_requirements.keys():
+            if getattr(self.options, hl_comp):
+                for internal_requirement in self._internal_requirements[hl_comp]:
+                    if internal_requirement not in enabled_sdks:
+                        enabled_sdks.append(internal_requirement)
 
-                # alias name to support find_package(AWSSDK COMPONENTS s3 kms ...)
-                component_alias = "aws-sdk-cpp-{}_alias".format(sdk)
-                self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
-                self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
-                self.cpp_info.components[component_alias].requires = [sdk]
+        for sdk in enabled_sdks:
+            self.cpp_info.components[sdk].requires = ["core"]
+            if sdk in self._internal_requirements:
+                self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
+            self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
+            self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
+            self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
+            self.cpp_info.components[sdk].names["pkg_config"] = "aws-sdk-cpp-" + sdk
+
+            # alias name to support find_package(AWSSDK COMPONENTS s3 kms ...)
+            component_alias = "aws-sdk-cpp-{}_alias".format(sdk)
+            self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
+            self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
+            self.cpp_info.components[component_alias].requires = [sdk]
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
