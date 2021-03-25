@@ -126,10 +126,6 @@ class OpenSSLConan(ConanFile):
     _source_subfolder = "source_subfolder"
     exports_sources = ['patches/*']
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def config_options(self):
         if self._full_version >= "1.1.0":
             del self.options.no_md2
@@ -200,6 +196,9 @@ class OpenSSLConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
