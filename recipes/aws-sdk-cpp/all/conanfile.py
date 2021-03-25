@@ -327,6 +327,9 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
             self.requires("libcurl/7.74.0")
+        if self.settings.os == "Linux":
+            if self.options.get_safe("text-to-speech"):
+                self.requires("pulseaudio/14.2")
 
     def package_id(self):
         for hl_comp in self._internal_requirements.keys():
@@ -413,11 +416,19 @@ class AwsSdkCppConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend(["winhttp", "wininet", "bcrypt", "userenv", "version", "ws2_32"])
+            if self.options.get_safe("text-to-speech"):
+                self.cpp_info.components["text-to-speech"].system_libs.append("winmm")
         else:
             self.cpp_info.components["core"].requires.append("libcurl::curl")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.append("atomic")
+            if self.options.get_safe("text-to-speech"):
+                self.cpp_info.components["text-to-speech"].requires.append("pulseaudio")
+
+        if self.settings.os == "Macos":
+            if self.options.get_safe("text-to-speech"):
+                self.cpp_info.frameworks.append("CoreAudio")
 
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
