@@ -329,10 +329,10 @@ class AwsSdkCppConan(ConanFile):
             self.requires("libcurl/7.74.0")
 
     def package_id(self):
-        for sdk in self.sdks:
-            if getattr(self.options, sdk) and sdk in self.internal_requirements:
-                for internal_requirement in self.internal_requirements[sdk]:
-                    setattr(self.options, internal_requirement, True)
+        for hl_comp in self.internal_requirements.keys():
+            if getattr(self.options, hl_comp):
+                for internal_requirement in self.internal_requirements[hl_comp]:
+                    setattr(self.info.options, internal_requirement, True)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
