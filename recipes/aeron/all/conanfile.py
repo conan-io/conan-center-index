@@ -113,9 +113,14 @@ class AeronConan(ConanFile):
 
         libs_folder = os.path.join(self.package_folder, "lib")
         if self.options.shared:
+            tools.remove_files_by_mask(libs_folder, "libaeron.so")
+            tools.remove_files_by_mask(libs_folder, "libaeron.dll")
+            tools.remove_files_by_mask(libs_folder, "libaeron.dylib")
             tools.remove_files_by_mask(libs_folder, "*.a")
             tools.remove_files_by_mask(libs_folder, "*.lib")
         else:
+            tools.remove_files_by_mask(libs_folder, "libaeron_static.a")
+            tools.remove_files_by_mask(libs_folder, "libaeron_static.lib")
             tools.remove_files_by_mask(libs_folder, "*.dll")
             tools.remove_files_by_mask(libs_folder, "*.so")
             tools.remove_files_by_mask(libs_folder, "*.dylib")
