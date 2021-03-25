@@ -9,7 +9,7 @@ class AeronConan(ConanFile):
     name = "aeron"
     description = "Efficient reliable UDP unicast, UDP multicast, and IPC message transport"
     topics = ("conan", "aeron", "udp", "messaging", "low-latency")
-    url = "https://github.com/real-logic/aeron"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/real-logic/aeron/wiki"
     license = "Apache License 2.0"
     exports_sources = "CMakeLists.txt",
@@ -48,7 +48,7 @@ class AeronConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.os == "Windows":
-            self.requires.add("pthreads4w/3.0.0")
+            self.requires("pthreads4w/3.0.0")
         if self.settings.compiler == "Visual Studio" and self.settings.arch != "x86_64":
             # https://github.com/real-logic/aeron#c-build
             raise ConanInvalidConfiguration("{} currently only supports 64-bit builds on Windows".format(self.name))
