@@ -126,6 +126,10 @@ class OpenSSLConan(ConanFile):
     _source_subfolder = "source_subfolder"
     exports_sources = ['patches/*']
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
         if self._full_version >= "1.1.0":
             del self.options.no_md2
@@ -158,9 +162,6 @@ class OpenSSLConan(ConanFile):
             del self.options.capieng_dialog
             del self.options.enable_capieng
         else:
-            del self.options.fPIC
-
-        if self.options.shared:
             del self.options.fPIC
 
     def build_requirements(self):
