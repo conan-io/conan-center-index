@@ -33,6 +33,8 @@ class LibcapConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
