@@ -160,6 +160,9 @@ class OpenSSLConan(ConanFile):
         else:
             del self.options.fPIC
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             if not self._win_bash:
