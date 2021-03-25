@@ -47,6 +47,7 @@ class LibcapConan(ConanFile):
         if self._autotools:
             return self._autotools, self._autotools_env
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.fpic = self.options.get_safe("fPIC", True)
         self._autotools_env = self._autotools.vars
         self._autotools_env["SHARED"] = \
             "yes" if self.options.shared else "no"
