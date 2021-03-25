@@ -34,7 +34,6 @@ class ExpatConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
