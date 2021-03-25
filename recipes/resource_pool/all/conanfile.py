@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from conans.tools import check_min_cppstd
 import os
 import glob
@@ -27,10 +28,25 @@ class ResourcePool(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
     def _validate_compiler_settings(self):
         compiler = self.settings.compiler
         if compiler.get_safe("cppstd"):
             check_min_cppstd(self, "17")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+
+        if not minimum_version:
+            self.output.warn("resource_pool requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("resource_pool requires a compiler that supports at least C++17")
 
     def configure(self):
         self._validate_compiler_settings()
