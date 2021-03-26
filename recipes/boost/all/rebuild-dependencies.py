@@ -240,7 +240,7 @@ class BoostDependencyBuilder(object):
 
                 dependency_tree = {}
                 buildable_dependencies = subprocess.check_output(["boostdep", "--list-buildable-dependencies"], text=True)
-                log.debug("boosdep --list-buildable-dependencies returnes: %s", buildable_dependencies)
+                log.debug("boostdep --list-buildable-dependencies returns: %s", buildable_dependencies)
                 for line in buildable_dependencies.splitlines():
                     if re.match(r"^[\s]*#.*", line):
                         continue
