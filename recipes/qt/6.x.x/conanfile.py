@@ -673,6 +673,9 @@ class QtConan(ConanFile):
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
             _create_module("QmlModels", ["Qml"])
+            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
+            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
+            self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if self.options.gui:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
                 if self.options.widgets:
