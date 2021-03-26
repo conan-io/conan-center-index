@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, tools
 
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.32.0"
 
 
 class BrigandConan(ConanFile):
