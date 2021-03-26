@@ -13,8 +13,14 @@ class ConanRecipe(ConanFile):
     exports_sources = ["CMakeLists.txt", "Findcatkin.cmake"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _cmake = None
 
@@ -35,6 +41,8 @@ class ConanRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         self._cmake.configure()
         return self._cmake
 
