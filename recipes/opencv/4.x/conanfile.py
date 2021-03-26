@@ -31,7 +31,8 @@ class OpenCVConan(ConanFile):
         "with_gtk": [True, False],
         "with_quirc": [True, False],
         "with_cuda": [True, False],
-        "with_cublas": [True, False]
+        "with_cublas": [True, False],
+        "with_v4l": [True, False]
     }
     default_options = {
         "shared": False,
@@ -50,7 +51,8 @@ class OpenCVConan(ConanFile):
         "with_gtk": True,
         "with_quirc": True,
         "with_cuda": False,
-        "with_cublas": False
+        "with_cublas": False,
+        "with_v4l": False
     }
 
     short_paths = True
@@ -233,7 +235,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
         self._cmake.definitions["WITH_QUIRC"] = False
-        self._cmake.definitions["WITH_V4L"] = False
+        self._cmake.definitions["WITH_V4L"] = self.options.with_v4l
         self._cmake.definitions["WITH_VA"] = False
         self._cmake.definitions["WITH_VA_INTEL"] = False
         self._cmake.definitions["WITH_VTK"] = False
