@@ -4,6 +4,7 @@
 ## Contents
 
   * [Introduction](#introduction)
+    * [Build Images](#build-images)
   * [Windows](#windows)
   * [Linux](#linux)
   * [MacOS](#macos)<!-- endToc -->
@@ -29,6 +30,9 @@ Currently, given the following supported platforms and configurations we
 are generating **136 different binary packages for a C++ library**
 and **88 for a C library**.
 
+### Build Images
+
+For more information see [conan-io/conan-docker-tools](https://github.com/conan-io/conan-docker-tools)
 
 ## Windows
 

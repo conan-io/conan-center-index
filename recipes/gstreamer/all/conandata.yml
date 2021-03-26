@@ -8,3 +8,6 @@ sources:
   "1.18.3":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.3/gstreamer-1.18.3.tar.gz"
     sha256: "d7e3917b5d3d9c3bd9bb70b7500314a5725377cff39bcd818df13c1fda0f60ba"
+  "1.18.4":
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.4/gstreamer-1.18.4.tar.gz"
+    sha256: "f0956c2056281f5909d030945a9896810e55084f29b6bcfc401b53e91ddf1c7f"

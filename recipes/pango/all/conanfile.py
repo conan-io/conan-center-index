@@ -5,6 +5,8 @@ import glob
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 class PangoConan(ConanFile):
     name = "pango"
     license = "LGPL-2.0-and-later"
@@ -29,6 +31,10 @@ class PangoConan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
+    
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,20 +59,20 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.57.1")
 
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
 
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
             self.requires("xorg/system")
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
         self.requires("harfbuzz/2.7.4")
-        self.requires("glib/2.67.1")
+        self.requires("glib/2.67.6")
         self.requires("fribidi/1.0.9")
 
     def source(self):

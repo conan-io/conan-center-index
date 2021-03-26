@@ -38,11 +38,11 @@ class AtSpi2CoreConan(ConanFile):
         del self.settings.compiler.cppstd
     
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.57.1")
         self.build_requires("pkgconf/1.7.3")
     
     def requirements(self):
-        self.requires("glib/2.67.0")
+        self.requires("glib/2.67.6")
         if self.options.with_x11:
             self.requires("xorg/system")
         self.requires("dbus/1.12.20")

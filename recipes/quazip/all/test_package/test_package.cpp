@@ -6,7 +6,9 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Quazip test_package" << std::endl;
 
-    QuaZip zip(argv[1]);
+    const QString path = QString::fromLatin1(argv[1]);
+
+    QuaZip zip(path);
 
     if (zip.open(QuaZip::mdUnzip)) {
 

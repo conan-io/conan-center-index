@@ -86,3 +86,9 @@ sources:
   "3.19.6":
     sha256: ec87ab67c45f47c4285f204280c5cde48e1c920cfcfed1555b27fb3b1a1d20ba
     url: https://github.com/Kitware/CMake/releases/download/v3.19.6/cmake-3.19.6.tar.gz
+  "3.19.7":
+    sha256: 58a15f0d56a0afccc3cc5371234fce73fcc6c8f9dbd775d898e510b83175588e
+    url: https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7.tar.gz
+  "3.20.0":
+    sha256: 9c06b2ddf7c337e31d8201f6ebcd3bba86a9a033976a9aee207fe0c6971f4755
+    url: https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0.tar.gz
