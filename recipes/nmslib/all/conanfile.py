@@ -22,6 +22,10 @@ class Nmslib(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
             raise ConanInvalidConfiguration("Builds fail for VS 14")  # TODO: add reason in message -> unsupported?
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -38,6 +42,7 @@ class Nmslib(ConanFile):
     def _configure_cmake(self):
         if self._cmake is None:
             cmake = CMake(self)
+            cmake.definitions["WITHOUT_TESTS"] = True
             cmake.configure()
             self._cmake = cmake
         return self._cmake
@@ -53,3 +58,5 @@ class Nmslib(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["NonMetricSpaceLib"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
