@@ -12,11 +12,13 @@ class DjinniSuppotLib(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                 "fPIC": [True, False],
-                "target": ["JNI", "OBJC", "Auto"]
+                "target": ["JNI", "OBJC", "Auto"],
+                "system_java": [True, False]
                }
     default_options = {"shared": False,
                         "fPIC": True ,
-                        "target": "Auto"
+                        "target": "Auto",
+                        "system_java": False
                        }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
@@ -45,6 +47,11 @@ class DjinniSuppotLib(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def build_requirements(self):
+        if not self.options.system_java:
+            self.build_requires("zulu-openjdk/11.0.8@")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
