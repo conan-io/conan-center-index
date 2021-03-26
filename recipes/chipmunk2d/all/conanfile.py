@@ -70,3 +70,5 @@ class Chipmunk2DConan(ConanFile):
         self.cpp_info.components["chipmunk"].names["cmake_find_package"] = chipmunk_name
         self.cpp_info.components["chipmunk"].names["cmake_find_package_multi"] = chipmunk_name
         self.cpp_info.components["chipmunk"].libs = ["chipmunk"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["chipmunk"].system_libs = ["m", "pthread"]
