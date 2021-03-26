@@ -10,14 +10,20 @@ class KissfftConan(ConanFile):
     description = "a Fast Fourier Transform (FFT) library that tries to Keep it Simple, Stupid"
     topics = ("conan", "fft", "kiss", "frequency-domain", "fast-fourier-transform")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "datatype": ["float", "double", "int16_t", "int32_t", "simd"],
-               "use_alloca": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "datatype": "float",
-                       "use_alloca": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "datatype": ["float", "double", "int16_t", "int32_t", "simd"],
+        "openmp": [True, False],
+        "use_alloca": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "datatype": "float",
+        "openmp": False,
+        "use_alloca": False
+    }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake",
     _cmake = None
@@ -48,6 +54,7 @@ class KissfftConan(ConanFile):
         cmake.definitions["KISSFFT_TEST"] = False
         cmake.definitions["KISSFFT_TOOLS"] = False
         cmake.definitions["KISSFFT_DATATYPE"] = self.options.datatype
+        cmake.definitions["KISSFFT_OPENMP"] = self.options.openmp
         cmake.definitions["KISSFFT_USE_ALLOCA"] = self.options.use_alloca
         cmake.configure()
         self._cmake = cmake
@@ -64,8 +71,18 @@ class KissfftConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["kissfft-%s" % self.options.datatype]
+        lib_name = "kissfft-{datatype}{openmp}".format(
+            datatype=self.options.datatype,
+            openmp="-openmp" if self.options.openmp else ""
+        )
+        self.cpp_info.names["cmake_find_package"] = "kissfft"
+        self.cpp_info.names["cmake_find_package_multi"] = "kissfft"
+        self.cpp_info.names["pkg_config"] = lib_name
+        self.cpp_info.components["libkissfft"].names["cmake_find_package"] = lib_name
+        self.cpp_info.components["libkissfft"].names["cmake_find_package_multi"] = lib_name
+        self.cpp_info.components["libkissfft"].names["pkg_config"] = lib_name
+        self.cpp_info.components["libkissfft"].libs = [lib_name]
         if self.options.shared:
-            self.cpp_info.defines.append("KISS_FFT_SHARED")
+            self.cpp_info.components["libkissfft"].defines.append("KISS_FFT_SHARED")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["libkissfft"].system_libs = ["m"]
