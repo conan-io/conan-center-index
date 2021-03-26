@@ -19,7 +19,7 @@ class Nmslib(ConanFile):
     _cmake = None
 
     def validate(self):
-        if self.settings.compier == "Visual Studio" and self.settings.compiler.version == "14":
+        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
             raise ConanInvalidConfiguration("Builds fail for VS 14")  # TODO: add reason in message -> unsupported?
 
     def config_options(self):
