@@ -5,6 +5,7 @@ from conans import ConanFile, CMake, tools
 class DjinniSuppotLib(ConanFile):
     name = "djinni-support-lib"
     homepage = "https://djinni.xlcpp.dev"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Djinni is a tool for generating cross-language type declarations and interface bindings"
     topics = ("java", "Objective-C", "Android", "iOS")
     license = "Apache-2.0"
