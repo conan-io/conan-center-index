@@ -10,8 +10,7 @@ class PCRE2Conan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,6 +35,8 @@ class PCRE2Conan(ConanFile):
         "support_jit": False
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -74,6 +75,15 @@ class PCRE2Conan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
+        # FindPackageHandleStandardArgs.cmake which can break conan generators
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        if tools.Version(self.version) < "10.34":
+            tools.replace_in_file(cmakelists, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        else:
+            tools.replace_in_file(cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -95,6 +105,7 @@ class PCRE2Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

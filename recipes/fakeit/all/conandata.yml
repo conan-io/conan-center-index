@@ -1,0 +1,4 @@
+sources:
+  "2.0.7":
+    url: https://github.com/eranpeer/FakeIt/archive/refs/tags/2.0.7.tar.gz
+    sha256: e28ad1181487447a7add926a289d0db0bbb354a64d3395f75066b74750a93769

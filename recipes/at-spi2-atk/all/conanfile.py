@@ -42,13 +42,13 @@ class AtSPI2AtkConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires('meson/0.56.1')
+        self.build_requires('meson/0.57.1')
         self.build_requires('pkgconf/1.7.3')
 
     def requirements(self):
-        self.requires('at-spi2-core/2.38.0')
+        self.requires('at-spi2-core/2.39.1')
         self.requires('atk/2.36.0')
-        self.requires('glib/2.67.1')
+        self.requires('glib/2.67.6')
         self.requires('libxml2/2.9.10')
 
     def source(self):

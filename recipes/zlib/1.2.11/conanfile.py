@@ -12,12 +12,19 @@ class ZlibConan(ConanFile):
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "minizip": False}
+    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False, "deprecated"]}
+    default_options = {"shared": False, "fPIC": True, "minizip": "deprecated"}
     exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
     topics = ("conan", "zlib", "compression")
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -27,24 +34,20 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.options.shared:
+            del self.options.fPIC
+
+        if self.options.minizip != "deprecated":
+            self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
+
+    def package_id(self):
+        del self.info.options.minizip
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
-    def build(self):
-        self._build_zlib()
-        if self.options.minizip:
-            self._build_minizip()
-
-    def _build_zlib_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_dir=".")
-        # we need to build only libraries without test example/example64 and minigzip/minigzip64
-        make_target = "zlib" if self.options.shared else "zlibstatic"
-
-        cmake.build(build_dir=".", target=make_target)
-
-    def _build_zlib(self):
+    def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
@@ -65,18 +68,13 @@ class ZlibConan(ConanFile):
                                           '#ifdef HAVE_STDARG_H    '
                                           '/* may be set to #if 1 by ./configure */',
                                           '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
-                self._build_zlib_cmake()
 
-    def _build_minizip(self):
-        minizip_dir = os.path.join(self._source_subfolder, 'contrib', 'minizip')
-        os.rename("CMakeLists_minizip.txt", os.path.join(minizip_dir, 'CMakeLists.txt'))
-        with tools.chdir(minizip_dir):
-            cmake = CMake(self)
-            cmake.configure(source_folder=minizip_dir)
-            cmake.build()
-            cmake.install()
+    def build(self):
+        self._patch_sources()
+        make_target = "zlib" if self.options.shared else "zlibstatic"
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        cmake.build(target=make_target)
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
@@ -99,39 +97,34 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlibstatic.lib")
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
 
-    def package(self):
-        # Extract the License/s from the header to a file
+    def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
             tmp = tools.load("zlib.h")
             license_contents = tmp[2:tmp.find("*/", 1)]
             tools.save("LICENSE", license_contents)
 
-        # Copy the license files
+    def package(self):
+        self._extract_license()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
         # Copy headers
         for header in ["*zlib.h", "*zconf.h"]:
             self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src="_build", keep_path=False)
+            self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
 
         # Copying static and dynamic libs
-        build_dir = os.path.join(self._source_subfolder, "_build")
         if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.dll", dst="bin", src=self._build_subfolder, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=self._build_subfolder, keep_path=False)
         else:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
 
         self._rename_libraries()
 
     def package_info(self):
-        if self.options.minizip:
-            self.cpp_info.libs.append('minizip')
-            if self.options.shared:
-                self.cpp_info.defines.append('MINIZIP_DLL')
         self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
