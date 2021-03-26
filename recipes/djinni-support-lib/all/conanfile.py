@@ -52,6 +52,13 @@ class DjinniSuppotLib(ConanFile):
         if not self.options.system_java:
             self.build_requires("zulu-openjdk/11.0.8@")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
