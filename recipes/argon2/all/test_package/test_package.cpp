@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include "argon2.h"
 
-
 int main() {
 
     const char * salt = "SALTSTR";
     const char * pwd = "password";
-
+    
     char encoded[97] = {};
 
     // high-level API
