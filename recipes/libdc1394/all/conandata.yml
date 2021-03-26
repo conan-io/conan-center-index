@@ -1,0 +1,4 @@
+sources:
+  "2.2.6":
+    url: "https://sourceforge.net/projects/libdc1394/files/libdc1394-2/2.2.6/libdc1394-2.2.6.tar.gz"
+    sha256: "2b905fc9aa4eec6bdcf6a2ae5f5ba021232739f5be047dec8fe8dd6049c10fed"
