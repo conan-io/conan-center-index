@@ -13,7 +13,7 @@ class BrigandConan(ConanFile):
     topics = ("meta-programming", "boost", "runtime", "header-only")
     homepage = "https://github.com/edouarda/brigand"
     license = "BSL-1.0"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "compiler"
     requires = "boost/1.75.0"
     no_copy_sources = True
 
