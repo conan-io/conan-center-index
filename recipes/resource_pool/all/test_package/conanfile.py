@@ -1,9 +1,10 @@
-from conans import ConanFile, CMake
+import os
+from conans import ConanFile, CMake, tools
 
 
 class ResourcePoolTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = "cmake_find_package", "cmake"
 
     def build(self):
         cmake = CMake(self)
@@ -11,4 +12,6 @@ class ResourcePoolTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        pass # Building alone is sufficient
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)

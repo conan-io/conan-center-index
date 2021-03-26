@@ -48,7 +48,7 @@ class ResourcePool(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("resource_pool requires a compiler that supports at least C++17")
 
-    def configure(self):
+    def validate(self):
         self._validate_compiler_settings()
 
     def source(self):
