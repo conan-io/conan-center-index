@@ -24,9 +24,12 @@ openal/1.20.1
 openblas/0.3.7
 opencv/2.4.13.5
 openh264/1.7.0
+openssl/1.1.1d
 protobuf/3.9.1
 protoc/3.9.1.dssl1
+sip/4.19.3
 snappy/1.1.8
+strawberryperl/5.30.0.1
 xz_utils/5.2.4
 zlib/1.2.11
 

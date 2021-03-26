@@ -80,8 +80,9 @@ class SipConan(ConanFile):
                     python = self.options.python
                 ))
                 # cannot be bothered to fix build of siplib which we don't use anyway
+                vcvarsall_cmd = tools.vcvars_command(self)
                 with tools.chdir("sipgen"):
-                    self.run("nmake")
+                    self.run("{vcv} && nmake".format(vcv=vcvarsall_cmd))
 
     def package(self):
         if tools.os_info.is_macos:
@@ -91,7 +92,8 @@ class SipConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 # partial execution of installation step due to siplib not being built
                 with tools.chdir("sipgen"):
-                    self.run("nmake install")
+                    vcvarsall_cmd = tools.vcvars_command(self)
+                    self.run("{vcv} && nmake install".format(vcv=vcvarsall_cmd))
                 with tools.chdir("siplib"):
                     self.run("mkdir {prefix}\\include\\".format(prefix = self.package_folder))
                     self.run("copy /y sip.h {prefix}\\include\\sip.h".format(prefix = self.package_folder))
