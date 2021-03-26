@@ -14,12 +14,14 @@ class NlohmannJsonConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "multiple_headers": [True, False],
-        "implicit_conversions": [True, False]
+        "implicit_conversions": [True, False],
     }
     default_options = {
         "multiple_headers": False,
-        "implicit_conversions": True
+        "implicit_conversions": True,
     }
+
+    _cmake = None
 
     @property
     def _can_disable_implicit_conversions(self):
@@ -39,22 +41,23 @@ class NlohmannJsonConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["JSON_BuildTests"] = False
-        cmake.definitions["JSON_MultipleHeaders"] = self.options.multiple_headers
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["JSON_BuildTests"] = False
+        self._cmake.definitions["JSON_MultipleHeaders"] = self.options.multiple_headers
         if self._can_disable_implicit_conversions:
-            cmake.definitions["JSON_ImplicitConversions"] = self.options.implicit_conversions
+            self._cmake.definitions["JSON_ImplicitConversions"] = self.options.implicit_conversions
 
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))

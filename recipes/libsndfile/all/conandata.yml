@@ -1,4 +1,11 @@
 sources:
-  "1.0.28":
-    url: "http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz"
-    sha256: "1ff33929f042fa333aed1e8923aa628c3ee9e1eb85512686c55092d1e5a9dfa9"
+  "1.0.29":
+    url: "https://github.com/erikd/libsndfile/archive/v1.0.29.tar.gz"
+    sha256: "c5541ccfa672b3f461ac21a38cdd37b1fe061cc62a422800b9d53649dee549ee"
+  "1.0.30":
+    url: "https://github.com/erikd/libsndfile/archive/v1.0.30.tar.gz"
+    sha256: "5942b963d1db3ed8ab1ffb85708322aa9637df76d9fe84e1dfe49a97a90e8f47"
+patches:
+  "1.0.30":
+    - base_path: source_subfolder
+      patch_file: patches/0001-disable-static-runtime-logic.patch

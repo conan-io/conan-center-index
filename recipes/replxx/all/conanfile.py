@@ -48,6 +48,12 @@ class ReplxxConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if tools.Version(self.version) < "0.0.3":
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "src/io.cxx"),
+                "#include <array>\n",
+                "#include <array>\n#include <stdexcept>\n"
+            )
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -55,6 +61,7 @@ class ReplxxConan(ConanFile):
         self.copy("LICENSE.md", dst='licenses', src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

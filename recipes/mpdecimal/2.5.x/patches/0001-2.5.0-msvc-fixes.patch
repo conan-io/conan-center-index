@@ -1,0 +1,65 @@
+--- libmpdec++/Makefile.vc
++++ libmpdec++/Makefile.vc
+@@ -16,15 +16,15 @@
+ # LIBSHARED_CXX = libmpdec++-2.5.0.dll
+ 
+ !if "$(DEBUG)" == "1"
+-OPT = /MTd /Od /Zi /EHsc
+-OPT_SHARED = /MDd /Od /Zi /EHsc
++OPT = /Od /Zi /EHsc
++OPT_SHARED = /Od /Zi /EHsc
+ !else
+-OPT = /MT /Ox /GS /EHsc
+-OPT_SHARED = /MD /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
++OPT_SHARED = /Ox /GS /EHsc
+ !endif
+ 
+ 
+-MPD_CXXFLAGS = /W4 /nologo $(CONFIG) $(OPT)
+-MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS)
++MPD_CXXFLAGS = /W4 /nologo $(CONFIG) $(OPT) $(CONAN_CXXFLAGS) $(CONAN_CFLAGS)
++MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS) $(CONAN_LDFLAGS)
+ 
+ 
+@@ -34,13 +34,13 @@
+ OBJS = decimal.obj
+ 
+ 
+-$(LIBSTATIC_CXX): Makefile $(OBJS)
++$(LIBSTATIC_CXX): Makefile.vc $(OBJS)
+ 	-@if exist $@ del $(LIBSTATIC_CXX)
+ 	lib /out:$(LIBSTATIC_CXX) $(OBJS)
+ 
+ 
+ decimal.obj:\
+-Makefile decimal.cc decimal.hh
++Makefile.vc decimal.cc decimal.hh
+ 	$(CXX) "-I." "-I$(SRCDIR)" $(MPD_CXXFLAGS) -c decimal.cc
+ 
+ 
+--- libmpdec/Makefile.vc
++++ libmpdec/Makefile.vc
+@@ -36,15 +36,15 @@
+ !endif
+ 
+ !if "$(DEBUG)" == "1"
+-OPT = /MTd /Od /Zi /EHsc
+-OPT_SHARED = /MDd /Od /Zi /EHsc
++OPT = /Od /Zi /EHsc
++OPT_SHARED = /Od /Zi /EHsc
+ !else
+-OPT = /MT /Ox /GS /EHsc
+-OPT_SHARED = /MD /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
++OPT_SHARED = /Ox /GS /EHsc
+ !endif
+ 
+-MPD_CFLAGS = /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT)
+-MPD_CFLAGS_SHARED = /DBUILD_DLL /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT_SHARED) $(PGOFLAGS)
+-MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS)
++MPD_CFLAGS = /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT) $(CONAN_CFLAGS)
++MPD_CFLAGS_SHARED = /DBUILD_DLL /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT_SHARED) $(PGOFLAGS) $(CONAN_CFLAGS)
++MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS) $(CONAN_LDFLAGS)
+ 
+ 

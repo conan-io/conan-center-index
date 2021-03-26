@@ -30,6 +30,8 @@ class LibwebpConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -90,10 +92,38 @@ class LibwebpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["webpmux", "webpdemux", "webpdecoder", "webp"]
-        if self.options.shared and self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.cpp_info.libs = [lib + ".dll" for lib in self.cpp_info.libs]
+        self.cpp_info.names["cmake_find_package"] = "WebP"
+        self.cpp_info.names["cmake_find_package_multi"] = "WebP"
+        # webpdecoder
+        self.cpp_info.components["webpdecoder"].names["cmake_find_package"] = "webpdecoder"
+        self.cpp_info.components["webpdecoder"].names["cmake_find_package_multi"] = "webpdecoder"
+        self.cpp_info.components["webpdecoder"].names["pkg_config"] = "libwebpdecoder"
+        self.cpp_info.components["webpdecoder"].libs = [self._lib_name("webpdecoder")]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-        if self.settings.os == "Linux" or self.settings.os == "Android":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["webpdecoder"].system_libs = ["pthread"]
+        # webp
+        self.cpp_info.components["webp"].names["cmake_find_package"] = "webp"
+        self.cpp_info.components["webp"].names["cmake_find_package_multi"] = "webp"
+        self.cpp_info.components["webp"].names["pkg_config"] = "libwebp"
+        self.cpp_info.components["webp"].libs = [self._lib_name("webp")]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["webp"].system_libs = ["m", "pthread"]
+        # webpdemux
+        self.cpp_info.components["webpdemux"].names["cmake_find_package"] = "webpdemux"
+        self.cpp_info.components["webpdemux"].names["cmake_find_package_multi"] = "webpdemux"
+        self.cpp_info.components["webpdemux"].names["pkg_config"] = "libwebpdemux"
+        self.cpp_info.components["webpdemux"].libs = [self._lib_name("webpdemux")]
+        self.cpp_info.components["webpdemux"].requires = ["webp"]
+        # webpmux
+        self.cpp_info.components["webpmux"].names["cmake_find_package"] = "libwebpmux"
+        self.cpp_info.components["webpmux"].names["cmake_find_package_multi"] = "libwebpmux"
+        self.cpp_info.components["webpmux"].names["pkg_config"] = "libwebpmux"
+        self.cpp_info.components["webpmux"].libs = [self._lib_name("webpmux")]
+        self.cpp_info.components["webpmux"].requires = ["webp"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["webpmux"].system_libs = ["m"]
+
+    def _lib_name(self, name):
+        if self.options.shared and self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+            return name + ".dll"
+        return name

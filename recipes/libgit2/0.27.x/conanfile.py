@@ -31,7 +31,12 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
     }
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows" or self.options.shared:
@@ -61,13 +66,13 @@ class LibGit2Conan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        self.requires("http_parser/2.9.2")
+        self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.8.2")
+            self.requires("libssh2/1.9.0")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.67.0")
+            self.requires("libcurl/7.75.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -90,51 +95,45 @@ class LibGit2Conan(ConanFile):
     }
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        cmake.definitions["USE_SSH"] = self.options.with_libssh2
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
+        self._cmake.definitions["USE_SSH"] = self.options.with_libssh2
 
         if tools.is_apple_os(self.settings.os):
-            cmake.definitions["USE_ICONV"] = self.options.with_iconv
+            self._cmake.definitions["USE_ICONV"] = self.options.with_iconv
         else:
-            cmake.definitions["USE_ICONV"] = True
+            self._cmake.definitions["USE_ICONV"] = True
 
 
-        cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
-        cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
+        self._cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
+        self._cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        cmake.definitions["BUILD_CLAR"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_CLAR"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
 
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+            self._cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
-        cmake.configure()
-        
-        return cmake
+        self._cmake.configure()
+        return self._cmake
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
-                              "FIND_PACKAGE(libssh2 REQUIRED)\n"
+                              "FIND_PACKAGE(Libssh2 REQUIRED)\n"
                               "\tSET(LIBSSH2_FOUND ON)\n"
-                              "\tSET(LIBSSH2_INCLUDE_DIRS ${libssh2_INCLUDE_DIRS})\n"
-                              "\tSET(LIBSSH2_LIBRARIES ${libssh2_LIBRARIES})\n"
-                              "\tSET(LIBSSH2_LIBRARY_DIRS ${libssh2_LIB_DIRS})")
+                              "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
+                              "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
+                              "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "FIND_PKGLIBRARIES(CURL libcurl)",
                               "FIND_PACKAGE(CURL REQUIRED)\n")
-        
-        tools.save("FindOpenSSL.cmake",
-                   "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-                   "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
-                   "set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n",
-                   append=True)
 
     def build(self):
         self._patch_sources()
-
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -142,7 +141,6 @@ class LibGit2Conan(ConanFile):
         self.copy("COPYING", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):

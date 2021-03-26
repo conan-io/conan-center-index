@@ -8,6 +8,12 @@ sources:
   "1.38.1":
     url: "https://github.com/libuv/libuv/archive/v1.38.1.zip"
     sha256: "0359369492742eb2a36312fffe26f80bcffe4cec981a4fd72d182b061ee14890"
+  "1.40.0":
+    url: "https://github.com/libuv/libuv/archive/v1.40.0.zip"
+    sha256: "61366e30d8484197dc9e4a94dbd98a0ba52fb55cb6c6d991af1f3701b10f322b"
+  "1.41.0":
+    url: "https://github.com/libuv/libuv/archive/v1.41.0.zip"
+    sha256: "cb89a8b9f686c5ccf7ed09a9e0ece151a73ebebc17af3813159c335b02181794"
 patches:
   "1.34.2":
     - base_path: "source_subfolder"
@@ -18,3 +24,9 @@ patches:
   "1.38.1":
     - base_path: "source_subfolder"
       patch_file: "patches/1.38.1/fix-cmake.patch"
+  "1.40.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-cmake.patch"
+  "1.41.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.41.0/fix-cmake.patch"

@@ -1,0 +1,8 @@
+sources:
+  "0.20":
+    url: "https://www.intra2net.com/en/developer/libftdi/download/libftdi-0.20.tar.gz"
+    sha256: "3176d5b5986438f33f5208e690a8bfe90941be501cc0a72118ce3d338d4b838e"
+patches:
+  "0.20":
+    - patch_file: "patches/0001-cmake-fixes.patch"
+      base_path: "source_subfolder"

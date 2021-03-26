@@ -1,0 +1,4 @@
+sources:
+  "0.5.5":
+    url: "https://github.com/LLNL/zfp/archive/0.5.5.tar.gz"
+    sha256: "6a7f4934489087d9c117a4af327fd6495ea757924f4df467b9c537abf8bd86c4"

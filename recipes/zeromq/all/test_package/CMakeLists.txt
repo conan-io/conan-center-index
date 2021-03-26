@@ -19,3 +19,7 @@ endif()
 if(WITH_LIBSODIUM)
   target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_LIBSODIUM")
 endif()
+
+if(WITH_NORM)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_NORM")
+endif()

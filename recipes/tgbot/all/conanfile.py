@@ -8,42 +8,66 @@ class TgbotConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://reo7sp.github.io/tgbot-cpp"
     description = "C++ library for Telegram bot API"
+    topics = ("conan", "tgbot", "telegram", "telegram-api", "telegram-bot", "bot")
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True, "shared": False}
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False]
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False
+    }
 
     generators = "cmake", "cmake_find_package"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
-    requires = (
-        "boost/1.71.0",
-        "openssl/1.1.1d",
-        "libcurl/7.67.0"
-    )
+    exports_sources = ['CMakeLists.txt']
 
-    _source_subfolder = "tgbot"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
+    def requirements(self):
+        self.requires("boost/1.75.0")
+        self.requires("libcurl/7.75.0")
+        self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def _patch_sources(self):
+        # Don't force PIC
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+            ""
+        )
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_TESTS"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_TESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

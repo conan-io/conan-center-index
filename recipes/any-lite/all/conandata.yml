@@ -2,3 +2,9 @@ sources:
   "0.2.0":
     url: https://github.com/martinmoene/any-lite/archive/v0.2.0.tar.gz
     sha256: 945ac39f14273be742c8a060af100182e38920f641e5d8fa16699e74a09e9850
+  "0.3.0":
+    url: https://github.com/martinmoene/any-lite/archive/v0.3.0.tar.gz
+    sha256: fa7087ef7b4455c00b4b715649eb7176d6d0806c3a57cd4734845611ebe9888e
+  "0.4.0":
+    url: https://github.com/martinmoene/any-lite/archive/v0.4.0.tar.gz
+    sha256: 889549098291a1313d2fc8cd12dcdab13214d05cdce7ed5fe2dc724cdd7b3125

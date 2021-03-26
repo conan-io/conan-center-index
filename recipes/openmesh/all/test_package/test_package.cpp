@@ -40,7 +40,7 @@ int main()
   face_vhandles.push_back(vhandle[2]);
   face_vhandles.push_back(vhandle[3]);
   mesh.add_face(face_vhandles);
- 
+
   face_vhandles.clear();
   face_vhandles.push_back(vhandle[7]);
   face_vhandles.push_back(vhandle[6]);
@@ -76,5 +76,10 @@ int main()
   face_vhandles.push_back(vhandle[4]);
   mesh.add_face(face_vhandles);
 
+  std::cout << "Writing mesh as obj to stdout\n";
+  if (!OpenMesh::IO::write_mesh(mesh, std::cout, "obj")) {
+    std::cerr << "Unable to write mesh to stdout" << std::endl;
+    return -1;
+  }
   return 0;
 }

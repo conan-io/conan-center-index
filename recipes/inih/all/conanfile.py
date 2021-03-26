@@ -32,9 +32,6 @@ class InihConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def build_requirements(self):
-        self.build_requires("meson/0.54.2")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,6 +43,9 @@ class InihConan(ConanFile):
                 raise ConanInvalidConfiguration("Shared inih is not supported")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def build_requirements(self):
+        self.build_requires("meson/0.55.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

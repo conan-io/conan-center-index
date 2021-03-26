@@ -51,14 +51,13 @@ class CunitConan(ConanFile):
             self.requires("ncurses/6.2")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("CUnit-{}".format("-".join(self.version.rsplit(".", 1))), self._source_subfolder)
+        os.rename("CUnit-{}".format(self.version), self._source_subfolder)
         with tools.chdir(self._source_subfolder):
             for f in glob.glob("*.c"):
                 os.chmod(f, 0o644)
@@ -88,6 +87,8 @@ class CunitConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",

@@ -171,8 +171,13 @@ class ArrowConan(ConanFile):
         if required or self.options.with_boost == "auto":
             if self.options.gandiva:
                 return True
-            if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
-                return True
+            version = tools.Version(self.version)
+            if version.major == "1":
+                if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
+                    return True
+            elif version.major == "2":
+                if self.settings.compiler == "Visual Studio":
+                    return True
             return False
         else:
             return bool(self.options.with_boost)
@@ -209,11 +214,11 @@ class ArrowConan(ConanFile):
         if self.options.with_backtrace:
             raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
         if self._with_protobuf():
-            self.requires("protobuf/3.11.4")
+            self.requires("protobuf/3.12.4")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
-            self.requires("boost/1.72.0")
+            self.requires("boost/1.74.0")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
         if self.options.with_flight_rpc:
@@ -229,11 +234,11 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             raise ConanInvalidConfiguration("CCI has no llvm recipe (yet)")
         if self._with_openssl():
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.7.299")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.7")
+            self.requires("brotli/1.0.9")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_orc:
@@ -245,9 +250,9 @@ class ArrowConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
         if self._with_re2():
-            self.requires("re2/20200301")
+            self.requires("re2/20201101")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -304,7 +309,10 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["RE2_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ZLIB_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
+        if tools.Version(self.version) >= "2.0":
+            self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
+        else:
+            self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_THRIFT"] = self._with_thrift()
         self._cmake.definitions["Thrift_SOURCE"] = "SYSTEM"
@@ -324,11 +332,11 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_BUILD_TESTS"] = False
         self._cmake.definitions["ARROW_ENABLE_TIMING_TESTS"] = False
         self._cmake.definitions["ARROW_BUILD_BENCHMARKS"] = False
-
         self._cmake.definitions["LLVM_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
         self._cmake.definitions["utf8proc_SOURCE"] = "SYSTEM"
 
+        self._cmake.definitions["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
@@ -379,9 +387,9 @@ class ArrowConan(ConanFile):
         self.info.options.with_grpc = self._with_grpc()
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Arrow"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Arrow"
         self.cpp_info.components["libarrow"].libs = [self._lib_name("arrow")]
-        self.cpp_info.components["libarrow"].filenames["cmake_find_package"] = "Arrow"
-        self.cpp_info.components["libarrow"].filenames["cmake_find_package_multi"] = "Arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package"] = "arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = "arrow"
         self.cpp_info.components["libarrow"].names["pkg_config"] = "arrow"
@@ -390,11 +398,8 @@ class ArrowConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libarrow"].system_libs = ["pthread"]
 
-
         if self.options.parquet:
             self.cpp_info.components["libparquet"].libs = [self._lib_name("parquet")]
-            self.cpp_info.components["libparquet"].filenames["cmake_find_package"] = "Parquet"
-            self.cpp_info.components["libparquet"].filenames["cmake_find_package_multi"] = "Parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package"] = "parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
@@ -402,8 +407,6 @@ class ArrowConan(ConanFile):
 
         if self.options.plasma:
             self.cpp_info.components["libplasma"].libs = [self._lib_name("plasma")]
-            self.cpp_info.components["libplasma"].filenames["cmake_find_package"] = "Plasma"
-            self.cpp_info.components["libplasma"].filenames["cmake_find_package_multi"] = "Arrow"
             self.cpp_info.components["libplasma"].names["cmake_find_package"] = "plasma"
             self.cpp_info.components["libplasma"].names["cmake_find_package_multi"] = "plasma"
             self.cpp_info.components["libplasma"].names["pkg_config"] = "plasma"
@@ -411,11 +414,9 @@ class ArrowConan(ConanFile):
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].libs = [self._lib_name("gandiva")]
-            self.cpp_info.components["libgandiva"].filenames["cmake_find_package"] = "Gandiva"
-            self.cpp_info.components["libgandiva"].filenames["cmake_find_package_multi"] = "Gandiva"
             self.cpp_info.components["libgandiva"].names["cmake_find_package"] = "gandiva"
-            self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "plasma"
-            self.cpp_info.components["libgandiva"].names["pkg_config"] = "plasma"
+            self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
+            self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
 
         if self.options.dataset_modules:
@@ -432,6 +433,9 @@ class ArrowConan(ConanFile):
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
             if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
+            if tools.Version(self.version) >= "2.0":
+                # FIXME: only headers components is used
+                self.cpp_info.components["libarrow"].requires.append("boost::boost")
         if self._with_openssl():
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
         if self._with_gflags():

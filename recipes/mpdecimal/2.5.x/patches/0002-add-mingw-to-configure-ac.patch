@@ -1,0 +1,64 @@
+--- configure.ac
++++ configure.ac
+@@ -12,13 +12,22 @@
+ AC_MSG_RESULT($ac_sys_system)
+ 
+ LIBSTATIC=libmpdec.a
+-case $ac_sys_system in
+-    darwin*|Darwin*)
++AC_CANONICAL_HOST
++
++AC_MSG_NOTICE(["host is $ac_cv_host"])
++case $ac_cv_host in
++    *darwin*|*Darwin*)
+         LIBNAME="libmpdec.dylib"
+         LIBSONAME="libmpdec.2.dylib"
+         LIBSHARED="libmpdec.2.5.0.dylib"
+         CONFIGURE_LDFLAGS="-dynamiclib -install_name @rpath/$LIBSONAME -compatibility_version 2.5 -current_version 2.5.0"
+         ;;
++    *windows*|*w64*)
++        LIBNAME="libmpdec.dll"
++        LIBSONAME="libmpdec-2.dll"
++        LIBSHARED="libmpdec-2.5.0.dll"
++        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
++        ;;
+     *)
+         LIBNAME="libmpdec.so"
+         LIBSONAME="libmpdec.so.2"
+@@ -34,19 +43,25 @@ AC_SUBST(LIBSHARED)
+ 
+ 
+ LIBSTATIC_CXX=libmpdec++.a
+-case $ac_sys_system in
+-    darwin*|Darwin*)
++case $ac_cv_host in
++    *darwin*|*Darwin*)
+         LIBNAME_CXX="libmpdec++.dylib"
+         LIBSONAME_CXX="libmpdec++.2.dylib"
+         LIBSHARED_CXX="libmpdec++.2.5.0.dylib"
+         CONFIGURE_LDXXFLAGS="-dynamiclib -install_name @rpath/$LIBSONAME_CXX -undefined dynamic_lookup -compatibility_version 2.5 -current_version 2.5.0"
+         ;;
+-    *)
++    *linux*)
+         LIBNAME_CXX="libmpdec++.so"
+         LIBSONAME_CXX="libmpdec++.so.2"
+         LIBSHARED_CXX="libmpdec++.so.2.5.0"
+         CONFIGURE_LDXXFLAGS="-shared -Wl,-soname,$LIBSONAME_CXX"
+         ;;
++    *windows* | *w64*)
++        LIBNAME_CXX="libmpdec++.dll"
++        LIBSONAME_CXX="libmpdec++-2.dll"
++        LIBSHARED_CXX="libmpdec++-2.5.0.dll"
++        CONFIGURE_LDXXFLAGS="-shared -Wl,--out-implib,libmpdec++.dll.a"
++        ;;
+ esac
+ 
+ AC_SUBST(LIBSTATIC_CXX)
+@@ -55,7 +70,6 @@ AC_SUBST(LIBSONAME_CXX)
+ AC_SUBST(LIBSHARED_CXX)
+ 
+ # Apparently purely informational for this particular build:
+-AC_CANONICAL_HOST
+ AC_SUBST(build)
+ AC_SUBST(host)
+ 

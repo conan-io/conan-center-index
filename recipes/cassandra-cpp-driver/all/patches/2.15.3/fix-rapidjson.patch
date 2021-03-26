@@ -1,0 +1,38 @@
+ src/CMakeLists.txt | 1 -
+ src/json.hpp       | 8 ++++----
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7e81b2a06..2f3229292 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -89,7 +89,6 @@ list(APPEND INCLUDE_DIRS
+   third_party/hdr_histogram # FIXME: Use conan package
+   third_party/mt19937_64 # FIXME: Use conan package
+   third_party/sparsehash/src) # FIXME: Use conan package
+-  third_party/rapidjson/rapidjson
+ 
+ list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+diff --git a/src/json.hpp b/src/json.hpp
+index 620536e55..6003f2521 100644
+--- a/src/json.hpp
++++ b/src/json.hpp
+@@ -48,13 +48,13 @@ static void delete_(T* ptr) {
+ #define RAPIDJSON_NEW(x) ::datastax::internal::json::new_<x>
+ #define RAPIDJSON_DELETE(x) ::datastax::internal::json::delete_(x)
+ 
+-#include "third_party/rapidjson/rapidjson/document.h"
+-#include "third_party/rapidjson/rapidjson/stringbuffer.h"
++#include <rapidjson/document.h>
++#include <rapidjson/stringbuffer.h>
+ #ifndef JSON_DEBUG
+-#include "third_party/rapidjson/rapidjson/writer.h"
++#include <rapidjson/writer.h>
+ #define JSON_WRITE_TYPE Writer
+ #else
+-#include "third_party/rapidjson/rapidjson/prettywriter.h"
++#include <rapidjson/prettywriter.h>
+ #define JSON_WRITE_TYPE PrettyWriter
+ #endif
+ 

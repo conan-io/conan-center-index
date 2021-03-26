@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2963045..197c813 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,6 +8,7 @@ add_library(polylineencoder
+   src/polylineencoder.cpp
+ )
+
++if (BUILD_TESTING)
+ add_executable(poly_test
+   test/main.cpp
+ )
+@@ -18,3 +19,11 @@ target_link_libraries(poly_test
+
+ enable_testing()
+ add_test(NAME Test COMMAND poly_test)
++endif()
++
++install(TARGETS polylineencoder
++	RUNTIME DESTINATION bin
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib)
++install(DIRECTORY src/ DESTINATION include
++        FILES_MATCHING PATTERN "*.h")

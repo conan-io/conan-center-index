@@ -24,6 +24,8 @@ class LiunwindConan(ConanFile):
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libunwind is only supported on Linux and FreeBSD")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -61,6 +63,23 @@ class LiunwindConan(ConanFile):
                 os.unlink(filename)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["unwind"].names["pkg_config"] = "libunwind"
+        self.cpp_info.components["unwind"].libs = ["unwind"]
+        self.cpp_info.components["unwind"].requires = ["xz_utils::xz_utils"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["unwind"].system_libs.append("pthread")
+        self.cpp_info.components["generic"].names["pkg_config"] = "libunwind-generic"
+        self.cpp_info.components["generic"].libs = ["unwind-generic"]
+        self.cpp_info.components["generic"].requires = ["unwind"]
+        if self.options.ptrace:
+            self.cpp_info.components["ptrace"].names["pkg_config"] = "libunwind-ptrace"
+            self.cpp_info.components["ptrace"].libs = ["unwind-ptrace"]
+            self.cpp_info.components["ptrace"].requires = ["generic", "unwind"]
+        if self.options.setjmp:
+            self.cpp_info.components["setjmp"].names["pkg_config"] = "libunwind-setjmp"
+            self.cpp_info.components["setjmp"].libs = ["unwind-setjmp"]
+            self.cpp_info.components["setjmp"].requires = ["unwind"]
+        if self.options.coredump:
+            self.cpp_info.components["coredump"].names["pkg_config"] = "libunwind-coredump"
+            self.cpp_info.components["coredump"].libs = ["unwind-coredump"]
+            self.cpp_info.components["coredump"].requires = ["generic", "unwind"]

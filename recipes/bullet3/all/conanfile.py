@@ -124,3 +124,5 @@ class Bullet3Conan(ConanFile):
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
         if self.options.extras:
             self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))
+        if self.options.double_precision:
+            self.cpp_info.defines.append("BT_USE_DOUBLE_PRECISION")

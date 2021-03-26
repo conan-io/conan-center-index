@@ -1,7 +1,7 @@
 import os
 import re
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 
 class AprConan(ConanFile):
@@ -38,6 +38,11 @@ class AprConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+        if (self.settings.compiler == "apple-clang" and
+            tools.Version(self.settings.compiler.version) == "12" and
+            self.version == "1.7.0"):
+            raise ConanInvalidConfiguration("apr does not (yet) support apple-clang 12")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -64,13 +69,15 @@ class AprConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-installbuilddir=${prefix}/bin/build-1",
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
+        if tools.cross_building(self.settings):
+            #
+            conf_args.append("apr_cv_mutex_robust_shared=yes")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -118,6 +125,8 @@ class AprConan(ConanFile):
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl", "pthread"]
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["rpcrt4"]
 
         apr_root = self.package_folder
         if tools.os_info.is_windows:

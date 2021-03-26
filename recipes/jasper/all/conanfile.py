@@ -1,22 +1,33 @@
+from conans import ConanFile, CMake, tools
 import glob
 import os
-from conans import ConanFile, CMake, tools
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class JasperConan(ConanFile):
     name = "jasper"
     license = "JasPer License Version 2.0"
-    homepage = "https://github.com/mdadams/jasper"
+    homepage = "https://jasper-software.github.io/jasper"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "jpegturbo": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "jpegturbo": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "jpegturbo": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libjpeg": "libjpeg",
+        "jpegturbo": False
+    }
 
     _cmake = None
 
@@ -33,13 +44,22 @@ class JasperConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def requirements(self):
+        # Handle deprecated libjpeg option
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.0.4")
-        else:
+            self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
+        if self.options.with_libjpeg == "libjpeg" and self.options.jpegturbo:
+            self.options.with_libjpeg = "libjpeg-turbo"
+        del self.options.jpegturbo
+
+    def requirements(self):
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.0.6")
+        elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
 
     def source(self):
@@ -75,8 +95,43 @@ class JasperConan(ConanFile):
             for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
                 if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
                     os.unlink(dll_file)
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            if(DEFINED Jasper_FOUND)
+                set(JASPER_FOUND ${Jasper_FOUND})
+            endif()
+            if(DEFINED Jasper_INCLUDE_DIR)
+                set(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIR})
+            endif()
+            if(DEFINED Jasper_LIBRARIES)
+                set(JASPER_LIBRARIES ${Jasper_LIBRARIES})
+            endif()
+            if(DEFINED Jasper_VERSION)
+                set(JASPER_VERSION_STRING ${Jasper_VERSION})
+            endif()
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Jasper"
+        self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
+        self.cpp_info.names["pkg_config"] = "jasper"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.libs = ["jasper"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

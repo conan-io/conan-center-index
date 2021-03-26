@@ -8,6 +8,15 @@ sources:
   "4.1.7":
     url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.1.7.tar.gz"
     sha256: "71b504f21f62b69c76b371fe7044e0dfc6d42650a15c267431c5084badb0ade7"
+  "4.2.1":
+    url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.2.1.tar.gz"
+    sha256: "33306d6cdb60554998afb304cdc3e3120a71ea539b4be187812065b1b9e59c2f"
+  "4.3.10":
+    url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.10.tar.gz"
+    sha256: "4fa1e9650f7a08ae7217899431a3b3f0a173ad826dd819f0b8c760e4e2a65298"
+  "4.3.11":
+    url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.11.tar.gz"
+    sha256: "be2b11ada1020f77b859857310be54bd073c3a4f579d99a5e251a738576ca28c"
 patches:
   "4.1.5":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
@@ -16,5 +25,14 @@ patches:
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
       base_path: "source_subfolder"
   "4.1.7":
+    - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
+      base_path: "source_subfolder"
+  "4.2.1":
+    - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
+      base_path: "source_subfolder"
+  "4.3.10":
+    - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
+      base_path: "source_subfolder"
+  "4.3.11":
     - patch_file: "patches/0001-cmake-openssl-install-directories.patch"
       base_path: "source_subfolder"

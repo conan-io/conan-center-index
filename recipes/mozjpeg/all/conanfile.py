@@ -3,6 +3,9 @@ import os
 import glob
 
 
+required_conan_version = ">=1.29.1"
+
+
 class MozjpegConan(ConanFile):
     name = "mozjpeg"
     description = "MozJPEG is an improved JPEG encoder"
@@ -27,83 +30,107 @@ class MozjpegConan(ConanFile):
         "enable12bit": [True, False],
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'SIMD': True,
-        'arithmetic_encoder': True,
-        'arithmetic_decoder': True,
-        'libjpeg7_compatibility': False,
-        'libjpeg8_compatibility': False,
-        'mem_src_dst': True,
-        'turbojpeg': True,
-        'java': False,
-        'enable12bit': False
+        "shared": False,
+        "fPIC": True,
+        "SIMD": True,
+        "arithmetic_encoder": True,
+        "arithmetic_decoder": True,
+        "libjpeg7_compatibility": False,
+        "libjpeg8_compatibility": False,
+        "mem_src_dst": True,
+        "turbojpeg": True,
+        "java": False,
+        "enable12bit": False,
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
     _autotools = None
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        self.provides = ["libjpeg", "libjpeg-turbo"] if self.options.turbojpeg else "libjpeg"
+
+    @property
+    def _use_cmake(self):
+        return self.settings.os == "Windows" or tools.Version(self.version) >= "4.0.0"
 
     def build_requirements(self):
-        self.build_requires("nasm/2.13.02")
+        if not self._use_cmake:
+            if self.settings.os != "Windows":
+                self.build_requires("libtool/2.4.6")
+                self.build_requires("pkgconf/1.7.3")
+        if self.options.SIMD:
+            self.build_requires("nasm/2.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['ENABLE_TESTING'] = False
-        cmake.definitions['ENABLE_STATIC'] = not self.options.shared
-        cmake.definitions['ENABLE_SHARED'] = self.options.shared
-        cmake.definitions['WITH_SIMD'] = self.options.SIMD
-        cmake.definitions['WITH_ARITH_ENC'] = self.options.arithmetic_encoder
-        cmake.definitions['WITH_ARITH_DEC'] = self.options.arithmetic_decoder
-        cmake.definitions['WITH_JPEG7'] = self.options.libjpeg7_compatibility
-        cmake.definitions['WITH_JPEG8'] = self.options.libjpeg8_compatibility
-        cmake.definitions['WITH_MEM_SRCDST'] = self.options.mem_src_dst
-        cmake.definitions['WITH_TURBOJPEG'] = self.options.turbojpeg
-        cmake.definitions['WITH_JAVA'] = self.options.java
-        cmake.definitions['WITH_12BIT'] = self.options.enable12bit
-        if self.settings.compiler == 'Visual Studio':
-            cmake.definitions['WITH_CRT_DLL'] = 'MD' in str(self.settings.compiler.runtime)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_TESTING"] = False
+        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
+        self._cmake.definitions["WITH_SIMD"] = self.options.SIMD
+        self._cmake.definitions["WITH_ARITH_ENC"] = self.options.arithmetic_encoder
+        self._cmake.definitions["WITH_ARITH_DEC"] = self.options.arithmetic_decoder
+        self._cmake.definitions["WITH_JPEG7"] = self.options.libjpeg7_compatibility
+        self._cmake.definitions["WITH_JPEG8"] = self.options.libjpeg8_compatibility
+        self._cmake.definitions["WITH_MEM_SRCDST"] = self.options.mem_src_dst
+        self._cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
+        self._cmake.definitions["WITH_JAVA"] = self.options.java
+        self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
+        self._cmake.definitions["CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"] = False
+        self._cmake.definitions["PNG_SUPPORTED"] = False  # PNG and zlib are only required for executables (and static libraries)
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["WITH_CRT_DLL"] = "MD" in str(self.settings.compiler.runtime)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _configure_autotools(self):
         if not self._autotools:
             with tools.chdir(self._source_subfolder):
-                self.run('autoreconf -fiv')
+                self.run("autoreconf -fiv")
             self._autotools = AutoToolsBuildEnvironment(self)
-            args = []
-            if self.options.shared:
-                args.extend(['--disable-static', '--enable-shared'])
-            else:
-                args.extend(['--disable-shared', '--enable-static'])
-            args.append('--with-pic' if self.options.fPIC else '--without-pic')
-            args.append('--with-simd' if self.options.SIMD else '--without-simd')
-            args.append('--with-arith-enc' if self.options.arithmetic_encoder else '--without-arith-enc')
-            args.append('--with-arith-dec' if self.options.arithmetic_decoder else '--without-arith-dec')
-            args.append('--with-jpeg7' if self.options.libjpeg7_compatibility else '--without-jpeg7')
-            args.append('--with-jpeg8' if self.options.libjpeg8_compatibility else '--without-jpeg8')
-            args.append('--with-mem-srcdst' if self.options.mem_src_dst else '--without-mem-srcdst')
-            args.append('--with-turbojpeg' if self.options.turbojpeg else '--without-turbojpeg')
-            args.append('--with-java' if self.options.java else '--without-java')
-            args.append('--with-12bit' if self.options.enable12bit else '--without-12bit')
+            yes_no = lambda v: "yes" if v else "no"
+            args = [
+                "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
+                "--with-simd={}".format(yes_no(self.options.SIMD)),
+                "--with-arith-enc={}".format(yes_no(self.options.arithmetic_encoder)),
+                "--with-arith-dec={}".format(yes_no(self.options.arithmetic_decoder)),
+                "--with-jpeg7={}".format(yes_no(self.options.libjpeg7_compatibility)),
+                "--with-jpeg8={}".format(yes_no(self.options.libjpeg8_compatibility)),
+                "--with-mem-srcdst={}".format(yes_no(self.options.mem_src_dst)),
+                "--with-turbojpeg={}".format(yes_no(self.options.turbojpeg)),
+                "--with-java={}".format(yes_no(self.options.java)),
+                "--with-12bit={}".format(yes_no(self.options.enable12bit)),
+                "--enable-shared={}".format(yes_no(self.options.shared)),
+                "--enable-static={}".format(yes_no(not self.options.shared)),
+            ]
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.settings.os == 'Windows':
+        if self._use_cmake:
             cmake = self._configure_cmake()
             cmake.build()
         else:
@@ -112,35 +139,36 @@ class MozjpegConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == 'Windows':
+        if self._use_cmake:
             cmake = self._configure_cmake()
             cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
-        # drop pc and cmake file
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
-        # remove binaries
-        for bin_program in ['cjpeg', 'djpeg', 'jpegtran', 'tjbench', 'wrjpgcom', 'rdjpgcom']:
-            for ext in ['', '.exe']:
-                try:
-                    os.remove(os.path.join(self.package_folder, 'bin', bin_program+ext))
-                except OSError:
-                    pass
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb_file)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # remove binaries and pdb files
+        for bin_pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
+            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", bin_pattern_to_remove)):
+                os.remove(bin_file)
 
-        # drop la files
-        for la in ['libjpeg', 'libturbojpeg']:
-            la_file = os.path.join(self.package_folder, "lib", la + ".la")
-            if os.path.isfile(la_file):
-                os.unlink(la_file)
-
-        tools.rmdir(os.path.join(self.package_folder, 'doc'))
+    def _lib_name(self, name):
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and not self.options.shared:
+            return name + "-static"
+        return name
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # libjpeg
+        self.cpp_info.components["libjpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["libjpeg"].libs = [self._lib_name("jpeg")]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["libjpeg"].system_libs.append("m")
+        # libturbojpeg
+        if self.options.turbojpeg:
+            self.cpp_info.components["libturbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["libturbojpeg"].libs = [self._lib_name("turbojpeg")]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libturbojpeg"].system_libs.append("m")

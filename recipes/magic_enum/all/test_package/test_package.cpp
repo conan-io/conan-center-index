@@ -11,4 +11,3 @@ int main(){
     return color_name == "RED" ? EXIT_SUCCESS : EXIT_FAILURE ;
 
 }
-

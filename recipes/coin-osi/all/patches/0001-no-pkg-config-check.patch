@@ -1,0 +1,13 @@
+--- Osi/Makefile.in
++++ Osi/Makefile.in
+@@ -938,8 +938,8 @@
+ 
+ install-data-hook:
+ 	@$(mkdir_p) "$(addlibsdir)"
+-@COIN_HAS_PKGCONFIG_TRUE@	PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@:$(DESTDIR)$(pkgconfiglibdir) \
+-@COIN_HAS_PKGCONFIG_TRUE@	$(PKG_CONFIG) --libs osi > $(addlibsdir)/osi_addlibs.txt
++@COIN_HAS_PKGCONFIG_TRUE@	#PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@:$(DESTDIR)$(pkgconfiglibdir) \
++@COIN_HAS_PKGCONFIG_TRUE@	#$(PKG_CONFIG) --libs osi > $(addlibsdir)/osi_addlibs.txt
+ @COIN_CXX_IS_CL_TRUE@@COIN_HAS_PKGCONFIG_FALSE@	echo "-libpath:`$(CYGPATH_W) @abs_lib_dir@` libOsi.lib @OSILIB_LIBS_INSTALLED@" > $(addlibsdir)/osi_addlibs.txt
+ @COIN_CXX_IS_CL_FALSE@@COIN_HAS_PKGCONFIG_FALSE@	echo -L@abs_lib_dir@ -lOsi @OSILIB_LIBS_INSTALLED@ > $(addlibsdir)/osi_addlibs.txt
+ 

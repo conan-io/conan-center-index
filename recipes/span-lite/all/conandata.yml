@@ -4,4 +4,16 @@ sources:
     sha256: da97ea5922a3c6129fe2ce89b95b471ae40e2ad921b354e472236a5ad57c5053
   "0.7.0":
     url: https://github.com/martinmoene/span-lite/archive/v0.7.0.tar.gz
-    sha256: e95a9b281b46eb2b44257c6c4ec218c1741144c1167644896e29fd6aed9bbcf4    
+    sha256: e95a9b281b46eb2b44257c6c4ec218c1741144c1167644896e29fd6aed9bbcf4
+  "0.8.0":
+    url: https://github.com/martinmoene/span-lite/archive/v0.8.0.tar.gz
+    sha256: cca1c9de1dd1b7244ee8e5a093cc38b869d972154db61932b7dd22bd7a9d609c
+  "0.8.1":
+    url: https://github.com/martinmoene/span-lite/archive/v0.8.1.tar.gz
+    sha256: 2136dba54988c16b03f7c652ea977205bf624bfde90c24331177027d6529386d
+  "0.9.0":
+    url: https://github.com/martinmoene/span-lite/archive/v0.9.0.tar.gz
+    sha256: cdb5f86e5f5e679d63700a56de734c44fe22a574a17347d09dbaaef80619af91
+  "0.9.2":
+    url: https://github.com/martinmoene/span-lite/archive/v0.9.2.tar.gz
+    sha256: 7562802aac9b78e0140c3d59933cf4dc5825c0712c63daad2f7fff8c67e62eb4

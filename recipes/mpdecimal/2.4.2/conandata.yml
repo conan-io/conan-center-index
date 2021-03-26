@@ -5,4 +5,6 @@ sources:
 patches:
   "2.4.2":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-2.4.2-msvc-fixes.patch"
+      patch_file: "patches/0001-msvc-fixes.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-disable-vcstdint-h-vs2015.patch"

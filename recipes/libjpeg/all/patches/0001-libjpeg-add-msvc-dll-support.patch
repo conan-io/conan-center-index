@@ -32,14 +32,61 @@
 
 --- makefile.vc
 +++ makefile.vc
-@@ -111,6 +111,10 @@ libjpeg.lib: $(LIBOBJECTS)
- 	$(RM) libjpeg.lib
- 	lib -out:libjpeg.lib  $(LIBOBJECTS)
+@@ -30,6 +30,7 @@
+ # miscellaneous OS-dependent stuff
+ # file deletion command
+ RM= del
++MKDIR=mkdir
  
-+libjpeg.dll.lib libjpeg-9.dll: $(LIBOBJECTS)
-+	$(RM) libjpeg-9.dll libjpeg.dll.lib
-+	link -DLL -out:libjpeg-9.dll -implib:libjpeg.dll.lib $(LIBOBJECTS)
+ # End of configurable options.
+ 
+@@ -105,20 +106,30 @@
+ 	$(cc) $(CFLAGS) $*.c
+ 
+ 
+-all: libjpeg.lib cjpeg.exe djpeg.exe jpegtran.exe rdjpgcom.exe wrjpgcom.exe
++all: shared/libjpeg.lib static/libjpeg.lib cjpeg.exe djpeg.exe jpegtran.exe rdjpgcom.exe wrjpgcom.exe
+ 
+-libjpeg.lib: $(LIBOBJECTS)
+-	$(RM) libjpeg.lib
+-	lib -out:libjpeg.lib  $(LIBOBJECTS)
++shared:
++	$(MKDIR) shared
++	
++static:
++	$(MKDIR) static
++	
++static/libjpeg.lib: $(LIBOBJECTS) static
++	$(RM) static\libjpeg.lib
++	lib -out:static/libjpeg.lib  $(LIBOBJECTS)
 +
- cjpeg.exe: $(COBJECTS) libjpeg.lib
- 	$(link) $(LDFLAGS) -out:cjpeg.exe $(COBJECTS) libjpeg.lib $(LDLIBS)
++shared/libjpeg.lib shared/libjpeg-9.dll: $(LIBOBJECTS) shared
++	$(RM) shared\libjpeg.lib shared\libjpeg-9.dll
++	link -DLL -out:shared/libjpeg-9.dll -implib:shared/libjpeg.lib $(LIBOBJECTS)
  
+-cjpeg.exe: $(COBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:cjpeg.exe $(COBJECTS) libjpeg.lib $(LDLIBS)
++cjpeg.exe: $(COBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:cjpeg.exe $(COBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+-djpeg.exe: $(DOBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:djpeg.exe $(DOBJECTS) libjpeg.lib $(LDLIBS)
++djpeg.exe: $(DOBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:djpeg.exe $(DOBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+-jpegtran.exe: $(TROBJECTS) libjpeg.lib
+-	$(link) $(LDFLAGS) -out:jpegtran.exe $(TROBJECTS) libjpeg.lib $(LDLIBS)
++jpegtran.exe: $(TROBJECTS) static/libjpeg.lib
++	$(link) $(LDFLAGS) -out:jpegtran.exe $(TROBJECTS) static/libjpeg.lib $(LDLIBS)
+ 
+ rdjpgcom.exe: rdjpgcom.obj
+ 	$(link) $(LDFLAGS) -out:rdjpgcom.exe rdjpgcom.obj $(LDLIBS)
+@@ -128,7 +139,7 @@
+ 
+ 
+ clean:
+-	$(RM) *.obj *.exe libjpeg.lib
++	$(RM) *.obj *.exe static\libjpeg.lib shared\libjpeg.lib shared\libjpeg-9.dll
+ 	$(RM) testout*
+ 
+ setup-vc6:

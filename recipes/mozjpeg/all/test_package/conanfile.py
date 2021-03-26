@@ -12,8 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
-            return
-        bin_path = os.path.join("bin", "test_package")
-        img_name = os.path.join(self.source_folder, "testimg.jpg")
-        self.run("%s %s" % (bin_path, img_name), run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            img_name = os.path.join(self.source_folder, "testimg.jpg")
+            self.run("%s %s" % (bin_path, img_name), run_environment=True)

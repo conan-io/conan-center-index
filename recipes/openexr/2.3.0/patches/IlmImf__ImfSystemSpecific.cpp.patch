@@ -1,5 +1,5 @@
---- IlmImf/ImfSystemSpecific.cpp.orig	2017-11-17 23:00:24 UTC
-+++ IlmImf/ImfSystemSpecific.cpp
+--- a/OpenEXR/IlmImf/ImfSystemSpecific.cpp
++++ b/OpenEXR/IlmImf/ImfSystemSpecific.cpp
 @@ -44,11 +44,23 @@ namespace {
      // Helper functions for gcc + SSE enabled
      void cpuid(int n, int &eax, int &ebx, int &ecx, int &edx)

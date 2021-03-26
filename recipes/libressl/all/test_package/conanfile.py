@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class PackageTest(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -12,13 +12,6 @@ class PackageTest(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
-            # Handle mingw
-            if self.settings.os == "Windows":
-                ext = ".exe"
-            else:
-                ext = ""
-            assert(os.path.exists(os.path.join("bin", "example%s" % ext)))
-        else:
-            exec_path = os.path.join('bin', 'example')
-            self.run(exec_path, run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)

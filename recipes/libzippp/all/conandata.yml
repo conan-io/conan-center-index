@@ -1,0 +1,4 @@
+sources:
+  "4.0":
+    url: "https://github.com/ctabin/libzippp/archive/libzippp-v4.0-1.7.3.tar.gz"
+    sha256: "7560c2d8bbace39245ba6e89c5454b8bc5eb753bb13451bca2c7b5810c0a2f2d"

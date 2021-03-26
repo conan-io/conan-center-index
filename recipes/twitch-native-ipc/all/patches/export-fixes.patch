@@ -1,0 +1,13 @@
+diff --git a/libnativeipc/include/nativeipc/ConnectionExports.h b/libnativeipc/include/nativeipc/ConnectionExports.h
+index 6995217..a100a7c 100644
+--- a/libnativeipc/include/nativeipc/ConnectionExports.h
++++ b/libnativeipc/include/nativeipc/ConnectionExports.h
+@@ -13,7 +13,7 @@
+ #define NATIVEIPC_LIBSPEC
+ #endif
+ 
+-#include <cstdint>
++#include <stdint.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {

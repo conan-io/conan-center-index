@@ -1,0 +1,12 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/vahancho/polylineencoder/archive/1.0.0.zip"
+    sha256: "1e02cff3f65bac68ffeca2651fca829c8b2e0d6f674ebe074bc6b9706d71a91b"
+patches:
+  "1.0.0":
+    - patch_file: "patches/0001-cmake-target-name.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-include-limits.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-cmake-install.patch"
+      base_path: "source_subfolder"

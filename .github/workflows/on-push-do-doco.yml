@@ -1,0 +1,28 @@
+name: docs_markdown_toc
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+
+jobs:
+  docs_markdown_toc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run MarkdownSnippets
+      run: |
+        dotnet tool install --global MarkdownSnippets.Tool
+        mdsnippets ${GITHUB_WORKSPACE} \
+          --convention InPlaceOverwrite \
+          --exclude-directories 'recipes' \
+          --toc-level 5
+      shell: bash
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        branch: action-doc-toc
+        commit-message: "[docs] Regenerate tables of contents"
+        title: "[docs] Regenerate tables of contents"
+        body: "Automatic update of the documentation TOCs."

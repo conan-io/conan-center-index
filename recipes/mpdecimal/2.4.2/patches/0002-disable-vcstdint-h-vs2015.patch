@@ -1,0 +1,18 @@
+--- libmpdec/vcstdint.h
++++ libmpdec/vcstdint.h
+@@ -32,7 +32,7 @@
+ #ifndef _MSC_VER // [
+ #error "Use this header only with Microsoft Visual C++ compilers!"
+ #endif // _MSC_VER ]
+-
++#if _MSC_VER < 1900 // Only enable for Visual Studio <2015
+ #ifndef _MSC_STDINT_H_ // [
+ #define _MSC_STDINT_H_
+ 
+@@ -230,3 +230,6 @@
+ 
+ 
+ #endif // _MSC_STDINT_H_ ]
++#else // Only enable for Visual Studio <2015
++#include <stdint.h>
++#endif // Only enable for Visual Studio <2015

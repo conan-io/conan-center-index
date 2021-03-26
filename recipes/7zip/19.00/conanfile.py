@@ -11,12 +11,12 @@ class Package7Zip(ConanFile):
     license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
     homepage = "https://www.7-zip.org"
     topics = ("conan", "7zip", "zip", "compression", "decompression")
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler"
 
     def configure(self):
-        if self.settings.os_build != "Windows":
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if self.settings.arch_build not in ("x86", "x86_64"):
+        if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
     def source(self):
@@ -32,28 +32,29 @@ class Package7Zip(ConanFile):
     def build_requirements(self):
         self.build_requires("lzma_sdk/9.20")
 
-        if self.settings.compiler !=  "Visual Studio" and tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
             self.build_requires("make/4.2.1")
 
     def _uncompress_7z(self, filename):
         self.run("7zr x {}".format(filename))
 
-    _msvc_platforms = {
-        "x86_64": "x64",
-        "x86": "x86",
-    }
+    @property
+    def _msvc_platform(self):
+        return {
+            'x86_64': 'x64',
+            'x86': 'x86',
+        }[str(self.settings.arch)]
 
     def _build_msvc(self):
         with tools.vcvars(self.settings):
             with tools.chdir(os.path.join("CPP", "7zip")):
-                self.run("nmake /f makefile PLATFORM=%s" % (
-                self._msvc_platforms[str(self.settings.arch_build)]))
+                self.run("nmake /f makefile PLATFORM=%s" % self._msvc_platform)
 
     def _build_autotools(self):
         # TODO: Enable non-Windows methods in configure
         autotools = AutoToolsBuildEnvironment(self)
         extra_env = {}
-        if self.settings.os_build == "Windows" and self.settings.compiler == "gcc":
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             extra_env["IS_MINGW"] = "1"
         with tools.environment_append(extra_env):
             with tools.chdir(os.path.join("CPP", "7zip", "Bundles", "LzmaCon")):
@@ -76,7 +77,7 @@ class Package7Zip(ConanFile):
     def package(self):
         self.copy("DOC/License.txt", src="", dst="licenses")
         self.copy("DOC/unRarLicense.txt", src="", dst="licenses")
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
             self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
 

@@ -19,39 +19,40 @@ class MagicEnumConan(ConanFile):
     homepage = "https://github.com/Neargye/magic_enum"
     license = "MIT"
     settings = "compiler"
+    no_copy_source = True
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("magic_enum requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("magic_enum: Unsupported compiler: {}-{} "
+                                            "(https://github.com/Neargye/magic_enum#compiler-compatibility)."
+                                            .format(self.settings.compiler, self.settings.compiler.version))
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    @property
-    def _supported_compiler(self):
-        compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-        if compiler == "Visual Studio" and version >= "15":
-            return True
-        if compiler == "gcc" and version >= "9":
-            return True
-        if compiler == "clang" and version >= "5":
-            return True
-        if compiler == "apple-clang" and version >= "10":
-            return True
-        return False
-
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        if not self._supported_compiler:
-            raise ConanInvalidConfiguration("magic_enum: Unsupported compiler: {}-{} "
-                                            "(https://github.com/Neargye/magic_enum#compiler-compatibility).".format(self.settings.compiler, self.settings.compiler.version))
-
     def package(self):
-        self.copy("include/*", src=self._source_subfolder)
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()

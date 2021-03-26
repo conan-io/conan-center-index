@@ -62,11 +62,9 @@ class RocksDB(ConanFile):
         if self.settings.arch != "x86_64":
             del self.options.with_tbb
 
-        minimal_cpp_standard = "11"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-
     def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
@@ -77,6 +75,22 @@ class RocksDB(ConanFile):
 
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
+
+    def requirements(self):
+        if self.options.with_gflags:
+            self.requires("gflags/2.2.2")
+        if self.options.with_snappy:
+            self.requires("snappy/1.1.8")
+        if self.options.with_lz4:
+            self.requires("lz4/1.9.2")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_zstd:
+            self.requires("zstd/1.4.5")
+        if self.options.get_safe("with_tbb"):
+            self.requires("tbb/2020.2")
+        if self.options.with_jemalloc:
+            self.requires("jemalloc/5.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -104,7 +118,7 @@ class RocksDB(ConanFile):
         self._cmake.definitions["WITH_LZ4"] = self.options.with_lz4
         self._cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
+        self._cmake.definitions["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         self._cmake.definitions["WITH_JEMALLOC"] = self.options.with_jemalloc
         self._cmake.definitions["ROCKSDB_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
@@ -137,32 +151,15 @@ class RocksDB(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-    def requirements(self):
-        if self.options.with_gflags:
-            self.requires("gflags/2.2.2")
-        if self.options.with_snappy:
-            self.requires("snappy/1.1.7")
-        if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.with_zstd:
-            self.requires("zstd/1.3.8")
-        if self.options.with_tbb:
-            self.requires("tbb/2019_u9")
-        if self.options.with_jemalloc:
-            self.requires("jemalloc/5.2.1")
-
     def _remove_static_libraries(self):
         for static_lib_name in ["lib*.a", "{}.lib".format(self.name)]:
             for file in glob.glob(os.path.join(self.package_folder, "lib", static_lib_name)):
                 os.remove(file)
 
-
     def _remove_cpp_headers(self):
         for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
             if path != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
-                if os.path.isfile(path): 
+                if os.path.isfile(path):
                     os.remove(path)
                 else:
                     shutil.rmtree(path)
@@ -175,18 +172,34 @@ class RocksDB(ConanFile):
         if self.options.shared:
             self._remove_static_libraries()
             self._remove_cpp_headers() # Force stable ABI for shared libraries
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "RocksDB"
         self.cpp_info.names["cmake_find_package_multi"] = "RocksDB"
-        self.cpp_info.libs = tools.collect_libs(self)
+        cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
+        self.cpp_info.components["librocksdb"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["librocksdb"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["librocksdb"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Shlwapi.lib", "Rpcrt4.lib"]
+            self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
-                self.cpp_info.defines = ["ROCKSDB_DLL"]
+                self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
         if self.options.lite:
-            self.cpp_info.defines.append("ROCKSDB_LITE")
+            self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
+        if self.options.with_gflags:
+            self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
+        if self.options.with_snappy:
+            self.cpp_info.components["librocksdb"].requires.append("snappy::snappy")
+        if self.options.with_lz4:
+            self.cpp_info.components["librocksdb"].requires.append("lz4::lz4")
+        if self.options.with_zlib:
+            self.cpp_info.components["librocksdb"].requires.append("zlib::zlib")
+        if self.options.with_zstd:
+            self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
+        if self.options.get_safe("with_tbb"):
+            self.cpp_info.components["librocksdb"].requires.append("tbb::tbb")
+        if self.options.with_jemalloc:
+            self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")

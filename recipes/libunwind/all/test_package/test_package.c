@@ -1,5 +1,7 @@
+#include <stdio.h>
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
+
 
 void show_backtrace (void) {
   unw_cursor_t cursor; unw_context_t uc;

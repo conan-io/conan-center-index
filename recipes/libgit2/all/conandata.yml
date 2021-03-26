@@ -1,4 +1,7 @@
 sources:
-  "0.28.3":
-    url: "https://github.com/libgit2/libgit2/archive/v0.28.3.tar.gz"
-    sha256: "ee5344730fe11ce7c86646e19c2d257757be293f5a567548d398fb3af8b8e53b"
+  "1.1.0":
+    url: "https://github.com/libgit2/libgit2/archive/v1.1.0.tar.gz"
+    sha256: "41a6d5d740fd608674c7db8685685f45535323e73e784062cf000a633d420d1e"
+  "1.0.1":
+    url: "https://github.com/libgit2/libgit2/archive/v1.0.1.tar.gz"
+    sha256: "1775427a6098f441ddbaa5bd4e9b8a043c7401e450ed761e69a415530fea81d2"

@@ -2,15 +2,6 @@ sources:
   1.8.1:
     sha256: 43cc469c01d1f799efc51e2bfde6ffdf467b98a8a0901e6b33db86958619b3af
     url: http://github.com/pocoproject/poco/archive/poco-1.8.1-release.tar.gz
-  1.9.0:
-    sha256: 45ec5c759d2ad02bb812745f6cb585aa04af025c921b1bb4bdefa108ce4f1756
-    url: http://github.com/pocoproject/poco/archive/poco-1.9.0-release.tar.gz
-  1.9.1:
-    sha256: 8d76989d8ba5a7080e6a14f9274ff22fda37906fb8991727c2639b26d901198b
-    url: http://github.com/pocoproject/poco/archive/poco-1.9.1-release.tar.gz
-  1.9.2:
-    sha256: c04ee41304645a08aeff8b24321164b101adfc07b3e464fbb9e1856fbd8e4d7b
-    url: http://github.com/pocoproject/poco/archive/poco-1.9.2-release.tar.gz
   1.9.3:
     sha256: 73b9dfd1f57106eefb9b451d223579281acfb50b031424e9d0c6486ebb824d01
     url: http://github.com/pocoproject/poco/archive/poco-1.9.3-release.tar.gz
@@ -26,19 +17,6 @@ sources:
 patches:
   1.8.1:
     - patch_file: patches/1.8.1.patch
-      base_path: source_subfolder
-  1.9.0:
-    - patch_file: patches/1.9.0.patch
-      base_path: source_subfolder
-  1.9.1:
-    - patch_file: patches/1.9.1.patch
-      base_path: source_subfolder
-    - patch_file: patches/1.9.1-2.patch
-      base_path: source_subfolder
-  1.9.2:
-    - patch_file: patches/1.9.2.patch
-      base_path: source_subfolder
-    - patch_file: patches/1.9.2-2.patch
       base_path: source_subfolder
   1.9.3:
     - patch_file: patches/1.9.2.patch

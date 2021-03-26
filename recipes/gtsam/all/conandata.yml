@@ -2,3 +2,13 @@ sources:
   "4.0.2":
     url: "https://github.com/borglab/gtsam/archive/4.0.2.tar.gz"
     sha256: "8770a440f1af98c3f0d9d4dffd568de2d4c21b245e7231e987e26bc236aeb5aa"
+  "4.0.3":
+    url: "https://github.com/borglab/gtsam/archive/4.0.3.tar.gz"
+    sha256: "eaa561749edf7a2d402981828253e28aed6c717dae35738301c5ab23e2595f25"
+patches:
+  "4.0.2":
+    - patch_file: "patches/conan-4.0.2.patch"
+      base_path: "source_subfolder"
+  "4.0.3":
+    - patch_file: "patches/conan-4.0.3.patch"
+      base_path: "source_subfolder"

@@ -1,7 +1,10 @@
+from conans import ConanFile, CMake, tools
 import glob
 import os
+import textwrap
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class OpenmeshConan(ConanFile):
     name = "openmesh"
@@ -69,26 +72,56 @@ class OpenmeshConan(ConanFile):
             for pattern_to_remove in patterns_to_remove:
                 for lib_file in glob.glob(os.path.join(self.package_folder, "lib", pattern_to_remove)):
                     os.remove(lib_file)
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                "OpenMeshCore": "OpenMesh::OpenMeshCore",
+                "OpenMeshTools": "OpenMesh::OpenMeshTools",
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        # TODO: components shouldn't be namespaced
         self.cpp_info.names["cmake_find_package"] = "OpenMesh"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMesh"
         self.cpp_info.names["pkg_config"] = "openmesh"
+        suffix = "d" if self.settings.build_type == "Debug" else ""
         # OpenMeshCore
         self.cpp_info.components["openmeshcore"].names["cmake_find_package"] = "OpenMeshCore"
         self.cpp_info.components["openmeshcore"].names["cmake_find_package_multi"] = "OpenMeshCore"
-        self.cpp_info.components["openmeshcore"].libs = [self._get_decorated_lib("OpenMeshCore")]
+        self.cpp_info.components["openmeshcore"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["openmeshcore"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["openmeshcore"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["openmeshcore"].libs = ["OpenMeshCore" + suffix]
+        if not self.options.shared:
+            self.cpp_info.components["openmeshcore"].defines = ["OM_STATIC_BUILD"]
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["openmeshcore"].defines.append("_USE_MATH_DEFINES")
         # OpenMeshTools
         self.cpp_info.components["openmeshtools"].names["cmake_find_package"] = "OpenMeshTools"
         self.cpp_info.components["openmeshtools"].names["cmake_find_package_multi"] = "OpenMeshTools"
-        self.cpp_info.components["openmeshtools"].libs = [self._get_decorated_lib("OpenMeshTools")]
+        self.cpp_info.components["openmeshtools"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["openmeshtools"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["openmeshtools"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["openmeshtools"].libs = ["OpenMeshTools" + suffix]
         self.cpp_info.components["openmeshtools"].requires = ["openmeshcore"]
-
-    def _get_decorated_lib(self, name):
-        libname = name
-        if self.settings.build_type == "Debug":
-            libname += "d"
-        return libname

@@ -142,3 +142,5 @@ class BdwGcConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread", "dl"]
+        if self.options.gc_debug:
+            self.cpp_info.defines.append("GC_DEBUG")

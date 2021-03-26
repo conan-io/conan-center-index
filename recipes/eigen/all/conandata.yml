@@ -1,4 +1,14 @@
 sources:
+  "3.3.9":
+    url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2"
+    sha256: "0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677"
+  "3.3.8":
+    url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.tar.bz2"
+    sha256: "0215c6593c4ee9f1f7f28238c4e8995584ebf3b556e9dbf933d84feb98d5b9ef"
   "3.3.7":
     url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2"
     sha256: "685adf14bd8e9c015b78097c1dc22f2f01343756f196acdc76a678e1ae352e11"
+patches:
+  "3.3.8":
+    - patch_file: "patches/0001-assert-exception-upstream-issue-2011.patch"
+      base_path: "source_subfolder"

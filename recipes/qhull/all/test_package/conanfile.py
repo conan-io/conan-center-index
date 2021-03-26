@@ -4,10 +4,12 @@ from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["QHULL_REENTRANT"] = self.options["qhull"].reentrant
+        cmake.definitions["QHULL_SHARED"] = self.options["qhull"].shared
         cmake.configure()
         cmake.build()
 

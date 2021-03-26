@@ -12,14 +12,18 @@ class LibeventConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_openssl": [True, False],
-               "disable_threads": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_openssl": True,
-                       "disable_threads": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_openssl": [True, False],
+        "disable_threads": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_openssl": True,
+        "disable_threads": False
+    }
     generators = "cmake", "cmake_find_package"
     short_paths = True
 
@@ -45,7 +49,7 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -94,6 +98,9 @@ class LibeventConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "Libevent"
         self.cpp_info.names["cmake_find_package"] = "libevent"
         self.cpp_info.names["cmake_find_package_multi"] = "libevent"
+        # libevent
+        self.cpp_info.components["liblibevent"].names["pkg_config"] = "libevent"
+        self.cpp_info.components["liblibevent"].requires = ["core", "extra"]
         # core
         self.cpp_info.components["core"].names["pkg_config"] = "libevent_core"
         self.cpp_info.components["core"].libs = ["event_core"]

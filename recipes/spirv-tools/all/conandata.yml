@@ -5,3 +5,10 @@ sources:
   "v2020.3":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.3.tar.gz"
     sha256: "8b538a1cb2a4275ef9617abcb047d54e8292f975ac1d93323d5dd1e19c85280b"
+  "v2020.5":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.5.tar.gz"
+    sha256: "947ee994ba416380bd7ccc1c6377ac28a4802a55ca81ccc06796c28e84c00b71"
+patches:
+  "v2020.5":
+    - patch_file: "patches/support-SPV_KHR_fragment_shading_rate.patch"
+      base_path: "source_subfolder"

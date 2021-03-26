@@ -70,3 +70,5 @@ class TinyXmlConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.with_stl:
             self.cpp_info.defines = ["TIXML_USE_STL"]
+        self.cpp_info.names["cmake_find_package"] = "TinyXML"
+        self.cpp_info.names["cmake_find_package_multi"] = "TinyXML"

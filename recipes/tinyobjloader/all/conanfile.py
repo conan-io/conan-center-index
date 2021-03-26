@@ -11,9 +11,7 @@ class TinyObjLoaderConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
-    author = "Florian Stellbrink <flo@stellbr.ink>"
     topics = ("conan", "tinyobjloader", "wavefront", "geometry")
-    exports = "LICENSE"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _source_subfolder = "source_subfolder"

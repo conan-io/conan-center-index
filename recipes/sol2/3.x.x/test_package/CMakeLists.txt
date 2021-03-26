@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(${PROJECT_NAME} test_package.cpp sol_test.hpp)
+find_package(sol2 REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
-enable_testing()
-
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} sol2::sol2)

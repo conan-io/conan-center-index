@@ -14,7 +14,7 @@ class MpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "mpfr/4.0.2"
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -25,6 +25,9 @@ class MpcConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("mpfr/4.1.0")
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
@@ -50,6 +53,8 @@ class MpcConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         autotools = self._configure_autotools()
         autotools.make()
 

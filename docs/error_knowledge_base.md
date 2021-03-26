@@ -42,6 +42,20 @@ class SomeRecipe(ConanFile):
             del self.options.fPIC
 ```
 
+Or, a package is built as `shared` library and `fPIC` is declared. The option `fPIC` should be removed:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+```
+
+Here we use `configure()` method, because user options are loaded after `config_options()` only.
+
+
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
 It is not allowed to use version ranges for the recipes in Conan center, where the dependency graph should be deterministic.
@@ -308,6 +322,14 @@ The CMakeLists.txt definitions [CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.
 
 By default, all packages should be built as static library (the option ``shared`` is ``False`` in ``default_options``). However, some projects can be restricted to shared library only, for those cases, open a new [issue](https://github.com/conan-io/hooks/issues) to include the package name in the allowlist.
 
-### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
+#### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
 
 The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
+
+#### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
+
+It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
+
+#### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
+
+The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.

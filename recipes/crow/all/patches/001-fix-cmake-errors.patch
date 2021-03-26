@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 40d53f8b420c70c002134996842c46f5a84e181b..5dc9bfdd063f81466c2072a6a308e998f4fe7d50 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,15 +48,15 @@ include_directories("${PROJECT_INCLUDE_DIR}")
+ include_directories("${PROJECT_SOURCE_DIR}")
+ 
+ #add_subdirectory(src)
+-add_subdirectory(examples)
++#add_subdirectory(examples)
+ 
+ if (MSVC)
+ else()
+-	add_subdirectory(tests)
++	#add_subdirectory(tests)
+ 
+-	enable_testing()
+-	add_test(NAME crow_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/unittest)
+-	add_test(NAME template_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/template/test.py WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests/template)
++	#enable_testing()
++	#add_test(NAME crow_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/unittest)
++	#add_test(NAME template_test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/template/test.py WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tests/template)
+ 
+ 	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/amalgamate)
+ 

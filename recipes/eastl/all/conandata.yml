@@ -11,16 +11,32 @@ sources:
   3.16.07:
     url: "https://github.com/electronicarts/EASTL/archive/3.16.07.tar.gz"
     sha256: "f997a81c8cb36618bd4526ea7a02d026c8111d15fbc138c67ba8f4606680d551"
+  3.17.03:
+    url: "https://github.com/electronicarts/EASTL/archive/3.17.03.tar.gz"
+    sha256: "50a072066e30fda364d482df6733572d8ca440a33825d81254b59a6ca9f4375a"
+  3.17.06:
+    url: "https://github.com/electronicarts/EASTL/archive/3.17.06.tar.gz"
+    sha256: "9ebeef26cdf091877ee348450d2711cd0bb60ae435309126c0adf8fec9a01ea5"
 patches:
   3.15.00:
-    - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
+    - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
   3.16.01:
-    - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
+    - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
   3.16.05:
-    - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
+    - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
   3.16.07:
-    - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
+    - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
+      base_path: "source_subfolder"
+  3.17.03:
+    - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
+      base_path: "source_subfolder"
+  3.17.06:
+    - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
       base_path: "source_subfolder"

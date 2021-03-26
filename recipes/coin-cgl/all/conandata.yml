@@ -1,0 +1,8 @@
+sources:
+  "0.60.3":
+    url: "https://github.com/coin-or/Cgl/archive/releases/0.60.3.tar.gz"
+    sha256: "cfeeedd68feab7c0ce377eb9c7b61715120478f12c4dd0064b05ad640e20f3fb"
+patches:
+  "0.60.3":
+    - patch_file: "patches/0001-no-pkg-config-check.patch"
+      base_path: "source_subfolder"

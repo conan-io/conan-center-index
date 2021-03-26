@@ -1,12 +1,13 @@
 from conans import ConanFile, Meson, tools
-import glob
 import os
+
+required_conan_version = ">= 1.29.1"
 
 
 class PkgConfConan(ConanFile):
     name = "pkgconf"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://pkgconf.org/"
+    homepage = "https://git.sr.ht/~kaniini/pkgconf"
     topics = ("conan", "pkgconf")
     settings = "os", "arch", "compiler", "build_type"
     license = "ISC"
@@ -43,10 +44,10 @@ class PkgConfConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pkgconf-pkgconf-{}".format(self.version), self._source_subfolder)
+        os.rename("pkgconf-{}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("meson/0.53.2")
+        self.build_requires("meson/0.56.2")
 
     @property
     def _sharedstatedir(self):
@@ -82,12 +83,10 @@ class PkgConfConan(ConanFile):
         meson.install()
 
         if self.settings.compiler == "Visual Studio":
-            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-                os.unlink(pdb)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
             if not self.options.shared:
                 os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-
 
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
@@ -104,7 +103,8 @@ class PkgConfConan(ConanFile):
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        pkg_config = os.path.join(bindir, "pkgconf").replace("\\", "/")
+        exesuffix = ".exe" if self.settings.os == "Windows" else ""
+        pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.env_info.PKG_CONFIG = pkg_config
 

@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 
 class ZeroMQConan(ConanFile):
@@ -15,11 +16,15 @@ class ZeroMQConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "encryption": [None, "libsodium", "tweetnacl"],
+        "with_norm": [True, False],
+        "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "encryption": "libsodium",
+        "with_norm": False,
+        "poller": None
     }
     generators = "cmake", "cmake_find_package"
 
@@ -40,10 +45,15 @@ class ZeroMQConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.os == "Windows" and self.options.with_norm:
+            raise ConanInvalidConfiguration(
+                "Norm and ZeroMQ are not compatible on Windows yet")
 
     def requirements(self):
         if self.options.encryption == "libsodium":
             self.requires("libsodium/1.0.18")
+        if self.options.with_norm:
+            self.requires("norm/1.5.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -63,11 +73,14 @@ class ZeroMQConan(ConanFile):
         self._cmake.definitions["ENABLE_CPACK"] = False
         self._cmake.definitions["WITH_DOCS"] = False
         self._cmake.definitions["WITH_DOC"] = False
+        self._cmake.definitions["WITH_NORM"] = self.options.with_norm
+        if self.options.poller:
+            self._cmake.definitions["POLLER"] = self.options.poller
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
 
@@ -96,6 +109,7 @@ class ZeroMQConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         # TODO: CMake imported target shouldn't be namespaced
@@ -113,4 +127,6 @@ class ZeroMQConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["libzmq"].defines.append("ZMQ_STATIC")
         if self.options.encryption == "libsodium":
-            self.cpp_info.components["libzmq"].requires = ["libsodium::libsodium"]
+            self.cpp_info.components["libzmq"].requires.append("libsodium::libsodium")
+        if self.options.with_norm:
+            self.cpp_info.components["libzmq"].requires.append("norm::norm")

@@ -1,4 +1,7 @@
 sources:
+  "0.11.1":
+    url: "https://github.com/HdrHistogram/HdrHistogram_c/archive/0.11.1.tar.gz"
+    sha256: "8550071d4ae5c8229448f9b68469d6d42c620cd25111b49c696d00185e5f8329"
   "0.11.0":
     url: "https://github.com/HdrHistogram/HdrHistogram_c/archive/0.11.0.tar.gz"
     sha256: "c00696b3d81776675aa2bc62d3642e31bd8a48cc9619c9bd7d4a78762896e353"

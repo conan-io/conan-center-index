@@ -1,0 +1,12 @@
+sources:
+  "cci.20190615":
+    url: "https://github.com/BinomialLLC/crunch/archive/44c8402e24441c7524ca364941fd224ab3b971e9.zip"
+    sha256: "4bbb5abde6ed6a56cdbb0e9c0cc2cb70d35b8b613aedc40658b79700f8ed0b50"
+patches:
+  "cci.20190615":
+    - patch_file: "patches/001_linux64_compilation_fixes.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002_fix_clang_inline.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003_fix_missing_cast.patch"
+      base_path: "source_subfolder"

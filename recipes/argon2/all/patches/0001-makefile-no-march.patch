@@ -1,0 +1,34 @@
+- Pass bin extension though Makefile args (.exe for mingw)
+- Remove -march= such that consumers of argon2 can add a more specialized `-march=...` to their profile. 
+
+--- Makefile
++++ Makefile
+@@ -15,7 +15,7 @@
+ # software. If not, they may be obtained at the above URLs.
+ #
+ 
+-RUN = argon2
++RUN = argon2$(RUN_EXT)
+ BENCH = bench
+ GENKAT = genkat
+ ARGON2_VERSION ?= ZERO
+--- Makefile
++++ Makefile
+@@ -49,7 +49,7 @@
+ 				-Wextra -Wno-type-limits -Werror -coverage -DTEST_LARGE_RAM
+ 
+ OPTTARGET ?= native
+-OPTTEST := $(shell $(CC) -Iinclude -Isrc -march=$(OPTTARGET) src/opt.c -c \
++OPTTEST := $(shell $(CC) $(CFLAGS) -Iinclude -Isrc src/opt.c -c \
+ 			-o /dev/null 2>/dev/null; echo $$?)
+ # Detect compatible platform
+ ifneq ($(OPTTEST), 0)
+@@ -57,7 +57,7 @@
+ 	SRC += src/ref.c
+ else
+ $(info Building with optimizations for $(OPTTARGET))
+-	CFLAGS += -march=$(OPTTARGET)
++	#CFLAGS += -march=$(OPTTARGET)
+ 	SRC += src/opt.c
+ endif
+ 

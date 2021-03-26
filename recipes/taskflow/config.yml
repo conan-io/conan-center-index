@@ -5,3 +5,9 @@ versions:
     folder: all
   2.5.0:
     folder: all
+  2.6.0:
+    folder: all
+  2.7.0:
+    folder: all
+  3.0.0:
+    folder: all

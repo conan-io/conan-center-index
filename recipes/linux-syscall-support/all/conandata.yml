@@ -1,0 +1,3 @@
+sources:
+  "cci.20200813":
+    url: "https://chromium.googlesource.com/linux-syscall-support/+archive/29f7c7e018f4ce706a709f0b0afbf8bacf869480.tar.gz"

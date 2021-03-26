@@ -1,6 +1,6 @@
 sources:
   "1.4.18":
-    url: "http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.bz2"
+    url: "https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.bz2"
     sha256: "6640d76b043bc658139c8903e293d5978309bf0f408107146505eca701e67cf6"
 patches:
   "1.4.18":
@@ -17,4 +17,6 @@ patches:
     - patch_file: "patches/0007-vasnprintf-port-to-macos-10.13.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0008-open-files-in-binary-mode.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0009-disable-hardening-in-source.patch"
       base_path: "source_subfolder"

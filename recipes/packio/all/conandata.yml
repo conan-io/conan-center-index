@@ -1,22 +1,34 @@
 sources:
-  "1.0.1":
+  1.0.1:
     sha256: 873ebd2ce8c8dbf8a4e7b777b1aa735fe4da3863131a5d6c938e339ee7e0a4d1
     url: https://github.com/qchateau/packio/archive/1.0.1.tar.gz
-  "1.0.2":
+  1.0.2:
     sha256: 040389f2de4a6da5df1cc323cdd80bc21bfc6a7f9bb9e56090d1ea0b1260226d
     url: https://github.com/qchateau/packio/archive/1.0.2.tar.gz
-  "1.1.0":
+  1.1.0:
     sha256: fb8baeeb903335b71b4241433faaff895e42e671da1c15b100e24b060f1d3784
     url: https://github.com/qchateau/packio/archive/1.1.0.tar.gz
-  "1.1.1":
+  1.1.1:
     sha256: 5f77bcbb843cc7dd7731c37db586e9e4f3997ebf04a8d1eccb9eae21841c7e55
     url: https://github.com/qchateau/packio/archive/1.1.1.tar.gz
-  "1.2.0":
+  1.2.0:
     sha256: b459c50a2ae7b90b45cd99a727dcd133e48602634571378491533148e642c511
     url: https://github.com/qchateau/packio/archive/1.2.0.tar.gz
-  "1.2.1":
+  1.2.1:
     sha256: 1b3f1654e8321148dd58172fcc6807451382dff30bb803967449a318b33101c5
     url: https://github.com/qchateau/packio/archive/1.2.1.tar.gz
-  "1.3.0":
+  1.3.0:
     sha256: adb723ef14b4a3ec41e9a7c17c48c8ee58712604b678b24f44e6a8aa471f18e5
     url: https://github.com/qchateau/packio/archive/1.3.0.tar.gz
+  2.0.0:
+    sha256: b647b3088830c127a1d5d475a95476cc00c81675244cf7d17c9ca1f12e88740e
+    url: https://github.com/qchateau/packio/archive/2.0.0.tar.gz
+  2.0.1:
+    sha256: 081d378be922262c39218e115eabdf77f257e4773928011dff95795b8146b520
+    url: https://github.com/qchateau/packio/archive/2.0.1.tar.gz
+  2.1.0:
+    sha256: d13be083cd5a133b02fdd1da0d89fb75988c16109ccdcd631d53f9ca2457ad42
+    url: https://github.com/qchateau/packio/archive/2.1.0.tar.gz
+  "2.2.0":
+    url: "https://github.com/qchateau/packio/archive/2.2.0.tar.gz"
+    sha256: "ac9f33d5e8dd92bd3cdec106e10453424060bae9c4cd97281aa5d20fb20476f7"

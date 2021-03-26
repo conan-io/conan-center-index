@@ -16,6 +16,9 @@ class NinjaConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _cmake = None
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -30,15 +33,14 @@ class NinjaConan(ConanFile):
         os.rename("ninja-%s" % self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 

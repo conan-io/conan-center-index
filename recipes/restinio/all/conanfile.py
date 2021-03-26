@@ -49,30 +49,33 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/7.0.3")
-        self.requires("expected-lite/0.4.0")
-        self.requires("optional-lite/3.2.0")
-        self.requires("string-view-lite/1.4.0")
+        self.requires("fmt/7.1.3")
+        self.requires("expected-lite/0.5.0")
+        self.requires("optional-lite/3.4.0")
+        self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/1.2.2")
 
         if self.options.asio == "standalone":
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("asio/1.17.0")
+                self.requires("asio/1.18.0")
             else:
                 self.requires("asio/1.16.1")
         else:
-            self.requires("boost/1.73.0")
+            if tools.Version(self.version) >= "0.6.9":
+                self.requires("boost/1.75.0")
+            else:
+                self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
         if self.options.with_pcre == 1:
-            self.requires("pcre/8.41")
+            self.requires("pcre/8.44")
         elif self.options.with_pcre == 2:
-            self.requires("pcre2/10.33")
+            self.requires("pcre2/10.35")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -94,7 +97,7 @@ class RestinioConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))

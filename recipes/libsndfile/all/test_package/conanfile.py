@@ -1,10 +1,11 @@
-from conans import ConanFile, CMake, tools
 import os
 
+from conans import ConanFile, CMake, tools
 
-class TestPackageConan(ConanFile):
+
+class LibsndfileTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +13,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
+        if not tools.cross_building(self):
+            bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)
-

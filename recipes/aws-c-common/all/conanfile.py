@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 import os
 
+required_conan_version = ">=1.28.0"
 
 class AwsCCommon(ConanFile):
     name = "aws-c-common"
@@ -67,10 +68,18 @@ class AwsCCommon(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-common"))
 
     def package_info(self):
-        self.cpp_info.libs = ["aws-c-common"]
+        self.cpp_info.filenames["cmake_find_package"] = "aws-c-common"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-common"
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package"] = "aws-c-common"
+        self.cpp_info.components["aws-c-common-lib"].names["cmake_find_package_multi"] = "aws-c-common"
+        self.cpp_info.components["aws-c-common-lib"].libs = ["aws-c-common"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m", "pthread", "rt"]
+            self.cpp_info.components["aws-c-common-lib"].system_libs = ["m", "pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
         if not self.options.shared:
             if tools.is_apple_os(self.settings.os):
-                self.cpp_info.frameworks = ["CoreFoundation"]
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake")]
+                self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]
+        self.cpp_info.components["aws-c-common-lib"].builddirs = [os.path.join("lib", "cmake")]

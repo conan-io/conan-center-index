@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -7,7 +7,7 @@ conan_basic_setup()
 find_package(Taskflow REQUIRED)
 
 set(_CXX_STANDARD 14)
-if (Taskflow_VERSION LESS_EQUAL "2.2.0")
+if (Taskflow_VERSION LESS_EQUAL "2.2.0" OR Taskflow_VERSION GREATER_EQUAL "3.0.0")
     set(_CXX_STANDARD 17)
 endif()
 

@@ -21,6 +21,9 @@ class BitseryConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "bitsery-" + self.version
@@ -28,7 +31,10 @@ class BitseryConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.h", dst=os.path.join("include", "bitsery"), src=os.path.join(self._source_subfolder, "include", "bitsery"))
+        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Bitsery"
+        self.cpp_info.names["cmake_find_package_multi"] = "Bitsery"
+        self.cpp_info.components["bitserylib"].names["cmake_find_package"] = "bitsery"
+        self.cpp_info.components["bitserylib"].names["cmake_find_package_multi"] = "bitsery"

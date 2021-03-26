@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
+import glob
 import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class libuvConan(ConanFile):
@@ -26,21 +28,19 @@ class libuvConan(ConanFile):
         "patches/*"
     ]
 
-    @property
-    def _source_subfolder_name(self):
-        return "source_subfolder"
+    _cmake = None
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LIBUV_BUILD_TESTS"] = False
-        cmake.configure()
-        return cmake
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self.settings.compiler == "Visual Studio":
@@ -49,12 +49,19 @@ class libuvConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libuv-{}".format(self.version), self._source_subfolder_name)
+        os.rename("libuv-{}".format(self.version), self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["LIBUV_BUILD_TESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

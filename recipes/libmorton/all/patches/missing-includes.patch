@@ -1,0 +1,20 @@
+--- a/libmorton/include/morton2D.h
++++ b/libmorton/include/morton2D.h
+@@ -5,6 +5,7 @@
+ 
+ #include <algorithm>
+ #include <stdint.h>
++#include <math.h>
+ #include "morton2D_LUTs.h"
+ #include "morton_common.h"
+ 
+--- a/libmorton/include/morton3D.h
++++ b/libmorton/include/morton3D.h
+@@ -5,6 +5,7 @@
+ 
+ #include <algorithm>
+ #include <stdint.h>
++#include <math.h>
+ #include "morton3D_LUTs.h"
+ #include "morton_common.h"
+ 

@@ -16,7 +16,7 @@ class RabbitmqcConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "ssl": [True, False]}
     default_options = {"shared": False, "fPIC": True, "ssl": False}
     generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt", "patches/**"
+    exports_sources = ["CMakeLists.txt"]
     _cmake = None
 
     @property
@@ -35,16 +35,12 @@ class RabbitmqcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self._source_subfolder)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        extracted_dir = "{}-{}".format(self.name, self.version)
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake is None:
@@ -62,7 +58,6 @@ class RabbitmqcConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -93,3 +88,5 @@ class RabbitmqcConan(ConanFile):
                 self.cpp_info.components["rabbitmq"].system_libs.append("pthread")
         if not self.options.shared:
             self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
+        if self.options.ssl:
+            self.cpp_info.components["rabbitmq"].requires.append("openssl::openssl")

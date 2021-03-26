@@ -1,0 +1,15 @@
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -188,7 +188,7 @@
+ )
+-
++if(BUILD_SHARED_LIBS)
++set(libsuffix Shared)
++endif()
+ if(NOT THIS_IS_SUBPROJECT)
+-  install(TARGETS check checkShared
+-    EXPORT check-targets
+-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  install(TARGETS check${libsuffix}
++    EXPORT check-targets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

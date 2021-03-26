@@ -25,7 +25,6 @@ class LibwebsocketsConan(ConanFile):
         "ssl_client_use_os_ca_certs": [True, False],                            # SSL support should make use of the OS-installed CA root certs
         "ssl_server_with_ecdh_cert": [True, False],                             # Include SSL server use ECDH certificate
 
-
         "enable_network": [True, False],                                        # Compile with network-related code
         "role_h1": [True, False],                                               # Compile with support for http/1 (needed for ws)
         "role_ws": [True, False],                                               # Compile with support for websockets
@@ -99,7 +98,7 @@ class LibwebsocketsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
         "with_libuv": False,
         "with_libevent": False,
         "with_zlib": False,
@@ -133,7 +132,6 @@ class LibwebsocketsConan(ConanFile):
         "enable_ranges": False,
         "enable_server_status": False,
         "enable_threadpool": False,
-        "enable_http_stream_compression": False,
         "enable_http_stream_compression": False,
         "enable_http_brotli": False,
         "enable_acme": False,
@@ -190,26 +188,24 @@ class LibwebsocketsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.38.0")
+            self.requires("libuv/1.40.0")
 
         if self.options.with_libevent == "libevent":
-            self.requires("libevent/2.1.11")
+            self.requires("libevent/2.1.12")
         elif self.options.with_libevent == "libev":
-            self.requires("libev/4.27")
+            self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.11")
@@ -217,13 +213,13 @@ class LibwebsocketsConan(ConanFile):
             self.requires("miniz/2.1.0")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.33.1")
+            self.requires("libmount/2.36")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.34.0")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_ssl == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
@@ -232,12 +228,11 @@ class LibwebsocketsConan(ConanFile):
             self.requires("mbedtls/2.16.3-gpl")
 
         if self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.4.0")
+            self.requires("wolfssl/4.5.0")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
             # TODO - Add hubbub package when available.
-          
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -422,17 +417,18 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
+        if tools.Version(self.version) >= "4.1.0":
+            self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
 
-
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
-        if self.options.with_ssl != "False":
+        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl:
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib Crypt32.lib)"
+                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
 
     def build(self):
@@ -450,13 +446,40 @@ class LibwebsocketsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced
+        cmake_target = "websockets_shared" if self.options.shared else "websockets"
+        pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
+        self.cpp_info.names["cmake_find_package"] = "Libwebsockets"
+        self.cpp_info.names["cmake_find_package_multi"] = "Libwebsockets"
+        self.cpp_info.names["pkg_config"] = pkgconfig_name
+        self.cpp_info.components["_libwebsockets"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libwebsockets"].names["pkgconfig_name"] = pkgconfig_name
+        self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "m"])
-
-        if self.options.shared:
-            self.cpp_info.names["pkg_config"] = "libwebsockets"
-        else:
-            self.cpp_info.names["pkg_config"] = "libwebsockets_static"
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
+        if self.options.with_libuv:
+            self.cpp_info.components["_libwebsockets"].requires.append("libuv::libuv")
+        if self.options.with_libevent == "libevent":
+            self.cpp_info.components["_libwebsockets"].requires.append("libevent::libevent")
+        elif self.options.with_libevent == "libev":
+            self.cpp_info.components["_libwebsockets"].requires.append("libev::libev")
+        if self.options.with_zlib == "zlib":
+            self.cpp_info.components["_libwebsockets"].requires.append("zlib::zlib")
+        elif self.options.with_zlib == "miniz":
+            self.cpp_info.components["_libwebsockets"].requires.append("miniz::miniz")
+        if self.options.with_libmount:
+            self.cpp_info.components["_libwebsockets"].requires.append("libmount::libmount")
+        if self.options.with_sqlite3:
+            self.cpp_info.components["_libwebsockets"].requires.append("sqlite3::sqlite3")
+        if self.options.with_ssl == "openssl":
+            self.cpp_info.components["_libwebsockets"].requires.append("openssl::openssl")
+        elif self.options.with_ssl in ["mbedtls-apache", "mbedtls-gpl"]:
+            self.cpp_info.components["_libwebsockets"].requires.append("mbedtls::mbedtls")
+        elif self.options.with_ssl == "wolfssl":
+            self.cpp_info.components["_libwebsockets"].requires.append("wolfssl::wolfssl")
+        if self.options.with_hubbub:
+            # TODO - Add hubbub package when available.
+            pass

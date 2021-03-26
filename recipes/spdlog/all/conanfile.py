@@ -45,13 +45,15 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
         if self.settings.os != "Windows" and \
            (self.options.wchar_support or self.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is not yet supported under windows")
+            raise ConanInvalidConfiguration("wchar is only supported under windows")
+        if self.settings.compiler == "Visual Studio" and self.options.get_safe("shared", False) and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def requirements(self):
         if Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.0.1")
+            self.requires("fmt/7.1.2")
         elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.0")
+            self.requires("fmt/6.2.1")
         else:
             self.requires("fmt/6.0.0")
 
@@ -85,8 +87,8 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
-        if tools.Version(self.version) < "1.7" and tools.Version(self.deps_cpp_info["fmt"].version) >= 7:
-            raise ConanInvalidConfiguration("The project spdlog/{} requires fmt <7.x".format(self.version))
+        if Version(self.version) < "1.7" and Version(self.deps_cpp_info["fmt"].version) >= "7":
+            raise ConanInvalidConfiguration("The project {}/{} requires fmt < 7.x".format(self.name, self.version))
 
         self._disable_werror()
         if not self.options.header_only:
@@ -115,7 +117,7 @@ class SpdlogConan(ConanFile):
             component_name = "libspdlog"
             self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
-            
+
         self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
         if self.options["fmt"].header_only:
             self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]

@@ -1,4 +1,6 @@
 versions:
+  "0.51.0":
+    folder: all
   "0.51.2":
     folder: all
   "0.52.0":
@@ -20,4 +22,20 @@ versions:
   "0.54.3":
     folder: all
   "0.55.0":
+    folder: all
+  "0.55.1":
+    folder: all
+  "0.55.2":
+    folder: all
+  "0.55.3":
+    folder: all
+  "0.56.0":
+    folder: all
+  "0.56.1":
+    folder: all
+  "0.56.2":
+    folder: all
+  "0.57.0":
+    folder: all
+  "0.57.1":
     folder: all

@@ -1,0 +1,9 @@
+versions:
+    "system":
+        folder: "system"
+    "4.1.2":
+        folder: all
+    "4.0.2":
+        folder: all
+    "3.24.24":
+        folder: all

@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class Gsl_liteTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -12,13 +12,6 @@ class Gsl_liteTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
-            if self.settings.os == "Emscripten":
-                exe_name = "example.js"
-            elif tools.os_info.is_windows:
-                exe_name = "example.exe"
-            else:
-                exe_name = "example"
-            assert(os.path.exists(os.path.join("bin", exe_name)))
-        else:
-            self.run(".%sexample" % os.sep, cwd="bin")
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)

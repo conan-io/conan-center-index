@@ -8,3 +8,6 @@ sources:
   "3.2.0":
     url: "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz"
     sha256: "47bd2eb4b4503e47c02efa7e67d2fcd95c7eac6bc9d06b343a1b4705793ed1d5"
+  "3.2.1":
+    url: "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.1.tar.gz"
+    sha256: "d28db224cfb6d18009b2a7e8cb213cd5c943bbec87550062fef6a38479250315"

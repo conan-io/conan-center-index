@@ -9,7 +9,7 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["dll-dir.patch"]
+    exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
     settings = 'os', 'arch', 'compiler', 'build_type'
@@ -23,8 +23,23 @@ class BotanConan(ConanFile):
         'with_sqlite3': [True, False],
         'with_zlib': [True, False],
         'with_boost': [True, False],
+        'with_sse2': [True, False],
+        'with_ssse3': [True, False],
+        'with_sse4_1': [True, False],
+        'with_sse4_2': [True, False],
+        'with_avx2': [True, False],
+        'with_bmi2': [True, False],
+        'with_rdrand': [True, False],
+        'with_rdseed': [True, False],
+        'with_aes_ni': [True, False],
+        'with_sha_ni': [True, False],
+        'with_altivec': [True, False],
+        'with_neon': [True, False],
+        'with_armv8crypto': [True, False],
+        'with_powercrypto': [True, False],
         'enable_modules': "ANY",
-        'system_cert_bundle': "ANY"
+        'system_cert_bundle': "ANY",
+        'module_policy': [None, 'bsi', 'modern', 'nist']
     }
     default_options = {'amalgamation': True,
                        'with_bzip2': False,
@@ -35,8 +50,35 @@ class BotanConan(ConanFile):
                        'with_sqlite3': False,
                        'with_zlib': False,
                        'with_boost': False,
+                       'with_sse2': True,
+                       'with_ssse3': True,
+                       'with_sse4_1': True,
+                       'with_sse4_2': True,
+                       'with_avx2': True,
+                       'with_bmi2': True,
+                       'with_rdrand': True,
+                       'with_rdseed': True,
+                       'with_aes_ni': True,
+                       'with_sha_ni': True,
+                       'with_altivec': True,
+                       'with_neon': True,
+                       'with_armv8crypto': True,
+                       'with_powercrypto': True,
                        'enable_modules': None,
-                       'system_cert_bundle': None}
+                       'system_cert_bundle': None,
+                       'module_policy': None}
+
+    @property
+    def _is_x86(self):
+        return str(self.settings.arch) in ["x86", "x86_64"]
+
+    @property
+    def _is_ppc(self):
+        return "ppc" in str(self.settings.arch)
+
+    @property
+    def _is_arm(self):
+        return "arm" in str(self.settings.arch)
 
     def configure(self):
         self._validate_compiler_settings()
@@ -57,7 +99,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.0.2u")
+            self.requires("openssl/1.1.1i")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
@@ -68,6 +110,23 @@ class BotanConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._is_x86:
+            del self.options.with_sse2
+            del self.options.with_ssse3
+            del self.options.with_sse4_1
+            del self.options.with_sse4_2
+            del self.options.with_avx2
+            del self.options.with_bmi2
+            del self.options.with_rdrand
+            del self.options.with_rdseed
+            del self.options.with_aes_ni
+            del self.options.with_sha_ni
+        if not self._is_arm:
+            del self.options.with_neon
+            del self.options.with_armv8crypto
+        if not self._is_ppc:
+            del self.options.with_altivec
+            del self.options.with_powercrypto
 
         # --single-amalgamation option is no longer available
         # See also https://github.com/randombit/botan/pull/2246
@@ -190,11 +249,16 @@ class BotanConan(ConanFile):
         if self.settings.os != "Windows" and self.options.fPIC:
             botan_extra_cxx_flags.append('-fPIC')
 
-        if self.settings.os == "Macos" and self.settings.os.version:
-            macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                   self.settings.os.version)
+        if tools.is_apple_os(self.settings.os):
+            if self.settings.get_safe("os.version"):
+                macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
+                                                                       self.settings.get_safe("os.version"),
+                                                                       self.settings.get_safe("os.sdk"),
+                                                                       self.settings.get_safe("os.subsystem"),
+                                                                       self.settings.get_safe("arch"))
+                botan_extra_cxx_flags.append(macos_min_version)
             macos_sdk_path = "-isysroot {}".format(tools.XCRun(self.settings).sdk_path)
-            botan_extra_cxx_flags.extend([macos_min_version, macos_sdk_path])
+            botan_extra_cxx_flags.append(macos_sdk_path)
 
         # This is to work around botan's configure script that *replaces* its
         # standard (platform dependent) flags in presence of an environment
@@ -224,7 +288,7 @@ class BotanConan(ConanFile):
 
         if self.options.with_openssl:
             build_flags.append('--with-openssl')
-            build_flags.extend(self._dependency_build_flags("OpenSSL"))
+            build_flags.extend(self._dependency_build_flags("openssl"))
 
         if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')
@@ -238,8 +302,56 @@ class BotanConan(ConanFile):
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
 
+        if self.options.module_policy:
+            build_flags.append('--module-policy={}'.format(self.options.module_policy))
+
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
+
+        if self._is_x86:
+            if not self.options.with_sse2:
+                build_flags.append('--disable-sse2')
+
+            if not self.options.with_ssse3:
+                build_flags.append('--disable-ssse3')
+
+            if not self.options.with_sse4_1:
+                build_flags.append('--disable-sse4.1')
+
+            if not self.options.with_sse4_2:
+                build_flags.append('--disable-sse4.2')
+
+            if not self.options.with_avx2:
+                build_flags.append('--disable-avx2')
+
+            if not self.options.with_bmi2:
+                build_flags.append('--disable-bmi2')
+
+            if not self.options.with_rdrand:
+                build_flags.append('--disable-rdrand')
+
+            if not self.options.with_rdseed:
+                build_flags.append('--disable-rdseed')
+
+            if not self.options.with_aes_ni:
+                build_flags.append('--disable-aes-ni')
+
+            if not self.options.with_sha_ni:
+                build_flags.append('--disable-sha-ni')
+
+        if self._is_ppc:
+            if not self.options.with_powercrypto:
+                build_flags.append('--disable-powercrypto')
+
+            if not self.options.with_altivec:
+                build_flags.append('--disable-altivec')
+
+        if self._is_arm:
+            if not self.options.with_neon:
+                build_flags.append('--disable-neon')
+
+            if not self.options.with_armv8crypto:
+                build_flags.append('--disable-armv8crypto')
 
         if str(self.settings.build_type).lower() == 'debug':
             build_flags.append('--debug-mode')

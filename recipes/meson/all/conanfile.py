@@ -10,7 +10,7 @@ class MesonInstallerConan(ConanFile):
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
     no_copy_source = True
-    requires = "ninja/1.10.0"
+
     _source_subfolder = "source_subfolder"
     _meson_cmd = """@echo off
 CALL python %~dp0/meson.py %*
@@ -19,6 +19,12 @@ CALL python %~dp0/meson.py %*
 meson_dir=$(dirname "$0")
 exec "$meson_dir/meson.py" "$@"
 """
+
+    def requirements(self):
+        self.requires("ninja/1.10.2")
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -49,5 +55,4 @@ exec "$meson_dir/meson.py" "$@"
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
 
-    def package_id(self):
-        self.info.header_only()
+        self.cpp_info.builddirs = [os.path.join("bin", "mesonbuild", "cmake", "data")]

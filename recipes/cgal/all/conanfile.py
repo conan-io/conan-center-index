@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class CgalConan(ConanFile):
     name = "cgal"
-    license = "LGPL-3.0-or-later"
+    license = "GPL-3.0-or-later", "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CGAL/cgal"
     description = "C++ library that aims to provide easy access to efficient and reliable algorithms"\
@@ -60,9 +60,9 @@ class CgalConan(ConanFile):
             del self.options.shared
 
     def requirements(self):
-        self.requires("boost/1.73.0")
-        self.requires("eigen/3.3.7")
-        self.requires("mpfr/4.0.2")
+        self.requires("boost/1.75.0")
+        self.requires("eigen/3.3.9")
+        self.requires("mpfr/4.1.0")
 
     def package_id(self):
         if self.options.header_only:
@@ -96,7 +96,8 @@ class CgalConan(ConanFile):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        self.cpp_info.libs = tools.collect_libs(self)
+        if not self.options.header_only:
+            self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
         if not self.options.header_only:

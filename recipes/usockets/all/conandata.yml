@@ -2,9 +2,17 @@ sources:
   "0.4.0":
     url: "https://github.com/uNetworking/uSockets/archive/v0.4.0.tar.gz"
     sha256: "f9f15b395def578cc79a5b32abc64fa9cff5dac873062911f515b984b90f7cc2"
+  "0.6.0":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.6.0.tar.gz"
+    sha256: "999387d3653b2bc663c34aa7e973358ac4c4897dccd644553a5caab843a978a1"
 patches:
   "0.4.0":
     - patch_file: "patches/0001-makefile.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-vcxproj.patch"
+      base_path: "source_subfolder"
+  "0.6.0":
+    - patch_file: "patches/0001-makefile_0.6.0.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-vcxproj.patch"
       base_path: "source_subfolder"

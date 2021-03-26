@@ -55,12 +55,14 @@ class DlibConan(ConanFile):
             del self.options.with_avx
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
 
     def requirements(self):
         if self.options.with_gif:
-            self.requires("giflib/5.1.4")
+            self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_png:
@@ -117,7 +119,9 @@ class DlibConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
-        # There is a single library whose name depends on settings
+        self.cpp_info.names["pkg_config"] = "dlib-1"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32", "winmm", "comctl32", "gdi32", "imm32"]

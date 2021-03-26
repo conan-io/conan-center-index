@@ -1,12 +1,14 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+
+find_package(volk REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} volk::volk)
 
 add_executable(${PROJECT_NAME}_nolibs test_package.c)
 target_compile_definitions(${PROJECT_NAME}_nolibs PRIVATE VOLK_IMPLEMENTATION)
-target_link_libraries(${PROJECT_NAME}_nolibs ${CONAN_SYSTEM_LIBS_VOLK})
+target_link_libraries(${PROJECT_NAME}_nolibs volk::volk_headers)
