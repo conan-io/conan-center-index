@@ -20,7 +20,7 @@ class DjinniSuppotLib(ConanFile):
                         "target": "Auto",
                         "system_java": False
                        }
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["patches/**", "CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -79,6 +79,8 @@ class DjinniSuppotLib(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)        
         cmake = self._configure_cmake()
         cmake.build()
 
