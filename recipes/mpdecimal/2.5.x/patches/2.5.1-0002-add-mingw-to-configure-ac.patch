@@ -13,7 +13,8 @@
 +        LIBSHARED="libmpdec.2.5.1.dll"
 +        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
 +        ;;
-     darwin*|Darwin*)
+-    darwin*|Darwin*)
++    *darwin*|*Darwin*)
 @@ -232,2 +238,8 @@
  case $ac_sys_system in
 +    *windows*|*w64*)
@@ -22,4 +23,14 @@
 +        LIBSHARED="libmpdec.2.5.1.dll"
 +        CONFIGURE_LDFLAGS="-shared -Wl,--out-implib,libmpdec.dll.a"
 +        ;;
-     darwin*|Darwin*)
+-    darwin*|Darwin*)
++    *darwin*|*Darwin*)
+@@ -546,7 +558,7 @@
+         case $CC in
+             *gcc*|*clang*) # icc >= 11.0 works as well
+                 case $ac_sys_system in
+-                    darwin*|Darwin*)
++                    *darwin*|*Darwin*)
+                     ;;
+                 *)
+                     DETECTED_MACHINE="ppro"
