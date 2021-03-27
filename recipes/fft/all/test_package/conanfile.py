@@ -13,7 +13,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            tools.save("data", "2 2 2")
-            for binary in ["fftsg2dt", "fftsg3dt", "shrtdctt"]:
-                bin_path = os.path.join("bin", binary)
-                self.run(bin_path + "< data", run_environment=True)
+            self.run(os.path.join("bin", "test_package"), run_environment=True)

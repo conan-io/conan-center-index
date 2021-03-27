@@ -8,7 +8,7 @@ conan_basic_setup()
 option(THREADS "use threads")
 
 set(SOURCES "fft_build.c")
-set(HEADERS "alloc.h;fft.h;fft2.h;fft3.h;dct.h;${CMAKE_CURRENT_BINARY_DIR}/fft_export.h")
+set(HEADERS "fft.h;fft2.h;fft3.h;dct.h;${CMAKE_CURRENT_BINARY_DIR}/fft_export.h")
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 

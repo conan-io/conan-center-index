@@ -21,7 +21,7 @@ class FftConan(ConanFile):
                        "threads": False,
                        "max_threads": 4,
                        "threads_begin_n": 65536}
-    exports_sources = ["CMakeLists.txt", "fft_build.c", "alloc.h.fixed", "fft.h", "fft2.h", "fft3.h", "dct.h"]
+    exports_sources = ["CMakeLists.txt", "fft_build.c", "fft.h", "fft2.h", "fft3.h", "dct.h"]
     generators = "cmake",
 
     @property
@@ -30,8 +30,6 @@ class FftConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
-        os.unlink("alloc.h")
-        os.rename("alloc.h.fixed", "alloc.h")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,8 +80,6 @@ class FftConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fft"]
-        if not self.options.shared:
-            self.cpp_info.defines.append("FFT_STATIC_DEFINE")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
                 self.cpp_info.system_libs.append("pthread")
