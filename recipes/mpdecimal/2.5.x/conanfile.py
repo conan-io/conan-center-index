@@ -143,6 +143,7 @@ class MpdecimalConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
                 autotools = self._configure_autotools()
+                self.output.info(tools.load(os.path.join("libmpdec", "Makefile")))
                 libmpdec, libmpdecpp = self._target_names
                 with tools.chdir("libmpdec"):
                     autotools.make(target=libmpdec)
