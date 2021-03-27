@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!jtransform_request_workspace(&src, &transform)) {
-        printf(stderr, "Can only transform odd-size images perfectly.\n");
+        fprintf(stderr, "Can only transform odd-size images perfectly.\n");
         return 3;
     }
 
