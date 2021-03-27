@@ -8,3 +8,4 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/const-fix.patch"
       base_path: "source_subfolder"
+      # patch_source: https://github.com/aclements/libelfin/pull/54
