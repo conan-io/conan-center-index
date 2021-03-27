@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
     dst.err = jpeg_std_error(&err_in.pub);
     jpeg_create_compress(&dst);
 
-
     jpeg_stdio_src(&src, fin);
 
     jcopy_markers_setup(&src, JCOPYOPT_ALL);
