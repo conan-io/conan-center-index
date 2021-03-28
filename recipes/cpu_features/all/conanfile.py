@@ -59,4 +59,8 @@ class CpuFeaturesConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["cpu_features"]
+        self.cpp_info.names["cmake_find_package"] = "CpuFeatures"
+        self.cpp_info.names["cmake_find_package_multi"] = "CpuFeatures"
+        self.cpp_info.components["libcpu_features"].names["cmake_find_package"] = "cpu_features"
+        self.cpp_info.components["libcpu_features"].names["cmake_find_package_multi"] = "cpu_features"
+        self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
