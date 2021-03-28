@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.errors import ConanException
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 
 required_conan_version = ">=1.32.0"
@@ -14,8 +13,8 @@ class ImaglConan(ConanFile):
     description = "A lightweight library to load image for OpenGL application."
     topics = ("opengl", "texture", "image")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_png": [True, False], "with_jpeg": [True, False], "not_in_cci": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_png": True, "with_jpeg": True, "not_in_cci": False}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_png": [True, False], "with_jpeg": [True, False], "allow_clang_11": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_png": True, "with_jpeg": True, "allow_clang_11": False}
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
     _cmake = None
@@ -90,8 +89,8 @@ class ImaglConan(ConanFile):
         elif lazy_lt_semver(compiler_version, minimum_version) or lazy_lt_semver(toolset_version, minimum_toolset_version):
             raise ConanInvalidConfiguration("imaGL requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), compiler_version)
                                          + (" Your Visual Studio toolset version is {}; version {}+ is required.".format(toolset_version, str(minimum_toolset_version)) if minimum_toolset_version else ""))
-        elif str(self.settings.compiler) == "clang" and compiler_version == "11" and not self.options.not_in_cci:
-            raise ConanInvalidConfiguration("Clang 11 is not currently supported by conan center index. To build imaGL, append '-o imagl:not_in_cci=True --build missing' to your 'conan install' command line.")
+        elif str(self.settings.compiler) == "clang" and compiler_version == "11" and not self.options.allow_clang_11:
+            raise ConanInvalidConfiguration("Clang 11 is not currently supported by conan center index. To build imaGL, append '-o imagl:allow_clang_11=True --build missing' to your 'conan install' command line.")
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
             if minimum_toolset_version != "0":
@@ -103,7 +102,7 @@ class ImaglConan(ConanFile):
         if not self._supports_jpeg:
             del self.options.with_jpeg
         if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
-            del self.options.not_in_cci
+            del self.options.allow_clang_11
 
     def requirements(self):
         if self.options.with_png:
