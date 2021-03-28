@@ -12,12 +12,12 @@ class DjinniSuppotLib(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                 "fPIC": [True, False],
-                "target": ["JNI", "OBJC", "Auto"],
+                "target": ["jni", "objc", "auto"],
                 "system_java": [True, False]
                }
     default_options = {"shared": False,
                         "fPIC": True ,
-                        "target": "Auto",
+                        "target": "auto",
                         "system_java": False
                        }
     exports_sources = ["patches/**", "CMakeLists.txt"]
@@ -27,17 +27,17 @@ class DjinniSuppotLib(ConanFile):
 
     @property
     def objc_support(self):
-        if self.options.target == "Auto":
+        if self.options.target == "auto":
             return self.settings.os in ["iOS", "Macos"]
         else:
-            return self.options.target == "OBJC"
+            return self.options.target == "objc"
 
     @property
     def jni_support(self):
-        if self.options.target == "Auto":
+        if self.options.target == "auto":
             return self.settings.os != "iOS"
         else:
-            return self.options.target == "JNI"
+            return self.options.target == "jni"
 
 
     def configure(self):
@@ -62,7 +62,7 @@ class DjinniSuppotLib(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version", self._source_subfolder)
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -80,7 +80,7 @@ class DjinniSuppotLib(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)        
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
