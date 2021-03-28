@@ -90,9 +90,7 @@ class DjinniSuppotLib(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        #self.cpp_info.libdirs = ["lib"] # thats default anyway
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include",]
         self.cpp_info.includedirs.append("include/djinni")
         # these should not be here, but to support old generated files ....
         if self.objc_support:
