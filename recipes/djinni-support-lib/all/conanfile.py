@@ -62,7 +62,7 @@ class DjinniSuppotLib(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(f"djinni-support-lib-{self.version}", self._source_subfolder)
+        os.rename(self.name + "-" + self.version", self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
