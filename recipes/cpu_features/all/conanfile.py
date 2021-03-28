@@ -24,7 +24,7 @@ class CpuFeaturesConan(ConanFile):
 
     @property
     def _build_subfolder(self):
-        return "_build_subfolder"
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
