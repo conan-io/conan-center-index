@@ -64,3 +64,10 @@ class CpuFeaturesConan(ConanFile):
         self.cpp_info.components["libcpu_features"].names["cmake_find_package"] = "cpu_features"
         self.cpp_info.components["libcpu_features"].names["cmake_find_package_multi"] = "cpu_features"
         self.cpp_info.components["libcpu_features"].libs = ["cpu_features"]
+        self.cpp_info.components["libcpu_features"].includedirs = [os.path.join("include", "cpu_features")]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libcpu_features"].system_libs = ["dl"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
