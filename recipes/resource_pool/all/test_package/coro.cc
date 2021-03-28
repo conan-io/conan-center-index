@@ -1,6 +1,5 @@
 #include <yamail/resource_pool/async/pool.hpp>
 
-#include <atomic>
 #include <iostream>
 #include <thread>
 #include <memory>
@@ -11,7 +10,6 @@ using time_traits = yamail::resource_pool::time_traits;
 struct null_buffer : std::streambuf { int overflow(int c) override { return c; } } null_buf;
 
 int main() {
-    std::atomic_bool success{true};
     boost::asio::io_context service;
     ofstream_pool pool(1, 10);
     boost::asio::spawn(service, [&](boost::asio::yield_context yield){
@@ -19,14 +17,12 @@ int main() {
         auto handle = pool.get_auto_waste(service, yield[ec], time_traits::duration::max());
         if (ec) {
             std::cout << "handle error: " << ec.message() << std::endl;
-            success = false;
             return;
         }
         std::cout << "got resource handle" << std::endl;
         if (handle.empty()) {
             auto stream = std::make_unique<std::ostream>(&null_buf);
             if (!stream->good()) {
-                success = false;
                 return;
             }
             handle.reset(std::move(stream));
@@ -37,5 +33,4 @@ int main() {
         }
     });
     service.run();
-    return success ? 0 : 1;
 }
