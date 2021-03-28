@@ -88,11 +88,6 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
-        if Version(self.version) == "1.8.3":
-            # This seems to be a broken https://github.com/gabime/spdlog/pull/1890
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "find_package(fmt 5.3.0 CONFIG REQUIRED)", "find_package(fmt REQUIRED)")
-
         if Version(self.version) < "1.7" and Version(self.deps_cpp_info["fmt"].version) >= "7":
             raise ConanInvalidConfiguration("The project {}/{} requires fmt < 7.x".format(self.name, self.version))
 
