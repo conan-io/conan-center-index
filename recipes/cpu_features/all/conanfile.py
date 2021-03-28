@@ -43,7 +43,7 @@ class CpuFeaturesConan(ConanFile):
         if self._cmake:
             return self._cmake
         cmake = CMake(self)
-        cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", False)
+        cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
         cmake.configure()
         self._cmake = cmake
         return self._cmake
