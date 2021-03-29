@@ -253,17 +253,11 @@ class BoostConan(ConanFile):
 
     @property
     def _fPIC(self):
-        try:
-            return self.options.fPIC
-        except ConanException:
-            return True
+        return self.options.get_safe("fPIC", self.default_options["fPIC"])
 
     @property
     def _shared(self):
-        try:
-            return self.options.shared
-        except ConanException:
-            return False
+        return self.options.get_safe("shared", self.default_options["shared"])
 
     def configure(self):
         if self.options.header_only:
