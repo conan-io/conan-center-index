@@ -9,6 +9,7 @@ class TinydirConan(ConanFile):
     homepage = "https://github.com/cxong/tinydir"
     description = "Lightweight, portable and easy to integrate C directory and file reader"
     topics = ("conan", "c", "portable", "filesystem", "directory", "posix", "header-only")
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
