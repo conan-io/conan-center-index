@@ -424,7 +424,7 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
-                self.cpp_info.components["text-to-speech"].requires.append("pulseaudio")
+                self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
 
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
