@@ -256,7 +256,7 @@ class BoostConan(ConanFile):
         try:
             return self.options.fPIC
         except ConanException:
-            return False
+            return True
 
     @property
     def _shared(self):
