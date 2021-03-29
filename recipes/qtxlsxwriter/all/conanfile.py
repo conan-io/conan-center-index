@@ -22,10 +22,7 @@ class QtXlsxWriterConan(ConanFile):
     }
 
     generators = "CMakeDeps"
-    exports_sources = [
-        "CMakeLists.txt",
-        os.path.join("patches", "*")
-    ]
+    exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
 
