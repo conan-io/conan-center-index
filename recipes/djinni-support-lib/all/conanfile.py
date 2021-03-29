@@ -96,4 +96,4 @@ class DjinniSuppotLib(ConanFile):
         if self.objc_support:
             self.cpp_info.includedirs.append(os.path.join("include", "djinni", "objc"))
         if self.jni_support:
-            self.cpp_info.includedirs.append("include/djinni/jni")
+            self.cpp_info.includedirs.append(os.path.join("include", "djinni", "jni"))
