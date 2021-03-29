@@ -104,6 +104,10 @@ class ImaglConan(ConanFile):
         if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
             del self.options.allow_clang_11
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
