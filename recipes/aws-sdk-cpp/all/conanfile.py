@@ -428,7 +428,7 @@ class AwsSdkCppConan(ConanFile):
 
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
-                self.cpp_info.frameworks.append("CoreAudio")
+                self.cpp_info.components["text-to-speech"].frameworks.append("CoreAudio")
 
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
