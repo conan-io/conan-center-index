@@ -49,6 +49,7 @@ class CapstoneConan(ConanFile):
         cmake.definitions['CAPSTONE_BUILD_TESTS'] = False
         cmake.definitions['CAPSTONE_BUILD_CSTOOL'] = False
         cmake.definitions['CAPSTONE_ARCHITECUTRE_DEFAULT'] = False
+        cmake.definitions['CAPSTONE_USE_SYS_DYN_MEM'] = self.options.use_default_alloc
         for a in self._archs:
             cmake.definitions['CAPSTONE_%s_SUPPORT' % a.upper()] = self.options.get_safe(a)
         runtime = self.settings.get_safe("compiler.runtime")
