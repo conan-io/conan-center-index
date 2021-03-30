@@ -54,7 +54,7 @@ class TidyHtml5Conan(ConanFile):
         cmake.definitions['ENABLE_ALLOC_DEBUG'] = False
         cmake.definitions['ENABLE_MEMORY_DEBUG'] = False
         cmake.definitions['BUILD_SHARED_LIB'] = self.options.shared
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         self._cmake = cmake
         return self._cmake
 
