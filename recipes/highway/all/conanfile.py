@@ -36,6 +36,10 @@ class HighwayConan(ConanFile):
             "clang": "7",
         }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
