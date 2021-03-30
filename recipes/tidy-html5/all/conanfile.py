@@ -74,12 +74,13 @@ class TidyHtml5Conan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "tidy"
         self.cpp_info.names["cmake_find_package_multi"] = "tidy"
 
+        suffix = 'd' if self.settings.compiler == 'Visual Studio' and self.settings.build_type == 'Debug' else ''
         if self.options.shared:
             self.cpp_info.components["tidy-share"].names["cmake_find_package"] = "tidy-share"
             self.cpp_info.components["tidy-share"].names["cmake_find_package_multi"] = "tidy-share"
-            self.cpp_info.components["tidy-share"].libs = ["tidy"]
+            self.cpp_info.components["tidy-share"].libs = ["tidy" + suffix]
         else:
             self.cpp_info.components["tidy-static"].names["cmake_find_package"] = "tidy-static"
             self.cpp_info.components["tidy-static"].names["cmake_find_package_multi"] = "tidy-static"
-            self.cpp_info.components["tidy-static"].libs = ["tidys"]
+            self.cpp_info.components["tidy-static"].libs = ["tidys" + suffix]
             self.cpp_info.components["tidy-static"].defines.append('TIDY_STATIC')
