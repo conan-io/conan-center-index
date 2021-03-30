@@ -125,7 +125,7 @@ Note about `build_type`.- We retain the `build_type` setting to make it possible
 
 ## Can I remove an option from recipe
 
-It's preferable don't doing it, because it may break other packages which require those deleted options.
+It's preferable to don't doing it, because it may break other packages which require those deleted options.
 Prefer the deprecation path with a mapping from old options to new ones:
 
 * Add "deprecated" as option value
