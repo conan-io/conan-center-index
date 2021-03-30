@@ -74,6 +74,7 @@ class TidyHtml5Conan(ConanFile):
         #FIXME: tidy does not install under a CMake namespace
         self.cpp_info.names["cmake_find_package"] = "tidy"
         self.cpp_info.names["cmake_find_package_multi"] = "tidy"
+        self.cpp_info.names["pkg_config"] = "tidy"
 
         suffix = 'd' if self.settings.compiler == 'Visual Studio' and self.settings.build_type == 'Debug' else ''
         if self.options.shared:
