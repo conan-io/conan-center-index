@@ -8,7 +8,7 @@ class TidyHtml5Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.html-tidy.org"
     description = "The granddaddy of HTML tools, with support for modern standards"
-    topics = ("conan", )
+    topics = ("html", "parser", "xml", "tools")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
