@@ -60,23 +60,11 @@ set_target_properties(${QTXLSXWRITER_TARGET_NAME} PROPERTIES
 	DEFINE_SYMBOL QT_BUILD_XLSX_LIB
 )
 
-set_property(TARGET ${QTXLSXWRITER_TARGET_NAME} PROPERTY PUBLIC_HEADER
-	source_subfolder/src/xlsx/xlsxabstractooxmlfile.h
-	source_subfolder/src/xlsx/xlsxabstractsheet.h
-	source_subfolder/src/xlsx/xlsxcell.h
-	source_subfolder/src/xlsx/xlsxcellformula.h
-	source_subfolder/src/xlsx/xlsxcellrange.h
-	source_subfolder/src/xlsx/xlsxcellreference.h
-	source_subfolder/src/xlsx/xlsxchart.h
-	source_subfolder/src/xlsx/xlsxchartsheet.h
-	source_subfolder/src/xlsx/xlsxconditionalformatting.h
-	source_subfolder/src/xlsx/xlsxdatavalidation.h
-	source_subfolder/src/xlsx/xlsxdocument.h
-	source_subfolder/src/xlsx/xlsxformat.h
-	source_subfolder/src/xlsx/xlsxglobal.h
-	source_subfolder/src/xlsx/xlsxrichstring.h
-	source_subfolder/src/xlsx/xlsxworkbook.h
-	source_subfolder/src/xlsx/xlsxworksheet.h
+file(GLOB QTXLSXWRITER_PRIVATE_HEADERS LIST_DIRECTORIES=false source_subfolder/src/xlsx/*_p.h)
+set(QTXLSXWRITER_PUBLIC_HEADERS ${QTXLSXWRITER_HEADERS})
+list(REMOVE_ITEM QTXLSXWRITER_PUBLIC_HEADERS ${QTXLSXWRITER_PRIVATE_HEADERS})
+set_property(TARGET ${QTXLSXWRITER_TARGET_NAME} PROPERTY
+	PUBLIC_HEADER ${QTXLSXWRITER_PUBLIC_HEADERS}
 )
 
 # define installing rules for target files
