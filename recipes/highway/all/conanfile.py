@@ -13,8 +13,8 @@ class HighwayConan(ConanFile):
     topics = ("highway", "simd")
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {fPIC: [True, False]}
-    default_options = {fPIC: True}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
@@ -40,7 +40,7 @@ class HighwayConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         minimum_version = self._minimum_compilers_version.get(
-                                                    str(self.settings.compiler))
+                                                   str(self.settings.compiler))
         if not minimum_version:
             self.output.warn(
                 "{} recipe lacks information about the {} compiler support."
@@ -60,8 +60,11 @@ class HighwayConan(ConanFile):
             tools.patch(**patch)
         # Honor fPIC option
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE), "")
-        tools.replace_in_file(cmakelists, "set_property(TARGET hwy PROPERTY POSITION_INDEPENDENT_CODE ON)", "")
+        tools.replace_in_file(cmakelists,
+                              "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)", "")
+        tools.replace_in_file(cmakelists,
+                              "set_property(TARGET hwy PROPERTY "
+                              "POSITION_INDEPENDENT_CODE ON)", "")
 
     def _configure_cmake(self):
         if self._cmake:
