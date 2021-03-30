@@ -70,6 +70,7 @@ class CapstoneConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # FIXME : add components, if needed
 
     def package_info(self):
         if self.options.shared:
