@@ -73,3 +73,4 @@ class ZopfliConan(ConanFile):
         self.cpp_info.components["libzopflipng"].names["cmake_find_package"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].names["cmake_find_package_multi"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
+        self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]        
