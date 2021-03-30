@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 
 class ZipConan(ConanFile):
-    name = "zip"
+    name = "kuba-zip"
     license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kuba--/zip"
