@@ -71,6 +71,7 @@ class TidyHtml5Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        #FIXME: tidy does not install under a CMake namespace
         self.cpp_info.names["cmake_find_package"] = "tidy"
         self.cpp_info.names["cmake_find_package_multi"] = "tidy"
 
