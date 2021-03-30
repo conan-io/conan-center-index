@@ -125,8 +125,8 @@ Note about `build_type`.- We retain the `build_type` setting to make it possible
 
 ## Can I remove a deprecated option from recipe
 
-No. Changing any option will result in a different package ID and may result a different behavior, the result can break users.
-Instead, you should deprecate the option:
+It's preferable don't doing it, because it may break other packages requires those deleted options.
+Prefer the deprecation path with a mapping from old options to new ones:
 
 * Add "deprecated" as option value
 * Set "deprecated" as default option
@@ -148,3 +148,7 @@ def package_id(self):
 This is the safest way, users will be warned of deprecation and their projects will not risk breaking.
 As aditional examples, take a look on follow recipes: [dcmtk](https://github.com/conan-io/conan-center-index/blob/5e6089005f0bb66cd16db7b0e5f37f5081c7820c/recipes/dcmtk/all/conanfile.py#L24), [gtsam](https://github.com/conan-io/conan-center-index/blob/f7f18ab050e5d97fac70932b0ba4c115a930958c/recipes/gtsam/all/conanfile.py#L40)
 and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c82564199fdd9ca2f95231693c1a7136a/recipes/libcurl/all/conanfile.py#L24).
+
+However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
+After one month, we will welcome a PR removing the option that was deprecated.
+
