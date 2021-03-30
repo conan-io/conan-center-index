@@ -123,7 +123,7 @@ We decided that these packages (as long as they match the premises) should list 
 
 Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
 
-## Can I remove a deprecated option from recipe
+## Can I remove an option from recipe
 
 It's preferable don't doing it, because it may break other packages requires those deleted options.
 Prefer the deprecation path with a mapping from old options to new ones:
