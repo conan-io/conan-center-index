@@ -8,12 +8,22 @@ class GflagsConan(ConanFile):
     topics = ("conan", "gflags", "cli", "flags", "commandline")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gflags/gflags"
-    license = 'BSD-3-Clause'
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "nothreads": [True, False], "namespace": "ANY"}
-    default_options = {'shared': False, 'fPIC': True, 'nothreads': True, 'namespace': 'gflags'}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "nothreads": [True, False],
+        "namespace": "ANY",
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "nothreads": True,
+        "namespace": "gflags",
+    }
 
     @property
     def _source_subfolder(self):
@@ -63,6 +73,6 @@ class GflagsConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(['shlwapi'])
+            self.cpp_info.system_libs.extend(["shlwapi"])
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "m"])
