@@ -15,7 +15,7 @@ class LuajitConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
-    _cmake = None
+    _env_build = None
 
     @property
     def _source_subfolder(self):
@@ -34,6 +34,11 @@ class LuajitConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _configure_autotools(self):
+        if not self._env_build:
+            self._env_build = AutoToolsBuildEnvironment(self)
+        return self._env_build
+
     def build(self):
         if self.settings.compiler == 'Visual Studio':
             with tools.chdir(os.path.join(self._source_subfolder, 'src')):
@@ -43,9 +48,25 @@ class LuajitConan(ConanFile):
                     self.run("msvcbuild.bat %s" % variant)
         else:
             buildmode = 'shared' if self.options.shared else 'static'
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'src', 'Makefile'),
+            makefile = os.path.join(self._source_subfolder, 'src', 'Makefile')
+            tools.replace_in_file(makefile,
                                   'BUILDMODE= mixed',
                                   'BUILDMODE= %s' % buildmode)
+            tools.replace_in_file(makefile,
+                                  'TARGET_DYLIBPATH= $(TARGET_LIBPATH)/$(TARGET_DYLIBNAME)',
+                                  'TARGET_DYLIBPATH= $(TARGET_DYLIBNAME)')
+            # adjust mixed mode defaults to build either .so or .a, but not both
+            if not self.options.shared:
+                tools.replace_in_file(makefile,
+                                      'TARGET_T= $(LUAJIT_T) $(LUAJIT_SO)',
+                                      'TARGET_T= $(LUAJIT_T) $(LUAJIT_A)')
+                tools.replace_in_file(makefile,
+                                      'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_SO)',
+                                      'TARGET_DEP= $(LIB_VMDEF) $(LUAJIT_A)')
+            else:
+                tools.replace_in_file(makefile,
+                                      'TARGET_O= $(LUAJIT_A)',
+                                      'TARGET_O= $(LUAJIT_SO)')
             env = dict()
             if self.settings.os == "Macos":
                 # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
@@ -56,25 +77,31 @@ class LuajitConan(ConanFile):
                     version = "%s.%s" % (major, minor)
                 env["MACOSX_DEPLOYMENT_TARGET"] = version
             with tools.chdir(self._source_subfolder), tools.environment_append(env):
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.make()
+                env_build = self._configure_autotools()
+                env_build.make(args=["PREFIX=%s" % self.package_folder])
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        ljs = os.path.join(self._source_subfolder, "src")
-        self.copy("lua.h", dst="include", src=ljs)
-        self.copy("lualib.h", dst="include", src=ljs)
-        self.copy("lauxlib.h", dst="include", src=ljs)
-        self.copy("luaconf.h", dst="include", src=ljs)
-        self.copy("lua.hpp", dst="include", src=ljs)
-        self.copy("luajit.h", dst="include", src=ljs)
-        self.copy("lua51.lib", dst="lib", src=ljs)
-        self.copy("lua51.dll", dst="bin", src=ljs)
-        self.copy("libluajit.a", dst="lib", src=ljs)
-        self.copy("libluajit*.so", dst="lib", src=ljs)
-        self.copy("libluajit*.dylib", dst="lib", src=ljs)
+        if self.settings.compiler == 'Visual Studio':
+            ljs = os.path.join(self._source_subfolder, "src")
+            inc = os.path.join(self.package_folder, "include", "luajit-2.0")
+            self.copy("lua.h", dst=inc, src=ljs)
+            self.copy("lualib.h", dst=inc, src=ljs)
+            self.copy("lauxlib.h", dst=inc, src=ljs)
+            self.copy("luaconf.h", dst=inc, src=ljs)
+            self.copy("lua.hpp", dst=inc, src=ljs)
+            self.copy("luajit.h", dst=inc, src=ljs)
+            self.copy("lua51.lib", dst="lib", src=ljs)
+            self.copy("lua51.dll", dst="bin", src=ljs)
+        else:
+            with tools.chdir(self._source_subfolder):
+                env_build = self._configure_autotools()
+                env_build.install(args=["PREFIX=%s" % self.package_folder])
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["lua51" if self.settings.compiler == "Visual Studio" else "luajit"]
+        self.cpp_info.libs = ["lua51" if self.settings.compiler == "Visual Studio" else "luajit-5.1"]
+        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", "luajit-2.0")]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "dl"])
