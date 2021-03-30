@@ -13,6 +13,8 @@ class HighwayConan(ConanFile):
     topics = ("highway", "simd")
 
     settings = "os", "compiler", "build_type", "arch"
+    options = {fPIC: [True, False]}
+    default_options = {fPIC: True}
 
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
@@ -53,6 +55,14 @@ class HighwayConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        # Honor fPIC option
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE), "")
+        tools.replace_in_file(cmakelists, "set_property(TARGET hwy PROPERTY POSITION_INDEPENDENT_CODE ON)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -62,8 +72,7 @@ class HighwayConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -74,6 +83,5 @@ class HighwayConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Highway"
-        self.cpp_info.names["cmake_find_package_multi"] = "Highway"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libhwy"
+        self.cpp_info.libs = ["hwy"]
