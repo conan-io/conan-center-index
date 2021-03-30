@@ -1,4 +1,5 @@
 import os
+import platform
 from conans import ConanFile, tools, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment
 
 
@@ -45,7 +46,16 @@ class LuajitConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, 'src', 'Makefile'),
                                   'BUILDMODE= mixed',
                                   'BUILDMODE= %s' % buildmode)
-            with tools.chdir(self._source_subfolder):
+            env = dict()
+            if self.settings.os == "Macos":
+                # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
+                # is not set then it's forced to 10.4, which breaks compile on Mojave.
+                version = self.settings.get_safe("os.version")
+                if not version and platform.system() == "Darwin":
+                    major, minor, _ = platform.mac_ver()[0].split(".")
+                    version = "%s.%s" % (major, minor)
+                env["MACOSX_DEPLOYMENT_TARGET"] = version
+            with tools.chdir(self._source_subfolder), tools.environment_append(env):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make()
 
