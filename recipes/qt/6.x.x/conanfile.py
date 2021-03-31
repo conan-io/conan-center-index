@@ -167,7 +167,7 @@ class QtConan(ConanFile):
             assert section.count('"') == 2
             modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
-            if status != "obsolete" and status != "ignore":
+            if status not in ["obsolete", "ignore", "additionalLibrary"]:
                 submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
