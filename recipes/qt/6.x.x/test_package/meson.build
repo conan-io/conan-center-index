@@ -1,6 +1,6 @@
 project('test_package', 'cpp')
-qt5 = import('qt5')
-qt5_dep = dependency('qt5', modules: ['Core'])
-moc_files = qt5.preprocess(moc_headers : 'greeter.h')
+qt6 = import('qt6')
+qt6_dep = dependency('qt6', modules: ['Core'])
+moc_files = qt6.preprocess(moc_headers : 'greeter.h', qresources : 'example.qrc')
 executable('test_package', 'test_package.cpp', moc_files,
-           dependencies : qt5_dep)
+           dependencies : qt6_dep)

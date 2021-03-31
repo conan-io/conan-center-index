@@ -49,7 +49,7 @@ class OnnxConan(ConanFile):
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
     def requirements(self):
-        self.requires("protobuf/3.13.0")
+        self.requires("protobuf/3.15.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -7,4 +7,3 @@ int main(int argc, char* argv[])
 	zmqpp::context ctx; // throws on error
 	return 0;
 }
-

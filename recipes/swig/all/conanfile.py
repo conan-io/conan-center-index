@@ -40,17 +40,25 @@ class SwigConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("swig-rel-{}".format(self.version), self._source_subfolder)
 
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     @contextmanager
     def _build_context(self):
         env = {}
         if self.settings.compiler != "Visual Studio":
-            env["YACC"] = self.deps_user_info["bison"].YACC
+            env["YACC"] = self._user_info_build["bison"].YACC
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env.update({
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} link".format(self.deps_user_info["automake"].ar_lib),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "AR": "{} link".format(self._user_info_build["automake"].ar_lib),
                     "LD": "link",
                 })
                 with tools.environment_append(env):

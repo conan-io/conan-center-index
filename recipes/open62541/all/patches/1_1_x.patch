@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2fd6ef29..cde6a08c 100755
+index 2fd6ef2..e3bc6a5 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -31,14 +31,7 @@ index 2fd6ef29..cde6a08c 100755
  
  #################
  # Build Options #
-@@ -456,13 +454,13 @@ if(UA_ENABLE_ENCRYPTION)
-         # use the OpenSSL encryption library
-         # https://cmake.org/cmake/help/v3.0/module/FindOpenSSL.html
-         find_package(OpenSSL REQUIRED)
--        list(APPEND open62541_LIBRARIES ${OPENSSL_LIBRARIES})
-+        list(APPEND open62541_LIBRARIES ${OpenSSL_LIBRARIES})
-     else()
-         # The recommended way is to install mbedtls via the OS package manager. If
+@@ -462,7 +460,7 @@ if(UA_ENABLE_ENCRYPTION)
          # that is not possible, manually compile mbedTLS and set the cmake variables
          # defined in /tools/cmake/FindMbedTLS.cmake.
          find_package(MbedTLS REQUIRED)
@@ -130,7 +123,7 @@ index 2fd6ef29..cde6a08c 100755
          ${lib_sources})
  endif()
  
-@@ -1147,10 +1122,13 @@ if(UA_ENABLE_AMALGAMATION)
+@@ -1147,11 +1122,14 @@ if(UA_ENABLE_AMALGAMATION)
      target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
      target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -138,14 +131,14 @@ index 2fd6ef29..cde6a08c 100755
 +        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL)
--        target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
-+        target_include_directories(open62541-object PRIVATE ${OpenSSL_INCLUDE_DIR})
-+    endif()
+         target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
+     endif()
 +    if(UA_ENABLE_WEBSOCKET_SERVER)
 +        target_include_directories(open62541-plugins PRIVATE ${Libwebsockets_INCLUDE_DIR})
-     endif()
++    endif()
  
      # make sure the open62541_amalgamation target builds before so that amalgamation is finished and it is not executed again for open62541-object
+     # and thus may overwrite the amalgamation result during multiprocessor compilation
 @@ -1186,6 +1164,9 @@ else()
                        )
  
@@ -167,7 +160,7 @@ index 2fd6ef29..cde6a08c 100755
      if(UA_PACK_DEBIAN)
          add_library(open62541-static STATIC $<TARGET_OBJECTS:open62541-object> $<TARGET_OBJECTS:open62541-plugins>)
          set_target_properties(open62541-static PROPERTIES OUTPUT_NAME open62541)
-@@ -1232,10 +1217,10 @@ else()
+@@ -1232,7 +1217,7 @@ else()
      include_directories_private("${PROJECT_BINARY_DIR}")
  
      if(UA_ENABLE_ENCRYPTION_MBEDTLS)
@@ -175,13 +168,9 @@ index 2fd6ef29..cde6a08c 100755
 +        include_directories_private(${MbedTLS_INCLUDE_DIRS})
      endif()
      if(UA_ENABLE_ENCRYPTION_OPENSSL)
--        include_directories_private(${OPENSSL_INCLUDE_DIR})
-+        include_directories_private(${OpenSSL_INCLUDE_DIR})
-     endif()
- 
-     # Option-specific includes
+         include_directories_private(${OPENSSL_INCLUDE_DIR})
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
-index 7787b40e..99dc884b 100644
+index 7787b40..99dc884 100644
 --- a/src/server/ua_discovery_manager.h
 +++ b/src/server/ua_discovery_manager.h
 @@ -50,7 +50,7 @@ typedef struct periodicServerRegisterCallback_entry {
@@ -194,7 +183,7 @@ index 7787b40e..99dc884b 100644
  /**
   * TXT record:
 diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
-index 6121b8c3..e4cae7c5 100644
+index 6121b8c..e4cae7c 100644
 --- a/src/server/ua_server_discovery_mdns.c
 +++ b/src/server/ua_server_discovery_mdns.c
 @@ -11,8 +11,8 @@

@@ -11,7 +11,7 @@ class BoostDepConan(ConanFile):
     license = "BSL-1.0"
     topics = ("conan", "boostdep", "dependency", "tree")
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     _cmake = None
 
