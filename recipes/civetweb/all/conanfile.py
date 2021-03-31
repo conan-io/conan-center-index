@@ -59,7 +59,7 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.options["openssl"].shared:
@@ -68,11 +68,6 @@ class CivetwebConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("civetweb-%s" % self.version, self._source_subfolder)
-
-    def _patch_sources(self):
-        cmakelists_src = os.path.join(self._source_subfolder, "src", "CMakeLists.txt")
-        tools.replace_in_file(cmakelists_src, "${OPENSSL_INCLUDE_DIR}", "${OpenSSL_INCLUDE_DIR}")
-        tools.replace_in_file(cmakelists_src, "${OPENSSL_LIBRARIES}", "OpenSSL::SSL OpenSSL::Crypto")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -89,11 +84,11 @@ class CivetwebConan(ConanFile):
         self._cmake.definitions["CIVETWEB_ENABLE_CXX"] = self.options.with_cxx
         self._cmake.definitions["CIVETWEB_BUILD_TESTING"] = False
         self._cmake.definitions["CIVETWEB_ENABLE_ASAN"] = False
+        self._cmake.definitions["CIVETWEB_CXX_ENABLE_LTO"] = False
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
