@@ -27,7 +27,8 @@ class CppSortConan(ConanFile):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
-            "gcc": "5.5"
+            "gcc": "5.5",
+            "Visual Studio": "16"
         }
 
     def validate(self):
@@ -71,6 +72,10 @@ class CppSortConan(ConanFile):
 
         # Remove CMake config files (only files in lib)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags = ["/permissive-"]
 
     def package_id(self):
         self.info.header_only()
