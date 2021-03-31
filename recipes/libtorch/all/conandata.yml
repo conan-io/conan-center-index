@@ -1,0 +1,20 @@
+sources:
+  "1.8.1":
+    url: "https://github.com/pytorch/pytorch/archive/v1.8.1.tar.gz"
+    sha256: "a13b379d7acd2470e643b4fd54a3bd4a68eea6032153aa3fd705ba34718a32dc"
+patches:
+  "1.8.1":
+    - patch_file: "patches/0001-fix-system-onnx-namespace.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-pytorch-subproject.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-disable-pybind11-for-no-build-python.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-avoid-python-external-typing-extensions.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-vulkan-codegen.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0006-fix-install-target.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-unvendor-dependencies-and-honor-flags.patch"
+      base_path: "source_subfolder"
