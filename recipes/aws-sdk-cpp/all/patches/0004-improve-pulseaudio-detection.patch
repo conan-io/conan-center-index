@@ -11,7 +11,7 @@ index b1054515d5..82847accf5 100644
  if(PLATFORM_WINDOWS)
      file( GLOB TEXT_TO_SPEECH_PLATFORM_HEADERS "include/aws/text-to-speech/windows/*.h" )
  	file( GLOB TEXT_TO_SPEECH_PLATFORM_SOURCE "source/text-to-speech/windows/*.cpp" )
-@@ -20,13 +18,15 @@ if(PLATFORM_WINDOWS)
+@@ -20,13 +18,13 @@ if(PLATFORM_WINDOWS)
  endif()
  
  if (PLATFORM_LINUX)
