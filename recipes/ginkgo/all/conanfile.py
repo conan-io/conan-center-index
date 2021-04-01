@@ -97,17 +97,22 @@ class GinkgoConan(ConanFile):
     def package_info(self):
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
 
-        self.cpp_info.components["reference"].libs = [
+        self.cpp_info.components["ginkgo_reference"].libs = [
             "ginkgo_reference" + debug_suffix]
-        self.cpp_info.components["cuda"].libs = ["ginkgo_cuda" + debug_suffix]
-        self.cpp_info.components["hip"].libs = ["ginkgo_hip" + debug_suffix]
+        self.cpp_info.components["ginkgo_cuda"].libs = [
+            "ginkgo_cuda" + debug_suffix]
+        self.cpp_info.components["ginkgo_hip"].libs = [
+            "ginkgo_hip" + debug_suffix]
 
-        self.cpp_info.components["omp"].libs = ["ginkgo_omp" + debug_suffix]
-        self.cpp_info.components["omp"].requires = ["cuda", "hip"]
+        self.cpp_info.components["ginkgo_omp"].libs = [
+            "ginkgo_omp" + debug_suffix]
+        self.cpp_info.components["ginkgo_omp"].requires = [
+            "ginkgo_cuda", "ginkgo_hip"]
 
-        self.cpp_info.components["core"].libs = ["ginkgo" + debug_suffix]
-        self.cpp_info.components["core"].requires = [
-            "reference", "omp", "cuda", "hip"]
+        self.cpp_info.components["ginkgo_core"].libs = [
+            "ginkgo" + debug_suffix]
+        self.cpp_info.components["ginkgo_core"].requires = [
+            "ginkgo_reference", "ginkgo_omp", "ginkgo_cuda", "ginkgo_hip"]
 
         self.cpp_info.names["cmake_find_package"] = "Ginkgo"
         self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
