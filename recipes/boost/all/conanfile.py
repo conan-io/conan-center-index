@@ -6,6 +6,7 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+import re
 import sys
 import shlex
 import shutil
@@ -1222,8 +1223,19 @@ class BoostConan(ConanFile):
         tools.save(filename,  contents)
 
     @property
+    def _msvc_toolset(self):
+        if self._is_msvc:
+            toolset = self.settings.compiler.get_safe("toolset", default="")
+            match = re.match(r'v(\d+)(\d)$', toolset)
+            if match:
+                return "%s.%s" % (match.group(1), match.group(2))
+
+    @property
     def _toolset_version(self):
         if self._is_msvc:
+            toolset_from_setting = self._msvc_toolset
+            if toolset_from_setting:
+                return toolset_from_setting
             compiler_version = str(self.settings.compiler.version)
             if Version(compiler_version) >= "16":
                 return "14.2"
