@@ -9,6 +9,7 @@ c-ares/1.15.0
 caffe/1.0.windows
 bzip2/1.0.8
 ffmpeg/3.3.1
+freetype/2.10.1
 gflags/2.2.2
 glog/0.4.0
 hdf5/1.10.6
@@ -45,6 +46,10 @@ caffe:with_lmdb=True
 curl:shared=True
 facesdk:shared=True
 ffmpeg:shared=True
+freetype:shared=False
+freetype:with_png=True
+freetype:with_zlib=True
+freetype:with_bzip2=True
 gflags:shared=True
 glog:shared=True
 hdf5:shared=True
