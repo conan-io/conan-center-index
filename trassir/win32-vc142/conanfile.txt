@@ -28,7 +28,7 @@ openh264/1.7.0
 openssl/1.1.1d
 protobuf/3.9.1
 protoc/3.9.1.dssl1
-sip/4.19.3
+sip/4.19.3.dssl1
 snappy/1.1.8
 strawberryperl/5.30.0.1
 xz_utils/5.2.4

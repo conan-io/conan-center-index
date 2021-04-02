@@ -1,13 +1,13 @@
-name: Win32 VC-16 Release
+name: Win32 vc142 Debug
 
 on:
   pull_request:
     paths:
       - 'recipes/**'
       - 'builder/**'
-      - '.github/workflows/win32-vc16-release.yml'
-      - 'trassir/win32-vc16/conanfile.txt'
-      - 'trassir/win32-vc16/conanprofile.release'
+      - '.github/workflows/win32-vc142-debug.yml'
+      - 'trassir/win32-vc142/conanfile.txt'
+      - 'trassir/win32-vc142/conanprofile.debug'
 
   push:
     branches:
@@ -15,9 +15,9 @@ on:
     paths:
       - 'recipes/**'
       - 'builder/**'
-      - '.github/workflows/win32-vc16-release.yml'
-      - 'trassir/win32-vc16/conanfile.txt'
-      - 'trassir/win32-vc16/conanprofile.release'
+      - '.github/workflows/win32-vc142-debug.yml'
+      - 'trassir/win32-vc142/conanfile.txt'
+      - 'trassir/win32-vc142/conanprofile.debug'
 
 env:
   LDAP_USERNAME: ${{ secrets.LDAP_USERNAME }}
@@ -49,5 +49,5 @@ jobs:
           python sources/builder/build.py
         env:
           PYTHONUNBUFFERED: "true"
-          CONAN_TXT: trassir/win32-vc16/conanfile.txt
-          CONAN_PROFILE: trassir/win32-vc16/conanprofile.release
+          CONAN_TXT: trassir/win32-vc142/conanfile.txt
+          CONAN_PROFILE: trassir/win32-vc142/conanprofile.debug
