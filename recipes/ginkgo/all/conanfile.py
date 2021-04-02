@@ -95,27 +95,34 @@ class GinkgoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-
-        self.cpp_info.components["ginkgo_reference"].libs = [
-            "ginkgo_reference" + debug_suffix]
-        self.cpp_info.components["ginkgo_cuda"].libs = [
-            "ginkgo_cuda" + debug_suffix]
-        self.cpp_info.components["ginkgo_hip"].libs = [
-            "ginkgo_hip" + debug_suffix]
-
-        self.cpp_info.components["ginkgo_omp"].libs = [
-            "ginkgo_omp" + debug_suffix]
-        self.cpp_info.components["ginkgo_omp"].requires = [
-            "ginkgo_cuda", "ginkgo_hip"]
-
-        self.cpp_info.components["core"].libs = [
-            "ginkgo" + debug_suffix]
-        self.cpp_info.components["core"].requires = [
-            "ginkgo_reference", "ginkgo_omp", "ginkgo_cuda", "ginkgo_hip"]
-        self.cpp_info.components["core"].names["cmake_find_package"] = "ginkgo"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "ginkgo"
-
         self.cpp_info.names["cmake_find_package"] = "Ginkgo"
         self.cpp_info.names["cmake_find_package_multi"] = "Ginkgo"
         self.cpp_info.names["pkg_config"] = "ginkgo"
+
+        debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+
+        self.cpp_info.components["ginkgo_core"].names["cmake_find_package"] = "ginkgo"
+        self.cpp_info.components["ginkgo_core"].names["cmake_find_package_multi"] = "ginkgo"
+        self.cpp_info.components["ginkgo_core"].names["pkg_config"] = "ginkgo"
+        self.cpp_info.components["ginkgo_core"].libs = ["ginkgo" + debug_suffix]
+        self.cpp_info.components["ginkgo_core"].requires = [
+            "ginkgo_omp", "ginkgo_cuda", "ginkgo_reference", "ginkgo_hip"
+        ]
+
+        self.cpp_info.components["ginkgo_cuda"].names["cmake_find_package"] = "ginkgo_cuda"
+        self.cpp_info.components["ginkgo_cuda"].names["cmake_find_package_multi"] = "ginkgo_cuda"
+        self.cpp_info.components["ginkgo_cuda"].libs = ["ginkgo_cuda" + debug_suffix]
+        self.cpp_info.components["ginkgo_cuda"].requires = ["ginkgo_hip"]
+
+        self.cpp_info.components["ginkgo_omp"].names["cmake_find_package"] = "ginkgo_omp"
+        self.cpp_info.components["ginkgo_omp"].names["cmake_find_package_multi"] = "ginkgo_omp"
+        self.cpp_info.components["ginkgo_omp"].libs = ["ginkgo_omp" + debug_suffix]
+        self.cpp_info.components["ginkgo_omp"].requires = ["ginkgo_cuda", "ginkgo_hip"]
+
+        self.cpp_info.components["ginkgo_hip"].names["cmake_find_package"] = "ginkgo_hip"
+        self.cpp_info.components["ginkgo_hip"].names["cmake_find_package_multi"] = "ginkgo_hip"
+        self.cpp_info.components["ginkgo_hip"].libs = ["ginkgo_hip" + debug_suffix]
+
+        self.cpp_info.components["ginkgo_reference"].names["cmake_find_package"] = "ginkgo_reference"
+        self.cpp_info.components["ginkgo_reference"].names["cmake_find_package_multi"] = "ginkgo_reference"
+        self.cpp_info.components["ginkgo_reference"].libs = ["ginkgo_reference" + debug_suffix]
