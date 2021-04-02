@@ -14,6 +14,7 @@ file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
+set(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 include(GNUInstallDirs)
 
