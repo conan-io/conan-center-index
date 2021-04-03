@@ -1,7 +1,7 @@
 sources:
   "1.8.20":
-    url: "http://doxygen.nl/files/doxygen-1.8.20.src.tar.gz"
-    sha256: "5a018e57d26d7eeac415e676fe7817ae8be9828ed338d9701a2b26c7630389ce"
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.20.src.tar.gz"
+    sha256: "e0db6979286fd7ccd3a99af9f97397f2bae50532e4ecb312aa18862f8401ddec"
   "1.8.18":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.18.src.tar.gz"
     sha256: "18173d9edc46d2d116c1f92a95d683ec76b6b4b45b817ac4f245bb1073d00656"

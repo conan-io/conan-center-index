@@ -1,6 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.client.tools import msvs_toolset
 import os
 import shutil
 import string
@@ -80,7 +79,7 @@ class JemallocConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH", None):
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     @property
     def _autotools_args(self):
@@ -155,7 +154,7 @@ class JemallocConan(ConanFile):
                 if self.settings.build_type == "Debug":
                     libname += "d"
             else:
-                toolset = msvs_toolset(self.settings)
+                toolset = tools.msvs_toolset(self.settings)
                 toolset_number = "".join(c for c in toolset if c in string.digits)
                 libname += "-vc{}-{}".format(toolset_number, self._msvc_build_type)
         else:

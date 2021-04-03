@@ -95,7 +95,7 @@ class FontconfigConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"

@@ -186,7 +186,7 @@ MALLOCPROXY.DEF =
                 context = tools.intel_compilervars(self)
             elif self._is_msvc:
                 # intentionally not using vcvars for clang-cl yet
-                context = tools.vcvars(self.settings)
+                context = tools.vcvars(self)
             with context:
                 self.run("%s %s %s" % (make, extra, " ".join(targets)))
 

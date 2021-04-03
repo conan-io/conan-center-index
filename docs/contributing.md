@@ -1,16 +1,20 @@
 # Contributing to Conan Center Index
 
-
 The following summarizes the process for contributing to the CCI (Conan Center Index) project.
 
-Community
----------
+<!-- toc -->
+## Contents
+
+  * [Community](#community)
+  * [Dev-flow & Pull Requests](#dev-flow--pull-requests)
+  * [Issues](#issues)<!-- endToc -->
+
+## Community
 
 Conan Center Index is an Open Source MIT licensed project.
 Conan Center Index is developed by the Conan maintainers and a great community of contributors.
 
-Dev-flow & Pull Requests
-------------------------
+## Dev-flow & Pull Requests
 
 CCI follows the ["GitFlow"](https://datasift.github.io/gitflow/IntroducingGitFlow.html) branching model.
 Issues are triaged and categorized mainly by type (package request, bug...) and priority (high, medium...) using GitHub
@@ -29,8 +33,7 @@ To contribute follow the next steps:
 
 The ``conan-io`` organization maintainers will review and help with the packaging.
 
-Issues
-------
+## Issues
 
 If you think you found a bug in CCI or in a recipe, open an issue indicating the following:
 

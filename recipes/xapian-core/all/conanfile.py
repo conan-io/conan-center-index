@@ -87,7 +87,7 @@ class XapianCoreConan(ConanFile):
         self._autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in self._autotools.library_paths])
         self._autotools.library_paths = []
         if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
+            self._autotools.cxx_flags.extend(["-EHsc", "-FS"])
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",

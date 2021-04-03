@@ -48,6 +48,8 @@ class LibBsdConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if tools.is_apple_os(self.settings.os):
+            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
         ]
         if self.options.shared:

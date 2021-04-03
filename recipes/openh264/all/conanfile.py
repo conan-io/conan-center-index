@@ -162,7 +162,7 @@ class OpenH264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        self.cpp_info.names["pkg_config"] = "libopenh264"
+        self.cpp_info.names["pkg_config"] = "openh264"
         libcxx = tools.stdcpp_library(self)
         if libcxx:
             self.cpp_info.system_libs.append(libcxx)

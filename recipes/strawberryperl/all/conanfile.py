@@ -10,17 +10,17 @@ class StrawberryperlConan(ConanFile):
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "installer", "perl", "windows")
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
     short_paths = True
 
     def configure(self):
-        if self.settings.os_build != "Windows":
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only windows supported for Strawberry Perl.")
 
     def build(self):
-        arch_build = str(self.settings.arch_build)
-        url = self.conan_data["sources"][self.version]["url"][arch_build]
-        sha256 = self.conan_data["sources"][self.version]["sha256"][arch_build]
+        arch = str(self.settings.arch)
+        url = self.conan_data["sources"][self.version]["url"][arch]
+        sha256 = self.conan_data["sources"][self.version]["sha256"][arch]
         tools.get(url, sha256=sha256)
 
     def package(self):
@@ -37,3 +37,5 @@ class StrawberryperlConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: %s" % bin_path)
         self.env_info.PATH.append(bin_path)
+
+        self.deps_user_info.perl = os.path.join(self.package_folder, "bin", "perl.exe").replace("\\", "/")

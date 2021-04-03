@@ -7,7 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 class EnttConan(ConanFile):
     name = "entt"
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
-    topics = ("conan," "entt", "gaming", "entity", "ecs")
+    topics = ("conan", "entt", "gaming", "entity", "ecs")
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"

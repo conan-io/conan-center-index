@@ -5,6 +5,9 @@ import glob
 import shutil
 
 
+required_conan_version = ">=1.32.0"
+
+
 class MongoCxxConan(ConanFile):
     name = "mongo-cxx-driver"
     license = "Apache-2.0"
@@ -44,7 +47,12 @@ class MongoCxxConan(ConanFile):
 
     @property
     def _minimal_std_version(self):
-        return "17" if self.options.polyfill == "std" else "11"
+        return {
+            "std": "17",
+            "experimental": "14",
+            "boost": "11",
+            "polyfill": "11"
+        }[str(self.options.polyfill)]
 
     @property
     def _compilers_minimum_version(self):
@@ -54,6 +62,14 @@ class MongoCxxConan(ConanFile):
                 "Visual Studio": "15",
                 "gcc": "7",
                 "clang": "5",
+                "apple-clang": "10"
+            }
+        elif self.options.polyfill == "experimental":
+            # C++14
+            return {
+                "Visual Studio": "15",
+                "gcc": "5",
+                "clang": "3.5",
                 "apple-clang": "10"
             }
         elif self.options.polyfill == "boost":
@@ -73,19 +89,27 @@ class MongoCxxConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("mongo-c-driver/1.17.3")
+        if self.options.polyfill == "boost":
+            self.requires("boost/1.75.0")
+
+    def validate(self):
+        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
+            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
+
         if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
             # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
             raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
-        if self.options.polyfill == "experimental":
-            # TODO: add experimental support
-            # Cannot model std::experimental (how to check availability in stdlib?)
-            raise ConanInvalidConfiguration("experimental polyfill is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimal_std_version)
 
         compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
+            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
+
         if compiler not in self._compilers_minimum_version:
             self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
             return
@@ -98,11 +122,6 @@ class MongoCxxConan(ConanFile):
                     self._minimal_std_version
                 )
             )
-
-    def requirements(self):
-        self.requires("mongo-c-driver/1.17.2")
-        if self.options.polyfill == "boost":
-            self.requires("boost/1.74.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -138,10 +157,7 @@ class MongoCxxConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
-            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
         self._patch_sources()
-
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -171,7 +187,6 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["mongocxx"].names["cmake_find_package"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
         self.cpp_info.components["mongocxx"].names["cmake_find_package_multi"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
         self.cpp_info.components["mongocxx"].names["pkg_config"] = "libmongocxx"
-        self.cpp_info.components["mongocxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "mongocxx")]
         self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
@@ -181,7 +196,6 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].names["cmake_find_package"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
         self.cpp_info.components["bsoncxx"].names["cmake_find_package_multi"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
         self.cpp_info.components["bsoncxx"].names["pkg_config"] = "libbsoncxx" if self.options.shared else "libbsoncxx-static"
-        self.cpp_info.components["bsoncxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "bsoncxx")]
         self.cpp_info.components["bsoncxx"].libs = ["bsoncxx" if self.options.shared else "bsoncxx-static"]
         if not self.options.shared:
             self.cpp_info.components["bsoncxx"].defines = ["BSONCXX_STATIC"]

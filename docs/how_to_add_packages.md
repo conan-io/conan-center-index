@@ -1,10 +1,28 @@
 # Adding Packages to ConanCenter
 
+<!-- toc -->
+## Contents
+
+  * [Join the Early Access Program](#join-the-early-access-program)
+  * [More Information about Recipes](#more-information-about-recipes)
+    * [Before start](#before-start)
+    * [The recipe folder](#the-recipe-folder)
+    * [The version folder/s](#the-version-folders)
+    * [The conanfile.py and `test_package` folder](#the-conanfilepy-and-test_package-folder)
+    * [The `conandata.yml`](#the-conandatayml)
+    * [How to provide a good recipe](#how-to-provide-a-good-recipe)
+    * [Test the recipe locally](#test-the-recipe-locally)
+    * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
+    * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
+
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please write a comment
+requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors
+to the new process.
 
-All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This process helps CCI against spam and malicious code.
+All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This
+process helps conan-center-index against spam and malicious code.
 
 The contribution of packages is done via pull requests to the recipes found in this Github repository https://github.com/conan-io/conan-center-index.
 
@@ -165,6 +183,12 @@ Call `conan create . lib/1.0@` in the folder of the recipe using the profile you
 
     cd conan-center-index/recipes/boost/all
     conan create . 1.74.0@
+
+### Updating conan hooks on your machine
+
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
+
+    conan config install
 
 ### Debugging failed builds
 

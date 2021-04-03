@@ -151,3 +151,5 @@ class MpirConan(ConanFile):
             if self.options.get_safe("enable_cxx"):
                 self.cpp_info.libs.append("gmpxx")
             self.cpp_info.libs.append("gmp")
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("MSC_USE_DLL")

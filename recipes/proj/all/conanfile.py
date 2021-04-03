@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.28.0"
 
@@ -49,14 +49,11 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("sqlite3/3.33.0")
+        self.requires("sqlite3/3.34.1")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.73.0")
-
-    def build_requirements(self):
-        self.build_requires("sqlite3/3.33.0")
+            self.requires("libcurl/7.75.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -105,6 +102,7 @@ class ProjConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         proj_version = tools.Version(self.version)
@@ -114,8 +112,10 @@ class ProjConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
+        self.cpp_info.names["pkg_config"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+        self.cpp_info.components["projlib"].names["pkg_config"] = "proj"
         self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.components["projlib"].system_libs.append("m")

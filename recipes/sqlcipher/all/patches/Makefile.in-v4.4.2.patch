@@ -1,0 +1,15 @@
+diff --git a/Makefile.in b/Makefile.in
+index 3f810ab..7e03007 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -1469,9 +1469,8 @@ lib_install:	libsqlcipher.la
+ 	$(INSTALL) -d $(DESTDIR)$(libdir)
+ 	$(LTINSTALL) libsqlcipher.la $(DESTDIR)$(libdir)
+ 
+-install:	sqlcipher$(TEXE) lib_install sqlite3.h sqlcipher.pc ${HAVE_TCL:1=tcl_install}
++install:	lib_install sqlite3.h
+ 	$(INSTALL) -d $(DESTDIR)$(bindir)
+-	$(LTINSTALL) sqlcipher$(TEXE) $(DESTDIR)$(bindir)
+ 	$(INSTALL) -d $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 sqlite3.h $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 $(TOP)/src/sqlite3ext.h $(DESTDIR)$(includedir)

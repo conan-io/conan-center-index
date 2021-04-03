@@ -23,6 +23,9 @@ sources:
   "2.17.2":
     url: "https://github.com/randombit/botan/archive/2.17.2.tar.gz"
     sha256: "3d99da64573abab6d6e8036a45f8c567a57721c8f23850e05aadd84fc2e0075c"
+  "2.17.3":
+    url: "https://github.com/randombit/botan/archive/2.17.3.tar.gz"
+    sha256: "544c62e43be0c60fff7ac8707ee99fe134c75bef06bded217d04f0a4b333519a"
 patches:
   "2.12.1":
      - patch_file: "patches/dll-dir.patch"

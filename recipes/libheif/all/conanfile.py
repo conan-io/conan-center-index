@@ -13,9 +13,13 @@ class Libheif(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False],
-               "with_x265": [True, False]}
+               "with_x265": [True, False],
+               "with_dav1d": [True, False],
+               "with_libaomav1": [True, False]}
     default_options = {"shared": False, "fPIC": True,
-                       "with_x265": False}
+                       "with_x265": False,
+                       "with_dav1d": False,
+                       "with_libaomav1": False}
 
     _cmake = None
 
@@ -26,6 +30,10 @@ class Libheif(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if tools.Version(self.version) < "1.11.0":
+            # dav1d supported since 1.10.0 but usable option `WITH_DAV1D`
+            # for controlling support exists only since 1.11.0
+            del self.options.with_dav1d
 
     def configure(self):
         if self.options.shared:
@@ -42,6 +50,10 @@ class Libheif(ConanFile):
         self.requires("libde265/1.0.8")
         if self.options.with_x265:
             self.requires("libx265/3.4")
+        if self.options.get_safe('with_libaomav1'):
+            self.requires("libaom-av1/2.0.1")
+        if self.options.get_safe('with_dav1d'):
+            self.requires("dav1d/0.8.1")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -52,8 +64,15 @@ class Libheif(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EXAMPLES"] = False
+        self._cmake.definitions['WITH_RAV1E'] = False
+        # x265
         self._cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_X265'] = not self.options.with_x265
-        self._cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_LibAOM'] = True
+        self._cmake.definitions['WITH_X265'] = self.options.with_x265
+        # aom
+        self._cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_LibAOM'] = not self.options.get_safe('with_libaomav1', False)
+        self._cmake.definitions['WITH_AOM'] = self.options.get_safe('with_libaomav1', False)
+        # dav1d
+        self._cmake.definitions['WITH_DAV1D'] = self.options.get_safe('with_dav1d', False)
         self._cmake.configure()
         return self._cmake
 
@@ -80,6 +99,10 @@ class Libheif(ConanFile):
         self.cpp_info.components["heif"].requires = ["libde265::libde265"]
         if self.options.with_x265:
             self.cpp_info.components["heif"].requires.append("libx265::libx265")
+        if self.options.get_safe('with_libaomav1'):
+            self.cpp_info.components["heif"].requires.append("libaom-av1::libaom-av1")
+        if self.options.get_safe('with_dav1d'):
+            self.cpp_info.components["heif"].requires.append("dav1d::dav1d")
 
         self.cpp_info.components["heif"].libs = ["heif"]
 
