@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 project(imguizmo CXX)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
@@ -14,7 +16,6 @@ file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-set(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 include(GNUInstallDirs)
 
