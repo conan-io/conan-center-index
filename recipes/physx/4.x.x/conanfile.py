@@ -153,6 +153,8 @@ class PhysXConan(ConanFile):
                                   "")
 
         # No error for compiler warnings
+        tools.replace_in_file(os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
+                              "/WX", "")
         for cmake_os in ("linux", "mac", "android", "ios"):
             tools.replace_in_file(os.path.join(physx_source_cmake_dir, cmake_os, "CMakeLists.txt"),
                                   "-Werror", "")
