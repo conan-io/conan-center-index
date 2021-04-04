@@ -7,7 +7,7 @@ class RmluiConan(ConanFile):
     description = "RmlUi - The HTML/CSS User Interface Library Evolved"
     homepage = "https://github.com/mikke89/RmlUi"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "https://github.com/mikke89/RmlUi/blob/master/LICENSE"
+    license = "MIT"
     topics = ("conan", "css", "gui", "html", "lua", "rmlui")
     settings = "os", "compiler", "build_type", "arch"
     options = {
