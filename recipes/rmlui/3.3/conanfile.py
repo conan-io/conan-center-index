@@ -40,8 +40,14 @@ class RmluiConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
-        self.requires("freetype/2.10.1")
+        if not self.options.no_font_interface_default:
+            self.requires("freetype/2.10.1")
+
         if self.options.build_lua_bindings:
             self.requires("lua/5.3.5")
 
@@ -97,4 +103,21 @@ class RmluiConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.disable_rtti_and_exceptions:
+            self.cpp_info.defines.append("RMLUI_USE_CUSTOM_RTTI")
+
+        if self.options.no_thirdparty_containers:
+            self.cpp_info.defines.append("RMLUI_NO_THIRDPARTY_CONTAINERS")
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("RMLUI_STATIC_LIB")
+
+        self.cpp_info.libs.append("RmlDebugger")
+
+        if self.options.build_lua_bindings:
+            self.cpp_info.libs.append("RmlControlsLua")
+        self.cpp_info.libs.append("RmlControls")
+
+        if self.options.build_lua_bindings:
+            self.cpp_info.libs.append("RmlCoreLua")
+        self.cpp_info.libs.append("RmlCore")
