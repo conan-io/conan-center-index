@@ -4,11 +4,6 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(test_kaitai test_kaitai.cpp)
-target_link_libraries(test_kaitai ${CONAN_LIBS})
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package ${CONAN_LIBS})
 
-# CTest is a testing tool that can be used to test your project.
-enable_testing()
-add_test(NAME test_kaitai
-         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-         COMMAND test_kaitai)
