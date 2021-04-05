@@ -21,4 +21,4 @@ sources:
       "Macos":
           url: https://dl.google.com/android/repository/android-ndk-r22-darwin-x86_64.zip
           sha256: 14fce4dea7fb3facbc0e3d20270007bffec3ba383aec02e8b0e0dad8d8782892
-
+  "installed": ~

@@ -18,6 +18,9 @@ class AndroidNDKInstallerConan(ConanFile):
     settings = {"os": ["Windows", "Linux", "Macos"],
                 "arch": ["x86_64"]}
 
+    options = {"with_existing_ndk": [True, False]}
+    default_options = {"with_existing_ndk" : False}
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -27,10 +30,13 @@ class AndroidNDKInstallerConan(ConanFile):
             raise ConanInvalidConfiguration("No binaries available for other than 'x86_64' architectures")
 
     def source(self):
-        tarballs = self.conan_data["sources"][self.version]["url"]
-        tools.get(**tarballs[str(self.settings.os)])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        if self.options.with_existing_ndk:
+            self.output.info(f"Skip Android NDK download and extract. Using NDK from {self._android_ndk_root}")
+        else:
+            tarballs = self.conan_data["sources"][self.version]["url"]
+            tools.get(**tarballs[str(self.settings.os)])
+            extracted_dir = self.name + "-" + self.version
+            os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         pass # no build, but please also no warnings
@@ -71,7 +77,7 @@ class AndroidNDKInstallerConan(ConanFile):
     def _fix_permissions(self):
         if os.name != 'posix':
             return
-        for root, _, files in os.walk(self.package_folder):
+        for root, _, files in os.walk(self._android_ndk_root):
             for filename in files:
                 filename = os.path.join(root, filename)
                 with open(filename, 'rb') as f:
@@ -96,12 +102,14 @@ class AndroidNDKInstallerConan(ConanFile):
                         self._chmod_plus_x(filename)
 
     def package(self):
-        self.copy(pattern="*", dst=".", src=self._source_subfolder, keep_path=True, symlinks=True)
-        self.copy(pattern="*NOTICE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*NOTICE.toolchain", dst="licenses", src=self._source_subfolder)
+        if not self.options.with_existing_ndk:
+            self.copy(pattern="*", dst=".", src=self.source_subfolder, keep_path=True, symlinks=True)
+            self.copy(pattern="*NOTICE", dst="licenses", src=self.source_subfolder)
+            self.copy(pattern="*NOTICE.toolchain", dst="licenses", src=self.source_subfolder)
+            self._fix_permissions()
+
         self.copy("cmake-wrapper.cmd")
         self.copy("cmake-wrapper")
-        self._fix_permissions()
 
     @property
     def _host(self):
@@ -109,7 +117,7 @@ class AndroidNDKInstallerConan(ConanFile):
 
     @property
     def _ndk_root(self):
-        return os.path.join(self.package_folder, "toolchains", "llvm", "prebuilt", self._host)
+        return os.path.join(self._android_ndk_root, "toolchains", "llvm", "prebuilt", self._host)
 
     def _tool_name(self, tool):
         if 'clang' in tool:
@@ -135,19 +143,36 @@ class AndroidNDKInstallerConan(ConanFile):
         if os.name == 'posix':
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
+    @property
+    def _android_ndk_root(self):
+        # TODO caching
+        if not self.options.with_existing_ndk:
+            return self.package_folder
+
+        if "ANDROID_NDK_ROOT" in os.environ:
+            if not os.path.exists(os.path.join(android_ndk_root, "ndk-build")):
+                raise Exception(f"Path in ANDROID_NDK_ROOT={android_ndk_root} doesn't exists")
+
+            return os.environ.get("ANDROID_NDK_ROOT")
+        else:
+            raise Exception("Option with_existing_ndk=True but environment variable ANDROID_NDK_ROOT not defined")
+
     def package_info(self):
+        if self.options.with_existing_ndk:
+            self.output.info(f"Skip Android NDK download and extract. Using NDK from {self._android_ndk_root}")
+
         # test shall pass, so this runs also in the build as build requirement context
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
-        self.env_info.PATH.append(self.package_folder)
+        self.env_info.PATH.append(self._android_ndk_root)
 
         # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located. 
         # That's what most NDK-related scripts use (inside the NDK, and outside of it).
         # https://groups.google.com/g/android-ndk/c/qZjhOaynHXc
-        self.output.info('Creating ANDROID_NDK_ROOT environment variable: %s' % self.package_folder)
-        self.env_info.ANDROID_NDK_ROOT = self.package_folder
+        self.output.info('Creating ANDROID_NDK_ROOT environment variable: %s' % self._android_ndk_root)
+        self.env_info.ANDROID_NDK_ROOT = self._android_ndk_root
 
-        self.output.info('Creating ANDROID_NDK_HOME environment variable: %s' % self.package_folder)
-        self.env_info.ANDROID_NDK_HOME = self.package_folder
+        self.output.info('Creating ANDROID_NDK_HOME environment variable: %s' % self._android_ndk_root)
+        self.env_info.ANDROID_NDK_HOME = self._android_ndk_root
 
         #  this is not enough, I can kill that .....
         if not hasattr(self, 'settings_target'):
@@ -187,7 +212,7 @@ class AndroidNDKInstallerConan(ConanFile):
         self.output.info('Creating CONAN_CMAKE_PROGRAM environment variable: %s' % cmake_wrapper)
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
 
-        toolchain = os.path.join(self.package_folder, "build", "cmake", "android.toolchain.cmake")
+        toolchain = os.path.join(self._android_ndk_root, "build", "cmake", "android.toolchain.cmake")
         self.output.info('Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: %s' % toolchain)
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain
 
