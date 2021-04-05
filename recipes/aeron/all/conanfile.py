@@ -11,22 +11,18 @@ class AeronConan(ConanFile):
     topics = ("conan", "aeron", "udp", "messaging", "low-latency")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/real-logic/aeron/wiki"
-    license = "Apache License 2.0"
+    license = "Apache-2.0"
     exports_sources = "CMakeLists.txt",
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_aeron_driver": [True, False],
-        "build_tests": [True, False],
-        "build_samples": [True, False],
+        "build_aeron_driver": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_aeron_driver": False,
-        "build_tests": False,
-        "build_samples": False
+        "build_aeron_driver": False
     }
     generators = "cmake",
 
@@ -48,10 +44,8 @@ class AeronConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.os == "Windows":
-            self.requires("pthreads4w/3.0.0")
-            if self.options.shared:
-                raise ConanInvalidConfiguration("{} option shared=True is not supported on Windows", self.name)
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("{} option shared=True is not supported on Windows", self.name)
 
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
@@ -72,8 +66,16 @@ class AeronConan(ConanFile):
                 "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
             )
 
+    def requirements(self):
+        if self.settings.os == "Windows":
+            self.requires("pthreads4w/3.0.0")
+
     def build_requirements(self):
         self.build_requires("zulu-openjdk/11.0.8")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -88,8 +90,8 @@ class AeronConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["AERON_INSTALL_TARGETS"] = True
         cmake.definitions["BUILD_AERON_DRIVER"] = self.options.build_aeron_driver
-        cmake.definitions["AERON_TESTS"] = self.options.build_tests
-        cmake.definitions["AERON_BUILD_SAMPLES"] = self.options.build_samples
+        cmake.definitions["AERON_TESTS"] = False
+        cmake.definitions["AERON_BUILD_SAMPLES"] = False
         cmake.definitions["BUILD_AERON_ARCHIVE_API"] = True
         cmake.definitions["AERON_ENABLE_NONSTANDARD_OPTIMIZATIONS"] = True
 
@@ -99,12 +101,6 @@ class AeronConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-
-        if self.options.build_tests:
-            self.output.info("Running {} tests".format(self.name))
-            source_path = os.path.join(self._build_subfolder, self._source_subfolder)
-            with tools.chdir(source_path):
-                self.run("ctest")
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -149,9 +145,6 @@ class AeronConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append("include/{}".format(self.name))
-
-        self.output.info("{} requires C++11. Enforcing for downstream targets...".format(self.name))
-        self.cpp_info.cppflags.append("-std=c++11")
 
         # See: https://github.com/real-logic/aeron/blob/23f9ef8c6bd25955c3a64454f4e5d9c4a86c8d5a/CMakeLists.txt#L213
         self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
