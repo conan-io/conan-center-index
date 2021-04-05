@@ -8,7 +8,7 @@ add_executable(test_kaitai test_kaitai.cpp)
 target_link_libraries(test_kaitai ${CONAN_LIBS})
 
 # CTest is a testing tool that can be used to test your project.
-# enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+enable_testing()
+add_test(NAME test_kaitai
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+         COMMAND test_kaitai)
