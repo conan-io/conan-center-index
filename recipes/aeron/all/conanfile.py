@@ -64,9 +64,9 @@ class AeronConan(ConanFile):
             "apple-clang": "8"
         }
 
-        if compiler not in minimal_version:
+        if compiler in minimal_version and compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
-                "{} requires a compiler newer than {} {}".format(self.name, compiler, compiler_version)
+                "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
             )
 
     def build_requirements(self):
