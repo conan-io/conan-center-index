@@ -58,7 +58,7 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration("{} currently only supports 64-bit builds on Windows".format(self.name))
 
         minimal_version = {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "5",
             "clang": "6",
             "apple-clang": "8"
