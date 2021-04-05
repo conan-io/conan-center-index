@@ -47,8 +47,11 @@ class AeronConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
         if self.settings.os == "Windows":
             self.requires("pthreads4w/3.0.0")
+            if self.options.shared:
+                raise ConanInvalidConfiguration("{} option shared=True is not supported on Windows", self.name)
 
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
@@ -130,13 +133,15 @@ class AeronConan(ConanFile):
         libs_folder = os.path.join(self.package_folder, "lib")
         if self.options.shared:
             tools.remove_files_by_mask(libs_folder, "libaeron.so")
-            tools.remove_files_by_mask(libs_folder, "libaeron.dll")
+            tools.remove_files_by_mask(libs_folder, "aeron.dll")
             tools.remove_files_by_mask(libs_folder, "libaeron.dylib")
             tools.remove_files_by_mask(libs_folder, "*.a")
             tools.remove_files_by_mask(libs_folder, "*.lib")
         else:
             tools.remove_files_by_mask(libs_folder, "libaeron_static.a")
-            tools.remove_files_by_mask(libs_folder, "libaeron_static.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron_static.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron_client_shared.lib")
             tools.remove_files_by_mask(libs_folder, "*.dll")
             tools.remove_files_by_mask(libs_folder, "*.so")
             tools.remove_files_by_mask(libs_folder, "*.dylib")
