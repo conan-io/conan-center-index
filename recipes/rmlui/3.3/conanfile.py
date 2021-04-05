@@ -12,7 +12,6 @@ class RmluiConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "build_lua_bindings": [True, False],
-        "build_samples": [True, False],
         "disable_rtti_and_exceptions": [True, False],
         "enable_precompiled_headers": [True, False],
         "enable_tracy_profiling": [True, False],
@@ -23,7 +22,6 @@ class RmluiConan(ConanFile):
     }
     default_options = {
         "build_lua_bindings": False,
-        "build_samples": False,
         "disable_rtti_and_exceptions": False,
         "enable_precompiled_headers": True,
         "enable_tracy_profiling": False,
@@ -59,7 +57,7 @@ class RmluiConan(ConanFile):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.build_lua_bindings
-            self._cmake.definitions["BUILD_SAMPLES"] = self.options.build_samples
+            self._cmake.definitions["BUILD_SAMPLES"] = False
             self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = self.options.disable_rtti_and_exceptions
             self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = self.options.enable_precompiled_headers
             self._cmake.definitions["ENABLE_TRACY_PROFILING"] = self.options.enable_tracy_profiling
