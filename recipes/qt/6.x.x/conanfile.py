@@ -104,7 +104,7 @@ class QtConan(ConanFile):
         self.copy("qtmodules%s.conf" % self.version)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.19.1")
+        self.build_requires("cmake/3.20.0")
         self.build_requires("ninja/1.10.2")
         self.build_requires('pkgconf/1.7.3')
         if self.settings.compiler == "Visual Studio":
@@ -167,7 +167,7 @@ class QtConan(ConanFile):
             assert section.count('"') == 2
             modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
-            if status != "obsolete" and status != "ignore":
+            if status not in ["obsolete", "ignore", "additionalLibrary"]:
                 submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
@@ -196,10 +196,10 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
         if self.options.with_vulkan:
-            self.requires("vulkan-loader/1.2.170.0")
+            self.requires("vulkan-loader/1.2.172.0")
 
         if self.options.with_glib:
-            self.requires("glib/2.67.5")
+            self.requires("glib/2.68.0")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -209,7 +209,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/68.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.7.4")
+            self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.0.6")
@@ -218,7 +218,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.34.1")
+            self.requires("sqlite3/3.35.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
@@ -526,7 +526,7 @@ class QtConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
-        
+
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             if not os.path.isfile(module):
@@ -562,7 +562,7 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
-        
+
 
     def package_id(self):
         del self.info.options.cross_compile
