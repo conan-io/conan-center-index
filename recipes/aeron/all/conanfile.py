@@ -49,9 +49,25 @@ class AeronConan(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Windows":
             self.requires("pthreads4w/3.0.0")
-        if self.settings.compiler == "Visual Studio" and self.settings.arch != "x86_64":
+
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version)
+
+        if compiler == "Visual Studio" and self.settings.arch != "x86_64":
             # https://github.com/real-logic/aeron#c-build
             raise ConanInvalidConfiguration("{} currently only supports 64-bit builds on Windows".format(self.name))
+
+        minimal_version = {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "6",
+            "apple-clang": "8"
+        }
+
+        if compiler not in minimal_version:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler newer than {} {}".format(self.name, compiler, compiler_version)
+            )
 
     def build_requirements(self):
         self.build_requires("zulu-openjdk/11.0.8")
