@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.17)
+project(PackageTest)
+
+set(CMAKE_CXX_STANDARD 11)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-message(STATUS "CONAN_INCLUDE_DIRS is ${CONAN_INCLUDE_DIRS}")
-message(STATUS "CONAN_LIBS is ${CONAN_LIBS}")
-include_directories(${CONAN_INCLUDE_DIRS})
+find_package(icc REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
+target_include_directories(example PUBLIC ${CONAN_INCLUDE_DIRS_ICC})
+target_link_libraries(example icc::icc)

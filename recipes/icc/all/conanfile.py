@@ -66,17 +66,25 @@ class IccConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.rename('Inter-Component-Communication-{}'.format(self.version), dst=self._source_subfolder)
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
 
     def package(self):
-        self.copy("*.h", src="src", dst="include")
-        self.copy("*.hpp", src="src", dst="include")
+        self.copy(
+            '*.h',
+            dst='include',
+            src=os.path.join(self._source_subfolder, 'src')
+        )
+        self.copy(
+            '*.hpp',
+            dst='include',
+            src=os.path.join(self._source_subfolder, 'src')
+        )
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
