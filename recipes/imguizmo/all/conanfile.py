@@ -61,4 +61,4 @@ class ImGuizmoConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs += ["imguizmo"]
+        self.cpp_info.libs = ["imguizmo"]
