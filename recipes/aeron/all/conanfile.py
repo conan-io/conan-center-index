@@ -88,9 +88,9 @@ class AeronConan(ConanFile):
         cmake.install()
 
         with tools.chdir(self.package_folder):
-            os.rename("include", "old_include")
+            tools.rename("include", "old_include")
             os.makedirs("include")
-            os.rename("old_include", os.path.join("include", "aeron"))
+            tools.rename("old_include", os.path.join("include", "aeron"))
 
             for dll in glob.glob(os.path.join("lib", "*.dll")):
                 shutil.move(dll, "bin")
@@ -110,6 +110,9 @@ class AeronConan(ConanFile):
             tools.remove_files_by_mask(libs_folder, "*.so")
             tools.remove_files_by_mask(libs_folder, "*.dylib")
             tools.remove_files_by_mask(libs_folder, "*shared.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron_client.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron_driver.lib")
+            tools.remove_files_by_mask(libs_folder, "aeron.lib")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
