@@ -87,14 +87,19 @@ class HarfbuzzConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake = self._configure_cmake_compiler_flags(self._cmake)
         self._cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
-        self._cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
+        self._cmake.definitions["HB_HAVE_GRAPHITE2"] = False
         self._cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
-
-        if self.settings.os == "Windows":
+        self._cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
+        if tools.is_apple_os(self.settings.os):
+            self._cmake.definitions["HB_HAVE_CORETEXT"] = True
+        elif self.settings.os == "Windows":
             self._cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
             self._cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
             self._cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
-
+        self._cmake.definitions["HB_BUILD_UTILS"] = False
+        self._cmake.definitions["HB_BUILD_SUBSET"] = False
+        self._cmake.definitions["HB_HAVE_GOBJECT"] = False
+        self._cmake.definitions["HB_HAVE_INTROSPECTION"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
