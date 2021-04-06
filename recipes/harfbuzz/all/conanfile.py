@@ -113,7 +113,9 @@ class HarfbuzzConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "harfbuzz"
         self.cpp_info.names["cmake_find_package_multi"] = "harfbuzz"
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.with_icu:
+            self.cpp_info.libs.append("harfbuzz-icu")
+        self.cpp_info.libs.append("harfbuzz")
         self.cpp_info.includedirs.append(os.path.join("include", "harfbuzz"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
