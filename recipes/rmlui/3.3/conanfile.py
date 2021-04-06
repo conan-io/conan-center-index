@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conans.model.version import Version
+from six import StringIO
 import os
 
 
@@ -11,43 +13,47 @@ class RmluiConan(ConanFile):
     topics = ("conan", "css", "gui", "html", "lua", "rmlui")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "build_lua_bindings": [True, False],
-        "disable_rtti_and_exceptions": [True, False],
-        "enable_precompiled_headers": [True, False],
-        "enable_tracy_profiling": [True, False],
+        "enable_rtti_and_exceptions": [True, False],
         "fPIC": [True, False],
-        "no_font_interface_default": [True, False],
-        "no_thirdparty_containers": [True, False],
-        "shared": [True, False]
+        "shared": [True, False],
+        "with_freetype_font_interface": [True, False],
+        "with_lua_bindings": [True, False],
+        "with_thirdparty_containers": [True, False]
     }
     default_options = {
-        "build_lua_bindings": False,
-        "disable_rtti_and_exceptions": False,
-        "enable_precompiled_headers": True,
-        "enable_tracy_profiling": False,
+        "enable_rtti_and_exceptions": True,
         "fPIC": True,
-        "no_font_interface_default": False,
-        "no_thirdparty_containers": False,
-        "shared": False
+        "shared": False,
+        "with_freetype_font_interface": True,
+        "with_lua_bindings": False,
+        "with_thirdparty_containers": True
     }
     generators = "cmake_find_package"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
         if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
-        if not self.options.no_font_interface_default:
+        if self.options.with_freetype_font_interface:
             self.requires("freetype/2.10.1")
 
-        if self.options.build_lua_bindings:
+        if self.options.with_lua_bindings:
             self.requires("lua/5.3.5")
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -56,13 +62,18 @@ class RmluiConan(ConanFile):
     def _configure_cmake(self):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.build_lua_bindings
+
+            cmake_version_output = StringIO()
+            self.run("%s --version" % self._cmake._cmake_program, output=cmake_version_output)
+            cmake_version = Version(cmake_version_output.getvalue().split('\n', 1)[0].rsplit(' ', 1)[-1])
+
+            self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
             self._cmake.definitions["BUILD_SAMPLES"] = False
-            self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = self.options.disable_rtti_and_exceptions
-            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = self.options.enable_precompiled_headers
-            self._cmake.definitions["ENABLE_TRACY_PROFILING"] = self.options.enable_tracy_profiling
-            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = self.options.no_font_interface_default
-            self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = self.options.no_thirdparty_containers
+            self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
+            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = cmake_version >= "3.16.0"
+            self._cmake.definitions["ENABLE_TRACY_PROFILING"] = False
+            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = not self.options.with_freetype_font_interface
+            self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
 
             self._cmake.configure(source_folder=self._source_subfolder)
 
@@ -101,21 +112,21 @@ class RmluiConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        if self.options.disable_rtti_and_exceptions:
+        if not self.options.enable_rtti_and_exceptions:
             self.cpp_info.defines.append("RMLUI_USE_CUSTOM_RTTI")
-
-        if self.options.no_thirdparty_containers:
-            self.cpp_info.defines.append("RMLUI_NO_THIRDPARTY_CONTAINERS")
 
         if not self.options.shared:
             self.cpp_info.defines.append("RMLUI_STATIC_LIB")
 
+        if not self.options.with_thirdparty_containers:
+            self.cpp_info.defines.append("RMLUI_NO_THIRDPARTY_CONTAINERS")
+
         self.cpp_info.libs.append("RmlDebugger")
 
-        if self.options.build_lua_bindings:
+        if self.options.with_lua_bindings:
             self.cpp_info.libs.append("RmlControlsLua")
         self.cpp_info.libs.append("RmlControls")
 
-        if self.options.build_lua_bindings:
+        if self.options.with_lua_bindings:
             self.cpp_info.libs.append("RmlCoreLua")
         self.cpp_info.libs.append("RmlCore")
