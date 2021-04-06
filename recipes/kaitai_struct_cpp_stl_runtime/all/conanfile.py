@@ -14,14 +14,10 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     options = {
-        "shared": [True],
-        "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_iconv": [True, False]
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_zlib": False,
         "with_iconv": False
     }
@@ -41,14 +37,6 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
