@@ -103,7 +103,7 @@ class AeronConan(ConanFile):
         libs_folder = os.path.join(self.package_folder, "lib")
         if self.options.shared:
             tools.remove_files_by_mask(libs_folder, "*.a")
-            tools.remove_files_by_mask(libs_folder, "*.lib")
+            tools.remove_files_by_mask(libs_folder, "*static.lib")
         else:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
             tools.remove_files_by_mask(libs_folder, "*.so")
@@ -118,4 +118,4 @@ class AeronConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
         if self.settings.os == "Linux":
-            self.cpp_info.system_linux = ["m", "pthread"]
+            self.cpp_info.system_libs = ["m", "pthread"]
