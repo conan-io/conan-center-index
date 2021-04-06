@@ -110,8 +110,9 @@ class HarfbuzzConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "harfbuzz"
+        self.cpp_info.names["cmake_find_package_multi"] = "harfbuzz"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "harfbuzz"))
         if self.settings.os == "Linux":
