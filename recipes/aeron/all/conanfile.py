@@ -1,6 +1,5 @@
 import os
 import shutil
-import re
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -46,16 +45,6 @@ class AeronConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{} does not support 'shared=True' on Windows.".format(self.name))
-
-    def requirements(self):
-        if self.settings.os == "Windows":
-            self.requires("pthreads4w/3.0.0")
-
-    def build_requirements(self):
-        self.build_requires("zulu-openjdk/11.0.8")
-
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
@@ -99,6 +88,9 @@ class AeronConan(ConanFile):
             os.makedirs("include")
             os.rename("old_include", os.path.join("include", "aeron"))
 
+            for dll in glob.glob(os.path.join("lib", "*.dll")):
+                shutil.move(dll, "bin")
+
         archive_resources_dir = os.path.join(self._source_subfolder, "aeron-archive", "src", "main", "resources")
         self.copy("*", dst="res", src=archive_resources_dir)
 
@@ -113,6 +105,7 @@ class AeronConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
             tools.remove_files_by_mask(libs_folder, "*.so")
             tools.remove_files_by_mask(libs_folder, "*.dylib")
+            tools.remove_files_by_mask(libs_folder, "*shared.lib")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
