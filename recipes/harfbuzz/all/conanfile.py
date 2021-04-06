@@ -75,17 +75,11 @@ class HarfbuzzConan(ConanFile):
 
         return cmake
 
-    def _configure_cmake_macos(self, cmake):
-        if tools.is_apple_os(self.settings.os):
-            cmake.definitions["CMAKE_MACOSX_RPATH"] = True
-        return cmake
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake = self._configure_cmake_compiler_flags(self._cmake)
-        self._cmake = self._configure_cmake_macos(self._cmake)
         self._cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
         self._cmake.definitions["HB_BUILD_TESTS"] = False
         self._cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
