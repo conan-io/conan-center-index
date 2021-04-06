@@ -84,7 +84,6 @@ class HarfbuzzConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake = self._configure_cmake_compiler_flags(self._cmake)
         self._cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
-        self._cmake.definitions["HB_BUILD_TESTS"] = False
         self._cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
         self._cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
 
