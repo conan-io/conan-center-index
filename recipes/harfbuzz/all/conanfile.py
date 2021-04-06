@@ -69,23 +69,10 @@ class HarfbuzzConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-    def _configure_cmake_compiler_flags(self, cmake):
-        flags = []
-        compiler = str(self.settings.compiler)
-        if compiler in ("clang", "apple-clang"):
-            flags.append("-Wno-deprecated-declarations")
-        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
-            flags.append("-Wa,-mbig-obj")
-        cmake.definitions["CMAKE_C_FLAGS"] = " ".join(flags)
-        cmake.definitions["CMAKE_CXX_FLAGS"] = cmake.definitions["CMAKE_C_FLAGS"]
-
-        return cmake
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake = self._configure_cmake_compiler_flags(self._cmake)
         self._cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
         self._cmake.definitions["HB_HAVE_GRAPHITE2"] = False
         self._cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
@@ -100,6 +87,11 @@ class HarfbuzzConan(ConanFile):
         self._cmake.definitions["HB_BUILD_SUBSET"] = False
         self._cmake.definitions["HB_HAVE_GOBJECT"] = False
         self._cmake.definitions["HB_HAVE_INTROSPECTION"] = False
+        # fix for MinGW debug build
+        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
+            self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
