@@ -18,17 +18,17 @@ class qt(Generator):
     def content(self):
         return """[Paths]
 Prefix = %s
-ArchData = bin/archdatadir
-HostData = bin/archdatadir
-Data = bin/datadir
-Sysconf = bin/sysconfdir
-LibraryExecutables = bin/archdatadir/bin
-Plugins = bin/archdatadir/plugins
-Imports = bin/archdatadir/imports
-Qml2Imports = bin/archdatadir/qml
-Translations = bin/datadir/translations
-Documentation = bin/datadir/doc
-Examples = bin/datadir/examples""" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+ArchData = res/archdatadir
+HostData = res/archdatadir
+Data = res/datadir
+Sysconf = res/sysconfdir
+LibraryExecutables = res/archdatadir/bin
+Plugins = res/archdatadir/plugins
+Imports = res/archdatadir/imports
+Qml2Imports = res/archdatadir/qml
+Translations = res/datadir/translations
+Documentation = res/datadir/doc
+Examples = res/datadir/examples""" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
 class QtConan(ConanFile):
