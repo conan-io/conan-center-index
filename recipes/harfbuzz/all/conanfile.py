@@ -9,11 +9,8 @@ class HarfbuzzConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://harfbuzz.org"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -33,10 +30,30 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": True
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        else:
+            del self.options.with_gdi
+            del self.options.with_uniscribe
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_freetype:
@@ -45,19 +62,6 @@ class HarfbuzzConan(ConanFile):
             self.requires("icu/68.2")
         if self.options.with_glib:
             self.requires("glib/2.68.0")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        else:
-            del self.options.with_gdi
-            del self.options.with_uniscribe
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
