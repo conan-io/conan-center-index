@@ -2,6 +2,9 @@ sources:
   "3.9.1":
     sha256: 98e615d592d237f94db8bf033fba78cd404d979b0b70351a9e5aaff725398357
     url: https://github.com/protocolbuffers/protobuf/archive/v3.9.1.tar.gz
+  "3.11.3":
+    sha256: cf754718b0aa945b00550ed7962ddc167167bd922b842199eeb6505e6f344852
+    url: https://github.com/protocolbuffers/protobuf/archive/v3.11.3.tar.gz
   "3.11.4":
     sha256: a79d19dcdf9139fa4b81206e318e33d245c4c9da1ffed21c87288ed4380426f9
     url: https://github.com/protocolbuffers/protobuf/archive/v3.11.4.tar.gz
