@@ -18,7 +18,8 @@ class HarfbuzzConan(ConanFile):
         "with_icu": [True, False],
         "with_glib": [True, False],
         "with_gdi": [True, False],
-        "with_uniscribe": [True, False]
+        "with_uniscribe": [True, False],
+        "with_directwrite": [True, False],
     }
     default_options = {
         "shared": False,
@@ -27,7 +28,8 @@ class HarfbuzzConan(ConanFile):
         "with_icu": False,
         "with_glib": True,
         "with_gdi": True,
-        "with_uniscribe": True
+        "with_uniscribe": True,
+        "with_directwrite": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -48,6 +50,7 @@ class HarfbuzzConan(ConanFile):
         else:
             del self.options.with_gdi
             del self.options.with_uniscribe
+            del self.options.with_directwrite
 
     def configure(self):
         if self.options.shared:
@@ -90,6 +93,7 @@ class HarfbuzzConan(ConanFile):
         if self.settings.os == "Windows":
             self._cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
             self._cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
+            self._cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -116,6 +120,14 @@ class HarfbuzzConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs.extend(["dwrite", "rpcrt4", "usp10", "gdi32", "user32"])
+            self.cpp_info.system_libs.append("user32")
+            if self.options.with_gdi or self.options.with_uniscribe:
+                self.cpp_info.system_libs.append("gdi32")
+            if self.options.with_uniscribe or self.options.with_directwrite:
+                self.cpp_info.system_libs.append("rpcrt4")
+            if self.options.with_uniscribe:
+                self.cpp_info.system_libs.append("usp10")
+            if self.options.with_directwrite:
+                self.cpp_info.system_libs.append("dwrite")
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
