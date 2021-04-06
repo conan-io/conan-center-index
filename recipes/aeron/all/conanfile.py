@@ -80,6 +80,10 @@ class AeronConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MT", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/MTd", "")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
@@ -117,5 +121,9 @@ class AeronConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "aeron"))
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
+
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["wsock32", "ws2_32", "Iphlpapi"]
+            self.cpp_info.defines.append("HAVE_WSAPOLL")
