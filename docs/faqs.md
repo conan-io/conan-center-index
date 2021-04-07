@@ -19,7 +19,7 @@ This section gathers the most common questions from the community related to pac
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
-  * [Why is `tools.check_min_cppstd call` not enough?](#)<!-- endToc -->
+  * [Why is `tools.check_min_cppstd call` not enough?](#why-is-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
