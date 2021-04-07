@@ -13,8 +13,8 @@ class HimalayaConan(ConanFile):
     description = "C++ library to calculate three-loop corrections to the Higgs boson mass in the MSSM"
     topics = ("conan", "high-energy", "physics", "hep", "Higgs", "mass", "MSSM")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {"fPIC": [True, False], "shared": [True, False]}
+    default_options = {"fPIC": True, "shared": False}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
