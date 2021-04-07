@@ -21,7 +21,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         "with_zlib": False,
         "with_iconv": False
     }
-
+    short_paths = True
     _cmake = None
 
     def requirements(self):
