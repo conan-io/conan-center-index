@@ -1,0 +1,4 @@
+sources:
+    "7.0.0":
+        url: "https://github.com/tudo-astroparticlephysics/PROPOSAL/archive/refs/tags/7.0.0.tar.gz"
+        sha256: "4c2dcc6292f3ec2a7ee33e551a9ef4d9d11e46efd4a36a171f4ad1add227c0e9"
