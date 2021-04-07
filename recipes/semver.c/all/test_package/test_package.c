@@ -2,7 +2,7 @@
 #include "semver.h"
 
 int main(void) {
-	semver_t v = {};
+	semver_t v;
 	semver_bump (&v);
 
 	const char ver[] = "1.0.0";
