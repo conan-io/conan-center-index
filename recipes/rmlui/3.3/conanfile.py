@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.model.version import Version
 from six import StringIO
 import os
 
@@ -14,21 +13,22 @@ class RmluiConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "enable_rtti_and_exceptions": [True, False],
+        "font_interface": ["freetype", None],
         "fPIC": [True, False],
         "shared": [True, False],
-        "with_freetype_font_interface": [True, False],
         "with_lua_bindings": [True, False],
         "with_thirdparty_containers": [True, False]
     }
     default_options = {
         "enable_rtti_and_exceptions": True,
+        "font_interface": "freetype",
         "fPIC": True,
         "shared": False,
-        "with_freetype_font_interface": True,
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
-    generators = "cmake_find_package"
+    exports_sources = ["CMakeLists.txt"]
+    generators = ["cmake", "cmake_find_package"]
 
     @property
     def _minimum_cpp_standard(self):
@@ -45,7 +45,7 @@ class RmluiConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.with_freetype_font_interface:
+        if self.options.font_interface == "freetype":
             self.requires("freetype/2.10.1")
 
         if self.options.with_lua_bindings:
@@ -65,17 +65,17 @@ class RmluiConan(ConanFile):
 
             cmake_version_output = StringIO()
             self.run("%s --version" % self._cmake._cmake_program, output=cmake_version_output)
-            cmake_version = Version(cmake_version_output.getvalue().split('\n', 1)[0].rsplit(' ', 1)[-1])
+            cmake_version = tools.Version(cmake_version_output.getvalue().split('\n', 1)[0].rsplit(' ', 1)[-1])
 
             self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
             self._cmake.definitions["BUILD_SAMPLES"] = False
             self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
             self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = cmake_version >= "3.16.0"
             self._cmake.definitions["ENABLE_TRACY_PROFILING"] = False
-            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = not self.options.with_freetype_font_interface
+            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
             self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
 
-            self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.configure()
 
         return self._cmake
 
