@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from six import StringIO
 import os
 
 
@@ -27,6 +26,7 @@ class RmluiConan(ConanFile):
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
+    build_requires = ["cmake/3.20.0"]
     exports_sources = ["CMakeLists.txt"]
     generators = ["cmake", "cmake_find_package"]
 
@@ -62,15 +62,10 @@ class RmluiConan(ConanFile):
     def _configure_cmake(self):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
-
-            cmake_version_output = StringIO()
-            self.run("%s --version" % self._cmake._cmake_program, output=cmake_version_output)
-            cmake_version = tools.Version(cmake_version_output.getvalue().split('\n', 1)[0].rsplit(' ', 1)[-1])
-
             self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
             self._cmake.definitions["BUILD_SAMPLES"] = False
             self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
-            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = cmake_version >= "3.16.0"
+            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = True
             self._cmake.definitions["ENABLE_TRACY_PROFILING"] = False
             self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
             self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
