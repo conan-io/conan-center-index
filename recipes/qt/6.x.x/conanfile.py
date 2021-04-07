@@ -12,7 +12,8 @@ from conans.model import Generator
 class qt(Generator):
     @staticmethod
     def content_template(path, folder):
-        return textwrap.dedent("""[Paths]
+        return textwrap.dedent("""\
+            [Paths]
             Prefix = {0}
             ArchData = {1}/archdatadir
             HostData = {1}/archdatadir
