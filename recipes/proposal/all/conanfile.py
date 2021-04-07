@@ -36,6 +36,10 @@ class PROPOSALConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("cubicinterpolation/0.1.4")
         self.requires("spdlog/1.8.2")
