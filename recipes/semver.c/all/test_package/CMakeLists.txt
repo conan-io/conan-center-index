@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
+find_package(semver.c CONFIG REQUIRED)
+
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} semver.c::semver.c)
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)

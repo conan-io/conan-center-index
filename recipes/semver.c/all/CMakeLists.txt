@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION 3.1)
 project(semver.c C)
 
-if (CONAN_STATIC)
-  add_library(semver.c STATIC source_subfolder/semver.c)
-else()
-  add_library(semver.c SHARED source_subfolder/semver.c)
-endif()
+include(conanbuildinfo.cmake)
+conan_basic_setup()
+
+add_library(${CMAKE_PROJECT_NAME} source_subfolder/semver.c)
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
+	PUBLIC_HEADER source_subfolder/semver.h
+	C_STANDARD  99) 
+
+install(TARGETS ${CMAKE_PROJECT_NAME}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+	PUBLIC_HEADER DESTINATION include)
+
