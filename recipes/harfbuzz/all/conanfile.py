@@ -32,6 +32,8 @@ class HarfbuzzConan(ConanFile):
         "with_directwrite": True,
     }
 
+    short_paths = True
+
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
