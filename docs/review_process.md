@@ -156,4 +156,4 @@ That may explain the fact there are moments when the information showed in the f
 
 ## Stale PRs
 
-Conan Center Index uses [stale bot](https://github.com/probot/stale) to close abandoned pull requests. It's configured by [stale.yml](.github/stale.yml). When a pull request gets stale, [official reviewers](#official-reviewers) are allowed to update authot's PR, fixing or changing what is considered necessary to be accepted on review process.
+Conan Center Index uses [stale bot](https://github.com/probot/stale) to close abandoned pull requests. It's configured by [stale.yml](.github/stale.yml). When a pull request gets stale, [official reviewers](#official-reviewers) are allowed to update author's PR, fixing or changing what is considered necessary to be accepted on review process.
