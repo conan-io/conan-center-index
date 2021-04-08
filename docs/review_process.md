@@ -21,7 +21,8 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Automatic Merges](#automatic-merges)
     * [Merge](#merge)
     * [Upload](#upload)
-    * [Updating web front end](#updating-web-front-end)<!-- endToc -->
+    * [Updating web front end](#updating-web-front-end)
+  * [Stale PRs](#stale-prs)<!-- endToc -->
 
 ## [conan-center-bot](https://github.com/conan-center-bot)
 
