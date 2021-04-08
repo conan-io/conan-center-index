@@ -17,16 +17,12 @@ class PROPOSALConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_testing": [True, False],
-        "build_python": [True, False],
-        "build_documentation": [True, False],
+        "with_python": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_testing": False,
-        "build_python": False,
-        "build_documentation": False,
+        "with_python": False,
     }
 
     generators = "cmake_find_package", "cmake_paths"
@@ -43,12 +39,8 @@ class PROPOSALConan(ConanFile):
     def requirements(self):
         self.requires("cubicinterpolation/0.1.4")
         self.requires("spdlog/1.8.2")
-        if self.options.build_python:
+        if self.options.with_python:
             self.requires("pybind11/2.6.2")
-        if self.options.build_testing:
-            self.requires("gtest/1.10.0")
-        if self.options.build_documentation:
-            self.requires("doxygen/1.8.20")
 
     @property
     def _minimum_compilers_version(self):
@@ -74,11 +66,9 @@ class PROPOSALConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = self.options.build_testing
-        self._cmake.definitions["BUILD_PYTHON"] = self.options.build_python
-        self._cmake.definitions[
-            "BUILD_DOCUMENTATION"
-        ] = self.options.build_documentation
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python
+        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
