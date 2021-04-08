@@ -1,0 +1,4 @@
+sources:
+  "0.10.1":
+    url: "https://codeload.github.com/libusb/hidapi/zip/refs/tags/hidapi-0.10.1"
+    sha256: "7278906e2026343bf3926762fd48534b49a43c334c07f7da0bb51a383ad2ca5c"
