@@ -25,7 +25,7 @@ class PROPOSALConan(ConanFile):
         "with_python": False,
     }
 
-    generators = "cmake_find_package", "cmake_paths"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
