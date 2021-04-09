@@ -7,6 +7,7 @@
 # If you get an idea to solve one of this issues, please report here or fork.
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class HidapiConan(ConanFile):
@@ -36,8 +37,10 @@ class HidapiConan(ConanFile):
             del self.options.minosx
         if self.settings.os != "Linux":
             del self.options.with_libusb
-        if self.settings.os == "Windows":
-            self.settings.arch.remove("x86_64")
+
+    def configure(self):
+        if self.settings.os == "Windows" and self.settings.arch == "x86_64":
+            raise ConanInvalidConfiguration("There's no support for x86_64 on Windows yet, please use x86")
 
     def requirements(self):
         if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
