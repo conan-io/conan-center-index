@@ -6,6 +6,7 @@
 #
 # If you get an idea to solve one of this issues, please report here or fork.
 import os
+import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -79,12 +80,15 @@ class HidapiConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE*.txt", src=self._source_dir, dst="licenses")
-        self.copy(os.path.join("hidapi", "*.h"), dst="include", src=self._source_dir)
-        self.copy("*hidapi.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        if self.settings.os == "Windows":
+            self.copy(os.path.join("hidapi", "*.h"), dst="include", src=self._source_dir)
+            self.copy("*hidapi.lib", dst="lib", keep_path=False)
+            self.copy("*.dll", dst="bin", keep_path=False)
+        else:
+            autotools = AutoToolsBuildEnvironment(self)
+            autotools.install()
+            shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            shutil.rmtree(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         if self.settings.os == "Linux":
