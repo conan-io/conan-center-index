@@ -162,6 +162,8 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.9.10')
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == 'Windows' and self.options.shared:
             message = 'Shared build not supported on Windows'
             raise ConanInvalidConfiguration(message)
