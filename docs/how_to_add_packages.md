@@ -164,7 +164,7 @@ For C/C++ projects which use CMake for building, you can take a look on [szip](h
 
 However, if you need to use autotools for building, you can take a look on [mpc](https://github.com/conan-io/conan-center-index/blob/master/recipes/mpc/all/conanfile.py), [libatomic_ops](https://github.com/conan-io/conan-center-index/blob/master/recipes/libatomic_ops/all/conanfile.py), [libev](https://github.com/conan-io/conan-center-index/blob/master/recipes/libev/all/conanfile.py).
 
-Please be aware that ConanCenter only build from sources and [pre-compiled binaries are not acceptable](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md)
+Please be aware that ConanCenter only builds from sources and [pre-compiled binaries are not acceptable](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md)
 
 ### Test the recipe locally
 
