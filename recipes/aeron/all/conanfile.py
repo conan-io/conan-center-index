@@ -50,7 +50,8 @@ class AeronConan(ConanFile):
         compiler_version = tools.Version(self.settings.compiler.version)
 
         minimal_version = {
-            "Visual Studio": "16"
+            "Visual Studio": "16",
+            "gcc": "5"
         }
 
         if compiler in minimal_version and compiler_version < minimal_version[compiler]:
