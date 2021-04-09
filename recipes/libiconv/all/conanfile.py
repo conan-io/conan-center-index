@@ -27,7 +27,19 @@ class LibiconvConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+        return self.settings.compiler in ["Visual Studio", "msvc"]
+
+    @property
+    def _is_msvc_equal_or_newer_than_1700(self):
+        compiler = self.settings.get_safe("compiler")
+        compiler_version = self.settings.get_safe("compiler.version")
+        if ((not compiler) or (not compiler_version)):
+            return False
+        elif (compiler == "Visual Studio") and (tools.Version(compiler_version) > "10"):
+            return True
+        elif (compiler == "msvc") and (tools.Version(compiler_version) >= "17"):
+            return True
+        return False
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
@@ -104,7 +116,7 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if self._is_msvc:
+        if self._is_msvc_equal_or_newer_than_1700:
             self._autotools.flags.append("-FS")
 
         self._autotools.configure(args=configure_args, host=host, build=build)
