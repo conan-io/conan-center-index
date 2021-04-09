@@ -58,6 +58,18 @@ class PROPOSALConan(ConanFile):
                 "PROPOSAL is not supported on Windows and Visual Studio"
             )
 
+        minimum_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler), False
+        )
+        if not minimum_version:
+            self.output.warn(
+                "PROPOSAL requires C++14. Your compiler is unknown. Assuming it supports C++14."
+            )
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                "PROPOSAL requires gcc >= 7 or clang >= 6 as a compiler!"
+            )    
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "PROPOSAL-" + self.version
