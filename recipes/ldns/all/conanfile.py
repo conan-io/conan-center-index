@@ -33,6 +33,12 @@ class LDNSConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("ldns-{}".format(self.version), self._source_subfolder)
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and \
+           "CONAN_BASH_PATH" not in os.environ and \
+           tools.os_info.detect_windows_subsystem() != 'msys2':
+            self.build_requires("msys2/20200517")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -40,7 +46,7 @@ class LDNSConan(ConanFile):
         args = [
             "--with-ssl={}".format(self.deps_cpp_info["openssl"].rootpath),
             "--disable-ldns-config",
-            "--disable-rpath", shared, static, pic,
+            "--disable-rpath",
             # DNSSEC algorithm support
             "--enable-dsa",
             "--enable-ecdsa",
@@ -62,7 +68,7 @@ class LDNSConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             args.append("--with-xcode-sdk={}".format(tools.XCRun(self.settings).sdk_version))
 
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
