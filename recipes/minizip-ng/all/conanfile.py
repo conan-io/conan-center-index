@@ -64,7 +64,8 @@ class MinizipNgConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-
+        if self.options.mz_compatibility:
+            self.provides = "minizip"
         if not tools.is_apple_os(self.settings.os):
             del self.options.with_libcomp
         elif self.options.with_libcomp:
@@ -101,7 +102,7 @@ class MinizipNgConan(ConanFile):
         self._cmake.definitions["MZ_LZMA"] = self.options.with_lzma
         self._cmake.definitions["MZ_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["MZ_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["MZ_LIBCOMP"] = tools.is_apple_os(self.settings.os) and self.options.with_libcomp
+        self._cmake.definitions["MZ_LIBCOMP"] = self.options.get_safe("with_libcomp", False)
 
         if self.settings.os != "Windows":
             self._cmake.definitions["MZ_ICONV"] = self.options.with_iconv
