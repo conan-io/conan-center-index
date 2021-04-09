@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <mz.h>
+#include <mz_os.h>
 
 int main(int argc, char** argv)
 {
