@@ -9,6 +9,7 @@ class PROPOSALConan(ConanFile):
     name = "proposal"
     homepage = "https://github.com/tudo-astroparticlephysics/PROPOSAL"
     license = "GNU Lesser General Public License v3.0"
+    exports_sources = "CMakeLists.txt"
     url = "https://github.com/conan-io/conan-center-index"
     description = "monte Carlo based lepton and photon propagator"
     topics = ("propagator", "lepton", "photon", "stochastic")
@@ -69,17 +70,19 @@ class PROPOSALConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python
         self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
-        cmake.build()
+        with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
+            cmake.build(target="PROPOSAL")
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        cmake.install()
+        with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
+            cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
