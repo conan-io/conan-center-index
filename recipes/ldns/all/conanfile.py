@@ -37,19 +37,6 @@ class LDNSConan(ConanFile):
         if self._autotools:
             return self._autotools
 
-        if self.options.shared:
-            shared = "--enable-shared"
-            static = "--disable-static"
-        else:
-            shared = "--disable-shared"
-            static = "--enable-static"
-
-        if self.settings.os != "Windows":
-            if self.options.shared or self.options.fPIC:
-                pic = "--with-pic=yes"
-            else:
-                pic = "--with-pic=no"
-
         args = [
             "--with-ssl={}".format(self.deps_cpp_info["openssl"].rootpath),
             "--disable-ldns-config",
@@ -67,6 +54,9 @@ class LDNSConan(ConanFile):
             # library bindings
             "--without-pyldns",
             "--without-p5-dns-ldns",
+            ("--enable-shared" if self.option.shared else "--disable-static"),
+            ("--enable-static" if not self.option.shared else "--disable-shared"),
+            ("--with-pic=yes" if self.options.get_safe("fPIC", True) else "--with-pic=no"),
         ]
 
         if self.settings.compiler == "apple-clang":
@@ -89,3 +79,5 @@ class LDNSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ldns"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["rt", "pthread", "dl"]
