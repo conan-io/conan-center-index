@@ -1,23 +1,18 @@
-import glob
 import os
-import os.path
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 
-class ldnsConan(ConanFile):
+class LDNSConan(ConanFile):
     name = "ldns"
-    version = "1.7.1"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https:///www.nlnetlabs.nl/projects/ldns"
     description = "LDNS is a DNS library that facilitates DNS tool programming"
-    topics = ("DNS")
+    topics = ("dns", "rfc", "dnssec")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    requires = "openssl/1.1.1j"
-
+    requires = "openssl/1.1.1k"
     _autotools = None
 
     @property
@@ -86,12 +81,11 @@ class ldnsConan(ConanFile):
         autotools.make()
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         for target in ["install-h", "install-lib"]:
             autotools.make(target=target)
-        for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-            os.remove(la_file)
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["ldns"]

@@ -1,11 +1,11 @@
-import os.path
+import os
 
 from conans import ConanFile, CMake, tools
 
 
 class ldnsTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -14,4 +14,5 @@ class ldnsTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(os.path.join(".", "example"))
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)
