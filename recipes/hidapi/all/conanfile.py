@@ -44,7 +44,7 @@ class HidapiConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
-            self.requires("libusb/[~=1.0]")
+            self.requires("libusb/1.0.24")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
