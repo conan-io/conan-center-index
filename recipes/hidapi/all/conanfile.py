@@ -7,6 +7,7 @@
 # If you get an idea to solve one of this issues, please report here or fork.
 import os
 import shutil
+import glob
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -92,6 +93,8 @@ class HidapiConan(ConanFile):
             autotools.install()
             shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
             shutil.rmtree(os.path.join(self.package_folder, "share"))
+            for path in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.unlink(path)
 
     def package_info(self):
         if self.settings.os == "Linux":
