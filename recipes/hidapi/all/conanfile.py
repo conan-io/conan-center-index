@@ -43,6 +43,9 @@ class HidapiConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("There's no support for x86_64 on Windows yet, please use x86")
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def requirements(self):
         if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
             self.requires("libusb/1.0.24")
