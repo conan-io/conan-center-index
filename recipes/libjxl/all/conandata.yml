@@ -1,0 +1,10 @@
+sources:
+  "0.3.7":
+    url: "https://gitlab.com/wg1/jpeg-xl/-/archive/v0.3.7/jpeg-xl-v0.3.7.tar.gz"
+    sha256: "1da84510a7e11f616fe55ac23db876b462585fd5916683ba8454761f5495a547"
+patches:
+  "0.3.7":
+    - patch_file: "patches/0001-disable-tools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-use-conan-targets.patch"
+      base_path: "source_subfolder"
