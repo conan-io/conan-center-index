@@ -46,6 +46,18 @@ class AeronConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version)
+
+        minimal_version = {
+            "Visual Studio": "16"
+        }
+
+        if compiler in minimal_version and compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
+            )
+
     def build_requirements(self):
         self.build_requires("zulu-openjdk/11.0.8")
 
