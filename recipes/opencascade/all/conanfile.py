@@ -40,6 +40,7 @@ class OpenCascadeConan(ConanFile):
     short_paths = True
 
     generators = "cmake"
+    exports_sources = "patches/**"
     _cmake = None
 
     @property
@@ -93,6 +94,9 @@ class OpenCascadeConan(ConanFile):
         tools.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         cmakelists_tools = os.path.join(self._source_subfolder, "tools", "CMakeLists.txt")
         occt_toolkit_cmake = os.path.join(self._source_subfolder, "adm", "cmake", "occt_toolkit.cmake")
