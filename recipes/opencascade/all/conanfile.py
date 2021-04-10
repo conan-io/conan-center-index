@@ -335,8 +335,12 @@ class OpenCascadeConan(ConanFile):
     @property
     def _occt_components(self):
         # TODO: Might be improved to something more robust and maintainable where
-        # we read in source code EXTERNLIB file of each component at package()
-        # time and generate a file which can be read at package_info() time.
+        # we extract information from source code at package time and write it
+        # in a file read at consume time. We could extract this information like
+        # this:
+        # - list of modules and potential associated components from adm/MODULE file
+        # - add component if its lib file can be found in lib folder after the build
+        # - dependencies of each component from src/<component>/EXTERNLIB file
 
         # External libs
         def _ffmpeg():
@@ -349,7 +353,7 @@ class OpenCascadeConan(ConanFile):
             return ["openvr::openvr"] if self.options.with_openvr else []
 
         def _rapidjson():
-            return ["openvr::openvr"] if self.options.with_rapidjson else []
+            return ["rapidjson::rapidjson"] if self.options.with_rapidjson else []
 
         def _tbb():
             return ["tbb::tbb"] if self.options.with_tbb else []
