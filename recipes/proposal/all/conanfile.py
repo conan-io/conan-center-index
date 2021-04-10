@@ -45,7 +45,7 @@ class PROPOSALConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"gcc": "7", "clang": "6", "apple-clang": "6"}
+        return {"gcc": "5", "clang": "6", "apple-clang": "6"}
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -67,7 +67,7 @@ class PROPOSALConan(ConanFile):
             )
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                "PROPOSAL requires gcc >= 7 or clang >= 6 as a compiler!"
+                "PROPOSAL requires gcc >= 5 or clang >= 6 as a compiler!"
             )    
 
     def source(self):
