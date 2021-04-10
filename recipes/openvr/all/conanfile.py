@@ -75,7 +75,7 @@ class OpenvrConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "openvr"))
 
         if not self.options.shared:
-            self.cpp_info.defines.append('OPENVR_BUILD_STATIC')
+            self.cpp_info.defines.append("OPENVR_BUILD_STATIC")
 
         if self.settings.os != "Windows":
             self.cpp_info.system_libs.append("dl")
