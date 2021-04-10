@@ -27,7 +27,7 @@ class ceressolverConan(ConanFile):
                        "use_glog": False,
                        "use_gflags": False,
                        "use_custom_blas": True,
-                       "use_eigen_sparse": True,
+                       "use_eigen_sparse": False,
                        "use_TBB": False,
                        "use_CXX11_threads": False,
                        "use_CXX11": False,
