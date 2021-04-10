@@ -8,7 +8,7 @@ required_conan_version = ">=1.32.0"
 class PROPOSALConan(ConanFile):
     name = "proposal"
     homepage = "https://github.com/tudo-astroparticlephysics/PROPOSAL"
-    license = "GNU Lesser General Public License v3.0"
+    license = "LGPL-3.0"
     exports_sources = "CMakeLists.txt"
     url = "https://github.com/conan-io/conan-center-index"
     description = "monte Carlo based lepton and photon propagator"
