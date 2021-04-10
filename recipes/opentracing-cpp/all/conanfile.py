@@ -42,8 +42,8 @@ class OpenTracingConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -78,9 +78,9 @@ class OpenTracingConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenTracing"
 
         if self.options.shared:
-            self.cpp_info.components["opentracing-shared"].names["cmake_find_package"] = "opentracing"
-            self.cpp_info.components["opentracing-shared"].names["cmake_find_package_multi"] = "opentracing"
-            self.cpp_info.components["opentracing-shared"].libs = ["opentracing"]
+            self.cpp_info.components["opentracing"].names["cmake_find_package"] = "opentracing"
+            self.cpp_info.components["opentracing"].names["cmake_find_package_multi"] = "opentracing"
+            self.cpp_info.components["opentracing"].libs = ["opentracing"]
         else:
             self.cpp_info.components["opentracing-static"].names["cmake_find_package"] = "opentracing-static"
             self.cpp_info.components["opentracing-static"].names["cmake_find_package_multi"] = "opentracing-static"
