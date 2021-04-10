@@ -87,14 +87,12 @@ class PROPOSALConan(ConanFile):
 
     def build(self):
         cmake = self._configure_cmake()
-        with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
-            cmake.build(target="PROPOSAL")
+        cmake.build(target="PROPOSAL")
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
-            cmake.install()
+        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
