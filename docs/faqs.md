@@ -30,6 +30,12 @@ However, if it is not possible and there is the case of a new recipe producing a
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
 
+## What is the policy on creating packages from pre-compiled binaries?
+
+The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+
+Check the link for further details.
+
 ## Should reference names use `-` or `_`?
 
 Recipes should stick to the original name of a library as much as possible. For example `libjpeg-turbo`, `expected-lite` and `optional-lite` have a `-` in their original names.
