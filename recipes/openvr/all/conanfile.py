@@ -80,7 +80,7 @@ class OpenvrConan(ConanFile):
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
 
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
 
         if self.settings.os == "Macos":
