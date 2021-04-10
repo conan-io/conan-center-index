@@ -10,13 +10,32 @@ from conans.model import Generator
 
 
 class qt(Generator):
+    @staticmethod
+    def content_template(path, folder):
+        return textwrap.dedent("""\
+            [Paths]
+            Prefix = {0}
+            ArchData = {1}/archdatadir
+            HostData = {1}/archdatadir
+            Data = {1}/datadir
+            Sysconf = {1}/sysconfdir
+            LibraryExecutables = {1}/archdatadir/bin
+            Plugins = {1}/archdatadir/plugins
+            Imports = {1}/archdatadir/imports
+            Qml2Imports = {1}/archdatadir/qml
+            Translations = {1}/datadir/translations
+            Documentation = {1}/datadir/doc
+            Examples = {1}/datadir/examples""").format(path, folder)
+
     @property
     def filename(self):
         return "qt.conf"
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s\n" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+        return qt.content_template(
+            self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/"),
+            "res")
 
 
 class QtConan(ConanFile):
@@ -503,19 +522,7 @@ class QtConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write(textwrap.dedent("""[Paths]
-                Prefix = ..
-                ArchData = res/archdatadir
-                HostData = res/archdatadir
-                Data = res/datadir
-                Sysconf = res/sysconfdir
-                LibraryExecutables = res/archdatadir/bin
-                Plugins = res/archdatadir/plugins
-                Imports = res/archdatadir/imports
-                Qml2Imports = res/archdatadir/qml
-                Translations = res/datadir/translations
-                Documentation = res/datadir/doc
-                Examples = res/datadir/examples"""))
+            f.write(qt.content_template("..", "res"))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
