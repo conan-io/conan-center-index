@@ -17,7 +17,7 @@ class NlohmannJsonConan(ConanFile):
         "implicit_conversions": [True, False],
     }
     default_options = {
-        "multiple_headers": False,
+        "multiple_headers": True,
         "implicit_conversions": True,
     }
 
