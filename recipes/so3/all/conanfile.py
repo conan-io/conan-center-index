@@ -16,7 +16,7 @@ class So3Conan(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
     requires = "fftw/3.3.9", "ssht/1.3.7"
-    generators = "cmake", "cmake_find_package", "cmake_paths"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
 
     @property
