@@ -57,7 +57,6 @@ class HarfbuzzConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
 
     def requirements(self):
         if self.options.with_freetype:
@@ -130,3 +129,7 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("dwrite")
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
+        if not self.options.shared:
+            libcxx = tools.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
