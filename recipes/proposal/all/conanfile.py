@@ -87,7 +87,7 @@ class PROPOSALConan(ConanFile):
 
     def build(self):
         cmake = self._configure_cmake()
-        cmake.build(target="PROPOSAL")
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
