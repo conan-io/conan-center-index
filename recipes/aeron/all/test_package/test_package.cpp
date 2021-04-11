@@ -1,4 +1,4 @@
-#include <aeron/Aeron.h>
+#include <Aeron.h>
 
 #include <cstdlib>
 #include <iostream>

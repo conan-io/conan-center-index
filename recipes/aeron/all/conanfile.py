@@ -101,10 +101,6 @@ class AeronConan(ConanFile):
         cmake.install()
 
         with tools.chdir(self.package_folder):
-            tools.rename("include", "old_include")
-            os.makedirs("include")
-            tools.rename("old_include", os.path.join("include", "aeron"))
-
             for dll in glob.glob(os.path.join("lib", "*.dll")):
                 shutil.move(dll, "bin")
 
