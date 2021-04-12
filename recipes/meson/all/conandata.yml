@@ -59,3 +59,6 @@ sources:
   "0.57.1":
     url: "https://github.com/mesonbuild/meson/archive/0.57.1.tar.gz"
     sha256: "0c043c9b5350e9087cd4f6becf6c0d10b1d618ca3f919e0dcca2cdf342360d5d"
+  "0.57.2":
+    url: "https://github.com/mesonbuild/meson/archive/0.57.2.tar.gz"
+    sha256: "cd3773625253df4fd1c380faf03ffae3d02198d6301e7c8bc7bba6c66af66096"
