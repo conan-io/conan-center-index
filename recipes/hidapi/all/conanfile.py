@@ -1,48 +1,46 @@
-# Known Issues
-#
-# * Not support x64 for Windows
-#
-#     [libusb/hidapi](https://github.com/libusb/hidapi) provides a `sln` file to build for Windows, which lack support x64.
-#
-# If you get an idea to solve one of this issues, please report here or fork.
 import os
-import shutil
-import glob
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 
 
 class HidapiConan(ConanFile):
     name = "hidapi"
-    description = "HIDAPI is a multi-platform library which allows an application to interface with USB and Bluetooth HID-Class devices on Windows, Linux, FreeBSD, and macOS."
-    topics = ("conan", "hidapi", "libusb")
+    description = "HIDAPI is a multi-platform library which allows an application to interface " \
+                  "with USB and Bluetooth HID-Class devices on Windows, Linux, FreeBSD, and macOS."
+    topics = ("libusb", "hid-class", "bluetooth")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libusb/hidapi"
-    license = "BSD-Style"
+    license = "GPL-3-or-later", "BSD-3-Clause"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "minosx": ['10.7', '10.8', '10.9', '10.10', '10.11', '10.12', '10.13', '10.14', '10.15', '11'],
         "fPIC": [True, False],
-        "with_libusb": [True, False]
+        "shared": [True, False],
     }
     default_options = {
-        "minosx": 10.7, "fPIC": True, "with_libusb": False
+        "fPIC": True,
+        "shared": False,
     }
     generators = "pkg_config"
+    _autotools = None
 
     @property
-    def _source_dir(self):
-        return "hidapi-hidapi-" + self.version
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os != "Macos":
-            del self.options.minosx
-        if self.settings.os != "Linux":
-            del self.options.with_libusb
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.os == "Windows" and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("There's no support for x86_64 on Windows yet, please use x86")
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
@@ -51,56 +49,62 @@ class HidapiConan(ConanFile):
         if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
             self.requires("libusb/1.0.24")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        if self.settings.os != "Windows":
-            self.run("chmod +x ./%s/bootstrap" % self._source_dir)
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+                              "AC_CONFIG_MACRO_DIR", "dnl AC_CONFIG_MACRO_DIR")
+        if self.settings.os == "Macos":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                                  r"-install_name \$rpath/", "-install_name ")
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        with tools.chdir(self._source_subfolder):
+            os.chmod("configure.ac", os.stat("configure.ac").st_mode | 0o111)
+            self.run("./bootstrap")
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = ["--enable-shared" if self.options.shared else "--disable-shared",
+                "--enable-static" if not self.options.shared else "--disable-static"]
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
     def build(self):
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                self.build_msvc()
+        self._patch_sources()
+        if self.settings.compiler == "Visual Studio":
+            self._build_msvc()
         else:
-            self.build_unix()
+            autotools = self._configure_autotools()
+            autotools.make()
 
-    def build_msvc(self):
+    def _build_msvc(self):
         msbuild = MSBuild(self)
-        msbuild.build("%s/windows/hidapi.sln" % self._source_dir,
+        msbuild.build(os.path.join(self._source_subfolder, "windows", "hidapi.sln"),
                       platforms={"x86": "Win32"})
 
-    def build_unix(self):
-        self.run(os.path.join(".", "bootstrap"), cwd=self._source_dir)
-        if self.settings.os == "Macos":
-            configure = os.path.join(self._source_dir, "configure")
-            tools.replace_in_file(configure, r"-install_name \$rpath/",
-                                  "-install_name ")
-        autotools = AutoToolsBuildEnvironment(self)
-        if self.settings.os == "Macos":
-            autotools.flags.append('-mmacosx-version-min=%s' %
-                                   self.options.minosx)
-
-        autotools.configure(self._source_dir)
-        autotools.make()
-
     def package(self):
-        self.copy("LICENSE*.txt", src=self._source_dir, dst="licenses")
+        self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
         if self.settings.os == "Windows":
-            self.copy(os.path.join("hidapi", "*.h"), dst="include", src=self._source_dir)
+            self.copy(os.path.join("hidapi", "*.h"), dst="include", src=self._source_subfolder)
             self.copy("*hidapi.lib", dst="lib", keep_path=False)
             self.copy("*.dll", dst="bin", keep_path=False)
         else:
-            autotools = AutoToolsBuildEnvironment(self)
+            autotools = self._configure_autotools()
             autotools.install()
-            shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            shutil.rmtree(os.path.join(self.package_folder, "share"))
-            for path in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.unlink(path)
+            # tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         if self.settings.os == "Linux":
-            if self.options.with_libusb:
-                self.cpp_info.libs = ["hidapi-libusb"]
-            else:
-                self.cpp_info.libs = ["hidapi-hidraw"]
+            self.cpp_info.components["libusb"].names["pkg_config"] = "hidapi-libusb"
+            self.cpp_info.components["libusb"].libs = ["hidapi-libusb"]
+            self.cpp_info.components["libusb"].requires = ["libusb::libusb"]
+            self.cpp_info.components["libusb"].system_libs = ["pthread", "dl", "rt"]
+
+            self.cpp_info.components["hidraw"].names["pkg_config"] = "hidapi-hidraw"
+            self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
+            self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         else:
             self.cpp_info.libs = ["hidapi"]
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation", "Appkit"])
