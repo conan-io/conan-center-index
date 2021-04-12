@@ -19,20 +19,20 @@ sources:
     url: "https://github.com/harfbuzz/harfbuzz/archive/2.8.0.tar.gz"
 patches:
   "2.6.8":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.0":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.1":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.2":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.4":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.8.0":
-    - patch_file: "patches/source_subfolder_2.8.X.patch"
-      base_path: "."
+    - patch_file: "patches/icu-2.8.x.patch"
+      base_path: "source_subfolder"
