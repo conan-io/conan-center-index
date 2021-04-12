@@ -40,6 +40,7 @@ class ZipConan(ConanFile):
             return self._cmake
         cmake = CMake(self)
         cmake.definitions["CMAKE_DISABLE_TESTING"] = True
+        cmake.definitions["ZIP_STATIC_PIC"] = self.options.get_safe("fPIC", False)
         cmake.configure()
         self._cmake = cmake
         return self._cmake
