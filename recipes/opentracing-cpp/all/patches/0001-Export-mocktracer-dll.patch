@@ -1,0 +1,18 @@
+# They forgot to export the mocktracer dll
+---
+ mocktracer/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/mocktracer/CMakeLists.txt b/mocktracer/CMakeLists.txt
+index 9835fe3..c245fef 100644
+--- a/mocktracer/CMakeLists.txt
++++ b/mocktracer/CMakeLists.txt
+@@ -21,6 +21,7 @@ if (BUILD_SHARED_LIBS)
+   install(TARGETS opentracing_mocktracer
+           COMPONENT DIST
+           EXPORT OpenTracingTargets
++          RUNTIME DESTINATION ${LIB_INSTALL_DIR}
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+           ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
+
+-- 

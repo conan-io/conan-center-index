@@ -9,7 +9,7 @@ class OpenTracingConan(ConanFile):
     topics = ("conan", "opentracing")
     homepage = "https://github.com/opentracing/opentracing-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,7 +49,9 @@ class OpenTracingConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-    def build(self):
+    def build(self):        
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -95,3 +97,21 @@ class OpenTracingConan(ConanFile):
                 self.cpp_info.components["opentracing-static"].libs = ["opentracing"]
             else:
                 self.cpp_info.components["opentracing-static"].libs = ["opentracing-static"]
+
+        if self.options.enable_mocktracer:
+            if self.options.shared:
+                self.cpp_info.components["opentracing_mocktracer"].names["cmake_find_package"] = "opentracing_mocktracer"
+                self.cpp_info.components["opentracing_mocktracer"].names["cmake_find_package_multi"] = "opentracing_mocktracer"
+                self.cpp_info.components["opentracing_mocktracer"].libs = ["opentracing_mocktracer"]
+                self.cpp_info.components["opentracing_mocktracer"].bindirs = ["lib"]
+                self.cpp_info.components["opentracing_mocktracer"].requires = ["opentracing"]
+            else:
+                self.cpp_info.components["opentracing_mocktracer-static"].names["cmake_find_package"] = "opentracing_mocktracer-static"
+                self.cpp_info.components["opentracing_mocktracer-static"].names["cmake_find_package_multi"] = "opentracing_mocktracer-static"
+                self.cpp_info.components["opentracing_mocktracer-static"].defines.append('OPENTRACING_MOCK_TRACER_STATIC')
+                self.cpp_info.components["opentracing_mocktracer-static"].requires = ["opentracing-static"]
+
+                if self.settings.os != "Windows":
+                    self.cpp_info.components["opentracing_mocktracer-static"].libs = ["opentracing_mocktracer"]
+                else:
+                    self.cpp_info.components["opentracing_mocktracer-static"].libs = ["opentracing_mocktracer-static"]
