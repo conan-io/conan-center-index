@@ -94,6 +94,10 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = \
             self.options.get_safe('fPIC', default=False) or self.options.shared
 
+        if not self.options.shared:
+            cmake.definitions['DISABLE_LLVM_LINK_LLVM_DYLIB'] = True
+        # cmake.definitions['LLVM_LINK_DYLIB'] = self.options.shared
+
         cmake.definitions['LLVM_TARGET_ARCH'] = 'host'
         cmake.definitions['LLVM_TARGETS_TO_BUILD'] = self.options.targets
         cmake.definitions['LLVM_BUILD_LLVM_DYLIB'] = self.options.shared
@@ -193,6 +197,10 @@ class LLVMCoreConan(ConanFile):
         cmake.install()
 
         if not self.options.shared:
+            for ext in ['.a', '.lib']:
+                lib = '*LLVMTableGenGlobalISel{}'.format(ext)
+                self.copy(lib, dst='lib', src='lib')
+
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
                 dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
