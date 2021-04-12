@@ -78,8 +78,8 @@ class DoxygenConan(ConanFile):
         cmake.install()
 
     def package_id(self):
-        self.info.include_build_settings()
         del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
