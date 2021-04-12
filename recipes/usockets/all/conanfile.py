@@ -34,9 +34,9 @@ class UsocketsConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1g")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.4.0")
+            self.requires("wolfssl/4.6.0")
         if self.options.with_libuv:
-            self.requires("libuv/1.38.0")
+            self.requires("libuv/1.41.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
