@@ -1,7 +1,10 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import json
 import os
 import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class OpenCascadeConan(ConanFile):
@@ -14,37 +17,77 @@ class OpenCascadeConan(ConanFile):
     topics = ("conan", "opencascade", "occt", "3d", "modeling", "cad")
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_ffmpeg": [True, False],
+        "with_freeimage": [True, False],
+        "with_openvr": [True, False],
+        "with_rapidjson": [True, False],
+        "with_tbb": [True, False],
+        "extended_debug_messages": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_ffmpeg": False,
+        "with_freeimage": False,
+        "with_openvr": False,
+        "with_rapidjson": False,
+        "with_tbb": False,
+        "extended_debug_messages": False,
+    }
+
+    short_paths = True
 
     generators = "cmake"
+    exports_sources = "patches/**"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_linux(self):
+        return self.settings.os in ["Linux", "FreeBSD"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.build_type != "Debug":
+            del self.options.extended_debug_messages
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("tcl/8.6.10")
         self.requires("tk/8.6.10")
         self.requires("freetype/2.10.4")
         self.requires("opengl/system")
+        if self._is_linux:
+            self.requires("fontconfig/2.13.93")
+            self.requires("xorg/system")
+        # TODO: add ffmpeg & freeimage support (also vtk?)
+        if self.options.with_ffmpeg:
+            raise ConanInvalidConfiguration("ffmpeg recipe not yet available in CCI")
+        if self.options.with_freeimage:
+            raise ConanInvalidConfiguration("freeimage recipe not yet available in CCI")
+        if self.options.with_openvr:
+            self.requires("openvr/1.14.15")
+        if self.options.with_rapidjson:
+            self.requires("rapidjson/1.1.0")
+        if self.options.with_tbb:
+            self.requires("tbb/2020.3")
 
     def validate(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0":
-            raise ConanInvalidConfiguration("Clang 6.0 is not supported.")
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
-            raise ConanInvalidConfiguration("Visual Studio 14 is not supported.")
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "15":
-            raise ConanInvalidConfiguration("Visual Studio 15 is not supported.")
+        if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
+           self.settings.build_type == "Release":
+            raise ConanInvalidConfiguration("OpenCASCADE {} doesn't support Clang 6.0 if Release build type".format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -52,84 +95,181 @@ class OpenCascadeConan(ConanFile):
         tools.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        cmakelists_tools = os.path.join(self._source_subfolder, "tools", "CMakeLists.txt")
+        occt_toolkit_cmake = os.path.join(self._source_subfolder, "adm", "cmake", "occt_toolkit.cmake")
+        occt_csf_cmake = os.path.join(self._source_subfolder, "adm", "cmake", "occt_csf.cmake")
+        occt_defs_flags_cmake = os.path.join(self._source_subfolder, "adm", "cmake", "occt_defs_flags.cmake")
+
+        # Inject conanbuildinfo, upstream build files are not ready for a CMake wrapper (too much modifications required)
+        # Also inject compile flags
         tools.replace_in_file(
             cmakelists,
             "project (OCCT)",
-            '''project (OCCT)
-                include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-                conan_basic_setup(TARGETS)''')
+            "project (OCCT)\n"
+            "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\n"
+            "conan_basic_setup(TARGETS)\n"
+            "conan_global_flags()")
 
-        tools.replace_in_file(
-            cmakelists,
-            "${3RDPARTY_INCLUDE_DIRS}",
-            "${CONAN_INCLUDE_DIRS}")
+        # Avoid to add system include/libs directories
+        tools.replace_in_file(cmakelists, "3RDPARTY_INCLUDE_DIRS", "CONAN_INCLUDE_DIRS")
+        tools.replace_in_file(cmakelists, "3RDPARTY_LIBRARY_DIRS", "CONAN_LIB_DIRS")
+        tools.replace_in_file(cmakelists_tools, "3RDPARTY_INCLUDE_DIRS", "CONAN_INCLUDE_DIRS")
+        tools.replace_in_file(cmakelists_tools, "3RDPARTY_LIBRARY_DIRS", "CONAN_LIB_DIRS")
 
-        occ_toolkit_cmake = os.path.join(self._source_subfolder, "adm",
-                                         "cmake", "occt_toolkit.cmake")
+        # Do not fail due to "fragile" upstream logic to find dependencies
+        tools.replace_in_file(cmakelists, "if (3RDPARTY_NOT_INCLUDED)", "if(0)")
+        tools.replace_in_file(cmakelists, "if (3RDPARTY_NO_LIBS)", "if(0)")
+        tools.replace_in_file(cmakelists, "if (3RDPARTY_NO_DLLS)", "if(0)")
+
+        # Inject dependencies from conan, and avoid to rely on upstream custom CMake files
+        conan_targets = []
+
+        ## freetype
+        conan_targets.append("CONAN_PKG::freetype")
+        tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freetype\")", "")
         tools.replace_in_file(
-            occ_toolkit_cmake,
+            occt_csf_cmake,
+            "set (CSF_FREETYPE \"freetype\")",
+            "set (CSF_FREETYPE \"{}\")".format(" ".join(self.deps_cpp_info["freetype"].libs)))
+        ## tcl
+        conan_targets.append("CONAN_PKG::tcl")
+        tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tcl\")", "")
+        csf_tcl_libs = "set (CSF_TclLibs \"{}\")".format(" ".join(self.deps_cpp_info["tcl"].libs))
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
+        ## tk
+        conan_targets.append("CONAN_PKG::tk")
+        tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "")
+        csf_tk_libs = "set (CSF_TclTkLibs \"{}\")".format(" ".join(self.deps_cpp_info["tk"].libs))
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk86\")", csf_tk_libs)
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs Tk)", csf_tk_libs)
+        tools.replace_in_file(occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
+        ## fontconfig
+        if self._is_linux:
+            conan_targets.append("CONAN_PKG::fontconfig")
+            tools.replace_in_file(
+                occt_csf_cmake,
+                "set (CSF_fontconfig  \"fontconfig\")",
+                "set (CSF_fontconfig  \"{}\")".format(" ".join(self.deps_cpp_info["fontconfig"].libs)))
+        ## tbb
+        if self.options.with_tbb:
+            conan_targets.append("CONAN_PKG::tbb")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tbb\")", "")
+            tools.replace_in_file(
+                occt_csf_cmake,
+                "set (CSF_TBB \"tbb tbbmalloc\")",
+                "set (CSF_TBB \"{}\")".format(" ".join(self.deps_cpp_info["tbb"].libs)))
+        ## ffmpeg
+        if self.options.with_ffmpeg:
+            conan_targets.append("CONAN_PKG::ffmpeg")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/ffmpeg\")", "")
+            tools.replace_in_file(
+                occt_csf_cmake,
+                "set (CSF_FFmpeg \"avcodec avformat swscale avutil\")",
+                "set (CSF_FFmpeg \"{}\")".format(" ".join(self.deps_cpp_info["ffmpeg"].libs)))
+        ## freeimage
+        if self.options.with_freeimage:
+            conan_targets.append("CONAN_PKG::freeimage")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/freeimage\")", "")
+            tools.replace_in_file(
+                occt_csf_cmake,
+                "set (CSF_FreeImagePlus \"freeimage\")",
+                "set (CSF_FreeImagePlus \"{}\")".format(" ".join(self.deps_cpp_info["freeimage"].libs)))
+        ## openvr
+        if self.options.with_openvr:
+            conan_targets.append("CONAN_PKG::openvr")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/openvr\")", "")
+            tools.replace_in_file(
+                occt_csf_cmake,
+                "set (CSF_OpenVR \"openvr_api\")",
+                "set (CSF_OpenVR \"{}\")".format(" ".join(self.deps_cpp_info["openvr"].libs)))
+        ## rapidjson
+        if self.options.with_rapidjson:
+            conan_targets.append("CONAN_PKG::rapidjson")
+            tools.replace_in_file(cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/rapidjson\")", "")
+
+        ## Inject conan targets
+        tools.replace_in_file(
+            occt_toolkit_cmake,
             "${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}",
-            """${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}
-            CONAN_PKG::tcl CONAN_PKG::tk CONAN_PKG::freetype""")
+            "${{USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}} {}".format(" ".join(conan_targets)))
 
+        # Do not install pdb files
         tools.replace_in_file(
-            occ_toolkit_cmake,
+            occt_toolkit_cmake,
             """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
              CONFIGURATIONS Debug RelWithDebInfo
              DESTINATION "${INSTALL_DIR_BIN}\\${OCCT_INSTALL_BIN_LETTER}")""",
             "")
 
+        # Honor fPIC option, compiler.cppstd and compiler.libcxx
+        tools.replace_in_file(occt_defs_flags_cmake, "-fPIC", "")
+        tools.replace_in_file(occt_defs_flags_cmake, "-std=c++0x", "")
+        tools.replace_in_file(occt_defs_flags_cmake, "-std=gnu++0x", "")
+        tools.replace_in_file(occt_defs_flags_cmake, "-stdlib=libc++", "")
+        tools.replace_in_file(occt_csf_cmake,
+                              "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
+                              "set (CSF_ThreadLibs  \"pthread rt\")")
+
+        # No hardcoded link through #pragma
         tools.replace_in_file(
-            os.path.join(self._source_subfolder,
-                         "src", "Font", "Font_FontMgr.cxx"),
+            os.path.join(self._source_subfolder, "src", "Font", "Font_FontMgr.cxx"),
             "#pragma comment (lib, \"freetype.lib\")",
             "")
         tools.replace_in_file(
-            os.path.join(self._source_subfolder,
-                        "src", "Draw", "Draw.cxx"),
+            os.path.join(self._source_subfolder, "src", "Draw", "Draw.cxx"),
             """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
 #pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
             ""
         )
 
-        tcl_libs = self.deps_cpp_info["tcl"].libs
-        tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "adm", "cmake", "tcl.cmake"),
-            "${CSF_TclLibs}",
-            tcl_lib)
-
-        tk_libs = self.deps_cpp_info["tk"].libs
-        tk_lib = next(filter(lambda lib: "tk8" in lib, tk_libs))
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "adm", "cmake", "tk.cmake"),
-            "${CSF_TclTkLibs}",
-            tk_lib)
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["3RDPARTY_TCL_LIBRARY_DIR"] = \
-            os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib")
-        self._cmake.definitions["3RDPARTY_TCL_INCLUDE_DIR"] = \
-            self.deps_cpp_info["tcl"].include_paths[0]
-        self._cmake.definitions["3RDPARTY_TK_LIBRARY_DIR"] = \
-            os.path.join(self.deps_cpp_info["tk"].rootpath, "lib")
-        self._cmake.definitions["3RDPARTY_TK_INCLUDE_DIR"] = \
-            self.deps_cpp_info["tk"].include_paths[0]
-        if not self.options.shared:
-            self._cmake.definitions["BUILD_LIBRARY_TYPE"] = "Static"
 
+        # Inject C++ standard from profile since we have removed hardcoded C++11 from upstream build files
+        self._cmake.definitions["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11")
+
+        self._cmake.definitions["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
+        self._cmake.definitions["INSTALL_TEST_CASES"] = False
+        self._cmake.definitions["BUILD_RESOURCES"] = False
+        self._cmake.definitions["BUILD_RELEASE_DISABLE_EXCEPTIONS"] = True
+        if self.settings.build_type == "Debug":
+            self._cmake.definitions["BUILD_WITH_DEBUG"] = self.options.extended_debug_messages
+        self._cmake.definitions["BUILD_USE_PCH"] = False
+        self._cmake.definitions["INSTALL_SAMPLES"] = False
+
+        self._cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
         self._cmake.definitions["INSTALL_DIR_BIN"] = "bin"
-        self._cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
         self._cmake.definitions["INSTALL_DIR_LIB"] = "lib"
+        self._cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
         self._cmake.definitions["INSTALL_DIR_RESOURCE"] = "res/resource"
         self._cmake.definitions["INSTALL_DIR_DATA"] = "res/data"
         self._cmake.definitions["INSTALL_DIR_SAMPLES"] = "res/samples"
         self._cmake.definitions["INSTALL_DIR_DOC"] = "res/doc"
-        self._cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
+
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["BUILD_SAMPLES_MFC"] = False
+        self._cmake.definitions["BUILD_SAMPLES_QT"] = False
+        self._cmake.definitions["BUILD_Inspector"] = False
+        if tools.is_apple_os(self.settings.os):
+            self._cmake.definitions["USE_GLX"] = False
+        if self.settings.os == "Windows":
+            self._cmake.definitions["USE_D3D"] = False
+        self._cmake.definitions["BUILD_ENABLE_FPE_SIGNAL_HANDLER"] = False
+        self._cmake.definitions["BUILD_DOC_Overview"] = False
+
+        self._cmake.definitions["USE_FREEIMAGE"] = self.options.with_freeimage
+        self._cmake.definitions["USE_OPENVR"] = self.options.with_openvr
+        self._cmake.definitions["USE_FFMPEG"] = self.options.with_ffmpeg
+        self._cmake.definitions["USE_TBB"] = self.options.with_tbb
+        self._cmake.definitions["USE_RAPIDJSON"] = self.options.with_rapidjson
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
@@ -167,9 +307,12 @@ class OpenCascadeConan(ConanFile):
             self._replace_package_folder("libi", "lib")
             self._replace_package_folder("bini", "bin")
 
+        occt_modules = self._get_modules_from_source_code()
+        self._create_modules_json_file(occt_modules)
+
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {target: "OpenCASCADE::{}".format(target) for module in self._modules_toolkits.values() for target in module}
+            os.path.join(self.package_folder, self._cmake_module_file_rel_path),
+            {target: "OpenCASCADE::{}".format(target) for module in occt_modules.values() for target in module}
         )
 
     @staticmethod
@@ -185,153 +328,126 @@ class OpenCascadeConan(ConanFile):
         tools.save(module_file, content)
 
     @property
-    def _module_subfolder(self):
+    def _cmake_module_subfolder(self):
         return os.path.join("lib", "cmake")
 
     @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
+    def _cmake_module_file_rel_path(self):
+        return os.path.join(self._cmake_module_subfolder,
                             "conan-official-{}-targets.cmake".format(self.name))
 
-    @property
-    def _modules_toolkits(self):
-        return {
-            "FoundationClasses": {
-                "TKernel": [],
-                "TKMath": ["TKernel"],
-            },
-            "ModelingData": {
-                "TKG2d": ["TKernel", "TKMath"],
-                "TKG3d": ["TKMath", "TKernel", "TKG2d"],
-                "TKGeomBase": ["TKernel", "TKMath", "TKG2d", "TKG3d"],
-                "TKBRep": ["TKMath", "TKernel", "TKG2d", "TKG3d", "TKGeomBase"],
-            },
-            "ModelingAlgorithms": {
-                "TKGeomAlgo": ["TKernel", "TKMath", "TKG3d", "TKG2d", "TKGeomBase", "TKBRep"],
-                "TKTopAlgo": ["TKMath", "TKernel", "TKG2d", "TKG3d", "TKGeomBase", "TKBRep", "TKGeomAlgo"],
-                "TKPrim": ["TKBRep", "TKernel", "TKMath", "TKG2d", "TKGeomBase", "TKG3d", "TKTopAlgo"],
-                "TKBO": ["TKBRep", "TKTopAlgo", "TKMath", "TKernel", "TKG2d", "TKG3d", "TKGeomAlgo", "TKGeomBase",
-                         "TKPrim", "TKShHealing"],
-                "TKBool": ["TKBRep", "TKTopAlgo", "TKMath", "TKernel", "TKPrim", "TKG2d", "TKG3d", "TKShHealing",
-                           "TKGeomBase", "TKGeomAlgo", "TKBO"],
-                "TKHLR": ["TKBRep", "TKernel", "TKMath", "TKGeomBase", "TKG2d", "TKG3d", "TKGeomAlgo", "TKTopAlgo"],
-                "TKFillet": ["TKBRep", "TKernel", "TKMath", "TKGeomBase", "TKGeomAlgo", "TKG2d", "TKTopAlgo", "TKG3d",
-                             "TKBool", "TKShHealing", "TKBO"],
-                "TKOffset": ["TKFillet", "TKBRep", "TKTopAlgo", "TKMath", "TKernel", "TKGeomBase", "TKG2d", "TKG3d",
-                             "TKGeomAlgo", "TKShHealing", "TKBO", "TKPrim", "TKBool"],
-                "TKFeat": ["TKBRep", "TKTopAlgo", "TKGeomAlgo", "TKMath", "TKernel", "TKGeomBase", "TKPrim", "TKG2d",
-                           "TKBO", "TKG3d", "TKBool", "TKShHealing"],
-                "TKMesh": ["TKernel", "TKMath", "TKBRep", "TKTopAlgo", "TKShHealing", "TKGeomBase", "TKG3d", "TKG2d"],
-                "TKXMesh": ["TKBRep", "TKMath", "TKernel", "TKG2d", "TKG3d", "TKMesh"],
-                "TKShHealing": ["TKBRep", "TKernel", "TKMath", "TKG2d", "TKTopAlgo", "TKG3d", "TKGeomBase",
-                                "TKGeomAlgo"],
-            },
-            "Visualization": {
-                "TKService": ["TKernel", "TKMath"],
-                "TKV3d": ["TKBRep", "TKMath", "TKernel", "TKService", "TKShHealing", "TKTopAlgo", "TKG2d", "TKG3d",
-                          "TKGeomBase", "TKMesh", "TKGeomAlgo", "TKHLR"],
-                "TKOpenGl": ["TKernel", "TKService", "TKMath"],
-                "TKMeshVS": ["TKV3d", "TKMath", "TKService", "TKernel", "TKG3d", "TKG2d"],
-            },
-            "ApplicationFramework": {
-                "TKCDF": ["TKernel"],
-                "TKLCAF": ["TKCDF", "TKernel"],
-                "TKCAF": ["TKernel", "TKGeomBase", "TKBRep", "TKTopAlgo", "TKMath", "TKG2d", "TKG3d", "TKCDF",
-                          "TKLCAF", "TKBO"],
-                "TKBinL": ["TKCDF", "TKernel", "TKLCAF"],
-                "TKXmlL": ["TKCDF", "TKernel", "TKMath", "TKLCAF"],
-                "TKBin": ["TKBRep", "TKMath", "TKernel", "TKG2d", "TKG3d", "TKCAF", "TKCDF", "TKLCAF", "TKBinL"],
-                "TKXml": ["TKCDF", "TKernel", "TKMath", "TKBRep", "TKG2d", "TKGeomBase", "TKG3d", "TKLCAF", "TKCAF",
-                          "TKXmlL"],
-                "TKStdL": ["TKernel", "TKCDF", "TKLCAF"],
-                "TKStd": ["TKernel", "TKCDF", "TKCAF", "TKLCAF", "TKBRep", "TKMath", "TKG2d", "TKG3d", "TKStdL"],
-                "TKTObj": ["TKCDF", "TKernel", "TKMath", "TKLCAF"],
-                "TKBinTObj": ["TKCDF", "TKernel", "TKTObj", "TKMath", "TKLCAF", "TKBinL"],
-                "TKXmlTObj": ["TKCDF", "TKernel", "TKTObj", "TKMath", "TKLCAF", "TKXmlL"],
-                "TKVCAF": ["TKernel", "TKGeomBase", "TKBRep", "TKTopAlgo", "TKMath", "TKService", "TKG2d", "TKG3d",
-                           "TKCDF", "TKLCAF", "TKBO", "TKCAF", "TKV3d"],
-            },
-            "DataExchange": {
-                "TKXSBase": ["TKBRep", "TKernel", "TKMath", "TKG2d", "TKG3d", "TKTopAlgo", "TKGeomBase", "TKShHealing"],
-                "TKSTEPBase": ["TKernel", "TKXSBase", "TKMath"],
-                "TKSTEPAttr": ["TKernel", "TKXSBase", "TKSTEPBase"],
-                "TKSTEP209": ["TKernel", "TKXSBase", "TKSTEPBase"],
-                "TKSTEP": ["TKernel", "TKSTEPAttr", "TKSTEP209", "TKSTEPBase", "TKBRep", "TKMath", "TKG2d",
-                           "TKShHealing", "TKTopAlgo", "TKG3d", "TKGeomBase", "TKGeomAlgo", "TKXSBase"],
-                "TKIGES": ["TKBRep", "TKernel", "TKMath", "TKTopAlgo", "TKShHealing", "TKG2d", "TKG3d", "TKGeomBase",
-                           "TKGeomAlgo", "TKPrim", "TKBool", "TKXSBase"],
-                "TKXCAF": ["TKBRep", "TKernel", "TKMath", "TKService", "TKG2d", "TKTopAlgo", "TKV3d", "TKCDF", "TKLCAF",
-                           "TKG3d", "TKCAF", "TKVCAF"],
-                "TKXDEIGES": ["TKBRep", "TKernel", "TKMath", "TKXSBase", "TKCDF", "TKLCAF", "TKG2d", "TKG3d", "TKXCAF",
-                              "TKIGES"],
-                "TKXDESTEP": ["TKBRep", "TKSTEPAttr", "TKernel", "TKMath", "TKXSBase", "TKTopAlgo", "TKG2d", "TKCAF",
-                              "TKSTEPBase", "TKCDF", "TKLCAF", "TKG3d", "TKXCAF", "TKSTEP", "TKShHealing"],
-                "TKSTL": ["TKernel", "TKMath", "TKBRep", "TKG2d", "TKG3d", "TKTopAlgo"],
-                "TKVRML": ["TKBRep", "TKTopAlgo", "TKMath", "TKGeomBase", "TKernel", "TKPrim", "TKG2d", "TKG3d",
-                           "TKMesh", "TKHLR", "TKService", "TKGeomAlgo", "TKV3d", "TKLCAF", "TKXCAF"],
-                "TKXmlXCAF": ["TKXmlL", "TKBRep", "TKCDF", "TKMath", "TKernel", "TKService", "TKG2d", "TKGeomBase",
-                              "TKCAF", "TKG3d", "TKLCAF", "TKXCAF", "TKXml"],
-                "TKBinXCAF": ["TKBRep", "TKXCAF", "TKMath", "TKService", "TKernel", "TKBinL", "TKG2d", "TKCAF", "TKCDF",
-                              "TKG3d", "TKLCAF", "TKBin"],
-                "TKRWMesh": ["TKernel", "TKMath", "TKMesh", "TKXCAF", "TKLCAF", "TKV3d", "TKBRep", "TKG3d",
-                             "TKService"],
-            },
-            "Draw": {
-                "TKDraw": ["TKernel", "TKG2d", "TKGeomBase", "TKG3d", "TKMath", "TKBRep", "TKGeomAlgo", "TKTopAlgo",
-                           "TKShHealing", "TKMesh", "TKService", "TKHLR"],
-                "TKTopTest": ["TKBRep", "TKGeomAlgo", "TKTopAlgo", "TKernel", "TKMath", "TKBO", "TKG2d", "TKG3d",
-                              "TKDraw", "TKHLR", "TKGeomBase", "TKMesh", "TKService", "TKV3d", "TKFillet", "TKPrim",
-                              "TKBool", "TKOffset", "TKFeat", "TKShHealing"],
-                "TKViewerTest": ["TKGeomBase", "TKFillet", "TKBRep", "TKTopAlgo", "TKHLR", "TKernel", "TKMath",
-                                 "TKService", "TKShHealing", "TKBool", "TKPrim", "TKGeomAlgo", "TKG2d", "TKTopTest",
-                                 "TKG3d", "TKOffset", "TKMesh", "TKV3d", "TKDraw", "TKOpenGl"],
-                "TKXSDRAW": ["TKBRep", "TKV3d", "TKMath", "TKernel", "TKService", "TKXSBase", "TKMeshVS", "TKG3d",
-                             "TKViewerTest", "TKG2d", "TKSTEPBase", "TKTopAlgo", "TKGeomBase", "TKGeomAlgo", "TKMesh",
-                             "TKDraw", "TKSTEP", "TKIGES", "TKSTL", "TKVRML", "TKLCAF", "TKDCAF", "TKXCAF", "TKRWMesh"],
-                "TKDCAF": ["TKGeomBase", "TKBRep", "TKGeomAlgo", "TKernel", "TKMath", "TKG2d", "TKG3d", "TKDraw",
-                           "TKCDF", "TKV3d", "TKService", "TKLCAF", "TKFillet", "TKTopAlgo", "TKPrim", "TKBool",
-                           "TKBO", "TKCAF", "TKVCAF", "TKViewerTest", "TKStd", "TKStdL", "TKBin", "TKBinL", "TKXml",
-                           "TKXmlL"],
-                "TKXDEDRAW": ["TKCDF", "TKBRep", "TKXCAF", "TKernel", "TKIGES", "TKV3d", "TKMath", "TKService",
-                              "TKXSBase", "TKG2d", "TKCAF", "TKVCAF", "TKDraw", "TKTopAlgo", "TKLCAF", "TKG3d",
-                              "TKSTEPBase", "TKSTEP", "TKMesh", "TKXSDRAW", "TKXDEIGES", "TKXDESTEP", "TKDCAF",
-                              "TKViewerTest", "TKBinXCAF", "TKXmlXCAF", "TKVRML"],
-                "TKTObjDRAW": ["TKernel", "TKCDF", "TKLCAF", "TKTObj", "TKMath", "TKDraw", "TKDCAF", "TKBinTObj",
-                               "TKXmlTObj"],
-                "TKQADraw": ["TKBRep", "TKMath", "TKernel", "TKService", "TKG2d", "TKDraw", "TKV3d", "TKGeomBase",
-                              "TKG3d", "TKViewerTest", "TKCDF", "TKDCAF", "TKLCAF", "TKFillet", "TKTopAlgo", "TKHLR",
-                              "TKBool", "TKGeomAlgo", "TKPrim", "TKBO", "TKShHealing", "TKOffset", "TKFeat", "TKCAF",
-                              "TKVCAF", "TKIGES", "TKXSBase", "TKMesh", "TKXCAF", "TKBinXCAF", "TKSTEP", "TKSTEPBase",
-                              "TKXDESTEP", "TKXSDRAW", "TKSTL", "TKXml", "TKTObj", "TKXmlL", "TKBin", "TKBinL", "TKStd",
-                              "TKStdL"],
-            },
+    def _get_modules_from_source_code(self):
+        csf_to_conan_dependencies = {
+            # Mandatory dependencies
+            "CSF_FREETYPE": {"externals": ["freetype::freetype"]},
+            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"]},
+            "CSF_TclLibs": {"externals": ["tcl::tcl"]},
+            "CSF_TclTkLibs": {"externals": ["tk::tk"]},
+            "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
+            "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
+            # Optional dependencies
+            "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
+            "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
+            "CSF_OpenVR": {"externals": ["openvr::openvr"] if self.options.with_openvr else []},
+            "CSF_RapidJSON": {"externals": ["rapidjson::rapidjson"] if self.options.with_rapidjson else []},
+            "CSF_TBB": {"externals": ["tbb::tbb"] if self.options.with_tbb else []},
+            "CSF_VTK": {},
+            # Android system libs
+            "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},
+            # Linux system libs
+            "CSF_ThreadLibs": {"system_libs": ["pthread", "rt"] if self._is_linux else []},
+            "CSF_dl": {"system_libs": ["dl"] if self._is_linux else []},
+            "CSF_dpsLibs": {},
+            "CSF_XmuLibs": {},
+            # Windows system libs
+            "CSF_advapi32": {"system_libs": ["advapi32"] if self.settings.os == "Windows" else []},
+            "CSF_gdi32": {"system_libs": ["gdi32"] if self.settings.os == "Windows" else []},
+            "CSF_psapi": {"system_libs": ["psapi"] if self.settings.os == "Windows" else []},
+            "CSF_shell32": {"system_libs": ["shell32"] if self.settings.os == "Windows" else []},
+            "CSF_user32": {"system_libs": ["user32"] if self.settings.os == "Windows" else []},
+            "CSF_winmm": {"system_libs": ["winmm"] if self.settings.os == "Windows" else []},
+            "CSF_wsock32": {"system_libs": ["wsock32"] if self.settings.os == "Windows" else []},
+            "CSF_d3d9": {},
+            # Apple OS frameworks
+            "CSF_Appkit": {"frameworks": ["UIKit"] if self.settings.os == "iOS" else ["Appkit"] if tools.is_apple_os(self.settings.os) else []},
+            "CSF_IOKit": {"frameworks": ["IOKit"] if tools.is_apple_os(self.settings.os) else []},
+            "CSF_objc": {},
         }
+
+        modules = {}
+
+        # MODULES file lists all modules and all possible components per module
+        modules_content = tools.load(os.path.join(self.build_folder, self._source_subfolder, "adm", "MODULES"))
+        packaged_libs_list = tools.collect_libs(self, "lib")
+        for module_line in modules_content.splitlines():
+            components = {}
+            module_components = module_line.split()
+            components_list = [component for component in module_components[1:] if component in packaged_libs_list]
+            for component_name in components_list:
+                component_deps = {}
+                # EXTERNLIB file stores dependencies of each component. External dependencies are prefixed with CSF_
+                externlib_content = tools.load(os.path.join(self.build_folder, self._source_subfolder,
+                                               "src", component_name, "EXTERNLIB"))
+                for dependency in externlib_content.splitlines():
+                    if dependency.startswith("TK") and dependency in packaged_libs_list:
+                        component_deps.setdefault("internals", []).append(dependency)
+                    elif dependency.startswith("CSF_"):
+                        deps_dict = csf_to_conan_dependencies[dependency]
+                        for dep_type, deps in deps_dict.items():
+                            if deps:
+                                component_deps.setdefault(dep_type, []).extend(deps)
+                components.update({component_name: component_deps})
+            modules.update({module_components[0]:components})
+
+        return modules
+
+    def _create_modules_json_file(self, modules):
+        tools.save(self._modules_helper_filepath, json.dumps(modules, indent=4))
+
+    @property
+    def _modules_helper_filepath(self):
+        return os.path.join(self.package_folder, "lib", "occt_modules.json")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenCASCADE"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenCASCADE"
 
-        for component, targets in self._modules_toolkits.items():
-            conan_component_name = "occt_{}".format(component.lower())
-            self.cpp_info.components[conan_component_name].names["cmake_find_package"] = component
-            self.cpp_info.components[conan_component_name].names["cmake_find_package_multi"] = component
-            for target_lib, internal_requires in targets.items():
-                conan_component_target_name = "occt_{}".format(target_lib.lower())
-                target_requires = ["occt_{}".format(inter_require.lower()) for inter_require in internal_requires]
-                self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
-                self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
-                self.cpp_info.components[conan_component_target_name].builddirs.append(self._module_subfolder)
-                self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-                self.cpp_info.components[conan_component_target_name].libs = [target_lib]
-                self.cpp_info.components[conan_component_target_name].requires = target_requires
-                self.cpp_info.components[conan_component_name].requires.append(conan_component_target_name)
+        def _to_qualified_name(target):
+            return "occt_{}".format(target.lower())
 
-                # 3rd-party requirements taken from https://dev.opencascade.org/doc/overview/html/index.html#intro_req_libs
-                # TODO: which specific targets?
-                if component == "Visualization":
-                    self.cpp_info.components[conan_component_target_name].requires.extend(["freetype::freetype", "opengl::opengl"])
-                elif component == "Draw":
-                    self.cpp_info.components[conan_component_target_name].requires.extend(["tcl::tcl", "tk::tk"])
-                if tools.os_info.is_posix and target_lib == "TKernel":
-                    self.cpp_info.components[conan_component_target_name].system_libs.append("pthread")
+        def _register_components(modules_dict):
+            for module, targets in modules_dict.items():
+                conan_component_module_name = _to_qualified_name(module)
+                self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
+                self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
+
+                for target_lib, target_deps in targets.items():
+                    conan_component_target_name = _to_qualified_name(target_lib)
+                    requires = [_to_qualified_name(internal) for internal in target_deps.get("internals", [])] + \
+                               target_deps.get("externals", [])
+                    system_libs = target_deps.get("system_libs", [])
+                    frameworks = target_deps.get("frameworks", [])
+
+                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
+                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
+                    self.cpp_info.components[conan_component_target_name].builddirs.append(self._cmake_module_subfolder)
+                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._cmake_module_file_rel_path]
+                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._cmake_module_file_rel_path]
+                    self.cpp_info.components[conan_component_target_name].libs = [target_lib]
+                    self.cpp_info.components[conan_component_target_name].requires = requires
+                    self.cpp_info.components[conan_component_target_name].system_libs = system_libs
+                    self.cpp_info.components[conan_component_target_name].frameworks = frameworks
+                    if self.settings.os == "Windows" and not self.options.shared:
+                        self.cpp_info.components[conan_component_target_name].defines.append("OCCT_STATIC_BUILD")
+
+                    self.cpp_info.components[conan_component_module_name].requires.append(conan_component_target_name)
+
+        occt_modules_json_content = tools.load(self._modules_helper_filepath)
+        occt_modules = json.loads(occt_modules_json_content)
+        _register_components(occt_modules)
+
+        # DRAWEXE executable is not created if static build
+        if self.options.shared:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
