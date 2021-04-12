@@ -91,9 +91,11 @@ class LLVMCoreConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions['BUILD_SHARED_LIBS'] = False
         cmake.definitions['CMAKE_SKIP_RPATH'] = True
+        cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = \
+            self.options.get_safe('fPIC', default=False) or self.options.shared
 
-        cmake.definitions['LLVM_TARGETS_TO_BUILD'] = self.options.targets
         cmake.definitions['LLVM_TARGET_ARCH'] = 'host'
+        cmake.definitions['LLVM_TARGETS_TO_BUILD'] = self.options.targets
         cmake.definitions['LLVM_BUILD_LLVM_DYLIB'] = self.options.shared
         cmake.definitions['LLVM_DYLIB_COMPONENTS'] = self.options.components
         cmake.definitions['LLVM_ENABLE_PIC'] = \
