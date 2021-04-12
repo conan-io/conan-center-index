@@ -22,7 +22,7 @@ class OpenTracingConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "enable_mocktracer": False,
-        "enable_dynamic_load": True
+        "enable_dynamic_load": False
     }
 
     _cmake = None
@@ -81,10 +81,15 @@ class OpenTracingConan(ConanFile):
             self.cpp_info.components["opentracing"].names["cmake_find_package"] = "opentracing"
             self.cpp_info.components["opentracing"].names["cmake_find_package_multi"] = "opentracing"
             self.cpp_info.components["opentracing"].libs = ["opentracing"]
+            self.cpp_info.components["opentracing"].bindirs = ["lib"]
+            if self.options.enable_dynamic_load and self.settings.os == "Linux":
+                self.cpp_info.components["opentracing"].system_libs.append("dl")
         else:
             self.cpp_info.components["opentracing-static"].names["cmake_find_package"] = "opentracing-static"
             self.cpp_info.components["opentracing-static"].names["cmake_find_package_multi"] = "opentracing-static"
             self.cpp_info.components["opentracing-static"].defines.append('OPENTRACING_STATIC')
+            if self.options.enable_dynamic_load and self.settings.os == "Linux":
+                self.cpp_info.components["opentracing-static"].system_libs.append("dl")
             
             if self.settings.os != "Windows":
                 self.cpp_info.components["opentracing-static"].libs = ["opentracing"]
