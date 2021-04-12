@@ -51,13 +51,6 @@ class PROPOSALConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
-        if (
-            self.settings.os == "Windows"
-            or self.settings.compiler == "Visual Studio"
-        ):
-            raise ConanInvalidConfiguration(
-                "PROPOSAL is not supported on Windows and Visual Studio"
-            )
 
         minimum_version = self._minimum_compilers_version.get(
             str(self.settings.compiler), False
