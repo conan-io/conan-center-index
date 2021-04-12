@@ -37,7 +37,7 @@ class DoxygenConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("xapian-core/1.4.16")
+        self.requires("xapian-core/1.4.18")
         self.requires("zlib/1.2.11")
 
     def build_requirements(self):
