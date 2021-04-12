@@ -84,5 +84,9 @@ class OpenTracingConan(ConanFile):
         else:
             self.cpp_info.components["opentracing-static"].names["cmake_find_package"] = "opentracing-static"
             self.cpp_info.components["opentracing-static"].names["cmake_find_package_multi"] = "opentracing-static"
-            self.cpp_info.components["opentracing-static"].libs = ["opentracing-static"]
             self.cpp_info.components["opentracing-static"].defines.append('OPENTRACING_STATIC')
+            
+            if self.settings.os != "Windows":
+                self.cpp_info.components["opentracing-static"].libs = ["opentracing"]
+            else:
+                self.cpp_info.components["opentracing-static"].libs = ["opentracing-static"]
