@@ -14,7 +14,7 @@ class UwebsocketsConan(ConanFile):
     settings = "compiler"
     no_copy_source = True
 
-    requires = ("usockets/0.4.0",
+    requires = ("usockets/0.7.1",
                 "zlib/1.2.11")
 
     @property
