@@ -54,9 +54,9 @@ class PROPOSALConan(ConanFile):
 
     def validate(self):
 
-        if (self.settings.os == "Windows") and self.options.shared:
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration(
-                "Can not build shared library on Windows."
+                "Can not build shared library on Visual Studio."
             )
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
