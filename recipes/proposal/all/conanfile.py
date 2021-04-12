@@ -50,9 +50,14 @@ class PROPOSALConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"gcc": "5", "clang": "5", "apple-clang": "5"}
+        return {"Visual Studio": "15", "gcc": "5", "clang": "5", "apple-clang": "5"}
 
     def validate(self):
+
+        if (self.settings.os == "Windows") and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Can not build shared library on Windows."
+            )
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
 
@@ -65,7 +70,7 @@ class PROPOSALConan(ConanFile):
             )
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                "PROPOSAL requires gcc >= 5 or clang >= 6 as a compiler!"
+                "PROPOSAL requires gcc >= 5, clang >= 5 or Visual Studio >= 15 as a compiler!"
             )
 
     def source(self):
