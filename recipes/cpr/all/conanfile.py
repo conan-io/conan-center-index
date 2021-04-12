@@ -48,6 +48,11 @@ class CprConan(ConanFile):
         # https://github.com/whoshuu/cpr/releases/tag/1.5.1
         return tools.Version(self.version) >= "1.5.1"
 
+    @property
+    def _uses_old_cmake_options(self):
+        # https://github.com/whoshuu/cpr/releases/tag/1.6.0
+        return tools.Version(self.version) < "1.6.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -91,19 +96,37 @@ class CprConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    def _get_cmake_option(self, option):
+        CPR_1_6_CMAKE_OPTIONS_TO_OLD = {
+            "CPR_FORCE_USE_SYSTEM_CURL": "USE_SYSTEM_CURL",
+            "CPR_BUILD_TESTS": "BUILD_CPR_TESTS",
+            "CPR_BUILD_TESTS_SSL": "BUILD_CPR_TESTS_SSL",
+            "CPR_GENERATE_COVERAGE": "GENERATE_COVERAGE",
+            "CPR_USE_SYSTEM_GTEST": "USE_SYSTEM_GTEST",
+            "CPR_FORCE_OPENSSL_BACKEND": "USE_OPENSSL",
+            "CPR_FORCE_WINSSL_BACKEND": "USE_WINSSL",
+            "CPR_GENERATE_COVERAGE": "GENERATE_COVERAGE",
+        }
+
+        if self._uses_old_cmake_options:
+            # Get the translated option if we can, or the original if one isn't defined.
+            return CPR_1_6_CMAKE_OPTIONS_TO_OLD.get(option, option)
+        else:
+            return option
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["USE_SYSTEM_CURL"] = True
-            self._cmake.definitions["BUILD_CPR_TESTS"] = False
-            self._cmake.definitions["GENERATE_COVERAGE"] = False
-            self._cmake.definitions["USE_SYSTEM_GTEST"] = False
+            self._cmake.definitions[self._get_cmake_option("CPR_FORCE_USE_SYSTEM_CURL")] = True
+            self._cmake.definitions[self._get_cmake_option("CPR_BUILD_TESTS")] = False
+            self._cmake.definitions[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
+            self._cmake.definitions[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
             if self._supports_openssl:
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.get_safe("with_openssl", False)
             if self._supports_winssl: # The CMake options changed
                 # https://github.com/whoshuu/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20aR39-R40
-                self._cmake.definitions["USE_OPENSSL"] = self.options.get_safe("with_openssl", False)
-                self._cmake.definitions["USE_WINSSL"] = self.options.get_safe("with_winssl", False)
+                self._cmake.definitions[self._get_cmake_option("CPR_FORCE_OPENSSL_BACKEND")] = self.options.get_safe("with_openssl", False)
+                self._cmake.definitions[self._get_cmake_option("CPR_FORCE_WINSSL_BACKEND")] = self.options.get_safe("with_winssl", False)
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
