@@ -577,40 +577,30 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
-
-        corefilecontents = textwrap.dedent("""\
+        
+        def _create_private_module(module, path, dependencies=[]):
+            dependencies_string = ''.join('Qt6::%s;' % dependency for dependency in dependencies[:-1])
+            dependencies_string.join('Qt6::%s', dependencies[-1])
+            contents = textwrap.dedent("""\
             if(NOT TARGET Qt6::CorePrivate)
                 add_library(Qt6::CorePrivate INTERFACE IMPORTED)
 
-                set_target_properties(Qt6::CorePrivate PROPERTIES
-                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/../../../include/QtCore/6.0.0;${CMAKE_CURRENT_LIST_DIR}/../../../include/QtCore/6.0.0/QtCore"
-                    INTERFACE_LINK_LIBRARIES "Qt6::Core"
+                set_target_properties(Qt6::{0}Private PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/../../../include/Qt{0}/{1};${CMAKE_CURRENT_LIST_DIR}/../../../include/Qt{0}/{1}/Qt{0}"
+                    INTERFACE_LINK_LIBRARIES "{2}"
                 )
                 
                 add_library(Qt::CorePrivate INTERFACE IMPORTED)
                 set_target_properties(Qt::CorePrivate PROPERTIES
-                    INTERFACE_LINK_LIBRARIES "Qt6::CorePrivate"
+                    INTERFACE_LINK_LIBRARIES "Qt6::{0}Private"
                     _qt_is_versionless_target "TRUE"
                 )
-            endif()""")
-        tools.save(os.path.join(self.package_folder, self._cmake_qt6core_private_file), corefilecontents)
-        qmlfilecontents = textwrap.dedent("""\
-            if(NOT TARGET Qt6::QmlPrivate)
-                add_library(Qt6::QmlPrivate INTERFACE IMPORTED)
+            endif()""".format(module, self.version, dependencies))
+            
+            tools.save(os.path.join(self.package_folder, path), contents)
 
-                set_target_properties(Qt6::QmlPrivate PROPERTIES
-                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/QtQml/6.0.0;${CMAKE_CURRENT_LIST_DIR}/include/QtQml/6.0.0/QtQml"
-                    INTERFACE_LINK_LIBRARIES "Qt::CorePrivate;Qt6::Qml"
-                )
-                
-                add_library(Qt::QmlPrivate INTERFACE IMPORTED)
-                set_target_properties(Qt::QmlPrivate PROPERTIES
-                    INTERFACE_LINK_LIBRARIES "Qt6::QmlPrivate"
-                    _qt_is_versionless_target "TRUE"
-                )
-            endif()""")
-        tools.save(os.path.join(self.package_folder, self._cmake_qt6qml_private_file), qmlfilecontents)
-        
+        _create_private_module("Core",self._cmake_qt6core_private_file,["Core"])
+        _create_private_module("Qml", self._cmake_qt6qml_private_file, ["CorePrivate", "Qml"])
 
     def package_id(self):
         del self.info.options.cross_compile
