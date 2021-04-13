@@ -12,7 +12,6 @@ class MinizipNgConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "compiler", "build_type", "arch"
-    provides = "minizip"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -55,6 +54,8 @@ class MinizipNgConan(ConanFile):
             del self.options.fPIC
             del self.options.with_iconv
             del self.options.with_libbsd
+        if not tools.is_apple_os(self.settings.os):
+            del self.options.with_libcomp
 
     def build_requirements(self):
         self.build_requires('pkgconf/1.7.3')
@@ -66,9 +67,7 @@ class MinizipNgConan(ConanFile):
         del self.settings.compiler.libcxx
         if self.options.mz_compatibility:
             self.provides = "minizip"
-        if not tools.is_apple_os(self.settings.os):
-            del self.options.with_libcomp
-        elif self.options.with_libcomp:
+        if self.options.get_safe("with_libcomp"):
             del self.options.with_zlib
 
     def requirements(self):
@@ -81,15 +80,13 @@ class MinizipNgConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.4.8")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.settings.os != "Windows":
-            if self.options.with_iconv:
+            if self.options.get_safe("with_iconv"):
                 self.requires("libiconv/1.16")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "minizip-ng-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -113,20 +110,8 @@ class MinizipNgConan(ConanFile):
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "BZIP2_FOUND",
-                              "BZip2_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "BZIP2_VERSION_STRING",
-                              "BZip2_VERSION")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "BZIP2_INCLUDE_DIRS",
-                              "BZip2_INCLUDE_DIRS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "BZIP2_LIBRARIES",
-                              "BZip2_LIBRARIES")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "BZIP2_LIBRARY_DIRS",
-                              "BZip2_LIB_DIRS")
+                              "set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
+                              "")
 
     def build(self):
         self._patch_sources()
@@ -165,7 +150,7 @@ class MinizipNgConan(ConanFile):
 
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append('HAVE_LZMA')
-        if tools.is_apple_os(self.settings.os) and self.options.with_libcomp:
+        if tools.is_apple_os(self.settings.os) and self.options.get_safe("with_libcomp"):
             self.cpp_info.components["minizip"].defines.append('HAVE_LIBCOMP')
         if self.options.with_bzip2:
             self.cpp_info.components["minizip"].defines.append('HAVE_BZIP2')
