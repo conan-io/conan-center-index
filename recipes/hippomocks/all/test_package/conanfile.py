@@ -4,7 +4,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    no_copy_source = True
 
     def build(self):
         cmake = CMake(self)
