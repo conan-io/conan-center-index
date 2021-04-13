@@ -13,7 +13,7 @@ class ZlibNgConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = ["shared": False, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
 
     _cmake = None
 
