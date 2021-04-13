@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <standalone/fakeit.hpp>
+#include <fakeit.hpp>
 
 using namespace fakeit;
 

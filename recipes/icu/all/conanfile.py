@@ -170,6 +170,9 @@ class ICUBase(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         bindir = bindir.replace("\\", "/") if tools.os_info.is_windows else bindir
         args.append("--sbindir=%s" % bindir)
+        libdir = os.path.join(self.package_folder, "lib")
+        libdir = libdir.replace("\\", "/") if tools.os_info.is_windows else libdir
+        args.append("--libdir=%s" % libdir)
 
         if self._is_mingw:
             mingw_chost = "i686-w64-mingw32" if self.settings.arch == "x86" else "x86_64-w64-mingw32"

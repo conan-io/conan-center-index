@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -11,15 +12,28 @@ class FakeItConan(ConanFile):
     topics = ("mock", "fake", "spy")
     settings = "compiler"
     options = {
-        "integration": [None, "boost", "catch", "cute", "gtest", "mettle", "nunit", "mstest", "qtest", "standalone",
-                        "tpunit"]
+        "integration": ["boost", "catch", "cute", "gtest", "mettle", "nunit", "mstest", "qtest", "standalone", "tpunit"]
     }
-    default_options = {"integration": None}
+    default_options = {"integration": "standalone"}
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def requirements(self):
+        if self.options.integration == "boost":
+            self.requires("boost/1.75.0")
+        elif self.options.integration == "catch":
+            self.requires("catch2/2.13.4")
+        elif self.options.integration == "gtest":
+            self.requires("gtest/cci.20210126")
+        elif self.options.integration == "qtest":
+            self.requires("qt/6.0.2")
+        elif self.options.integration == "standalone":
+            pass
+        else:
+            raise ConanInvalidConfiguration("%s is not (yet) available on cci" % self.options.integration)
 
     def configure(self):
         minimal_cpp_standard = "11"
@@ -32,13 +46,8 @@ class FakeItConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy(pattern="*.hpp", dst="include", src=os.path.join(self._source_subfolder, "single_header"))
+        self.copy(pattern="fakeit.hpp", dst="include", src=os.path.join(self._source_subfolder, "single_header", str(self.options.integration)))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
-        self.info.header_only()
-
-    def package_info(self):
-        if self.options.integration is not None:
-            config_dir = str(self.options.integration)
-            self.cpp_info.includedirs.append(config_dir)
+        del self.settings.compiler

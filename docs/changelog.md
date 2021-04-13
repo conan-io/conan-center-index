@@ -1,5 +1,12 @@
 # Changelog
 
+### 08-April-2021 - 17:01 CET
+
+- [feature] Hide previous comments by the bot.
+- [feature] Use Artifactory API to promote packages from one repository to another.
+- [job] Add ability to specify a repository and branch for the hooks when running the export check.
+- [job] Add checks to validate infrastructure: Python version, Macos features.
+
 ### 05-March-2021 - 15:28 CET
 
 - [feature] Stop generating packages for apple-clang 9.1.
