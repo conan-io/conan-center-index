@@ -12,8 +12,8 @@ class ZlibNgConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = ["shared": False, "fPIC": True}
 
     _cmake = None
 
