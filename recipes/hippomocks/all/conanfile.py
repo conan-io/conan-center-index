@@ -21,7 +21,7 @@ class HippomocksConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy('*.h', dst='include/hippomocks', src='%s/HippoMocks/' % self._source_subfolder)
+        self.copy('*.h', dst=os.path.join('include', 'hippomocks'), src=os.path.join(self._source_subfolder, 'HippoMocks'))
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
 
     def package_id(self):
