@@ -7,7 +7,7 @@ class ZlibNgConan(ConanFile):
     description = "zlib data compression library for the next generation systems"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Dead2/zlib-ng/"
-    license="https://github.com/Dead2/zlib-ng/blob/ba7f0eb6e294306ac6d771216ea4442f2ea2d830/LICENSE.md"
+    license ="Zlib"
     topics = ("conan", "zlib", "compression")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
