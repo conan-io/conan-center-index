@@ -499,6 +499,14 @@ class QtConan(ConanFile):
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
+    @property
+    def _cmake_qt6core_private_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_qt6_coreprivate.cmake")
+
+    @property
+    def _cmake_qt6qml_private_file(self):
+        return os.path.join("lib", "cmake", "Qt6Qml", "conan_qt_qt6_qmlprivate.cmake")
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
@@ -562,6 +570,40 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+
+        corefilecontents = textwrap.dedent("""\
+            if(NOT TARGET Qt6::CorePrivate)
+                add_library(Qt6::CorePrivate INTERFACE IMPORTED)
+
+                set_target_properties(Qt6::CorePrivate PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/../../../include/QtCore/6.0.0;${CMAKE_CURRENT_LIST_DIR}/../../../include/QtCore/6.0.0/QtCore"
+                    INTERFACE_LINK_LIBRARIES "Qt6::Core"
+                )
+                
+                add_library(Qt::CorePrivate INTERFACE IMPORTED)
+                set_target_properties(Qt::CorePrivate PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "Qt6::CorePrivate"
+                    _qt_is_versionless_target "TRUE"
+                )
+            endif()""")
+        tools.save(os.path.join(self.package_folder, self._cmake_qt6core_private_file), corefilecontents)
+        
+        qmlfilecontents = textwrap.dedent("""\
+            if(NOT TARGET Qt6::QmlPrivate)
+                add_library(Qt6::QmlPrivate INTERFACE IMPORTED)
+
+                set_target_properties(Qt6::QmlPrivate PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/QtQml/6.0.0;${CMAKE_CURRENT_LIST_DIR}/include/QtQml/6.0.0/QtQml"
+                    INTERFACE_LINK_LIBRARIES "Qt::CorePrivate;Qt6::Qml"
+                )
+                
+                add_library(Qt::QmlPrivate INTERFACE IMPORTED)
+                set_target_properties(Qt::QmlPrivate PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "Qt6::QmlPrivate"
+                    _qt_is_versionless_target "TRUE"
+                )
+            endif()""")
+        tools.save(os.path.join(self.package_folder, self._cmake_qt6qml_private_file), qmlfilecontents)
         
 
     def package_id(self):
@@ -672,6 +714,8 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt6qml_private_file)
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6qml_private_file)
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
@@ -733,6 +777,8 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt6core_private_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6core_private_file)
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
