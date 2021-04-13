@@ -60,49 +60,12 @@ class ZlibNgConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "ZLIB"
-        self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
-        if self.settings.os == "Windows":
-            if self.options.shared:
-                if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ["zlibd"]
-                else:
-                    self.cpp_info.libs = ["zlib"]
-            else:
-                if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ["zlibstaticd"]
-                else:
-                    self.cpp_info.libs = ["zlibstatic"]
-        else:
-            self.cpp_info.libs = ["z-ng"]
-
-    def _rename_libraries(self):
-        if self.settings.os == "Windows":
-            lib_path = os.path.join(self.package_folder, "lib")
-            suffix = "d" if self.settings.build_type == "Debug" else ""
-
-            if self.options.shared:
-                if self.settings.compiler == "Visual Studio":
-                    current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-            else:
-                if self.settings.compiler == "Visual Studio":
-                    current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-                elif self.settings.compiler == "gcc":
-                    current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                    os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
-                elif self.settings.compiler == "clang":
-                    current_lib = os.path.join(lib_path, "zlibstatic.lib")
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
-
     def package(self):
         # Copy license
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
 
         # Copy headers
-        for header in ["*zlib.h", "*zconf.h"]:
+        for header in ["*zlib*.h", "*zconf*.h"]:
             self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
             self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
 
@@ -116,4 +79,19 @@ class ZlibNgConan(ConanFile):
             self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
 
-        self._rename_libraries()
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ZLIB"
+        self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                if self.settings.build_type == "Debug":
+                    self.cpp_info.libs = ["zlib-ngd"]
+                else:
+                    self.cpp_info.libs = ["zlib-ng"]
+            else:
+                if self.settings.build_type == "Debug":
+                    self.cpp_info.libs = ["zlib-ngstaticd"]
+                else:
+                    self.cpp_info.libs = ["zlib-ngstatic"]
+        else:
+            self.cpp_info.libs = ["z-ng"]
