@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from io import StringIO
 import os
 
 class TestPackageConan(ConanFile):
@@ -16,5 +17,5 @@ class TestPackageConan(ConanFile):
         try:
            self.run(bin_path, run_environment=True, output=buffer)
            self.output.success("enough.c test passed")
-        except:
+        except: # print output of test in case of error
             self.output.error(buffer.getvalue())
