@@ -9,8 +9,6 @@ class HippomocksConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = 'https://github.com/dascandy/hippomocks.git'
     license = 'LGPL-2.1'
-    settings = None
-    short_paths = True
     no_copy_source = True
 
     @property
@@ -36,4 +34,3 @@ class HippomocksConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Hippomocks"
         self.cpp_info.names["cmake_find_package_multi"] = "Hippomocks"
-
