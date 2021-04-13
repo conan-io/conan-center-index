@@ -4,7 +4,7 @@ project(test_package LANGUAGES C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(ZLIB)
+find_package(ZLIB REQUIRED)
 
 add_executable(${PROJECT_NAME} enough.c)
 target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)
