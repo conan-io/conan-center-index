@@ -107,7 +107,6 @@ class ZlibNgConan(ConanFile):
             self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
 
         # Copying static and dynamic libs
-        #build_dir = os.path.join(self._source_subfolder, "_build")
         if self.options.shared:
             self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
             self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
