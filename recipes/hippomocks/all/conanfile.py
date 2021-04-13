@@ -20,10 +20,6 @@ class HippomocksConan(ConanFile):
         extracted_dir = glob.glob("%s-%s*" % (self.name, self.version))[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        # This is a header-only library so no build step required
-        pass
-
     def package(self):
         self.copy('*.h', dst='include/hippomocks', src='%s/HippoMocks/' % self._source_subfolder)
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
