@@ -66,16 +66,16 @@ class ZlibNgConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ['zlibd']
+                    self.cpp_info.libs = ["zlibd"]
                 else:
-                    self.cpp_info.libs = ['zlib']
+                    self.cpp_info.libs = ["zlib"]
             else:
                 if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ['zlibstaticd']
+                    self.cpp_info.libs = ["zlibstaticd"]
                 else:
-                    self.cpp_info.libs = ['zlibstatic']
+                    self.cpp_info.libs = ["zlibstatic"]
         else:
-            self.cpp_info.libs = ['z-ng']
+            self.cpp_info.libs = ["z-ng"]
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
