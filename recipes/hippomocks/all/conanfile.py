@@ -36,3 +36,4 @@ class HippomocksConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Hippomocks"
         self.cpp_info.names["cmake_find_package_multi"] = "Hippomocks"
+
