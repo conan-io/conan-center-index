@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake
-from io import StringIO
+from conans import ConanFile, CMake, tools
 import os
 
 class TestPackageConan(ConanFile):
