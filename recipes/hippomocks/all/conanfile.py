@@ -3,7 +3,6 @@ import os, glob
 
 class HippomocksConan(ConanFile):
     name = 'hippomocks'
-    version = '10960d0' # This library is not versioned
     description = 'Single-header mocking framework.'
     topics = ("conan", "hippomocks", "mock", "framework")
     url = "https://github.com/conan-io/conan-center-index"
