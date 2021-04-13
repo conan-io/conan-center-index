@@ -46,6 +46,13 @@ class AeronConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def build_requirements(self):
+        self.build_requires("zulu-openjdk/11.0.8")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
@@ -58,13 +65,6 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
             )
-
-    def build_requirements(self):
-        self.build_requires("zulu-openjdk/11.0.8")
-
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
