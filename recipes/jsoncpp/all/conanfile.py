@@ -115,3 +115,5 @@ class JsoncppConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("JSON_DLL")
