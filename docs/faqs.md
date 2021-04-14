@@ -158,3 +158,8 @@ and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c825641
 
 However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
 After one month, we will welcome a PR removing the option that was deprecated.
+
+
+## Can I split a project into an installer and library package?
+
+No. Some projects provide more than a simple library, but also applications. For those projects, both libraries and executables should be kept together under the same Conan package. In the past, we tried to separate popular projects, like Protobuf, and it proved to be a complex and hard task to be maintained, requiring custom patches to disable parts of the building. Also, with the [context](https://docs.conan.io/en/latest/systems_cross_building/cross_building.html#conan-v1-24-and-newer) feature, we can use the same package as build requirement, for the same build platform, and as a regular requirement, for the host platform, when cross-building.
