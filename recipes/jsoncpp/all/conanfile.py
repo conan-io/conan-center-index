@@ -82,8 +82,9 @@ class JsoncppConan(ConanFile):
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {
-                "jsoncpp_lib": "jsoncpp::jsoncpp",
-                "jsoncpp_static": "jsoncpp::jsoncpp"
+                "jsoncpp_lib": "jsoncpp::jsoncpp",        # imported target for shared lib, but also static between 1.9.0 & 1.9.3
+                "jsoncpp_static": "jsoncpp::jsoncpp",     # imported target for static lib if >= 1.9.4
+                "jsoncpp_lib_static": "jsoncpp::jsoncpp", # imported target for static lib if < 1.9.0
             }
         )
 
