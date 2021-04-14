@@ -9,8 +9,6 @@ class OpenvrConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ValveSoftware/openvr"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -22,6 +20,8 @@ class OpenvrConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -29,10 +29,12 @@ class OpenvrConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
@@ -57,6 +59,8 @@ class OpenvrConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -68,13 +72,18 @@ class OpenvrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "openvr"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs.append(os.path.join("include", "openvr"))
 
         if not self.options.shared:
-            self.cpp_info.defines.append('OPENVR_BUILD_STATIC')
+            self.cpp_info.defines.append("OPENVR_BUILD_STATIC")
+            libcxx = tools.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
 
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
 
-        if self.settings.os == "Macos":
+        if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.append("Foundation")
