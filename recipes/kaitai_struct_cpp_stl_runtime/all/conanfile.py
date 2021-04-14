@@ -50,8 +50,12 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        
         if self.options.with_iconv:
             self._cmake.definitions["STRING_ENCODING_TYPE"] = "ICONV"
+        elif self.options.with_iconv:
+            self._cmake.definitions["STRING_ENCODING_TYPE"] = "NONE"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
