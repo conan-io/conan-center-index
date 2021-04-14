@@ -52,9 +52,6 @@ class HidapiConan(ConanFile):
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
                               "AC_CONFIG_MACRO_DIR", "dnl AC_CONFIG_MACRO_DIR")
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
-                                  r"-install_name \$rpath/", "-install_name ")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -62,6 +59,9 @@ class HidapiConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             os.chmod("configure.ac", os.stat("configure.ac").st_mode | 0o111)
             self.run("./bootstrap")
+        if self.settings.os == "Macos":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                                  r"-install_name \$rpath/", "-install_name ")
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = ["--enable-shared" if self.options.shared else "--disable-shared",
                 "--enable-static" if not self.options.shared else "--disable-static"]
