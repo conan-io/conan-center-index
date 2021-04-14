@@ -1,6 +1,6 @@
-#include <iostream>
 #include "hidapi/hidapi.h"
 
-int main() {
+int main(void) {
     hid_init();
+    return 0;
 }
