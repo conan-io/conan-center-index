@@ -46,10 +46,10 @@ class UwebsocketsConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
 
-        if self.version == "18.3.0":
-            self.requires("usockets/0.4.0")
-        else:
+        if tools.Version(self.version) >= "19.0.0":
             self.requires("usockets/0.7.1")
+        else:
+            self.requires("usockets/0.4.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
