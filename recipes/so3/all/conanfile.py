@@ -56,3 +56,5 @@ class So3Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["so3"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
