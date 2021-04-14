@@ -29,7 +29,7 @@ class HarfbuzzConan(ConanFile):
         "with_glib": True,
         "with_gdi": True,
         "with_uniscribe": True,
-        "with_directwrite": True,
+        "with_directwrite": False
     }
 
     short_paths = True
