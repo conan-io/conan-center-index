@@ -11,6 +11,14 @@ class DoxygenConan(ConanFile):
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "build_parse": [True, False],
+        "build_search": [True, False]
+    }
+    default_options = {
+        "build_parse": True,
+        "build_search": True
+    }
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     short_paths = True
@@ -42,8 +50,9 @@ class DoxygenConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("xapian-core/1.4.18")
-        self.requires("zlib/1.2.11")
+        if self.options.build_search:
+            self.requires("xapian-core/1.4.18")
+            self.requires("zlib/1.2.11")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -60,8 +69,8 @@ class DoxygenConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["build_parse"] = True
-        self._cmake.definitions["build_search"] = True
+        self._cmake.definitions["build_parse"] = self.options.build_parse
+        self._cmake.definitions["build_search"] = self.options.build_search
         self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         self._cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         self._cmake.configure(build_folder=self._build_subfolder)
