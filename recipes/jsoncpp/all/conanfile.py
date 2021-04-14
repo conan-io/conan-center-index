@@ -57,6 +57,7 @@ class JsoncppConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["JSONCPP_WITH_TESTS"] = False
+        self._cmake.definitions["JSONCPP_WITH_WARNING_AS_ERROR"] = False
         self._cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
         self._cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
         self._cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
