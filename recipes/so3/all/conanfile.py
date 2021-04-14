@@ -4,7 +4,6 @@ from glob import glob
 import os
 
 
-
 class So3Conan(ConanFile):
     name = "so3"
     license = "GPL-3.0-or-later"
@@ -29,20 +28,22 @@ class So3Conan(ConanFile):
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("SO3 requires C99 support for complex numbers.")
+            raise ConanInvalidConfiguration(
+                "SO3 requires C99 support for complex numbers."
+            )
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob('so3-*/')[0]
+        extracted_dir = glob("so3-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
     def cmake(self):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
-            self._cmake.definitions["tests"] = False
+            self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.definitions["python"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
