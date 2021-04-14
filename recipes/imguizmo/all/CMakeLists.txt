@@ -14,6 +14,7 @@ file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CONAN_LIBS})
 
 include(GNUInstallDirs)
 
