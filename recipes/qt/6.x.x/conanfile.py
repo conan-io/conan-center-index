@@ -594,7 +594,9 @@ class QtConan(ConanFile):
             tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
-        _create_private_module("Qml", ["CorePrivate", "Qml"])
+        
+        if self.options.qtdeclarative:
+            _create_private_module("Qml", ["CorePrivate", "Qml"])
 
     def package_id(self):
         del self.info.options.cross_compile
