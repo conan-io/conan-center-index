@@ -56,7 +56,6 @@ class HidapiConan(ConanFile):
         if self._autotools:
             return self._autotools
         with tools.chdir(self._source_subfolder):
-            os.chmod("configure.ac", os.stat("configure.ac").st_mode | 0o111)
             self.run("./bootstrap")
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
