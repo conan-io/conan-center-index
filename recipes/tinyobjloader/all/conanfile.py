@@ -5,13 +5,22 @@ from conans import ConanFile, CMake, tools
 class TinyObjLoaderConan(ConanFile):
     name = "tinyobjloader"
     description = "Tiny but powerful single file wavefront obj loader"
-    settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
     topics = ("conan", "tinyobjloader", "wavefront", "geometry")
+
+    settings = "os", "arch", "build_type", "compiler"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "double": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "double": False,
+    }
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -42,7 +51,7 @@ class TinyObjLoaderConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["TINYOBJLOADER_USE_DOUBLE"] = False
+        self._cmake.definitions["TINYOBJLOADER_USE_DOUBLE"] = self.options.double
         self._cmake.definitions["TINYOBJLOADER_BUILD_TEST_LOADER"] = False
         self._cmake.definitions["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
         self._cmake.definitions["TINYOBJLOADER_BUILD_OBJ_STICHER"] = False
@@ -61,4 +70,7 @@ class TinyObjLoaderConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "tinyobjloader"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        suffix = "_double" if self.options.double else ""
+        self.cpp_info.libs = ["tinyobjloader" + suffix]
+        if self.options.double:
+            self.cpp_info.defines.append("TINYOBJLOADER_USE_DOUBLE")
