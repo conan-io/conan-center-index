@@ -41,7 +41,8 @@ class HidapiConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("libtool/2.4.6")
 
     def requirements(self):
         if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
