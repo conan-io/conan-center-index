@@ -14,9 +14,6 @@ class UwebsocketsConan(ConanFile):
     settings = "compiler"
     no_copy_source = True
 
-    requires = ("usockets/0.4.0",
-                "zlib/1.2.11")
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -45,6 +42,14 @@ class UwebsocketsConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+
+        if tools.Version(self.version) >= "19.0.0":
+            self.requires("usockets/0.7.1")
+        else:
+            self.requires("usockets/0.4.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
