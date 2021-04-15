@@ -1,5 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class TinyObjLoaderConan(ConanFile):
@@ -68,9 +71,41 @@ class TinyObjLoaderConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "tinyobjloader"))
+        cmake_target = "tinyobjloader_double" if self.options.double else "tinyobjloader"
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {cmake_target: "tinyobjloader::tinyobjloader"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "tinyobjloader"
+        self.cpp_info.names["cmake_find_package_multi"] = "tinyobjloader"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         suffix = "_double" if self.options.double else ""
+        self.cpp_info.names["pkg_config"] = "tinyobjloader" + suffix
         self.cpp_info.libs = ["tinyobjloader" + suffix]
         if self.options.double:
             self.cpp_info.defines.append("TINYOBJLOADER_USE_DOUBLE")
