@@ -757,4 +757,6 @@ class QtConan(ConanFile):
                         module = m[:m.find("_")]
                         with tools.chdir(m):
                             for d2 in os.listdir():
-                                self.cpp_info.components["qt%s" % module].exelinkflags.extend([os.path.join(os.path.abspath(os.getcwd()), d2, f) for f in os.listdir(d2)])
+                                obj_files = [os.path.join(os.path.abspath(os.getcwd()), d2, f) for f in os.listdir(d2)]
+                                self.cpp_info.components["qt%s" % module].exelinkflags.extend(obj_files)
+                                self.cpp_info.components["qt%s" % module].sharedlinkflags.extend(obj_files)
