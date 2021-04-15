@@ -632,7 +632,7 @@ class QtConan(ConanFile):
         _create_module("Core", core_reqs)
         self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
-            gui_reqs = []
+            gui_reqs = ["DBus"]
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
