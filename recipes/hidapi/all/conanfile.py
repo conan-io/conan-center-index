@@ -30,8 +30,12 @@ class HidapiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
+            self.options.shared = True
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            raise ConanInvalidConfiguration("Static libraries for Visual Studio are currently not available")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
