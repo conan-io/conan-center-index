@@ -93,7 +93,7 @@ class HidapiConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libusb"].names["pkg_config"] = "hidapi-libusb"
             self.cpp_info.components["libusb"].libs = ["hidapi-libusb"]
             self.cpp_info.components["libusb"].requires = ["libusb::libusb"]
