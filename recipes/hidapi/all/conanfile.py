@@ -32,8 +32,6 @@ class HidapiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.settings.arch == "x86_64":
-            raise ConanInvalidConfiguration("There's no support for x86_64 on Windows yet, please use x86")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
