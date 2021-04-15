@@ -12,10 +12,18 @@ class TinyObjLoaderConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
     topics = ("conan", "tinyobjloader", "wavefront", "geometry")
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -31,11 +39,16 @@ class TinyObjLoaderConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
-        cmake.definitions["CMAKE_INSTALL_DOCDIR"] = "licenses"
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["TINYOBJLOADER_USE_DOUBLE"] = False
+        self._cmake.definitions["TINYOBJLOADER_BUILD_TEST_LOADER"] = False
+        self._cmake.definitions["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
+        self._cmake.definitions["TINYOBJLOADER_BUILD_OBJ_STICHER"] = False
+        self._cmake.definitions["CMAKE_INSTALL_DOCDIR"] = "licenses"
+        self._cmake.configure(build_dir=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
