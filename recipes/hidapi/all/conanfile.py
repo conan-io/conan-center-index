@@ -45,7 +45,7 @@ class HidapiConan(ConanFile):
             self.build_requires("libtool/2.4.6")
 
     def requirements(self):
-        if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libusb/1.0.24")
 
     def _patch_sources(self):
