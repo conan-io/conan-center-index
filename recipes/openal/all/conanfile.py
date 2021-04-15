@@ -162,6 +162,7 @@ class OpenALConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
+        self.cpp_info.names["pkg_config"] = "openal"
 
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
