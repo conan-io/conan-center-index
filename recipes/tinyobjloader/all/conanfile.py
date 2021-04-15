@@ -7,7 +7,7 @@ class TinyObjLoaderConan(ConanFile):
     description = "Tiny but powerful single file wavefront obj loader"
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
@@ -26,7 +26,7 @@ class TinyObjLoaderConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -35,7 +35,7 @@ class TinyObjLoaderConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + '-' + self.version
+        extracted_folder = self.name + "-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
     def _configure_cmake(self):
