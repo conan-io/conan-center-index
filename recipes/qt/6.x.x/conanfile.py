@@ -747,3 +747,14 @@ class QtConan(ConanFile):
             self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
             self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+
+        with tools.chdir(os.path.join(self.package_folder, "lib")):
+            for d1 in os.listdir():
+                if not d1.startswith("objects-"):
+                    continue
+                with tools.chdir(d1):
+                    for m in os.listdir():
+                        module = m[:m.find("_")]
+                        with tools.chdir(m):
+                            for d2 in os.listdir():
+                                self.cpp_info.components["qt%s" % module].exelinkflags.extend([os.path.join(os.path.abspath(os.getcwd()), d2, f) for f in os.listdir(d2)])
