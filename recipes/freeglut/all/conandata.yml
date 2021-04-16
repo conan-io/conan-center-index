@@ -1,0 +1,4 @@
+sources:
+  "3.2.1":
+    sha256: "23b93b77ac01bc70af0c56fa3316f25ea8f136603f93df319ca74867e15134d3"
+    url: "https://github.com/dcnieho/FreeGLUT/archive/FG_3_2_1.tar.gz"
