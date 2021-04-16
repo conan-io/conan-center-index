@@ -98,13 +98,27 @@ class freeglutConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "FreeGLUT"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "FreeGLUT"
+        self.cpp_info.names["cmake_find_package"] = "FreeGLUT"
+        self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
+
+        self.cpp_info.components['freeglut_'].libs = tools.collect_libs(self)
+
+        self.cpp_info.components['freeglut_'].names["cmake_find_package"] = "freeglut" if self.options.shared else "freeglut_static"
+        self.cpp_info.components['freeglut_'].names["cmake_find_package_multi"] = "freeglut" if self.options.shared else "freeglut_static"
+        self.cpp_info.components['freeglut_'].names["pkg_config"] = "freeglut" if self.settings.os == "Windows" else "glut"
+
+        self.cpp_info.components['freeglut_'].requires.append("opengl::opengl")
+        self.cpp_info.components['freeglut_'].requires.append('glu::glu')
+        if self.settings.os == "Linux":
+            self.cpp_info.components['freeglut_'].requires.append("xorg::xorg")
 
         if self.settings.os == "Windows":
             if not self.options.shared:
-                self.cpp_info.defines.append("FREEGLUT_STATIC=1")
-            self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
-            self.cpp_info.system_libs.extends(["glu32", "gdi32", "winmm", "user32"])
+                self.cpp_info.components['freeglut_'].defines.append("FREEGLUT_STATIC=1")
+            self.cpp_info.components['freeglut_'].defines.append("FREEGLUT_LIB_PRAGMAS=0")
+            self.cpp_info.components['freeglut_'].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extends(["pthread", "m", "dl", "rt"])
+            self.cpp_info.components['freeglut_'].system_libs.extend(["pthread", "m", "dl", "rt"])
