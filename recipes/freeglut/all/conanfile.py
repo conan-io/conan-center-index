@@ -84,8 +84,6 @@ class freeglutConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib", "lib64"]
-
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Windows":
