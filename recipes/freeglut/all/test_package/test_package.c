@@ -1,12 +1,10 @@
-#include <cstdlib>
-#include <cstdarg>
-#include <iostream>
-
+#include <stdio.h>
 #include "GL/freeglut.h"
 
 
 void error_handler(const char *fmt, va_list ap) {
-    std::cout << fmt << std::endl;
+    vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
 }
 
 void renderScene(void) {
@@ -24,9 +22,7 @@ void renderScene(void) {
 
 int main(int argc, char **argv) {
     glutInitErrorFunc(error_handler);
-    std::cout << std::endl << "FreeGLUT version:" << std::endl;
-    std::cout << glutGet(GLUT_VERSION);
-    std::cout << std::endl;
+	printf("FreeGLUT version: %d\n", glutGet(GLUT_VERSION));
 
     /*
     glutInit(&argc,argv);
