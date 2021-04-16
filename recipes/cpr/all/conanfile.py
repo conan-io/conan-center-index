@@ -65,8 +65,9 @@ class CprConan(ConanFile):
         if not self._supports_winssl:
             del self.options.with_winssl
 
-        if self._supports_openssl and tools.is_apple_os(self.settings.os):
-            self.options.with_openssl = False # Default libcurl in CCI is `with_ssl="darwin"` which is unclear if cpr supports this
+        if self.options.get_safe("with_openssl", False) and tools.is_apple_os(self.settings.os):
+            # https://github.com/whoshuu/cpr/issues/546
+            raise ConanInvalidConfiguration("cpr cannot be built on macOS with openssl")
 
         # Make sure libcurl uses the same SSL implementation
         if self.options.get_safe("with_openssl", False):
@@ -127,6 +128,10 @@ class CprConan(ConanFile):
                 # https://github.com/whoshuu/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20aR39-R40
                 self._cmake.definitions[self._get_cmake_option("CPR_FORCE_OPENSSL_BACKEND")] = self.options.get_safe("with_openssl", False)
                 self._cmake.definitions[self._get_cmake_option("CPR_FORCE_WINSSL_BACKEND")] = self.options.get_safe("with_winssl", False)
+
+            supports_any_ssl = self.options.get_safe("with_openssl", False) or self.options.get_safe("with_winssl", False)
+            if not self._uses_old_cmake_options and not supports_any_ssl:
+                self._cmake.definitions["CPR_ENABLE_SSL"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
