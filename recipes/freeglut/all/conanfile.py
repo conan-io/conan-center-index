@@ -44,6 +44,9 @@ class freeglutConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("opengl/system")
         self.requires('glu/system')
