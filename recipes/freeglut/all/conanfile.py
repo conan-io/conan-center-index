@@ -5,7 +5,6 @@ import os
 
 class freeglutConan(ConanFile):
     name = "freeglut"
-    version = "3.2.1"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
@@ -74,13 +73,13 @@ class freeglutConan(ConanFile):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
         cmake = CMake(self, set_cmake_flags=True)
 
-        cmake.definitions["FREEGLUT_BUILD_DEMOS"] = "OFF"
-        cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = "OFF" if self.options.shared else "ON"
-        cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
-        cmake.definitions["FREEGLUT_GLES"] = "ON" if self.options.gles else "OFF"
-        cmake.definitions["FREEGLUT_PRINT_ERRORS"] = "ON" if self.options.print_errors_at_runtime else "OFF"
-        cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = "ON" if self.options.print_warnings_at_runtime else "OFF"
-        cmake.definitions["FREEGLUT_INSTALL_PDB"] = "OFF"
+        cmake.definitions["FREEGLUT_BUILD_DEMOS"] = False
+        cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
+        cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
+        cmake.definitions["FREEGLUT_GLES"] = self.options.gles
+        cmake.definitions["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
+        cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
+        cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
         cmake.definitions["INSTALL_PDB"] = False
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
@@ -105,14 +104,7 @@ class freeglutConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines.append("FREEGLUT_STATIC=1")
             self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
-            self.cpp_info.system_libs.append("glu32")
-            self.cpp_info.system_libs.append("gdi32")
-            self.cpp_info.system_libs.append("winmm")
-            self.cpp_info.system_libs.append("user32")
+            self.cpp_info.system_libs.extends(["glu32", "gdi32", "winmm", "user32"])
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("dl")
-            self.cpp_info.system_libs.append("rt")
-
+            self.cpp_info.system_libs.extends(["pthread", "m", "dl", "rt"])
