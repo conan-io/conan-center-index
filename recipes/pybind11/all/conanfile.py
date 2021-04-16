@@ -43,8 +43,7 @@ class PyBind11Conan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        for filename in ["pybind11Common.cmake", "pybind11NewTools.cmake", "pybind11Targets.cmake",
-                         "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
+        for filename in ["pybind11Targets.cmake", "pybind11Config.cmake", "pybind11ConfigVersion.cmake"]:
             try:
                 os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", filename))
             except:
@@ -61,6 +60,8 @@ class PyBind11Conan(ConanFile):
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"))
                 self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Tools.cmake"))
+                self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Common.cmake"))
+                self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11NewTools.cmake"))
             self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
             self.cpp_info.components["headers"].requires = ["main"]
             self.cpp_info.components["embed"].requires = ["main"]
@@ -79,4 +80,4 @@ class PyBind11Conan(ConanFile):
 
             for generator in ["cmake", "cmake_multi", "cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.build_modules[generator] = [os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"),
-                                                        os.path.join(cmake_base_path, "pybind11Tools.cmake")]
+                                                          os.path.join(cmake_base_path, "pybind11Tools.cmake")]
