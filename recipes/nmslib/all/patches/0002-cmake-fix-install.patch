@@ -1,10 +1,11 @@
---- similarity_search/src/CMakeLists.txt	2021-03-26 15:49:30 +0100
-+++ similarity_search/src/CMakeLists.txt	2021-03-26 15:57:29 +0100
-@@ -53,6 +53,7 @@
+--- similarity_search/src/CMakeLists.txt
++++ similarity_search/src/CMakeLists.txt
+@@ -53,6 +53,8 @@
  install(TARGETS NonMetricSpaceLib   
    ARCHIVE DESTINATION lib
    LIBRARY DESTINATION lib
-+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  RUNTIME DESTINATION bin
++  INCLUDES DESTINATION include
    COMPONENT library
  )
  
