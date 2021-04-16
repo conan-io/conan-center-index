@@ -48,6 +48,13 @@ class PyBind11Conan(ConanFile):
                 os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", filename))
             except:
                 pass
+        if tools.Version(self.version) >= "2.6.0":
+            tools.replace_in_file(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
+                                  "if(TARGET pybind11::lto)",
+                                  "if(FALSE)")
+            tools.replace_in_file(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
+                                  "add_library(",
+                                  "# add_library(")
 
     def package_id(self):
         self.info.header_only()
@@ -58,10 +65,10 @@ class PyBind11Conan(ConanFile):
             self.cpp_info.components["main"].names["cmake_find_package"] = "pybind11"
             self.cpp_info.components["main"].builddirs = [cmake_base_path]
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"))
+                #self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "FindPythonLibsNew.cmake"))
                 self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Common.cmake"))
-                self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Tools.cmake"))
-                self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11NewTools.cmake"))
+                #self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11Tools.cmake"))
+                #self.cpp_info.components["main"].build_modules[generator].append(os.path.join(cmake_base_path, "pybind11NewTools.cmake"))
             self.cpp_info.components["headers"].includedirs = [os.path.join("include", "pybind11")]
             self.cpp_info.components["headers"].requires = ["main"]
             self.cpp_info.components["embed"].requires = ["main"]
