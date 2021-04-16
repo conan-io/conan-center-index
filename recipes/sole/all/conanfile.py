@@ -28,7 +28,7 @@ class SoleConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder)
-        self.copy(pattern="sole.hpp", dst="include",
+        self.copy(pattern="*.hpp", dst="include",
                   src=self._source_subfolder)
 
     def package_info(self):
