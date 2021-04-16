@@ -32,7 +32,7 @@ class SoleConan(ConanFile):
                   src=self._source_subfolder)
 
     def package_info(self):
-        if str(self.settings.os) in ["Linux"]:
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs.append('rt')
 
     def package_id(self):
