@@ -42,10 +42,24 @@ class OpenvrConan(ConanFile):
             raise ConanInvalidConfiguration("OpenVR can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
+    def requirements(self):
+        self.requires("jsoncpp/1.9.4")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Honor fPIC=False
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "-fPIC", "")
+        # Unvendor jsoncpp (we rely on our CMake wrapper for jsoncpp injection)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "jsoncpp.cpp", "")
+        tools.rmdir(os.path.join(self._source_subfolder, "src", "json"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -59,8 +73,7 @@ class OpenvrConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
