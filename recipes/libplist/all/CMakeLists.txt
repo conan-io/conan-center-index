@@ -1,0 +1,56 @@
+﻿cmake_minimum_required (VERSION 3.1.0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+project (libplist)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+include_directories(${PROJECT_SOURCE_DIR}/libplist/src)
+include_directories(${PROJECT_SOURCE_DIR}/libplist/include)
+include_directories(${PROJECT_SOURCE_DIR}/libplist/libcnary)
+include_directories(${PROJECT_SOURCE_DIR}/libplist/libcnary/include)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+    add_definitions (-D_SCL_SECURE_NO_WARNINGS=1)
+    add_definitions (-D_CRT_SECURE_NO_WARNINGS=1)
+
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
+endif()
+
+
+#######################################################################
+#                              libcnary                               #
+#######################################################################
+
+aux_source_directory(${PROJECT_SOURCE_DIR}/libplist/libcnary CNARY_SRC)
+
+add_library(cnary ${CNARY_SRC})
+
+INSTALL(TARGETS cnary
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
+
+#######################################################################
+#                              libplist                               #
+#######################################################################
+
+aux_source_directory(${PROJECT_SOURCE_DIR}/libplist/src SRC)
+
+file(GLOB_RECURSE HEADERS "libplist/include/*.h")
+
+add_library(plist ${SRC})
+
+target_link_libraries(plist cnary)
+
+INSTALL(TARGETS plist
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
+
+INSTALL(FILES ${HEADERS} DESTINATION plist)

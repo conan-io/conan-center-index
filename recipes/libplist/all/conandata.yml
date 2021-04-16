@@ -1,0 +1,7 @@
+sources:
+  "1.2.240":
+    url: "https://github.com/libimobiledevice-win32/libplist/archive/refs/tags/v1.2.240.tar.gz"
+    sha256: "9de6e5b8cb806e4cde96ef68833fe6baba0094a12072db343e9c2fdd52187e9e"
+  "1.3.17":
+    url: "https://github.com/libimobiledevice-win32/libplist/archive/refs/tags/v1.3.17.tar.gz"
+    sha256: "104316d645126b9c0358bac08f6f5544f0759eedab9d82f113b547a798d3d084"
