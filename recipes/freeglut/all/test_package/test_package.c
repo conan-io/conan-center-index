@@ -30,7 +30,7 @@ void renderScene(void) {
 int main(int argc, char **argv) {
     glutInitErrorFunc(error_handler);
     glutInitWarningFunc(warning_handler);
-    glutInit(&argc,argv);
+    // glutInit(&argc,argv); //causes segfault on linux when called
     printf("FreeGLUT version: %d\n", glutGet(GLUT_VERSION));
 
     /*
