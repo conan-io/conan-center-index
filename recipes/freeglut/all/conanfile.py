@@ -19,7 +19,6 @@ class freeglutConan(ConanFile):
         "gles": [True, False],
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
-        "replace_glut": [True, False],
     }
     default_options = {
         "shared": False,
@@ -27,7 +26,6 @@ class freeglutConan(ConanFile):
         "gles": False,
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
-        "replace_glut": True,
     }
 
     @property
@@ -41,7 +39,6 @@ class freeglutConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.replace_glut = False
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -89,10 +86,7 @@ class freeglutConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib64"]
 
-        if self.options.replace_glut:
-            self.cpp_info.libs = ["glut"]
-        else:
-            self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Windows":
             if not self.options.shared:
