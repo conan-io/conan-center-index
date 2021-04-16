@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.1.0)
+﻿cmake_minimum_required (VERSION 3.4.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 project (libplist)
 
@@ -53,4 +53,4 @@ INSTALL(TARGETS plist
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
 
-INSTALL(FILES ${HEADERS} DESTINATION plist)
+INSTALL(FILES ${HEADERS} DESTINATION include/plist)
