@@ -93,6 +93,7 @@ class BoostConan(ConanFile):
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
+        "visibility": ["global", "protected", "hidden"],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -122,6 +123,7 @@ class BoostConan(ConanFile):
         "pch": True,
         "extra_b2_flags": "None",
         "i18n_backend": "iconv",
+        "visibility": "hidden",
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -249,7 +251,21 @@ class BoostConan(ConanFile):
     def _configure_options(self):
         return self._dependencies["configure_options"]
 
+    @property
+    def _fPIC(self):
+        return self.options.get_safe("fPIC", self.default_options["fPIC"])
+
+    @property
+    def _shared(self):
+        return self.options.get_safe("shared", self.default_options["shared"])
+
     def configure(self):
+        if self.options.header_only:
+            del self.options.shared
+            del self.options.fPIC
+        elif self.options.shared:
+            del self.options.fPIC
+
         if self.options.without_locale:
             self.options.i18n_backend = None
         else:
@@ -265,11 +281,11 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
-        if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime) and self.options.shared:
-            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared and self.options.numa:
-            raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
+        if self.settings.compiler == "Visual Studio" and self._shared:
+            if "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+            if self.options.numa:
+                raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -370,10 +386,10 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
 
         if self._with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
         elif self._with_iconv:
             self.requires("libiconv/1.16")
 
@@ -610,7 +626,7 @@ class BoostConan(ConanFile):
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
                 command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
-                if self.options.debug_level:
+                if "debug_level" in self.options:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command, run_environment=True)
@@ -780,6 +796,7 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
+            flags.append("--disable-icu")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
             flags.append("--disable-icu --disable-iconv")
@@ -803,8 +820,9 @@ class BoostConan(ConanFile):
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
+        flags.append("visibility=%s" % self.options.visibility)
 
-        flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
+        flags.append("link=%s" % ("shared" if self._shared else "static"))
         if self.settings.build_type == "Debug":
             flags.append("variant=debug")
         else:
@@ -825,9 +843,8 @@ class BoostConan(ConanFile):
         # CXX FLAGS
         cxx_flags = []
         # fPIC DEFINITION
-        if self.settings.os != "Windows":
-            if self.options.fPIC:
-                cxx_flags.append("-fPIC")
+        if self._fPIC:
+            cxx_flags.append("-fPIC")
         if self.settings.build_type == "RelWithDebInfo":
             if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
                 cxx_flags.append("-g")
@@ -867,15 +884,16 @@ class BoostConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
                 cxx_flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                    self.settings.os.version))
+                                                                    self.settings.get_safe("os.version"),
+                                                                    self.settings.get_safe("os.sdk"),
+                                                                    self.settings.get_safe("os.subsystem"),
+                                                                    self.settings.get_safe("arch")))
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
                 cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
                 cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
 
-            cxx_flags.append("-fvisibility=hidden")
-            cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
 
         if self._with_iconv:
@@ -903,7 +921,7 @@ class BoostConan(ConanFile):
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
                       "--abbreviate-paths"])
-        if self.options.debug_level:
+        if "debug_level" in self.options:
             flags.append("-d%d" % self.options.debug_level)
         return flags
 
@@ -1096,7 +1114,7 @@ class BoostConan(ConanFile):
         if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
 
-        if self._is_msvc and self.options.shared:
+        if self._is_msvc and self._shared:
             # Some boost releases contain both static and shared variants of some libraries (if shared=True)
             all_libs = set(tools.collect_libs(self, "lib"))
             static_libs = set(l for l in all_libs if l.startswith("lib"))
@@ -1214,7 +1232,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
             self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
-            if self.options.shared:
+            if self._shared:
                 # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
                 self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
 
@@ -1268,7 +1286,7 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
-                if self.settings.compiler == "Visual Studio" and (not self.options.shared or n in self._dependencies["static_only"]):
+                if self.settings.compiler == "Visual Studio" and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
                 return libprefix + n
 
@@ -1338,7 +1356,7 @@ class BoostConan(ConanFile):
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
-                if not self.options.shared:
+                if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
                 self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]

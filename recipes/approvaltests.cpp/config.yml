@@ -57,3 +57,7 @@ versions:
     folder: all
   10.7.0:
     folder: all
+  10.7.1:
+    folder: all
+  10.8.0:
+    folder: all

@@ -11,11 +11,12 @@ int gcd(int u, int v) {
         return u;
 
     // look for factors of 2
-    if (~u & 1) // u is even
+    if (~u & 1) { // u is even
         if (v & 1) // v is odd
             return gcd(u >> 1, v);
         else // both u and v are even
             return gcd(u >> 1, v >> 1) << 1;
+    }
 
     if (~v & 1) // u is odd, v is even
         return gcd(u, v >> 1);

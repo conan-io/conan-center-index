@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -227,34 +227,34 @@
+@@ -227,24 +227,24 @@ SET(install_bin_pdb)
  SET(dbd_drivers)
  
  # Note: The WINNT definition on some targets is used only by libaprutil.rc.
@@ -28,12 +28,8 @@
 +  ADD_LIBRARY(apr_crypto_openssl-1 crypto/apr_crypto_openssl.c libaprutil.rc)
    SET(install_targets ${install_targets} apr_crypto_openssl-1)
    SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_crypto_openssl-1.pdb)
--  SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
-+  SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OpenSSL_INCLUDE_DIR}")
-   SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES COMPILE_DEFINITIONS "WINNT")
-   SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES COMPILE_FLAGS "-DAPR_DECLARE_EXPORT=1 -DAPU_DECLARE_EXPORT=1 -DDLL_NAME=apr_crypto_openssl")
--  TARGET_LINK_LIBRARIES(apr_crypto_openssl-1 libaprutil-1 ${APR_LIBRARIES} ${OPENSSL_LIBRARIES})
-+  TARGET_LINK_LIBRARIES(apr_crypto_openssl-1 libaprutil-1 ${APR_LIBRARIES} ${OpenSSL_LIBRARIES})
+   SET_TARGET_PROPERTIES(apr_crypto_openssl-1 PROPERTIES INCLUDE_DIRECTORIES "${APR_INCLUDE_DIRECTORIES};${OPENSSL_INCLUDE_DIR}")
+@@ -254,7 +254,7 @@ IF(APU_HAVE_CRYPTO)
  ENDIF()
  
  IF(APU_HAVE_ODBC)
@@ -42,13 +38,12 @@
    SET(install_targets ${install_targets} apr_dbd_odbc-1)
    SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_dbd_odbc-1.pdb)
    SET(dbd_drivers ${dbd_drivers} odbc)
-@@ -265,7 +265,7 @@
+@@ -265,7 +265,7 @@ IF(APU_HAVE_ODBC)
  ENDIF()
  
  IF(APR_HAS_LDAP)
 -  ADD_LIBRARY(apr_ldap-1 SHARED ldap/apr_ldap_init.c ldap/apr_ldap_option.c 
-+  ADD_LIBRARY(apr_ldap-1 ldap/apr_ldap_init.c ldap/apr_ldap_option.c 
++  ADD_LIBRARY(apr_ldap-1 ldap/apr_ldap_init.c ldap/apr_ldap_option.c
                ldap/apr_ldap_rebind.c libaprutil.rc)
    SET(install_targets ${install_targets} apr_ldap-1)
    SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/apr_ldap-1.pdb)
-

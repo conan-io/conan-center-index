@@ -1,0 +1,14 @@
+sources:
+  "1.1.1":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.1.tar.gz"
+    sha256: "cd1712c571d4155f4143c435c8551a5cb8cbb311ad7fff03595322ab971682c0"
+  "1.1.0":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.0.tar.gz"
+    sha256: "0538fa1c23ddae495c7f82ccd0db90790a90b7017a258ca7575fbae8021f3058"
+patches:
+  "1.1.1":
+    - patch_file: "patches/0001-fix-spirv-cross-includes-1.1.x.patch"
+      base_path: "source_subfolder"
+  "1.1.0":
+    - patch_file: "patches/0001-fix-spirv-cross-includes-1.1.x.patch"
+      base_path: "source_subfolder"
