@@ -16,7 +16,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.35.1"
 
 
 # When adding (or removing) an option, also add this option to the list in
@@ -180,6 +180,19 @@ class BoostConan(ConanFile):
                 break
         return dependencies
 
+    def _all_super_modules(self, name):
+        dependencies = {name}
+        while True:
+            new_dependencies = set(dependencies)
+            for module in self._dependencies["dependencies"]:
+                if dependencies.intersection(set(self._dependencies["dependencies"][module])):
+                    new_dependencies.add(module)
+            if len(new_dependencies) > len(dependencies):
+                dependencies = new_dependencies
+            else:
+                break
+        return dependencies
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -247,6 +260,28 @@ class BoostConan(ConanFile):
             # Shared builds of numa do not link on Visual Studio due to missing symbols
             self.options.numa = False
 
+        if tools.Version(self.version) >= "1.76.0":
+            # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_math():
+                super_modules = self._all_super_modules("math")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, "without_{}".format(smod), True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.cppstd:
+                if not tools.valid_min_cppstd(self, 11):
+                    disable_math()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx11
+                if min_compiler_version is None:
+                    self.output.warn("Assuming the compiler supports c++11 by default")
+                elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_math()
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -272,6 +307,22 @@ class BoostConan(ConanFile):
             if not self.options.i18n_backend:
                 raise ConanInvalidConfiguration("Boost.locale library requires a i18n_backend (either 'icu' or 'iconv')")
 
+        if not self.options.without_python:
+            if not self.options.python_version:
+                self.options.python_version = self._detect_python_version()
+                self.options.python_executable = self._python_executable
+
+        # FIXME: check this + shouldn't default be on self._is_msvc?
+        # if self.options.layout == "b2-default":
+        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
+
+        if self.options.layout == "b2-default":
+            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
+
+        if self.options.without_fiber:
+            del self.options.numa
+
+    def validate(self):
         if not self.options.multithreading:
             # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
             #   Look also on the comments of the answer for more details
@@ -294,11 +345,6 @@ class BoostConan(ConanFile):
                     if self.options.get_safe("without_{}".format(mod_dep), False):
                         raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
-        if not self.options.without_python:
-            if not self.options.python_version:
-                self.options.python_version = self._detect_python_version()
-                self.options.python_executable = self._python_executable
-
         if not self.options.get_safe("without_nowide", True):
             # nowide require a c++11-able compiler with movable std::fstream
             mincompiler_version = self._min_compiler_version_nowide
@@ -317,10 +363,6 @@ class BoostConan(ConanFile):
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
 
-        # FIXME: check this + shouldn't default be on self._is_msvc?
-        # if self.options.layout == "b2-default":
-        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
         if not all((self.options.without_fiber, self.options.get_safe("without_json", True))):
             # fiber/json require a c++11-able compiler.
             if self.settings.compiler.cppstd:
@@ -334,11 +376,16 @@ class BoostConan(ConanFile):
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
 
-        if self.options.layout == "b2-default":
-            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
-        if self.options.without_fiber:
-            del self.options.numa
+        if tools.Version(self.version) >= "1.76.0":
+            # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
+            if not self.options.without_math:
+                if self.settings.compiler.cppstd:
+                    tools.check_min_cppstd(self, 11)
+                else:
+                    min_compiler_version = self._min_compiler_version_default_cxx11
+                    if min_compiler_version is not None:
+                        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                            raise ConanInvalidConfiguration("Boost.Math requires a C++11 capable compiler")
 
     def build_requirements(self):
         if not self.options.header_only:
