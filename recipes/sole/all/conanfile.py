@@ -10,7 +10,7 @@ class SoleConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler"
     no_copy_source = True
-    license = "zlib"
+    license = "Zlib"
 
     @property
     def _source_subfolder(self):
