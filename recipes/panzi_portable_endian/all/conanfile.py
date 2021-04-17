@@ -3,7 +3,7 @@ from conans import ConanFile, tools
 
 
 class PanziPortableEndian(ConanFile):
-    name = "panzi_portable_endian"
+    name = "panzi-portable-endian"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gist.github.com/panzi/6856583"
     description = "This provides the endian conversion functions form endian.h on Windows, Linux, *BSD, and Mac OS X"
