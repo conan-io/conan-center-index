@@ -24,7 +24,7 @@ class LibplistConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" or self.options.shared:
             del self.options.fPIC
 
     def source(self):
