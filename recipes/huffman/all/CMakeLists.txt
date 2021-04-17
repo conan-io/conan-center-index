@@ -26,6 +26,10 @@ set(SRC
 
 add_library(huffman ${SRC})
 
+if(WIN32)
+    target_link_libraries(huffman ws2_32)
+endif()
+
 INSTALL(TARGETS huffman
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
