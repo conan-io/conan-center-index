@@ -3,7 +3,7 @@ import os
 
 
 class JpegxlConan(ConanFile):
-    name = "libjxl"
+    name = "jpeg-xl"
     description = "JPEG XL image format reference implementation"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
