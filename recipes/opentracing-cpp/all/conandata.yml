@@ -5,4 +5,4 @@ sources:
 patches:
   "1.6.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-Export-mocktracer-dll.patch"
+      patch_file: "patches/0001-Set-default-installation-folders.patch"

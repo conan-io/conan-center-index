@@ -82,8 +82,6 @@ class OpenTracingConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenTracing"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenTracing"
 
-        # Default should be bin/
-        self.cpp_info.components["opentracing"].bindirs = ["lib"]
         self.cpp_info.components["opentracing"].names[
             "cmake_find_package"
         ] = "opentracing"
@@ -111,7 +109,6 @@ class OpenTracingConan(ConanFile):
                 "cmake_find_package_multi"
             ] = "opentracing_mocktracer"
 
-            self.cpp_info.components["opentracing_mocktracer"].bindirs = ["lib"]
             self.cpp_info.components["opentracing_mocktracer"].requires = [
                 "opentracing"
             ]
