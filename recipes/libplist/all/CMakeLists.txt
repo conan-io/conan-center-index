@@ -5,10 +5,10 @@ project (libplist)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-include_directories(${PROJECT_SOURCE_DIR}/libplist/src)
-include_directories(${PROJECT_SOURCE_DIR}/libplist/include)
-include_directories(${PROJECT_SOURCE_DIR}/libplist/libcnary)
-include_directories(${PROJECT_SOURCE_DIR}/libplist/libcnary/include)
+include_directories(${PROJECT_SOURCE_DIR}/source_subfolder/src)
+include_directories(${PROJECT_SOURCE_DIR}/source_subfolder/include)
+include_directories(${PROJECT_SOURCE_DIR}/source_subfolder/libcnary)
+include_directories(${PROJECT_SOURCE_DIR}/source_subfolder/libcnary/include)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,7 +27,7 @@ endif()
 #                              libcnary                               #
 #######################################################################
 
-aux_source_directory(${PROJECT_SOURCE_DIR}/libplist/libcnary CNARY_SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/source_subfolder/libcnary CNARY_SRC)
 
 add_library(cnary ${CNARY_SRC})
 
@@ -40,9 +40,9 @@ INSTALL(TARGETS cnary
 #                              libplist                               #
 #######################################################################
 
-aux_source_directory(${PROJECT_SOURCE_DIR}/libplist/src SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/source_subfolder/src SRC)
 
-file(GLOB_RECURSE HEADERS "libplist/include/*.h")
+file(GLOB_RECURSE HEADERS "source_subfolder/include/*.h")
 
 add_library(plist ${SRC})
 

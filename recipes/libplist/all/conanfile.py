@@ -21,7 +21,7 @@ class LibplistConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "libplist"
+        return "source_subfolder"
 
     def configure(self):
         if self.settings.os == "Windows":
