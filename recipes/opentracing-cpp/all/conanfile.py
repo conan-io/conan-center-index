@@ -82,12 +82,12 @@ class OpenTracingConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenTracing"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenTracing"
 
-        self.cpp_info.components["opentracing"].names[
-            "cmake_find_package"
-        ] = "opentracing"
-        self.cpp_info.components["opentracing"].names[
-            "cmake_find_package_multi"
-        ] = "opentracing"
+        self.cpp_info.components["opentracing"].names["cmake_find_package"] = (
+            "opentracing" if self.options.shared else "opentracing-static"
+        )
+        self.cpp_info.components["opentracing"].names["cmake_find_package_multi"] = (
+            "opentracing" if self.options.shared else "opentracing-static"
+        )
 
         if not self.options.shared:
             self.cpp_info.components["opentracing"].defines.append("OPENTRACING_STATIC")
@@ -104,10 +104,18 @@ class OpenTracingConan(ConanFile):
         if self.options.enable_mocktracer:
             self.cpp_info.components["opentracing_mocktracer"].names[
                 "cmake_find_package"
-            ] = "opentracing_mocktracer"
+            ] = (
+                "opentracing_mocktracer"
+                if self.options.shared
+                else "opentracing_mocktracer-static"
+            )
             self.cpp_info.components["opentracing_mocktracer"].names[
                 "cmake_find_package_multi"
-            ] = "opentracing_mocktracer"
+            ] = (
+                "opentracing_mocktracer"
+                if self.options.shared
+                else "opentracing_mocktracer-static"
+            )
 
             self.cpp_info.components["opentracing_mocktracer"].requires = [
                 "opentracing"
