@@ -342,7 +342,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.build_requires("b2/4.2.0")
+            self.build_requires("b2/4.5.0")
 
     def _with_dependency(self, dependency):
         """
