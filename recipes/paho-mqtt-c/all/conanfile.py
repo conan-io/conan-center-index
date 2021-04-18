@@ -20,14 +20,14 @@ class PahoMqttcConan(ConanFile):
         "fPIC": [True, False],
         "ssl": [True, False],
         "asynchronous": [True, False],
-        "samples": [True, False]
+        "samples": [True, False, "deprecated"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "ssl": True,
         "asynchronous": True,
-        "samples": False
+        "samples": "deprecated"
     }
 
     _cmake = None
@@ -51,7 +51,7 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -69,11 +69,11 @@ class PahoMqttcConan(ConanFile):
         self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
+        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = False
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
-            self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
-            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
         self._cmake.configure()
         return self._cmake
 
