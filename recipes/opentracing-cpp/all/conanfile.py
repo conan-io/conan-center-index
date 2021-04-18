@@ -96,7 +96,7 @@ class OpenTracingConan(ConanFile):
         self.cpp_info.components["opentracing"].libs = ["opentracing" + lib_suffix]
         if not self.options.shared:
             self.cpp_info.components["opentracing"].defines.append("OPENTRACING_STATIC")
-        if self.options.enable_dynamic_load and self.settings.os == "Linux":
+        if self.options.enable_dynamic_load and self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["opentracing"].system_libs.append("dl")
 
         # opentracing_mocktracer
