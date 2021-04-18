@@ -82,55 +82,38 @@ class OpenTracingConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenTracing"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenTracing"
 
+        target_suffix = "" if self.options.shared else "-static"
+        lib_suffix = (
+            "" if self.options.shared or self.settings.os != "Windows" else "-static"
+        )
+        # opentracing
         self.cpp_info.components["opentracing"].names["cmake_find_package"] = (
-            "opentracing" if self.options.shared else "opentracing-static"
+            "opentracing" + target_suffix
         )
         self.cpp_info.components["opentracing"].names["cmake_find_package_multi"] = (
-            "opentracing" if self.options.shared else "opentracing-static"
+            "opentracing" + target_suffix
         )
-
+        self.cpp_info.components["opentracing"].libs = ["opentracing" + lib_suffix]
         if not self.options.shared:
             self.cpp_info.components["opentracing"].defines.append("OPENTRACING_STATIC")
-
-        if self.settings.os == "Windows" and (not self.options.shared):
-            self.cpp_info.components["opentracing"].libs = ["opentracing-static"]
-        else:
-            self.cpp_info.components["opentracing"].libs = ["opentracing"]
-
         if self.options.enable_dynamic_load and self.settings.os == "Linux":
             self.cpp_info.components["opentracing"].system_libs.append("dl")
 
-        # Mocktracer
+        # opentracing_mocktracer
         if self.options.enable_mocktracer:
             self.cpp_info.components["opentracing_mocktracer"].names[
                 "cmake_find_package"
-            ] = (
-                "opentracing_mocktracer"
-                if self.options.shared
-                else "opentracing_mocktracer-static"
-            )
+            ] = ("opentracing_mocktracer" + target_suffix)
             self.cpp_info.components["opentracing_mocktracer"].names[
                 "cmake_find_package_multi"
-            ] = (
-                "opentracing_mocktracer"
-                if self.options.shared
-                else "opentracing_mocktracer-static"
-            )
-
+            ] = ("opentracing_mocktracer" + target_suffix)
+            self.cpp_info.components["opentracing_mocktracer"].libs = [
+                "opentracing_mocktracer" + lib_suffix
+            ]
             self.cpp_info.components["opentracing_mocktracer"].requires = [
                 "opentracing"
             ]
-
             if not self.options.shared:
                 self.cpp_info.components["opentracing_mocktracer"].defines.append(
                     "OPENTRACING_MOCK_TRACER_STATIC"
                 )
-
-            if self.settings.os == "Windows" and (not self.options.shared):
-                self.cpp_info.components["opentracing_mocktracer"].libs = [
-                    "opentracing_mocktracer-static"
-                ]
-            else:
-                self.cpp_info.components["opentracing_mocktracer"].libs = [
-                    "opentracing_mocktracer"
-                ]
