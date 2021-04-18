@@ -14,7 +14,7 @@ class OpenVDBConan(ConanFile):
     topics = ("conan", "openvdb")
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -96,42 +96,28 @@ class OpenVDBConan(ConanFile):
     def _patch_sources(self):
         # Remove FindXXX files from OpenVDB. Let Conan do the job
         tools.remove_files_by_mask(os.path.join(self._source_subfolder, "cmake"), "Find*")
-        # TODO: move to patches
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  find_package(IlmBase ${MINIMUM_ILMBASE_VERSION} REQUIRED)",
-            "# find_package(IlmBase ${MINIMUM_ILMBASE_VERSION} REQUIRED)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  find_package(IlmBase ${MINIMUM_ILMBASE_VERSION} REQUIRED COMPONENTS Half)",
-            "  find_package(OpenEXR ${MINIMUM_OPENEXR_VERSION} REQUIRED)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  get_target_property(ILMBASE_LIB_TYPE IlmBase::Half TYPE)",
-            "# get_target_property(ILMBASE_LIB_TYPE IlmBase::Half TYPE)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  find_package(Blosc ${MINIMUM_BLOSC_VERSION} REQUIRED)",
-            "  find_package(c-blosc ${MINIMUM_BLOSC_VERSION} REQUIRED)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  list(APPEND OPENVDB_CORE_DEPENDENT_LIBS Blosc::blosc)",
-            "  list(APPEND OPENVDB_CORE_DEPENDENT_LIBS c-blosc::c-blosc)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  if(OPENEXR_USE_STATIC_LIBS OR (${ILMBASE_LIB_TYPE} STREQUAL STATIC_LIBRARY))",
-            "  if(OPENEXR_USE_STATIC_LIBS)",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "openvdb", "openvdb", "CMakeLists.txt"),
-            "  IlmBase::Half",
-            "  OpenEXR::OpenEXR",
-        )
+        with open("FindBlosc.cmake", "w") as f:
+            f.write(
+                """find_package(c-blosc)
+if(c-blosc_FOUND)
+    add_library(Blosc::blosc ALIAS c-blosc::c-blosc)
+endif()
+"""
+            )
+        with open("FindIlmBase.cmake", "w") as f:
+            f.write(
+                """find_package(OpenEXR)
+if(OpenEXR_FOUND)
+  add_library(IlmBase::Half ALIAS OpenEXR::OpenEXR)
+  add_library(IlmBase::IlmThread ALIAS OpenEXR::OpenEXR)
+  add_library(IlmBase::Iex ALIAS OpenEXR::OpenEXR)
+  add_library(IlmBase::Imath ALIAS OpenEXR::OpenEXR)
+  add_library(OpenEXR::IlmImf ALIAS OpenEXR::OpenEXR)
+ endif()
+ """
+            )
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
