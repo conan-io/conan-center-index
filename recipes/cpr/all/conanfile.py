@@ -53,6 +53,16 @@ class CprConan(ConanFile):
         # https://github.com/whoshuu/cpr/releases/tag/1.6.0
         return tools.Version(self.version) < "1.6.0"
 
+    @property
+    def _uses_valid_abi_and_compiler(self):
+        # https://github.com/conan-io/conan-center-index/pull/5194#issuecomment-821908385
+        return not (
+            tools.Version(self.version) >= "1.6.0"
+            and self.settings.compiler == "clang"
+            and self.settings.compiler.libcxx == "libstdc++"
+            and tools.Version(self.settings.compiler.version) < "9"
+        )
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -124,6 +134,9 @@ class CprConan(ConanFile):
         return self._cmake
 
     def validate(self):
+        if not self._uses_valid_abi_and_compiler:
+            raise ConanInvalidConfiguration("Cannot compiler CPR with libstdc++ on clang < 9")
+
         if self.options.get_safe("with_openssl", False) and tools.is_apple_os(self.settings.os):
             # https://github.com/whoshuu/cpr/issues/546
             raise ConanInvalidConfiguration("cpr cannot be built on macOS with openssl")
