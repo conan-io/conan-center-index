@@ -47,11 +47,21 @@ class OpenVDBConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _check_compilier_version(self):
+        compiler = str(self.settings.compiler)
+        version = str(self.settings.compiler.version)
+        if version < self._compilers_min_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a %s version greater than %s"
+                % (self.name, compiler, self._compilers_min_version[compiler])
+            )
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+        self._check_compilier_version()
 
     def requirements(self):
         self.requires("boost/1.69.0")  # should be 1.66.0 but not in conan center
