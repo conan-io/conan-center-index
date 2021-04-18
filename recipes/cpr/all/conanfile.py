@@ -135,7 +135,7 @@ class CprConan(ConanFile):
 
     def validate(self):
         if not self._uses_valid_abi_and_compiler:
-            raise ConanInvalidConfiguration("Cannot compiler CPR with libstdc++ on clang < 9")
+            raise ConanInvalidConfiguration("Cannot compile CPR/1.6.0 with libstdc++ on clang < 9")
 
         if self.options.get_safe("with_openssl", False) and tools.is_apple_os(self.settings.os):
             # https://github.com/whoshuu/cpr/issues/546
