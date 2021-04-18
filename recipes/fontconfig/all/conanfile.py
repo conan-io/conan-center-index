@@ -13,16 +13,8 @@ class FontconfigConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/fontconfig/fontconfig"
     topics = ("conan", "fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        "with_nls": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        "with_nls": True,
-    }
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "pkg_config"
 
     _autotools = None
@@ -48,8 +40,6 @@ class FontconfigConan(ConanFile):
         self.requires("expat/2.2.10")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
-        elif self.settings.os == "Macos" and self.options.with_nls:
-            self.requires("libgettext/0.20.1")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
@@ -66,9 +56,9 @@ class FontconfigConan(ConanFile):
         if not self._autotools:
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-                    "--disable-docs"]
-            if not self.options.with_nls:
-                args.append("--disable-nls")
+                    "--disable-docs",
+                    "--disable-nls",
+                   ]
             args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
             args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
