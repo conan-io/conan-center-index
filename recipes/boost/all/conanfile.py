@@ -139,6 +139,9 @@ class BoostConan(ConanFile):
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
+        if self.settings.compiler == "apple-clang":
+            # For now, assume apple-clang will enable c++11 in the distant future
+            return 99
         return {
             "gcc": 6,
             "clang": 6,
