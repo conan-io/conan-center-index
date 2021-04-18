@@ -312,10 +312,6 @@ class BoostConan(ConanFile):
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
 
-        # FIXME: check this + shouldn't default be on self._is_msvc?
-        # if self.options.layout == "b2-default":
-        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
         if self.options.layout == "b2-default":
             self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
