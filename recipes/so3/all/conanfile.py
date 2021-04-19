@@ -26,13 +26,15 @@ class So3Conan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
                 "SO3 requires C99 support for complex numbers."
             )
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -44,7 +46,6 @@ class So3Conan(ConanFile):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_TESTING"] = False
-            self._cmake.definitions["python"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
