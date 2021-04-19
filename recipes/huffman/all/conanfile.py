@@ -34,8 +34,9 @@ class HuffmanConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = "huffman-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
