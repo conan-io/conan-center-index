@@ -28,6 +28,8 @@ class LapackConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Macos" and \
