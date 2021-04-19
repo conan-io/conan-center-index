@@ -40,7 +40,7 @@ class LapackConan(ConanFile):
             raise ConanInvalidConfiguration("This library needs option 'visual_studio=True' to be consumed")
 
     def config_options(self):
-        if self.options.shared or self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
