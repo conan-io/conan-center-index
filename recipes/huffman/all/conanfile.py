@@ -23,10 +23,14 @@ class HuffmanConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
