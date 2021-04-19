@@ -15,11 +15,9 @@ endif()
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-set(SRC
+add_library(huffman
     source_subfolder/huffman.c
 )
-
-add_library(huffman ${SRC})
 
 if(WIN32)
     target_link_libraries(huffman ws2_32)
