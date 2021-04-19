@@ -1,0 +1,4 @@
+sources:
+  "3.9.1":
+    sha256: dbd3966b272020ca38b328c01df78f23f727b8839ba191895b788a8b986c3955
+    url: https://github.com/Reference-LAPACK/lapack/archive/v3.9.1.zip
