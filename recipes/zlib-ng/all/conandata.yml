@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    sha256: "86993903527d9b12fc543335c19c1d33a93797b3d4d37648b5addae83679ecd8"
+    url: "https://github.com/Dead2/zlib-ng/archive/2.0.0.tar.gz"
