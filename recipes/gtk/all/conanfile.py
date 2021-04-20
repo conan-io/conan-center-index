@@ -2,8 +2,10 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
-class LibnameConan(ConanFile):
+
+class GtkConan(ConanFile):
     name = "gtk"
     description = "libraries used for creating graphical user interfaces for applications."
     topics = ("conan", "gtk", "widgets")
@@ -73,8 +75,8 @@ class LibnameConan(ConanFile):
             self.build_requires("sassc/3.6.1")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.2")
-        self.requires("glib/2.67.6")
+        self.requires("gdk-pixbuf/2.42.4")
+        self.requires("glib/2.68.0")
         if self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
@@ -97,11 +99,7 @@ class LibnameConan(ConanFile):
             self.requires("pango/1.48.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        if self._gtk3:
-            extracted_dir = extracted_dir.replace("gtk", "gtk+")
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
