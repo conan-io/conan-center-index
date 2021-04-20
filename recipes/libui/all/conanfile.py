@@ -29,7 +29,7 @@ class libuiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.option.shared:
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
