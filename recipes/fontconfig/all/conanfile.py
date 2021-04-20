@@ -53,6 +53,12 @@ class FontconfigConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extrated_dir = self.name + "-" + self.version
         os.rename(extrated_dir, self._source_subfolder)
+        # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, 'Makefile.in'),
+            '@CROSS_COMPILING_TRUE@RUN_FC_CACHE_TEST = false',
+            'RUN_FC_CACHE_TEST=false'
+        )
 
     def _configure_autotools(self):
         if not self._autotools:
