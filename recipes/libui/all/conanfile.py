@@ -28,6 +28,10 @@ class libuiConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def configure(self):
+        if self.option.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "libui-"+os.path.basename(
