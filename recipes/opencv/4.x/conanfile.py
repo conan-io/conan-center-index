@@ -236,7 +236,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
         self._cmake.definitions["WITH_QUIRC"] = False
-        self._cmake.definitions["WITH_V4L"] = self.options.with_v4l
+        self._cmake.definitions["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         self._cmake.definitions["WITH_VA"] = False
         self._cmake.definitions["WITH_VA_INTEL"] = False
         self._cmake.definitions["WITH_VTK"] = False
