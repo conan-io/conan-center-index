@@ -77,9 +77,14 @@ class PahoMqttcConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def build(self):
+    def _patch_source(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if not self.options.get_safe("fPIC", True):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "POSITION_INDEPENDENT_CODE ON", "")
+
+    def build(self):
+        self._patch_source()
         cmake = self._configure_cmake()
         cmake.build(target=self._cmake_target)
 
