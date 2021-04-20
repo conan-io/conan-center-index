@@ -21,6 +21,8 @@ patches:
   "1.3.0":
     - patch_file: "patches/0001-fix-MinGW-and-OSX-builds-for-1-3-0.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0004-fix-cmake-find-openssl.patch"
+      base_path: "source_subfolder"
   "1.3.1":
     - patch_file: "patches/0002-fix-MinGW-and-OSX-builds-for-1-3-1.patch"
       base_path: "source_subfolder"
