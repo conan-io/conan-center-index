@@ -81,29 +81,15 @@ class PahoMqttcConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
-        cmake.build()
-        # cmake.build(target=self._cmake_target)
+        cmake.build(target=self._cmake_target)
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
         self.copy(self._epl_file, src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        if self.settings.os != "Windows" or not self.options.shared:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-        else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "MQTTVersion*")
-
-        # Remove the extra version that do not match the options
-        for lib_pattern in ["*paho-mqtt3as.*", "*paho-mqtt3cs.*", "*paho-mqtt3c.*", "*paho-mqtt3a.*",
-                            "*paho-mqtt3as-static*", "*paho-mqtt3cs-static*", "*paho-mqtt3c-static*", "*paho-mqtt3a-static*"]:
-            if not self._lib_target in lib_pattern:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), lib_pattern)
-                if self.settings.os == "Windows" and self.options.shared:
-                    tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), lib_pattern)
+        # Manually copy since the CMake installs everything
+        self.copy("*.h", src=self._source_subfolder, dst="include", keep_path=False)
+        self.copy("*{}.*".format(self._lib_target), keep_path=True)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
