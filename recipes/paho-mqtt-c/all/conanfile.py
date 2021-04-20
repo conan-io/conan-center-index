@@ -45,6 +45,9 @@ class PahoMqttcConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        
+        if self.options.samples != "deprecated":
+            self.output.warn("samples option is deprecated and they are no longer provided in the package.")            
 
         if not self.options.shared and tools.Version(self.version) < "1.3.4":
             raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
@@ -99,6 +102,9 @@ class PahoMqttcConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
+    def package_id(self):
+        del self.info.options.samples
+        
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
