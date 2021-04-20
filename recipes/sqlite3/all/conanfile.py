@@ -38,6 +38,7 @@ class ConanSqlite3(ConanFile):
         "disable_gethostuuid": [True, False],
         "max_blob_size": "ANY",
         "build_executable": [True, False],
+        "target_os": ["auto", "windows", "unix", "other"],
     }
     default_options = {
         "shared": False,
@@ -62,6 +63,7 @@ class ConanSqlite3(ConanFile):
         "disable_gethostuuid": False,
         "max_blob_size": 1000000000,
         "build_executable": True,
+        "target_os": "auto",
     }
 
     _cmake = None
@@ -125,6 +127,7 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
         self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        self._cmake.definitions["TARGET_OS"] = self.options.target_os
         self._cmake.configure()
         return self._cmake
 
