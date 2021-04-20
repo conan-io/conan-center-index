@@ -26,6 +26,8 @@ class LapackConan(ConanFile):
     requires = "zlib/1.2.11"
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _cmake = None
+
 
     def configure(self):
         if self.options.shared:
@@ -50,26 +52,28 @@ class LapackConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_GNUtoMS"] = self.options.visual_studio
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["LAPACKE"] = True
-        cmake.definitions["CBLAS"] = True
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_GNUtoMS"] = self.options.visual_studio
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["LAPACKE"] = True
+        self._cmake.definitions["CBLAS"] = True
+        self._cmake.configure(build_dir=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("This library cannot be built with Visual Studio. Please use MinGW to "
                             "build it and option 'visual_studio=True' to build and consume.")
-        cmake = self._configure_cmake()
+        self._cmake = self._configure_cmake()
         for target in ["blas", "cblas", "lapack", "lapacke"]:
-            cmake.build(target=target)
+            self._cmake.build(target=target)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        self._cmake = self._configure_cmake()
+        self._cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
