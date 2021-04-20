@@ -89,7 +89,8 @@ class PahoMqttcConan(ConanFile):
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         # Manually copy since the CMake installs everything
         self.copy("*.h", src=self._source_subfolder, dst="include", keep_path=False)
-        self.copy("*{}.*".format(self._lib_target), keep_path=True)
+        self.copy(os.path.join("lib", "*{}.*".format(self._lib_target)), dst="lib", keep_path=False)
+        self.copy(os.path.join("bin", "*{}.*".format(self._lib_target)), dst="bin", keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
