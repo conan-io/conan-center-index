@@ -78,6 +78,7 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_gtk
+            del self.options.with_v4l
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
