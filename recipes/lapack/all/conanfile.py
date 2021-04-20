@@ -19,8 +19,8 @@ class LapackConan(ConanFile):
     )
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "visual_studio": [True, False]}
-    default_options = {"shared": False, "visual_studio": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     requires = "zlib/1.2.11"
@@ -38,10 +38,8 @@ class LapackConan(ConanFile):
             self.settings.compiler == "apple-clang" and \
             Version(self.settings.compiler.version.value) < "8.0":
             raise ConanInvalidConfiguration("lapack requires apple-clang >=8.0")
-        if self.options.visual_studio and not self.options.shared:
-            raise ConanInvalidConfiguration("only shared builds are supported for Visual Studio")
-        if self.settings.compiler == "Visual Studio" and not self.options.visual_studio:
-            raise ConanInvalidConfiguration("This library needs option 'visual_studio=True' to be consumed")
+        if self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration("only shared builds are supported for Windows")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,7 +53,7 @@ class LapackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_GNUtoMS"] = self.options.visual_studio
+        self._cmake.definitions["CMAKE_GNUtoMS"] = self.settings.os == "Windows"
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["LAPACKE"] = True
         self._cmake.definitions["CBLAS"] = True
@@ -65,7 +63,7 @@ class LapackConan(ConanFile):
     def build(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("This library cannot be built with Visual Studio. Please use MinGW to "
-                            "build it and option 'visual_studio=True' to build and consume.")
+                            "build it.")
         self._cmake = self._configure_cmake()
         for target in ["blas", "cblas", "lapack", "lapacke"]:
             self._cmake.build(target=target)
@@ -77,7 +75,7 @@ class LapackConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-        if self.options.visual_studio:
+        if self.settings.os == "Windows":
             for bin_path in self.deps_cpp_info.bin_paths:  # Copy MinGW dlls for Visual Studio consumers
                 self.copy(pattern="*seh*.dll", dst="bin", src=bin_path, keep_path=False)
                 self.copy(pattern="*sjlj*.dll", dst="bin", src=bin_path, keep_path=False)
@@ -94,16 +92,20 @@ class LapackConan(ConanFile):
                     shutil.move(lib, vslib)
 
     def package_id(self):
-        if self.options.visual_studio:
-            self.info.settings.compiler = "Visual Studio"
-            del self.info.settings.compiler.version
-            del self.info.settings.compiler.runtime
-            del self.info.settings.compiler.toolset
+        if self.settings.os == "Windows":
+            compatible_pkg = self.info.clone() 
+
+            compatible_pkg.settings.compiler = "Visual Studio"
+            del compatible_pkg.settings.compiler.version
+            del compatible_pkg.settings.compiler.runtime
+            del compatible_pkg.settings.compiler.toolset
+
+            self.compatible_packages.append(compatible_pkg) 
 
     def package_info(self):
         # the order is important for static builds
         libs = ["lapacke", "lapack", "blas", "cblas"]
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows":
             libs = [l + ".dll.lib" for l in libs]
         self.cpp_info.libs = libs
 
