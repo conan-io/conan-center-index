@@ -92,10 +92,10 @@ class LapackConan(ConanFile):
                     shutil.move(lib, vslib)
 
     def package_id(self):
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             compatible_pkg = self.info.clone() 
 
-            compatible_pkg.settings.compiler = "Visual Studio"
+            compatible_pkg.settings.compiler = "gcc"
             del compatible_pkg.settings.compiler.version
             del compatible_pkg.settings.compiler.runtime
             del compatible_pkg.settings.compiler.toolset
