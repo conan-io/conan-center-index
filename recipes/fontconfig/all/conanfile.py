@@ -40,8 +40,6 @@ class FontconfigConan(ConanFile):
         self.requires("expat/2.2.10")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
-        elif self.settings.os == "Macos":
-            self.requires("libgettext/0.20.1")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
@@ -58,7 +56,9 @@ class FontconfigConan(ConanFile):
         if not self._autotools:
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-                    "--disable-docs"]
+                    "--disable-docs",
+                    "--disable-nls",
+                   ]
             args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
             args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
