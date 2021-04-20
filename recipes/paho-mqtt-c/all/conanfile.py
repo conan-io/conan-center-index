@@ -16,12 +16,14 @@ class PahoMqttcConan(ConanFile):
                "fPIC": [True, False],
                "ssl": [True, False],
                "samples": [True, False],
-               "asynchronous": [True, False]}
+               "asynchronous": [True, False],
+               "high_performance": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "ssl": True,
                        "asynchronous" : True,
-                       "samples": False}
+                       "samples": False,
+                       "high_performance": False}
 
     _cmake = None
 
@@ -65,6 +67,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
+        self._cmake.definitions["PAHO_HIGH_PERFORMANCE"] = self.options.high_performance
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
