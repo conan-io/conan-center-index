@@ -33,10 +33,7 @@ class libuiConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "libui-"+os.path.basename(
-            self.conan_data["sources"][self.version]['url']).removesuffix('.tar.gz')
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
         self.requires("gtk/3.24.24")
