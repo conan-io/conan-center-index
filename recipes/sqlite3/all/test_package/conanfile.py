@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def build(self):
-        if self.options["sqlite3"].target_os == "other":
+        if not self.options["sqlite3"].enable_default_vfs:
             # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
             return
 
@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if self.options["sqlite3"].target_os == "other":
+        if not self.options["sqlite3"].enable_default_vfs:
             # That code will not build
             return
 
