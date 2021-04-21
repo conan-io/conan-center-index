@@ -22,7 +22,7 @@ class HippomocksConan(ConanFile):
 
     def package(self):
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
-        self.copy('*.h', dst=os.path.join('include', self.name), src=os.path.join(self._source_subfolder, self._libname))
+        self.copy('*.h', dst=os.path.join('include', self._libname), src=os.path.join(self._source_subfolder, self._libname))
 
     def package_id(self):
         self.info.header_only()
