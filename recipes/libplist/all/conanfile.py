@@ -5,7 +5,7 @@ import os
 class LibplistConan(ConanFile):
     name = "libplist"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/libimobiledevice/libplist"
+    homepage = "https://github.com/libimobiledevice-win32/libplist"
     description = "A library to handle Apple Property List format in binary or XML"
     topics = ["conan", "plist", "apple"]
     license = "LGPL-2.1"
