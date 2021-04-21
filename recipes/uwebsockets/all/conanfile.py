@@ -27,21 +27,27 @@ class UwebsocketsConan(ConanFile):
             "Visual Studio": "15",
             "gcc": "7",
             "clang": "5",
-            "apple-clang": "10"
+            "apple-clang": "10",
         }
 
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+                "%s recipe lacks information about the %s compiler standard version support"
+                % (self.name, compiler)
+            )
             self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+                "%s requires a compiler that supports at least C++%s"
+                % (self.name, minimal_cpp_standard)
+            )
             return
 
         version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+                "%s requires a compiler that supports at least C++%s"
+                % (self.name, minimal_cpp_standard)
+            )
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -57,8 +63,18 @@ class UwebsocketsConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "src"), dst=os.path.join("include", "uWebSockets"), keep_path=False)
-        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "src", "f2"), dst=os.path.join("include", "uWebSockets", "f2"), keep_path=False)
+        self.copy(
+            pattern="*.h",
+            src=os.path.join(self._source_subfolder, "src"),
+            dst=os.path.join("include", "uWebSockets"),
+            keep_path=False,
+        )
+        self.copy(
+            pattern="*.hpp",
+            src=os.path.join(self._source_subfolder, "src", "f2"),
+            dst=os.path.join("include", "uWebSockets", "f2"),
+            keep_path=False,
+        )
 
     def package_id(self):
         self.info.header_only()
