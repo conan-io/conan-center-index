@@ -103,7 +103,7 @@ class freeglutConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "FreeGLUT"
         self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
 
-        self.cpp_info.components['freeglut_'].libs = tools.collect_libs(self)
+        self.cpp_info.components["freeglut_"].libs = tools.collect_libs(self)
 
         self.cpp_info.components['freeglut_'].names["cmake_find_package"] = "freeglut" if self.options.shared else "freeglut_static"
         self.cpp_info.components['freeglut_'].names["cmake_find_package_multi"] = "freeglut" if self.options.shared else "freeglut_static"
