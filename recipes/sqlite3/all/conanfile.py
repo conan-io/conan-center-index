@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -87,6 +88,10 @@ class ConanSqlite3(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.target_os == "other" and self.options.build_executable:
+            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+            raise ConanInvalidConfiguration("Building executable is not supported for non-default OSes")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
