@@ -49,7 +49,7 @@ class freeglutConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires('glu/system')
+        self.requires("glu/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
