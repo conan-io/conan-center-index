@@ -8,7 +8,7 @@ class freeglutConan(ConanFile):
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/dcnieho/FreeGLUT"
+    homepage = "http://freeglut.sourceforge.net/"
     license = "X11"
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
