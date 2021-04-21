@@ -14,7 +14,7 @@ class Box2dConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True,}
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     @property
     def _source_subfolder(self):
@@ -36,13 +36,9 @@ class Box2dConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("box2d-%s" % self.version, self._source_subfolder)
 
-    def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                              "box2d STATIC",
-                              "box2d")
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = CMake(self)
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
