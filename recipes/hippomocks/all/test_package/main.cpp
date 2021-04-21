@@ -1,4 +1,4 @@
-#include <hippomocks/hippomocks.h>
+#include <HippoMocks/hippomocks.h>
 
 struct Foo {
 public:
