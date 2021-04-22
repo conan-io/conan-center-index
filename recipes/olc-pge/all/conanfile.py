@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, tools, errors
 
 
 class oldPixelGameEngineConan(ConanFile):
@@ -23,6 +23,9 @@ class oldPixelGameEngineConan(ConanFile):
 
     def configure(self):
         tools.check_min_cppstd(self, 14)
+        if self.settings.os == "Linux" and tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "18":
+            raise errors.ConanInvalidConfiguration(
+                "Requires a system with recent OpenGL.")
 
     def package_id(self):
         self.info.header_only()
