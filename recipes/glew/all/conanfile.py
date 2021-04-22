@@ -22,7 +22,7 @@ class GlewConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_egl": True
+        "with_egl": False
     }
 
     _cmake = None
@@ -58,10 +58,8 @@ class GlewConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
-        if self.options.with_egl:
-            self._cmake.definitions["GLEW_EGL"] = True
-        self._cmake.definitions["BUILD_UTILS"] = "OFF"
+        self._cmake.definitions["BUILD_UTILS"] = False
+        self._cmake.definitions["GLEW_EGL"] = self.options.get_safe("with_egl", False)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
