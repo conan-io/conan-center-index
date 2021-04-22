@@ -2,13 +2,15 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class freeglutConan(ConanFile):
     name = "freeglut"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://freeglut.sourceforge.net/"
+    homepage = "http://freeglut.sourceforge.net"
     license = "X11"
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
@@ -65,9 +67,7 @@ class freeglutConan(ConanFile):
             raise ConanInvalidConfiguration("%s does not support gcc >= 10 and clang >= 11" % self.name)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "FreeGLUT-FG_" + self.version.replace(".", "_")
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
@@ -105,20 +105,20 @@ class freeglutConan(ConanFile):
 
         self.cpp_info.components["freeglut_"].libs = tools.collect_libs(self)
 
-        self.cpp_info.components['freeglut_'].names["cmake_find_package"] = "freeglut" if self.options.shared else "freeglut_static"
-        self.cpp_info.components['freeglut_'].names["cmake_find_package_multi"] = "freeglut" if self.options.shared else "freeglut_static"
-        self.cpp_info.components['freeglut_'].names["pkg_config"] = "freeglut" if self.settings.os == "Windows" else "glut"
+        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = "freeglut" if self.options.shared else "freeglut_static"
+        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = "freeglut" if self.options.shared else "freeglut_static"
+        self.cpp_info.components["freeglut_"].names["pkg_config"] = "freeglut" if self.settings.os == "Windows" else "glut"
 
-        self.cpp_info.components['freeglut_'].requires.append("opengl::opengl")
-        self.cpp_info.components['freeglut_'].requires.append('glu::glu')
+        self.cpp_info.components["freeglut_"].requires.append("opengl::opengl")
+        self.cpp_info.components["freeglut_"].requires.append("glu::glu")
         if self.settings.os == "Linux":
-            self.cpp_info.components['freeglut_'].requires.append("xorg::xorg")
+            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
 
         if self.settings.os == "Windows":
             if not self.options.shared:
-                self.cpp_info.components['freeglut_'].defines.append("FREEGLUT_STATIC=1")
-            self.cpp_info.components['freeglut_'].defines.append("FREEGLUT_LIB_PRAGMAS=0")
-            self.cpp_info.components['freeglut_'].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
+                self.cpp_info.components["freeglut_"].defines.append("FREEGLUT_STATIC=1")
+            self.cpp_info.components["freeglut_"].defines.append("FREEGLUT_LIB_PRAGMAS=0")
+            self.cpp_info.components["freeglut_"].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
 
         if self.settings.os == "Linux":
-            self.cpp_info.components['freeglut_'].system_libs.extend(["pthread", "m", "dl", "rt"])
+            self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])

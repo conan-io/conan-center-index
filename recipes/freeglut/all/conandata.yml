@@ -1,4 +1,4 @@
 sources:
   "3.2.1":
-    sha256: "23b93b77ac01bc70af0c56fa3316f25ea8f136603f93df319ca74867e15134d3"
-    url: "https://github.com/dcnieho/FreeGLUT/archive/FG_3_2_1.tar.gz"
+    sha256: "d4000e02102acaf259998c870e25214739d1f16f67f99cb35e4f46841399da68"
+    url: "http://downloads.sourceforge.net/freeglut/freeglut/freeglut-3.2.1.tar.gz"
