@@ -21,7 +21,7 @@ class oldPixelGameEngineConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         tools.check_min_cppstd(self, 14)
         if self.settings.os == "Linux" and tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "18":
             raise errors.ConanInvalidConfiguration(
