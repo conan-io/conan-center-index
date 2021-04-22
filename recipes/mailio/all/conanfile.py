@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.30.0"
 
 class mailioConan(ConanFile):
     name = "mailio"
@@ -20,8 +21,8 @@ class mailioConan(ConanFile):
         "fPIC": True,
         "shared": False
     }
-    requires = ["boost/1.75.0", "openssl/1.1.1i"]
-    generators = "cmake"
+    requires = ["boost/1.75.0", "openssl/1.1.1j"]
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
     _cmake = None
@@ -73,10 +74,8 @@ class mailioConan(ConanFile):
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def build(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -88,3 +87,4 @@ class mailioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.requires = ["boost::system", "boost::date_time", "boost::regex", "openssl::openssl"]

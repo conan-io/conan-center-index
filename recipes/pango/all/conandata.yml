@@ -8,3 +8,9 @@ sources:
   "1.48.2":
     url: "https://github.com/GNOME/pango/archive/1.48.2.tar.gz"
     sha256: "19ea06742d9b8da590fed3c2bea018258609c18718a6deedd46cab957d3be9cf"
+  "1.48.3":
+    url: "https://github.com/GNOME/pango/archive/1.48.3.tar.gz"
+    sha256: "63318b75bdd510b11fc960dbcdff9bc8b744fb3e45583acbb3410ef36bacc054"
+  "1.48.4":
+    url: "https://github.com/GNOME/pango/archive/1.48.4.tar.gz"
+    sha256: "2c7e92f2430ae2ab91d6156488f41dfb0fd1ea787fbfb807dfe53a4f361a9d1a"

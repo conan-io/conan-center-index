@@ -1,6 +1,9 @@
-import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class OpenALConan(ConanFile):
@@ -30,6 +33,7 @@ class OpenALConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
     @property
     def _supports_cxx14(self):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
@@ -124,10 +128,45 @@ class OpenALConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            if(DEFINED OpenAL_FOUND)
+                set(OPENAL_FOUND ${OpenAL_FOUND})
+            endif()
+            if(DEFINED OpenAL_INCLUDE_DIR)
+                set(OPENAL_INCLUDE_DIR ${OpenAL_INCLUDE_DIR})
+            endif()
+            if(DEFINED OpenAL_LIBRARIES)
+                set(OPENAL_LIBRARY ${OpenAL_LIBRARIES})
+            endif()
+            if(DEFINED OpenAL_VERSION)
+                set(OPENAL_VERSION_STRING ${OpenAL_VERSION})
+            endif()
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
+        self.cpp_info.names["pkg_config"] = "openal"
+
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
         if self.settings.os == "Linux":

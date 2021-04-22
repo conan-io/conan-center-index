@@ -2,7 +2,7 @@ import os
 import shutil
 import itertools
 import glob
-
+import textwrap
 import configparser
 from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -16,7 +16,19 @@ class qt(Generator):
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s\n" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+        return """[Paths]
+Prefix = %s
+ArchData = bin/archdatadir
+HostData = bin/archdatadir
+Data = bin/datadir
+Sysconf = bin/sysconfdir
+LibraryExecutables = bin/archdatadir/bin
+Plugins = bin/archdatadir/plugins
+Imports = bin/archdatadir/imports
+Qml2Imports = bin/archdatadir/qml
+Translations = bin/datadir/translations
+Documentation = bin/datadir/doc
+Examples = bin/datadir/examples""" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
 class QtConan(ConanFile):
@@ -109,7 +121,6 @@ class QtConan(ConanFile):
     }
     default_options.update({module: False for module in _submodules})
 
-    requires = "zlib/1.2.11"
     short_paths = True
 
     def export(self):
@@ -262,8 +273,9 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         if self.options.with_pcre2:
             self.requires("pcre2/10.35")
 
@@ -630,6 +642,10 @@ class QtConan(ConanFile):
                     }) if tools.os_info.is_macos else tools.no_op():
                         self.run(self._make_program(), run_environment=True)
 
+    @property
+    def _cmake_executables_file(self):
+        return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
+
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
@@ -652,7 +668,8 @@ Examples = bin/datadir/examples""")
             if not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
+            tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb*")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
@@ -660,6 +677,46 @@ Examples = bin/datadir/examples""")
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
+
+        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
+            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
+            if not os.path.isfile(module):
+                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
+
+
+        extension = ""
+        if self.settings.os == "Windows":
+            extension = ".exe"
+        v = tools.Version(self.version)
+        filecontents = textwrap.dedent("""\
+            set(QT_CMAKE_EXPORT_NAMESPACE Qt5)
+            set(QT_VERSION_MAJOR {major})
+            set(QT_VERSION_MINOR {minor})
+            set(QT_VERSION_PATCH {patch})
+        """.format(major=v.major, minor=v.minor, patch=v.patch))
+        targets = {}
+        targets["Core"] = ["moc", "rcc", "qmake"]
+        targets["DBus"] = ["qdbuscpp2xml", "qdbusxml2cpp"]
+        if self.options.widgets:
+            targets["Widgets"] = ["uic"]
+        if self.options.qttools:
+            targets["Tools"] = ["qhelpgenerator", "qcollectiongenerator", "qdoc", "qtattributionsscanner"]
+            targets[""] = ["lconvert", "lrelease", "lupdate"]
+        if self.options.qtremoteobjects:
+            targets["RemoteObjects"] = ["repc"]
+        if self.options.qtscxml:
+            targets["Scxml"] = ["qscxmlc"]
+        for namespace, targets in targets.items():
+            for target in targets:
+                filecontents += textwrap.dedent("""\
+                    if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
+                        add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
+                        set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../bin/{target}{ext})
+                        set(Qt5{namespace}_{uppercase_target}_EXECUTABLE ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
+                    endif()
+                    """.format(target=target, ext=extension, namespace=namespace, uppercase_target=target.upper()))
+
+        tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -694,6 +751,14 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.frameworks.extend(["IOKit"])    # "libQt5Core.a" require "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
+
+        for m in os.listdir(os.path.join("lib", "cmake")):
+            module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
+            self.cpp_info.build_modules["cmake_find_package"].append(module)
+            self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
+        self.cpp_info.build_modules["cmake_find_package"].append(self._cmake_executables_file)
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
 
 
     @staticmethod

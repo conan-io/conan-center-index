@@ -2,8 +2,10 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
-class LibnameConan(ConanFile):
+
+class GtkConan(ConanFile):
     name = "gtk"
     description = "libraries used for creating graphical user interfaces for applications."
     topics = ("conan", "gtk", "widgets")
@@ -67,41 +69,37 @@ class LibnameConan(ConanFile):
             raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.57.1")
         self.build_requires("pkgconf/1.7.3")
         if self._gtk4:
             self.build_requires("sassc/3.6.1")
 
     def requirements(self):
-        self.requires("gdk-pixbuf/2.42.0")
-        self.requires("glib/2.67.0")
+        self.requires("gdk-pixbuf/2.42.4")
+        self.requires("glib/2.68.0")
         if self.settings.compiler != "Visual Studio":
-            self.requires("cairo/1.17.2")
+            self.requires("cairo/1.17.4")
         if self._gtk4:
-            self.requires("graphene/1.10.2")
+            self.requires("graphene/1.10.4")
         if self.settings.os == "Linux":
             if self._gtk4:
-                self.requires("xkbcommon/1.0.3")
+                self.requires("xkbcommon/1.1.0")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
-                    self.requires("xkbcommon/1.0.3")
-                self.requires("wayland/1.18.0")
+                    self.requires("xkbcommon/1.1.0")
+                self.requires("wayland/1.19.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
-        self.requires("libepoxy/1.5.4")
+        self.requires("libepoxy/1.5.5")
         if self.options.with_pango:
-            self.requires("pango/1.48.0")
+            self.requires("pango/1.48.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        if self._gtk3:
-            extracted_dir = extracted_dir.replace("gtk", "gtk+")
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)

@@ -6,3 +6,5 @@ patches:
   "4.2.15":
     - patch_file: "patches/fix-export-macro.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-missing-unistd-include.patch"
+      base_path: "source_subfolder"

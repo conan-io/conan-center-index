@@ -1,6 +1,8 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class CerealConan(ConanFile):
@@ -44,12 +46,12 @@ class CerealConan(ConanFile):
     def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += (
-                "if(TARGET {aliased} AND NOT TARGET {alias})\n"
-                "    add_library({alias} INTERFACE IMPORTED)\n"
-                "    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})\n"
-                "endif()\n"
-            ).format(alias=alias, aliased=aliased)
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
 
     @property
@@ -61,8 +63,10 @@ class CerealConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
-        self.cpp_info.builddirs = [self._module_subfolder]
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        module_target_rel_path = os.path.join(self._module_subfolder, self._module_file)
+        self.cpp_info.build_modules["cmake_find_package"] = [module_target_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_target_rel_path]
         if self.options.thread_safe:
             self.cpp_info.defines = ["CEREAL_THREAD_SAFE=1"]
             if self.settings.os == "Linux":

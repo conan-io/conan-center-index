@@ -57,7 +57,8 @@ class OdbcConan(ConanFile):
         args = ["--enable-static=%s" % static_flag,
                 "--enable-shared=%s" % shared_flag,
                 "--enable-ltdl-install",
-                "--enable-iconv=%s" % libiconv_flag]
+                "--enable-iconv=%s" % libiconv_flag,
+                "--sysconfdir=/etc"]
         if self.options.with_libiconv:
             libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
             args.append("--with-libiconv-prefix=%s" % libiconv_prefix)

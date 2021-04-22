@@ -3,3 +3,5 @@ versions:
     folder: all
   "2.46":
     folder: all
+  "2.48":
+    folder: all

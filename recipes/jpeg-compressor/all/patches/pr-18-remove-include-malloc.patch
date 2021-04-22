@@ -1,0 +1,13 @@
+# Upstream pull request: https://github.com/richgel999/jpeg-compressor/pull/18
+diff --git a/jpge.cpp b/jpge.cpp
+index fd32f2f..221c65b 100644
+--- a/jpge.cpp
++++ b/jpge.cpp
+@@ -32,7 +32,6 @@
+ 
+ #include <stdlib.h>
+ #include <string.h>
+-#include <malloc.h>
+ 
+ #define JPGE_MAX(a,b) (((a)>(b))?(a):(b))
+ #define JPGE_MIN(a,b) (((a)<(b))?(a):(b))

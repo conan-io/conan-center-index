@@ -10,8 +10,7 @@ class PCREConan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,6 +43,8 @@ class PCREConan(ConanFile):
         "with_stack_for_recursion": True
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -87,16 +88,20 @@ class PCREConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def patch_cmake(self):
-        """Patch CMake file to avoid man and share during install stage
-        """
+    def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # Avoid man and share during install stage
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
+        # Do not override CMAKE_MODULE_PATH and do not add ${PROJECT_SOURCE_DIR}/cmake
+        # because it contains a custom FindPackageHandleStandardArgs.cmake which
+        # can break conan generators
+        tools.replace_in_file(
+            cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -122,7 +127,7 @@ class PCREConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self.patch_cmake()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
