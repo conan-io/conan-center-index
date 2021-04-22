@@ -29,7 +29,6 @@ class OpenCVConan(ConanFile):
         "with_eigen": [True, False],
         "with_webp": [True, False],
         "with_gtk": [True, False],
-        "gtk_version": [2,3],
         "with_quirc": [True, False],
         "with_cuda": [True, False],
         "with_cublas": [True, False]
@@ -49,7 +48,6 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_webp": True,
         "with_gtk": True,
-        "gtk_version" : 2,
         "with_quirc": True,
         "with_cuda": False,
         "with_cublas": False
@@ -244,9 +242,8 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_XINE"] = False
         self._cmake.definitions["WITH_LAPACK"] = False
 
-        with_gtk = self.options.get_safe("with_gtk", False)
-        self._cmake.definitions["WITH_GTK"] = with_gtk
-        self._cmake.definitions["WITH_GTK_2_X"] = with_gtk and self.options.gtk_version == 2
+        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
+        self._cmake.definitions["WITH_GTK_2_X"] = self._is_gtk_version2
         self._cmake.definitions["WITH_WEBP"] = self.options.with_webp
         self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg != False
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
@@ -336,6 +333,18 @@ class OpenCVConan(ConanFile):
     @property
     def _module_file(self):
         return "conan-official-{}-targets.cmake".format(self.name)
+
+    # returns true if GTK2 is selected. To do this, the version option
+    # of the gtk/system package is checked or the conan package version
+    # of an gtk conan package is checked.
+    @property
+    def _is_gtk_version2(self):
+        if self.options.get_safe("with_gtk", False) == False:
+            return False
+        if self.requires["gtk"].ref.version == "system":
+            return self.options["gtk"].version == 2
+        else:
+            return self.requires["gtk"].ref.version < "3.0"
 
     @property
     def _opencv_components(self):
