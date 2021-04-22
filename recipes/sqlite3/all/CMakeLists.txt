@@ -34,7 +34,7 @@ option(HAVE_STRERROR_R "Use strerror_r()")
 option(HAVE_USLEEP "Use usleep() system call to implement the xSleep method")
 option(DISABLE_GETHOSTUUID "Disable function gethostuuid")
 set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or BLOB")
-set(TARGET_OS CACHE STRING "Set target OS for SQLite building")
+option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 
 add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
 if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
