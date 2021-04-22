@@ -31,7 +31,8 @@ class OpenCVConan(ConanFile):
         "with_gtk": [True, False],
         "with_quirc": [True, False],
         "with_cuda": [True, False],
-        "with_cublas": [True, False]
+        "with_cublas": [True, False],
+        "with_cufft": [True, False]
     }
     default_options = {
         "shared": False,
@@ -50,7 +51,8 @@ class OpenCVConan(ConanFile):
         "with_gtk": True,
         "with_quirc": True,
         "with_cuda": False,
-        "with_cublas": False
+        "with_cublas": False,
+        "with_cufft": False
     }
 
     short_paths = True
@@ -92,6 +94,7 @@ class OpenCVConan(ConanFile):
                 raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if not self.options.with_cuda:
             del self.options.with_cublas
+            del self.options.with_cufft
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
@@ -203,7 +206,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_ADE"] = False
         self._cmake.definitions["WITH_ARAVIS"] = False
         self._cmake.definitions["WITH_CLP"] = False
-        self._cmake.definitions["WITH_CUFFT"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
         self._cmake.definitions["WITH_FFMPEG"] = False
         self._cmake.definitions["WITH_GSTREAMER"] = False
@@ -279,6 +281,7 @@ class OpenCVConan(ConanFile):
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
         self._cmake.definitions["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
+        self._cmake.definitions["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
