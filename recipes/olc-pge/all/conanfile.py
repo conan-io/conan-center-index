@@ -1,10 +1,10 @@
 from conans import ConanFile, tools, errors
 
 
-class oldPixelGameEngineConan(ConanFile):
+class olcPixelGameEngineConan(ConanFile):
     name = "olc-pge"
     homepage = "https://github.com/OneLoneCoder/olcPixelGameEngine"
-    description = "The olcPixelGameEngine is a single-file prototyping and game-engine framework created in C++. It is cross platform, compiling on Windows via Visual Studio and Code::Blocks, and on Linux with a modern g++."
+    description = "The olcPixelGameEngine is a single-file prototyping and game-engine framework created in C++."
     topics = ("conan", "olc", "pge", "pixelengine", "pixelgameengine", "pgex",
               "game-development", "game-engine", "engine", "gamedev", "gaming", "graphics")
     license = "LicenseRef-LICENSE"
