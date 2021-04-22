@@ -80,15 +80,10 @@ class ZlibNgConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
 
         if self.settings.os == "Windows":
-            if self.options.shared:
-                if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ["zlib-ngd"]
-                else:
-                    self.cpp_info.libs = ["zlib-ng"]
+            if self.settings.build_type == "Debug":
+                self.cpp_info.libs = ["zlib-ngd"]
             else:
-                if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ["zlib-ngstaticd"]
-                else:
-                    self.cpp_info.libs = ["zlib-ngstatic"]
+                self.cpp_info.libs = ["zlib-ng"]
+
         else:
             self.cpp_info.libs = ["z-ng"]
