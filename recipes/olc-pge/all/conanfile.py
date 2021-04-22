@@ -7,7 +7,7 @@ class oldPixelGameEngineConan(ConanFile):
     description = "The olcPixelGameEngine is a single-file prototyping and game-engine framework created in C++. It is cross platform, compiling on Windows via Visual Studio and Code::Blocks, and on Linux with a modern g++."
     topics = ("conan", "olc", "pge", "pixelengine", "pixelgameengine", "pgex",
               "game-development", "game-engine", "engine", "gamedev", "gaming", "graphics")
-    license = "OLC-3"
+    license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
