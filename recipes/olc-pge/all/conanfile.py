@@ -27,7 +27,8 @@ class oldPixelGameEngineConan(ConanFile):
             self.options.image_loader = "gdi"
 
     def validate(self):
-        tools.check_min_cppstd(self, 14)
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
         if self.settings.os == "Linux" and tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "18":
             raise errors.ConanInvalidConfiguration(
                 "Requires a system with recent OpenGL.")
