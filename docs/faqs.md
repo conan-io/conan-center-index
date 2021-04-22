@@ -161,4 +161,4 @@ After one month, we will welcome a PR removing the option that was deprecated.
 
 ## What license should I use for Public Domain?
 
-[The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used, instead. By default, if a project uses Public Domain and there is no offcial license listed, you shoul use [Unlicense](https://spdx.org/licenses/Unlicense).
+[The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
