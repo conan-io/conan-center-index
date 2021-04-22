@@ -1,5 +1,7 @@
 from conans import ConanFile, tools, errors
 
+required_conan_version = ">=1.32.0"
+
 
 class olcPixelGameEngineConan(ConanFile):
     name = "olc-pge"
