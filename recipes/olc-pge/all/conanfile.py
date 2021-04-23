@@ -43,6 +43,9 @@ class olcPixelGameEngineConan(ConanFile):
                 if "ptrdiff_t" in glext:
                     raise errors.ConanInvalidConfiguration(
                         "Incompatible glext.h header.")
+        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version <= "14":
+            raise errors.ConanInvalidConfiguration(
+                "Visual Studio older than 15 not compatible")
 
     def package_id(self):
         # Only clear some of the header only impacting values.
