@@ -13,10 +13,10 @@ class olcPixelGameEngineConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "image_loader": ['png', 'stb', 'gdi'],
+        "image_loader": ["png", "stb", "gdi"],
     }
     default_options = {
-        "image_loader": 'png',
+        "image_loader": "png",
     }
 
     @property
@@ -49,9 +49,9 @@ class olcPixelGameEngineConan(ConanFile):
         self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-        if self.options.image_loader == 'stb':
+        if self.options.image_loader == "stb":
             self.requires("stb/20200203")
-        elif self.options.image_loader == 'png':
+        elif self.options.image_loader == "png":
             self.requires("libpng/1.6.37")
 
     def package(self):
