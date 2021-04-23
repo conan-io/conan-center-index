@@ -91,7 +91,7 @@ class ConanSqlite3(ConanFile):
 
         if (not self.options.enable_default_vfs) and self.options.build_executable:
             # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-            raise ConanInvalidConfiguration("Building executable is not supported without default OS interface")
+            raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -7,19 +7,12 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def build(self):
-        if not self.options["sqlite3"].enable_default_vfs:
-            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
-            return
-
         cmake = CMake(self)
+        cmake.definitions["USE_EMPTY_VFS"] = not self.options["sqlite3"].enable_default_vfs
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not self.options["sqlite3"].enable_default_vfs:
-            # That code will not build
-            return
-
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
