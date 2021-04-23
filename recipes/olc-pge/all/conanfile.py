@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, errors
+import os
 
 required_conan_version = ">=1.32.0"
 
@@ -61,6 +62,11 @@ class olcPixelGameEngineConan(ConanFile):
                   dst="include", src=self._source_subfolder)
         self.copy(pattern="*.h", dst="include",
                   src=self._source_subfolder+"/Extensions")
+        if self.settings.os == "Windows":
+            tools.save(os.path.join(
+                self.package_folder, "bin", "noop.bat"), "")
+        else:
+            tools.save(os.path.join(self.package_folder, "bin", "noop.sh"), "")
 
     def package_info(self):
         self.cpp_info.libdirs = []
