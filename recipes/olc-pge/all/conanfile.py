@@ -32,7 +32,7 @@ class olcPixelGameEngineConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+            tools.check_min_cppstd(self, 17)
         if self.options.image_loader == "gdi" and self.settings.os != "Windows":
             raise errors.ConanInvalidConfiguration(
                 "GDI image loader only supported on Windows")
