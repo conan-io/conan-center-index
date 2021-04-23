@@ -54,6 +54,8 @@ class olcPixelGameEngineConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
+        tools.replace_in_file(os.path.join(
+            self._source_subfolder, "olcPixelGameEngine.h"), "#define GL_SILENCE_DEPRECATION", "")
 
     def requirements(self):
         self.requires("opengl/system")
