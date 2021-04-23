@@ -34,7 +34,7 @@ int main()
 {
 	Example demo;
 	if (demo.Construct(256, 240, 4, 4))
-		demo.Start();
+		/*demo.Start()*/;
 
 	return 0;
 }
