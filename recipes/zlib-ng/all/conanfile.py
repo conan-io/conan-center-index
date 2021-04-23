@@ -12,8 +12,20 @@ class ZlibNgConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False],
+               "zlib_compat": [True, False],
+               "with_gzfileop": [True, False],
+               "with_optim": [True, False],
+               "with_new_strategies": [True, False],
+               "with_native_instructions": [True, False],
+               "fPIC": [True, False]}
+    default_options = {"shared": False,
+                       "zlib_compat": False,
+                       "with_gzfileop": True,
+                       "with_optim": False,
+                       "with_new_strategies": True,
+                       "with_native_instructions": False,
+                       "fPIC": True}
     _cmake = None
 
     @property
@@ -41,16 +53,12 @@ class ZlibNgConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-        self._cmake.definitions["ZLIB_COMPAT"] = False
-        self._cmake.definitions["ZLIB_ENABLE_TESTS"] = False
-        self._cmake.definitions["WITH_GZFILEOP"] = True
-        self._cmake.definitions["WITH_OPTIM"] = True
-        self._cmake.definitions["WITH_NEW_STRATEGIES"] = True
-        self._cmake.definitions["WITH_NATIVE_INSTRUCTIONS"] = False
-        self._cmake.definitions["WITH_SANITIZER"] = False
-        self._cmake.definitions["WITH_FUZZERS"] = False
-        self._cmake.definitions["WITH_MAINTAINER_WARNINGS"] = False
-        self._cmake.definitions["WITH_CODE_COVERAGE"] = False
+
+        self._cmake.definitions["ZLIB_COMPAT"] = self.options.zlib_compat
+        self._cmake.definitions["WITH_GZFILEOP"] = self.options.with_gzfileop
+        self._cmake.definitions["WITH_OPTIM"] = self.options.with_optim
+        self._cmake.definitions["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
+        self._cmake.definitions["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
 
         self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._cmake
