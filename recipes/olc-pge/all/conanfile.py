@@ -42,10 +42,13 @@ class olcPixelGameEngineConan(ConanFile):
                 glext = tools.load("/usr/include/GL/glext.h")
                 if "ptrdiff_t" in glext:
                     raise errors.ConanInvalidConfiguration(
-                        "Incompatible glext.h header.")
+                        "Incompatible glext.h header with distro %s %s." % (tools.os_info.linux_distro, tools.os_info.os_version))
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15":
             raise errors.ConanInvalidConfiguration(
                 "Visual Studio older than 15 not compatible")
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11.0":
+            raise errors.ConanInvalidConfiguration(
+                "Xcode older than 11.0 not compatible")
 
     def package_id(self):
         # Only clear some of the header only impacting values.
