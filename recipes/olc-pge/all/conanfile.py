@@ -66,7 +66,7 @@ class olcPixelGameEngineConan(ConanFile):
             tools.save(os.path.join(
                 self.package_folder, "bin", "noop.bat"), "")
         else:
-            tools.save(os.path.join(self.package_folder, "bin", "noop.sh"), "")
+            tools.save(os.path.join(self.package_folder, "bin", "noop"), "")
 
     def package_info(self):
         self.cpp_info.libdirs = []
