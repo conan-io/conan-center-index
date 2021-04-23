@@ -21,7 +21,8 @@ conan-center-index tries to make the process as smooth and simple as possible fo
   * [Automatic Merges](#automatic-merges)
     * [Merge](#merge)
     * [Upload](#upload)
-    * [Updating web front end](#updating-web-front-end)<!-- endToc -->
+    * [Updating web front end](#updating-web-front-end)
+  * [Stale PRs](#stale-prs)<!-- endToc -->
 
 ## [conan-center-bot](https://github.com/conan-center-bot)
 
@@ -153,3 +154,7 @@ This also blocks further merges until upload is finished. It also explains why n
 repository.  Instead, it's updated by the conan center CI job as its own step. The metadata from the conan repository is
 converted to the format the web-front-end understands and then sent to it as a scheduled update. As a result, there may occasionally be delays in updating the web-front-end.
 That may explain the fact there are moments when the information showed in the frontend doesn't match the actual state on the ConanCenter repository.
+
+## Stale PRs
+
+Conan Center Index uses [stale bot](https://github.com/probot/stale) to close abandoned pull requests. It's configured by [stale.yml](.github/stale.yml). When a pull request gets stale, we encourage anyone to take ownership of the PR (even submit changes to the author's branch if possible) so existing work doesn't get lost when the pull request is closed without merging.

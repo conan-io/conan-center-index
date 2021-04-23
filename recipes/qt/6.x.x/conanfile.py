@@ -10,13 +10,32 @@ from conans.model import Generator
 
 
 class qt(Generator):
+    @staticmethod
+    def content_template(path, folder):
+        return textwrap.dedent("""\
+            [Paths]
+            Prefix = {0}
+            ArchData = {1}/archdatadir
+            HostData = {1}/archdatadir
+            Data = {1}/datadir
+            Sysconf = {1}/sysconfdir
+            LibraryExecutables = {1}/archdatadir/bin
+            Plugins = {1}/archdatadir/plugins
+            Imports = {1}/archdatadir/imports
+            Qml2Imports = {1}/archdatadir/qml
+            Translations = {1}/datadir/translations
+            Documentation = {1}/datadir/doc
+            Examples = {1}/datadir/examples""").format(path, folder)
+
     @property
     def filename(self):
         return "qt.conf"
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s\n" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+        return qt.content_template(
+            self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/"),
+            "res")
 
 
 class QtConan(ConanFile):
@@ -499,23 +518,14 @@ class QtConan(ConanFile):
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
+    def _cmake_qt6_private_file(self, module):
+        return os.path.join("lib", "cmake", "Qt6{0}".format(module), "conan_qt_qt6_{0}private.cmake".format(module.lower()))
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), "w") as f:
-            f.write(textwrap.dedent("""[Paths]
-                Prefix = ..
-                ArchData = res/archdatadir
-                HostData = res/archdatadir
-                Data = res/datadir
-                Sysconf = res/sysconfdir
-                LibraryExecutables = res/archdatadir/bin
-                Plugins = res/archdatadir/plugins
-                Imports = res/archdatadir/imports
-                Qml2Imports = res/archdatadir/qml
-                Translations = res/datadir/translations
-                Documentation = res/datadir/doc
-                Examples = res/datadir/examples"""))
+            f.write(qt.content_template("..", "res"))
         self.copy("*LICENSE*", src="qt6/", dst="licenses")
         for module in self._submodules:
             if not self.options.get_safe(module):
@@ -562,7 +572,31 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        
+        def _create_private_module(module, dependencies=[]):
+            dependencies_string = ';'.join('Qt6::%s' % dependency for dependency in dependencies)
+            contents = textwrap.dedent("""\
+            if(NOT TARGET Qt6::{0}Private)
+                add_library(Qt6::{0}Private INTERFACE IMPORTED)
 
+                set_target_properties(Qt6::{0}Private PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
+                    INTERFACE_LINK_LIBRARIES "{2}"
+                )
+                
+                add_library(Qt::{0}Private INTERFACE IMPORTED)
+                set_target_properties(Qt::{0}Private PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "Qt6::{0}Private"
+                    _qt_is_versionless_target "TRUE"
+                )
+            endif()""".format(module, self.version, dependencies_string))
+            
+            tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
+
+        _create_private_module("Core", ["Core"])
+        
+        if self.options.qtdeclarative:
+            _create_private_module("Qml", ["CorePrivate", "Qml"])
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -672,6 +706,8 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Qml"))
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
@@ -733,6 +769,8 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Core"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Core"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)

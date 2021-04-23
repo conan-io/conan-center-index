@@ -17,7 +17,7 @@ This section gathers the most common questions from the community related to pac
       * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
-  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
+  * [Why _installer_ packages remove some settings from their package ID?](#why-installer-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
 
@@ -30,6 +30,12 @@ This repository will try to follow the most well-known names for each of the rec
 However, if it is not possible and there is the case of a new recipe producing a name collision, the first recipe contributed will have precedence over it. Generally, recipes contributed to the repo won't change its name in order to not break users.
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
+
+## What is the policy on creating packages from pre-compiled binaries?
+
+The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+
+Check the link for further details.
 
 ## Should reference names use `-` or `_`?
 
@@ -153,6 +159,9 @@ and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c825641
 
 However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
 After one month, we will welcome a PR removing the option that was deprecated.
+## What license should I use for Public Domain?
+
+[The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
 
 ## Why is a `tools.check_min_cppstd` call not enough?
 

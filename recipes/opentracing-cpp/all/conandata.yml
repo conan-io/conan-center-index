@@ -1,0 +1,8 @@
+sources:
+  "1.6.0":
+    url: https://github.com/opentracing/opentracing-cpp/archive/refs/tags/v1.6.0.tar.gz
+    sha256: 5b170042da4d1c4c231df6594da120875429d5231e9baa5179822ee8d1054ac3
+patches:
+  "1.6.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-Set-default-installation-folders.patch"
