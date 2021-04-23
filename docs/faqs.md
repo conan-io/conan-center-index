@@ -179,7 +179,7 @@ This fails to cover the waste number of use cases for the following reasons:
 3. Conan-Center-Index does **not** manage the `cppstd` setting for the compilers it supports to generate binaries.
 
 ```python
-def configure(self):
+def validate(self):
     # 👇 Correct
     if self.settings.compiler.get_safe("cppstd"):
         tools.check_min_cppstd(self, 14)
