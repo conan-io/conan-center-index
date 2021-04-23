@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
