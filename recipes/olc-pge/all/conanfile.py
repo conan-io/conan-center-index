@@ -32,15 +32,19 @@ class olcPixelGameEngineConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if self.settings.os == "Linux" and tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version < "18":
-            raise errors.ConanInvalidConfiguration(
-                "Requires a system with recent OpenGL.")
         if self.options.image_loader == "gdi" and self.settings.os != "Windows":
             raise errors.ConanInvalidConfiguration(
                 "GDI image loader only supported on Windows")
+        if self.settings.os == "Linux":
+            # Kludge to check if we can use the system OpenGL available.
+            if os.path.exists("/usr/include/GL/glext.h"):
+                glext = tools.load("/usr/include/GL/glext.h")
+                if "ptrdiff_t" in glext:
+                    raise errors.ConanInvalidConfiguration(
+                        "Incompatible glext.h header.")
 
-    # def package_id(self):
-    #     self.info.header_only()
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -62,11 +66,6 @@ class olcPixelGameEngineConan(ConanFile):
                   dst="include", src=self._source_subfolder)
         self.copy(pattern="*.h", dst="include",
                   src=self._source_subfolder+"/Extensions")
-        if self.settings.os == "Windows":
-            tools.save(os.path.join(
-                self.package_folder, "bin", "noop.bat"), "")
-        else:
-            tools.save(os.path.join(self.package_folder, "bin", "noop"), "")
 
     def package_info(self):
         self.cpp_info.libdirs = []
