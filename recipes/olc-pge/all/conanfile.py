@@ -38,8 +38,8 @@ class olcPixelGameEngineConan(ConanFile):
             raise errors.ConanInvalidConfiguration(
                 "GDI image loader only supported on Windows")
 
-    def package_id(self):
-        self.info.header_only()
+    # def package_id(self):
+    #     self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
