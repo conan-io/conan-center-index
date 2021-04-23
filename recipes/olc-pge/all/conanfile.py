@@ -19,6 +19,7 @@ class olcPixelGameEngineConan(ConanFile):
     default_options = {
         "image_loader": "png",
     }
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -44,7 +45,11 @@ class olcPixelGameEngineConan(ConanFile):
                         "Incompatible glext.h header.")
 
     def package_id(self):
-        self.info.header_only()
+        # Only clear some of the header only impacting values.
+        # self.info.header_only()
+        # self.info.settings.clear()
+        self.info.options.clear()
+        self.info.requires.clear()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
