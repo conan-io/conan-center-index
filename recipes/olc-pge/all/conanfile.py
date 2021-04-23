@@ -85,3 +85,5 @@ class olcPixelGameEngineConan(ConanFile):
                 self.cpp_info.system_libs.extend(["gdi32", "gdiplus", ])
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "stdc++fs"]
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(["GLUT"])
