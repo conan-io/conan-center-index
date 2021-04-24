@@ -1,4 +1,5 @@
 import os
+import shutil
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration, ConanException
@@ -151,6 +152,7 @@ class SociConan(ConanFile):
                 tools.rename(os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
         os.remove(os.path.join(self.package_folder, "include", "soci", "soci-config.h.in"))
+        shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["soci_core"]
