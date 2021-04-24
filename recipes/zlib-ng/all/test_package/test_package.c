@@ -225,20 +225,6 @@ int main(int argc, char ** argv) {
     root = 9;
     max = 15;
 
-    if (argc > 1) {
-        syms = atoi(argv[1]);
-        if (argc > 2) {
-            root = atoi(argv[2]);
-            if (argc > 3)
-                max = atoi(argv[3]);
-        }
-    }
-    if (argc > 4 || syms < 2 || root < 1 || max < 1) {
-        fputs("invalid arguments, need: [sym >= 2 [root >= 1 [max >= 1]]]\n",
-            stderr);
-        return 1;
-    }
-
     if (max > syms - 1)
         max = syms - 1;
 
