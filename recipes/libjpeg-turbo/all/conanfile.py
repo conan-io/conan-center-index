@@ -140,9 +140,17 @@ class LibjpegTurboConan(ConanFile):
                 os.remove(bin_file)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"
+        self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
+
+        self.cpp_info.components["jpeg"].names["cmake_find_package"] = self._lib_name('jpeg')
+        self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = self._lib_name('jpeg')
         self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
         self.cpp_info.components["jpeg"].libs = [self._lib_name("jpeg")]
+
         if self.options.get_safe("turbojpeg"):
+            self.cpp_info.components["turbojpeg"].names["cmake_find_package"] = self._lib_name('turbojpeg')
+            self.cpp_info.components["turbojpeg"].names["cmake_find_package_multi"] = self._lib_name('turbojpeg')
             self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
             self.cpp_info.components["turbojpeg"].libs = [self._lib_name("turbojpeg")]
 
