@@ -31,13 +31,3 @@ class CajunJsonApiConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = self.name
-        self.cpp_info.filenames["cmake_find_package_multi"] = self.name
-        self.cpp_info.names["cmake_find_package"] = "cajun"
-        self.cpp_info.names["cmake_find_package_multi"] = "cajun"
-
-        self.cpp_info.components["_cajun"].libs = []
-        self.cpp_info.components["_cajun"].names["cmake_find_package"] = "jsonapi"
-        self.cpp_info.components["_cajun"].names["cmake_find_package_multi"] = "jsonapi"

@@ -4,9 +4,8 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-
 find_package(cajun-jsonapi REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE cajun::jsonapi)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+target_link_libraries(${PROJECT_NAME} PRIVATE cajun-jsonapi::cajun-jsonapi)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
