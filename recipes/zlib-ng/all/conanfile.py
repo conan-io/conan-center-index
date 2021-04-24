@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 from conans.tools import download, unzip, replace_in_file, remove_files_by_mask, get
 import os
 
@@ -68,19 +68,12 @@ class ZlibNgConan(ConanFile):
         cmake.build()
 
     def package(self):
-        for header in ["*zlib*.h", "*zconf*.h"]:
-            self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
 
-        if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=self._build_subfolder, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=self._build_subfolder, keep_path=False)
-        else:
-            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pc")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.cmake")
 
-        self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
