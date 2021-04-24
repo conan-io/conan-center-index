@@ -53,6 +53,9 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
         if self.options.docs != "deprecated":
             self.output.warn("'docs' option is deprecated. Do not use.")
+
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 

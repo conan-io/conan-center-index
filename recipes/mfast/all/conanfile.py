@@ -176,25 +176,25 @@ class mFASTConan(ConanFile):
                 "comp": "mfast",
                 "target": "mfast" + target_suffix,
                 "lib": "mfast" + lib_suffix,
-                "requires": ["boost::boost"]
+                "requires": ["boost::headers"]
             },
             "mfast_coder": {
                 "comp": "mfast_coder",
                 "target": "mfast_coder" + target_suffix,
                 "lib": "mfast_coder" + lib_suffix,
-                "requires": ["libmfast", "boost::boost"]
+                "requires": ["libmfast", "boost::headers"]
             },
             "mfast_xml_parser": {
                 "comp": "mfast_xml_parser",
                 "target": "mfast_xml_parser" + target_suffix,
                 "lib": "mfast_xml_parser" + lib_suffix,
-                "requires": ["libmfast", "boost::boost", "tinyxml2::tinyxml2"]
+                "requires": ["libmfast", "boost::headers", "tinyxml2::tinyxml2"]
             },
             "mfast_json": {
                 "comp": "mfast_json",
                 "target": "mfast_json" + target_suffix,
                 "lib": "mfast_json" + lib_suffix,
-                "requires": ["libmfast", "boost::boost"]
+                "requires": ["libmfast", "boost::headers"]
             }
         }
 

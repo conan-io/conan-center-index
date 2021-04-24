@@ -168,6 +168,8 @@ However, if you need to use autotools for building, you can take a look on [mpc]
 
 Many projects offer **pkg-config**'s `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
 
+Please be aware that ConanCenter only builds from sources and [pre-compiled binaries are not acceptable](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md)
+
 ### Test the recipe locally
 
  The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:

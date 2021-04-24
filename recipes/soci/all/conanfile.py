@@ -8,7 +8,7 @@ class SociConan(ConanFile):
     homepage = "https://github.com/SOCI/soci"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The C++ Database Access Library "
-    topics = ("cpp", "database-library", "oracle", "postgresql", "mysql", "odbc", "db2", "firebird", "sqlite3", "boost" )
+    topics = ("mysql", "odbc", "postgresql", "sqlite3")
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"

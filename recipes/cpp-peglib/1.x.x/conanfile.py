@@ -11,7 +11,7 @@ class CpppeglibConan(ConanFile):
     homepage = "https://github.com/yhirose/cpp-peglib"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler"
-    no_copy_source = True
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -52,6 +52,10 @@ class CpppeglibConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

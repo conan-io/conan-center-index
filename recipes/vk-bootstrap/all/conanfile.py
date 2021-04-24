@@ -67,9 +67,11 @@ class VkBootstrapConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # TODO: move those modifications to patches when upstream CMakeLists will be more stable
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # We don't need full Vulkan SDK, just headers, but vulkan-headers recipe alone can't emulate FindVulkan.cmake
-        tools.replace_in_file(cmakelists, "find_package(Vulkan REQUIRED)", "")
+        if tools.Version(self.version) < "0.3.0":
+            # We don't need full Vulkan SDK, just headers, but vulkan-headers recipe alone can't emulate FindVulkan.cmake
+            tools.replace_in_file(cmakelists, "find_package(Vulkan REQUIRED)", "")
         # No warnings as errors
         tools.replace_in_file(cmakelists, "-pedantic-errors", "")
         tools.replace_in_file(cmakelists, "/WX", "")
@@ -79,6 +81,8 @@ class VkBootstrapConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["VK_BOOTSTRAP_TEST"] = False
+        if tools.Version(self.version) >= "0.3.0":
+            self._cmake.definitions["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = ";".join(self.deps_cpp_info["vulkan-headers"].include_paths)
         self._cmake.configure()
         return self._cmake
 

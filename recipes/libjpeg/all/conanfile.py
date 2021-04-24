@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
@@ -26,6 +27,8 @@ class LibjpegConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -105,7 +108,7 @@ class LibjpegConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
-            
+
             self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
@@ -121,6 +124,17 @@ class LibjpegConan(ConanFile):
             for file in os.listdir(bindir):
                 if file.endswith(".exe"):
                     os.unlink(os.path.join(bindir, file))
+
+        for fn in ("jpegint.h", "transupp.h",):
+            self.copy(fn, src=self._source_subfolder, dst="include")
+
+        for fn in ("jinclude.h", "transupp.c",):
+            self.copy(fn, src=self._source_subfolder, dst="res")
+
+        # Remove export decorations of transupp symbols
+        for relpath in os.path.join("include", "transupp.h"), os.path.join("res", "transupp.c"):
+            path = os.path.join(self.package_folder, relpath)
+            tools.save(path, re.subn(r"(?:EXTERN|GLOBAL)\(([^)]+)\)", r"\1", tools.load(path))[0])
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "JPEG"
