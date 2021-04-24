@@ -6,6 +6,7 @@ This section gathers the most common questions from the community related to pac
 ## Contents
 
   * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
   * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
   * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
@@ -19,6 +20,7 @@ This section gathers the most common questions from the community related to pac
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
   * [Why _installer_ packages remove some settings from their package ID?](#why-installer-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
+  * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
