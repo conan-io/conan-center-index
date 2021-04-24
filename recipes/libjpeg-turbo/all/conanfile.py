@@ -144,16 +144,15 @@ class LibjpegTurboConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
 
         cmake_target_suffix = "-static" if not self.options.shared else ""
-        pkgconf_target_suffix = "-static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
+        lib_suffix = "-static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
 
         self.cpp_info.components["jpeg"].names["cmake_find_package"] = "jpeg" + cmake_target_suffix
         self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = "jpeg" + cmake_target_suffix
         self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
-        self.cpp_info.components["jpeg"].libs = ["jpeg" + pkgconf_target_suffix]
+        self.cpp_info.components["jpeg"].libs = ["jpeg" + lib_suffix]
 
         if self.options.get_safe("turbojpeg"):
             self.cpp_info.components["turbojpeg"].names["cmake_find_package"] = "turbojpeg" + cmake_target_suffix
             self.cpp_info.components["turbojpeg"].names["cmake_find_package_multi"] = "turbojpeg" + cmake_target_suffix
             self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
-            self.cpp_info.components["turbojpeg"].libs = ["turbojpeg" + pkgconf_target_suffix]
-
+            self.cpp_info.components["turbojpeg"].libs = ["turbojpeg" + lib_suffix]
