@@ -1,0 +1,13 @@
+diff --git a/repro/Makefile.in b/repro/Makefile.in
+index 2f9f8bd..6a02304 100644
+--- a/repro/Makefile.in
++++ b/repro/Makefile.in
+@@ -282,7 +282,7 @@ AM_V_at = $(am__v_at_@AM_V@)
+ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
+ am__v_at_0 = @
+ am__v_at_1 = 
+-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
++DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir) -I$(top_srcdir)
+ depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
+ am__maybe_remake_depfiles = depfiles
+ am__depfiles_remade = ./$(DEPDIR)/librepro_la-AbstractDb.Plo \

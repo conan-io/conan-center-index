@@ -1,5 +1,5 @@
-#include <resip/stack/SipMessage.hxx>
 #include <resip/stack/Helper.hxx>
+#include <resip/stack/SipMessage.hxx>
 #include <rutil/Logger.hxx>
 #include <iostream>
 
@@ -40,14 +40,13 @@ int main(int argc, char* argv[])
 {
     Log::initialize(Log::Cout, Log::Warning, argv[0]);
 
-    SipMessage* msg = SipMessage::make(Data(Data::Share, sipRawData.data()), true);
-    if (!msg)
+    std::unique_ptr<SipMessage> msg{ SipMessage::make(Data(Data::Share, sipRawData.data()), true)} ;
+    if (not msg)
     {
         return 1;
     }
 
-    std::cout << std::string(msg->methodStr().data()) << std::endl;
-    std::string headers = "";
+    std::string headers;
     for (int i = 0; i < Headers::Type::MAX_HEADERS; i++)
     {
         auto rawHeader = msg->getRawHeader(static_cast<Headers::Type>(i));
@@ -62,10 +61,10 @@ int main(int argc, char* argv[])
         headers += "\r\n";
     }
 
-    std::cout << headers << std::endl;
-    std::cout << std::string(msg->getRawBody().getBuffer(), msg->getRawBody().getLength()) << std::endl;
+    std::cout << msg->methodStr().data() << std::endl
+              << headers << std::endl
+              << std::string(msg->getRawBody().getBuffer(), msg->getRawBody().getLength()) << std::endl;
 
-    delete msg;
     return 0;
 }
 

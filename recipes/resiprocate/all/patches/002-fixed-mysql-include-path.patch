@@ -1,0 +1,36 @@
+diff --git a/repro/MySqlDb.cxx b/repro/MySqlDb.cxx
+index c5b0f67..982fcb8 100644
+--- a/repro/MySqlDb.cxx
++++ b/repro/MySqlDb.cxx
+@@ -7,10 +7,10 @@
+
+ #ifdef USE_MYSQL
+
+-#ifdef WIN32
+-#include <errmsg.h>
+-#else 
++#if __has_include("mysql/errmsg.h")
+ #include <mysql/errmsg.h>
++#else
++#include <errmsg.h>
+ #endif
+
+ #include "rutil/Data.hxx"
+diff --git a/repro/MySqlDb.hxx b/repro/MySqlDb.hxx
+index 46f91cc..609934e 100644
+--- a/repro/MySqlDb.hxx
++++ b/repro/MySqlDb.hxx
+@@ -1,10 +1,10 @@
+ #if !defined(RESIP_MYSQLDB_HXX)
+ #define RESIP_MYSQLDB_HXX 
+
+-#ifdef WIN32
+-#include <mysql.h>
+-#else 
++#if __has_include("mysql/mysql.h")
+ #include <mysql/mysql.h>
++#else
++#include <mysql.h>
+ #endif
+
+ #include "rutil/Data.hxx"

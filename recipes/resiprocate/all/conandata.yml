@@ -2,3 +2,10 @@ sources:
   "1.12.0":
     url: https://www.resiprocate.org/files/pub/reSIProcate/releases/resiprocate-1.12.0.tar.gz
     sha256: 046826503d3c8682ae0e42101b28f903c5f988235f1ff4a98dbfb9066d0d3d49
+patches:
+  "1.12.0":
+    - patch_file: "patches/001-fixed-missing-include-dir.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002-fixed-mysql-include-path.patch"
+      base_path: "source_subfolder"
+
