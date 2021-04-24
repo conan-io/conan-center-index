@@ -60,7 +60,7 @@ class ZlibNgConan(ConanFile):
         self._cmake.definitions["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         self._cmake.definitions["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
 
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
