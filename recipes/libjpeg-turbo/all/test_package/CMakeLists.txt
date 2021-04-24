@@ -4,6 +4,8 @@ project(test_package C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(libjpeg-turbo REQUIRED CONFIG)
+
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE libjpeg-turbo::jpeg)
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
