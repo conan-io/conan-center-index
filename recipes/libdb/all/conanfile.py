@@ -235,3 +235,4 @@ class LibdbConan(ConanFile):
         elif self.settings.os == "Windows" :
             self.cpp_info.system_libs.append("ws2_32")
 
+
