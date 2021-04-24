@@ -1,8 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
-import os
-import shutil
-
+import os, shutil, glob
 
 class LibdbConan(ConanFile):
     name = "libdb"
@@ -70,22 +68,22 @@ class LibdbConan(ConanFile):
         os.rename("db-{}".format(self.version), self._source_subfolder)
 
     def _patch_sources(self):
-        for patch_data in self.conan_data["patches"][self.version]:
-            tools.patch(**patch_data)
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
 
-        import glob
-        for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
-            tools.replace_in_file(file,
-                                  "<PropertyGroup Label=\"Globals\">",
-                                  "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
+        if self.version >= "5":
+            for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
+                tools.replace_in_file(file,
+                                      "<PropertyGroup Label=\"Globals\">",
+                                      "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
 
-        dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
-        tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
-        tools.replace_in_file(dist_configure,
-                              "\n    --disable-option-checking)",
-                              "\n    --datarootdir=*)"
-                              "\n      ;;"
-                              "\n    --disable-option-checking)")
+            dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
+            tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
+            tools.replace_in_file(dist_configure,
+                                  "\n    --disable-option-checking)",
+                                  "\n    --datarootdir=*)"
+                                  "\n      ;;"
+                                  "\n    --disable-option-checking)")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -221,7 +219,9 @@ class LibdbConan(ConanFile):
             libs.append("db_tcl")
         if self.options.get_safe("with_cxx"):
             libs.extend(["db_cxx", "db_stl"])
-        libs.extend(["db_sql", "db"])
+        libs.extend(["db"])
+        if self.version >= "5":
+            libs.extend(["db_sql"])
         if self.settings.compiler == "Visual Studio":
             libs = ["lib{}".format(lib) for lib in libs]
         return libs

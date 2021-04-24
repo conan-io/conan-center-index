@@ -2,6 +2,10 @@ sources:
   "5.3.28":
     url: "https://download.oracle.com/berkeley-db/db-5.3.28.tar.gz"
     sha256: "e0a992d740709892e81f9d93f06daf305cf73fb81b545afe72478043172c3628"
+  "4.8.30":
+    url: "https://download.oracle.com/berkeley-db/db-4.8.30.tar.gz"
+    sha256: "e0491a07cdb21fb9aa82773bbbedaeb7639cbd0e7f96147ab46141e0045db72a"
+
 patches:
   "5.3.28":
     - patch_file: "patches/0001-rename_atomic_compare_exchange.patch"
@@ -11,4 +15,7 @@ patches:
     - patch_file: "patches/0003-msvc-db_tcl-add-static-configuration.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0004-msvc-tcl-include-conanbuildinfo-props.patch"
+      base_path: "source_subfolder"
+  "4.8.30":
+    - patch_file: "patches/0001-rename_atomic_compare_exchange_4.28.patch"
       base_path: "source_subfolder"
