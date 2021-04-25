@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.32.0"
+
 
 class GlslangConan(ConanFile):
     name = "glslang"
@@ -57,6 +59,10 @@ class GlslangConan(ConanFile):
     def requirements(self):
         if self.options.enable_optimizer:
             self.requires("spirv-tools/2020.5")
+
+    def validate(self):
+        if self.options.enable_optimizer and self.options["spirv-tools"].shared:
+            raise ConanInvalidConfiguration("glslang with enable_optimizer requires static spirv-tools, because SPIRV-Tools-opt is not built if shared")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
