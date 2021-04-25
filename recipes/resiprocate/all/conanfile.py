@@ -45,6 +45,8 @@ class ResiprocateConan(ConanFile):
             raise ConanInvalidConfiguration("reSIProcate recipe does not currently support {}.".format(self.settings.os))
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_repro:
+            self.options["libdb"].with_cxx = True
 
     def requirements(self):
         if self.options.with_ssl:
@@ -55,7 +57,6 @@ class ResiprocateConan(ConanFile):
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_repro:
             self.requires("libdb/4.8.30")
-            self.options["libdb"].with_cxx = True
 
     def build_requirements(self):
         if self.options.with_repro:
@@ -64,6 +65,10 @@ class ResiprocateConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+
+    def validate(self):
+        if self.options.get_safe("with_repro", False) and not self.options["libdb"].with_cxx:
+            raise ConanInvalidConfiguration("%s can not be built with 'with_repro' when 'with_cxx' is disabled in libdb" % self.name)
 
     def _configure_autotools(self):
         if self._autotools:
