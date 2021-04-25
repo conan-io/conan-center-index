@@ -93,8 +93,9 @@ class LibdbConan(ConanFile):
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
             "--enable-compat185",
-            "--enable-sql",
         ]
+        if self.version >= "5":
+            conf_args.extend(["--enable-sql"])
         if self.options.with_cxx:
             conf_args.extend(["--enable-cxx", "--enable-stl"])
         else:
