@@ -11,7 +11,7 @@ class LibZipConan(ConanFile):
     license = "BSD-3-Clause"
     topics = ("conan", "zip", "libzip", "zip-archives", "zip-editing")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -60,15 +60,15 @@ class LibZipConan(ConanFile):
             self.requires("bzip2/1.0.8")
 
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.4")
+            self.requires("xz_utils/5.2.5")
 
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5 ")
+            self.requires("zstd/1.4.9")
 
         if self._crypto == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         elif self._crypto == "mbedtls":
-            self.requires("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.25")
 
     def package_id(self):
         self.info.options.crypto = self._crypto
