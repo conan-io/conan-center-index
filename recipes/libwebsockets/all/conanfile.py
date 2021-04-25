@@ -197,6 +197,11 @@ class LibwebsocketsConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        
+        if tools.Version(self.version) == "4.2.0" and self.options.shared:
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "4.9":
+                # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
+                raise ConanInvalidConfiguration("{}/{} shared=True with GCC-4.9 does not build. Please submit a PR with a fix.".format(self.name, self.version))
 
     def requirements(self):
         if self.options.with_libuv:
@@ -219,7 +224,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.34.0")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
 
         if self.options.with_ssl == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
