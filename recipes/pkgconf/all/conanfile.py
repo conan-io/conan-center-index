@@ -93,9 +93,11 @@ class PkgConfConan(ConanFile):
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "libpkgconf"))
+        self.cpp_info.names["pkg_config"] = "libpkgconf"
         self.cpp_info.libs = ["pkgconf"]
         if not self.options.shared:
             self.cpp_info.defines = ["PKGCONFIG_IS_STATIC"]
