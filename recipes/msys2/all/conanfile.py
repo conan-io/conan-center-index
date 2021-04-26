@@ -241,6 +241,8 @@ class MSYS2Conan(ConanFile):
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         msys_root = self._msys_dir
         msys_bin = os.path.join(msys_root, "usr", "bin")
 
