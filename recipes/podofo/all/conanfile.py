@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans import tools
 import os
 
 class OatppSwaggerConan(ConanFile):
@@ -58,6 +59,8 @@ class OatppSwaggerConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
         self._cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
+        if tools.Version("0.9.7") <= self.version and not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
