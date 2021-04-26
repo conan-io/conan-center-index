@@ -166,14 +166,14 @@ class LibcurlConan(ConanFile):
         del self.info.options.with_wolfssl
 
     def build_requirements(self):
-        if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-           tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
-        elif self._is_win_x_android:
-            self.build_requires("ninja/1.10.2")
-        elif not tools.os_info.is_windows:
+        if self._is_using_cmake_build:
+            if self._is_win_x_android:
+                self.build_requires("ninja/1.10.2")
+        else:
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.3")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
