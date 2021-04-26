@@ -205,4 +205,10 @@ class LibtoolConan(ConanFile):
 
         automake_extra_include = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_extra_include))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_include)
+        # force colon separator in AUTOMAKE_CONAN_INCLUDES between paths, even on Windows
+        automake_conan_includes = tools.get_env("AUTOMAKE_CONAN_INCLUDES")
+        if automake_conan_includes:
+            automake_conan_includes = automake_conan_includes + ":" + automake_extra_include
+        else:
+            automake_conan_includes = automake_extra_include
+        self.env_info.AUTOMAKE_CONAN_INCLUDES = automake_conan_includes
