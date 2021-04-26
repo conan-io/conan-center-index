@@ -63,13 +63,7 @@ class MSYS2Conan(ConanFile):
         if tools.Version(self.version) >= "20210105" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
         if tools.Version(self.version) <= "20161025":
-            raise ConanInvalidConfiguration("msys2 v.20161025 is no longer supported")    
-
-    def _download(self, url, sha256):
-        from six.moves.urllib.parse import urlparse
-        filename = os.path.basename(urlparse(url[0]).path)
-        tools.download(url=url, filename=filename, sha256=sha256)
-        return filename
+            raise ConanInvalidConfiguration("msys2 v.20161025 is no longer supported")
 
     @property
     def _keyring_subfolder(self):
@@ -182,8 +176,7 @@ class MSYS2Conan(ConanFile):
         pass
 
     def _do_source(self):
-        filename = self._download(**self.conan_data["sources"][self.version][str(self.settings.arch)])
-        tools.unzip(filename)
+        tools.get(**self.conan_data["sources"][self.version][str(self.settings.arch)])
         self._download_keyring()
 
     def build(self):
