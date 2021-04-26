@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import download, unzip, replace_in_file, remove_files_by_mask, get
+from conans.errors import ConanInvalidConfiguration
+
 import os
 
 class ZlibNgConan(ConanFile):
@@ -47,13 +48,17 @@ class ZlibNgConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"][self.version])
         os.rename("zlib-ng-{}".format(self.version), self._source_subfolder)
+
+    def validate(self):
+        if self.options.zlib_compat and not self.options.with_gzfileop:
+            raise ConanInvalidConfiguration("The option 'with_gzfileop' must be True when 'zlib_compat' is True.")
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-
+        self._cmake.definitions["ZLIB_ENABLE_TESTS"] = False
         self._cmake.definitions["ZLIB_COMPAT"] = self.options.zlib_compat
         self._cmake.definitions["WITH_GZFILEOP"] = self.options.with_gzfileop
         self._cmake.definitions["WITH_OPTIM"] = self.options.with_optim
@@ -68,23 +73,26 @@ class ZlibNgConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pc")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.cmake")
-
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
-
+        suffix = "" if self.options.zlib_compat else "-ng"
         if self.settings.os == "Windows":
             if self.settings.build_type == "Debug":
-                self.cpp_info.libs = ["zlib-ngd"]
+                self.cpp_info.libs = ["zlib{}d".format(suffix)]
             else:
-                self.cpp_info.libs = ["zlib-ng"]
+                self.cpp_info.libs = ["zlib{}".format(suffix)]
 
         else:
-            self.cpp_info.libs = ["z-ng"]
+            self.cpp_info.libs = ["z{}".format(suffix)]
+        if self.options.zlib_compat:
+            self.cpp_info.defines.append("ZLIB_COMPAT")
+        if self.options.with_gzfileop:
+            self.cpp_info.defines.append("WITH_GZFILEOP")
+        if not self.options.with_new_strategies:
+            self.cpp_info.defines.extend(["NO_QUICK_STRATEGY", "NO_MEDIUM_STRATEGY"])
