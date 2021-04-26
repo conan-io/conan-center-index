@@ -8,7 +8,7 @@ class LemonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sqlite.org/lemon.html"
     topics = ("conan", "lemon", "grammar", "lexer", "lalr", "parser", "generator", "sqlite")
-    license = "Public Domain"
+    license = "Unlicense"
     exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake"

@@ -50,7 +50,7 @@ class VulkanValidationLayersConan(ConanFile):
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def requirements(self):
-        self.requires("spirv-tools/v2020.5", private=True)
+        self.requires("spirv-tools/2020.5", private=True)
         self.requires("vulkan-headers/{}".format(self.version))
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")

@@ -123,7 +123,9 @@ class ProtobufConan(ConanFile):
         protoc_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), protoc_filename)
         protoc_target = textwrap.dedent("""\
             if(NOT TARGET protobuf::protoc)
-                find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
+                if(CMAKE_CROSSCOMPILING)
+                    find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
+                endif()
                 if(NOT PROTOC_PROGRAM)
                     set(PROTOC_PROGRAM \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\")
                 endif()

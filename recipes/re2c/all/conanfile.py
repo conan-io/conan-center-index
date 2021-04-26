@@ -9,7 +9,7 @@ class Re2CConan(ConanFile):
     topics = ("conan", "re2c", "lexer", "language", "tokenizer", "flex")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://re2c.org/"
-    license = "Public domain"
+    license = "Unlicense"
     settings = "os", "arch", "build_type", "compiler"
     exports_sources = "patches/**"
 
