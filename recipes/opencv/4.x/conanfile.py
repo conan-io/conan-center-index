@@ -52,7 +52,7 @@ class OpenCVConan(ConanFile):
         "with_quirc": True,
         "with_cuda": False,
         "with_cublas": False,
-        "dnn": False
+        "dnn": True
     }
 
     short_paths = True
