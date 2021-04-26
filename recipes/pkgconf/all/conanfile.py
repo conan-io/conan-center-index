@@ -65,8 +65,9 @@ class PkgConfConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "shared_library(", "library(")
+        if tools.Version(self.version) < "1.7.4":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                "shared_library(", "library(")
         if not self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                   "'-DLIBPKGCONF_EXPORT'",
