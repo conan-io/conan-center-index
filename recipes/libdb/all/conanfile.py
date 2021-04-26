@@ -36,6 +36,10 @@ class LibdbConan(ConanFile):
     def _mingw_build(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows"
 
+    @property
+    def _supports_sql(self):
+        return self.version >= "5"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -71,7 +75,7 @@ class LibdbConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)
 
-        if self.version >= "5":
+        if self._supports_sql:
             for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
                 tools.replace_in_file(file,
                                       "<PropertyGroup Label=\"Globals\">",
@@ -94,7 +98,7 @@ class LibdbConan(ConanFile):
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
             "--enable-compat185",
         ]
-        if self.version >= "5":
+        if self._supports_sql:
             conf_args.extend(["--enable-sql"])
         if self.options.with_cxx:
             conf_args.extend(["--enable-cxx", "--enable-stl"])
@@ -131,9 +135,12 @@ class LibdbConan(ConanFile):
         return self._msvc_platforms[str(self.settings.arch)]
 
     def _build_msvc(self):
-        projects = ["db", "db_sql", "db_stl"]
+        projects = ["db", "db_stl"]
         if self.options.with_tcl:
             projects.append("db_tcl")
+        if self._supports_sql:
+            projects.append("db_sql")
+
         msbuild = MSBuild(self)
         upgraded = False
         for project in projects:
@@ -215,13 +222,12 @@ class LibdbConan(ConanFile):
 
     @property
     def _libs(self):
-        libs = []
+        libs = ["db"]
         if self.options.with_tcl:
-            libs.append("db_tcl")
+            libs.extend(["db_tcl"])
         if self.options.get_safe("with_cxx"):
             libs.extend(["db_cxx", "db_stl"])
-        libs.extend(["db"])
-        if self.version >= "5":
+        if self._supports_sql:
             libs.extend(["db_sql"])
         if self.settings.compiler == "Visual Studio":
             libs = ["lib{}".format(lib) for lib in libs]
