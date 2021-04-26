@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans import tools
 import os
 
-class OatppSwaggerConan(ConanFile):
+class PodofoConan(ConanFile):
     name = "podofo"
     license = "GPL-3.0", "LGPL-3.0"
     homepage = "http://podofo.sourceforge.net"
