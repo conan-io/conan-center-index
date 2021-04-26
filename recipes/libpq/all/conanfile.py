@@ -59,6 +59,7 @@ class LibpqConan(ConanFile):
         # Looking into source code, it appears that zlib is not used in libpq
         if self.options.with_zlib != "deprecated":
             self.output.warn("with_zlib option is deprecated, do not use anymore")
+        del self.options.with_zlib
 
     def requirements(self):
         if self.options.with_openssl:
