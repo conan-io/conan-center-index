@@ -99,7 +99,7 @@ class YojimboConan(ConanFile):
                 msbuild.build("Yojimbo.sln")
             else:
                 config = "Debug" if self.settings.build_type == "Debug" else "Release"
-                config = "_x64"
+                config += "_x64"
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=["config=%s" % config])
 
