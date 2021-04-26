@@ -108,6 +108,9 @@ class Open62541Conan(ConanFile):
             tools.patch(**patch)
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         if not self.options.subscription:
             if self.options.subscription_events:
                 raise ConanInvalidConfiguration(
