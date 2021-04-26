@@ -80,7 +80,38 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return "arm" in str(self.settings.arch)
 
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+        if not self._is_x86:
+            del self.options.with_sse2
+            del self.options.with_ssse3
+            del self.options.with_sse4_1
+            del self.options.with_sse4_2
+            del self.options.with_avx2
+            del self.options.with_bmi2
+            del self.options.with_rdrand
+            del self.options.with_rdseed
+            del self.options.with_aes_ni
+            del self.options.with_sha_ni
+        if not self._is_arm:
+            del self.options.with_neon
+            del self.options.with_armv8crypto
+        if not self._is_ppc:
+            del self.options.with_altivec
+            del self.options.with_powercrypto
+
+        # --single-amalgamation option is no longer available
+        # See also https://github.com/randombit/botan/pull/2246
+        if Version(self.version) >= "2.14.0":
+            del self.options.single_amalgamation
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         self._validate_compiler_settings()
 
         if Version(self.version) >= "2.14.0":
@@ -107,42 +138,14 @@ class BotanConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.71.0")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if not self._is_x86:
-            del self.options.with_sse2
-            del self.options.with_ssse3
-            del self.options.with_sse4_1
-            del self.options.with_sse4_2
-            del self.options.with_avx2
-            del self.options.with_bmi2
-            del self.options.with_rdrand
-            del self.options.with_rdseed
-            del self.options.with_aes_ni
-            del self.options.with_sha_ni
-        if not self._is_arm:
-            del self.options.with_neon
-            del self.options.with_armv8crypto
-        if not self._is_ppc:
-            del self.options.with_altivec
-            del self.options.with_powercrypto
-
-        # --single-amalgamation option is no longer available
-        # See also https://github.com/randombit/botan/pull/2246
-        if Version(self.version) >= "2.14.0":
-            del self.options.single_amalgamation
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "botan-" + self.version
         os.rename(extracted_dir, "sources")
 
     def build(self):
-        if "patches" in self.conan_data:
-            if self.version in self.conan_data["patches"]:
-                for patch in self.conan_data["patches"][self.version]:
-                    tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir('sources'):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
@@ -246,7 +249,7 @@ class BotanConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 botan_abi_flags.append('-m64')
 
-        if self.settings.os != "Windows" and self.options.fPIC:
+        if self.options.get_safe('fPIC', True):
             botan_extra_cxx_flags.append('-fPIC')
 
         if tools.is_apple_os(self.settings.os):
