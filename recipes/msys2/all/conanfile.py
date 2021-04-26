@@ -208,6 +208,8 @@ class MSYS2Conan(ConanFile):
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
+            for package in ['pkgconf']:
+                self.run('bash -l -c "pacman -Rs $(pacman -Qsq %s) --noconfirm"' % package)
 
         self._kill_pacman()
 
