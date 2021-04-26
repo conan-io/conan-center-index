@@ -47,7 +47,7 @@ class PkgConfConan(ConanFile):
         os.rename("pkgconf-{}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.57.2")
 
     @property
     def _sharedstatedir(self):
