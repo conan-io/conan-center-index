@@ -81,9 +81,6 @@ class BotanConan(ConanFile):
         return "arm" in str(self.settings.arch)
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
         self._validate_compiler_settings()
 
         if Version(self.version) >= "2.14.0":
