@@ -5,3 +5,6 @@ sources:
   "0.10.33":
     url: https://github.com/mackron/miniaudio/archive/fca829edefd8389380f8e3ee26cc4b8c426dd742.tar.gz
     sha256: DF1B4E36211112FDC35AF92F2288DAFDEB07290F4010E7C5E2505AFFA880E0EE
+  "0.10.34":
+    url: https://github.com/mackron/miniaudio/archive/994cda44b5bfe93f4ab640b5187f3fa6e86f63f6.tar.gz
+    sha256: 8F90F7D810A3FA5BA012BC1FB760036941E53CCC74B8C9EA12191E03FF0287F1
