@@ -278,8 +278,8 @@ class OpenCVConan(ConanFile):
 
         self._cmake.definitions["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
-            self._cmake.definitions["PROTOBUF_UPDATE_FILES"] = "ON"
-            self._cmake.definitions["BUILD_opencv_dnn"] = "ON"
+            self._cmake.definitions["PROTOBUF_UPDATE_FILES"] = True
+            self._cmake.definitions["BUILD_opencv_dnn"] = True
 
         if self.options.contrib:
             self._cmake.definitions['OPENCV_EXTRA_MODULES_PATH'] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
