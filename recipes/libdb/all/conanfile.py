@@ -75,19 +75,18 @@ class LibdbConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)
 
-        if self._supports_sql:
-            for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
-                tools.replace_in_file(file,
-                                      "<PropertyGroup Label=\"Globals\">",
-                                      "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
+        for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
+            tools.replace_in_file(file,
+                                  "<PropertyGroup Label=\"Globals\">",
+                                  "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
 
-            dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
-            tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
-            tools.replace_in_file(dist_configure,
-                                  "\n    --disable-option-checking)",
-                                  "\n    --datarootdir=*)"
-                                  "\n      ;;"
-                                  "\n    --disable-option-checking)")
+        dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
+        tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
+        tools.replace_in_file(dist_configure,
+                              "\n    --disable-option-checking)",
+                              "\n    --datarootdir=*)"
+                              "\n      ;;"
+                              "\n    --disable-option-checking)")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -223,7 +222,7 @@ class LibdbConan(ConanFile):
     @property
     def _libs(self):
         libs = ["db"]
-        if self.options.with_tcl:
+        if self.options.get_safe("with_tcl"):
             libs.extend(["db_tcl"])
         if self.options.get_safe("with_cxx"):
             libs.extend(["db_cxx", "db_stl"])
