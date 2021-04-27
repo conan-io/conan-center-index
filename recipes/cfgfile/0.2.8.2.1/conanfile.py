@@ -12,10 +12,33 @@ class CfgfileConan(ConanFile):
     no_copy_source = True
     generators = "cmake"
     topics = ("conan", "cfgfile", "configuration")
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.5",
+            "apple-clang": "10"
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
+
+        compiler = str(self.settings.compiler)
+        if compiler not in self._compilers_minimum_version:
+            self.output.warn("Unknown compiler, assuming it supports at least C++14")
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < self._compilers_minimum_version[compiler]:
+            raise ConanInvalidConfiguration("cfgfile requires a compiler that supports at least C++14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
