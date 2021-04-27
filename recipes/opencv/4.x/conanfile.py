@@ -168,9 +168,15 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(find_protobuf,
                                   'find_package(Protobuf QUIET)',
                                   '''find_package(Protobuf QUIET)
-            set(Protobuf_LIBRARIES ${protobuf_LIBRARIES})  # patch: map conan generated v ariable
-            set(Protobuf_LIBRARY ${protobuf_LIBS})  # patch: map conan generated v ariable
-            set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})  # patch: map conan generated v ariable''')
+            if(NOT DEFINED Protobuf_LIBRARIES)
+              set(Protobuf_LIBRARIES ${protobuf_LIBRARIES})
+            endif()
+            if(NOT DEFINED Protobuf_LIBRARY)
+              set(Protobuf_LIBRARY ${protobuf_LIBS})
+            endif()
+            if(NOT DEFINED Protobuf_INCLUDE_DIR)
+              set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
+            endif()''')
             # in 'if' block, get_target_property() produces an error
             tools.replace_in_file(find_protobuf,
                                   'if(TARGET "${Protobuf_LIBRARIES}")',
