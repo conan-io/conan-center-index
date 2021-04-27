@@ -128,15 +128,15 @@ class BotanConan(ConanFile):
 
     def requirements(self):
         if self.options.with_bzip2:
-            self.requires("bzip2/1.0.6")
+            self.requires("bzip2/1.0.8")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.30.1")
+            self.requires("sqlite3/3.35.5")
         if self.options.with_boost:
-            self.requires("boost/1.71.0")
+            self.requires("boost/1.76.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
