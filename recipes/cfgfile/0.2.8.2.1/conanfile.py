@@ -9,7 +9,7 @@ class CfgfileConan(ConanFile):
     homepage = "https://github.com/igormironchik/cfgfile.git"
     license = "MIT"
     description = "Header-only library for reading/saving configuration files with schema defined in sources."
-    exports = "cfgfile/*", "COPYING", "generator/*", "3rdparty/Args/Args/*.hpp"
+    no_copy_source = True
     generators = "cmake"
     topics = ("conan", "cfgfile", "configuration")
 
