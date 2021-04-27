@@ -26,10 +26,7 @@ class RangesnextConan(ConanFile):
             tools.check_min_cppstd(self, "20")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("rangesnext requires C++20, which your compiler does not fully support.")
-        else:
+        if not minimum_version or tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("rangesnext requires C++20, which your compiler does not fully support.")
 
     def source(self):
