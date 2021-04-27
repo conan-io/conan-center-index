@@ -11,3 +11,6 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-c89-compatible.patch"
       base_path: "source_subfolder"
+  "1.7.4":
+    - patch_file: "patches/0003-fix-static-link.patch"
+      base_path: "source_subfolder"
