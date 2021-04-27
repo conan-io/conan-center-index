@@ -89,7 +89,8 @@ class ConanSqlite3(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if (not self.options.enable_default_vfs) and self.options.build_executable:
+    def validate(self):
+        if not self.options.enable_default_vfs and self.options.build_executable:
             # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
             raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
 
