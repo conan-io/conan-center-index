@@ -18,12 +18,16 @@ class CprConan(ConanFile):
         "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_winssl": [True, False],
+        "with_darwinssl": [True, False],
+        "no_ssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
         "with_winssl": False,
+        "with_darwinssl": False,
+        "no_ssl": False,
     }
 
     _cmake = None
@@ -40,13 +44,23 @@ class CprConan(ConanFile):
     def _supports_openssl(self):
         # https://github.com/whoshuu/cpr/commit/b036a3279ba62720d1e43362d32202bf412ea152
         # https://github.com/whoshuu/cpr/releases/tag/1.5.0
-        return tools.Version(self.version) >= "1.5.0"
+        return tools.Version(self.version) >= "1.5.0" and not tools.is_apple_os(self.settings.os)
 
     @property
     def _supports_winssl(self):
         # https://github.com/whoshuu/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9
         # https://github.com/whoshuu/cpr/releases/tag/1.5.1
-        return tools.Version(self.version) >= "1.5.1"
+        return tools.Version(self.version) >= "1.5.1" and self.settings.os == "Windows"
+
+    @property
+    def _supports_darwinssl(self):
+        # https://github.com/whoshuu/cpr/releases/tag/1.6.1
+        return tools.Version(self.version) >= "1.6.1"
+
+    @property
+    def _can_disable_ssl(self):
+        # https://github.com/whoshuu/cpr/releases/tag/1.6.0
+        return not self._uses_old_cmake_options
 
     @property
     def _uses_old_cmake_options(self):
@@ -74,6 +88,8 @@ class CprConan(ConanFile):
             del self.options.with_openssl
         if not self._supports_winssl:
             del self.options.with_winssl
+        if not self._supports_darwinssl:
+            del self.options.with_darwinssl
 
         # Make sure libcurl uses the same SSL implementation
         if self.options.get_safe("with_openssl", False):
@@ -82,6 +98,8 @@ class CprConan(ConanFile):
         if self.options.get_safe("with_winssl", False):
             # self.options["libcurl"].with_winssl = True # deprecated in https://github.com/conan-io/conan-center-index/pull/2880
             self.options["libcurl"].with_ssl = "schannel"
+        if self.options.get_safe("with_darwinssl", False):
+            self.options["libcurl"].with_ssl = "darwinssl"
 
 
     def source(self):
@@ -120,26 +138,37 @@ class CprConan(ConanFile):
             self._cmake.definitions[self._get_cmake_option("CPR_BUILD_TESTS")] = False
             self._cmake.definitions[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
             self._cmake.definitions[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
+
             if self._supports_openssl:
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.get_safe("with_openssl", False)
+
+            if self._supports_darwinssl:
+                self._cmake.definitions[self._get_cmake_option("CPR_FORCE_DARWINSSL_BACKEND")] = self.options.get_safe("with_darwinssl", False)
+
             if self._supports_winssl: # The CMake options changed
                 # https://github.com/whoshuu/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20aR39-R40
                 self._cmake.definitions[self._get_cmake_option("CPR_FORCE_OPENSSL_BACKEND")] = self.options.get_safe("with_openssl", False)
                 self._cmake.definitions[self._get_cmake_option("CPR_FORCE_WINSSL_BACKEND")] = self.options.get_safe("with_winssl", False)
 
-            supports_any_ssl = self.options.get_safe("with_openssl", False) or self.options.get_safe("with_winssl", False)
-            if not self._uses_old_cmake_options and not supports_any_ssl:
+            if self._can_disable_ssl and self.options.get_safe("no_ssl", False):
                 self._cmake.definitions["CPR_ENABLE_SSL"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def validate(self):
         if not self._uses_valid_abi_and_compiler:
-            raise ConanInvalidConfiguration("Cannot compile CPR/1.6.0 with libstdc++ on clang < 9")
+            raise ConanInvalidConfiguration("Cannot compile cpr/1.6.0 with libstdc++ on clang < 9")
+
+        if not self._can_disable_ssl and self.options.get_safe("no_ssl", False):
+            # https://github.com/whoshuu/cpr/issues/546
+            raise ConanInvalidConfiguration("cpr < 1.6.0 cannot manually disable SSL.")
 
         if self.options.get_safe("with_openssl", False) and tools.is_apple_os(self.settings.os):
             # https://github.com/whoshuu/cpr/issues/546
             raise ConanInvalidConfiguration("cpr cannot be built on macOS with openssl")
+
+        if self.options.get_safe("with_darwinssl", False) and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("cpr only supports darwinssl on macOS")
 
         if self.options.get_safe("with_winssl", False) and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("cpr only supports winssl on Windows")
