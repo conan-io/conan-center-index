@@ -7,7 +7,7 @@ class RangesnextConan(ConanFile):
     name = "rangesnext"
     description = "ranges features for C++23 ported to C++20"
     topics = ("conan", "rangesnext", "ranges", "backport", "backport-cpp")
-    url = "https://github.com/cor3ntin/rangesnext"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cor3ntin/rangesnext"
     license = "BSL-1.0"
     exports_sources = "patches/**"
