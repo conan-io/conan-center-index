@@ -1,0 +1,9 @@
+
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+#include <string>
+
+static const std::string c_input_folder = "@INPUT_PATH@";
+
+#endif
