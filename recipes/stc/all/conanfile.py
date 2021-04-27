@@ -9,6 +9,7 @@ class StcConan(ConanFile):
     homepage = "https://github.com/tylov/STC"
     description = "A modern, user friendly, generic, type-safe and fast C99 container library: String, Vector, Sorted and Unordered Map and Set, Deque, Forward List, Smart Pointers, Bitset and Random numbers."
     topics = ("conan", "stc", "containers", "string", "vector", "map", "set", "deque", "bitset", "random", "list")
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
