@@ -178,9 +178,10 @@ class OpenCVConan(ConanFile):
               set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
             endif()''')
             # in 'if' block, get_target_property() produces an error
-            tools.replace_in_file(find_protobuf,
-                                  'if(TARGET "${Protobuf_LIBRARIES}")',
-                                  'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
+            if tools.Version(self.version) >= "4.4.0":
+                tools.replace_in_file(find_protobuf,
+                                      'if(TARGET "${Protobuf_LIBRARIES}")',
+                                      'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
 
     def _configure_cmake(self):
         if self._cmake:
