@@ -29,6 +29,7 @@ class freeglutConan(ConanFile):
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
     }
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -70,21 +71,24 @@ class freeglutConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
-        # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
-        cmake = CMake(self, set_cmake_flags=True)
+        if self._cmake:
+            return self._cmake
 
-        cmake.definitions["FREEGLUT_BUILD_DEMOS"] = False
-        cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
-        cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["FREEGLUT_GLES"] = self.options.gles
-        cmake.definitions["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
-        cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
-        cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
-        cmake.definitions["INSTALL_PDB"] = False
+        # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
+        self._cmake = CMake(self, set_cmake_flags=True)
+
+        self._cmake.definitions["FREEGLUT_BUILD_DEMOS"] = False
+        self._cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
+        self._cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["FREEGLUT_GLES"] = self.options.gles
+        self._cmake.definitions["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
+        self._cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
+        self._cmake.definitions["FREEGLUT_INSTALL_PDB"] = False
+        self._cmake.definitions["INSTALL_PDB"] = False
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
