@@ -72,6 +72,9 @@ class PkgConfConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                   "'-DLIBPKGCONF_EXPORT'",
                                   "'-DPKGCONFIG_IS_STATIC'")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            "project('pkgconf', 'c',",
+            "project('pkgconf', 'c',\ndefault_options : ['c_std=gnu99'],")
 
     def build(self):
         self._patch_sources()
