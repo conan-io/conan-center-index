@@ -1,7 +1,7 @@
 import glob
 import os
 import re
-from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -359,10 +359,8 @@ class LibcurlConan(ConanFile):
 
             self.run("chmod +x configure")
 
-            env_run = RunEnvironment(self)
             # run configure with *LD_LIBRARY_PATH env vars it allows to pick up shared openssl
-            self.output.info("Run vars: " + repr(env_run.vars))
-            with tools.environment_append(env_run.vars):
+            with tools.run_environment(self):
                 autotools, autotools_vars = self._configure_autotools()
                 autotools.make(vars=autotools_vars)
 
@@ -448,8 +446,7 @@ class LibcurlConan(ConanFile):
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         else:
-            env_run = RunEnvironment(self)
-            with tools.environment_append(env_run.vars):
+            with tools.run_environment(self):
                 with tools.chdir(self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
