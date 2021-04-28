@@ -30,9 +30,7 @@ class RangesnextConan(ConanFile):
             raise ConanInvalidConfiguration("rangesnext requires C++20, which your compiler does not fully support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         self._patch_sources()
