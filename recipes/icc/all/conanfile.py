@@ -75,30 +75,15 @@ class IccConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(
-            '*.h',
-            dst='include',
-            src=os.path.join(self._source_subfolder, 'src')
-        )
-        self.copy(
-            '*.hpp',
-            dst='include',
-            src=os.path.join(self._source_subfolder, 'src')
-        )
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
-        self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
+        cmake = CMake(self)
+        cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
+        cmake.configure(source_folder=self._source_subfolder)
+        cmake.build()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.name = "icc"
         self.cpp_info.libs = ["ICC"]
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['bin']
 
-        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == 'Android':
             self.cpp_info.system_libs = ['atomic']
