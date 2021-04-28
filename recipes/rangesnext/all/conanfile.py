@@ -21,7 +21,7 @@ class RangesnextConan(ConanFile):
     }
     _source_subfolder = "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "20")
 
