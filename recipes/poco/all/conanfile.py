@@ -108,6 +108,10 @@ class PocoConan(ConanFile):
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")

@@ -33,6 +33,8 @@ class LibcapConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -45,6 +47,7 @@ class LibcapConan(ConanFile):
         if self._autotools:
             return self._autotools, self._autotools_env
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.fpic = self.options.get_safe("fPIC", True)
         self._autotools_env = self._autotools.vars
         self._autotools_env["SHARED"] = \
             "yes" if self.options.shared else "no"

@@ -10,7 +10,7 @@ class JpegCompressorConan(ConanFile):
     homepage = "https://github.com/richgel999/jpeg-compressor"
     topics = ("conan", "jpeg", "image", "compression", "decompression")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Public Domain", "Apache-2.0"
+    license = "Unlicense", "Apache-2.0", "MIT"
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]

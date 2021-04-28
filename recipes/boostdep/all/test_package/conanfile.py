@@ -5,6 +5,9 @@ import os
 class DefaultNameConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
 
+    def build(self):
+        pass
+
     def test(self):
         if tools.cross_building(self.settings):
             return
