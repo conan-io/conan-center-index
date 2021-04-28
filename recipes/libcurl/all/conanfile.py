@@ -233,10 +233,14 @@ class LibcurlConan(ConanFile):
         tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
 
         # patch for zlib naming in mingw
-        if not tools.cross_building(self.settings):
+        if self.options.with_zlib:
+            zlib_name = self.deps_cpp_info["zlib"].libs[0]
+            tools.replace_in_file(configure_ac,
+                                  "AC_CHECK_LIB(z,",
+                                  "AC_CHECK_LIB({},".format(zlib_name))
             tools.replace_in_file(configure_ac,
                                   "-lz ",
-                                  "-lzlib ")
+                                  "-l{} ".format(zlib_name))
 
         # patch for openssl extras in mingw
         if self.options.with_ssl == "openssl":
@@ -377,10 +381,6 @@ class LibcurlConan(ConanFile):
                 autotools_vars["RCFLAGS"] += " --target=pe-i386"
             else:
                 autotools_vars["RCFLAGS"] += " --target=pe-x86-64"
-
-            del autotools_vars["LIBS"]
-            self.output.info("Autotools env vars: " + repr(autotools_vars))
-
         return autotools_vars
 
     def _configure_autotools(self):
