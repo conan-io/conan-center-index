@@ -339,12 +339,13 @@ class OpenCVConan(ConanFile):
     # of an gtk conan package is checked.
     @property
     def _is_gtk_version2(self):
-        if self.options.get_safe("with_gtk", False) == False:
+        if not self.options.get_safe("with_gtk", False):
             return False
-        if self.requires["gtk"].ref.version == "system":
+        gtk_version = self.deps_cpp_info["gtk"].version
+        if gtk_version == "system":
             return self.options["gtk"].version == 2
         else:
-            return self.requires["gtk"].ref.version < "3.0"
+            return tools.Version(gtk_version) < "3.0.0"
 
     @property
     def _opencv_components(self):
