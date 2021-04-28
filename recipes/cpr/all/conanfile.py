@@ -20,15 +20,15 @@ class CprConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_openssl": [True, False],
-        "with_winssl": [True, False],
+        "with_openssl": [True, False, "deprecated"],
+        "with_winssl": [True, False, "deprecated"],
         "with_ssl": ["openssl", "darwinssl", "winssl", _AUTO_SSL, _NO_SSL]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": False,
-        "with_winssl": False,
+        "with_openssl": "deprecated",
+        "with_winssl": "deprecated",
         "with_ssl": _AUTO_SSL
     }
 
@@ -178,14 +178,19 @@ class CprConan(ConanFile):
 
         return validators[library]
 
+    def _print_deprecation_messages(self):
+        if self.options.get_safe("with_openssl") != "deprecated":
+            self.output.warn("with_openssl is deprecated. Please use the with_ssl option.")
+        elif self.options.get_safe("with_winssl") != "deprecated":
+            self.output.warn("with_winssl is deprecated. Please use the with_ssl option.")
+
     # Get the configured ssl library
     def _get_ssl_library(self):
         ssl_library = str(self.options.get_safe("with_ssl"))
-        if self.options.get_safe("with_openssl", False):
-            self.output.warn("with_openssl is deprecated. Please use the with_ssl option.")
+        # These must check for True so that we don't take "deprecated" to be truthy
+        if self.options.get_safe("with_openssl") == True:
             return "openssl"
-        elif self.options.get_safe("with_winssl", False):
-            self.output.warn("with_winssl is deprecated. Please use the with_ssl option.")
+        elif self.options.get_safe("with_winssl") == True:
             return "winssl"
         elif not self._can_auto_ssl and ssl_library == CprConan._AUTO_SSL:
             if self._supports_openssl:
@@ -209,6 +214,7 @@ class CprConan(ConanFile):
             CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0"
         }
 
+        self._print_deprecation_messages()
         if not self._uses_valid_abi_and_compiler:
             raise ConanInvalidConfiguration("Cannot compile cpr/1.6.0 with libstdc++ on clang < 9")
 
