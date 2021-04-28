@@ -36,6 +36,13 @@ class EarcutConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
