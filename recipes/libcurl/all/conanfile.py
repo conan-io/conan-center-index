@@ -4,6 +4,8 @@ import re
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
 
 class LibcurlConan(ConanFile):
     name = "libcurl"
@@ -176,8 +178,8 @@ class LibcurlConan(ConanFile):
                 self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("curl-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def imports(self):
