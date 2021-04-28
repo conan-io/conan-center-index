@@ -31,13 +31,6 @@ class RangesnextConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-    def build(self):
-        self._patch_sources()
-
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.build()
-
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
