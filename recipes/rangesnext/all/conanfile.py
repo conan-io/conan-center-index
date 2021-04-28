@@ -10,8 +10,8 @@ class RangesnextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cor3ntin/rangesnext"
     license = "BSL-1.0"
-    exports_sources = "patches/**"
     settings = "compiler"
+    no_copy_source = True
 
     _compilers_minimum_version = {
         "gcc": "10",
@@ -35,7 +35,3 @@ class RangesnextConan(ConanFile):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="include", src=include_folder)
-
-    def _patch_sources(self):
-        for patchdata in self.conan_data["patches"][self.version]:
-            tools.patch(**patchdata)
