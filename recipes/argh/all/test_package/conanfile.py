@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from io import StringIO
 import os
 
 
