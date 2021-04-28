@@ -26,7 +26,7 @@ class ArgparseConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("argh.h", src=os.path.join(self._source_subfolder), dst=os.path.join("include", "argh"))
+        self.copy("argh.h", src=self._source_subfolder, dst=os.path.join("include", "argh"))
 
     def package_id(self):
         self.info.header_only()
