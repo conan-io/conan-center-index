@@ -8,4 +8,4 @@ add_executable(example example.cpp)
 
 target_link_libraries(example ${CONAN_LIBS})
 
-target_compile_features(example PUBLIC cxx_std_14)
+target_compile_features(example PUBLIC cxx_std_17)
