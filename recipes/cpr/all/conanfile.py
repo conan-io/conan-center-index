@@ -174,7 +174,7 @@ class CprConan(ConanFile):
 
         if library not in validators:
             # This should never happen, as the options are validated by conan.
-            raise ValueError(f"Unknown SSL library: {library}")
+            raise ValueError("Unknown SSL library: {}".format(library))
 
         return validators[library]
 
@@ -221,13 +221,13 @@ class CprConan(ConanFile):
         ssl_library = self._get_ssl_library()
         if not self._supports_ssl_library(ssl_library):
             raise ConanInvalidConfiguration(
-                f"Invalid SSL selection for the given configuration: {SSL_FAILURE_MESSAGES[ssl_library]}"
+                "Invalid SSL selection for the given configuration: {}".format(SSL_FAILURE_MESSAGES[ssl_library])
                 if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL)
-                else f"Invalid value of ssl option, {ssl_library}"
+                else "Invalid value of ssl option, {}".format(ssl_library)
             )
 
         if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL) and ssl_library != self.options["libcurl"].with_ssl:
-            raise ConanInvalidConfiguration(f"cpr requires libcurl to be built with the option with_ssl='{self.options.get_safe('ssl')}'.")
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('ssl')))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
