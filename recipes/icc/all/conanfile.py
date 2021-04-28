@@ -82,7 +82,9 @@ class IccConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.name = "icc"
+        cpp_info.names["cmake"] = "icc"
+        cpp_info.names["cmake_find_package"] = "icc"
+        cpp_info.names["cmake_find_multi_package"] = "icc"
         self.cpp_info.libs = ["ICC"]
 
         if self.settings.os == 'Android':
