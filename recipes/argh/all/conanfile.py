@@ -16,7 +16,7 @@ class ArgparseConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
