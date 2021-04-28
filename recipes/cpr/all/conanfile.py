@@ -62,7 +62,12 @@ class CprConan(ConanFile):
     @property
     def _can_auto_ssl(self):
         # https://github.com/whoshuu/cpr/releases/tag/1.6.0
-        return not self._uses_old_cmake_options
+        return not self._uses_old_cmake_options and not (
+           #  https://github.com/whoshuu/cpr/issues/546
+            tools.Version(self.version) in ["1.6.0", "1.6.1"]
+            and tools.is_apple_os(self.settings.os)
+        )
+
 
     @property
     def _uses_old_cmake_options(self):
@@ -82,6 +87,15 @@ class CprConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        ssl_library = self._get_ssl_library()
+        if not self._can_auto_ssl and ssl_library == CprConan._AUTO_SSL:
+            if self._supports_openssl:
+                self.output.info("Auto SSL is not available below version 1.6.0. Falling back to openssl")
+                self.options.with_ssl = "openssl"
+            else:
+                self.output.info("Auto SSL is not available below version 1.6.0 (or below 1.6.2 on macOS), and openssl not supported. Disabling SSL")
+                self.options.with_ssl = CprConan._NO_SSL
 
     def configure(self):
         SSL_CURL_LIBS = {
@@ -169,7 +183,8 @@ class CprConan(ConanFile):
         validators = {
             "openssl": self._supports_openssl,
             "darwinssl": self._supports_darwinssl,
-            "winssl": self._supports_winssl
+            "winssl": self._supports_winssl,
+            CprConan._AUTO_SSL: self._can_auto_ssl
         }
 
         if library not in validators:
@@ -192,17 +207,6 @@ class CprConan(ConanFile):
             return "openssl"
         elif self.options.get_safe("with_winssl") == True:
             return "winssl"
-        elif not self._can_auto_ssl and ssl_library == CprConan._AUTO_SSL:
-            if self._supports_openssl:
-                self.output.info("Auto SSL is not available below version 1.6.0. Falling back to openssl")
-                return "openssl"
-            elif not self._supports_openssl:
-                self.output.info("Auto SSL is not available below version 1.6.0, and openssl not supported. Disabling SSL")
-                return CprConan._NO_SSL
-        elif ssl_library == CprConan._AUTO_SSL and tools.Version(self.version) in ["1.6.0", "1.6.1"] and tools.is_apple_os(self.settings.os):
-           #  https://github.com/whoshuu/cpr/issues/546
-            self.output.info("Auto SSL is not available on macOS with version 1.6.0/1.6.1, and openssl not supported. Disabling SSL")
-            return CprConan._NO_SSL
 
         return ssl_library
 
@@ -211,7 +215,7 @@ class CprConan(ConanFile):
             "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
             "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
             "winssl": "WinSSL is only on Windows and on CPR versions >= 1.5.1",
-            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0"
+            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0 (and only >= 1.6.2 on macOS)"
         }
 
         self._print_deprecation_messages()
@@ -222,7 +226,7 @@ class CprConan(ConanFile):
         if not self._supports_ssl_library(ssl_library):
             raise ConanInvalidConfiguration(
                 "Invalid SSL selection for the given configuration: {}".format(SSL_FAILURE_MESSAGES[ssl_library])
-                if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL)
+                if ssl_library in SSL_FAILURE_MESSAGES
                 else "Invalid value of ssl option, {}".format(ssl_library)
             )
 
