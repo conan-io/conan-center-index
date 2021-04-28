@@ -230,7 +230,7 @@ class LibcurlConan(ConanFile):
             "--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)),
             "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
             "--with-schannel={}".format(yes_no(self.options.with_ssl == "schannel")),
-            "--with-darwinssl={}".format(yes_no(self.options.with_ssl == "darwinssl")),
+            "--with-secure-transport={}".format(yes_no(self.options.with_ssl == "darwinssl")),
             "--with-brotli={}".format(yes_no(self.options.with_brotli)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
