@@ -11,7 +11,7 @@ class ConanSqlite3(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
     topics = ("conan", "sqlite", "database", "sql", "serverless")
-    license = "Public Domain"
+    license = "Unlicense"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
     exports_sources = ["CMakeLists.txt"]

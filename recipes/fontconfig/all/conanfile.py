@@ -40,8 +40,6 @@ class FontconfigConan(ConanFile):
         self.requires("expat/2.2.10")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
-        elif self.settings.os == "Macos":
-            self.requires("libgettext/0.20.1")
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
@@ -58,7 +56,9 @@ class FontconfigConan(ConanFile):
         if not self._autotools:
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-                    "--disable-docs"]
+                    "--disable-docs",
+                    "--disable-nls",
+                   ]
             args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
             args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
@@ -72,6 +72,12 @@ class FontconfigConan(ConanFile):
     def _patch_files(self):
         #  - fontconfig requires libtool version number, change it for the corresponding freetype one
         tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'), '21.0.15', '2.8.1')
+        # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, 'Makefile.in'),
+            '@CROSS_COMPILING_TRUE@RUN_FC_CACHE_TEST = false',
+            'RUN_FC_CACHE_TEST=false'
+        )
 
     def build(self):
         # Patch files from dependencies
