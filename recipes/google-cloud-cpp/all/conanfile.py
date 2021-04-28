@@ -34,20 +34,39 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
+    def validate(self):
+        if self.settings.compiler == 'gcc' and tools.Version(self.settings.compiler.version) < "5.4":
+            raise ConanInvalidConfiguration("Building requires GCC >= 5.4")
+        if self.settings.compiler == 'clang' and tools.Version(self.settings.compiler.version) < "3.8":
+            raise ConanInvalidConfiguration("Building requires clang >= 3.8")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        #os.rename("Celero-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def requirements(self):
+        self.requires('protobuf/3.15.5')
+        # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
+        #   self.requires("gRPC")
+        #   self.requires('googleapis)
+        pass
+
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CELERO_COMPILE_DYNAMIC_LIBRARIES"] = self.options.shared
-        self._cmake.definitions["CELERO_COMPILE_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["CELERO_ENABLE_EXPERIMENTS"] = False
-        self._cmake.definitions["CELERO_ENABLE_FOLDERS"] = False
-        self._cmake.definitions["CELERO_ENABLE_TESTS"] = False
-        self._cmake.definitions["CELERO_TREAT_WARNINGS_AS_ERRORS"] = False
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
+        self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
+
         self._cmake.configure()
         return self._cmake
 
