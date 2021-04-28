@@ -79,8 +79,8 @@ class ZlibNgConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "ZLIB"
-        self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
+        #FIXME: CMake targets are https://github.com/zlib-ng/zlib-ng/blob/29fd4672a2279a0368be936d7cd44d013d009fae/CMakeLists.txt#L914
+        self.cpp_info.names["pkg_config"] = "zlib" + suffix
         suffix = "" if self.options.zlib_compat else "-ng"
         if self.settings.os == "Windows":
             if self.settings.build_type == "Debug":
