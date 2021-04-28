@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, tools, errors
 import os
 import glob
 
@@ -38,9 +38,8 @@ class ReflCppConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "5.1",
+            "gcc": "8",
+            "clang": "8",
         }
 
     def configure(self):
