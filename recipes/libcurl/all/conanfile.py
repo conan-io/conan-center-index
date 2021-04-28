@@ -224,18 +224,9 @@ class LibcurlConan(ConanFile):
     def _patch_mingw_files(self):
         if not self._is_mingw:
             return
-        # patch autotools files
-        top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
-        configure_ac = os.path.join(self._source_subfolder, "configure.ac")
-        lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
-
-        # for mingw builds - do not compile curl tool, just library
-        # linking errors are much harder to fix than to exclude curl tool
-        tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
-        tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
-
         # patch for zlib naming in mingw
         if self.options.with_zlib:
+            configure_ac = os.path.join(self._source_subfolder, "configure.ac")
             zlib_name = self.deps_cpp_info["zlib"].libs[0]
             tools.replace_in_file(configure_ac,
                                   "AC_CHECK_LIB(z,",
@@ -245,7 +236,13 @@ class LibcurlConan(ConanFile):
                                   "-l{} ".format(zlib_name))
 
         if self.options.shared:
+            # for mingw builds - do not compile curl tool, just library
+            # linking errors are much harder to fix than to exclude curl tool
+            top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+            tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+            tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
             # patch for shared mingw build
+            lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
             tools.replace_in_file(lib_makefile,
                                   "noinst_LTLIBRARIES = libcurlu.la",
                                   "")
