@@ -193,7 +193,6 @@ class LibcurlConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self._patch_misc_files()
         if self._is_using_cmake_build:
             self._build_with_cmake()
         else:
@@ -202,6 +201,9 @@ class LibcurlConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        self._patch_misc_files()
+        self._patch_mingw_files()
+        self._patch_cmake()
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -217,10 +219,58 @@ class LibcurlConan(ConanFile):
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
+    def _patch_mingw_files(self):
+        if not self._is_mingw:
+            return
+        # patch autotools files
+        top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+        configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+        lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
+
+        # for mingw builds - do not compile curl tool, just library
+        # linking errors are much harder to fix than to exclude curl tool
+        tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
+
+        # patch for zlib naming in mingw
+        if not tools.cross_building(self.settings):
+            tools.replace_in_file(configure_ac,
+                                  "-lz ",
+                                  "-lzlib ")
+
+        # patch for openssl extras in mingw
+        if self.options.with_ssl == "openssl":
+            tools.replace_in_file(configure_ac,
+                                  "-lcrypto ",
+                                  "-lcrypto -lcrypt32 ")
+
+        if self.options.shared:
+            # patch for shared mingw build
+            tools.replace_in_file(lib_makefile,
+                                  "noinst_LTLIBRARIES = libcurlu.la",
+                                  "")
+            tools.replace_in_file(lib_makefile,
+                                  "noinst_LTLIBRARIES =",
+                                  "")
+            tools.replace_in_file(lib_makefile,
+                                  "lib_LTLIBRARIES = libcurl.la",
+                                  "noinst_LTLIBRARIES = libcurl.la")
+            # add directives to build dll
+            # used only for native mingw-make
+            if not tools.cross_building(self.settings):
+                added_content = tools.load("lib_Makefile_add.am")
+                tools.save(lib_makefile, added_content, append=True)
+
+    def _patch_cmake(self):
+        if not self._is_using_cmake_build:
+            return
+        # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
         if self._has_zstd_option:
-            # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
                                   "if(UNIX)", "if(TRUE)")
+        # TODO: check this patch, it's suspicious
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "include(CurlSymbolHiding)", "")
 
     def _get_configure_command_args(self):
         yes_no = lambda v: "yes" if v else "no"
@@ -300,50 +350,6 @@ class LibcurlConan(ConanFile):
             version = int(match.group(1))
         return version
 
-    def _patch_mingw_files(self):
-        if not self._is_mingw:
-            return
-        # patch autotools files
-        # for mingw builds - do not compile curl tool, just library
-        # linking errors are much harder to fix than to exclude curl tool
-        tools.replace_in_file("Makefile.am",
-                              "SUBDIRS = lib src",
-                              "SUBDIRS = lib")
-
-        tools.replace_in_file("Makefile.am",
-                              "include src/Makefile.inc",
-                              "")
-
-        # patch for zlib naming in mingw
-        # when cross-building, the name is correct
-        if not tools.cross_building(self.settings):
-            tools.replace_in_file("configure.ac",
-                                  "-lz ",
-                                  "-lzlib ")
-
-        # patch for openssl extras in mingw
-        if self.options.with_ssl == "openssl":
-            tools.replace_in_file("configure",
-                                  "-lcrypto ",
-                                  "-lcrypto -lcrypt32 ")
-
-        if self.options.shared:
-            # patch for shared mingw build
-            tools.replace_in_file(os.path.join("lib", "Makefile.am"),
-                                  "noinst_LTLIBRARIES = libcurlu.la",
-                                  "")
-            tools.replace_in_file(os.path.join("lib", "Makefile.am"),
-                                  "noinst_LTLIBRARIES =",
-                                  "")
-            tools.replace_in_file(os.path.join("lib", "Makefile.am"),
-                                  "lib_LTLIBRARIES = libcurl.la",
-                                  "noinst_LTLIBRARIES = libcurl.la")
-            # add directives to build dll
-            # used only for native mingw-make
-            if not tools.cross_building(self.settings):
-                added_content = tools.load(os.path.join(self.source_folder, "lib_Makefile_add.am"))
-                tools.save(os.path.join("lib", "Makefile.am"), added_content, append=True)
-
     def _build_with_autotools(self):
         with tools.chdir(self._source_subfolder):
             # autoreconf
@@ -390,9 +396,6 @@ class LibcurlConan(ConanFile):
 
         # tweaks for mingw
         if self._is_mingw:
-            # patch autotools files
-            self._patch_mingw_files()
-
             self._autotools.defines.append("_AMD64_")
 
         if tools.cross_building(self) and tools.is_apple_os(self.settings.os):
@@ -440,12 +443,6 @@ class LibcurlConan(ConanFile):
         return self._cmake
 
     def _build_with_cmake(self):
-        # patch cmake files
-        with tools.chdir(self._source_subfolder):
-            tools.replace_in_file("CMakeLists.txt",
-                                  "include(CurlSymbolHiding)",
-                                  "")
-
         cmake = self._configure_cmake()
         cmake.build()
 
