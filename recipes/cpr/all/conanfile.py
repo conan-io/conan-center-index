@@ -55,7 +55,7 @@ class CprConan(ConanFile):
     @property
     def _supports_darwinssl(self):
         # https://github.com/whoshuu/cpr/releases/tag/1.6.1
-        return tools.Version(self.version) >= "1.6.1"
+        return tools.Version(self.version) >= "1.6.1" and tools.is_apple_os(self.settings.os)
 
     @property
     def _can_disable_ssl(self):
