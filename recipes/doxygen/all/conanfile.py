@@ -34,6 +34,11 @@ class DoxygenConan(ConanFile):
         if minimum_compiler_version is not None:
             if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
                 raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+        if (self.settings.compiler == "Visual Studio" and
+            tools.Version(self.settings.compiler.version.value) <= 14 and
+                tools.Version(self.version) == "1.8.18"):
+            raise ConanInvalidConfiguration("Doxygen version {} broken with VS {}.".format(self.version,
+                                                                                           self.settings.compiler.version))
         del self.settings.compiler.cppstd
 
     def requirements(self):
