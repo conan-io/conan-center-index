@@ -81,12 +81,13 @@ class LibdbConan(ConanFile):
                                   "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>")
 
         dist_configure = os.path.join(self._source_subfolder, "dist", "configure")
-        tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
         tools.replace_in_file(dist_configure,
                               "\n    --disable-option-checking)",
                               "\n    --datarootdir=*)"
                               "\n      ;;"
                               "\n    --disable-option-checking)")
+        if self._supports_sql:
+            tools.replace_in_file(dist_configure, "../$sqlite_dir", "$sqlite_dir")
 
     def _configure_autotools(self):
         if self._autotools:
