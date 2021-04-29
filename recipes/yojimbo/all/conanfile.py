@@ -55,8 +55,8 @@ class YojimboConan(ConanFile):
         # Before building we need to make some edits to the premake file to build using conan dependencies rather than local/bundled
 
         # Generate the list of dependency include and library paths as strings
-        include_path_str = ', '.join(f'"{p}"' for p in self.deps_cpp_info["libsodium"].include_paths + self.deps_cpp_info["mbedtls"].include_paths)
-        lib_path_str = ', '.join(f'"{p}"' for p in self.deps_cpp_info["libsodium"].lib_paths + self.deps_cpp_info["mbedtls"].lib_paths)
+        include_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].include_paths + self.deps_cpp_info["mbedtls"].include_paths)
+        lib_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].lib_paths + self.deps_cpp_info["mbedtls"].lib_paths)
 
         if self.settings.os == "Windows":
         
@@ -64,17 +64,19 @@ class YojimboConan(ConanFile):
             include_path_str = include_path_str.replace("\\", "/")
             lib_path_str = lib_path_str.replace("\\", "/")
             
+            premake_path = os.path.join(self._source_subfolder, "premake5.lua")
+            
             # Edit the premake script to use conan rather than bundled dependencies
-            tools.replace_in_file("%s/premake5.lua" % self._source_subfolder, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
-            tools.replace_in_file("%s/premake5.lua" % self._source_subfolder, "libdirs { \"./windows\" }", "libdirs { %s }" % lib_path_str, strict=True)
+            tools.replace_in_file(premake_path, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
+            tools.replace_in_file(premake_path, "libdirs { \"./windows\" }", "libdirs { %s }" % lib_path_str, strict=True)
             
             # Edit the premake script to change the name of libsodium
-            tools.replace_in_file("%s/premake5.lua" % self._source_subfolder, "\"sodium\"", "\"libsodium\"", strict=True)
+            tools.replace_in_file(premake_path, "\"sodium\"", "\"libsodium\"", strict=True)
             
         else:
         
         	# Edit the premake script to use  conan rather than local dependencies
-            tools.replace_in_file("%s/premake5.lua" % self._source_subfolder, "\"/usr/local/include\"", include_path_str, strict=True)
+            tools.replace_in_file(premake_path, "\"/usr/local/include\"", include_path_str, strict=True)
             
             
         # Build using premake
