@@ -58,13 +58,13 @@ class YojimboConan(ConanFile):
         include_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].include_paths + self.deps_cpp_info["mbedtls"].include_paths)
         lib_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].lib_paths + self.deps_cpp_info["mbedtls"].lib_paths)
 
+        premake_path = os.path.join(self._source_subfolder, "premake5.lua")
+
         if self.settings.os == "Windows":
         
             # Replace Windows directory seperator
             include_path_str = include_path_str.replace("\\", "/")
             lib_path_str = lib_path_str.replace("\\", "/")
-            
-            premake_path = os.path.join(self._source_subfolder, "premake5.lua")
             
             # Edit the premake script to use conan rather than bundled dependencies
             tools.replace_in_file(premake_path, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
