@@ -1,0 +1,4 @@
+sources:
+  "0.12.4":
+    sha256: "d935feac891fd39b4872074d968b1ddfe4b9128c5db1604e15447b87f7c70970"
+    url: "https://github.com/mapbox/earcut.hpp/archive/refs/tags/v0.12.4.zip"
