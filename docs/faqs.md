@@ -123,7 +123,6 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
 
-
 ## Why _installer_ packages remove some settings from their package ID?
 
 There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
@@ -161,6 +160,7 @@ and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c825641
 
 However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
 After one month, we will welcome a PR removing the option that was deprecated.
+
 ## What license should I use for Public Domain?
 
 [The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
