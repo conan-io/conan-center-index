@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -38,6 +39,7 @@ class ConanSqlite3(ConanFile):
         "disable_gethostuuid": [True, False],
         "max_blob_size": "ANY",
         "build_executable": [True, False],
+        "enable_default_vfs": [True, False],
     }
     default_options = {
         "shared": False,
@@ -62,6 +64,7 @@ class ConanSqlite3(ConanFile):
         "disable_gethostuuid": False,
         "max_blob_size": 1000000000,
         "build_executable": True,
+        "enable_default_vfs": True,
     }
 
     _cmake = None
@@ -85,6 +88,11 @@ class ConanSqlite3(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if not self.options.enable_default_vfs and self.options.build_executable:
+            # Need to provide custom VFS code: https://www.sqlite.org/custombuild.html
+            raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -125,6 +133,7 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
         self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
+        self._cmake.definitions["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         self._cmake.configure()
         return self._cmake
 
