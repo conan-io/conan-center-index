@@ -49,26 +49,27 @@ class grpcConan(ConanFile):
 
     requires = (
         "zlib/1.2.11",
-        "openssl/1.1.1h",
-        "protobuf/3.13.0",
-        "c-ares/1.15.0",
-        "abseil/20200225.3",
-        "re2/20201101"
+        "openssl/1.1.1k",
+        "protobuf/3.15.5",
+        "c-ares/1.17.1",
+        "abseil/20210324.0",
+        "re2/20210202"
     )
 
-    def configure(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+    def config_options(self):
+        if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
             compiler_version = tools.Version(self.settings.compiler.version)
             if compiler_version < 14:
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-        # See #5
-        cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -122,7 +123,7 @@ class grpcConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        #cmake.install()
+        cmake.install()
 
         # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         # tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
