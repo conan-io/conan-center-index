@@ -201,24 +201,24 @@ class grpcConan(ConanFile):
         self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package"] = "grpc_plugin_support"
         self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package_multi"] = "grpc_plugin_support"
         self.cpp_info.components["grpc_plugin_support"].requires = ["protobuf::libprotoc", "protobuf::libprotobuf"]
-        if self.settings.os == ['Macos', 'Linux']:
+        if self.settings.os in ['Macos', 'Linux']:
             self.cpp_info.components["grpc_plugin_support"].system_libs = _system_libs
         self.cpp_info.components["grpc_plugin_support"].libs = ["grpc_plugin_support"]
 
         # gRPC::grpcpp_channelz
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package"] = "grpcpp_channelz"
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package_multi"] = "grpcpp_channelz"
-        if self.settings.os == ['Macos', 'Linux']:
+        if self.settings.os in ['Macos', 'Linux']:
             self.cpp_info.components["grpcpp_channelz"].requires = ["protobuf::libprotobuf",  "_grpc"]
             self.cpp_info.components["grpcpp_channelz"].system_libs = _system_libs
-        elif self.settings.os == ['Windows']:
+        elif self.settings.os in ['Windows']:
             self.cpp_info.components["grpcpp_channelz"].requires = ["protobuf::libprotobuf",  "grpc++"]
         self.cpp_info.components["grpcpp_channelz"].libs = ["grpcpp_channelz"]
 
         # gRPC::upb
         self.cpp_info.components["upb"].names["cmake_find_package"] = "upb"
         self.cpp_info.components["upb"].names["cmake_find_package_multi"] = "upb"
-        if self.settings.os == ['Macos', 'Linux']:
+        if self.settings.os in ['Macos', 'Linux']:
             self.cpp_info.components["upb"].system_libs = _system_libs
         self.cpp_info.components["upb"].libs = ["upb"]
 
