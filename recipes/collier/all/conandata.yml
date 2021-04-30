@@ -1,0 +1,4 @@
+sources:
+  "1.2.5":
+    url: "https://collier.hepforge.org/downloads/collier-1.2.5.tar.gz"
+    sha256: "3ec58a975ff0c3b1ca870bc38973476c923ff78fd3dd5850e296037852b94a8b"
