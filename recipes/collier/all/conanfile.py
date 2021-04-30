@@ -65,4 +65,6 @@ class Gm2calcConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "COLLIER"
         self.cpp_info.names["cmake_find_package_multi"] = "COLLIER"
         self.cpp_info.names["pkg_config"] = "collier"
-        self.cpp_info.libs = ["collier"]
+        self.cpp_info.libs = ["collier", "gfortran"]
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.append("m")
