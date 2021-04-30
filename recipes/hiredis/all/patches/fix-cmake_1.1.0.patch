@@ -1,0 +1,107 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a8dfaa9..64cd4c4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -45,23 +45,20 @@ IF(WIN32)
+     ADD_COMPILE_DEFINITIONS(_CRT_SECURE_NO_WARNINGS WIN32_LEAN_AND_MEAN)
+ ENDIF()
+ 
+-ADD_LIBRARY(hiredis SHARED ${hiredis_sources})
+-ADD_LIBRARY(hiredis_static STATIC ${hiredis_sources})
++ADD_LIBRARY(hiredis ${hiredis_sources})
+ 
+ SET_TARGET_PROPERTIES(hiredis
+     PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+     VERSION "${HIREDIS_SONAME}")
+-SET_TARGET_PROPERTIES(hiredis_static
+-    PROPERTIES COMPILE_PDB_NAME hiredis_static)
+-SET_TARGET_PROPERTIES(hiredis_static
+-    PROPERTIES COMPILE_PDB_NAME_DEBUG hiredis_static${CMAKE_DEBUG_POSTFIX})
++SET_TARGET_PROPERTIES(hiredis
++    PROPERTIES COMPILE_PDB_NAME hiredis)
++SET_TARGET_PROPERTIES(hiredis
++    PROPERTIES COMPILE_PDB_NAME_DEBUG hiredis${CMAKE_DEBUG_POSTFIX})
+ IF(WIN32 OR MINGW)
+     TARGET_LINK_LIBRARIES(hiredis PUBLIC ws2_32 crypt32)
+-    TARGET_LINK_LIBRARIES(hiredis_static PUBLIC ws2_32 crypt32)
+ ENDIF()
+ 
+ TARGET_INCLUDE_DIRECTORIES(hiredis PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+-TARGET_INCLUDE_DIRECTORIES(hiredis_static PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ 
+ CONFIGURE_FILE(hiredis.pc.in hiredis.pc @ONLY)
+ 
+@@ -91,7 +88,7 @@ set(CPACK_RPM_PACKAGE_AUTOREQPROV ON)
+ 
+ include(CPack)
+ 
+-INSTALL(TARGETS hiredis hiredis_static
++INSTALL(TARGETS hiredis
+     EXPORT hiredis-targets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+@@ -101,14 +98,11 @@ if (MSVC)
+     INSTALL(FILES $<TARGET_PDB_FILE:hiredis>
+         DESTINATION ${CMAKE_INSTALL_BINDIR}
+         CONFIGURATIONS Debug RelWithDebInfo)
+-    INSTALL(FILES $<TARGET_FILE_DIR:hiredis_static>/$<TARGET_FILE_BASE_NAME:hiredis_static>.pdb
++    INSTALL(FILES $<TARGET_FILE_DIR:hiredis>/$<TARGET_FILE_BASE_NAME:hiredis>.pdb
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         CONFIGURATIONS Debug RelWithDebInfo)
+ endif()
+ 
+-# For NuGet packages
+-INSTALL(FILES hiredis.targets
+-    DESTINATION build/native)
+ 
+ INSTALL(FILES hiredis.h read.h sds.h async.h alloc.h
+     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/hiredis)
+@@ -148,9 +142,7 @@ IF(ENABLE_SSL)
+     FIND_PACKAGE(OpenSSL REQUIRED)
+     SET(hiredis_ssl_sources
+         ssl.c)
+-    ADD_LIBRARY(hiredis_ssl SHARED
+-            ${hiredis_ssl_sources})
+-    ADD_LIBRARY(hiredis_ssl_static STATIC
++    ADD_LIBRARY(hiredis_ssl
+             ${hiredis_ssl_sources})
+ 
+     IF (APPLE)
+@@ -161,22 +153,18 @@ IF(ENABLE_SSL)
+         PROPERTIES
+         WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+         VERSION "${HIREDIS_SONAME}")
+-    SET_TARGET_PROPERTIES(hiredis_ssl_static
+-        PROPERTIES COMPILE_PDB_NAME hiredis_ssl_static)
+-    SET_TARGET_PROPERTIES(hiredis_ssl_static
+-        PROPERTIES COMPILE_PDB_NAME_DEBUG hiredis_ssl_static${CMAKE_DEBUG_POSTFIX})
+-
+-    TARGET_INCLUDE_DIRECTORIES(hiredis_ssl PRIVATE "${OPENSSL_INCLUDE_DIR}")
+-    TARGET_INCLUDE_DIRECTORIES(hiredis_ssl_static PRIVATE "${OPENSSL_INCLUDE_DIR}")
++    SET_TARGET_PROPERTIES(hiredis_ssl
++        PROPERTIES COMPILE_PDB_NAME hiredis_ssl)
++    SET_TARGET_PROPERTIES(hiredis_ssl
++        PROPERTIES COMPILE_PDB_NAME_DEBUG hiredis_ssl${CMAKE_DEBUG_POSTFIX})
+ 
+-    TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE ${OPENSSL_LIBRARIES})
++    TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE OpenSSL::SSL)
+     IF (WIN32 OR MINGW)
+         TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
+-        TARGET_LINK_LIBRARIES(hiredis_ssl_static PUBLIC hiredis_static)
+     ENDIF()
+     CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
+ 
+-    INSTALL(TARGETS hiredis_ssl hiredis_ssl_static
++    INSTALL(TARGETS hiredis_ssl
+         EXPORT hiredis_ssl-targets
+         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+@@ -186,7 +174,7 @@ IF(ENABLE_SSL)
+         INSTALL(FILES $<TARGET_PDB_FILE:hiredis_ssl>
+             DESTINATION ${CMAKE_INSTALL_BINDIR}
+             CONFIGURATIONS Debug RelWithDebInfo)
+-        INSTALL(FILES $<TARGET_FILE_DIR:hiredis_ssl_static>/$<TARGET_FILE_BASE_NAME:hiredis_ssl_static>.pdb
++        INSTALL(FILES $<TARGET_FILE_DIR:hiredis_ssl>/$<TARGET_FILE_BASE_NAME:hiredis_ssl>.pdb
+             DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             CONFIGURATIONS Debug RelWithDebInfo)
+     endif()
