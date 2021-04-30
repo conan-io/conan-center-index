@@ -122,7 +122,7 @@ class GdalConan(ConanFile):
         "with_curl": False,
         "with_xml2": False,
         # "with_spatialite": False,
-        "with_sqlite3": False,
+        "with_sqlite3": True,
         # "with_rasterlite2": False,
         "with_pcre": False,
         # "with_epsilon": False,
