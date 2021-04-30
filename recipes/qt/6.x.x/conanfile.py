@@ -215,7 +215,7 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
         if self.options.with_vulkan:
-            self.requires("vulkan-loader/1.2.172.0")
+            self.requires("vulkan-loader/1.2.170.0")
 
         if self.options.with_glib:
             self.requires("glib/2.68.0")
