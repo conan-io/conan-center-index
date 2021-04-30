@@ -12,7 +12,7 @@ class grpcConan(ConanFile):
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package"
     short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
@@ -47,20 +47,22 @@ class grpcConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-    requires = (
-        "zlib/1.2.11",
-        "openssl/1.1.1k",
-        "protobuf/3.15.5",
-        "c-ares/1.17.1",
-        "abseil/20210324.0",
-        "re2/20210202"
-    )
+    def requirements(self):
+        self.requires('zlib/1.2.11')
+        self.requires('openssl/1.1.1k')
+        self.requires('protobuf/3.15.5')
+        self.requires('c-ares/1.17.1')
+        self.requires('abseil/20210324.0')
+        self.requires('re2/20210202')
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os in ['Windows', 'Linux']:
+            raise ConanInvalidConfiguration('WIP! Testing systems one by one')
+
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler == "Visual Studio":
@@ -82,12 +84,12 @@ class grpcConan(ConanFile):
         # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.build_csharp_ext else "OFF"
 
 
-        cmake.definitions["gRPC_BUILD_CODEGEN"] = "ON" if self.options.build_codegen else "OFF"
-        cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = "ON" if self.options.build_csharp_ext else "OFF"
-        cmake.definitions["gRPC_BUILD_TESTS"] = "OFF"
+        cmake.definitions["gRPC_BUILD_CODEGEN"] = bool(self.options.build_codegen)
+        cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = bool(self.options.build_csharp_ext)
+        cmake.definitions["gRPC_BUILD_TESTS"] = False
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
-        cmake.definitions["gRPC_INSTALL"] = "ON"
+        cmake.definitions["gRPC_INSTALL"] = True
         # cmake.definitions["CMAKE_INSTALL_PREFIX"] = self._build_subfolder
 
         # tell grpc to use the find_package versions
@@ -98,20 +100,13 @@ class grpcConan(ConanFile):
         cmake.definitions["gRPC_PROTOBUF_PROVIDER"] = "package"
         cmake.definitions["gRPC_ABSL_PROVIDER"] = "package"
 
-        cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = self.options.build_cpp_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = self.options.build_csharp_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = self.options.build_node_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = self.options.build_objective_c_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.build_php_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.build_python_plugin
-        cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.build_ruby_plugin
-
-        # see https://github.com/inexorgame/conan-grpc/issues/39
-        if self.settings.os == "Windows":
-            if not self.options["protobuf"].shared:
-                cmake.definitions["Protobuf_USE_STATIC_LIBS"] = "ON"
-            else:
-                cmake.definitions["PROTOBUF_USE_DLLS"] = "ON"
+        cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = bool(self.options.build_cpp_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = bool(self.options.build_csharp_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = bool(self.options.build_node_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = bool(self.options.build_objective_c_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = bool(self.options.build_php_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = bool(self.options.build_python_plugin)
+        cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = bool(self.options.build_ruby_plugin)
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -125,7 +120,7 @@ class grpcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
     
@@ -231,20 +226,6 @@ class grpcConan(ConanFile):
         # gRPC::grpc_ruby_plugin
 
         """
-        self.cpp_info.libs = [
-            "grpc++_unsecure",
-            "grpc++_reflection",
-            "grpc++_error_details",
-            "grpc++",
-            "grpc_unsecure",
-            "grpc_plugin_support",
-            "grpcpp_channelz",
-            "grpc",
-            "gpr",
-            "address_sorting",
-            "upb",
-        ]
-
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["wsock32", "ws2_32", "crypt32"]
         if self.settings.os == "Linux":

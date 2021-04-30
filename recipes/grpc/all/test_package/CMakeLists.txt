@@ -22,8 +22,8 @@ find_program(_PROTOBUF_PROTOC protoc ${CONAN_BIN_DIRS_PROTOBUF} NO_DEFAULT_PATH)
 # Find gRPC installation
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
-
-set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+# set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin ${CONAN_BIN_DIRS_GRPC} NO_DEFAULT_PATH)
 
 # Proto file
 get_filename_component(hw_proto "helloworld.proto" ABSOLUTE)
