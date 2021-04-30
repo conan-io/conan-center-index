@@ -58,9 +58,6 @@ class grpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ['Windows']:
-            raise ConanInvalidConfiguration('WIP! Testing systems one by one')
-
         if self.settings.compiler == "Visual Studio":
             compiler_version = tools.Version(self.settings.compiler.version)
             if compiler_version < 14:
