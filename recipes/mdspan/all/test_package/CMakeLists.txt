@@ -6,4 +6,3 @@ conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::mdspan)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
