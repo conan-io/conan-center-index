@@ -341,6 +341,8 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
 
     def _validate_dependency_graph(self):
+        if tools.Version(self.deps_cpp_info["libtiff"].version) < "4.0.0":
+            raise ConanInvalidConfiguration("gdal {} requires libtiff >= 4.0.0".format(self.version))
         if self.options.with_mongocxx:
             mongocxx_version = tools.Version(self.deps_cpp_info["mongo-cxx-driver"].version)
             if mongocxx_version < "3.0.0":
