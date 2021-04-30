@@ -365,6 +365,7 @@ class GdalConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
         # Remove embedded dependencies
         embedded_libs = [
             os.path.join("alg", "internal_libqhull"),
@@ -379,15 +380,29 @@ class GdalConan(ConanFile):
             embedded_libs.append(os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"))
         for lib_subdir in embedded_libs:
             tools.rmdir(os.path.join(self._source_subfolder, lib_subdir))
+
         # OpenCL headers
         tools.replace_in_file(os.path.join(self._source_subfolder, "alg", "gdalwarpkernel_opencl.h"),
                               "#include <OpenCL/OpenCL.h>",
                               "#include <CL/opencl.h>")
-        # Workaround for nc-config not packaged in netcdf recipe (gdal relies on it to check nc4 and hdf4 support in netcdf):
-        if self.options.with_netcdf and self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
-                                  "NETCDF_HAS_NC4=no",
-                                  "NETCDF_HAS_NC4=yes")
+
+        # More patches for autotools build
+        if self.settings.compiler != "Visual Studio":
+            configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+            # Workaround for nc-config not packaged in netcdf recipe (gdal relies on it to check nc4 and hdf4 support in netcdf):
+            if self.options.with_netcdf and self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
+                tools.replace_in_file(configure_ac,
+                                      "NETCDF_HAS_NC4=no",
+                                      "NETCDF_HAS_NC4=yes")
+            # Fix zlib checks and -lz injection to ensure to use external zlib and not fail others checks
+            if self.options.get_safe("with_zlib", True):
+                zlib_name = self.deps_cpp_info["zlib"].libs[0]
+                tools.replace_in_file(configure_ac,
+                                      "AC_CHECK_LIB(z,",
+                                      "AC_CHECK_LIB({},".format(zlib_name))
+                tools.replace_in_file(configure_ac,
+                                      "-lz ",
+                                      "-l{} ".format(zlib_name))
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
@@ -735,6 +750,13 @@ class GdalConan(ConanFile):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
 
+    @contextmanager
+    def _autotools_build_environment(self):
+        with tools.chdir(self._source_subfolder):
+            with tools.run_environment(self):
+                with tools.environment_append({"PKG_CONFIG_PATH": tools.unix_path(self.build_folder)}):
+                    yield
+
     def build(self):
         self._validate_dependency_graph()
         self._patch_sources()
@@ -743,7 +765,7 @@ class GdalConan(ConanFile):
             with self._msvc_build_environment():
                 self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
-            with tools.chdir(self._source_subfolder):
+            with self._autotools_build_environment():
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
                 autotools = self._configure_autotools()
                 autotools.make()
@@ -755,7 +777,7 @@ class GdalConan(ConanFile):
                 self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         else:
-            with tools.chdir(self._source_subfolder):
+            with self._autotools_build_environment():
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "gdalplugins"))
