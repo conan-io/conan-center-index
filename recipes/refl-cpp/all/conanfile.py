@@ -11,7 +11,7 @@ class ReflCppConan(ConanFile):
     description = "A modern compile-time reflection library for C++ with support for overloads, templates, attributes and proxies "
     topics = ("header", "header-only", "reflection", "modern", "metaprogramming")
     no_copy_source = True
-    settings = "os", "compiler", "build_type", "arch"
+    settings =  "compiler"
 
     @property
     def _minimum_cpp_standard(self):
