@@ -18,7 +18,6 @@ class grpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     # TODO: Add shared option
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "build_codegen": [True, False],
         "build_csharp_ext": [True, False],
@@ -31,7 +30,6 @@ class grpcConan(ConanFile):
         "build_ruby_plugin": [True, False]
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "build_codegen": True,
         "build_csharp_ext": False,
