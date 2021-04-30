@@ -12,7 +12,7 @@ class grpcConan(ConanFile):
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
@@ -58,11 +58,9 @@ class grpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ['Windows', 'Linux']:
+        if self.settings.os in ['Windows']:
             raise ConanInvalidConfiguration('WIP! Testing systems one by one')
 
-        if self.options.shared:
-            del self.options.fPIC
         if self.settings.compiler == "Visual Studio":
             compiler_version = tools.Version(self.settings.compiler.version)
             if compiler_version < 14:
