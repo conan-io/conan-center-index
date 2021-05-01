@@ -48,7 +48,6 @@ class DCMTKConan(ConanFile):
         "builtin_private_tags": False,
         "external_dictionary": True,
         "wide_io": False,
-        "libxml2:shared": False
     }
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
