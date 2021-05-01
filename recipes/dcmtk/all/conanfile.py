@@ -29,7 +29,7 @@ class DCMTKConan(ConanFile):
         "with_tcpwrappers": [True, False],
         "builtin_private_tags": [True, False],
         "external_dictionary": [True, False],
-        "wide_io": [True, False]
+        "wide_io": [True, False],
     }
     default_options = {
         "shared": False,
