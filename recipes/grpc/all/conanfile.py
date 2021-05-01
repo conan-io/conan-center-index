@@ -19,27 +19,27 @@ class grpcConan(ConanFile):
     # TODO: Add shared option
     options = {
         "fPIC": [True, False],
-        "build_codegen": [True, False],
-        "build_csharp_ext": [True, False],
-        "build_cpp_plugin": [True, False],
-        "build_csharp_plugin": [True, False],
-        "build_node_plugin": [True, False],
-        "build_objective_c_plugin": [True, False],
-        "build_php_plugin": [True, False],
-        "build_python_plugin": [True, False],
-        "build_ruby_plugin": [True, False]
+        "codegen": [True, False],
+        "csharp_ext": [True, False],
+        "cpp_plugin": [True, False],
+        "csharp_plugin": [True, False],
+        "node_plugin": [True, False],
+        "objective_c_plugin": [True, False],
+        "php_plugin": [True, False],
+        "python_plugin": [True, False],
+        "ruby_plugin": [True, False]
     }
     default_options = {
         "fPIC": True,
-        "build_codegen": True,
-        "build_csharp_ext": False,
-        "build_cpp_plugin": True,
-        "build_csharp_plugin": True,
-        "build_node_plugin": True,
-        "build_objective_c_plugin": True,
-        "build_php_plugin": True,
-        "build_python_plugin": True,
-        "build_ruby_plugin": True,
+        "codegen": True,
+        "csharp_ext": False,
+        "cpp_plugin": True,
+        "csharp_plugin": True,
+        "node_plugin": True,
+        "objective_c_plugin": True,
+        "php_plugin": True,
+        "python_plugin": True,
+        "ruby_plugin": True,
     }
 
     _cmake = None
@@ -82,11 +82,11 @@ class grpcConan(ConanFile):
         #
         #   enable_mobile=False # Enables iOS and Android support
         #
-        # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.build_csharp_ext else "OFF"
+        # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.csharp_ext else "OFF"
 
         self._cmake = CMake(self)
-        self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.build_codegen
-        self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.build_csharp_ext
+        self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.codegen
+        self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.csharp_ext
         self._cmake.definitions["gRPC_BUILD_TESTS"] = False
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
@@ -100,13 +100,13 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_PROTOBUF_PROVIDER"] = "package"
         self._cmake.definitions["gRPC_ABSL_PROVIDER"] = "package"
 
-        self._cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = self.options.build_cpp_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = self.options.build_csharp_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = self.options.build_node_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = self.options.build_objective_c_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.build_php_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.build_python_plugin
-        self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.build_ruby_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = self.options.cpp_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = self.options.csharp_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = self.options.node_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = self.options.objective_c_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.php_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
