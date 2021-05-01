@@ -190,7 +190,7 @@ class NCursesConan(ConanFile):
             set(CURSES_FOUND ON)
             set(CURSES_INCLUDE_DIRS ${ncurses_libcurses_INCLUDE_DIRS})
             set(CURSES_LIBRARIES ${ncurses_libcurses_LINK_LIBS})
-            set(CURSES_CFLAGS "${ncurses_DEFINITIONS} ${ncurses_COMPILE_OPTIONS_C}")
+            set(CURSES_CFLAGS ${ncurses_DEFINITIONS} ${ncurses_COMPILE_OPTIONS_C})
             set(CURSES_HAVE_CURSES_H OFF)
             set(CURSES_HAVE_NCURSES_H OFF)
             if(CURSES_NEED_NCURSES)
