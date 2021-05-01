@@ -162,6 +162,10 @@ class LibtoolConan(ConanFile):
             os.rename(os.path.join(binpath, "libtool"),
                       os.path.join(binpath, "libtool.exe"))
 
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "ltdl.lib"))
+
     @property
     def _libtool_relocatable_env(self):
         return {
@@ -173,10 +177,7 @@ class LibtoolConan(ConanFile):
         }
 
     def package_info(self):
-        lib = "ltdl"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
-        self.cpp_info.libs = [lib]
+        self.cpp_info.libs = ["ltdl"]
 
         if self.options.shared:
             if self.settings.os == "Windows":
