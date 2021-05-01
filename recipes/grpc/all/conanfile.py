@@ -85,8 +85,8 @@ class grpcConan(ConanFile):
         # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.build_csharp_ext else "OFF"
 
 
-        self._cmake.definitions["gRPC_BUILD_CODEGEN"] = bool(self.options.build_codegen)
-        self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = bool(self.options.build_csharp_ext)
+        self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.build_codegen
+        self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.build_csharp_ext
         self._cmake.definitions["gRPC_BUILD_TESTS"] = False
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
@@ -100,13 +100,13 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_PROTOBUF_PROVIDER"] = "package"
         self._cmake.definitions["gRPC_ABSL_PROVIDER"] = "package"
 
-        self._cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = bool(self.options.build_cpp_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = bool(self.options.build_csharp_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = bool(self.options.build_node_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = bool(self.options.build_objective_c_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = bool(self.options.build_php_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = bool(self.options.build_python_plugin)
-        self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = bool(self.options.build_ruby_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = self.options.build_cpp_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = self.options.build_csharp_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = self.options.build_node_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = self.options.build_objective_c_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.build_php_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.build_python_plugin
+        self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.build_ruby_plugin
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
