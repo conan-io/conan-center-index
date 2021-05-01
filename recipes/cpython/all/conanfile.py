@@ -34,6 +34,9 @@ class CPythonConan(ConanFile):
         "with_bsddb": [True, False],
         # Python 3 options
         "with_lzma": [True, False],
+
+        # options that don't change package id
+        "env_vars": [True, False],  # set environment variables
     }
     default_options = {
         "shared": False,
@@ -51,9 +54,12 @@ class CPythonConan(ConanFile):
 
         # Python 2 options
         "unicode": "ucs2",
-        "with_bsddb": True,
+        "with_bsddb": False,  # True,  # FIXME: libdb package missing (#5309/#5392)
         # Python 3 options
         "with_lzma": True,
+
+        # options that don't change package id
+        "env_vars": False,
     }
 
     _autotools = None
@@ -144,6 +150,9 @@ class CPythonConan(ConanFile):
                     self.output.warn("Visual Studio versions 14 and higher were never officially supported by the cpython developers")
             if str(self.settings.arch) not in self._msvc_archs:
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecure")
+
+    def package_id(self):
+        del self.info.options.env_vars
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -665,22 +674,27 @@ class CPythonConan(ConanFile):
 
         python = self._cpython_interpreter_path
         self.output.info("Setting PYTHON environment variable: {}".format(python))
-        self.env_info.PYTHON = python
+        self.user_info.python = python
+        if self.options.env_vars:
+            self.env_info.PYTHON = python
 
         if self.settings.compiler == "Visual Studio":
             pythonhome = os.path.join(self.package_folder, "bin")
         else:
-            pythonhome = os.path.join(self.package_folder)
+            pythonhome = self.package_folder
         self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
-        self.env_info.PYTHONHOME = pythonhome
+        self.user_info.pythonhome = pythonhome
+        if self.options.env_vars:
+            self.env_info.PYTHONHOME = pythonhome
 
         if self._is_py2:
-            if self.settings.compiler == "Visual Studio":
-                pass
+            python_root = ""
         else:
-            python_root = tools.unix_path(self.package_folder)
+            python_root = self.package_folder
             self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
-            self.env_info.PYTHON_ROOT = python_root
+            if self.options.env_vars:
+                self.env_info.PYTHON_ROOT = python_root
+        self.user_info.python_root = python_root
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

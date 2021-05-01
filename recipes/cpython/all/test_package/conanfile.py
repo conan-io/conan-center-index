@@ -75,9 +75,9 @@ class TestPackageConan(ConanFile):
         cmake.definitions["PY_FULL_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["PY_VERSION"] = self._py_version
         cmake.definitions["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
-        cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
+        cmake.definitions["PYTHON_EXECUTABLE"] = self.deps_user_info["cpython"].python
         cmake.definitions["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
-        cmake.definitions["Python{}_EXECUTABLE".format(py_major)] = tools.get_env("PYTHON")
+        cmake.definitions["Python{}_EXECUTABLE".format(py_major)] = self.deps_user_info["cpython"].python
         cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
         cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
         cmake.definitions["Python{}_FIND_FRAMEWORK".format(py_major)] = "NEVER"
@@ -114,11 +114,12 @@ class TestPackageConan(ConanFile):
                     ]
                     if self.settings.build_type == "Debug":
                         setup_args.append("--debug")
-                    self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
+                    self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module, should_work):
         try:
-            self.run("{} {}/test_package.py -b {} -t {} ".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
+            self.run("{} {}/test_package.py -b {} -t {} ".format(
+                self.deps_user_info["cpython"].python, self.source_folder, self.build_folder, module), run_environment=True)
             works = True
         except ConanException as e:
             works = False
@@ -140,10 +141,10 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
-            self.run("{} -c \"print('hello world')\"".format(tools.get_env("PYTHON")), run_environment=True)
+            self.run("{} -c \"print('hello world')\"".format(self.deps_user_info["cpython"].python), run_environment=True)
 
             buffer = StringIO()
-            self.run("{} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"".format(tools.get_env("PYTHON")), run_environment=True, output=buffer)
+            self.run("{} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"".format(self.deps_user_info["cpython"].python), run_environment=True, output=buffer)
             self.output.info(buffer.getvalue())
             version_detected = buffer.getvalue().splitlines()[-1].strip()
             if self._py_version != version_detected:
