@@ -13,10 +13,16 @@ class GoogleCloudCppConan(ConanFile):
     homepage = "https://github.com/googleapis/google-cloud-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt",]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False], 
+        "fPIC": [True, False]
+        }
+    default_options = {
+        "shared": False, 
+        "fPIC": True
+        }
 
     _cmake = None
 
@@ -45,6 +51,8 @@ class GoogleCloudCppConan(ConanFile):
 
     def requirements(self):
         self.requires('protobuf/3.15.5')
+        self.requires('grpc/1.37.0')
+        self.requires('nlohmann_json/3.9.1')
         # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
         #   self.requires("gRPC")
         #   self.requires('googleapis)
@@ -55,6 +63,8 @@ class GoogleCloudCppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+
         self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
 
         self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
@@ -80,18 +90,7 @@ class GoogleCloudCppConan(ConanFile):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        #tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        # FIXME: official CMake target is exported without namespace
-        self.cpp_info.filenames["cmake_find_package"] = "Celero"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
-        self.cpp_info.names["cmake_find_package"] = "celero"
-        self.cpp_info.names["cmake_find_package_multi"] = "celero"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared:
-            self.cpp_info.defines = ["CELERO_STATIC"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["powrprof", "psapi"]
+        pass
