@@ -161,7 +161,7 @@ class CPythonConan(ConanFile):
             if tools.Version(self.version) < "3.8":
                 self.requires("mpdecimal/2.4.2")
             else:
-                self.requires("mpdecimal/2.5.1")
+                self.requires("mpdecimal/2.5.0  ")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.18")
@@ -259,6 +259,12 @@ class CPythonConan(ConanFile):
             # Remove vendored packages
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
+
+        if self.options.with_curses:
+            # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
+                                  "curses_libs = ",
+                                  "curses_libs = {} #".format(repr(self.deps_cpp_info["ncurses"].libs + self.deps_cpp_info["ncurses"].system_libs)))
 
         # Enable static MSVC cpython
         if not self.options.shared:
