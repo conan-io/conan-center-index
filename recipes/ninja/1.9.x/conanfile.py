@@ -10,6 +10,8 @@ class NinjaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
     settings = "os_build", "arch_build", "compiler"
+    topics = ("conan", "ninja", "build")
+
     _source_subfolder = "source_subfolder"
 
     def _build_vs(self):

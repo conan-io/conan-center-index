@@ -20,9 +20,18 @@ sources:
   "2.17.1":
     url: "https://github.com/randombit/botan/archive/2.17.1.tar.gz"
     sha256: "ca562c00e61663c418bd9fdc6c70bdeaedafba8bef328cb6046a1d6390d39a71"
+  "2.17.2":
+    url: "https://github.com/randombit/botan/archive/2.17.2.tar.gz"
+    sha256: "3d99da64573abab6d6e8036a45f8c567a57721c8f23850e05aadd84fc2e0075c"
+  "2.17.3":
+    url: "https://github.com/randombit/botan/archive/2.17.3.tar.gz"
+    sha256: "544c62e43be0c60fff7ac8707ee99fe134c75bef06bded217d04f0a4b333519a"
 patches:
   "2.12.1":
      - patch_file: "patches/dll-dir.patch"
        base_path: "sources"
      - patch_file: "patches/fix-unrecognized-linker-flag.patch"
+       base_path: "sources"
+  "2.17.2":
+     - patch_file: "patches/vs2015-install-fix.patch"
        base_path: "sources"

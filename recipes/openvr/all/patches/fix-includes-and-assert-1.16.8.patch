@@ -1,0 +1,122 @@
+Fix compilaton errors due to wrong headers folder and usage of missing assert.h:
+https://github.com/ValveSoftware/openvr/pull/1524
+https://github.com/ValveSoftware/openvr/pull/1542
+
+--- a/src/openvr_api_public.cpp
++++ b/src/openvr_api_public.cpp
+@@ -2,12 +2,12 @@
+ #define VR_API_EXPORT 1
+ #include "openvr.h"
+ #include "ivrclientcore.h"
+-#include <vrcore/pathtools_public.h>
+-#include <vrcore/sharedlibtools_public.h>
+-#include <vrcore/envvartools_public.h>
++#include <vrcommon/pathtools_public.h>
++#include <vrcommon/sharedlibtools_public.h>
++#include <vrcommon/envvartools_public.h>
+ #include "hmderrors_public.h"
+-#include <vrcore/strtools_public.h>
+-#include <vrcore/vrpathregistry_public.h>
++#include <vrcommon/strtools_public.h>
++#include <vrcommon/vrpathregistry_public.h>
+ #include <mutex>
+ 
+ using vr::EVRInitError;
+--- a/src/vrcommon/dirtools_public.cpp
++++ b/src/vrcommon/dirtools_public.cpp
+@@ -1,7 +1,7 @@
+ //========= Copyright Valve Corporation ============//
+-#include <vrcore/dirtools_public.h>
+-#include <vrcore/strtools_public.h>
+-#include <vrcore/pathtools_public.h>
++#include <vrcommon/dirtools_public.h>
++#include <vrcommon/strtools_public.h>
++#include <vrcommon/pathtools_public.h>
+ 
+ #include <errno.h>
+ #include <string.h>
+--- a/src/vrcommon/envvartools_public.cpp
++++ b/src/vrcommon/envvartools_public.cpp
+@@ -1,6 +1,6 @@
+ //========= Copyright Valve Corporation ============//
+-#include <vrcore/envvartools_public.h>
+-#include <vrcore/strtools_public.h>
++#include <vrcommon/envvartools_public.h>
++#include <vrcommon/strtools_public.h>
+ #include <stdlib.h>
+ #include <string>
+ #include <cctype>
+--- a/src/vrcommon/pathtools_public.cpp
++++ b/src/vrcommon/pathtools_public.cpp
+@@ -1,6 +1,6 @@
+ //========= Copyright Valve Corporation ============//
+-#include <vrcore/strtools_public.h>
+-#include <vrcore/pathtools_public.h>
++#include <vrcommon/strtools_public.h>
++#include <vrcommon/pathtools_public.h>
+ 
+ #if defined( _WIN32)
+ #include <windows.h>
+--- a/src/vrcommon/sharedlibtools_public.cpp
++++ b/src/vrcommon/sharedlibtools_public.cpp
+@@ -1,5 +1,5 @@
+ //========= Copyright Valve Corporation ============//
+-#include <vrcore/sharedlibtools_public.h>
++#include <vrcommon/sharedlibtools_public.h>
+ #include <string.h>
+ 
+ #if defined(_WIN32)
+--- a/src/vrcommon/strtools_public.cpp
++++ b/src/vrcommon/strtools_public.cpp
+@@ -1,6 +1,7 @@
+ //========= Copyright Valve Corporation ============//
+-#include <vrcore/strtools_public.h>
++#include <vrcommon/strtools_public.h>
+ #include <string.h>
++#include <stdarg.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <sstream>
+@@ -9,7 +10,6 @@
+ #include <functional>
+ #include <locale>
+ #include <codecvt>
+-#include <vrcore/assert.h>
+ 
+ #if defined( _WIN32 )
+ #include <windows.h>
+@@ -128,7 +128,6 @@ std::string Format( const char *pchFormat, ... )
+ 	// Something went fairly wrong
+ 	if ( unSize < 0 )
+ 	{
+-		AssertMsg( false, "Format string parse failure" );
+ 		return "";
+ 	}
+ 
+@@ -149,7 +148,6 @@ std::string Format( const char *pchFormat, ... )
+ 	// Double check, just in case
+ 	if ( unSize < 0 )
+ 	{
+-		AssertMsg( false, "Format string parse failure" );
+ 		return "";
+ 	}
+ 
+--- a/src/vrcommon/vrpathregistry_public.cpp
++++ b/src/vrcommon/vrpathregistry_public.cpp
+@@ -1,11 +1,11 @@
+ //========= Copyright Valve Corporation ============//
+ 
+-#include <vrcore/vrpathregistry_public.h>
++#include <vrcommon/vrpathregistry_public.h>
+ #include <json/json.h>
+-#include <vrcore/pathtools_public.h>
+-#include <vrcore/envvartools_public.h>
+-#include <vrcore/strtools_public.h>
+-#include <vrcore/dirtools_public.h>
++#include <vrcommon/pathtools_public.h>
++#include <vrcommon/envvartools_public.h>
++#include <vrcommon/strtools_public.h>
++#include <vrcommon/dirtools_public.h>
+ 
+ #if defined( WIN32 )
+ #include <windows.h>

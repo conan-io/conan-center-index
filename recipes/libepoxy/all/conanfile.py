@@ -56,7 +56,7 @@ class EpoxyConan(ConanFile):
             del self.options.x11
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.57.1")
 
     def requirements(self):
         self.requires("opengl/system")

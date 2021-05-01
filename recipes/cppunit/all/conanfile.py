@@ -67,6 +67,8 @@ class CppunitConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Windows" and self.options.shared:
+            self._autotools.defines.append("CPPUNIT_BUILD_DLL")
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")

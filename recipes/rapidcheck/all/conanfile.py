@@ -9,6 +9,7 @@ class RapidcheckConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emil-e/rapidcheck"
     license = "BSD-2-Clause"
+    topics = "quickcheck", "testing", "property-testing"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"

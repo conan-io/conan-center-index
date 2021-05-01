@@ -1,10 +1,17 @@
 sources:
   "2.13.01":
-    sha256: f420d01e898d9e15b78316f473040c8b56b72b357edd8ddbcef4387defd74d52
-    url: http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.gz
+    sha256: aa0213008f0433ecbe07bb628506a5c4be8079be20fc3532a5031fd639db9a5e
+    url: https://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.xz
   "2.13.02":
-    sha256: 4749fd76a8a26dc7d8871bc97cc2c16cfa0c933f984a13128e94f464f417531a
-    url: http://www.nasm.us/pub/nasm/releasebuilds/2.13.02/nasm-2.13.02.tar.gz
+    sha256: 8ac3235f49a6838ff7a8d7ef7c19a4430d0deecc0c2d3e3e237b5e9f53291757
+    url: https://www.nasm.us/pub/nasm/releasebuilds/2.13.02/nasm-2.13.02.tar.xz
   "2.14":
-    sha256: 66305119c8adafa39fb403d2f335ed297579ddc7c7cf79f00c10433691006432
-    url: http://www.nasm.us/pub/nasm/releasebuilds/2.14/nasm-2.14.tar.gz
+    sha256: 97c615dbf02ef80e4e2b6c385f7e28368d51efc214daa98e600ca4572500eec0
+    url: https://www.nasm.us/pub/nasm/releasebuilds/2.14/nasm-2.14.tar.xz
+  "2.15.05":
+    sha256: 3caf6729c1073bf96629b57cee31eeb54f4f8129b01902c73428836550b30a3f
+    url: https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.xz
+patches:
+  "2.15.05":
+    - patch_file: "patches/2.15.05-0001-disable-newly-integrated-dependency-tracking.patch"
+      base_path: "source_subfolder"

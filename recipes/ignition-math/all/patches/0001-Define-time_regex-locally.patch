@@ -1,0 +1,42 @@
+From 24a9b3284fcbf05cfec09d9cbd4de4d9977c8318 Mon Sep 17 00:00:00 2001
+From: Juan Oxoby <juan@vicarious.com>
+Date: Fri, 16 Oct 2020 21:28:37 -0700
+Subject: [PATCH] Define time_regex locally
+
+---
+ include/ignition/math/Helpers.hh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/include/ignition/math/Helpers.hh b/include/ignition/math/Helpers.hh
+index 2dd5cc6..bd4d35f 100644
+--- a/include/ignition/math/Helpers.hh
++++ b/include/ignition/math/Helpers.hh
+@@ -870,7 +870,7 @@ namespace ignition
+     // The following regex takes a time string in the general format of
+     // "dd hh:mm:ss.nnn" where n is milliseconds, if just one number is
+     // provided, it is assumed to be seconds
+-    static const std::regex time_regex(
++    static const char* time_regex_str =
+         "^([0-9]+ ){0,1}"                       // day:
+                                                 // Any positive integer
+ 
+@@ -887,7 +887,7 @@ namespace ignition
+                                                 // 0 - 9
+                                                 // 00 - 59
+ 
+-        "(\\.[0-9]{1,3}){0,1})$");              // millisecond:
++        "(\\.[0-9]{1,3}){0,1})$";              // millisecond:
+                                                 // .0 - .9
+                                                 // .00 - .99
+                                                 // .000 - 0.999
+@@ -907,6 +907,7 @@ namespace ignition
+         uint64_t & numberMinutes, uint64_t & numberSeconds,
+         uint64_t & numberMilliseconds)
+     {
++      static const std::regex time_regex(time_regex_str);
+       std::smatch matches;
+ 
+       // `matches` should always be a size of 6 as there are 6 matching
+-- 
+2.17.1
+

@@ -87,7 +87,7 @@ class XapianCoreConan(ConanFile):
         self._autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in self._autotools.library_paths])
         self._autotools.library_paths = []
         if self.settings.compiler == "Visual Studio":
-            self._autotools.cxx_flags.append("-EHsc")
+            self._autotools.cxx_flags.extend(["-EHsc", "-FS"])
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",
@@ -131,6 +131,8 @@ class XapianCoreConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["rt"]
+            if self.settings.os == "SunOS":
+                self.cpp_info.system_libs = ["socket", "nsl"]
 
         self.cpp_info.names["cmake_find_package"] = "xapian"
         self.cpp_info.names["cmake_find_package_multi"] = "xapian"

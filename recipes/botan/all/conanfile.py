@@ -99,7 +99,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.0.2u")
+            self.requires("openssl/1.1.1i")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
@@ -249,11 +249,16 @@ class BotanConan(ConanFile):
         if self.settings.os != "Windows" and self.options.fPIC:
             botan_extra_cxx_flags.append('-fPIC')
 
-        if self.settings.os == "Macos" and self.settings.os.version:
-            macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                   self.settings.os.version)
+        if tools.is_apple_os(self.settings.os):
+            if self.settings.get_safe("os.version"):
+                macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
+                                                                       self.settings.get_safe("os.version"),
+                                                                       self.settings.get_safe("os.sdk"),
+                                                                       self.settings.get_safe("os.subsystem"),
+                                                                       self.settings.get_safe("arch"))
+                botan_extra_cxx_flags.append(macos_min_version)
             macos_sdk_path = "-isysroot {}".format(tools.XCRun(self.settings).sdk_path)
-            botan_extra_cxx_flags.extend([macos_min_version, macos_sdk_path])
+            botan_extra_cxx_flags.append(macos_sdk_path)
 
         # This is to work around botan's configure script that *replaces* its
         # standard (platform dependent) flags in presence of an environment
@@ -283,7 +288,7 @@ class BotanConan(ConanFile):
 
         if self.options.with_openssl:
             build_flags.append('--with-openssl')
-            build_flags.extend(self._dependency_build_flags("OpenSSL"))
+            build_flags.extend(self._dependency_build_flags("openssl"))
 
         if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')

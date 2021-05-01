@@ -13,7 +13,6 @@ class LibX264Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "bit_depth": [8, 10, "all"]}
     default_options = {'shared': False, 'fPIC': True, 'bit_depth': 'all'}
-    build_requires = "nasm/2.13.02"
     _override_env = {}
     _autotools = None
 
@@ -30,8 +29,9 @@ class LibX264Conan(ConanFile):
         return "source_subfolder"
 
     def build_requirements(self):
+        self.build_requires("nasm/2.15.05")
         if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -86,9 +86,6 @@ class LibX264Conan(ConanFile):
                 self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
                 # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
                 self._autotools.flags.append('-FS')
-            if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
-                self._autotools.flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                                self.settings.os.version))
             build_canonical_name = None
             host_canonical_name = None
             if self.settings.compiler == "Visual Studio":

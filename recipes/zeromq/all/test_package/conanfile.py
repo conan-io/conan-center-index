@@ -10,6 +10,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["WITH_LIBSODIUM"] = self.options["zeromq"].encryption == "libsodium"
         cmake.definitions["ZEROMQ_SHARED"] = self.options["zeromq"].shared
+        cmake.definitions["WITH_NORM"] = self.options["zeromq"].with_norm
         cmake.configure()
         cmake.build()
 

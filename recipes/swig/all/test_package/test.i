@@ -1,5 +1,4 @@
-/* File : example.i */
-%module example
+%module PackageTest
 
 %inline %{
 extern int    gcd(int u, int v);

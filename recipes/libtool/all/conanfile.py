@@ -44,12 +44,11 @@ class LibtoolConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("automake/1.16.2")
+        self.requires("automake/1.16.3")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     @contextmanager
     def _build_context(self):
@@ -163,6 +162,10 @@ class LibtoolConan(ConanFile):
             os.rename(os.path.join(binpath, "libtool"),
                       os.path.join(binpath, "libtool.exe"))
 
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "ltdl.lib"))
+
     @property
     def _libtool_relocatable_env(self):
         return {
@@ -174,10 +177,7 @@ class LibtoolConan(ConanFile):
         }
 
     def package_info(self):
-        lib = "ltdl"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
-        self.cpp_info.libs = [lib]
+        self.cpp_info.libs = ["ltdl"]
 
         if self.options.shared:
             if self.settings.os == "Windows":

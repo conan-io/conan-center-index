@@ -1,0 +1,24 @@
+sources:
+  "r21d":
+    url:
+      "Windows":
+          url: https://dl.google.com/android/repository/android-ndk-r21d-windows-x86_64.zip
+          sha256: 18335e57f8acab5a4acf6a2204130e64f99153015d55eb2667f8c28d4724d927
+      "Linux":
+          url: https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+          sha256: dd6dc090b6e2580206c64bcee499bc16509a5d017c6952dcd2bed9072af67cbd
+      "Macos":
+          url: https://dl.google.com/android/repository/android-ndk-r21d-darwin-x86_64.zip
+          sha256: 5851115c6fc4cce26bc320295b52da240665d7ff89bda2f5d5af1887582f5c48
+  "r22":
+    url:
+      "Windows":
+          url: https://dl.google.com/android/repository/android-ndk-r22-windows-x86_64.zip
+          sha256: 5a0eafa83c8bba3c76e8427aa3d83d169215f62963a277b1914a3651aa47f751
+      "Linux":
+          url: https://dl.google.com/android/repository/android-ndk-r22-linux-x86_64.zip
+          sha256: d37fc69cd81e5660234a686e20adef39bc0244086e4d66525a40af771c020718
+      "Macos":
+          url: https://dl.google.com/android/repository/android-ndk-r22-darwin-x86_64.zip
+          sha256: 14fce4dea7fb3facbc0e3d20270007bffec3ba383aec02e8b0e0dad8d8782892
+

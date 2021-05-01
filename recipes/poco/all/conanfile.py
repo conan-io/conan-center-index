@@ -4,6 +4,9 @@ from collections import namedtuple, OrderedDict
 import os
 
 
+required_conan_version = ">=1.32.0"
+
+
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
@@ -31,9 +34,9 @@ class PocoConan(ConanFile):
         # "PocoCppUnit": _PocoComponent("enable_cppunit", False, ("PocoFoundation", ), False)),
         "PocoCrypto": _PocoComponent("enable_crypto", True, ("PocoFoundation", ), True),    # also external openssl
         "PocoData": _PocoComponent("enable_data", True, ("PocoFoundation", ), True),
-        "PocoDataMySQL": _PocoComponent("enable_data_mysql", False, ("PocoData", ), True),
+        "PocoDataMySQL": _PocoComponent("enable_data_mysql", True, ("PocoData", ), True),
         "PocoDataODBC": _PocoComponent("enable_data_odbc", False, ("PocoData", ), True),
-        "PocoDataPostgreSQL": _PocoComponent("enable_data_postgresql", False, ("PocoData", ), True),    # also external postgresql
+        "PocoDataPostgreSQL": _PocoComponent("enable_data_postgresql", True, ("PocoData", ), True),    # also external postgresql
         "PocoDataSQLite": _PocoComponent("enable_data_sqlite", True, ("PocoData", ), True),  # also external sqlite3
         "PocoEncodings": _PocoComponent("enable_encodings", True, ("PocoFoundation", ), True),
         # "PocoEncodingsCompiler": _PocoComponent("enable_encodingscompiler", False, ("PocoNet", "PocoUtil", ), False),
@@ -95,24 +98,26 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.enable_netssl
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
             del self.options.enable_encodings
         if tools.Version(self.version) < "1.10":
+            del self.options.enable_data_mysql
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
-        if self.options.enable_data_mysql:
-            raise ConanInvalidConfiguration("MySQL not supported yet, open an issue here please: %s" % self.url)
         if self.settings.compiler == "Visual Studio":
             if self.options.shared and "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
-        if self.options.get_safe("enable_data_postgresql", False):
-            raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
         for compopt in self._poco_component_tree.values():
             if not compopt.option:
                 continue
@@ -122,25 +127,34 @@ class PocoConan(ConanFile):
                         continue
                     if not self.options.get_safe(self._poco_component_tree[compdep].option, False):
                         raise ConanInvalidConfiguration("option {} requires also option {}".format(compopt.option, self._poco_component_tree[compdep].option))
+        if self.options.enable_data_sqlite:
+            if self.options["sqlite3"].threadsafe == 0:
+                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
 
     def requirements(self):
-        self.requires("pcre/8.41")
+        self.requires("pcre/8.44")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
             self.requires("expat/2.2.10")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.34.0")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.enable_netssl or \
+        if self.options.get_safe("enable_netssl", False) or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.7")
+        if self.options.get_safe("enable_data_postgresql", False):
+            self.requires("libpq/13.1")
+        if self.options.get_safe("enable_data_mysql", False):
+            self.requires("apr/1.7.0")
+            self.requires('apr-util/1.6.1')
+            self.requires("libmysqlclient/8.0.17")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -160,6 +174,22 @@ class PocoConan(ConanFile):
         self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             self._cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
+        if self.options.get_safe("enable_data_postgresql", False):
+            self._cmake.definitions["PostgreSQL_ROOT_DIR"] = self.deps_cpp_info["libpq"].rootpath
+            self._cmake.definitions["PostgreSQL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
+            self._cmake.definitions["PostgreSQL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["libpq"].lib_paths)
+        if self.options.get_safe("enable_data_mysql", False):
+            self._cmake.definitions["MYSQL_ROOT_DIR"] = self.deps_cpp_info["libmysqlclient"].rootpath
+            self._cmake.definitions["MYSQL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
+            self._cmake.definitions["MYSQL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
+            self._cmake.definitions["MYSQL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["libmysqlclient"].lib_paths)
+            self._cmake.definitions["APR_ROOT_DIR"] = self.deps_cpp_info["apr"].rootpath
+            self._cmake.definitions["APR_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["apr"].include_paths)
+            self._cmake.definitions["APR_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr"].lib_paths)
+            self._cmake.definitions["APRUTIL_ROOT_DIR"] = self.deps_cpp_info["apr-util"].rootpath
+            self._cmake.definitions["APRUTIL_ROOT_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].include_paths)
+            self._cmake.definitions["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].lib_paths)
+
         self.output.info(self._cmake.definitions)
         # On Windows, Poco needs a message (MC) compiler.
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
@@ -167,9 +197,6 @@ class PocoConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.enable_data_sqlite:
-            if self.options["sqlite3"].threadsafe == 0:
-                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()

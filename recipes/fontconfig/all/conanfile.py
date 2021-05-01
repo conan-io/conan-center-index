@@ -43,6 +43,7 @@ class FontconfigConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("gperf/3.1")
+        self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
@@ -55,12 +56,15 @@ class FontconfigConan(ConanFile):
         if not self._autotools:
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-                    "--disable-docs"]
+                    "--disable-docs",
+                    "--disable-nls",
+                   ]
             args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
             args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--localstatedir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "var")))
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self._autotools.libs = []
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
         return self._autotools
@@ -68,12 +72,19 @@ class FontconfigConan(ConanFile):
     def _patch_files(self):
         #  - fontconfig requires libtool version number, change it for the corresponding freetype one
         tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'), '21.0.15', '2.8.1')
+        # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, 'Makefile.in'),
+            '@CROSS_COMPILING_TRUE@RUN_FC_CACHE_TEST = false',
+            'RUN_FC_CACHE_TEST=false'
+        )
 
     def build(self):
         # Patch files from dependencies
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
@@ -90,7 +101,7 @@ class FontconfigConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"

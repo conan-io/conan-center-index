@@ -66,6 +66,7 @@ class VorbisConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Vorbis"
         self.cpp_info.names["cmake_find_package_multi"] = "Vorbis"
+        self.cpp_info.names["pkg_config"] = "vorbis_full_package" # see https://github.com/conan-io/conan-center-index/pull/4173
         # vorbis
         self.cpp_info.components["vorbismain"].names["cmake_find_package"] = "vorbis"
         self.cpp_info.components["vorbismain"].names["cmake_find_package_multi"] = "vorbis"

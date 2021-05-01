@@ -29,11 +29,6 @@ class LibiconvConan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +38,10 @@ class LibiconvConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -95,13 +94,6 @@ class LibiconvConan(ConanFile):
                 host = "i686-w64-mingw32"
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
-
-        #
-        # If you pass --build when building for iPhoneSimulator, the configure script halts.
-        # So, disable passing --build by setting it to False.
-        #
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 

@@ -58,9 +58,9 @@ class MariadbConnectorcConan(ConanFile):
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.16")
         if self.options.with_curl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.75.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 
@@ -73,18 +73,13 @@ class MariadbConnectorcConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "${ZLIB_LIBRARY}",
-                              "${ZLIB_LIBRARIES}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "IF(OPENSSL_FOUND)",
-                              "IF(OpenSSL_FOUND)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
-                              "SET(SSL_LIBRARIES ${OpenSSL_LIBRARIES})")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "${OPENSSL_INCLUDE_DIR}",
-                              "${OpenSSL_INCLUDE_DIR}")
+        root_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
+        tools.replace_in_file(
+            root_cmake,
+            "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
+            "SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES})"
+        )
 
     def _configure_cmake(self):
         if self._cmake:

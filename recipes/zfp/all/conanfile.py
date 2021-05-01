@@ -21,7 +21,6 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": [True, False],
         "with_cache_fast_hash": [True, False],
         "with_cache_profile": [True, False],
-        "with_cuda": [True, False],
         "with_openmp": [True, False],
     }
     default_options = {
@@ -33,7 +32,6 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": False,
         "with_cache_fast_hash": False,
         "with_cache_profile": False,
-        "with_cuda": False,
         "with_openmp": False,
     }
 

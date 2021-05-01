@@ -1,4 +1,10 @@
 sources:
-  1.5.2:
-    url: https://github.com/stlab/libraries/archive/V1.5.2.tar.gz
+  "1.5.5":
+    url: "https://github.com/stlab/libraries/archive/v1.5.5.tar.gz"
+    sha256: "30ec5a36b4c074feac72a1b9a744f0b279010e18c7bb04bbdc5d44fe9eaf5ad8"
+  "1.5.4":
+    url: "https://github.com/stlab/libraries/archive/v1.5.4.tar.gz"
+    sha256: "87306f58f6614f4a1ca54dda52fedff7e610d3b3dae035829657bac77bc33640"
+  "1.5.2":
+    url: https://github.com/stlab/libraries/archive/v1.5.2.tar.gz
     sha256: a82eb013e51d0bb3ee2050f0eda31e11997cb4ca74d2abfdc2c8249c5c67c9fb

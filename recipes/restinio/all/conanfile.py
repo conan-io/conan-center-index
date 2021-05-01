@@ -49,9 +49,9 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/7.1.2")
+        self.requires("fmt/7.1.3")
         self.requires("expected-lite/0.5.0")
-        self.requires("optional-lite/3.3.0")
+        self.requires("optional-lite/3.4.0")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/1.2.2")
 
@@ -62,12 +62,12 @@ class RestinioConan(ConanFile):
                 self.requires("asio/1.16.1")
         else:
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("boost/1.74.0")
+                self.requires("boost/1.75.0")
             else:
                 self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
