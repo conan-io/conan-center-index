@@ -84,7 +84,7 @@ class grpcConan(ConanFile):
         #
         # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.build_csharp_ext else "OFF"
 
-
+        self._cmake = CMake(self)
         self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.build_codegen
         self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.build_csharp_ext
         self._cmake.definitions["gRPC_BUILD_TESTS"] = False
