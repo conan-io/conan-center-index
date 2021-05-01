@@ -166,6 +166,16 @@ class LibtoolConan(ConanFile):
             os.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
                       os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
+        # allow libtool to link static libs into shared for more platforms
+        libtool_m4 = os.path.join(self.package_folder, "bin", "share", "aclocal", "libtool.m4")
+        method_pass_all = "lt_cv_deplibs_check_method=pass_all"
+        tools.replace_in_file(libtool_m4,
+                              "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
+                              method_pass_all)
+        tools.replace_in_file(libtool_m4,
+                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+                              method_pass_all)
+
     @property
     def _libtool_relocatable_env(self):
         return {
