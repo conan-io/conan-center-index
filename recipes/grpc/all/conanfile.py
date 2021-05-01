@@ -42,8 +42,15 @@ class grpcConan(ConanFile):
         "build_ruby_plugin": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def requirements(self):
         self.requires('zlib/1.2.11')
@@ -67,7 +74,8 @@ class grpcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake is not None:
+            return self._cmake
 
         # This doesn't work yet as one would expect, because the install target builds everything
         # and we need the install target because of the generated CMake files
@@ -77,31 +85,31 @@ class grpcConan(ConanFile):
         # cmake.definitions["CONAN_ENABLE_MOBILE"] = "ON" if self.options.build_csharp_ext else "OFF"
 
 
-        cmake.definitions["gRPC_BUILD_CODEGEN"] = bool(self.options.build_codegen)
-        cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = bool(self.options.build_csharp_ext)
-        cmake.definitions["gRPC_BUILD_TESTS"] = False
+        self._cmake.definitions["gRPC_BUILD_CODEGEN"] = bool(self.options.build_codegen)
+        self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = bool(self.options.build_csharp_ext)
+        self._cmake.definitions["gRPC_BUILD_TESTS"] = False
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
-        cmake.definitions["gRPC_INSTALL"] = True
+        self._cmake.definitions["gRPC_INSTALL"] = True
 
         # tell grpc to use the find_package versions
-        cmake.definitions["gRPC_ZLIB_PROVIDER"] = "package"
-        cmake.definitions["gRPC_CARES_PROVIDER"] = "package"
-        cmake.definitions["gRPC_RE2_PROVIDER"] = "package"
-        cmake.definitions["gRPC_SSL_PROVIDER"] = "package"
-        cmake.definitions["gRPC_PROTOBUF_PROVIDER"] = "package"
-        cmake.definitions["gRPC_ABSL_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_ZLIB_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_CARES_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_RE2_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_SSL_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_PROTOBUF_PROVIDER"] = "package"
+        self._cmake.definitions["gRPC_ABSL_PROVIDER"] = "package"
 
-        cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = bool(self.options.build_cpp_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = bool(self.options.build_csharp_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = bool(self.options.build_node_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = bool(self.options.build_objective_c_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = bool(self.options.build_php_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = bool(self.options.build_python_plugin)
-        cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = bool(self.options.build_ruby_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_CPP_PLUGIN"] = bool(self.options.build_cpp_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_CSHARP_PLUGIN"] = bool(self.options.build_csharp_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_NODE_PLUGIN"] = bool(self.options.build_node_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN"] = bool(self.options.build_objective_c_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_PHP_PLUGIN"] = bool(self.options.build_php_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = bool(self.options.build_python_plugin)
+        self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = bool(self.options.build_ruby_plugin)
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
