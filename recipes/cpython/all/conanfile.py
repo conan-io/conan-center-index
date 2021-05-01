@@ -142,12 +142,11 @@ class CPythonConan(ConanFile):
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecure")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Python-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _with_libffi(self):
-        # cpython 3.7.7 on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
+        # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self._supports_modules \
                and (self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8") \
                and not tools.is_apple_os(self.settings.os)
@@ -155,26 +154,26 @@ class CPythonConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self._supports_modules:
-            self.requires("openssl/1.1.1i")
-            self.requires("expat/2.2.10")
+            self.requires("openssl/1.1.1k")
+            self.requires("expat/2.3.0")
             if self._with_libffi:
                 self.requires("libffi/3.2.1")
             if tools.Version(self.version) < "3.8":
                 self.requires("mpdecimal/2.4.2")
             else:
-                self.requires("mpdecimal/2.5.0")
+                self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
-            self.requires("libxcrypt/4.4.16")
+            self.requires("libxcrypt/4.4.18")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
-            self.requires("gdbm/1.18.1")
+            self.requires("gdbm/1.19")
         if self.options.get_safe("with_nis", False):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.35.5")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -228,6 +227,9 @@ class CPythonConan(ConanFile):
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
                 "--with-tcltk-libs={}".format(" ".join(tcltk_libs)),
             ])
+        if self.settings.os in ("Linux", "FreeBSD"):
+            # Building _testembed fails due to missing pthread/rt symbols
+            self._autotools.link_flags.append("-lpthread")
 
         build = None
         if tools.cross_building(self.settings) and not tools.cross_building(self.settings, skip_x64_x86=True):
