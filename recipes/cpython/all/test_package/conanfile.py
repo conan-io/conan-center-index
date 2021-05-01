@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools, RunEnviro
 from conans.errors import ConanException
 from io import StringIO
 import os
+import re
 import shutil
 
 
@@ -34,7 +35,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _py_version(self):
-        return self.deps_cpp_info["cpython"].version
+        return re.match(r"^([0-9.]+)", self.deps_cpp_info["cpython"].version).group(1)
 
     @property
     def _pymalloc(self):
@@ -71,6 +72,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["BUILD_MODULE"] = self._supports_modules
         cmake.definitions["PY_VERSION_MAJOR"] = py_major
         cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
+        cmake.definitions["PY_FULL_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["PY_VERSION"] = self._py_version
         cmake.definitions["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
@@ -142,8 +144,9 @@ class TestPackageConan(ConanFile):
 
             buffer = StringIO()
             self.run("{} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"".format(tools.get_env("PYTHON")), run_environment=True, output=buffer)
+            self.output.info(buffer.getvalue())
             version_detected = buffer.getvalue().splitlines()[-1].strip()
-            if version_detected != self.deps_cpp_info["cpython"].version:
+            if self._py_version != version_detected:
                 raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self._py_version, res=version_detected))
 
             if self._supports_modules:

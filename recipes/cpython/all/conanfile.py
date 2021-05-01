@@ -63,8 +63,12 @@ class CPythonConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _version_number_only(self):
+        return re.match(r"^([0-9.]+)", self.version).group(1)
+
+    @property
     def _version_tuple(self):
-        return tuple(self.version.split("."))
+        return tuple(self._version_number_only.split("."))
 
     @property
     def _supports_modules(self):
@@ -80,11 +84,11 @@ class CPythonConan(ConanFile):
 
     @property
     def _is_py3(self):
-        return tools.Version(self.version).major == "3"
+        return tools.Version(self._version_number_only).major == "3"
 
     @property
     def _is_py2(self):
-        return tools.Version(self.version).major == "2"
+        return tools.Version(self._version_number_only).major == "2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -148,7 +152,7 @@ class CPythonConan(ConanFile):
     def _with_libffi(self):
         # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self._supports_modules \
-               and (self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8") \
+               and (self.settings.compiler != "Visual Studio" or tools.Version(self._version_number_only) >= "3.8") \
                and not tools.is_apple_os(self.settings.os)
 
     def requirements(self):
@@ -158,10 +162,12 @@ class CPythonConan(ConanFile):
             self.requires("expat/2.3.0")
             if self._with_libffi:
                 self.requires("libffi/3.2.1")
-            if tools.Version(self.version) < "3.8":
+            if tools.Version(self._version_number_only) < "3.8":
                 self.requires("mpdecimal/2.4.2")
+            elif tools.Version(self._version_number_only) < "3.10":
+                self.requires("mpdecimal/2.5.0")
             else:
-                self.requires("mpdecimal/2.5.0  ")
+                self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.18")
@@ -241,7 +247,7 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.patch(**patch)
-        if self._is_py3:
+        if self._is_py3 and tools.Version(self._version_number_only) < "3.10":
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")
         if self.settings.compiler == "Visual Studio":
@@ -260,7 +266,7 @@ class CPythonConan(ConanFile):
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
 
-        if self.options.with_curses:
+        if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   "curses_libs = ",
@@ -279,7 +285,6 @@ class CPythonConan(ConanFile):
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
                                   "<PreprocessorDefinitions>", "<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
-            py_version = tools.Version(self.version)
 
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
@@ -358,7 +363,7 @@ class CPythonConan(ConanFile):
             "x86": "Win32",
             "x86_64": "x64",
         }
-        if tools.Version(self.version) >= "3.8":
+        if tools.Version(self._version_number_only) >= "3.8":
             archs.update({
                 "armv7": "ARM",
                 "armv8_32": "ARM",
@@ -384,10 +389,10 @@ class CPythonConan(ConanFile):
 
     def build(self):
         if self._supports_modules:
-            if tools.Version(self.version) < "3.8.0":
+            if tools.Version(self._version_number_only) < "3.8.0":
                 if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
                     raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
-            elif tools.Version(self.version) >= "3.9.0":
+            elif tools.Version(self._version_number_only) >= "3.9.0":
                 if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
@@ -412,7 +417,7 @@ class CPythonConan(ConanFile):
             "x86_64": "amd64",
             "x86": "win32",
         }
-        if tools.Version(self.version) >= "3.8":
+        if tools.Version(self._version_number_only) >= "3.8":
             build_subdir_lut.update({
                 "armv7": "arm32",
                 "armv8_32": "arm32",
@@ -577,7 +582,7 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             if self.settings.build_type == "Debug":
                 res += "d"
-            if tools.Version(self.version) < tools.Version("3.8"):
+            if tools.Version(self._version_number_only) < "3.8":
                 if self.options.get_safe("pymalloc", False):
                     res += "m"
         return res
@@ -599,7 +604,7 @@ class CPythonConan(ConanFile):
         # self.cpp_info.names["cmake_find_package_multi"] = "Python"
         # FIXME: conan components need to generate multiple .pc files (python2, python-27)
 
-        py_version = tools.Version(self.version)
+        py_version = tools.Version(self._version_number_only)
 
         # python component: "Build a C extension for Python"
         if self.settings.compiler == "Visual Studio":

@@ -5,5 +5,5 @@ versions:
     folder: "all"
   "3.8.9":
     folder: "all"
-  "3.9.4":
+  "3.10.0a7":
     folder: "all"

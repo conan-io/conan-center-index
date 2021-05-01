@@ -11,6 +11,9 @@ sources:
   "3.9.4":
     url: "https://www.python.org/ftp/python/3.9.4/Python-3.9.4.tgz"
     sha256: "66c4de16daa74a825cf9da9ddae1fe020b72c3854b73b1762011cc33f9e4592f"
+  "3.10.0a7":
+    url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0a7.tgz"
+    sha256: "8a13ee8033d32085e743e965f72e5ba631c82c8ad4d75d5ff68731a74c5c742b"
 patches:
   "2.7.18":
     - patch_file: "patches/2.7.18-0001-msvc.patch"
@@ -51,6 +54,19 @@ patches:
     - patch_file: "patches/3.9.1-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.9.1-0005-disable-macos-tcltk.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+      base_path: "source_subfolder"
+  "3.10.0a7":
+    - patch_file: "patches/3.10.0-0001-msvc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.9.1-0002-_msi-vcxproj.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.10.0-0003-_ctypes-ffi.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.10.0-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.10.0-0005-disable-macos-tcltk.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
