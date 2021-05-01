@@ -13,11 +13,6 @@ conan_basic_setup()
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
     ${CONAN_INCLUDE_DIRS_CFGFILE}/include)
 
-set(INPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp" )
-
 add_custom_target(gencfg
    COMMAND ${CONAN_BIN_DIRS_CFGFILE}/cfgfile.generator${CMAKE_EXECUTABLE_SUFFIX} -i ${CMAKE_CURRENT_SOURCE_DIR}/session_cfg.conf -o ${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp
 	)

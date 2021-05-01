@@ -3,13 +3,12 @@
 #include <fstream>
 
 #include "cfg.hpp"
-#include "config.hpp"
 
 int main()
 {
     Cfg::Session cfg;
 
-    std::ifstream stream( c_input_folder + "/test.cfg" );
+    std::ifstream stream( "../../../test.cfg" );
 
     try {
         Cfg::tag_Session< cfgfile::string_trait_t > s;

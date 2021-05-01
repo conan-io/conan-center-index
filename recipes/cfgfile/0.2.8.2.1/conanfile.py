@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
 class CfgfileConan(ConanFile):
@@ -42,21 +41,12 @@ class CfgfileConan(ConanFile):
             raise ConanInvalidConfiguration("cfgfile requires a compiler that supports at least C++14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-    def build(self):
+    def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "cfgfile"), dst=os.path.join("include", "cfgfile"))
         cmake = CMake(self)
         cmake.configure(source_folder="source_subfolder/generator")
         cmake.build()
         cmake.install()
-
-    def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("*", src=self._source_subfolder + "/cfgfile", dst="include/cfgfile")
-
-    def package_info(self):
-        self.cpp_info.includedirs = ["."]
-        self.cpp_info.names["cmake_find_package"] = "cfgfile"
-        self.cpp_info.names["cmake_find_package_multi"] = "cfgfile"
