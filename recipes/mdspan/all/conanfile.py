@@ -1,5 +1,4 @@
 from conans import ConanFile, tools
-from conans.tools import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -20,15 +19,15 @@ class MDSpanConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 11
+        return 14
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "14",
-            "gcc": "4.8",
-            "clang": "3.8",
-            "apple-clang": "8.0"
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1"
         }
 
     def configure(self):
