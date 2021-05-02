@@ -2,6 +2,9 @@ sources:
   "20.09.0":
     url: "https://poppler.freedesktop.org/poppler-20.09.0.tar.xz"
     sha256: "4ed6eb5ddc4c37f2435c9d78ff9c7c4036455aea3507d1ce8400070aab745363"
+  "21.04.0":
+    url: "https://poppler.freedesktop.org/poppler-21.04.0.tar.xz"
+    sha256: "5e2219656c6bbd36154133fef2e12b7d0938464518827098b29a10b1697ea79c"
 patches:
   "20.09.0":
     - patch_file: "patches/0001-cmake-use-PROJECT_SOURCE_DIR-fix-CMAKE_MODULE_PATH.patch"

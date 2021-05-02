@@ -95,7 +95,7 @@ class PopplerConan(ConanFile):
         self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
-        self.requires("poppler-data/0.4.9")
+        self.requires("poppler-data/0.4.10")
         self.requires("freetype/2.10.4")
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
@@ -108,8 +108,7 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_gobject_introspection"):
             self.requires("gobject-introspection/1.66.1")
         if self.options.with_qt:
-            # FIXME: missing qt recipe
-            raise ConanInvalidConfiguration("qt is not (yet) available on cii")
+            self.requires("qt/6.0.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/3.24.24")
         if self.options.with_openjpeg:
