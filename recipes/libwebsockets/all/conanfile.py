@@ -198,10 +198,9 @@ class LibwebsocketsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         
-        if tools.Version(self.version) == "4.2.0" and self.options.shared:
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "4.9":
+        if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
                 # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
-                raise ConanInvalidConfiguration("{}/{} shared=True with GCC-4.9 does not build. Please submit a PR with a fix.".format(self.name, self.version))
+                raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
 
     def requirements(self):
         if self.options.with_libuv:
