@@ -106,6 +106,8 @@ class LibdbConan(ConanFile):
             conf_args.extend(["--disable-shared", "--enable-static"])
         if self.options.with_tcl:
             conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
+        if tools.is_apple_os(self.settings.os):
+            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
         if self.settings.os == "Windows" and self.options.shared:
             tools.replace_in_file(os.path.join(self.build_folder, "libtool"),
