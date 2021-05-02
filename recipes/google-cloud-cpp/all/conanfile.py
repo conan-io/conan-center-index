@@ -53,6 +53,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('protobuf/3.15.5')
         self.requires('grpc/1.37.0')
         self.requires('nlohmann_json/3.9.1')
+        self.requires('crc32c/1.1.1')
         # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
         #   self.requires("gRPC")
         #   self.requires('googleapis)
