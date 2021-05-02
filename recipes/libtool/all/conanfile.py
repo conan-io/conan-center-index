@@ -206,14 +206,12 @@ class LibtoolConan(ConanFile):
         self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
-        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext))
-        self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
-        self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
-
         for key, value in self._libtool_relocatable_env.items():
             self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
 
-        automake_extra_include = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_extra_include))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_include)
+        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal"))
+        self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
+        self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(libtool_aclocal)
