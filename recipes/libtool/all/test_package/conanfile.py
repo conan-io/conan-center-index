@@ -111,7 +111,7 @@ class TestPackageConan(ConanFile):
             with self._build_context():
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 autotools.libs = []
-                autotools.library_paths = [os.path.join(install_prefix, "lib")]
+                autotools.link_flags.append("-L{}".format(tools.unix_path(os.path.join(install_prefix, "lib"))))
                 autotools.configure(args=conf_args, configure_dir=autotools_folder)
                 autotools.make(args=["V=1"])
                 autotools.install()
