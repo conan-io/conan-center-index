@@ -54,7 +54,8 @@ class crc32cConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["CRC32C_BUILD_TESTS"] = False
         self._cmake.definitions["CRC32C_BUILD_BENCHMARKS"] = False
         self._cmake.definitions["CRC32C_INSTALL"] = True
