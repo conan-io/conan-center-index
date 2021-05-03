@@ -45,7 +45,6 @@ class LibiconvConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        tools.rename(archive_name, self._source_subfolder)
 
     @contextmanager
     def _build_context(self):
