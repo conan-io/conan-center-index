@@ -20,7 +20,7 @@ class CrashpadConan(ConanFile):
     default_options = {
         "linktime_optimization": False,
         "force_embedded_zlib": False}
-    exports = [ "patches/*", "LICENSE.md" ]
+    exports = [ "patches/*"]
     short_paths = True
     generators = "compiler_args"
 
