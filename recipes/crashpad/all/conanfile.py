@@ -56,9 +56,6 @@ class CrashpadConan(ConanFile):
         self.run("gclient config --spec=\"%s\"" % self._make_spec(), run_environment=True)
         self.run("gclient sync --no-history", run_environment=True)
 
-        tools.patch(base_path=self._patch_base,
-                    patch_file="patches/buildsystem-adaptions.patch")
-
     def _get_target_cpu(self):
         arch = str(self.settings.arch)
 
@@ -127,6 +124,8 @@ class CrashpadConan(ConanFile):
              os.path.join(self._build_dir, "obj", self._build_name, "gen/util/mach/*.o")))
 
     def build(self):
+        tools.patch(base_path=self._patch_base,
+                    patch_file="patches/buildsystem-adaptions.patch")
 
         if self.options.force_embedded_zlib:
             tools.patch(base_path=self._patch_base,
