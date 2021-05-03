@@ -129,8 +129,7 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_gobject_introspection"):
             self.requires("gobject-introspection/1.68.0")
         if self.options.with_qt:
-            #self.requires("qt/6.0.3")
-            self.requires("qt/5.15.2")
+            self.requires("qt/6.0.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/3.24.24")
         if self.options.with_openjpeg:
