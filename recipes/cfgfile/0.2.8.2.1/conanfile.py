@@ -36,7 +36,7 @@ class CfgfileConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder + "/generator", build_folder=self._build_subfolder)
+        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "generator"), build_folder=self._build_subfolder)
         return self._cmake
 
     def validate(self):
