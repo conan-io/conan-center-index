@@ -238,6 +238,10 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
+        # libbacktrace cannot be built on Visual Studio
+        if self.settings.compiler == "Visual Studio":
+            del self.options.with_stacktrace_backtrace
+
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         if self.settings.compiler.cppstd:
@@ -1387,7 +1391,7 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
-                    if name in ("boost_stacktrace_basic",) and self.settings.compiler == "Visual Studio":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.compiler == "Visual Studio":
                         continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue

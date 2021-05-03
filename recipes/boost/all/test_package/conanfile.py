@@ -69,9 +69,13 @@ class TestPackageConan(ConanFile):
                 self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
             self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
         if not self.options["boost"].without_stacktrace:
-            self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
+            if self.settings.compiler != "Visual Studio":
+                self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
             self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
-        if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
-            self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
-        if self._boost_option("with_stacktrace_backtrace", False):
-            self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)
+            if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
+                self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
+            if self.settings.os == "Windows":
+                self.run(os.path.join("bin", "stacktrace_windbg_exe"), run_environment=True)
+                self.run(os.path.join("bin", "stacktrace_windbg_cached_exe"), run_environment=True)
+            if self._boost_option("with_stacktrace_backtrace", False):
+                self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)

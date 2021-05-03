@@ -37,7 +37,7 @@ int main() {
     std::cerr << "TEST_STACKTRACE_IMPL not defined!\n";
     res = 1;
 #else
-    std::cerr << "Testing " << stacktrace_impls[TEST_STACKTRACE_IMPL-1] << "...\n";
+    std::cerr << "Testing stacktrace_" << stacktrace_impls[TEST_STACKTRACE_IMPL-1] << "...\n";
 #   if defined(BOOST_STACKTRACE_USE_ADDR2LINE)
 #       if TEST_STACKTRACE_IMPL != TEST_STACKTRACE_ADDR2LINE
             std::cerr << "BOOST_STACKTRACE_USE_ADDR2LINE defined but not testing stacktrace_addr2line\n";
