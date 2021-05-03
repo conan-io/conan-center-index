@@ -46,7 +46,7 @@ class LibiconvConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         archive_name = "{0}-{1}".format(self.name, self.version)
-        os.rename(archive_name, self._source_subfolder)
+        tools.rename(archive_name, self._source_subfolder)
 
     @contextmanager
     def _build_context(self):
@@ -131,8 +131,8 @@ class LibiconvConan(ConanFile):
 
         if self._is_msvc and self.options.shared:
             for import_lib in ["iconv", "charset"]:
-                os.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
-                          os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
+                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                             os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Iconv"
