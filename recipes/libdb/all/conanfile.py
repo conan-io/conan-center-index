@@ -138,6 +138,10 @@ class LibdbConan(ConanFile):
         return "v140" if tools.Version(self.settings.compiler.version) >= "16" else None
 
     @property
+    def _msvc_upgrade_project(self):
+        return False if tools.Version(self.settings.compiler.version) >= "16" else True
+
+    @property
     def _msvc_arch(self):
         return self._msvc_platforms[str(self.settings.arch)]
 
@@ -149,12 +153,12 @@ class LibdbConan(ConanFile):
             projects.append("db_sql")
 
         msbuild = MSBuild(self)
-        upgraded = False
+        upgrade = self._msvc_upgrade_project,
         for project in projects:
             msbuild.build(os.path.join(self._source_subfolder, "build_windows", "VS10", "{}.vcxproj".format(project)),
                           build_type=self._msvc_build_type, platforms=self._msvc_platforms, toolset=self._msvc_toolset,
-                          upgrade_project=not upgraded)
-            upgraded = True
+                          upgrade_project=upgrade)
+            upgrade = False
 
     def build(self):
         self._patch_sources()
