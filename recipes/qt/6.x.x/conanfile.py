@@ -134,20 +134,31 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             self.options.with_glib = False
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
-            raise ConanInvalidConfiguration("qt 6 does not support GCC before 8")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
-            raise ConanInvalidConfiguration("qt 6 does not support clang before 9")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("qt 6 does not support Visual Studio before 2019")
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11":
-            raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
+
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
+    @property
+    def _minimum_compilers_version(self):
+        # Qt6 requires C++17
+        return {
+            "Visual Studio": "16",
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11"
+        }
+
     def configure(self):
+        # C++ minimum standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
