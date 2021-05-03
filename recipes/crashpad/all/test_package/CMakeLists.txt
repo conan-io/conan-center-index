@@ -1,8 +1,7 @@
-set (CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
-
-project(test_package)
 cmake_minimum_required(VERSION 3.1)
+project(test_package)
 
+set (CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
