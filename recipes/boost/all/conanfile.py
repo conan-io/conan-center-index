@@ -334,7 +334,7 @@ class BoostConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self._shared:
             if "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
-            if self.options.numa:
+            if self.options.get_safe("numa"):
                 raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
@@ -1066,7 +1066,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        
+
         if self._is_msvc:
             contents += ' "%s"' % self._cxx.replace("\\", "/")
         else:
