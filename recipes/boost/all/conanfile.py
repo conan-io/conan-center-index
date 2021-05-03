@@ -95,6 +95,7 @@ class BoostConan(ConanFile):
         "i18n_backend": ["iconv", "icu", None],
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": "ANY",
+        "with_stacktrace_backtrace": [True, False],
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -126,6 +127,7 @@ class BoostConan(ConanFile):
         "i18n_backend": "iconv",
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
+        "with_stacktrace_backtrace": True,
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -327,6 +329,9 @@ class BoostConan(ConanFile):
         else:
             del self.options.addr2line_location
 
+        if self.options.get_safe("without_stacktrace", True):
+            del self.options.with_stacktrace_backtrace
+
         if self.options.layout == "b2-default":
             self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
@@ -436,6 +441,10 @@ class BoostConan(ConanFile):
     def _with_iconv(self):
         return not self.options.header_only and self._with_dependency("iconv") and self.options.i18n_backend == "iconv"
 
+    @property
+    def _with_stacktrace_backtrace(self):
+        return not self.options.header_only and self.options.get_safe("with_stacktrace_backtrace", False)
+
     def requirements(self):
         if self._with_zlib:
             self.requires("zlib/1.2.11")
@@ -445,6 +454,9 @@ class BoostConan(ConanFile):
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
             self.requires("zstd/1.4.9")
+        if self._with_stacktrace_backtrace:
+            self.requires("libbacktrace/cci.20210118")
+            self.requires("libunwind/1.5.0")
 
         if self._with_icu:
             self.requires("icu/68.2")
@@ -1098,16 +1110,27 @@ class BoostConan(ConanFile):
             contents += '<archiver>"%s" ' % tools.which(self._ar).replace("\\", "/")
         if self._ranlib:
             contents += '<ranlib>"%s" ' % tools.which(self._ranlib).replace("\\", "/")
-        if "CXXFLAGS" in os.environ:
-            contents += '<cxxflags>"%s" ' % os.environ["CXXFLAGS"]
-        if "CFLAGS" in os.environ:
-            contents += '<cflags>"%s" ' % os.environ["CFLAGS"]
-        if "CPPFLAGS" in os.environ:
-            contents += '<compileflags>"%s" ' % os.environ["CPPFLAGS"]
-        if "LDFLAGS" in os.environ:
-            contents += '<linkflags>"%s" ' % os.environ["LDFLAGS"]
-        if "ASFLAGS" in os.environ:
-            contents += '<asmflags>"%s" ' % os.environ["ASFLAGS"]
+        cxxflags = tools.get_env("CXXFLAGS", " ")
+        cflags = tools.get_env("CFLAGS", " ")
+        cppflags = tools.get_env("CPPFLAGS", " ")
+        ldflags = tools.get_env("LDFLAGS", " ")
+        asflags = tools.get_env("ASFLAGS", " ")
+
+        if self._with_stacktrace_backtrace:
+            for l in ("libbacktrace", "libunwind"):
+                cppflags += " ".join("-I'{}'".format(p) for p in self.deps_cpp_info[l].include_paths) + " "
+                ldflags += " ".join("-L'{}'".format(p) for p in self.deps_cpp_info[l].lib_paths) + " "
+
+        if cxxflags.strip():
+            contents += '<cxxflags>"%s" ' % cxxflags
+        if cflags.strip():
+            contents += '<cflags>"%s" ' % cflags
+        if cppflags.strip():
+            contents += '<compileflags>"%s" ' % cppflags
+        if ldflags.strip():
+            contents += '<linkflags>"%s" ' % ldflags
+        if asflags.strip():
+            contents += '<asmflags>"%s" ' % asflags
 
         contents += " ;"
 
@@ -1366,12 +1389,6 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_basic",) and self.settings.compiler == "Visual Studio":
                         continue
-                    if name == "boost_stacktrace_backtrace":
-                        if "boost_stacktrace_backtrace" not in all_detected_libraries:
-                            continue
-                        # FIXME: Boost.Build sometimes picks up a system libbacktrace library.
-                        # How to avoid this and force using a conan packaged libbacktrace package.
-                        self.output.warn("Picked up a system libbacktrace library")
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
                     libs.append(add_libprefix(name.format(**libformatdata)) + libsuffix)
@@ -1400,9 +1417,6 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].names["pkg_config"] = "boost_{}".format(module)
 
                 for requirement in self._dependencies.get("requirements", {}).get(module, []):
-                    if requirement == "backtrace":
-                        # FIXME: add backtrace support (libbacktrace is available in cci)
-                        continue
                     if self.options.get_safe(requirement, None) == False:
                         continue
                     conan_requirement = self._option_to_conan_requirement(requirement)
@@ -1428,6 +1442,8 @@ class BoostConan(ConanFile):
                 if self.settings.os in ("Linux", "FreeBSD"):
                     self.cpp_info.components["stacktrace_basic"].system_libs.append("dl")
                     self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
+                    if self._with_stacktrace_backtrace:
+                        self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
 
                 if self._stacktrace_addr2line_available:
                     self.cpp_info.components["stacktrace_addr2line"].defines.extend([
@@ -1435,10 +1451,13 @@ class BoostConan(ConanFile):
                         "BOOST_STACKTRACE_USE_ADDR2LINE",
                     ])
 
-                # FIXME: add backtrace support
-                # self.cpp_info.components["stacktrace_backtrace"].defines.extend([
-                #     "BOOST_STACKTRACE_USE_BACKTRACE",
-                # ])
+                if self._with_stacktrace_backtrace:
+                    self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
+                    self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
+                    self.cpp_info.components["stacktrace_backtrace"].requires.extend([
+                        "libunwind::libunwind",
+                        "libbacktrace::libbacktrace",
+                    ])
 
                 self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 

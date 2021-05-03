@@ -36,6 +36,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
             cmake.definitions["WITH_STACKTRACE"] = not self.options["boost"].without_stacktrace
             cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
+            cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
             cmake.configure()
             cmake.build()
 
@@ -70,5 +71,7 @@ class TestPackageConan(ConanFile):
         if not self.options["boost"].without_stacktrace:
             self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
             self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
-        if self.deps_user_info["boost"].stacktrace_addr2line_available:
+        if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
             self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
+        if self._boost_option("with_stacktrace_backtrace", False):
+            self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)
