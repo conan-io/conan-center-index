@@ -94,6 +94,7 @@ class BoostConan(ConanFile):
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
         "visibility": ["global", "protected", "hidden"],
+        "addr2line_location": "ANY",
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -124,6 +125,7 @@ class BoostConan(ConanFile):
         "extra_b2_flags": "None",
         "i18n_backend": "iconv",
         "visibility": "hidden",
+        "addr2line_location": "/usr/bin/addr2line",
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -297,6 +299,10 @@ class BoostConan(ConanFile):
     def _shared(self):
         return self.options.get_safe("shared", self.default_options["shared"])
 
+    @property
+    def _stacktrace_addr2line_available(self):
+        return not self.options.header_only and not self.options.without_stacktrace and self.settings.compiler != "Visual Studio"
+
     def configure(self):
         if self.options.header_only:
             del self.options.shared
@@ -314,6 +320,12 @@ class BoostConan(ConanFile):
             if not self.options.python_version:
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
+
+        if self._stacktrace_addr2line_available:
+            if os.path.abspath(str(self.options.addr2line_location)) != str(self.options.addr2line_location):
+                raise ConanInvalidConfiguration("addr2line_location must be an absolute path to addr2line")
+        else:
+            del self.options.addr2line_location
 
         if self.options.layout == "b2-default":
             self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
@@ -956,6 +968,9 @@ class BoostConan(ConanFile):
         link_flags = 'linkflags="%s"' % " ".join(link_flags) if link_flags else ""
         flags.append(link_flags)
 
+        if self.options.get_safe("addr2line_location"):
+            cxx_flags.append("-DBOOST_STACKTRACE_ADDR2LINE_LOCATION={}".format(self.options.addr2line_location))
+
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
         flags.append(cxx_flags)
 
@@ -1349,7 +1364,7 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_basic") and self.settings.compiler == "Visual Studio":
+                    if name in ("boost_stacktrace_basic",) and self.settings.compiler == "Visual Studio":
                         continue
                     if name == "boost_stacktrace_backtrace":
                         if "boost_stacktrace_backtrace" not in all_detected_libraries:
@@ -1381,7 +1396,7 @@ class BoostConan(ConanFile):
 
                 for requirement in self._dependencies.get("requirements", {}).get(module, []):
                     if requirement == "backtrace":
-                        # FIXME: backtrace not (yet) available in cci
+                        # FIXME: add backtrace support (libbacktrace is available in cci)
                         continue
                     if self.options.get_safe(requirement, None) == False:
                         continue
@@ -1392,6 +1407,7 @@ class BoostConan(ConanFile):
                         if requirement != self.options.i18n_backend:
                             continue
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
+
             for incomplete_component in incomplete_components:
                 self.output.warn("Boost component '{0}' is missing libraries. Try building boost with '-o boost:without_{0}'.".format(incomplete_component))
 
@@ -1402,6 +1418,26 @@ class BoostConan(ConanFile):
             non_built = all_expected_libraries.difference(all_detected_libraries)
             if non_built:
                 raise ConanException("These libraries were expected to be built, but were not built: {}".format(non_built))
+
+            if self.settings.os in ("Linux", "FreeBSD"):
+                self.cpp_info.components["stacktrace"].system_libs.append("dl")
+
+            if self._stacktrace_addr2line_available:
+                self.cpp_info.components["stacktrace_addr2line"].defines.extend([
+                    "BOOST_STACKTRACE_ADDR2LINE_LOCATION=\"{}\"".format(self.options.addr2line_location),
+                    "BOOST_STACKTRACE_USE_ADDR2LINE",
+                ])
+
+            # FIXME: add backtrace support
+            # self.cpp_info.components["stacktrace_backtrace"].defines.extend([
+            #     "BOOST_STACKTRACE_USE_BACKTRACE",
+            # ])
+
+            self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
+
+            if self.settings.os == "Windows":
+                self.cpp_info.components["stacktrace_windb"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
+                self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
@@ -1438,3 +1474,4 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_USE_PTHREADS", "BOOST_SP_USE_PTHREADS"])
                 else:
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
+        self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
