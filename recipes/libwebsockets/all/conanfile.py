@@ -201,6 +201,8 @@ class LibwebsocketsConan(ConanFile):
         if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
                 # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
                 raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
+        if tools.Version(self.version) == "4.0.15" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+                raise ConanInvalidConfiguration("{}/{} with clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
 
     def requirements(self):
         if self.options.with_libuv:
