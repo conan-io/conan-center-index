@@ -11,7 +11,7 @@ class CrashpadConan(ConanFile):
     description = "Crashpad is a crash-reporting system."
     license = "Apache-2.0"
     homepage = "https://chromium.googlesource.com/crashpad/crashpad"
-    url = "https://github.com/bincrafters/conan-crashpad"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("crash-reporting", "logging", "minidump", "crash")
     settings = "os", "compiler", "build_type", "arch"
     options = {
