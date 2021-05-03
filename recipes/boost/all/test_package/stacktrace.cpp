@@ -16,13 +16,15 @@ void f1() {
 
 #define TEST_STACKTRACE_ADDR2LINE 1
 #define TEST_STACKTRACE_BACKTRACE 2
-#define TEST_STACKTRACE_NOOP 3
-#define TEST_STACKTRACE_WINDBG 4
-#define TEST_STACKTRACE_WINDBG_CACHED 5
+#define TEST_STACKTRACE_BASIC 3
+#define TEST_STACKTRACE_NOOP 4
+#define TEST_STACKTRACE_WINDBG 5
+#define TEST_STACKTRACE_WINDBG_CACHED 6
 
 static const char *stacktrace_impls[] = {
     "addr2line",
     "backtrace",
+    "basic",
     "noop",
     "windbg",
     "windbg_cached",

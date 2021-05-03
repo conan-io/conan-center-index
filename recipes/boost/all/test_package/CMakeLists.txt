@@ -71,17 +71,22 @@ if(NOT HEADER_ONLY)
 
     if(WITH_STACKTRACE)
         find_package(Boost COMPONENTS stacktrace REQUIRED)
+
         add_executable(stacktrace_noop_exe stacktrace.cpp)
-        target_compile_definitions(stacktrace_noop_exe PRIVATE TEST_STACKTRACE_IMPL=3)
+        target_compile_definitions(stacktrace_noop_exe PRIVATE TEST_STACKTRACE_IMPL=4)
         target_link_libraries(stacktrace_noop_exe PRIVATE Boost::stacktrace_noop)
+
+        add_executable(stacktrace_basic_exe stacktrace.cpp)
+        target_compile_definitions(stacktrace_basic_exe PRIVATE TEST_STACKTRACE_IMPL=3)
+        target_link_libraries(stacktrace_basic_exe PRIVATE Boost::stacktrace_basic)
 
         if(WIN32)
             add_executable(stacktrace_windbg_exe stacktrace.cpp)
-            target_compile_definitions(stacktrace_windbg_exe PRIVATE TEST_STACKTRACE_IMPL=4)
+            target_compile_definitions(stacktrace_windbg_exe PRIVATE TEST_STACKTRACE_IMPL=5)
             target_link_libraries(stacktrace_windbg_exe PRIVATE Boost::stacktrace_windbg)
 
             add_executable(stacktrace_windbg_cached_exe stacktrace.cpp)
-            target_compile_definitions(stacktrace_windbg_cached_exe PRIVATE TEST_STACKTRACE_IMPL=5)
+            target_compile_definitions(stacktrace_windbg_cached_exe PRIVATE TEST_STACKTRACE_IMPL=6)
             target_link_libraries(stacktrace_windbg_cached_exe PRIVATE Boost::stacktrace_windbg_cached)
         endif()
     endif()

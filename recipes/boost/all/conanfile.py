@@ -1383,6 +1383,11 @@ class BoostConan(ConanFile):
                     continue
 
                 module_libraries = filter_transform_module_libraries(self._dependencies["libs"][module])
+
+                # Don't create components for modules that should have libraries, but don't have (because of filter)
+                if self._dependencies["libs"][module] and not module_libraries:
+                    continue
+
                 all_expected_libraries = all_expected_libraries.union(module_libraries)
                 if set(module_libraries).difference(all_detected_libraries):
                     incomplete_components.append(module)
@@ -1419,25 +1424,27 @@ class BoostConan(ConanFile):
             if non_built:
                 raise ConanException("These libraries were expected to be built, but were not built: {}".format(non_built))
 
-            if self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.components["stacktrace"].system_libs.append("dl")
+            if not self.options.without_stacktrace:
+                if self.settings.os in ("Linux", "FreeBSD"):
+                    self.cpp_info.components["stacktrace_basic"].system_libs.append("dl")
+                    self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
 
-            if self._stacktrace_addr2line_available:
-                self.cpp_info.components["stacktrace_addr2line"].defines.extend([
-                    "BOOST_STACKTRACE_ADDR2LINE_LOCATION=\"{}\"".format(self.options.addr2line_location),
-                    "BOOST_STACKTRACE_USE_ADDR2LINE",
-                ])
+                if self._stacktrace_addr2line_available:
+                    self.cpp_info.components["stacktrace_addr2line"].defines.extend([
+                        "BOOST_STACKTRACE_ADDR2LINE_LOCATION=\"{}\"".format(self.options.addr2line_location),
+                        "BOOST_STACKTRACE_USE_ADDR2LINE",
+                    ])
 
-            # FIXME: add backtrace support
-            # self.cpp_info.components["stacktrace_backtrace"].defines.extend([
-            #     "BOOST_STACKTRACE_USE_BACKTRACE",
-            # ])
+                # FIXME: add backtrace support
+                # self.cpp_info.components["stacktrace_backtrace"].defines.extend([
+                #     "BOOST_STACKTRACE_USE_BACKTRACE",
+                # ])
 
-            self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
+                self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 
-            if self.settings.os == "Windows":
-                self.cpp_info.components["stacktrace_windb"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
-                self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["stacktrace_windb"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
+                    self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)

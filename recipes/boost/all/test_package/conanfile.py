@@ -68,6 +68,7 @@ class TestPackageConan(ConanFile):
                 self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
             self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
         if not self.options["boost"].without_stacktrace:
+            self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
             self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
         if self.deps_user_info["boost"].stacktrace_addr2line_available:
             self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
