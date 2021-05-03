@@ -1,0 +1,19 @@
+diff --git a/third_party/zlib/BUILD.gn b/third_party/zlib/BUILD.gn
+index e5a2ad38..ebaddd35 100644
+--- a/third_party/zlib/BUILD.gn
++++ b/third_party/zlib/BUILD.gn
+@@ -14,13 +14,7 @@
+ 
+ import("../../build/crashpad_buildconfig.gni")
+ 
+-if (crashpad_is_in_chromium || crashpad_is_in_fuchsia || crashpad_is_in_dart) {
+-  zlib_source = "external"
+-} else if (!crashpad_is_win && !crashpad_is_fuchsia) {
+-  zlib_source = "system"
+-} else {
+-  zlib_source = "embedded"
+-}
++zlib_source = "embedded"
+ 
+ config("zlib_config") {
+   if (zlib_source == "external") {

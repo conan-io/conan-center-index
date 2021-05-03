@@ -1,0 +1,194 @@
+diff --git a/build/BUILD.gn b/build/BUILD.gn
+index 8a1949c..031e819 100644
+--- a/build/BUILD.gn
++++ b/build/BUILD.gn
+@@ -39,10 +39,21 @@ if (mini_chromium_is_mac) {
+     # win_sdk\bin\SetEnv.cmd inside this path will be used to configure the
+     # Windows toolchain.
+     win_toolchain_path = "<autodetect>"
++
++    # linktime optimization (enables compiler flag /GL and linker flag /LTCG)
++    linktime_optimization = true
++
++    # Link CRT dynamically or statically
++    dynamic_crt = false
+   }
+ }
+ 
+ declare_args() {
++  custom_cc = ""
++  custom_cxx = ""
++  custom_cxx_is_gcc = false
++  custom_conan_compiler_args_file = ""
++
+   # Extra flags passed to the C compiler.
+   # Space-separated string of flags.
+   # "cflags" are passed to all invocations of the C, C++, Objective-C, and
+@@ -81,6 +92,12 @@ declare_args() {
+ config("debug") {
+   if (!mini_chromium_is_win) {
+     cflags = [ "-g" ]
++  } else {
++    if (dynamic_crt) {
++      cflags = [ "/MDd" ]
++    } else {
++      cflags = [ "/MTd" ]
++    }
+   }
+ }
+ 
+@@ -103,7 +120,6 @@ config("release") {
+     }
+   } else if (mini_chromium_is_win) {
+     cflags = [
+-      "/GL",  # LTCG.
+       "/O2",
+       "/Ob2",  # Both explicit and auto inlining.
+       "/Oy-",  # Disable omitting frame pointers, must be after /O2.
+@@ -111,11 +127,20 @@ config("release") {
+       "/d2Zi+",  # Improve debugging of optimized code.
+     ]
+     ldflags = [
+-      "/OPT:ICF",
+       "/OPT:REF",
+-      "/LTCG",
+     ]
+-    arflags = [ "/LTCG" ]
++
++    if (linktime_optimization) {
++      cflags += [ "/GL" ] # LTCG
++      ldflags += [ "/LTCG" ]
++      arflags = [ "/LTCG" ]
++    }
++
++    if (dynamic_crt) {
++      cflags += [ "/MD" ]
++    } else {
++      cflags += [ "/MT" ]
++    }
+   }
+ }
+ 
+@@ -128,32 +153,39 @@ config("default") {
+     cflags = [
+       "-Wall",
+       "-Wendif-labels",
+-      "-Werror",
+-      "-Wextra",
+-      "-Wextra-semi",
+       "-Wno-missing-field-initializers",
+       "-Wno-unused-parameter",
+       "-Wsign-compare",
+       "-fno-exceptions",
+       "-fno-rtti",
+       "-fno-strict-aliasing",  # See https://crbug.com/32204
+-      "-fobjc-call-cxx-cdtors",
+       "-fstack-protector-all",  # Implies -fstack-protector
+       "-fvisibility-inlines-hidden",
+       "-fvisibility=hidden",
+     ]
+ 
++    if (custom_cxx_is_gcc) {
++      cflags += [
++        "-Wno-multichar",
++        "-Wno-dangling-else",
++        "-Wno-empty-body"
++      ]
++    } else {
++      cflags += [
++        "-Wextra",
++        "-Wextra-semi",
++        "-Wheader-hygiene",
++        "-Wnewline-eof",
++        "-Wstring-conversion",
++        "-fobjc-call-cxx-cdtors",
++      ]
++    }
++
+     cflags_c = [ "-std=c11" ]
+     cflags_cc = [ "-std=c++14" ]
+     cflags_objc = cflags_c
+     cflags_objcc = cflags_cc
+ 
+-    cflags += [
+-      "-Wheader-hygiene",
+-      "-Wnewline-eof",
+-      "-Wstring-conversion",
+-    ]
+-
+     if (sysroot != "") {
+       if (sysroot == rebase_path(sysroot)) {
+         # If it’s already system-absolute, leave it alone.
+@@ -335,13 +367,13 @@ config("ios_enable_arc") {
+ }
+ 
+ config("Wexit_time_destructors") {
+-  if (mini_chromium_is_clang) {
++  if (mini_chromium_is_clang && !custom_cxx_is_gcc) {
+     cflags = [ "-Wexit-time-destructors" ]
+   }
+ }
+ 
+ config("Wimplicit_fallthrough") {
+-  if (mini_chromium_is_clang) {
++  if (mini_chromium_is_clang && !custom_cxx_is_gcc) {
+     cflags = [ "-Wimplicit-fallthrough" ]
+   }
+ }
+@@ -366,6 +398,14 @@ toolchain("gcc_like_toolchain") {
+   lib_switch = "-l"
+   lib_dir_switch = "-L"
+ 
++  if (defined(custom_cc) && custom_cc != "") {
++    cc = custom_cc
++  }
++
++  if (defined(custom_cxx) && custom_cxx != "") {
++    cxx = custom_cxx
++  }
++
+   if ((mini_chromium_is_linux || mini_chromium_is_fuchsia) && clang_path != "") {
+     cc = rebase_path(clang_path, root_build_dir) + "/bin/clang"
+     cxx = rebase_path(clang_path, root_build_dir) + "/bin/clang++"
+@@ -373,8 +413,12 @@ toolchain("gcc_like_toolchain") {
+     ar = rebase_path(clang_path, root_build_dir) + "/bin/llvm-ar"
+     ld = cxx
+   } else {
+-    cc = "clang"
+-    cxx = "clang++"
++    if (custom_cc == "") {
++      cc = "clang"
++    }
++    if (custom_cxx == "") {
++      cxx = "clang++"
++    }
+     asm = cxx
+     ld = cxx
+ 
+@@ -412,7 +456,7 @@ toolchain("gcc_like_toolchain") {
+ 
+   tool("cc") {
+     depfile = "{{output}}.d"
+-    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}}${extra_cflags}${extra_cflags_c} -c {{source}} -o {{output}}"
++    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} ${custom_conan_compiler_args_file} {{cflags_c}}${extra_cflags}${extra_cflags_c} -c {{source}} -o {{output}}"
+     depsformat = "gcc"
+     description = "CC {{output}}"
+     outputs = [
+@@ -422,7 +466,7 @@ toolchain("gcc_like_toolchain") {
+ 
+   tool("cxx") {
+     depfile = "{{output}}.d"
+-    command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}${extra_cflags}${extra_cflags_cc} -c {{source}} -o {{output}}"
++    command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} ${custom_conan_compiler_args_file} {{cflags_cc}}${extra_cflags}${extra_cflags_cc} -c {{source}} -o {{output}}"
+     depsformat = "gcc"
+     description = "CXX {{output}}"
+     outputs = [
+@@ -538,7 +582,7 @@ toolchain("gcc_like_toolchain") {
+       start_group_flag = "-Wl,--start-group"
+       end_group_flag = "-Wl,--end-group"
+     }
+-    command = "$ld {{ldflags}}${extra_ldflags} -o \"$outfile\" $start_group_flag {{inputs}} {{solibs}} $end_group_flag {{libs}}"
++    command = "$ld ${custom_conan_compiler_args_file} {{ldflags}}${extra_ldflags} -o \"$outfile\" $start_group_flag {{inputs}} {{solibs}} $end_group_flag {{libs}}"
+     description = "LINK $outfile"
+ 
+     default_output_dir = "{{root_out_dir}}"
