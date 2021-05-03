@@ -1,0 +1,72 @@
+--- a/googletest/cmake/internal_utils.cmake  	2021-05-12 09:19:45.131000000 +0200
++++ b/googletest/cmake/internal_utils.cmake 	2021-05-12 09:17:51.940454505 +0200
+@@ -250,7 +250,8 @@
+   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
+   if (WIN32 OR MINGW)
+     add_test(NAME ${name}
+-      COMMAND "powershell" "-Command" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1" "$<TARGET_FILE:${name}>")
++
++    COMMAND "powershell" "-Command" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/RunTest.ps1" "$<TARGET_FILE:${name}>")
+   else()
+     add_test(NAME ${name}
+       COMMAND "$<TARGET_FILE:${name}>")
+@@ -276,46 +277,46 @@
+     if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
+       if (CMAKE_CONFIGURATION_TYPES)
+         # Multi-configuration build generators as for Visual Studio save
+-        # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
++        # output in a subdirectory of CMAKE_RUNTIME_OUTPUT_DIRECTORY  (Debug,
+         # Release etc.), so we have to provide it here.
+         if (WIN32 OR MINGW)
+           add_test(NAME ${name}
+-            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1
++            COMMAND powershell -Command ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/RunTest.ps1
+               ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
++              --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG> ${ARGN})
+         else()
+           add_test(NAME ${name}
+             COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
++              --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG> ${ARGN})
+         endif()
+       else (CMAKE_CONFIGURATION_TYPES)
+         # Single-configuration build generators like Makefile generators
+-        # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
++        # don't have subdirs below CMAKE_RUNTIME_OUTPUT_DIRECTORY .
+         if (WIN32 OR MINGW)
+           add_test(NAME ${name}
+-            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
++            COMMAND powershell -Command ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RunTest.ps1
+               ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
++              --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${ARGN})
+         else()
+           add_test(NAME ${name}
+             COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
++              --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${ARGN})
+         endif()
+       endif (CMAKE_CONFIGURATION_TYPES)
+     else()
+-      # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
++      # ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} is known at configuration time, so we can
+       # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
+       # only at ctest runtime (by calling ctest -c <Configuration>), so
+       # we have to escape $ to delay variable substitution here.
+       if (WIN32 OR MINGW)
+         add_test(NAME ${name}
+-          COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+-            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
++          COMMAND powershell -Command ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RunTest.ps1
++            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}test/${name}.py
++            --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+       else()
+         add_test(NAME ${name}
+           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
++            --build_dir=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+       endif()
+     endif()
+   endif(PYTHONINTERP_FOUND)

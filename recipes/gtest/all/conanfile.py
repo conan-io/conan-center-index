@@ -2,6 +2,7 @@ import glob
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import shutil
 
 
 class GTestConan(ConanFile):
@@ -14,8 +15,28 @@ class GTestConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "build_gmock": [True, False], "fPIC": [True, False], "no_main": [True, False], "debug_postfix": "ANY", "hide_symbols": [True, False]}
-    default_options = {"shared": False, "build_gmock": True, "fPIC": True, "no_main": False, "debug_postfix": 'd', "hide_symbols": False}
+    options = {
+        "shared": [True, False],
+        "build_gmock": [True, False],
+        "fPIC": [True, False],
+        "no_main": [True, False],
+        "debug_postfix": "ANY",
+        "hide_symbols": [True, False],
+        "gtest_build_tests": [True, False],
+        "gmock_build_tests": [True, False],
+        "gtest_build_samples": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "build_gmock": True,
+        "fPIC": True,
+        "no_main": False,
+        "debug_postfix": 'd',
+        "hide_symbols": False,
+        "gtest_build_tests": False,
+        "gmock_build_tests": False,
+        "gtest_build_samples": False
+    }
     _source_subfolder = "source_subfolder"
 
     @property
@@ -45,7 +66,7 @@ class GTestConan(ConanFile):
                 "clang": "5",
                 "apple-clang": "9.1"
             }
-        
+
     @property
     def _postfix(self):
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
@@ -76,6 +97,9 @@ class GTestConan(ConanFile):
                 raise ConanInvalidConfiguration("{0} requires {1} {2}. The current compiler is {1} {3}.".format(
                     self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("googletest-*/")[0]
@@ -86,8 +110,11 @@ class GTestConan(ConanFile):
         if self.settings.build_type == "Debug":
             cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
         if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            cmake.definitions["gtest_force_shared_crt"] = "MD" in str(self.settings.compiler.runtime)
+            cmake.definitions["gtest_force_shared_crt"] = "MD" in str(
+                self.settings.compiler.runtime)
         cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
+        cmake.definitions["gtest_build_tests"] = self.options.gtest_build_tests
+        cmake.definitions["gmock_build_tests"] = self.options.gmock_build_tests
         cmake.definitions["GTEST_NO_MAIN"] = self.options.no_main
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             cmake.definitions["gtest_disable_pthreads"] = True
@@ -100,6 +127,8 @@ class GTestConan(ConanFile):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
+        if self.options.gtest_build_tests or self.options.gmock_build_tests:
+            cmake.test()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -118,28 +147,35 @@ class GTestConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GTest"
         self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
         self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
-        self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
+        self.cpp_info.components["libgtest"].libs = [
+            "gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
-        
+
         if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
             self.cpp_info.components["libgtest"].system_libs.append("regex")
 
         if self.options.shared:
-            self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
+            self.cpp_info.components["libgtest"].defines.append(
+                "GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version.value) >= "15":
-                self.cpp_info.components["libgtest"].defines.append("GTEST_LANG_CXX11=1")
-                self.cpp_info.components["libgtest"].defines.append("GTEST_HAS_TR1_TUPLE=0")
+                self.cpp_info.components["libgtest"].defines.append(
+                    "GTEST_LANG_CXX11=1")
+                self.cpp_info.components["libgtest"].defines.append(
+                    "GTEST_HAS_TR1_TUPLE=0")
 
         if not self.options.no_main:
-            self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
+            self.cpp_info.components["gtest_main"].libs = [
+                "gtest_main{}".format(self._postfix)]
             self.cpp_info.components["gtest_main"].requires = ["libgtest"]
 
         if self.options.build_gmock:
-            self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
+            self.cpp_info.components["gmock"].libs = [
+                "gmock{}".format(self._postfix)]
             self.cpp_info.components["gmock"].requires = ["libgtest"]
             if not self.options.no_main:
-                self.cpp_info.components["gmock_main"].libs = ["gmock_main{}".format(self._postfix)]
+                self.cpp_info.components["gmock_main"].libs = [
+                    "gmock_main{}".format(self._postfix)]
                 self.cpp_info.components["gmock_main"].requires = ["gmock"]

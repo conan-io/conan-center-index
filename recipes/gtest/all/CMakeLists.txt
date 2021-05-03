@@ -12,4 +12,5 @@ if(MSVC)
   endif(MSVC_VERSION AND MSVC_VERSION GREATER_EQUAL 1910)
 endif(MSVC)
 
+enable_testing()
 add_subdirectory("source_subfolder")

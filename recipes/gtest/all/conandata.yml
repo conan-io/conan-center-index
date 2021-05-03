@@ -12,11 +12,17 @@ patches:
   "1.8.1":
     - patch_file: "patches/gtest-1.8.1.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/gtest-1.8.1-internal-utils.patch"
+      base_path: "source_subfolder"
   "1.10.0":
     - patch_file: "patches/gtest-1.10.0.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/gtest-1.10.0-override.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/gtest-1.10.0-internal-utils.patch"
+      base_path: "source_subfolder"
   "cci.20210126":
     - patch_file: "patches/gtest-1.10.0.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/gtest-cci.20210126-internal-utils.patch"
       base_path: "source_subfolder"
