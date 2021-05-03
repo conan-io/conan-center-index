@@ -100,13 +100,13 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.with_cairo:
-            self.requires("cairo/1.17.2")
+            self.requires("cairo/1.17.4")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.67.1")
+            self.requires("glib/2.68.1")
         if self.options.get_safe("with_gobject_introspection"):
-            self.requires("gobject-introspection/1.66.1")
+            self.requires("gobject-introspection/1.68.0")
         if self.options.with_qt:
             self.requires("qt/6.0.3")
         if self.options.get_safe("with_gtk"):
@@ -121,13 +121,13 @@ class PopplerConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_nss:
             # FIXME: missing nss recipe
-            raise ConanInvalidConfiguration("nss is not (yet) available on cii")
+            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.splash:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.76.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.74.0")
+            self.requires("libcurl/7.75.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
