@@ -31,7 +31,7 @@ class CrashpadConan(ConanFile):
     _patch_base = os.path.join(_source_dir, "third_party/mini_chromium/mini_chromium")
 
     def build_requirements(self):
-        self.build_requires("depot_tools_installer/20200515@bincrafters/stable")
+        self.build_requires("depot_tools/cci.20201009")
         self.build_requires("ninja/1.10.2")
 
     def _mangle_spec_for_gclient(self, solutions):
