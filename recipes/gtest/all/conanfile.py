@@ -77,9 +77,7 @@ class GTestConan(ConanFile):
                     self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("googletest-*/")[0]
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
