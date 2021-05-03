@@ -57,6 +57,8 @@ class GTestConan(ConanFile):
             del self.options.debug_postfix
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
