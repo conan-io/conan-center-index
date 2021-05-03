@@ -47,7 +47,7 @@ class Bzip2Conan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         folder_name = "%s-%s" % (self.name, self.version)
-        os.rename(folder_name, self._source_subfolder)
+        tools.rename(folder_name, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
