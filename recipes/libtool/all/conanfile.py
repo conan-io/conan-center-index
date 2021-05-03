@@ -4,6 +4,8 @@ import re
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanException
 
+required_conan_version = ">=1.33.0"
+
 
 class LibtoolConan(ConanFile):
     name = "libtool"
@@ -40,8 +42,8 @@ class LibtoolConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         self.requires("automake/1.16.3")
@@ -157,14 +159,14 @@ class LibtoolConan(ConanFile):
 
         binpath = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
-            os.rename(os.path.join(binpath, "libtoolize"),
-                      os.path.join(binpath, "libtoolize.exe"))
-            os.rename(os.path.join(binpath, "libtool"),
-                      os.path.join(binpath, "libtool.exe"))
+            tools.rename(os.path.join(binpath, "libtoolize"),
+                         os.path.join(binpath, "libtoolize.exe"))
+            tools.rename(os.path.join(binpath, "libtool"),
+                         os.path.join(binpath, "libtool.exe"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "ltdl.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "ltdl.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
         # allow libtool to link static libs into shared for more platforms
         libtool_m4 = os.path.join(self.package_folder, "bin", "share", "aclocal", "libtool.m4")
