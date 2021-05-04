@@ -9,6 +9,7 @@ class CfgfileConan(ConanFile):
     homepage = "https://github.com/igormironchik/cfgfile.git"
     license = "MIT"
     description = "Header-only library for reading/saving configuration files with schema defined in sources."
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     topics = ("conan", "cfgfile", "configuration")
     settings = "os", "arch", "compiler", "build_type"
@@ -36,7 +37,9 @@ class CfgfileConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "generator"), build_folder=self._build_subfolder)
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def validate(self):
@@ -64,3 +67,8 @@ class CfgfileConan(ConanFile):
         self.copy("*.hpp", src=os.path.join(self._source_subfolder, "cfgfile"), dst=os.path.join("include", "cfgfile"))
         cmake = self._configure_cmake()
         cmake.install()
+
+    def package_info(self):
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
