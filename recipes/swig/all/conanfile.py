@@ -29,15 +29,15 @@ class SwigConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.1")
-        self.build_requires("automake/1.16.2")
+        self.build_requires("automake/1.16.3")
 
     def requirements(self):
-        self.requires("pcre/8.41")
+        self.requires("pcre/8.44")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
