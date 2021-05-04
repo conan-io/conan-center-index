@@ -40,7 +40,11 @@ class crc32cConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        pass
+        if self.options.shared:
+            del self.options.fPIC
+
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -50,6 +54,8 @@ class crc32cConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["CRC32C_BUILD_TESTS"] = False
         self._cmake.definitions["CRC32C_BUILD_BENCHMARKS"] = False
         self._cmake.definitions["CRC32C_INSTALL"] = True
