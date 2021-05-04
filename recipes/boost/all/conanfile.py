@@ -730,6 +730,17 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
+        # Older clang releases require a thread_local variable to be initialized by a constant value
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                              "/* thread_local */", "thread_local", strict=False)
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                              "/* static __thread */", "static __thread", strict=False)
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < 6:
+            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                  "thread_local", "/* thread_local */")
+            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
+                                  "static __thread", "/* static __thread */")
+
         if self.options.header_only:
             self.output.warn("Header only package, skipping build")
             return
@@ -1114,27 +1125,27 @@ class BoostConan(ConanFile):
             contents += '<archiver>"%s" ' % tools.which(self._ar).replace("\\", "/")
         if self._ranlib:
             contents += '<ranlib>"%s" ' % tools.which(self._ranlib).replace("\\", "/")
-        cxxflags = tools.get_env("CXXFLAGS", " ")
-        cflags = tools.get_env("CFLAGS", " ")
-        cppflags = tools.get_env("CPPFLAGS", " ")
-        ldflags = tools.get_env("LDFLAGS", " ")
-        asflags = tools.get_env("ASFLAGS", " ")
+        cxxflags = tools.get_env("CXXFLAGS", "") + " "
+        cflags = tools.get_env("CFLAGS", "") + " "
+        cppflags = tools.get_env("CPPFLAGS", "") + " "
+        ldflags = tools.get_env("LDFLAGS", "") + " "
+        asflags = tools.get_env("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
             for l in ("libbacktrace", "libunwind"):
-                cppflags += " ".join("-I'{}'".format(p) for p in self.deps_cpp_info[l].include_paths) + " "
-                ldflags += " ".join("-L'{}'".format(p) for p in self.deps_cpp_info[l].lib_paths) + " "
+                cppflags += " ".join("-I{}".format(p) for p in self.deps_cpp_info[l].include_paths) + " "
+                ldflags += " ".join("-L{}".format(p) for p in self.deps_cpp_info[l].lib_paths) + " "
 
         if cxxflags.strip():
-            contents += '<cxxflags>"%s" ' % cxxflags
+            contents += '<cxxflags>"%s" ' % cxxflags.strip()
         if cflags.strip():
-            contents += '<cflags>"%s" ' % cflags
+            contents += '<cflags>"%s" ' % cflags.strip()
         if cppflags.strip():
-            contents += '<compileflags>"%s" ' % cppflags
+            contents += '<compileflags>"%s" ' % cppflags.strip()
         if ldflags.strip():
-            contents += '<linkflags>"%s" ' % ldflags
+            contents += '<linkflags>"%s" ' % ldflags.strip()
         if asflags.strip():
-            contents += '<asmflags>"%s" ' % asflags
+            contents += '<asmflags>"%s" ' % asflags.strip()
 
         contents += " ;"
 
