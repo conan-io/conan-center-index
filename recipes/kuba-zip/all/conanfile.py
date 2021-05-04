@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class ZipConan(ConanFile):
@@ -8,22 +10,29 @@ class ZipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kuba--/zip"
     description = "A portable, simple zip library written in C"
-    topics = ("conan", 'zip', 'compression', 'c', 'miniz', 'portable', 'hacking')
+    topics = ("conan", "zip", "compression", "c", "miniz", "portable", "hacking")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -31,16 +40,17 @@ class ZipConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         cmake = CMake(self)
         cmake.definitions["CMAKE_DISABLE_TESTING"] = True
-        cmake.definitions["ZIP_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+        cmake.definitions["ZIP_STATIC_PIC"] = self.options.get_safe("fPIC", True)
+        cmake.definitions["ZIP_BUILD_DOCS"] = False
         cmake.configure()
         self._cmake = cmake
         return self._cmake
@@ -59,3 +69,5 @@ class ZipConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "zip"
         self.cpp_info.names["cmake_find_package_multi"] = "zip"
         self.cpp_info.libs = ["zip"]
+        if self.options.shared:
+            self.cpp_info.defines.append("ZIP_SHARED")
