@@ -124,7 +124,7 @@ class grpcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.cmake", dst="lib/cmake", src=os.path.join(self.source_folder, "cmake"))
+        self.copy(pattern="*.cmake", dst=os.path.join("lib", "cmake"), src=os.path.join(self.source_folder, "cmake"))
     
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
