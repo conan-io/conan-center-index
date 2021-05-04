@@ -38,6 +38,8 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
             cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
             cmake.configure()
+            # Disable parallel builds because c3i (=conan-center's test/build infrastructure) seems to choke here
+            cmake.parallel = False
             cmake.build()
 
     def test(self):
