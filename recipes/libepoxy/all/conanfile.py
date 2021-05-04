@@ -42,6 +42,8 @@ class EpoxyConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds on Windows are not supported")
