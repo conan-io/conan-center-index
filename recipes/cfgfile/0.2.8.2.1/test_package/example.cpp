@@ -8,7 +8,7 @@ int main()
 {
     Cfg::Session cfg;
 
-    std::ifstream stream( "../../../test.cfg" );
+    std::ifstream stream( "../../test.cfg" );
 
     try {
         Cfg::tag_Session< cfgfile::string_trait_t > s;

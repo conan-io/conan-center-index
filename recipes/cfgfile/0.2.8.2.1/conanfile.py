@@ -72,3 +72,6 @@ class CfgfileConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+    def package_id(self):
+        del self.info.settings.compiler

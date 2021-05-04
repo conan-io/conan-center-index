@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 import os
 
 class CfgfileTestConan(ConanFile):
@@ -10,5 +10,6 @@ class CfgfileTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        os.chdir("bin")
-        self.run(".%scfgfile.test" % os.sep)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "cfgfile.test")
+            self.run(bin_path, run_environment=True)
