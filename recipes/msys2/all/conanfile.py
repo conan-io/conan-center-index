@@ -80,6 +80,7 @@ class MSYS2Conan(ConanFile):
                 self.run('bash -l -c "pacman --debug -Rc dash --noconfirm"')
             except ConanException:
                 self.run('bash -l -c "cat /var/log/pacman.log || echo nolog"')
+                self._kill_pacman()
                 raise
 
     # https://github.com/msys2/MSYS2-packages/issues/1966
