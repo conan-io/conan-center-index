@@ -139,6 +139,10 @@ class OpenCVConan(ConanFile):
         if self.options.dnn:
             self.requires("protobuf/3.15.5")
 
+    def build_requirements(self):
+        if self.options.dnn and tools.cross_building(self.settings):
+            self.build_requires("protobuf/3.15.5")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0])
         os.rename("opencv-{}".format(self.version), self._source_subfolder)
