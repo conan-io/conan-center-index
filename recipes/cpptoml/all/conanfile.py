@@ -18,6 +18,7 @@ class CppTomlConan(ConanFile):
         "build_examples": False
     }
     generators = "cmake"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -40,12 +41,15 @@ class CppTomlConan(ConanFile):
         cmake.definitions["CPPTOML_BUILD_EXAMPLES"] = self.options.build_examples
         cmake.configure(build_folder=self._build_subfolder,source_folder=self._source_subfolder)
         cmake.build()
-        cmake.install()
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include", src=include_folder)
+        self.copy(pattern="*.h", dst="include", src=include_folder)
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "cpptoml"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpptoml"
