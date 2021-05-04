@@ -144,11 +144,11 @@ class OpenCVConan(ConanFile):
             self.build_requires("protobuf/3.15.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0])
-        os.rename("opencv-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version][0],
+                  destination=self._source_subfolder, strip_root=True)
 
-        tools.get(**self.conan_data["sources"][self.version][1])
-        os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
+        tools.get(**self.conan_data["sources"][self.version][1],
+                  destination=self._contrib_folder, strip_root=True)
 
     def _patch_opencv(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -342,8 +342,8 @@ class OpenCVConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
-            os.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
-                      os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
+            tools.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
+                         os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_subfolder, self._module_file),
             {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
