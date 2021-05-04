@@ -118,9 +118,8 @@ class MSYS2Conan(ConanFile):
         pass
 
     def build(self):
-        os.makedirs(os.path.join(self.package_folder, "bin"))
-        with tools.chdir(os.path.join(self.package_folder, "bin")):
-            tools.get(**self.conan_data["sources"][self.version][str(self.settings.arch)])
+        tools.get(**self.conan_data["sources"][self.version],
+                    destination=os.path.join(self.package_folder, "bin"))
         with lock():
             self._do_build()
 
