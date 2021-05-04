@@ -12,7 +12,7 @@ class GoogleCloudCppConan(ConanFile):
     topics = "google", "cloud", "google-cloud-storage", "google-cloud-platform", "google-cloud-pubsub", "google-cloud-spanner", "google-cloud-bigtable"
     homepage = "https://github.com/googleapis/google-cloud-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -51,7 +51,7 @@ class GoogleCloudCppConan(ConanFile):
 
     def requirements(self):
         self.requires('protobuf/3.15.5')
-        self.requires('grpc/1.37.0')
+        self.requires('grpc/1.37.1')
         self.requires('nlohmann_json/3.9.1')
         self.requires('crc32c/1.1.1')
         # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
