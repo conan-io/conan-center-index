@@ -103,15 +103,14 @@ class OpenCVConan(ConanFile):
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.6")
+            self.requires("libjpeg-turbo/2.1.0")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.25")
+            self.requires("jasper/2.0.32")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.4.0")
         if self.options.with_png:
@@ -125,10 +124,10 @@ class OpenCVConan(ConanFile):
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.1.0")
+            self.requires("libwebp/1.2.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.7.4")
+            self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
