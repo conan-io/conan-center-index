@@ -1,6 +1,7 @@
+#include <zip/zip.h>
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <zip/zip.h>
 
 int main()
 {
