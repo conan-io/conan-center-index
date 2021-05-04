@@ -28,6 +28,8 @@ class EpoxyConan(ConanFile):
         "egl": True,
         "x11": True
     }
+    
+    required_conan_version = ">=1.33.0"
 
     _meson = None
     
@@ -69,9 +71,8 @@ class EpoxyConan(ConanFile):
                 self.requires("egl/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
         if self._meson:
