@@ -168,6 +168,8 @@ However, if you need to use autotools for building, you can take a look on [mpc]
 
 Many projects offer **pkg-config**'s `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
 
+For cases where a project only offers source files, but not a build script, you can add CMake support, but first, contact the upstream and open a PR offering building support. If it's rejected because the author doesn't want any kind of build script, or the project is abandoned, CCI can accept your build script. Take a look at [Butteraugli](https://github.com/conan-io/conan-center-index/blob/master/recipes/butteraugli/all/CMakeLists.txt) and [DirectShowBaseClasses](https://github.com/conan-io/conan-center-index/blob/master/recipes/directshowbaseclasses/all/CMakeLists.txt) as examples.
+
 Please be aware that ConanCenter only builds from sources and [pre-compiled binaries are not acceptable](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md)
 
 ### Test the recipe locally
