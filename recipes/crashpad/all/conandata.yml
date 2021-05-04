@@ -1,0 +1,4 @@
+sources:
+  "cci.20210429":
+    url: "https://github.com/chromium/crashpad/archive/b10f07e52e56cc7463fbdd57940607ecb8118e8e.tar.gz"
+    sha256: "4cb46b2d5569fd5925c7f7d88febe236c2fe686a1e29afbdb5b53dd0d7fbf6cb"

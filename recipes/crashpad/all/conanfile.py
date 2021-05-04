@@ -5,6 +5,7 @@ from io import StringIO
 import os
 import json
 import re
+import glob
 
 class CrashpadConan(ConanFile):
     name = "crashpad"
@@ -25,10 +26,23 @@ class CrashpadConan(ConanFile):
     generators = "compiler_args"
 
     _commit_id = "c7d1d2a1dd7cf2442cbb8aa8da7348fa01d54182"
-    _source_dir = "crashpad"
-    _build_name = "out/Conan"
-    _build_dir = os.path.join(_source_dir, _build_name)
-    _patch_base = os.path.join(_source_dir, "third_party/mini_chromium/mini_chromium")
+    #_source_dir = "crashpad"
+    #_build_name = "out/Conan"
+    #_build_subfolder = os.path.join(_source_dir, _build_name)
+    #_patch_base = os.path.join(_source_dir, "third_party/mini_chromium/mini_chromium")
+
+    @property
+    def _build_name(self):
+        return "out/Conan"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return os.path.join(self._source_subfolder, self._build_name)
+
 
     def build_requirements(self):
         self.build_requires("depot_tools/cci.20201009")
@@ -53,8 +67,11 @@ class CrashpadConan(ConanFile):
             raise ConanInvalidConfiguration("gcc >= 5 is required")
 
     def source(self):
-        self.run("gclient config --spec=\"%s\"" % self._make_spec(), run_environment=True)
-        self.run("gclient sync --no-history", run_environment=True)
+        #self.run("gclient config --spec=\"%s\"" % self._make_spec(), run_environment=True)
+        #self.run("gclient sync --no-history", run_environment=True)
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("crashpad-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _get_target_cpu(self):
         arch = str(self.settings.arch)
@@ -120,41 +137,42 @@ class CrashpadConan(ConanFile):
         mactools = tools.XCRun(self.settings)
         self.run("%s cr %s %s" %                                      \
             (mactools.ar,                                             \
-             os.path.join(self._build_dir, "obj/util/libmachutil.a"), \
-             os.path.join(self._build_dir, "obj", self._build_name, "gen/util/mach/*.o")))
+             os.path.join(self._build_subfolder, "obj/util/libmachutil.a"), \
+             os.path.join(self._build_subfolder, "obj", self._build_name, "gen/util/mach/*.o")))
 
     def build(self):
-        tools.patch(base_path=self._patch_base,
-                    patch_file="patches/buildsystem-adaptions.patch")
-
-        if self.options.force_embedded_zlib:
-            tools.patch(base_path=self._patch_base,
-                        patch_file="patches/force-embedded-zlib.patch")
+#        tools.patch(base_path=self._patch_base,
+#                    patch_file="patches/buildsystem-adaptions.patch")
+#
+#        if self.options.force_embedded_zlib:
+#            tools.patch(base_path=self._patch_base,
+#                        patch_file="patches/force-embedded-zlib.patch")
 
         targets = "crashpad_handler"
         if self._glibc_version_pre_2_27():
             targets += " compat"
 
-        with tools.chdir(self._source_dir):
+        with tools.chdir(self._source_subfolder):
+            self.run("git init", run_environment=True)
             self.run('gn gen %s --args="%s"' % (self._build_name, self._setup_args_gn()), run_environment=True)
             self.run("ninja -j%d -C %s %s" % (tools.cpu_count(), self._build_name, targets), run_environment=True)
 
         if self.settings.os == "Macos":
             self._export_mach_utils()
 
-    def _copy_lib(self, src_dir):
-        self.copy("*.a", dst="lib",
-                  src=os.path.join(self._build_dir, src_dir), keep_path=False)
-        self.copy("*.lib", dst="lib",
-                  src=os.path.join(self._build_dir, src_dir), keep_path=False)
-
-    def _copy_headers(self, dst_dir, src_dir):
-        self.copy("*.h", dst=os.path.join("include", dst_dir),
-                         src=os.path.join(self._source_dir, src_dir))
-
-    def _copy_bin(self, src_bin):
-        self.copy(src_bin, src=self._build_dir, dst="bin")
-        self.copy("%s.exe" % src_bin, src=self._build_dir, dst="bin")
+#    def _copy_lib(self, src_dir):
+#        self.copy("*.a", dst="lib",
+#                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
+#        self.copy("*.lib", dst="lib",
+#                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
+#
+#    def _copy_headers(self, dst_dir, src_dir):
+#        self.copy("*.h", dst=os.path.join("include", dst_dir),
+#                         src=os.path.join(self._source_dir, src_dir))
+#
+#    def _copy_bin(self, src_bin):
+#        self.copy(src_bin, src=self._build_subfolder, dst="bin")
+#        self.copy("%s.exe" % src_bin, src=self._build_subfolder, dst="bin")
 
     def _glibc_version_pre_2_27(self):
         if self.settings.os != "Linux":
@@ -165,7 +183,7 @@ class CrashpadConan(ConanFile):
         return buf.getvalue().rstrip() < "2.27"
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_dir,
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder,
                              ignore_case=True, keep_path=False)
 
         self._copy_headers("crashpad/client", "client")
