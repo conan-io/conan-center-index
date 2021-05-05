@@ -51,8 +51,9 @@ class getSentryCrashpadConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("linux-syscall-support/cci.20200813", private=True)
+        if self.settings.os in ["Linux", "Android"]:
+            self.requires("openssl/1.1.1k")
         self.requires("zlib/1.2.11")
-        self.requires("openssl/1.1.1k")
 
     def config_options(self):
         if self.settings.os == "Windows":
