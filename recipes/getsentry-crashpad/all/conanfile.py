@@ -29,6 +29,7 @@ class getSentryCrashpadConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CRASHPAD_ENABLE_INSTALL"] = True
             self._cmake.definitions["CRASHPAD_ENABLE_INSTALL_DEV"] = True
+            self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
             self._cmake.configure()
         return self._cmake
 
