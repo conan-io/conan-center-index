@@ -37,6 +37,14 @@ class getSentryCrashpadConan(ConanFile):
         self.requires("zlib/1.2.11")
         self.requires("openssl/1.1.1k")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('crashpad-*/')[0]
