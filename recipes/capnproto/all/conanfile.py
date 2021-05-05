@@ -129,8 +129,7 @@ class CapnprotoConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
             if os.path.basename(cmake_file) != "CapnProtoMacros.cmake":
