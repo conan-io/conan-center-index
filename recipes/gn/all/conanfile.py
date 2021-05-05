@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import textwrap
@@ -18,6 +19,25 @@ class GnConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _minimum_compiler_version_supporting_cxx17(self):
+        return {
+            "Visual Studio": 15,
+            "gcc": 7,
+            "clang": 4,
+            "apple-clang": 10,
+        }.get(str(self.settings.compiler))
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+        else:
+            if self._minimum_compiler_version_supporting_cxx17:
+                if tools.Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
+                    raise ConanInvalidConfiguration("gn requires a compiler supporting c++17")
+            else:
+                self.output.warn("gn recipe does not recognize the compiler. gn requires a compiler supporting c++17. Assuming it does.")
 
     def package_id(self):
         del self.info.settings.compiler
