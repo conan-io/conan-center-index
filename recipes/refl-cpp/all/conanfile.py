@@ -20,9 +20,8 @@ class ReflCppConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
 
     def package(self):
         include_folder = self._source_subfolder
