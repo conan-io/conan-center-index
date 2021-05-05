@@ -1,0 +1,14 @@
+
+executable("test_package") {
+    sources = ["test_package.cpp"]
+
+    deps = [
+        ":test_static",
+    ]
+}
+
+static_library("test_static") {
+    sources = [
+        "test_static.cpp",
+    ]
+}
