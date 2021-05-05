@@ -75,7 +75,7 @@ class SentryNativeConan(ConanFile):
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
         self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.get_safe("qt", False)
+        self._cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.qt
         self._cmake.configure()
         return self._cmake
 
