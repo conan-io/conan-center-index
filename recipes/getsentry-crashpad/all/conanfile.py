@@ -121,8 +121,7 @@ class getSentryCrashpadConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # TODO Check if using collect_libs() is safe.
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["crashpad_minidump","crashpad_snapshot","crashpad_client","crashpad_util", "mini_chromium","crashpad_compat"]
         # TODO Check if sentry if installing this correctly, I think it should be include/crashpad and include/mini_chromium
         self.cpp_info.includedirs = [ os.path.join("include", "crashpad"), os.path.join("include","crashpad", "mini_chromium") ]
         # TODO check if m is needed
