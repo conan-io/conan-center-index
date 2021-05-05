@@ -432,7 +432,7 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.4.9")
 
         if self._with_icu:
             self.requires("icu/68.2")
