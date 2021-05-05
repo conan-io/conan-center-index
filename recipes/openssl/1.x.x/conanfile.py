@@ -635,6 +635,13 @@ class OpenSSLConan(ConanFile):
             if self._use_nmake and self._full_version >= "1.1.0":
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
+            if self._use_nmake:
+                # Windows: when cmake generates its cache, it populates some environment variables as well.
+                # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
+                # break nmake (don't know about mingw make). So we fix them
+                for v in ['CC', 'CXX', 'RC']:
+                    if v in os.environ and not '"' in os.environ[v]:
+                        os.environ[v] = '"' + os.environ[v].replace('/', '\\') + '"'
             self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
 
             self._patch_install_name()
