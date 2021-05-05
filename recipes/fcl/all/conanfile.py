@@ -40,6 +40,8 @@ class FclConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows" and self.options.shared:
