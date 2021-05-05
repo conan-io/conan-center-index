@@ -1,0 +1,4 @@
+sources:
+  "cci.20210420":
+    url: "https://github.com/getsentry/crashpad/archive/fdbe4d7b1053939f2c77193d8e854de5a3c93e17.zip"
+    sha256: "17335cdc5a2ab99d115ff6490fa36d45efba428bf7238a0a5f9422961a6e6a27"
