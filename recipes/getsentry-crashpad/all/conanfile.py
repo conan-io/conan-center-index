@@ -101,6 +101,8 @@ class getSentryCrashpadConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), dedent(old), dedent(new))
 
         #TODO make this a patch to the upstream sources
+        # 1. Install build/chromeos_buildflags.h header since crashpad/client/crashpad_client.h imports it.
+        # 2. Install mini_chromium headers in include/mini_chromium
         old = """\
             crashpad_install_dev(DIRECTORY mini_chromium
                 DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad"
@@ -108,14 +110,15 @@ class getSentryCrashpadConan(ConanFile):
             )"""
         new = """\
             crashpad_install_dev(DIRECTORY mini_chromium
-                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad"
+                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
                 FILES_MATCHING PATTERN "*.h"
             )
             crashpad_install_dev(DIRECTORY build
-                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/crashpad"
+                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mini_chromium"
                 FILES_MATCHING PATTERN "*.h"
             )"""
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "CMakeLists.txt"), dedent(old), dedent(new))
+
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -128,7 +131,7 @@ class getSentryCrashpadConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["crashpad_minidump","crashpad_snapshot","crashpad_client","crashpad_util", "mini_chromium","crashpad_compat"]
         # TODO Check if sentry if installing this correctly, I think it should be include/crashpad and include/mini_chromium
-        self.cpp_info.includedirs = [ os.path.join("include", "crashpad"), os.path.join("include","crashpad", "mini_chromium") ]
+        self.cpp_info.includedirs = [ os.path.join("include", "crashpad"), os.path.join("include", "mini_chromium") ]
         # TODO check if m is needed
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
