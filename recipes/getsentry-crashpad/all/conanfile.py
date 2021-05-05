@@ -59,6 +59,8 @@ class getSentryCrashpadConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("For now it doesn't build on Macos")
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
