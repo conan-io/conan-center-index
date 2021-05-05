@@ -90,7 +90,7 @@ class getSentryCrashpadConan(ConanFile):
     def build(self):
         #TODO make this a conan patch
         # Use conan's linux_syscall_support
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party","lss", "lss.h"),
+        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "lss", "lss.h"),
         """#include "third_party/lss/lss/linux_syscall_support.h""",
         """#include "linux_syscall_support.h""")
 
