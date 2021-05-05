@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import textwrap
+import time
 
 required_conan_version = ">=1.33.0"
 
@@ -102,6 +103,8 @@ class GnConan(ConanFile):
                 if self.settings.build_type == "Debug":
                     conf_args.append("-d")
                 self.run("python build/gen.py {}".format(" ".join(conf_args)), run_environment=True)
+                # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
+                time.sleep(1)
                 build_args = [
                     "-C", "out",
                     "-j{}".format(tools.cpu_count()),
