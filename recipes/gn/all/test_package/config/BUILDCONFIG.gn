@@ -14,7 +14,7 @@ if (current_cpu == "") {
 if (current_os == "") {
   current_os = target_os
 }
-is_windows = host_os == "darwin" && current_os == "darwin" && target_os == "darwin"
+is_windows = host_os == "win" && current_os == "windows" && target_os == "windows"
 is_linux = host_os == "linux" && current_os == "linux" && target_os == "linux"
 is_mac = host_os == "mac" && current_os == "mac" && target_os == "mac"
 # All binary targets will get this list of configs by default.
@@ -34,4 +34,12 @@ set_defaults("shared_library") {
 set_defaults("source_set") {
   configs = _shared_binary_target_configs
 }
-set_default_toolchain("//config/toolchain:gcc")
+print(host_os)
+print(current_os)
+print(target_os)
+print(is_windows)
+if (is_windows) {
+  set_default_toolchain("//config/toolchain:msvc")
+} else {
+  set_default_toolchain("//config/toolchain:gcc")
+}

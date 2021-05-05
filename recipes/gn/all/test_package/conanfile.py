@@ -55,8 +55,8 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             with tools.chdir(self.source_folder):
                 gn_args = [
-                    """--args='target_os="{os_}" target_cpu="{cpu}"'""".format(os_=self._target_os, cpu=self._target_cpu),
-                    os.path.join(self.build_folder, "bin")
+                    os.path.relpath(os.path.join(self.build_folder, "bin"), os.getcwd()).replace("\\", "/"),
+                    "--args=\"target_os=\\\"{os_}\\\" target_cpu=\\\"{cpu}\\\"\"".format(os_=self._target_os, cpu=self._target_cpu),
                 ]
                 self.run("gn gen {}".format(" ".join(gn_args)), run_environment=True)
             with self._build_context():

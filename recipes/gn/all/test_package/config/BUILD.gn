@@ -8,9 +8,14 @@ config("compiler_defaults") {
       "-pthread",
     ]
   }
+  if (current_os == "windows") {
+    cflags_cc = [
+      "-EHsc",
+    ]
+  }
 }
 config("executable_ldconfig") {
-  if (!is_mac) {
+  if (!is_mac && current_os != "windows") {
     ldflags = [
       "-Wl,-rpath=\$ORIGIN/",
       "-Wl,-rpath-link=",
