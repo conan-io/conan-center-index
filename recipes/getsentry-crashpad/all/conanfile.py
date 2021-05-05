@@ -62,6 +62,8 @@ class getSentryCrashpadConan(ConanFile):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("For now it doesn't build on Macos")
         if self.options.shared:
+            #TODO Every library is hardcoded as STATIC.
+            raise ConanInvalidConfiguration("getsentry-crashpad builds always STATIC.")
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
