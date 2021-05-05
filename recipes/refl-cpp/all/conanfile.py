@@ -1,6 +1,4 @@
 from conans import ConanFile, tools, errors
-import os
-import glob
 
 
 class ReflCppConan(ConanFile):
