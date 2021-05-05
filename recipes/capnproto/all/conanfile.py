@@ -170,7 +170,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             self.cpp_info.components["kj-async"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
-        self.cpp_info.components["kj"].builddirs = self._cmake_folder
+        self.cpp_info.components["kj"].builddirs.append(self._cmake_folder)
         self.cpp_info.components["kj"].build_modules = [os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")]
 
         bin_path = os.path.join(self.package_folder, "bin")
