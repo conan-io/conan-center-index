@@ -57,7 +57,6 @@ class AutoconfConan(ConanFile):
         conf_args = [
             "--datarootdir={}".format(datarootdir),
             "--prefix={}".format(prefix),
-            "HELP2MAN=:",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
