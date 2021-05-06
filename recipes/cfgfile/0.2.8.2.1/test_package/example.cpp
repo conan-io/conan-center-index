@@ -1,8 +1,7 @@
-
 #include <string>
 #include <fstream>
 
-#include "cfg.hpp"
+#include <cfg.hpp>
 
 int main()
 {
