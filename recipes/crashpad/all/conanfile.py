@@ -239,6 +239,7 @@ class CrashpadConan(ConanFile):
         self._copy_headers("crashpad/client", "client")
         self._copy_headers("crashpad/util",   "util")
         self._copy_headers("mini_chromium",   "third_party/mini_chromium/mini_chromium")
+        self._copy_headers("mini_chromium/build",   "out/Conan/gen/build") # for chromeos_buildflags.h
         self._copy_lib("obj/client")
         self._copy_lib("obj/util")
         self._copy_lib("obj/third_party/mini_chromium")
