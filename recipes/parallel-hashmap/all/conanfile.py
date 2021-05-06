@@ -17,6 +17,9 @@ class ParallelHashmapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -27,9 +30,6 @@ class ParallelHashmapConan(ConanFile):
                   dst=os.path.join("include", "parallel_hashmap"),
                   src=os.path.join(self._source_subfolder, "parallel_hashmap"))
         self.copy("phmap.natvis", dst="res", src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "phmap"
