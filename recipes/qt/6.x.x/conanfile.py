@@ -134,20 +134,31 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             self.options.with_glib = False
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
-            raise ConanInvalidConfiguration("qt 6 does not support GCC before 8")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
-            raise ConanInvalidConfiguration("qt 6 does not support clang before 9")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("qt 6 does not support Visual Studio before 2019")
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11":
-            raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
+
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
+    @property
+    def _minimum_compilers_version(self):
+        # Qt6 requires C++17
+        return {
+            "Visual Studio": "16",
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11"
+        }
+
     def configure(self):
+        # C++ minimum standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
@@ -211,14 +222,14 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
         if self.options.with_vulkan:
-            self.requires("vulkan-loader/1.2.172.0")
+            self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.0")
+            self.requires("glib/2.68.1")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -231,13 +242,13 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.0.6")
+                self.requires("libjpeg-turbo/2.1.0")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.35.2")
+            self.requires("sqlite3/3.35.5")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
@@ -249,7 +260,7 @@ class QtConan(ConanFile):
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.1.0")
+                self.requires("xkbcommon/1.2.1")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
