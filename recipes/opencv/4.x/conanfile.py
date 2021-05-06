@@ -103,15 +103,14 @@ class OpenCVConan(ConanFile):
         if self.settings.os == "Android":
             self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.6")
+            self.requires("libjpeg-turbo/2.1.0")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.25")
+            self.requires("jasper/2.0.32")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.4.0")
         if self.options.with_png:
@@ -125,10 +124,10 @@ class OpenCVConan(ConanFile):
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.1.0")
+            self.requires("libwebp/1.2.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.7.4")
+            self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
@@ -139,12 +138,16 @@ class OpenCVConan(ConanFile):
         if self.options.dnn:
             self.requires("protobuf/3.15.5")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0])
-        os.rename("opencv-{}".format(self.version), self._source_subfolder)
+    def build_requirements(self):
+        if self.options.dnn and tools.cross_building(self.settings):
+            self.build_requires("protobuf/3.15.5")
 
-        tools.get(**self.conan_data["sources"][self.version][1])
-        os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version][0],
+                  destination=self._source_subfolder, strip_root=True)
+
+        tools.get(**self.conan_data["sources"][self.version][1],
+                  destination=self._contrib_folder, strip_root=True)
 
     def _patch_opencv(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -338,8 +341,8 @@ class OpenCVConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
-            os.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
-                      os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
+            tools.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
+                         os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_subfolder, self._module_file),
             {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
