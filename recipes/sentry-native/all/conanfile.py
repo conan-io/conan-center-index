@@ -61,6 +61,9 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
         elif self.options.backend == "breakpad":
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
+        if self.options.qt:
+            self.requires("qt/5.15.2")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
