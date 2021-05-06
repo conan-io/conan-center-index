@@ -21,6 +21,10 @@ if(NOT WIN32)
     target_link_libraries(lmdb PUBLIC pthread)
 endif()
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+  set_target_properties(maxminddb PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 install(TARGETS lmdb)
 
 # LMDB utilities:
