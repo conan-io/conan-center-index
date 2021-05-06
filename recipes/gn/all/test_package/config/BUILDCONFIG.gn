@@ -34,10 +34,6 @@ set_defaults("shared_library") {
 set_defaults("source_set") {
   configs = _shared_binary_target_configs
 }
-print(host_os)
-print(current_os)
-print(target_os)
-print(is_windows)
 if (is_windows) {
   set_default_toolchain("//config/toolchain:msvc")
 } else {
