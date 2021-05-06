@@ -1,0 +1,5 @@
+sources:
+  "cci.20210505":
+    url:
+      crashpad: "https://chromium.googlesource.com/crashpad/crashpad/+archive/a2ab062f46775b1d632c4c437daade7c530422dc.tar.gz"
+      mini_chromium: "https://chromium.googlesource.com/chromium/mini_chromium/+archive/329ca82f73a592d832e79334bed842fba85b9fdd.tar.gz"
