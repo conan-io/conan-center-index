@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
                     "AR": "ar",
                     "LD": "g++",
                 }
-            elif self.settings.compiler == "clang":
+            elif self.settings.compiler in ("apple-clang", "clang"):
                 compiler_defaults = {
                     "CC": "clang",
                     "CXX": "clang++",
@@ -43,7 +43,9 @@ class TestPackageConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             return "darwin"
         # Assume gn knows about the os
-        return str(self.settings.os).lower()
+        return {
+            "Windows": "win",
+        }.get(str(self.settings.os), str(self.settings.os).lower())
 
     @property
     def _target_cpu(self):

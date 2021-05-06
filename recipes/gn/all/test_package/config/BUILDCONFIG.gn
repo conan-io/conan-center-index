@@ -14,7 +14,7 @@ if (current_cpu == "") {
 if (current_os == "") {
   current_os = target_os
 }
-is_windows = host_os == "win" && current_os == "windows" && target_os == "windows"
+is_windows = host_os == "win" && current_os == "win" && target_os == "win"
 is_linux = host_os == "linux" && current_os == "linux" && target_os == "linux"
 is_mac = host_os == "mac" && current_os == "mac" && target_os == "mac"
 # All binary targets will get this list of configs by default.
@@ -39,3 +39,10 @@ if (is_windows) {
 } else {
   set_default_toolchain("//config/toolchain:gcc")
 }
+
+print("current_os:", current_os)
+print("current_cpu:", current_cpu)
+print("host_os:", host_os)
+print("host_cpu:", host_cpu)
+print("target_os:", target_os)
+print("target_cpu:", target_os)
