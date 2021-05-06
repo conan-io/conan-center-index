@@ -15,7 +15,7 @@ config("compiler_defaults") {
   }
 }
 config("executable_ldconfig") {
-  if (!is_mac && current_os != "windows") {
+  if (!is_mac && current_os != "win") {
     ldflags = [
       "-Wl,-rpath=\$ORIGIN/",
       "-Wl,-rpath-link=",

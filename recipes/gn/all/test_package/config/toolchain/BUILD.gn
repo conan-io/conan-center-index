@@ -6,7 +6,7 @@ toolchain("gcc") {
     depfile = "{{output}}.d"
     _compiler = getenv("CC")
     if (_compiler == "") {
-        _compiler = "gcc"
+      _compiler = "gcc"
     }
     command = _compiler + " -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
@@ -18,7 +18,7 @@ toolchain("gcc") {
     depfile = "{{output}}.d"
     _compiler = getenv("CXX")
     if (_compiler == "") {
-        _compiler = "g++"
+      _compiler = "g++"
     }
     command = _compiler + " -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
@@ -29,7 +29,7 @@ toolchain("gcc") {
   tool("alink") {
     _archiver = getenv("AR")
     if (_archiver == "") {
-        _archiver = "ar"
+      _archiver = "ar"
     }
     command = "rm -f {{output}} && " + _archiver + " rcs {{output}} {{inputs}}"
     description = "AR {{target_output_name}}{{output_extension}}"
@@ -41,10 +41,10 @@ toolchain("gcc") {
   tool("solink") {
     _linker = getenv("LD")
     if (_linker == "") {
-        _linker = getenv("CXX")
-        if (_linker == "") {
-            _linker = "g++"
-        }
+      _linker = getenv("CXX")
+      if (_linker == "") {
+        _linker = "g++"
+      }
     }
     soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
     sofile = "{{output_dir}}/$soname"
@@ -52,13 +52,14 @@ toolchain("gcc") {
     if (is_mac) {
       os_specific_option = "-install_name @executable_path/$sofile"
       rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
+      default_output_extension = ".dylib"
     } else {
       os_specific_option = "-Wl,-soname=$soname"
       rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}}"
+      default_output_extension = ".so"
     }
     command = _linker + " -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
     description = "SOLINK $soname"
-    default_output_extension = ".so"
     default_output_dir = "{{root_out_dir}}"
     outputs = [ sofile ]
     link_output = sofile
@@ -68,10 +69,10 @@ toolchain("gcc") {
   tool("link") {
     _linker = getenv("LD")
     if (_linker == "") {
-        _linker = getenv("CXX")
-        if (_linker == "") {
-            _linker = "g++"
-        }
+      _linker = getenv("CXX")
+      if (_linker == "") {
+        _linker = "g++"
+      }
     }
     outfile = "{{target_output_name}}{{output_extension}}"
     rspfile = "$outfile.rsp"
@@ -99,18 +100,17 @@ toolchain("msvc") {
   tool("cc") {
     _compiler = getenv("CC")
     if (_compiler == "") {
-        _compiler = "cl -nologo"
+      _compiler = "cl -nologo"
     }
     command = _compiler + " {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -Fo{{output}}"
     description = "CC {{output}}"
-    default_output_extension = ".obj"
     outputs =
-        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
+      [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj" ]
   }
   tool("cxx") {
     _compiler = getenv("CXX")
     if (_compiler == "") {
-        _compiler = "cl -nologo"
+      _compiler = "cl -nologo"
     }
     command = _compiler + " {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -Fo{{output}}"
     description = "CXX {{output}}"
@@ -121,22 +121,19 @@ toolchain("msvc") {
   tool("alink") {
     _archiver = getenv("AR")
     if (_archiver == "") {
-        _archiver = "lib -nologo"
+      _archiver = "lib -nologo"
     }
     command = _archiver + " -OUT:{{output}} {{inputs}}"
     description = "LIB {{target_output_name}}{{output_extension}}"
     outputs =
-        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+      [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
     default_output_extension = ".lib"
     output_prefix = ""
   }
   tool("solink") {
     _linker = getenv("LD")
     if (_linker == "") {
-        _linker = getenv("CXX")
-        if (_linker == "") {
-            _linker = "link -nologo"
-        }
+      _linker = "link -nologo"
     }
     soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
     sofile = "{{output_dir}}/$soname"
@@ -155,10 +152,7 @@ toolchain("msvc") {
   tool("link") {
     _linker = getenv("LD")
     if (_linker == "") {
-        _linker = getenv("CXX")
-        if (_linker == "") {
-            _linker = "link -nologo"
-        }
+      _linker = "link -nologo"
     }
     outfile = "{{target_output_name}}{{output_extension}}"
     rspfile = "$outfile.rsp"
