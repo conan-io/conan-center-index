@@ -41,7 +41,7 @@ class TestPackageConan(ConanFile):
     @property
     def _target_os(self):
         if tools.is_apple_os(self.settings.os):
-            return "darwin"
+            return "mac"
         # Assume gn knows about the os
         return {
             "Windows": "win",
