@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import textwrap
+from contextlib import contextmanager
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -635,13 +636,6 @@ class OpenSSLConan(ConanFile):
             if self._use_nmake and self._full_version >= "1.1.0":
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-            if self._use_nmake:
-                # Windows: when cmake generates its cache, it populates some environment variables as well.
-                # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
-                # break nmake (don't know about mingw make). So we fix them
-                for v in ['CC', 'CXX', 'RC']:
-                    if v in os.environ and not '"' in os.environ[v]:
-                        os.environ[v] = '"' + os.environ[v].replace('/', '\\') + '"'
             self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
 
             self._patch_install_name()
@@ -687,6 +681,20 @@ class OpenSSLConan(ConanFile):
             return "gcc"
         return "cc"
 
+    @contextmanager
+    def _make_context(self):
+        if self._use_nmake:
+            # Windows: when cmake generates its cache, it populates some environment variables as well.
+            # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
+            # break nmake (don't know about mingw make). So we fix them
+            def sanitize_env_var(var):
+                return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
+            env = {key: sanitize_env_var(tools.get_env(key)) for key in ("CC", "RC") if tools.get_env(key)}
+            with tools.environment_append(env):
+                yield
+        else:
+            yield
+
     def build(self):
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
@@ -706,7 +714,8 @@ class OpenSSLConan(ConanFile):
                 else:
                     self._patch_configure()
                     self._patch_makefile_org()
-                self._make()
+                with self._make_context():
+                    self._make()
 
     @property
     def _cross_building(self):
