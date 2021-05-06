@@ -21,6 +21,9 @@ class AutoconfConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
+    def build_requirements(self):
+        self.requires("m4/1.4.18")
+
     def requirements(self):
         self.requires("m4/1.4.18")
 
@@ -54,13 +57,15 @@ class AutoconfConan(ConanFile):
         conf_args = [
             "--datarootdir={}".format(datarootdir),
             "--prefix={}".format(prefix),
+            "HELP2MAN=:",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.touch(os.path.join(self._source_subfolder, "configure"))
 
     def build(self):
         self._patch_files()
