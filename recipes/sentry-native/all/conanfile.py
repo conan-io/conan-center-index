@@ -61,6 +61,8 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
         elif self.options.backend == "breakpad":
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
+        if self.options.qt:
+            self.requires("qt/5.15.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -108,6 +110,6 @@ class SentryNativeConan(ConanFile):
                 self.cpp_info.system_libs.append("Version")
             if self.options.transport == "winhttp":
                 self.cpp_info.system_libs.append("winhttp")
-            
+
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
