@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.4)
 project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
