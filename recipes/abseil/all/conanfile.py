@@ -1,9 +1,8 @@
+from conans import ConanFile, CMake, tools
 import glob
 import json
 import os
 import re
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
 
 
 class ConanRecipe(ConanFile):
