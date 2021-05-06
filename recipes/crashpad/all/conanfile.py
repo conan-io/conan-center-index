@@ -62,6 +62,14 @@ class CrashpadConan(ConanFile):
         }]
         return "solutions=%s" % self._mangle_spec_for_gclient(solutions)
 
+    def _findByPattern(self, pattern, path):
+        result = []
+        for root, dirs, files in os.walk(path):
+            for name in files:
+                if fnmatch.fnmatch(name, pattern):
+                    result.append(os.path.join(root, name))
+        return result
+
     def configure(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.0":
             raise ConanInvalidConfiguration("gcc >= 5 is required")
@@ -197,9 +205,32 @@ class CrashpadConan(ConanFile):
         if self.settings.os != "Linux":
             return False
 
-        buf = StringIO()
-        self.run('ldd --version | head -1 | grep -o -E "[0-9]\.[0-9]+" | tail -1', output=buf)
-        return buf.getvalue().rstrip() < "2.27"
+        if not tools.cross_building(self.settings):
+            buf = StringIO()
+            self.run('ldd --version', output=buf)
+            cmdOutput = buf.getvalue()
+
+            version = tools.Version(
+                re.search("[0-9]\.[0-9]+", cmdOutput).group(0)
+            )
+        else:
+            #TODO Suggestions on a more generic way of doing this are welcome, this is what works for me
+            sysroot = tools.get_env("SYSROOT", None)
+            if sysroot:
+                found = self._findByPattern("libc-*.so", sysroot)
+                if found:
+                    version = tools.Version(
+                        re.search("[0-9]\.[0-9]+", os.path.basename(found[0])).group(0)
+                    )
+                else:
+                    self.output.warn("Couldn't detect glibc version")
+                    version = tools.Version(0)
+            else:
+                self.output.warn("Couldn't detect glibc version")
+                version = tools.Version(0)
+
+        return version < "2.27"
+
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder,
