@@ -13,16 +13,13 @@ add_library(lmdb
     source_subfolder/midl.h
 )
 
-set_target_properties(lmdb PROPERTIES PUBLIC_HEADER
-    source_subfolder/lmdb.h
+set_target_properties(lmdb PROPERTIES
+    PUBLIC_HEADER source_subfolder/lmdb.h
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 if(NOT WIN32)
     target_link_libraries(lmdb PUBLIC pthread)
-endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-  set_target_properties(maxminddb PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 install(TARGETS lmdb)
