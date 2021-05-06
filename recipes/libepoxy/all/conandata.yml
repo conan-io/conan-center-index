@@ -1,4 +1,7 @@
 sources:
+  "1.5.7":
+    url: "https://github.com/anholt/libepoxy/archive/1.5.7.tar.gz"
+    sha256: "b9e22ba707d0e723e9665c67a2b2974a86f4c4c27e3009dde24a988d1aadf643"
   "1.5.5":
     url: "https://github.com/anholt/libepoxy/archive/1.5.5.tar.gz"
     sha256: "5d80a43a6524a1ebdd0c9c5d5105295546a0794681853c636a0c70f8f9c658ce"

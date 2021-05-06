@@ -1,8 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
 
-required_conan_version = ">=1.28.0"
 
 class ProjConan(ConanFile):
     name = "proj"
@@ -49,15 +49,15 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("sqlite3/3.34.1")
+        self.requires("sqlite3/3.35.5")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.75.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
