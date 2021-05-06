@@ -64,6 +64,8 @@ class SentryNativeConan(ConanFile):
         if self.options.qt:
             self.requires("qt/5.15.2")
             self.requires("openssl/1.1.1j")
+            if tools.Version(self.version) < "0.4.5":
+                raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
