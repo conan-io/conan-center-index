@@ -29,7 +29,7 @@ class SentryNativeConan(ConanFile):
         "fPIC": True,
         "backend": "inproc",
         "transport": "curl",
-        "qt": False,
+        "qt": True,
     }
 
     _cmake = None
