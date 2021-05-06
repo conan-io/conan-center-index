@@ -45,7 +45,7 @@ class CrashpadConan(ConanFile):
 
 
     def build_requirements(self):
-        self.build_requires("depot_tools/cci.20201009")
+        self.build_requires("gn/cci.20210429")
         self.build_requires("ninja/1.10.2")
 
     def _mangle_spec_for_gclient(self, solutions):
