@@ -6,6 +6,8 @@ import os
 import json
 import re
 import glob
+import textwrap
+import fnmatch
 
 class CrashpadConan(ConanFile):
     name = "crashpad"
@@ -25,12 +27,6 @@ class CrashpadConan(ConanFile):
     short_paths = True
     generators = "compiler_args"
 
-    _commit_id = "c7d1d2a1dd7cf2442cbb8aa8da7348fa01d54182"
-    #_source_dir = "crashpad"
-    #_build_name = "out/Conan"
-    #_build_subfolder = os.path.join(_source_dir, _build_name)
-    #_patch_base = os.path.join(_source_dir, "third_party/mini_chromium/mini_chromium")
-
     @property
     def _build_name(self):
         return "out/Conan"
@@ -42,7 +38,6 @@ class CrashpadConan(ConanFile):
     @property
     def _build_subfolder(self):
         return os.path.join(self._source_subfolder, self._build_name)
-
 
     def build_requirements(self):
         self.build_requires("gn/cci.20210429")
@@ -117,7 +112,6 @@ class CrashpadConan(ConanFile):
                 return "arm"
         elif arch.startswith("mips"):
             return "mipsel"
-
         raise ConanInvalidConfiguration("your architecture (%s) is not supported" % arch)
 
     def _set_env_arg(self, args, envvar, gnvar):
@@ -180,26 +174,25 @@ class CrashpadConan(ConanFile):
             targets += " compat"
 
         with tools.chdir(self._source_subfolder):
-            self.run("git init", run_environment=True)
             self.run('gn gen %s --args="%s"' % (self._build_name, self._setup_args_gn()), run_environment=True)
             self.run("ninja -j%d -C %s %s" % (tools.cpu_count(), self._build_name, targets), run_environment=True)
 
         if self.settings.os == "Macos":
             self._export_mach_utils()
 
-#    def _copy_lib(self, src_dir):
-#        self.copy("*.a", dst="lib",
-#                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
-#        self.copy("*.lib", dst="lib",
-#                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
-#
-#    def _copy_headers(self, dst_dir, src_dir):
-#        self.copy("*.h", dst=os.path.join("include", dst_dir),
-#                         src=os.path.join(self._source_dir, src_dir))
-#
-#    def _copy_bin(self, src_bin):
-#        self.copy(src_bin, src=self._build_subfolder, dst="bin")
-#        self.copy("%s.exe" % src_bin, src=self._build_subfolder, dst="bin")
+    def _copy_lib(self, src_dir):
+        self.copy("*.a", dst="lib",
+                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
+        self.copy("*.lib", dst="lib",
+                  src=os.path.join(self._build_subfolder, src_dir), keep_path=False)
+
+    def _copy_headers(self, dst_dir, src_dir):
+        self.copy("*.h", dst=os.path.join("include", dst_dir),
+                         src=os.path.join(self._source_subfolder, src_dir))
+
+    def _copy_bin(self, src_bin):
+        self.copy(src_bin, src=self._build_subfolder, dst="bin")
+        self.copy("%s.exe" % src_bin, src=self._build_subfolder, dst="bin")
 
     def _glibc_version_pre_2_27(self):
         if self.settings.os != "Linux":
