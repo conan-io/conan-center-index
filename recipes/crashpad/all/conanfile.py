@@ -203,7 +203,10 @@ class CrashpadConan(ConanFile):
         self.cpp_info.libs = ['client', 'util', 'base']
 
         if self._glibc_version_pre_2_27():
-            self.cpp_info.libs += ['compat', 'dl', 'pthread']
+            self.cpp_info.libs += ['compat']
+
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ['dl', 'pthread']
 
         if self.settings.os == "Macos":
             self.cpp_info.libs.append('machutil')  # see _export_mach_utils
