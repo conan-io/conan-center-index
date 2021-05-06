@@ -758,15 +758,13 @@ class QtConan(ConanFile):
             self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
-            for d1 in os.listdir():
-                if not d1.startswith("objects-"):
-                    continue
-                with tools.chdir(d1):
-                    for m in os.listdir():
-                        module = m[:m.find("_")]
-                        with tools.chdir(m):
-                            for d2 in os.listdir():
-                                obj_files = [os.path.join(os.path.abspath(os.getcwd()), d2, f) for f in os.listdir(d2)]
-                                self.cpp_info.components["qt%s" % module].exelinkflags.extend(obj_files)
-                                self.cpp_info.components["qt%s" % module].sharedlinkflags.extend(obj_files)
+        objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
+        for object_dir in objects_dirs:
+            for m in os.listdir(object_dir):
+                submodules_dir = os.path.join(object_dir, m)
+                component = "qt" + m[:m.find("_")]
+                for sub_dir in os.listdir(submodules_dir):
+                    submodule_dir = os.path.join(submodules_dir, sub_dir)
+                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                    self.cpp_info.components[component].exelinkflags.extend(obj_files)
+                    self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
