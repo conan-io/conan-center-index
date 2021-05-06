@@ -12,11 +12,16 @@ class ParallelHashmapConan(ConanFile):
     topics = ("conan", "parallel-hashmap", "parallel", "hashmap", "btree")
     homepage = "https://github.com/greg7mdp/parallel-hashmap"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "compiler"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.header_only()
