@@ -66,12 +66,31 @@ class CrashpadConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.0":
             raise ConanInvalidConfiguration("gcc >= 5 is required")
 
+    @property
+    def _submodules(self):
+        return [
+            {
+                "name" : "mini_chromium",
+                "url" : "https://chromium.googlesource.com/chromium/mini_chromium",
+                "commit" : "329ca82f73a592d832e79334bed842fba85b9fdd"
+            },
+            {
+                "name" : "lss",
+                "url" : "https://chromium.googlesource.com/linux-syscall-support ",
+                "commit" : "e1e7b0ad8ee99a875b272c8e33e308472e897660"
+            },
+        ]
+
     def source(self):
-        #self.run("gclient config --spec=\"%s\"" % self._make_spec(), run_environment=True)
-        #self.run("gclient sync --no-history", run_environment=True)
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("crashpad-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
+
+        for module in self._submodules:
+            clonePath = os.path.join(self._source_subfolder, "third_party", module["name"], module["name"])
+            self.run(f"git clone {module['url']} {clonePath}")
+            with tools.chdir(path):
+                self.run(f"git checkout {module['commit']}")
 
     def _get_target_cpu(self):
         arch = str(self.settings.arch)
