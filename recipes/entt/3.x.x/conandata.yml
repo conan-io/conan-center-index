@@ -29,3 +29,6 @@ sources:
   3.7.0:
     url: https://github.com/skypjack/entt/archive/refs/tags/v3.7.0.tar.gz
     sha256: 39ad5c42acf3434f8c37e0baa18a8cb562c0845383a6b4da17fdbacc9f0a7695
+  3.7.1:
+    url: https://github.com/skypjack/entt/archive/refs/tags/v3.7.1.tar.gz
+    sha256: fe3ce773c17797c0c57ffa97f73902854fcc8e7afc7e09bea373e0c64fa24a23
