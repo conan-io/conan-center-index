@@ -94,4 +94,15 @@ class GoogleCloudCppConan(ConanFile):
         #tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        # cpp_bigquery
+        # cpp_bigtable
+        # cpp_common
+        # cpp_firestore
+        # cpp_googleapis
+        # cpp_grpc_utils
+        # cpp_iam
+        # cpp_logging
+        # cpp_pubsub
+        # cpp_spanner
+        # cpp_storage
         pass
