@@ -57,11 +57,10 @@ class XapianCoreConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 msvc_cl_sh =  os.path.join(self.build_folder, "msvc_cl.sh").replace("\\", "/")
-                env.update({
+                env = {
                     "AR": "lib",
                     "CC": msvc_cl_sh,
                     "CXX": msvc_cl_sh,
@@ -70,12 +69,11 @@ class XapianCoreConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
-            with tools.environment_append(env):
-                yield
+            yield
 
     @property
     def _datarootdir(self):
