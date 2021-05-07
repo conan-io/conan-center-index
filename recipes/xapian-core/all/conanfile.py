@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -126,6 +127,35 @@ class XapianCoreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self._datarootdir, "doc"))
         tools.rmdir(os.path.join(self._datarootdir, "man"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            set(XAPIAN_FOUND TRUE)
+            set(XAPIAN_INCLUDE_DIR ${xapian_INCLUDE_DIR}
+                                   ${xapian_INCLUDE_DIR_RELEASE}
+                                   ${xapian_INCLUDE_DIR_RELWITHDEBINFO}
+                                   ${xapian_INCLUDE_DIR_MINSIZEREL}
+                                   ${xapian_INCLUDE_DIR_DEBUG})
+            set(XAPIAN_LIBRARIES ${xapian_LIBRARIES}
+                                 ${xapian_LIBRARIES_RELEASE}
+                                 ${xapian_LIBRARIES_RELWITHDEBINFO}
+                                 ${xapian_LIBRARIES_MINSIZEREL}
+                                 ${xapian_LIBRARIES_DEBUG})
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.libs = ["xapian"]
@@ -137,7 +167,9 @@ class XapianCoreConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "xapian"
         self.cpp_info.names["cmake_find_package_multi"] = "xapian"
-        # FIXME: must define XAPIAN_INCLUDE_DIRS and XAPIAN_LIBRARIES cmake variables
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "xapian-core"
 
         binpath = os.path.join(self.package_folder, "bin")
