@@ -186,10 +186,7 @@ class CprConan(ConanFile):
             CprConan._AUTO_SSL: self._can_auto_ssl
         }
 
-        if library not in validators:
-            # This should never happen, as the options are validated by conan.
-            raise ValueError("Unknown SSL library: {}".format(library))
-
+        # A KeyError should never happen, as the options are validated by conan.
         return validators[library]
 
     def _print_deprecation_messages(self):
