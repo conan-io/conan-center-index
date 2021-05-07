@@ -138,6 +138,7 @@ class XapianCoreConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "xapian"
         self.cpp_info.names["cmake_find_package_multi"] = "xapian"
         # FIXME: must define XAPIAN_INCLUDE_DIRS and XAPIAN_LIBRARIES cmake variables
+        self.cpp_info.names["pkg_config"] = "xapian-core"
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(binpath))
