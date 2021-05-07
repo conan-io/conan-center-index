@@ -59,7 +59,7 @@ class AutoconfConan(ConanFile):
         return self._autotools
 
     def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
