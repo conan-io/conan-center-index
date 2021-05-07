@@ -1,0 +1,104 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cfefdbd..f93d036 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -532,16 +532,12 @@ INCLUDE(cpu_info)
+ INCLUDE(fileutils)
+ INCLUDE(zlib)
+ INCLUDE(zstd)
+-INCLUDE(lz4)
+-INCLUDE(icu)
+-INCLUDE(libevent)
+ INCLUDE(ssl)
+ INCLUDE(sasl)
+ INCLUDE(ldap)
+ INCLUDE(kerberos)
+ INCLUDE(rpc)
+ INCLUDE(readline)
+-INCLUDE(protobuf)
+ INCLUDE(package_name)
+ INCLUDE(libutils)
+ INCLUDE(plugin)
+@@ -550,7 +546,6 @@ INCLUDE(install_macros)
+ INCLUDE(install_layout)
+ INCLUDE(mysql_add_executable)
+ INCLUDE(curl)
+-INCLUDE(rapidjson)
+ INCLUDE(fprofile)
+ INCLUDE(gloves)
+ 
+@@ -1143,8 +1138,6 @@ ELSE()
+   SET(DEFAULT_TMPDIR "\"${TMPDIR}\"")
+ ENDIF()
+ 
+-INCLUDE(cmake/boost.cmake)
+-
+ IF (LINUX)
+   OPTION(WITH_SYSTEMD "Enable installation of systemd support files" OFF)
+   OPTION(WITH_SYSTEMD_DEBUG "Build in systemd debug trace" OFF)
+@@ -1417,19 +1410,6 @@ IF(WITH_AUTHENTICATION_LDAP)
+   ENDIF()
+ ENDIF()
+ 
+-# Add system/bundled editline.
+-MYSQL_CHECK_EDITLINE()
+-# Add libevent
+-MYSQL_CHECK_LIBEVENT()
+-# Add lz4 library
+-MYSQL_CHECK_LZ4()
+-# Add icu library
+-MYSQL_CHECK_ICU()
+-# Add protoc and libprotobuf
+-IF(NOT WITHOUT_SERVER)
+-  MYSQL_CHECK_PROTOBUF()
+-  MYSQL_CHECK_PROTOBUF_DLLS()
+-ENDIF()
+ # Try and set CURL_LIBRARY
+ MYSQL_CHECK_CURL()
+ MYSQL_CHECK_CURL_DLLS()
+@@ -1441,8 +1421,6 @@ IF(CURL_WARN_GIVEN)
+     "You can disable CURL with -DWITH_CURL=0"
+     )
+ ENDIF()
+-# Add RapidJSON library.
+-MYSQL_CHECK_RAPIDJSON()
+ 
+ MACRO(MY_INCLUDE_SYSTEM_DIRECTORIES LIBRARY)
+   IF(${WITH_${LIBRARY}} STREQUAL "bundled")
+@@ -1595,7 +1573,6 @@ IF(WITH_UNIT_TESTS)
+   ADD_SUBDIRECTORY(unittest/mytap/t)
+ ENDIF()
+ 
+-ADD_SUBDIRECTORY(client)
+ ADD_SUBDIRECTORY(utilities)
+ ADD_SUBDIRECTORY(share)
+ ADD_SUBDIRECTORY(libservices)
+diff --git a/cmake/zlib.cmake b/cmake/zlib.cmake
+index 67ac2c7..2b01c9a 100644
+--- a/cmake/zlib.cmake
++++ b/cmake/zlib.cmake
+@@ -101,22 +101,6 @@ MACRO (MYSQL_CHECK_ZLIB)
+     SET(WITH_ZLIB "bundled"
+       CACHE STRING "By default use bundled zlib on this platform")
+   ENDIF()
+-  
+-  IF(WITH_ZLIB STREQUAL "bundled")
+-    MYSQL_USE_BUNDLED_ZLIB()
+-  ELSEIF(WITH_ZLIB STREQUAL "system")
+-    FIND_SYSTEM_ZLIB()
+-    IF(NOT ZLIB_FOUND)
+-      MESSAGE(FATAL_ERROR "Cannot find system zlib libraries.")
+-    ENDIF()
+-  ELSE()
+-    RESET_ZLIB_VARIABLES()
+-    MESSAGE(FATAL_ERROR "WITH_ZLIB must be bundled or system")
+-  ENDIF()
+-  FIND_ZLIB_VERSION()
+-  IF(ZLIB_VERSION VERSION_LESS MIN_ZLIB_VERSION_REQUIRED)
+-    MESSAGE(FATAL_ERROR
+-      "ZLIB version must be at least ${MIN_ZLIB_VERSION_REQUIRED}, "
+-      "found ${ZLIB_VERSION}.\nPlease use -DWITH_ZLIB=bundled")
+-  ENDIF()
++
++  SET(ZLIB_LIBRARY "${CONAN_LIBS_ZLIB}" CACHE INTERNAL "System zlib library")
+ ENDMACRO()

@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1654,7 +1654,7 @@ IF(ENABLE_GCOV)
+   INCLUDE(fastcov)
+ ENDIF()
+ 
+-IF(UNIX)
++IF(FALSE)
+   ADD_SUBDIRECTORY(man)
+ ENDIF()
+
