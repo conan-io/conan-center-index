@@ -143,6 +143,6 @@ class XapianCoreConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(binpath))
         self.env_info.PATH.append(binpath)
 
-        automake_path = os.path.join(self._datarootdir, "aclocal")
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_path))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.unix_path(automake_path))
+        xapian_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(xapian_aclocal))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.unix_path(xapian_aclocal))
