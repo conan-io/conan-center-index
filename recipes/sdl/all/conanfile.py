@@ -9,7 +9,7 @@ class SDLConan(ConanFile):
     name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
     topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
-    url = "https://github.com/bincrafters/conan-ffmpeg"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -275,7 +275,7 @@ class SDLConan(ConanFile):
             cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING.txt", dst="license", src=self._source_subfolder)
+        self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "sdl2-config")
