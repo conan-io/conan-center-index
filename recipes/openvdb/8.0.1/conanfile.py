@@ -8,9 +8,11 @@ required_conan_version = ">=1.33.0"
 
 class OpenVDBConan(ConanFile):
     name = "openvdb"
-    description = ("OpenVDB is an open source C++ library comprising a novel hierarchical data"
-                   "structure and a large suite of tools for the efficient storage and "
-                   "manipulation of sparse volumetric data discretized on three-dimensional grids.")
+    description = (
+        "OpenVDB is an open source C++ library comprising a novel hierarchical data"
+        "structure and a large suite of tools for the efficient storage and "
+        "manipulation of sparse volumetric data discretized on three-dimensional grids."
+    )
     license = "MPL-2.0"
     topics = ("voxel", "voxelizer", "volume-rendering", "fx")
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
@@ -62,7 +64,7 @@ class OpenVDBConan(ConanFile):
 
     def _check_compilier_version(self):
         compiler = str(self.settings.compiler)
-        version = str(self.settings.compiler.version)
+        version = tools.Version(self.settings.compiler.version)
         if version < self._compilers_min_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a %s version greater than %s" % (self.name, compiler, self._compilers_min_version[compiler]))
 
