@@ -126,47 +126,6 @@ class SDLConan(ConanFile):
         if self.settings.os == "Linux":
             self.build_requires("pkgconf/1.7.3")
 
-    def system_requirements(self):
-        if self.settings.os == "Linux" and tools.os_info.is_linux:
-            if tools.os_info.with_apt or tools.os_info.with_yum:
-                installer = tools.SystemPackageTool()
-
-                packages = []
-                packages_apt = []
-                packages_yum = []
-
-                packages_apt.append("libgbm-dev")
-                packages_yum.append("gdm-devel")
-
-                if self.options.jack:
-                    packages_apt.append("libjack-dev")
-                    packages_yum.append("jack-audio-connection-kit-devel")
-                if self.options.sndio:
-                    packages_apt.append("libsndio-dev")
-                if self.options.nas:
-                    packages_apt.append("libaudio-dev")
-                    packages_yum.append("nas-devel")
-                if self.options.esd:
-                    packages_apt.append("libesd0-dev")
-                    packages_yum.append("esound-devel")
-                if self.options.arts:
-                    packages_apt.append("artsc0-dev")
-                if self.options.wayland:
-                    packages_apt.extend(["libwayland-dev",
-                                     "wayland-protocols"])
-                    packages_yum.extend(["wayland-devel",
-                                    "wayland-protocols-devel"])
-                if self.options.directfb:
-                    packages_apt.append("libdirectfb-dev")
-
-                if tools.os_info.with_apt:
-                    packages = packages_apt
-                elif tools.os_info.with_yum:
-                    packages = packages_yum
-
-                for package in packages:
-                    installer.install(package)
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "SDL2-" + self.version
