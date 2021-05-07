@@ -94,6 +94,8 @@ class ICUBase(ConanFile):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
+                    # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
+                    tools.save(os.path.join("data", "out", "tmp", "dirs.timestamp"), "")
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
                     command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
