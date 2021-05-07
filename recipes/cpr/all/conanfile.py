@@ -97,24 +97,12 @@ class CprConan(ConanFile):
                 self.options.with_ssl = CprConan._NO_SSL
 
     def configure(self):
-        SSL_CURL_LIBS = {
-            "openssl": "openssl",
-            "darwinssl": "darwinssl",
-            "winssl": "schannel"
-        }
-
         if self.options.shared:
             del self.options.fPIC
         if not self._supports_openssl:
             del self.options.with_openssl
         if not self._supports_winssl:
             del self.options.with_winssl
-
-        ssl_library = self._get_ssl_library()
-        # Make sure libcurl uses the same SSL implementation
-        # "auto" will be handled by cpr
-        if self._supports_ssl_library(ssl_library) and ssl_library in SSL_CURL_LIBS:
-            self.options["libcurl"].with_ssl = SSL_CURL_LIBS[ssl_library]
 
 
     def source(self):
