@@ -353,7 +353,7 @@ class BotanConan(ConanFile):
 
         build_flags.append('--without-pkg-config')
 
-        call_python = 'python' if self.settings.os == 'Windows' else 'python3'
+        call_python = 'python' if self.settings.os == 'Windows' else ''
 
         prefix = tools.unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
 
