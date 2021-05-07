@@ -185,3 +185,5 @@ class CrashpadConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["minidump", "snapshot", "client", "util", "compat", "common", "base"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
