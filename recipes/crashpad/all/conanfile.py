@@ -51,9 +51,9 @@ class CrashpadConan(ConanFile):
             self.output.warn("crashpad needs a shared libcurl library")
 
     def source(self):
-        tools.get(self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder)
-        tools.get(self.conan_data["sources"][self.version]["url"]["mini_chromium"],
-                  destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"))
+        tools.get(**self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version]["url"]["mini_chromium"],
+                  destination=os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium"), strip_root=True)
 
     @property
     def _gn_os(self):
@@ -105,6 +105,7 @@ class CrashpadConan(ConanFile):
             return str(self.options.http_transport)
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"), "zlib_source = \"embedded\"", "zlib_source = \"system\"")
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "common.gypi"), "-fPIC", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party","mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),   "-fPIC", "")
 
@@ -129,7 +130,7 @@ class CrashpadConan(ConanFile):
 
         if self.settings.compiler == "gcc":
             # Remove gcc-incompatible compiler arguments
-            for comp_arg in ("-Werror", "-Wheader-hygiene", "-Wnewline-eof", "-Wstring-conversion", "-Wexit-time-destructors", "-fobjc-call-cxx-cdtors"):
+            for comp_arg in ("-Werror", "-Wheader-hygiene", "-Wnewline-eof", "-Wstring-conversion", "-Wexit-time-destructors", "-fobjc-call-cxx-cdtors", "-Wextra-semi", "-Wimplicit-fallthrough"):
                 tools.replace_in_file(toolchain_path,
                                       "\"{}\"".format(comp_arg), "\"\"")
 
@@ -162,7 +163,8 @@ class CrashpadConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             with self._build_context():
                 self.run("gn gen out/Default --args=\"{}\"".format(" ".join(gn_args)), run_environment=True)
-                for target in ("client", "minidump", "crashpad_handler"):
+                for target in ("client", "minidump", "crashpad_handler", "snapshot"):
+                    # FIXME: Remove verbose once everything is working hunky dory
                     self.run("ninja -v -C out/Default {target} -j{parallel}".format(
                         target=target,
                         parallel=tools.cpu_count()), run_environment=True)

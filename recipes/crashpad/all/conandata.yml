@@ -1,5 +1,9 @@
 sources:
-  "cci.20210505":
+  "cci.20210506":
     url:
-      crashpad: "https://chromium.googlesource.com/crashpad/crashpad/+archive/a2ab062f46775b1d632c4c437daade7c530422dc.tar.gz"
-      mini_chromium: "https://chromium.googlesource.com/chromium/mini_chromium/+archive/329ca82f73a592d832e79334bed842fba85b9fdd.tar.gz"
+      crashpad:
+        url: "https://github.com/chromium/crashpad/archive/0c3d6e5fa10fcac9ca63df7d3fb68ef7f7bd5f3c.zip"
+        sha256: "48b1d5e34e9c6a4e8c740305e98d9a6c507f74e58b6c2357b157c2f55c11630f"
+      mini_chromium:
+        url: "https://github.com/chromium/mini_chromium/archive/ccb198907cecf072d8f5b2543d4d348e834a298a.zip"
+        sha256: "d526f659b0d44932bb4b5ff1277d855569572eb3fcad6ec1c69a71aac6a3d6ee"
