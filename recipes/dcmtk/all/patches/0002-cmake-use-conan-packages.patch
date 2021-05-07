@@ -1,5 +1,7 @@
---- a/CMake/3rdparty.cmake
-+++ b/CMake/3rdparty.cmake
+diff --git CMake/3rdparty.cmake CMake/3rdparty.cmake
+index 43aa282ef..3d1b00a7b 100644
+--- CMake/3rdparty.cmake
++++ CMake/3rdparty.cmake
 @@ -21,7 +21,7 @@ mark_as_advanced(DCMTK_USE_FIND_PACKAGE)
  if(DCMTK_USE_FIND_PACKAGE)
    # Find TIFF
@@ -36,7 +38,14 @@
      if(NOT PNG_FOUND)
        set(DCMTK_WITH_PNG OFF CACHE BOOL "" FORCE)
        message(STATUS "Warning: PNG support will be disabled because libpng was not found.")
-@@ -59,7 +59,7 @@ if(DCMTK_USE_FIND_PACKAGE)
+@@ -53,13 +53,13 @@ if(DCMTK_USE_FIND_PACKAGE)
+       message(STATUS "Info: DCMTK PNG support will be enabled")
+       set(WITH_LIBPNG 1)
+       include_directories(${PNG_INCLUDE_DIR})
+-      set(LIBPNG_LIBS ${PNG_LIBRARY})
++      set(LIBPNG_LIBS ${PNG_LIBRARIES})
+     endif()
+   endif()
  
    # Find OpenSSL
    if(DCMTK_WITH_OPENSSL)
@@ -189,8 +198,7 @@
        message(STATUS "Info: DCMTK ICONV support will be enabled")
        set(WITH_LIBICONV 1)
      else() # turn off library if library path not set
-@@ -363,8 +365,8 @@ else()
-           set(WITH_OPENJPEG "")
+@@ -364,7 +366,7 @@ else()
        else()
            set(OPENJPEG_INCDIR "${WITH_OPENJPEGINC1}")
            set(OPENJPEG_LIBDIR "${WITH_OPENJPEGINC}/lib")
