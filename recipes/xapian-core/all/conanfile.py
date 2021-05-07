@@ -158,7 +158,7 @@ class XapianCoreConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["xapian"]
         if not self.options.shared:
-            if self.settings.os == "Linux":
+            if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.system_libs = ["rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["rpcrt4", "ws2_32"]
