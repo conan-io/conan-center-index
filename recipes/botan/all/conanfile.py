@@ -120,11 +120,11 @@ class BotanConan(ConanFile):
         if self.options.get_safe("single_amalgamation"):
             self.options.amalgamation = True
 
+    def validate(self):
         if self.options.with_boost:
-            self.options["boost"].add("shared=False")
-            self.options["boost"].add("magic_autolink=False")
-            self.options["boost"].add("without_coroutine=False")
-            self.options["boost"].add("without_system=False")
+            if self.options["boost"].shared or self.options["boost"].magic_autolink or
+                self.options["boost"].without_coroutine or self.options["boost"].without_system:
+                raise ConanInvalidConfiguration("Botan requires a Boost dependency with the following options:\n boost:shared=False, boost:magic_autolink=False, boost:without_coroutine=False, boost:without_system=False")
 
     def requirements(self):
         if self.options.with_bzip2:
