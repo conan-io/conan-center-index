@@ -8,10 +8,11 @@ required_conan_version = ">=1.33.0"
 
 class OpenVDBConan(ConanFile):
     name = "openvdb"
-    version = "8.0.1"
-    description = "OpenVDB is an open source C++ library comprising a novel hierarchical data structure and a large suite of tools for the efficient storage and manipulation of sparse volumetric data discretized on three-dimensional grids. It was developed by DreamWorks Animation for use in volumetric applications typically encountered in feature film production."
+    description = ("OpenVDB is an open source C++ library comprising a novel hierarchical data"
+                   "structure and a large suite of tools for the efficient storage and "
+                   "manipulation of sparse volumetric data discretized on three-dimensional grids.")
     license = "MPL-2.0"
-    topics = ("conan", "openvdb")
+    topics = ("voxel", "voxelizer", "volume-rendering", "fx")
     homepage = "https://github.com/AcademySoftwareFoundation/openvdb"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
@@ -24,7 +25,7 @@ class OpenVDBConan(ConanFile):
         "with_zlib": [True, False],
         "with_log4cplus": [True, False],
         "with_exr": [True, False],
-        "simd": ["None", "SSE42", "AVX"],
+        "simd": [None, "SSE42", "AVX"],
     }
     default_options = {
         "shared": False,
@@ -33,7 +34,7 @@ class OpenVDBConan(ConanFile):
         "with_zlib": True,
         "with_log4cplus": False,
         "with_exr": False,
-        "simd": "None",
+        "simd": None,
     }
 
     _cmake = None
@@ -71,7 +72,7 @@ class OpenVDBConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
         if self.settings.arch not in ("x86", "x86_64"):
-            if self.options.simd != "None":
+            if self.options.simd:
                 raise ConanInvalidConfiguration("Only intel architectures support SSE4 or AVX.")
         self._check_compilier_version()
 
@@ -83,15 +84,14 @@ class OpenVDBConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_exr:
             # Not necessary now. Required for IlmBase::IlmImf
-            self.requires("openexr/2.5.5]")
+            self.requires("openexr/2.5.5")
         if self.options.with_blosc:
             self.requires("c-blosc/1.20.1")
         if self.options.with_log4cplus:
             self.requires("log4cplus/2.0.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         # Remove FindXXX files from OpenVDB. Let Conan do the job
