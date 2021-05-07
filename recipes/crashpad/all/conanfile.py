@@ -16,12 +16,12 @@ class CrashpadConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "http_transport": ["libcurl", "socket", "boringssl", None],
-        "with_tls": [True, False],
+        "with_tls": ["openssl", False],
     }
     default_options = {
         "fPIC": True,
         "http_transport": None,
-        "with_tls": True,
+        "with_tls": "openssl",
     }
     exports_sources = "patches/*"
 
@@ -50,7 +50,7 @@ class CrashpadConan(ConanFile):
             del self.options.with_tls
         if self.options.http_transport == "libcurl":
             self.requires("libcurl/7.75.0")
-        if self.options.get_safe("with_tls"):
+        if self.options.get_safe("with_tls") == "openssl":
             self.requires("openssl/1.1.1k")
 
     def validate(self):
@@ -170,7 +170,7 @@ class CrashpadConan(ConanFile):
             "host_cpu=\\\"{}\\\"".format(self._gn_arch),
             "is_debug={}".format(str(self.settings.build_type == "Debug").lower()),
             "crashpad_http_transport_impl=\\\"{}\\\"".format(self._http_transport_impl),
-            "crashpad_use_boringssl_for_http_transport_socket={}".format(str(self.options.get_safe("with_tls", False)).lower()),
+            "crashpad_use_boringssl_for_http_transport_socket={}".format(str(self.options.get_safe("with_tls", False) != False).lower()),
             "extra_cflags=\\\"{}\\\"".format(" ".join(extra_cflags)),
             "extra_cflags_c=\\\"{}\\\"".format(" ".join(extra_cflags_c)),
             "extra_cflags_cc=\\\"{}\\\"".format(" ".join(extra_cflags_cc)),
