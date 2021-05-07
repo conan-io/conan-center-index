@@ -730,6 +730,11 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
+        if tools.cross_building(self.settings, skip_x64_x86=True):
+            # When cross building, do not attempt to run the test-executable (assume they work)
+            tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
+                                  "$(>) > $(<)",
+                                  "echo \"\" > $(<)", strict=False)
         # Older clang releases require a thread_local variable to be initialized by a constant value
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* thread_local */", "thread_local", strict=False)
@@ -1443,7 +1448,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
             for incomplete_component in incomplete_components:
-                self.output.warn("Boost component '{0}' is missing libraries. Try building boost with '-o boost:without_{0}'.".format(incomplete_component))
+                self.output.warn("Boost component '{0}' is missing libraries. Try building boost with '-o boost:without_{0}'. (Option is not guaranteed to exist)".format(incomplete_component))
 
             non_used = all_detected_libraries.difference(all_expected_libraries)
             if non_used:
