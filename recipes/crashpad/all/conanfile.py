@@ -15,11 +15,13 @@ class CrashpadConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "http_transport": ["libcurl", "socket", None],
+        "http_transport": ["libcurl", "socket", "boringssl", None],
+        "with_tls": [True, False],
     }
     default_options = {
         "fPIC": True,
         "http_transport": None,
+        "with_tls": True,
     }
     exports_sources = "patches/*"
 
@@ -44,13 +46,18 @@ class CrashpadConan(ConanFile):
         # FIXME: use mini_chromium conan package instead of embedded package
         self.requires("zlib/1.2.11")
         self.requires("linux-syscall-support/cci.20200813")
+        if self.options.http_transport != "socket":
+            del self.options.with_tls
         if self.options.http_transport == "libcurl":
             self.requires("libcurl/7.75.0")
+        if self.options.get_safe("with_tls"):
+            self.requires("openssl/1.1.1k")
 
     def validate(self):
-        if not self.options["libcurl"].shared:
-            # FIXME: is this true?
-            self.output.warn("crashpad needs a shared libcurl library")
+        if self.options.http_transport == "libcurl":
+            if not self.options["libcurl"].shared:
+                # FIXME: is this true?
+                self.output.warn("crashpad needs a shared libcurl library")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder, strip_root=True)
@@ -107,6 +114,11 @@ class CrashpadConan(ConanFile):
             return str(self.options.http_transport)
 
     def build(self):
+        # Order of ssl and crypto is wrong (first ssl, then crypto)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "\"crypto\"", "SSL_LABEL")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "\"ssl\"", "\"crypto\"")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "SSL_LABEL", "\"ssl\"")
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"), "zlib_source = \"embedded\"", "zlib_source = \"system\"")
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "common.gypi"), "-fPIC", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party","mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),   "-fPIC", "")
@@ -145,6 +157,7 @@ class CrashpadConan(ConanFile):
         if self.options.get_safe("fPIC"):
             extra_cflags.append("-fPIC")
         extra_cflags.extend("-I'{}'".format(inc) for inc in autotools.include_paths)
+        extra_ldflags.extend("-L'{}'".format(libdir) for libdir in autotools.library_paths)
         if self.settings.compiler == "clang":
             if self.settings.compiler.get_safe("libcxx"):
                 stdlib = {
@@ -157,6 +170,7 @@ class CrashpadConan(ConanFile):
             "host_cpu=\\\"{}\\\"".format(self._gn_arch),
             "is_debug={}".format(str(self.settings.build_type == "Debug").lower()),
             "crashpad_http_transport_impl=\\\"{}\\\"".format(self._http_transport_impl),
+            "crashpad_use_boringssl_for_http_transport_socket={}".format(str(self.options.get_safe("with_tls", False)).lower()),
             "extra_cflags=\\\"{}\\\"".format(" ".join(extra_cflags)),
             "extra_cflags_c=\\\"{}\\\"".format(" ".join(extra_cflags_c)),
             "extra_cflags_cc=\\\"{}\\\"".format(" ".join(extra_cflags_cc)),
