@@ -11,16 +11,16 @@ class TestPackageConan(ConanFile):
 
     def build_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SDL2_SHARED"] = self.options["sdl2"].shared
+        cmake.definitions["SDL2_SHARED"] = self.options["sdl"].shared
         if self.settings.os == "Linux":
-            cmake.definitions["WITH_X11"] = self.options["sdl2"].x11
-            cmake.definitions["WITH_ALSA"] = self.options["sdl2"].alsa
-            cmake.definitions["WITH_PULSE"] = self.options["sdl2"].pulse
-            cmake.definitions["WITH_ESD"] = self.options["sdl2"].esd
-            cmake.definitions["WITH_ARTS"] = self.options["sdl2"].arts
-            cmake.definitions["WITH_DIRECTFB"] = self.options["sdl2"].directfb
+            cmake.definitions["WITH_X11"] = self.options["sdl"].x11
+            cmake.definitions["WITH_ALSA"] = self.options["sdl"].alsa
+            cmake.definitions["WITH_PULSE"] = self.options["sdl"].pulse
+            cmake.definitions["WITH_ESD"] = self.options["sdl"].esd
+            cmake.definitions["WITH_ARTS"] = self.options["sdl"].arts
+            cmake.definitions["WITH_DIRECTFB"] = self.options["sdl"].directfb
         if self.settings.os == "Windows":
-            cmake.definitions["WITH_DIRECTX"] = self.options["sdl2"].directx
+            cmake.definitions["WITH_DIRECTX"] = self.options["sdl"].directx
         cmake.configure()
         cmake.build()
 

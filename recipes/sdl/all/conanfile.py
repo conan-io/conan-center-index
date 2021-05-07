@@ -5,12 +5,11 @@ import os
 required_conan_version = ">=1.29.1"
 
 
-class SDL2Conan(ConanFile):
-    # TODO: When porting to CCI rename this package to SDL (without 2)
-    name = "sdl2"
+class SDLConan(ConanFile):
+    name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
     topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
-    url = "https://github.com/bincrafters/conan-sdl2"
+    url = "https://github.com/bincrafters/conan-ffmpeg"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
     exports_sources = ["CMakeLists.txt", "patches/*"]
