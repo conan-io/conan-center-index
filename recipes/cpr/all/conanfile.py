@@ -1,4 +1,3 @@
-from typing import no_type_check
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
