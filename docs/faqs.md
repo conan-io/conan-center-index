@@ -18,10 +18,10 @@ This section gathers the most common questions from the community related to pac
       * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
   * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
       * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
-  * [Why _installer_ packages remove some settings from their package ID?](#why-installer-packages-remove-some-settings-from-their-package-id)
+  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
   * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
-  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
+  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
