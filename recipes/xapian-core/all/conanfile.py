@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class XapianCoreConan(ConanFile):
     name = "xapian-core"
@@ -50,8 +52,8 @@ class XapianCoreConan(ConanFile):
             self.build_requires("msys2/20190524")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
@@ -116,8 +118,8 @@ class XapianCoreConan(ConanFile):
             if self.options.shared:
                 pass
             else:
-                os.rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
-                          os.path.join(self.package_folder, "lib", "xapian.lib"))
+                tools.rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
+                             os.path.join(self.package_folder, "lib", "xapian.lib"))
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "bin", "xapian-config")))
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libxapian.la")))
