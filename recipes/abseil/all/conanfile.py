@@ -1,9 +1,9 @@
-import glob
+from conans import ConanFile, CMake, tools
 import json
 import os
 import re
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+
+required_conan_version = ">=1.33.0"
 
 
 class ConanRecipe(ConanFile):
@@ -40,9 +40,8 @@ class ConanRecipe(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('abseil-cpp-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
