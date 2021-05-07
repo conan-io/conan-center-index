@@ -42,6 +42,7 @@ class CrashpadConan(ConanFile):
 
     def requirements(self):
         # FIXME: use mini_chromium conan package instead of embedded package
+        self.requires("zlib/1.2.11")
         self.requires("linux-syscall-support/cci.20200813")
         if self.options.http_transport == "libcurl":
             self.requires("libcurl/7.75.0")
