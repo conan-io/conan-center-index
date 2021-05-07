@@ -162,7 +162,9 @@ class XapianCoreConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["rt"]
-            if self.settings.os == "SunOS":
+            elif self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["rpcrt4", "ws2_32"]
+            elif self.settings.os == "SunOS":
                 self.cpp_info.system_libs = ["socket", "nsl"]
 
         self.cpp_info.names["cmake_find_package"] = "xapian"
