@@ -79,7 +79,7 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    _source_subfolder = 'sources' # Required to build 2.12.1
+    _source_subfolder = 'sources' # Required to build at least 2.12.1
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -122,10 +122,29 @@ class BotanConan(ConanFile):
                 raise ConanInvalidConfiguration('Botan requires a Boost dependency with the following options:\n' \
                     'boost:shared=False, boost:magic_autolink=False, boost:without_coroutine=False, boost:without_system=False')
 
-        self._validate_compiler_settings()
+        compiler = self.settings.compiler
+        version = tools.Version(self.settings.compiler.version)
 
-        if tools.Version(self.version) >= '2.14.0':
-            self._validate_v2_14()
+        if compiler == 'Visual Studio' and version < '14':
+            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
+
+        elif compiler == 'gcc' and version >= '5' and compiler.libcxx != 'libstdc++11':
+            raise ConanInvalidConfiguration(
+                'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
+
+        elif compiler == 'clang' and compiler.libcxx not in ['libstdc++11', 'libc++']:
+            raise ConanInvalidConfiguration(
+                'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
+                'or "compiler.libcxx=libc++"')
+
+        # Some older compilers cannot handle the amalgamated build anymore
+        # See also https://github.com/randombit/botan/issues/2328
+        if tools.Version(self.version) >= '2.14.0' and self.options.amalgamation:
+            if (compiler == 'apple-clang' and version < '10') or \
+               (compiler == 'gcc' and version < '8') or \
+               (compiler == 'clang' and version < '7'):
+                raise ConanInvalidConfiguration(
+                    'botan amalgamation is not supported for {}/{}'.format(compiler, version))
 
     def requirements(self):
         if self.options.with_bzip2:
@@ -155,53 +174,18 @@ class BotanConan(ConanFile):
             self.run(self._make_install_cmd)
 
     def package_info(self):
-        if self.settings.compiler == 'Visual Studio':
-            self.cpp_info.libs.append('botan')
-        else:
-            self.cpp_info.libs.extend(['botan-2'])
-            if self.settings.os != 'Windows':
-                self.cpp_info.system_libs.append('dl') # This looks wrong
-            if self.settings.os == 'Linux':
-                self.cpp_info.system_libs.append('rt')
-            if self.settings.os == 'Macos':
-                self.cpp_info.frameworks = ['Security', 'CoreFoundation']
-            if not self.options.shared:
-                self.cpp_info.system_libs.append('pthread')
+        self.cpp_info.libs = ['botan' if self.settings.compiler == 'Visual Studio' else 'botan-2']
+        if self.settings.os == 'Linux':
+            self.cpp_info.system_libs.extend(['dl', 'rt'])
+        if self.settings.os == 'Macos':
+            self.cpp_info.frameworks = ['Security', 'CoreFoundation']
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs.extend(['ws2_32', 'crypt32'])
 
-        self.cpp_info.includedirs = ['include/botan-2']
+        if not self.options.shared:
+            self.cpp_info.system_libs.append('pthread')
 
-    def _validate_compiler_settings(self):
-        compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version.value)
-
-        if compiler == 'Visual Studio' and version < '14':
-            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
-
-        elif compiler == 'gcc' and version >= '5' and compiler.libcxx != 'libstdc++11':
-            raise ConanInvalidConfiguration(
-                'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
-
-        elif compiler == 'clang' and compiler.libcxx not in ['libstdc++11', 'libc++']:
-            raise ConanInvalidConfiguration(
-                'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
-                'or "compiler.libcxx=libc++"')
-
-    def _validate_v2_14(self):
-        """disallow configurations that cause issues in Botan >= 2.14.0"""
-
-        compiler = self.settings.compiler
-        compiler_version = tools.Version(compiler.version.value)
-
-        # Some older compilers cannot handle the amalgamated build anymore
-        # See also https://github.com/randombit/botan/issues/2328
-        if self.options.amalgamation:
-            if (compiler == 'apple-clang' and compiler_version < '10') or \
-               (compiler == 'gcc' and compiler_version < '8') or \
-               (compiler == 'clang' and compiler_version < '7'):
-                raise ConanInvalidConfiguration(
-                    'amalgamation is not supported for {} {}'.format(compiler, compiler_version))
+        self.cpp_info.includedirs = [os.path.join('include', 'botan-2')]
 
     @property
     def _is_mingw_windows(self):
@@ -253,6 +237,7 @@ class BotanConan(ConanFile):
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe('os.version'):
+                # Required, see https://github.com/conan-io/conan-center-index/pull/3456
                 macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
                                                                        self.settings.get_safe('os.version'),
                                                                        self.settings.get_safe('os.sdk'),
@@ -368,7 +353,7 @@ class BotanConan(ConanFile):
 
         build_flags.append('--without-pkg-config')
 
-        call_python = 'python' if self.settings.os == 'Windows' else ''
+        call_python = 'python' if self.settings.os == 'Windows' else 'python3'
 
         prefix = tools.unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
 
