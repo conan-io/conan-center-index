@@ -68,8 +68,6 @@ class DjinniSuppotLib(ConanFile):
             del self.options.fPIC
         elif self.settings.os == "Android":
             self.options.system_java = True
-        if self.cppcli_support:
-            self.options.shared = False
 
     @property
     def _supported_compilers(self):
@@ -87,6 +85,8 @@ class DjinniSuppotLib(ConanFile):
             raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
         if self.options.shared:
             del self.options.fPIC
+            if self.cppcli_support:
+                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
