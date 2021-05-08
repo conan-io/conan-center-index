@@ -176,14 +176,11 @@ class BotanConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ['botan' if self.settings.compiler == 'Visual Studio' else 'botan-2']
         if self.settings.os == 'Linux':
-            self.cpp_info.system_libs.extend(['dl', 'rt'])
+            self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
         if self.settings.os == 'Macos':
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs.extend(['ws2_32', 'crypt32'])
-
-        if not self.options.shared:
-            self.cpp_info.system_libs.append('pthread')
 
         self.cpp_info.includedirs = [os.path.join('include', 'botan-2')]
 
