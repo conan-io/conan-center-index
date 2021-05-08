@@ -1,5 +1,4 @@
 from conans import ConanFile, tools
-import glob
 import os
 
 
@@ -9,16 +8,18 @@ class DtlConan(ConanFile):
     topics = ("diff", "library", "algorithm")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cubicdaiya/dtl"
-    license = "BSD"
+    license = "BSD-3-Clause"
     no_copy_source = True
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        src_dir = glob.glob(f"{self.name}-*/")[0]
-        os.rename(src_dir, "dtl")
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
-        self.copy("dtl/*", dst="include", src="dtl")
+        self.copy(os.path.join("dtl", "*.hpp"), dst="include", src="dtl")
         self.copy(pattern="COPYING", dst="licenses", src="dtl")
 
     def package_id(self):
