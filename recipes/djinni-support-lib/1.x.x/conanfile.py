@@ -81,6 +81,8 @@ class DjinniSuppotLib(ConanFile):
         }
 
     def configure(self):
+        if not (self.objc_support or self.jni_support or self.python_support or self.cppcli_support):
+            raise ConanInvalidConfiguration("Target language could not be determined automatically. Set target explicitly to one of 'jni', 'objc', 'python' or 'cppcli'")
         if self.options.shared:
             del self.options.fPIC
         if self.settings.get_safe("compiler.cppstd"):
