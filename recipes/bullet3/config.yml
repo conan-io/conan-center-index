@@ -9,3 +9,5 @@ versions:
     folder: all
   "3.09":
     folder: all
+  "3.17":
+    folder: all
