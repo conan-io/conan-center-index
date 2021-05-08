@@ -113,3 +113,30 @@ When components are defined in the `package_info` in `conanfile.py` the followin
 
 - use the `cmake_find_package` or `cmake_find_package_multi` generators in `test_package/conanfile.py`
 - corresponding call to `find_package()` with the components _explicitly_ used in `target_link_libraries`
+
+### Recommended feature options names
+
+It's often needed to add options to toggle specific library features on/off. Sometimes, it's preferred to have options enabled by default, sometimes disabled by default. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
+
+- enable_xxx / disable_xxx
+- with_xxx / without_xxx
+- use_xxx
+
+the actual recipe code then may look like:
+
+```py
+    options = {"use_tzdb": [True, False]}
+    default_options = {"use_tzdb": True}
+```
+
+```py
+    options = {"enable_locales": [True, False]}
+    default_options = {"enable_locales": True}
+```
+
+```py
+    options = {"with_threads": [True, False]}
+    default_options = {"with_threads": True}
+```
+
+having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
