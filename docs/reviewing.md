@@ -135,8 +135,8 @@ the actual recipe code then may look like:
 ```
 
 ```py
-    options = {"with_threads": [True, False]}
-    default_options = {"with_threads": True}
+    options = {"with_zlib": [True, False]}
+    default_options = {"with_zlib": True}
 ```
 
 having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
