@@ -272,7 +272,7 @@ class SDLConan(ConanFile):
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
-        if self.options.get_safe("iconv", False):
+        if self.settings.os != "Macos" and self.options.get_safe("iconv", False):
             self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
             self.cpp_info.components["libsdl2"].system_libs = ["dl", "rt", "pthread"]
