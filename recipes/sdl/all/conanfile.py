@@ -112,7 +112,7 @@ class SDLConan(ConanFile):
             raise ConanInvalidConfiguration("Linux not supported yet")
 
     def requirements(self):
-        if self.options.iconv:
+        if self.options.iconv and self.settings.os != "Macos":
             self.requires("libiconv/1.16")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
