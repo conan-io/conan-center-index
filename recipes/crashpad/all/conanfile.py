@@ -25,8 +25,6 @@ class CrashpadConan(ConanFile):
     }
     exports_sources = "patches/*"
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
