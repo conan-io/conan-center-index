@@ -77,8 +77,6 @@ class SDLConan(ConanFile):
     _cmake = None
 
     def config_options(self):
-        if self.options.shared:
-            del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio":
@@ -106,6 +104,8 @@ class SDLConan(ConanFile):
             del self.options.directx
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Macos" and not self.options.iconv:
