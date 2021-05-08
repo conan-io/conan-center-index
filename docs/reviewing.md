@@ -116,7 +116,7 @@ When components are defined in the `package_info` in `conanfile.py` the followin
 
 ### Recommended feature options names
 
-It's often needed to add options to toggle specific library features on/off. Sometimes, it's preferred to have options enabled by default, sometimes disabled by default. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
+It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
 
 - enable_<feature> / disable_<feature>
 - with_<dependency> / without_<dependency>
