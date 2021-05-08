@@ -49,9 +49,7 @@ class MDSpanConan(ConanFile):
                         self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "mdspan-mdspan-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
