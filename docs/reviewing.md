@@ -120,7 +120,7 @@ It's often needed to add options to toggle specific library features on/off. Som
 
 - enable_<feature> / disable_<feature>
 - with_<dependency> / without_<dependency>
-- use_xxx
+- use_<feature>
 
 the actual recipe code then may look like:
 
