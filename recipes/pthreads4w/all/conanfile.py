@@ -1,4 +1,4 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 import os
 
@@ -53,6 +53,7 @@ class Pthreads4WConan(ConanFile):
                 tools.replace_in_file('Makefile',
                 '	copy libpthreadV*.lib $(LIBDEST)',
                 '	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)')
+                tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
                 args = ['VCE' if self.options.exception_scheme == "CPP" \
                         else 'VSE' if self.options.exception_scheme == 'SEH'\
                         else 'VC']
@@ -61,7 +62,8 @@ class Pthreads4WConan(ConanFile):
                 if self.settings.build_type == 'Debug':
                     args[0] += '-debug'
                 with tools.vcvars(self.settings):
-                    self.run('nmake %s' % ' '.join(args))
+                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                        self.run('nmake %s' % ' '.join(args))
             else:
                 self.run('autoheader', win_bash=tools.os_info.is_windows)
                 self.run('autoconf', win_bash=tools.os_info.is_windows)
@@ -80,7 +82,8 @@ class Pthreads4WConan(ConanFile):
         with tools.chdir(self._source_folder):
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
-                    self.run('nmake install DESTROOT=%s' % self.package_folder)
+                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                        self.run('nmake install DESTROOT=%s' % self.package_folder)
             else:
                 autotools = self._configure_autotools()
                 tools.mkdir(os.path.join(self.package_folder, "include"))
@@ -101,5 +104,3 @@ class Pthreads4WConan(ConanFile):
             '__PTW32_CLEANUP_CXX' if self.options.exception_scheme == "CPP" else\
             '__PTW32_CLEANUP_SEH' if self.options.exception_scheme == "SEH" else\
             '__PTW32_CLEANUP_C')
-            
-
