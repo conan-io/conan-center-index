@@ -13,16 +13,24 @@ class Pthreads4WConan(ConanFile):
     license = "Apache-2.0"
     topics = "pthreads"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-        "exception_scheme": ["CPP", "SEH", "default"]}
-    default_options = {'shared': False, 'exception_scheme': 'default'}
+    options = {
+        "shared": [True, False],
+        "exception_scheme": ["CPP", "SEH", "default"],
+    }
+    default_options = {
+        "shared": False,
+        "exception_scheme": "default",
+    }
 
     _autotools = None
-    _source_folder = "source_folder"
+
+    @property
+    def _source_folder(self):
+        return "source_folder"
 
     def configure(self):
-        if self.settings.os != 'Windows':
-            raise ConanInvalidConfiguration('pthreads4w can only target Windows')
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("pthreads4w can only target Windows")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -45,43 +53,43 @@ class Pthreads4WConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_folder):
             if self.settings.compiler == "Visual Studio":
-                tools.replace_in_file('Makefile',
-                '	copy pthreadV*.lib $(LIBDEST)',
-                '	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)')
-                tools.replace_in_file('Makefile',
-                '	copy libpthreadV*.lib $(LIBDEST)',
-                '	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)')
+                tools.replace_in_file("Makefile",
+                "	copy pthreadV*.lib $(LIBDEST)",
+                "	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)")
+                tools.replace_in_file("Makefile",
+                "	copy libpthreadV*.lib $(LIBDEST)",
+                "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
-                args = ['VCE' if self.options.exception_scheme == "CPP" \
-                        else 'VSE' if self.options.exception_scheme == 'SEH'\
-                        else 'VC']
+                args = ["VCE" if self.options.exception_scheme == "CPP" \
+                        else "VSE" if self.options.exception_scheme == "SEH"\
+                        else "VC"]
                 if not self.options.shared:
-                    args[0] += '-static'
-                if self.settings.build_type == 'Debug':
-                    args[0] += '-debug'
+                    args[0] += "-static"
+                if self.settings.build_type == "Debug":
+                    args[0] += "-debug"
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run('nmake %s' % ' '.join(args))
+                        self.run("nmake {}".format(" ".join(args)))
             else:
-                self.run('autoheader', win_bash=tools.os_info.is_windows)
-                self.run('autoconf', win_bash=tools.os_info.is_windows)
+                self.run("autoheader", win_bash=tools.os_info.is_windows)
+                self.run("autoconf", win_bash=tools.os_info.is_windows)
 
                 autotools = self._configure_autotools()
 
-                make_target = 'GCE' if self.options.exception_scheme == "CPP" else 'GC'
+                make_target = "GCE" if self.options.exception_scheme == "CPP" else "GC"
                 if not self.options.shared:
-                    make_target += '-static'
-                if self.settings.build_type == 'Debug':
-                    make_target += '-debug'
+                    make_target += "-static"
+                if self.settings.build_type == "Debug":
+                    make_target += "-debug"
                 autotools.make(target=make_target, args=["-j1"])
 
     def package(self):
-        self.copy('LICENSE', dst='licenses', src=self._source_folder)
+        self.copy("LICENSE", dst="licenses", src=self._source_folder)
         with tools.chdir(self._source_folder):
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run('nmake install DESTROOT=%s' % self.package_folder)
+                        self.run("nmake install DESTROOT={}".format(self.package_folder))
             else:
                 autotools = self._configure_autotools()
                 tools.mkdir(os.path.join(self.package_folder, "include"))
@@ -99,6 +107,6 @@ class Pthreads4WConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["__PTW32_STATIC_LIB"]
         self.cpp_info.defines.append(
-            '__PTW32_CLEANUP_CXX' if self.options.exception_scheme == "CPP" else\
-            '__PTW32_CLEANUP_SEH' if self.options.exception_scheme == "SEH" else\
-            '__PTW32_CLEANUP_C')
+            "__PTW32_CLEANUP_CXX" if self.options.exception_scheme == "CPP" else\
+            "__PTW32_CLEANUP_SEH" if self.options.exception_scheme == "SEH" else\
+            "__PTW32_CLEANUP_C")
