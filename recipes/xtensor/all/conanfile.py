@@ -18,16 +18,16 @@ class XtensorConan(ConanFile):
         "tbb": [True, False],
         "openmp": [True, False],
     }
-    default_options = {"xsimd": True, "tbb": False, "openmp": False}
+    default_options = {
+        "xsimd": True,
+        "tbb": False,
+        "openmp": False,
+    }
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
         if self.options.tbb and self.options.openmp:
@@ -57,14 +57,18 @@ class XtensorConan(ConanFile):
         if self.options.tbb:
             self.requires("tbb/2020.0")
 
+    def package_id(self):
+        self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(
             "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
         )
-
-    def package_id(self):
-        self.info.header_only()
 
     def package_info(self):
         if self.options.xsimd:
