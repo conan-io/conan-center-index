@@ -9,8 +9,7 @@ class Libssh2Conan(ConanFile):
     homepage = "https://libssh2.org"
     topics = ("libssh", "ssh", "shell", "ssh2", "connection")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,7 +19,6 @@ class Libssh2Conan(ConanFile):
         "enable_mac_none": [True, False],
         "crypto_backend": ["openssl", "mbedtls"],
     }
-
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -30,6 +28,8 @@ class Libssh2Conan(ConanFile):
         "crypto_backend": "openssl",
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -58,6 +58,13 @@ class Libssh2Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libssh2-%s" % (self.version), self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)",
+                              "list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -76,8 +83,7 @@ class Libssh2Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
