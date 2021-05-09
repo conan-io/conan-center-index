@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile, tools
+from conans import ConanFile, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -17,7 +17,7 @@ class XsimdConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return "source_subfolder"
 
     def requirements(self):
         if self.options.xtl_complex:
