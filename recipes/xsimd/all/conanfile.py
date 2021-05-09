@@ -19,16 +19,16 @@ class XsimdConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    def requirements(self):
+        if self.options.xtl_complex:
+            self.requires("xtl/0.7.2")
+
     def package_id(self):
         self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def requirements(self):
-        if self.options.xtl_complex:
-            self.requires("xtl/0.7.2")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
