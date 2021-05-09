@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 
 
 class XsimdTestConan(ConanFile):
@@ -13,4 +13,5 @@ class XsimdTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        self.run(os.path.join("bin", "test_package"), run_environment=True)
+        if not tools.cross_building(self.settings):
+            self.run(os.path.join("bin", "test_package"), run_environment=True)
