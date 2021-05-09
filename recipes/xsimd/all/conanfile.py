@@ -25,7 +25,7 @@ class XsimdConan(ConanFile):
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.6.10")
+            self.requires("xtl/0.7.2")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
