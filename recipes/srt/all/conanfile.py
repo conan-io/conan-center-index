@@ -30,6 +30,11 @@ class SrtConan(ConanFile):
     def _has_stdcxx_sync(self):
         return tools.Version(self.version) >= "1.4.2"
 
+    @property
+    def _has_posix_threads(self):
+        return not (self.settings.os == "Windows" and (self.settings.compiler == "Visual Studio" or \
+               (self.settings.compiler == "gcc" and self.settings.compiler.get_safe("threads") == "win32")))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,7 +45,7 @@ class SrtConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1h")
-        if self.settings.os == "Windows" and not self._has_stdcxx_sync:
+        if not self._has_posix_threads and not self._has_stdcxx_sync:
             self.requires("pthreads4w/3.0.0")
 
     def source(self):
