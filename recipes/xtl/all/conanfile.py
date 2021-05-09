@@ -18,6 +18,9 @@ class XtlConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
