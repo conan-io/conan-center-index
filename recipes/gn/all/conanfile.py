@@ -47,6 +47,7 @@ class GnConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def build_requirements(self):
+        # FIXME: add cpython build requirements for `build/gen.py`.
         self.build_requires("ninja/1.10.2")
 
     @contextmanager
