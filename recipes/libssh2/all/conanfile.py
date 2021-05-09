@@ -92,13 +92,7 @@ class Libssh2Conan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
-        if os.path.exists(os.path.join(self.package_folder, "lib64")):
-            # rhel installs libraries into lib64
-            tools.rename(os.path.join(self.package_folder, "lib64"),
-                         os.path.join(self.package_folder, "lib"))
-
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
