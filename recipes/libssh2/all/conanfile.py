@@ -111,7 +111,7 @@ class Libssh2Conan(ConanFile):
         self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
         self.cpp_info.components["_libssh2"].names["pkg_config"] = "libssh2"
         self.cpp_info.components["_libssh2"].libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+        if self.settings.os == "Windows":
             self.cpp_info.components["_libssh2"].system_libs.append("ws2_32")
         elif self.settings.os == "Linux":
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
