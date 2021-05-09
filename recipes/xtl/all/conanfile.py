@@ -16,7 +16,7 @@ class XtlConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
