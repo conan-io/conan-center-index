@@ -91,6 +91,7 @@ class GnConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             with self._build_context():
+                # Generate dummy header to be able to run `build/ben.py` with `--no-last-commit-position`. This allows running the script without the tree having to be a git checkout.
                 tools.save(os.path.join("src", "gn", "last_commit_position.h"),
                            textwrap.dedent("""\
                                 #pragma once
