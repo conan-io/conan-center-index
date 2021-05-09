@@ -27,7 +27,7 @@ class XtensorConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return "source_subfolder"
 
     def configure(self):
         if self.options.tbb and self.options.openmp:
