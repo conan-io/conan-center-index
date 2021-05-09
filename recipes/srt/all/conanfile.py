@@ -11,13 +11,13 @@ class SrtConan(ConanFile):
     topics = ("conan", "srt", "ip", "transport")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     short_paths = True
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -54,6 +54,11 @@ class SrtConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set (CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")",
+                              "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -62,12 +67,15 @@ class SrtConan(ConanFile):
         self._cmake.definitions["ENABLE_LOGGING"] = False
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        self._cmake.definitions["ENABLE_STDCXX_SYNC"] = self._has_stdcxx_sync
+        if self._has_stdcxx_sync:
+            self._cmake.definitions["ENABLE_STDCXX_SYNC"] = True
+        self._cmake.definitions["ENABLE_ENCRYPTION"] = True
+        self._cmake.definitions["USE_OPENSSL_PC"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
