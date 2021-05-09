@@ -1,0 +1,21 @@
+diff --git a/src/macdeployqt/macdeployqt/main.cpp b/src/macdeployqt/macdeployqt/main.cpp
+index 0f9164053..5d9e40e36 100644
+--- a/src/macdeployqt/macdeployqt/main.cpp
++++ b/src/macdeployqt/macdeployqt/main.cpp
+@@ -27,6 +27,7 @@
+ ****************************************************************************/
+ #include <QCoreApplication>
+ #include <QDir>
++#include <QLibraryInfo>
+ 
+ #include "../shared/shared.h"
+ 
+@@ -236,7 +237,7 @@ int main(int argc, char **argv)
+     }
+ 
+     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
+-        deploymentInfo.pluginPath = deploymentInfo.qtPath + "/plugins";
++        deploymentInfo.pluginPath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
+         LogNormal();
+         deployPlugins(appBundlePath, deploymentInfo, useDebugLibs);
+         createQtConf(appBundlePath);
