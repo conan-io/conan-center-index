@@ -50,12 +50,12 @@ class XtensorConan(ConanFile):
             raise ConanInvalidConfiguration("xtensor requires at least C++14")
 
     def requirements(self):
-        self.requires("xtl/0.6.12")
-        self.requires("nlohmann_json/3.7.3")
+        self.requires("xtl/0.7.2")
+        self.requires("nlohmann_json/3.9.1")
         if self.options.xsimd:
-            self.requires("xsimd/7.4.6")
+            self.requires("xsimd/7.4.10")
         if self.options.tbb:
-            self.requires("tbb/2020.0")
+            self.requires("tbb/2020.3")
 
     def package_id(self):
         self.info.header_only()
