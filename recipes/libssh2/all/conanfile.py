@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Libssh2Conan(ConanFile):
     name = "libssh2"
@@ -55,8 +57,8 @@ class Libssh2Conan(ConanFile):
             self.requires("mbedtls/2.25.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libssh2-%s" % (self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -94,8 +96,8 @@ class Libssh2Conan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
         if os.path.exists(os.path.join(self.package_folder, "lib64")):
             # rhel installs libraries into lib64
-            os.rename(os.path.join(self.package_folder, "lib64"),
-                      os.path.join(self.package_folder, "lib"))
+            tools.rename(os.path.join(self.package_folder, "lib64"),
+                         os.path.join(self.package_folder, "lib"))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
