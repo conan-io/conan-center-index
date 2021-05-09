@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -36,8 +36,6 @@ class Pthreads4WConan(ConanFile):
                 os.rename(f, self._source_folder)
 
     def _configure_autotools(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanException("Visual Studio has no autotools support")
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
