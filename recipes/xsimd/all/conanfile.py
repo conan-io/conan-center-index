@@ -19,6 +19,9 @@ class XsimdConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
