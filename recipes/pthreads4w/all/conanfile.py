@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, Cona
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Pthreads4WConan(ConanFile):
     name = "pthreads4w"
@@ -30,10 +32,8 @@ class Pthreads4WConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        for f in os.listdir():
-            if os.path.isdir(f) and f.startswith('pthreads'):
-                os.rename(f, self._source_folder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_folder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
