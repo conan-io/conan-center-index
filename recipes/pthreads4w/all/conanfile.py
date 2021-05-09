@@ -59,7 +59,10 @@ class Pthreads4WConan(ConanFile):
                 tools.replace_in_file("Makefile",
                 "	copy libpthreadV*.lib $(LIBDEST)",
                 "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
+                tools.replace_in_file("Makefile", "XCFLAGS=\"/MD\"", "")
+                tools.replace_in_file("Makefile", "XCFLAGS=\"/MDd\"", "")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
+                tools.replace_in_file("Makefile", "XCFLAGS=\"/MTd\"", "")
                 args = ["VCE" if self.options.exception_scheme == "CPP" \
                         else "VSE" if self.options.exception_scheme == "SEH"\
                         else "VC"]
