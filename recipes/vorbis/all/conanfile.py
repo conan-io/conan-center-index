@@ -9,12 +9,12 @@ class VorbisConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xiph.org/vorbis/"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
