@@ -95,6 +95,8 @@ class SrtConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "srt"
         suffix = "_static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
         self.cpp_info.libs = ["srt" + suffix]
+        if self.options.shared:
+            self.cpp_info.defines = ["SRT_DYNAMIC"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Windows":
