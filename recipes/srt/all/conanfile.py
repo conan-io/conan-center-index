@@ -16,7 +16,7 @@ class SrtConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     short_paths = True
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -55,6 +55,8 @@ class SrtConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set (CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")",
                               "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")")
@@ -71,6 +73,10 @@ class SrtConan(ConanFile):
             self._cmake.definitions["ENABLE_STDCXX_SYNC"] = True
         self._cmake.definitions["ENABLE_ENCRYPTION"] = True
         self._cmake.definitions["USE_OPENSSL_PC"] = False
+        if self.settings.compiler == "Visual Studio":
+            # required to avoid warnings when srt shared, even if openssl shared,
+            # otherwise upstream CMakeLists would add /DELAYLOAD:libeay32.dll to link flags
+            self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
