@@ -54,11 +54,11 @@ class Pthreads4WConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
                 tools.replace_in_file("Makefile",
-                "	copy pthreadV*.lib $(LIBDEST)",
-                "	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)")
+                    "	copy pthreadV*.lib $(LIBDEST)",
+                    "	if exist pthreadV*.lib copy pthreadV*.lib $(LIBDEST)")
                 tools.replace_in_file("Makefile",
-                "	copy libpthreadV*.lib $(LIBDEST)",
-                "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
+                    "	copy libpthreadV*.lib $(LIBDEST)",
+                    "	if exist libpthreadV*.lib copy libpthreadV*.lib $(LIBDEST)")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MD\"", "")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MDd\"", "")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
