@@ -56,11 +56,14 @@ class LibKtxConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] = not self.options.shared
-        self._cmake.definitions["KTX_FEATURE_TESTS"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False       
+        self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] =
+        not self.options.shared
 
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        self._cmake.definitions["KTX_FEATURE_TESTS"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+
+        self._cmake.configure(build_folder=self._build_subfolder,
+                              source_folder=self._source_subfolder)
         return self._cmake
 
     def package(self):
@@ -68,10 +71,10 @@ class LibKtxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        os.rename( os.path.join(self.package_folder, "LICENSES"), os.path.join(self.package_folder, "license") )
+        os.rename(os.path.join(self.package_folder, "LICENSES"),
+                  os.path.join(self.package_folder, "license"))
 
     def package_info(self):
         self.cpp_info.libs = ["ktx"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl", "pthread"]
-
