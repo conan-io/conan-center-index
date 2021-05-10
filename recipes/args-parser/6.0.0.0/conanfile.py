@@ -47,5 +47,4 @@ class ArgsParserConan(ConanFile):
         self.copy("*.hpp", src=os.path.join(self._source_subfolder, "Args"), dst=os.path.join("include", "args-parser"))
 
     def package_id(self):
-        del self.info.settings.compiler
         self.info.header_only()
