@@ -1,0 +1,13 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/TinkoffCreditSystems/uconfig/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "9af342d0cb64f5ee2e09af72f0124e2c0637be40994ee46497a461323922dc6f"
+  "2.0.1":
+    url: "https://github.com/TinkoffCreditSystems/uconfig/archive/refs/tags/v2.0.1.tar.gz"
+    sha256: "40a347cde048a6526a15144d3e01284ba395869ebc3b97b2e01bd95709ebaf72"
+  "2.0.2":
+    url: "https://github.com/TinkoffCreditSystems/uconfig/archive/refs/tags/v2.0.2.tar.gz"
+    sha256: "f0ae7ae586a5a2cb960405cb61cd4acee550bd51e984e3413576f57e18ae41ed"
+  "2.0.3":
+    url: "https://github.com/TinkoffCreditSystems/uconfig/archive/refs/tags/v2.0.3.tar.gz"
+    sha256: "a1f6278ebd6c0c7ba391651ab6f0aceeb9cb77dc6936d45dc0e6fee3f27dfcbf"
