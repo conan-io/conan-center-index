@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 65bfab2..5ec4d70 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,10 +18,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra \
+-    -Wunused-variable -Wunused-parameter \
+-    -Wunused-function -Wunused -Wno-system-headers \
+-    -Wno-deprecated -Woverloaded-virtual -Wwrite-strings")
++if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
++else()
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra \
++        -Wunused-variable -Wunused-parameter \
++        -Wunused-function -Wunused -Wno-system-headers \
++        -Wno-deprecated -Woverloaded-virtual -Wwrite-strings")
++endif()
+
+ # compile in release with debug info mode by default
+ if(NOT CMAKE_BUILD_TYPE)

@@ -24,6 +24,9 @@ class UriTemplateConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = [
+        "patches/*",
+    ]
 
     _cmake = None
 
@@ -89,6 +92,8 @@ class UriTemplateConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

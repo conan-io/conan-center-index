@@ -1,4 +1,8 @@
 sources:
   "1.1.2":
     url: "https://github.com/TinkoffCreditSystems/uri-template/archive/refs/tags/v1.1.2.tar.gz"
-    sha256: "6b63da3e83b44089a774f8064bafdd2057171369572b6a82cd4d2b3f76d34cb3"
+    sha256: "4a0c2cc67e76901aa176eee40c2f325e86817b6f185329c475b1565798174ce2"
+patches:
+  "1.1.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-msvc.patch"
