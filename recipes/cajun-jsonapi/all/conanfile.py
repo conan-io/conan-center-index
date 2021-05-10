@@ -15,9 +15,7 @@ class CajunJsonApiConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("%s-*" % (self.name))[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _extract_license(self):
         file_content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "test.cpp"))
