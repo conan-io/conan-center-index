@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class SemverConan(ConanFile):
     name = "uconfig"
     description = "Lightweight, header-only, C++17 configuration library"
-    topics = ("conan", "semver", "semantic", "versioning")
+    topics = ("conan", "configuration", "env", "json")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/TinkoffCreditSystems/uconfig"
     license = "Apache-2.0"
