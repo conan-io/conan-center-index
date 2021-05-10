@@ -63,16 +63,17 @@ class Pthreads4WConan(ConanFile):
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MDd\"", "")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MT\"", "")
                 tools.replace_in_file("Makefile", "XCFLAGS=\"/MTd\"", "")
-                args = ["VCE" if self.options.exception_scheme == "CPP" \
-                        else "VSE" if self.options.exception_scheme == "SEH"\
-                        else "VC"]
+                target = {
+                    "CPP": "VCE",
+                    "SEH": "SSE",
+                }.get(str(self.options.exception_scheme), "VC")
                 if not self.options.shared:
-                    args[0] += "-static"
+                    target += "-static"
                 if self.settings.build_type == "Debug":
-                    args[0] += "-debug"
+                    target += "-debug"
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake {}".format(" ".join(args)))
+                        self.run("nmake {}".format(target))
             else:
                 self.run("autoheader", win_bash=tools.os_info.is_windows)
                 self.run("autoconf", win_bash=tools.os_info.is_windows)
