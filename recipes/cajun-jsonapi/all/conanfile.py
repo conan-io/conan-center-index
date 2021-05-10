@@ -1,4 +1,4 @@
-from conans import ConanFile, ConanFile, tools
+from conans import ConanFile, tools
 import os
 
 class CajunJsonApiConan(ConanFile):
