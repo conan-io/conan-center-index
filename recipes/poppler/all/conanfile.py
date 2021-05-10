@@ -300,7 +300,7 @@ class PopplerConan(ConanFile):
             qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
             self.cpp_info.components["libpoppler-qt"].libs = ["poppler-qt{}".format(qt_major)]
             self.cpp_info.components["libpoppler-qt"].names["pkg_config"] = "poppler-qt{}".format(qt_major)
-            self.cpp_info.components["libpoppler-qt"].requires = ["libpoppler", "qt::qt"]
+            self.cpp_info.components["libpoppler-qt"].requires = ["libpoppler", "qt::qtCore", "qt::qtGui", "qt::qtWidgets"]
 
         datadir = self.deps_user_info["poppler-data"].datadir
         self.output.info("Setting POPPLER_DATADIR env var: {}".format(datadir))
