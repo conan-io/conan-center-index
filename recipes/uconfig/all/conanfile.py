@@ -6,7 +6,7 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class SemverConan(ConanFile):
+class UconfigConan(ConanFile):
     name = "uconfig"
     description = "Lightweight, header-only, C++17 configuration library"
     topics = ("conan", "configuration", "env", "json")
