@@ -14,6 +14,32 @@ index 41b437a80..6bef9e28b 100644
                          int32_t version;
                          std::unordered_map<int32_t, boost::uuids::uuid> partitions;
                      };
+diff --git a/hazelcast/src/hazelcast/client/config.cpp b/hazelcast/src/hazelcast/client/config.cpp
+index 88cad1ec5..5da63b36a 100644
+--- a/hazelcast/src/hazelcast/client/config.cpp
++++ b/hazelcast/src/hazelcast/client/config.cpp
+@@ -856,7 +856,7 @@ namespace hazelcast {
+                 return it->second;
+             }
+ 
+-            return reliable_topic_config_map_.emplace(name, name).first->second;
++            return reliable_topic_config_map_.emplace(name, config::reliable_topic_config{name}).first->second;
+         }
+ 
+         const config::reliable_topic_config *client_config::lookup_reliable_topic_config(const std::string &name) const {
+diff --git a/hazelcast/src/hazelcast/client/discovery.cpp b/hazelcast/src/hazelcast/client/discovery.cpp
+index cdc10a906..51279b446 100644
+--- a/hazelcast/src/hazelcast/client/discovery.cpp
++++ b/hazelcast/src/hazelcast/client/discovery.cpp
+@@ -588,7 +588,7 @@ namespace hazelcast {
+ 
+                 std::unordered_map<address, address> aws_client::get_addresses() {
+                     util::Preconditions::check_ssl("aws_client::get_addresses");
+-                    return {};
++                    return std::unordered_map<address, address>();
+                 }
+         }
+     }
 diff --git a/hazelcast/src/hazelcast/client/spi.cpp b/hazelcast/src/hazelcast/client/spi.cpp
 index ada4e665c..6cf44642c 100644
 --- a/hazelcast/src/hazelcast/client/spi.cpp
