@@ -1,5 +1,5 @@
 from conans import ConanFile, ConanFile, tools
-import os, glob
+import os
 
 class CajunJsonApiConan(ConanFile):
     name = 'cajun-jsonapi'
