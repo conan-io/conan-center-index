@@ -53,30 +53,37 @@ class UriTemplateConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        compiler = str(self.settings.compiler)
+        compiler_name = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
+        # Exclude compiler.cppstd < 17
         min_req_cppstd = "17"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, min_req_cppstd)
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support." % (self.name, compiler))
+                             " standard version support." % (self.name, compiler_name))
 
-        minimal_version = {
+        # Exclude not supported compilers
+        compilers_required = {
             "Visual Studio": "16",
             "gcc": "7.3",
             "clang": "6.0",
             "apple-clang": "10.0",
         }
-        # Exclude not supported compilers
-        if compiler not in minimal_version:
-            self.output.info("%s requires a compiler that supports at least C++%s" % (self.name, min_req_cppstd))
-            return
-        if compiler_version < minimal_version[compiler]:
+        if compiler_name not in compilers_required or compiler_version < compilers_required[compiler_name]:
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s. %s %s is not supported." %
-                (self.name, min_req_cppstd, compiler, compiler_version))
+                (self.name, min_req_cppstd, compiler_name, compiler_version))
+
+        # Check stdlib ABI compatibility
+        if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration(
+                'Using %s with GCC on Linux requires "compiler.libcxx=libstdc++11"' % self.name)
+        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration(
+                'Using %s with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
+                'or "compiler.libcxx=libc++"' % self.name)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
