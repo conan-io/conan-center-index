@@ -13,18 +13,13 @@ class OzoConan(ConanFile):
     homepage = "https://github.com/yandex/ozo"
     license = "PostgreSQL"
 
-    settings = "os", "arch", "compiler", "build_type"
-    requires = ("boost/1.75.0", "resource_pool/cci.20210322", "libpq/13.2")
-    generators = "cmake_find_package"
+    settings = "os", "compiler"
+    requires = ("boost/1.76.0", "resource_pool/cci.20210322", "libpq/13.2")
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -53,9 +48,7 @@ class OzoConan(ConanFile):
         self._validate_compiler_settings()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst=os.path.join("include", "ozo"), src=os.path.join(self._source_subfolder, "include", "ozo"))
@@ -72,7 +65,6 @@ class OzoConan(ConanFile):
             "libpq::pq",
         ]
         main_comp.defines = [
-            "BOOST_COROUTINES_NO_DEPRECATION_WARNING",
             "BOOST_HANA_CONFIG_ENABLE_STRING_UDL",
             "BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT",
         ]
