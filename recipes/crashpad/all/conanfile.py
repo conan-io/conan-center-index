@@ -207,7 +207,21 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
 
     def package_info(self):
+        minichromium_libs = ["base"]
+        util_libs = ["util"]
+        if tools.is_apple_os(self.settings.os):
+            util_libs.append("mig_output")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            util_libs.append("compat")
+        client_libs = ["client", "common"]
+        snapshot_libs = ["snapshot", "context"]
+        minidump_libs = ["minidump", "format"]
+        handler_libs = ["handler"]
+
         self.output.info("DEBUG: contents of /lib: {}".format(os.listdir(os.path.join(self.package_folder, "lib"))))
-        self.cpp_info.libs = ["minidump", "snapshot", "client", "util", "compat", "common", "base"]
+        self.cpp_info.libs = handler_libs + minidump_libs + snapshot_libs + client_libs + util_libs + minichromium_libs
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
+        # FIXME: what frameworks are missing?
+        # if tools.is_apple_os(self.settings.os):
+        #     self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
