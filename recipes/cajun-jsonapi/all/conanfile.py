@@ -8,6 +8,7 @@ class CajunJsonApiConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cajun-jsonapi/cajun-jsonapi"
     license = "BSD-3-Clause"
+    settings = "compiler"
     no_copy_source = True
 
     @property
