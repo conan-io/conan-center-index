@@ -18,7 +18,7 @@ class LibKtxConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True
     }
     short_paths = True
@@ -56,9 +56,8 @@ class LibKtxConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] =
-        not self.options.shared
-
+        self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] = \
+            not self.options.shared
         self._cmake.definitions["KTX_FEATURE_TESTS"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
 
