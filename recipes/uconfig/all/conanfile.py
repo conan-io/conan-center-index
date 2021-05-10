@@ -33,10 +33,6 @@ class UconfigConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _version(self):
-        return tools.Version(self.version)
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
