@@ -223,5 +223,6 @@ class CrashpadConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
         # FIXME: what frameworks are missing?
-        # if tools.is_apple_os(self.settings.os):
-        #     self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.frameworks = ["CoreFoundation"]
+            # self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
