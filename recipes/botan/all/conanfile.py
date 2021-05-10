@@ -115,12 +115,15 @@ class BotanConan(ConanFile):
         if self.options.get_safe('single_amalgamation'):
             self.options.amalgamation = True
 
+    @property
+    def _required_boost_components(self):
+        return ['coroutine', 'system']
+
     def validate(self):
         if self.options.with_boost:
-            if self.options['boost'].shared or self.options['boost'].magic_autolink or \
-               self.options['boost'].without_coroutine or self.options['boost'].without_system:
-                raise ConanInvalidConfiguration('Botan requires a Boost dependency with the following options:\n' \
-                    'boost:shared=False, boost:magic_autolink=False, boost:without_coroutine=False, boost:without_system=False')
+            miss_boost_required_comp = any(getattr(self.options['boost'], 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
+            if self.options['boost'].header_only or self.options['boost'].shared or self.options['boost'].magic_autolink or miss_boost_required_comp:
+                raise ConanInvalidConfiguration('{0} requires non-header-only static boost, without magic_autolink, and with these components: {1}'.format(self.name, ', '.join(self._required_boost_components)))
 
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
