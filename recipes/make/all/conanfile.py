@@ -14,9 +14,8 @@ class MakeConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "make-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -26,7 +25,7 @@ class MakeConan(ConanFile):
         del self.info.settings.compiler
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version,[]):
             tools.patch(**patch)
 
         with tools.chdir(self._source_subfolder):
