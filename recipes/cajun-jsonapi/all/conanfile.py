@@ -26,8 +26,8 @@ class CajunJsonApiConan(ConanFile):
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
-        self.copy('*.h', dst=os.path.join('include','cajun','json'), src=os.path.join(self._source_subfolder, 'json'))
-        self.copy('*.inl', dst=os.path.join('include','cajun','json'), src=os.path.join(self._source_subfolder, 'json'))
+        self.copy('*.h', dst=os.path.join('include', 'json'), src=os.path.join(self._source_subfolder, 'json'))
+        self.copy('*.inl', dst=os.path.join('include', 'json'), src=os.path.join(self._source_subfolder, 'json'))
 
     def package_id(self):
         self.info.header_only()
