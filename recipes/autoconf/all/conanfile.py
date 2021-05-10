@@ -121,5 +121,5 @@ class AutoconfConan(ConanFile):
 
         if tools.Version(self.version) > "2.69":
             trailer_m4 = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "autoconf", "autoconf", "trailer.m4"))
-            self.output.info("Settings $TRAILER_M4 to {}".format(trailer_m4))
+            self.output.info("Settings TRAILER_M4 to {}".format(trailer_m4))
             self.env_info.TRAILER_M4 = trailer_m4
