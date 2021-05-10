@@ -31,8 +31,8 @@ class AutoconfConan(ConanFile):
         self.info.requires.clear()
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @property
     def _datarootdir(self):
@@ -118,3 +118,8 @@ class AutoconfConan(ConanFile):
         autom4te_perllibdir = self._autoconf_datarootdir
         self.output.info("Setting AUTOM4TE_PERLLIBDIR to {}".format(autom4te_perllibdir))
         self.env_info.AUTOM4TE_PERLLIBDIR = autom4te_perllibdir
+
+        if tools.Version(self.version) > "2.69":
+            trailer_m4 = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "autoconf", "autoconf", "trailer.m4"))
+            self.output.info("Settings $TRAILER_M4 to {}".format(trailer_m4))
+            self.env_info.TRAILER_M4 = trailer_m4
