@@ -17,10 +17,10 @@ class UconfigConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "use_rapidjson": [True, False],
+        "with_rapidjson": [True, False],
     }
     default_options = {
-        "use_rapidjson": True,
+        "with_rapidjson": True,
     }
 
     _cmake = None
@@ -50,7 +50,7 @@ class UconfigConan(ConanFile):
         return self._cmake
 
     def requirements(self):
-        if self.options.use_rapidjson:
+        if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
 
     def configure(self):
@@ -94,7 +94,7 @@ class UconfigConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        if self.options.use_rapidjson:
+        if self.options.with_rapidjson:
             self.cpp_info.defines = ["RAPIDJSON_HAS_STDSTRING=1"]
 
     def package_id(self):
