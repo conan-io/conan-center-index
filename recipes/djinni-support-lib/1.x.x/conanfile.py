@@ -27,32 +27,32 @@ class DjinniSuppotLib(ConanFile):
     _cmake = None
 
     @property
-    def objc_support(self):
+    def _objc_support(self):
         if self.options.target == "auto":
             return tools.is_apple_os(self.settings.os)
         else:
             return self.options.target == "objc"
 
     @property
-    def jni_support(self):
+    def _jni_support(self):
         if self.options.target == "auto":
             return self.settings.os == "Android"
         else:
             return self.options.target == "jni"
 
     @property
-    def python_support(self):
+    def _python_support(self):
         return self.options.target == "python"
 
     @property
-    def cppcli_support(self):
+    def _cppcli_support(self):
         if self.options.target == "auto":
             return self.settings.os  == "Windows"
         else:
             return self.options.target == "cppcli"
 
     def configure(self):
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.compiler == "Visual Studio" or self.options.shared:
             del self.options.fPIC
 
     @property
@@ -60,7 +60,7 @@ class DjinniSuppotLib(ConanFile):
         return "source_subfolder"
 
     def build_requirements(self):
-        if not self.options.system_java and self.jni_support:
+        if not self.options.system_java and self._jni_support:
             self.build_requires("zulu-openjdk/11.0.8@")
 
     def config_options(self):
@@ -78,15 +78,13 @@ class DjinniSuppotLib(ConanFile):
             "apple-clang": "10",
         }
 
-    def configure(self):
-        if not (self.objc_support or self.jni_support or self.python_support or self.cppcli_support):
+    def validate(self):
+        if not (self._objc_support or self._jni_support or self._python_support or self._cppcli_support):
             raise ConanInvalidConfiguration("Target language could not be determined automatically. Set target explicitly to one of 'jni', 'objc', 'python' or 'cppcli'")
-        if self.cppcli_support and (self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd"):
+        if self._cppcli_support and (self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd"):
             raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
-        if self.options.shared:
-            del self.options.fPIC
-            if self.cppcli_support:
-                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
+        if self.options.shared and self._cppcli_support:
+            raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
@@ -97,19 +95,18 @@ class DjinniSuppotLib(ConanFile):
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["DJINNI_WITH_OBJC"] = self.objc_support
-        self._cmake.definitions["DJINNI_WITH_JNI"] = self.jni_support
-        self._cmake.definitions["DJINNI_WITH_PYTHON"] = self.python_support
-        self._cmake.definitions["DJINNI_WITH_CPPCLI"] = self.cppcli_support
+        self._cmake.definitions["DJINNI_WITH_OBJC"] = self._objc_support
+        self._cmake.definitions["DJINNI_WITH_JNI"] = self._jni_support
+        self._cmake.definitions["DJINNI_WITH_PYTHON"] = self._python_support
+        self._cmake.definitions["DJINNI_WITH_CPPCLI"] = self._cppcli_support
         self._cmake.definitions["BUILD_TESTING"] = False
-        if self.jni_support:
+        if self._jni_support:
             self._cmake.definitions["JAVA_AWT_LIBRARY"] = "NotNeeded"
             self._cmake.definitions["JAVA_AWT_INCLUDE_PATH"] = "NotNeeded"
         self._cmake.configure()
