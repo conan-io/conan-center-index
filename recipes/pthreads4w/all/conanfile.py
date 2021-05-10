@@ -35,9 +35,10 @@ class Pthreads4WConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("autoconf/2.69")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -75,8 +76,8 @@ class Pthreads4WConan(ConanFile):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                         self.run("nmake {}".format(target))
             else:
-                self.run("autoheader", win_bash=tools.os_info.is_windows)
-                self.run("autoconf", win_bash=tools.os_info.is_windows)
+                self.run("{}".format(tools.get_env("AUTOHEADER")), win_bash=tools.os_info.is_windows)
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
                 autotools = self._configure_autotools()
 
