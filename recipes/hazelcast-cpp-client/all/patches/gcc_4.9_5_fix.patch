@@ -1,0 +1,31 @@
+diff --git a/hazelcast/include/hazelcast/client/spi/impl/ClientPartitionServiceImpl.h b/hazelcast/include/hazelcast/client/spi/impl/ClientPartitionServiceImpl.h
+index 41b437a80..6bef9e28b 100644
+--- a/hazelcast/include/hazelcast/client/spi/impl/ClientPartitionServiceImpl.h
++++ b/hazelcast/include/hazelcast/client/spi/impl/ClientPartitionServiceImpl.h
+@@ -64,10 +64,7 @@ namespace hazelcast {
+                     void reset();
+                 private:
+                     struct partition_table {
+-                        partition_table(int32_t connectionId = 0, int32_t version = -1,
+-                                        const std::unordered_map<int32_t, boost::uuids::uuid> &partitions = {});
+-
+-                        int32_t connection_id{0};
++                        int32_t connection_id;
+                         int32_t version;
+                         std::unordered_map<int32_t, boost::uuids::uuid> partitions;
+                     };
+diff --git a/hazelcast/src/hazelcast/client/spi.cpp b/hazelcast/src/hazelcast/client/spi.cpp
+index ada4e665c..6cf44642c 100644
+--- a/hazelcast/src/hazelcast/client/spi.cpp
++++ b/hazelcast/src/hazelcast/client/spi.cpp
+@@ -2388,10 +2388,6 @@ namespace hazelcast {
+                         return address(std::move(scoped_hostname), address_holder.get_port());
+                     }
+                 }
+-
+-                ClientPartitionServiceImpl::partition_table::partition_table(int32_t connectionId, int32_t version,
+-                                                                             const std::unordered_map<int32_t, boost::uuids::uuid> &partitions)
+-                        : connection_id(connectionId), version(version), partitions(partitions) {}
+             }
+         }
+     }
