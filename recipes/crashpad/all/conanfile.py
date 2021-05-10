@@ -156,7 +156,6 @@ class CrashpadConan(ConanFile):
                 tools.replace_in_file(toolchain_path,
                                       "\"{}\"".format(comp_arg), "\"\"")
 
-
         autotools = AutoToolsBuildEnvironment(self)
         extra_cflags = autotools.flags + ["-D{}".format(d) for d in autotools.defines]
         extra_cflags_c = []
