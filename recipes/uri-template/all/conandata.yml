@@ -5,4 +5,10 @@ sources:
 patches:
   "1.1.2":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-msvc.patch"
+      patch_file: "patches/0001-Fix-msvc-build.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-Include-optional-header.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-Remove-unconditional-fPIC.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-Fix-msvc-install.patch"

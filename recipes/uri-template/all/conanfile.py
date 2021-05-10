@@ -25,6 +25,7 @@ class UriTemplateConan(ConanFile):
         "fPIC": True,
     }
     exports_sources = [
+        "CMakeLists.txt",
         "patches/*",
     ]
 
@@ -45,7 +46,7 @@ class UriTemplateConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["URITEMPLATE_BUNDLED_MODE"] = False
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def config_options(self):
@@ -81,12 +82,10 @@ class UriTemplateConan(ConanFile):
 
         # Check stdlib ABI compatibility
         if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration(
-                'Using %s with GCC on Linux requires "compiler.libcxx=libstdc++11"' % self.name)
+            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
         elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration(
-                'Using %s with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
-                'or "compiler.libcxx=libc++"' % self.name)
+            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"' % self.name)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)

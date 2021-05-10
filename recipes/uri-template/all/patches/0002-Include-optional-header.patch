@@ -1,0 +1,25 @@
+From f7efa2ea6c847b586cc5bb4e7300769dd751b431 Mon Sep 17 00:00:00 2001
+From: ivovk <adikue@gmail.com>
+Date: Mon, 10 May 2021 21:51:59 +0300
+Subject: [PATCH 2/4] Include <optional> header
+
+---
+ include/uri-template/Matcher.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/uri-template/Matcher.h b/include/uri-template/Matcher.h
+index c3c1e8d..97bfee4 100644
+--- a/include/uri-template/Matcher.h
++++ b/include/uri-template/Matcher.h
+@@ -2,6 +2,8 @@
+ 
+ #include "Template.h"
+ 
++#include <optional>
++
+ namespace URI {
+ namespace Template {
+ 
+-- 
+2.31.1
+

@@ -1,23 +1,33 @@
+From 09f6ab19b2f03b4d8937e88741837058ca49dfc9 Mon Sep 17 00:00:00 2001
+From: ivovk <adikue@gmail.com>
+Date: Mon, 10 May 2021 21:51:47 +0300
+Subject: [PATCH 1/4] Fix msvc build
+
+---
+ CMakeLists.txt | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 65bfab2..5ec4d70 100644
+index 65bfab2..eca8e8e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,10 +18,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -18,10 +18,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
+ 
 -set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra \
 -    -Wunused-variable -Wunused-parameter \
 -    -Wunused-function -Wunused -Wno-system-headers \
 -    -Wno-deprecated -Woverloaded-virtual -Wwrite-strings")
-+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-+else()
++if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 +    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra \
 +        -Wunused-variable -Wunused-parameter \
 +        -Wunused-function -Wunused -Wno-system-headers \
 +        -Wno-deprecated -Woverloaded-virtual -Wwrite-strings")
 +endif()
-
+ 
  # compile in release with debug info mode by default
  if(NOT CMAKE_BUILD_TYPE)
+-- 
+2.31.1
+
