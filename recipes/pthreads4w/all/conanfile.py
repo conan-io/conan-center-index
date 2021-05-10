@@ -107,9 +107,14 @@ class Pthreads4WConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.defines.append(self._exception_scheme_definition)
         if not self.options.shared:
-            self.cpp_info.defines = ["__PTW32_STATIC_LIB"]
-        self.cpp_info.defines.append(
-            "__PTW32_CLEANUP_CXX" if self.options.exception_scheme == "CPP" else\
-            "__PTW32_CLEANUP_SEH" if self.options.exception_scheme == "SEH" else\
-            "__PTW32_CLEANUP_C")
+            self.cpp_info.defines.append("__PTW32_STATIC_LIB")
+
+    @property
+    def _exception_scheme_definition(self):
+        return {
+            "CPP": "__PTW32_CLEANUP_CXX",
+            "SEH": "__PTW32_CLEANUP_SEH",
+            "default": "__PTW32_CLEANUP_C",
+        }[str(self.options.exception_scheme)]
