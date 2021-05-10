@@ -207,6 +207,7 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
 
     def package_info(self):
+        self.output.info("DEBUG: contents of /lib: {}".format(os.listdir(os.path.join(self.package_folder, "lib"))))
         self.cpp_info.libs = ["minidump", "snapshot", "client", "util", "compat", "common", "base"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
