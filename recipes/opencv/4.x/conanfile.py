@@ -33,6 +33,7 @@ class OpenCVConan(ConanFile):
         "with_cuda": [True, False],
         "with_cublas": [True, False],
         "with_cufft": [True, False],
+        "with_v4l": [True, False],
         "dnn": [True, False]
     }
     default_options = {
@@ -54,6 +55,7 @@ class OpenCVConan(ConanFile):
         "with_cuda": False,
         "with_cublas": False,
         "with_cufft": False,
+        "with_v4l": False,
         "dnn": True
     }
 
@@ -80,6 +82,7 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_gtk
+            del self.options.with_v4l
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -261,7 +264,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
         self._cmake.definitions["WITH_QUIRC"] = False
-        self._cmake.definitions["WITH_V4L"] = False
+        self._cmake.definitions["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         self._cmake.definitions["WITH_VA"] = False
         self._cmake.definitions["WITH_VA_INTEL"] = False
         self._cmake.definitions["WITH_VTK"] = False
