@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
@@ -39,11 +40,13 @@ class CrashpadConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("gn/cci.20210429")
+        # FIXME: needs python 2.x support on Windows (uses print without parentheses + _winreg module)
 
     def requirements(self):
         # FIXME: use mini_chromium conan package instead of embedded package
         self.requires("zlib/1.2.11")
-        self.requires("linux-syscall-support/cci.20200813")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.requires("linux-syscall-support/cci.20200813")
         if self.options.http_transport != "socket":
             del self.options.with_tls
         if self.options.http_transport == "libcurl":
@@ -56,6 +59,8 @@ class CrashpadConan(ConanFile):
             if not self.options["libcurl"].shared:
                 # FIXME: is this true?
                 self.output.warn("crashpad needs a shared libcurl library")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not (yet) supported by this recipe because the build system requires python 2.x which is not (yet) available on CCI.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder, strip_root=True)
@@ -139,6 +144,11 @@ class CrashpadConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),
                               "assert(false, \"Unsupported architecture\")",
                               "print(\"Unknown architecture -> assume conan knows how to handle it\")")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "win_helper.py"),
+                              "print line", "print(line)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "win_helper.py"),
+                              "print result", "print(result)")
 
         if self.settings.compiler == "gcc":
             # Remove gcc-incompatible compiler arguments
