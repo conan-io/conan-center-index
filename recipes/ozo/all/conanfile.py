@@ -2,7 +2,6 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import check_min_cppstd, Version
 import os
-import glob
 
 
 class OzoConan(ConanFile):
