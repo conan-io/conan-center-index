@@ -1,0 +1,4 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "6091f5064d0cfd54c6155bb6c0d2ba7287f312d109010e9b702839ac78529fd3"
