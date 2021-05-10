@@ -25,8 +25,8 @@ class Pthreads4WConan(ConanFile):
     _autotools = None
 
     @property
-    def _source_folder(self):
-        return "source_folder"
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         if self.settings.os != "Windows":
@@ -41,7 +41,7 @@ class Pthreads4WConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_folder, strip_root=True)
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -51,7 +51,7 @@ class Pthreads4WConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_folder):
+        with tools.chdir(self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
                 tools.replace_in_file("Makefile",
                 "	copy pthreadV*.lib $(LIBDEST)",
@@ -87,8 +87,8 @@ class Pthreads4WConan(ConanFile):
                 autotools.make(target=make_target, args=["-j1"])
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_folder)
-        with tools.chdir(self._source_folder):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
