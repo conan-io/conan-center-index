@@ -18,6 +18,10 @@ class CajunJsonApiConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def _extract_license(self):
         file_content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "test.cpp"))
         return file_content[:file_content.find("*/")]
