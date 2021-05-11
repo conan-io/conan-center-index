@@ -37,11 +37,7 @@ class UconfigConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if tools.Version(self.version) < "2.0.2":
-            self._cmake.definitions["UCONFIG_BUNDLED_MODE"] = False
-            self._cmake.definitions["BUILD_TESTING"] = False
-        else:
-            self._cmake.definitions["UCONFIG_BUILD_TESTING"] = False
+        self._cmake.definitions["UCONFIG_BUILD_TESTING"] = False
         self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
