@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 import os
@@ -23,8 +23,6 @@ class UconfigConan(ConanFile):
         "with_rapidjson": True,
     }
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -32,14 +30,6 @@ class UconfigConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["UCONFIG_BUILD_TESTING"] = False
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
 
     def requirements(self):
         if self.options.with_rapidjson:
@@ -73,10 +63,6 @@ class UconfigConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
