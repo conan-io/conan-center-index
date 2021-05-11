@@ -77,5 +77,10 @@ class SemverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def package_info(self):
+        self.cpp_info.names["pkg_config"] = "semver"
+        self.cpp_info.names["cmake_find_package"] = "semver"
+        self.cpp_info.names["cmake_find_package_multi"] = "semver"
+
     def package_id(self):
         self.info.header_only()
