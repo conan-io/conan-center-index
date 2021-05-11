@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class OzoTestConan(ConanFile):
+class YandexOzoTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package_multi", "cmake"
 

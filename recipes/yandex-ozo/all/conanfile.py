@@ -6,8 +6,8 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class OzoConan(ConanFile):
-    name = "ozo"
+class YandexOzoConan(ConanFile):
+    name = "yandex-ozo"
     description = "C++ header-only library for asynchronous access to PostgreSQL databases using ASIO"
     topics = ("ozo", "yandex", "postgres", "postgresql", "cpp17", "database", "db", "asio")
     url = "https://github.com/conan-io/conan-center-index"
