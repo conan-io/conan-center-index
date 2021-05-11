@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(uri-template CONFIG REQUIRED)
+find_package(uri-template REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} uri-template::uri-template)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
