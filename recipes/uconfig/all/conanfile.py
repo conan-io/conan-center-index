@@ -86,6 +86,9 @@ class UconfigConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "uconfig"
+        self.cpp_info.names["cmake_find_package"] = "uconfig"
+        self.cpp_info.names["cmake_find_package_multi"] = "uconfig"
         if self.options.with_rapidjson:
             self.cpp_info.defines = ["RAPIDJSON_HAS_STDSTRING=1"]
 
