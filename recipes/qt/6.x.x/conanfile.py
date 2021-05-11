@@ -71,6 +71,7 @@ class QtConan(ConanFile):
         "with_pq": [True, False],
         "with_odbc": [True, False],
         "with_zstd": [True, False],
+        "with_brotli": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -104,6 +105,7 @@ class QtConan(ConanFile):
         "with_pq": True,
         "with_odbc": True,
         "with_zstd": False,
+        "with_brotli": True,
 
         "gui": True,
         "widgets": True,
@@ -267,6 +269,8 @@ class QtConan(ConanFile):
             self.requires("zstd/1.4.9")
         if self.options.qtwayland:
             self.requires("wayland/1.19.0")
+        if self.options.with_brotli:
+            self.requires("brotli/1.0.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -422,7 +426,8 @@ class QtConan(ConanFile):
                               ("gui", "gui"),
                               ("widgets", "widgets"),
                               ("with_zstd", "zstd"),
-                              ("with_vulkan", "vulkan")]:
+                              ("with_vulkan", "vulkan"),
+                              ("with_brotli", "brotli")]:
             self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -670,7 +675,7 @@ class QtConan(ConanFile):
         _create_module("Core", core_reqs)
         self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
-            gui_reqs = []
+            gui_reqs = ["DBus"]
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -697,7 +702,12 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
-        _create_module("Network", ["openssl::openssl"] if self.options.openssl else [])
+        networkReqs = []
+        if self.options.openssl:
+            networkReqs.append("openssl::openssl")
+        if self.options.with_brotli:
+            networkReqs.append("brotli::brotli")
+        _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
         if self.options.widgets:
@@ -789,3 +799,14 @@ class QtConan(ConanFile):
             self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
             self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+
+        objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
+        for object_dir in objects_dirs:
+            for m in os.listdir(object_dir):
+                submodules_dir = os.path.join(object_dir, m)
+                component = "qt" + m[:m.find("_")]
+                for sub_dir in os.listdir(submodules_dir):
+                    submodule_dir = os.path.join(submodules_dir, sub_dir)
+                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                    self.cpp_info.components[component].exelinkflags.extend(obj_files)
+                    self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
