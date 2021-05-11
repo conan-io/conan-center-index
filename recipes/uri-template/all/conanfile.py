@@ -106,4 +106,6 @@ class UriTemplateConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "uri-template"
         self.cpp_info.names["cmake_find_package_multi"] = "uri-template"
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.libdirs = ["lib", "bin"]
         self.cpp_info.libs = tools.collect_libs(self)
