@@ -1,5 +1,4 @@
 import os
-import shutil
 from conans import ConanFile, CMake, tools
 
 
@@ -39,8 +38,8 @@ class lmdbConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         root = "openldap-LMDB_{}".format(self.version)
-        os.rename(os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
-        shutil.rmtree(root)
+        tools.rename(os.path.join(root, "libraries", "liblmdb"), self._source_subfolder)
+        tools.rmdir(root)
 
     def build(self):
         cmake = self._configure_cmake()
