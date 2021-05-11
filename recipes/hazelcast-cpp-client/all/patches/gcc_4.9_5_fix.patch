@@ -41,10 +41,32 @@ index cdc10a906..51279b446 100644
          }
      }
 diff --git a/hazelcast/src/hazelcast/client/spi.cpp b/hazelcast/src/hazelcast/client/spi.cpp
-index ada4e665c..6cf44642c 100644
+index ada4e665c..206aecb9e 100644
 --- a/hazelcast/src/hazelcast/client/spi.cpp
 +++ b/hazelcast/src/hazelcast/client/spi.cpp
-@@ -2388,10 +2388,6 @@ namespace hazelcast {
+@@ -788,9 +788,10 @@ namespace hazelcast {
+                     auto previous_list = member_list_snapshot_.load()->members;
+ 
+                     member_list_snapshot_.store(
+-                            boost::shared_ptr<member_list_snapshot>(new member_list_snapshot{0, {}}));
++                            boost::shared_ptr<member_list_snapshot>(new member_list_snapshot{0}));
+ 
+-                    return detect_membership_events(previous_list, {});
++                    return detect_membership_events(previous_list,
++                                                    std::unordered_map<boost::uuids::uuid, member, boost::hash<boost::uuids::uuid>>());
+                 }
+ 
+                 void ClientClusterServiceImpl::clear_member_list() {
+@@ -2357,7 +2358,7 @@ namespace hazelcast {
+                         }
+ #else
+                         util::Preconditions::check_ssl("cloud_discovery::get_addresses");
+-                        return {};
++                        return std::unordered_map<address, address>();
+ #endif
+                     }
+ 
+@@ -2388,10 +2389,6 @@ namespace hazelcast {
                          return address(std::move(scoped_hostname), address_holder.get_port());
                      }
                  }
