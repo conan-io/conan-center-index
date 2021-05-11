@@ -5,8 +5,8 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class LibKtxConan(ConanFile):
-    name = "libktx"
+class KtxConan(ConanFile):
+    name = "ktx"
     description = "Khronos Texture library and tool"
     license = "Apache-2.0"
     topics = ("conan", "ktx")
