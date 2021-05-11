@@ -1,0 +1,4 @@
+sources:
+  "0.1.1":
+    url: "https://github.com/skystrife/cpptoml/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "23AF72468CFD4040984D46A0DD2A609538579C78DDC429D6B8FD7A10A6E24403"

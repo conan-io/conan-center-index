@@ -25,4 +25,7 @@ sources:
     sha256: 59acc2cc226bbec30705a45e8359d3e8afa592d95d8249d7830a7d42d1021eb5
   2.1.1:
     url: https://github.com/bernedom/SI/archive/2.1.1.tar.gz
-    sha256: 18656d4cbb41684f56ba9f7de5dc68e70e55a5f24d0f838ceebaee9a5a7f0b25   
+    sha256: 18656d4cbb41684f56ba9f7de5dc68e70e55a5f24d0f838ceebaee9a5a7f0b25
+  2.1.2:
+    url: https://github.com/bernedom/SI/archive/2.1.2.tar.gz
+    sha256: cecc18bbbd0904ba9f07916a740a2ac1c876d65082958cda7ca94b523396151a

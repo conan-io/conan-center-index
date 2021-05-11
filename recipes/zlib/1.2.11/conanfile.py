@@ -44,8 +44,7 @@ class ZlibConan(ConanFile):
         del self.info.options.minizip
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -82,20 +81,20 @@ class ZlibConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
-                if self.settings.compiler == "Visual Studio":
+                if self.settings.compiler == "Visual Studio" and suffix:
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
                 if self.settings.compiler == "Visual Studio":
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler == "gcc":
                     if self.settings.os != "Windows" or not self.settings.os.subsystem:
                         current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                        os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                        tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
                 elif self.settings.compiler == "clang":
                     current_lib = os.path.join(lib_path, "zlibstatic.lib")
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
 
     def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
