@@ -15,15 +15,15 @@ int main()
         return 1;
     }
     catch(const Excel::Exception &)
-	{
-		return 1;
-	}
-	catch(const CompoundFile::Exception &)
-	{
-		return 1;
-	}
-	catch(const std::exception &)
-	{
-		return 1;
-	}
+    {
+        return 1;
+    }
+    catch(const CompoundFile::Exception &)
+    {
+        return 1;
+    }
+    catch(const std::exception &)
+    {
+        return 1;
+    }
 }
