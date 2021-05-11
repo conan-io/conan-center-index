@@ -2,10 +2,17 @@
 #include <read-excel/exceptions.hpp>
 #include <read-excel/compoundfile/compoundfile_exceptions.hpp>
 
-int main()
+#include <iostream>
+
+int main(int argc, char ** argv)
 {
+    if (argc < 2) {
+        std::cerr << "Need an argument\n";
+        return 1;
+    }
+
     try {
-        Excel::Book book( "../../sample.xls" );
+        Excel::Book book( argv[1] );
 
         Excel::Sheet * sheet = book.sheet( 0 );
 

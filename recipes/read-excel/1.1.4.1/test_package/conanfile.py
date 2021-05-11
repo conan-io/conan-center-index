@@ -12,4 +12,5 @@ class ReadExcelTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "read-excel.test")
-            self.run(bin_path, run_environment=True)
+            xls_path = os.path.join(self.source_folder, "sample.xls");
+            self.run("{} \"{}\"".format(bin_path, xls_path), run_environment=True)
