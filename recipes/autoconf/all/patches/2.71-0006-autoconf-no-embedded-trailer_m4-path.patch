@@ -11,7 +11,7 @@ Work around this problem by getting the system information from an uppercase env
  # Variables.
  : ${AUTOM4TE='@bindir@/@autom4te-name@'}
 -: ${trailer_m4='@pkgdatadir@/autoconf/trailer.m4'}
-+: ${trailer_m4="$TRAILER_M4"}
++: ${trailer_m4="$AC_MACRODIR/autoconf/trailer.m4"}
  autom4te_options=
  outfile=
  verbose=false

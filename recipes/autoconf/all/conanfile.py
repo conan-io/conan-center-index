@@ -118,8 +118,3 @@ class AutoconfConan(ConanFile):
         autom4te_perllibdir = self._autoconf_datarootdir
         self.output.info("Setting AUTOM4TE_PERLLIBDIR to {}".format(autom4te_perllibdir))
         self.env_info.AUTOM4TE_PERLLIBDIR = autom4te_perllibdir
-
-        if tools.Version(self.version) > "2.69":
-            trailer_m4 = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "autoconf", "autoconf", "trailer.m4"))
-            self.output.info("Settings TRAILER_M4 to {}".format(trailer_m4))
-            self.env_info.TRAILER_M4 = trailer_m4

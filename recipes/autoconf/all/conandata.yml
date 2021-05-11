@@ -17,7 +17,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/2.71-0005-disable-man-regeneration.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/2.71-0006-autoconf-trailer_m4-from-uppercase-env.patch"
+    - patch_file: "patches/2.71-0006-autoconf-no-embedded-trailer_m4-path.patch"
       base_path: "source_subfolder"
   "2.69":
     - patch_file: "patches/2.69-0001-autom4te-relocatable.patch"
