@@ -107,6 +107,4 @@ class UriTemplateConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "uri-template"
         self.cpp_info.names["cmake_find_package"] = "uri-template"
         self.cpp_info.names["cmake_find_package_multi"] = "uri-template"
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libdirs = ["lib", "bin"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["uri-template"]
