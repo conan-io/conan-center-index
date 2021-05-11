@@ -42,7 +42,7 @@ class LibKtxConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        # Copied this section from the entt recipe 
+        # Copied this section from the entt recipe
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -103,7 +103,7 @@ class LibKtxConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         os.rename(os.path.join(self.package_folder, "LICENSES"),
-                  os.path.join(self.package_folder, "license"))
+                  os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["ktx"]
