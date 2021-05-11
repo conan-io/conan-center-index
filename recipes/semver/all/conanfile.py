@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 import os
@@ -17,8 +17,6 @@ class SemverConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -26,16 +24,6 @@ class SemverConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["SEMVER_OPT_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["SEMVER_OPT_BUILD_TESTS"] = False
-        self._cmake.definitions["SEMVER_OPT_INSTALL"] = True
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
 
     def configure(self):
         compiler = str(self.settings.compiler)
@@ -65,10 +53,6 @@ class SemverConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
