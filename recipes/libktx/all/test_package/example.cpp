@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     }
     ktxTexture* texture;
     KTX_error_code result;
-    result = ktxTexture_CreateFromNamedFile("mytex3d.ktx",
+    result = ktxTexture_CreateFromNamedFile(argv[1],
                                             KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
                                             &texture);
 
