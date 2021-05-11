@@ -57,3 +57,11 @@ class MDSpanConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "mdspan"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mdspan"
+        self.cpp_info.names["cmake_find_package"] = "std"
+        self.cpp_info.names["cmake_find_package_multi"] = "std"
+        self.cpp_info.components["_mdspan"].names["cmake_find_package"] = "mdspan"
+        self.cpp_info.components["_mdspan"].names["cmake_find_package_multi"] = "mdspan"
