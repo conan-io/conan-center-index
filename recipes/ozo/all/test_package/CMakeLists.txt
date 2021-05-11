@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(PackageTest CXX)
 
-find_package(ozo REQUIRED)
+find_package(ozo REQUIRED CONFIG)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)

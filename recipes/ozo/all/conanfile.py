@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import check_min_cppstd, Version
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class OzoConan(ConanFile):
     name = "ozo"
