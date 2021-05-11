@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -26,6 +26,10 @@ class ReadExcelConan(ConanFile):
             "apple-clang": "10"
         }
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
@@ -44,7 +48,14 @@ class ReadExcelConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "excel"), dst=os.path.join("include", "read-excel"))
+        cmake = CMake(self)
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.configure(source_folder=self._source_subfolder)
+        cmake.install()
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.builddirs.append(self._module_subfolder)
