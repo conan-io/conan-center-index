@@ -148,7 +148,7 @@ class RmluiConan(ConanFile):
 
     def package(self):
         self._configure_cmake().install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*LICENSE.txt", dst="licenses", src=self._source_subfolder, excludes=("Samples/*", "Tests/*"))
 
     def package_info(self):
         if self.options.matrix_mode == "row_major":
