@@ -80,10 +80,8 @@ class UconfigConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("*.ipp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "uconfig"
