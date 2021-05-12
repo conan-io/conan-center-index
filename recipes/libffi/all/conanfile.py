@@ -2,6 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.tools import Version
 from contextlib import contextmanager
 import os
+import shutil
 import platform
 
 
@@ -36,6 +37,7 @@ class LibffiConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20200517")
+        self.build_requires("gnu-config/cci.20201022")
 
     def configure(self):
         if self.options.shared:
@@ -126,8 +128,21 @@ class LibffiConan(ConanFile):
         self._autotools.configure(args=config_args, configure_dir=self._source_subfolder, build=build, host=host)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
         self._patch_sources()
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
