@@ -55,6 +55,7 @@ class UriTemplateConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         compiler_name = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
