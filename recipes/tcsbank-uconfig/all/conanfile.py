@@ -6,8 +6,8 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class UconfigConan(ConanFile):
-    name = "uconfig"
+class TCSBankUconfigConan(ConanFile):
+    name = "tcsbank-uconfig"
     description = "Lightweight, header-only, C++17 configuration library"
     topics = ("conan", "configuration", "env", "json")
     url = "https://github.com/conan-io/conan-center-index"
