@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -112,29 +112,11 @@
+@@ -120,29 +120,11 @@ endif()
 
  # Curl configuration
  if(CPR_FORCE_USE_SYSTEM_CURL)
