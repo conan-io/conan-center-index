@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 class ArgsParserTestConan(ConanFile):
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
