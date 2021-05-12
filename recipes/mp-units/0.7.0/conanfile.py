@@ -1,6 +1,5 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.tools import Version, check_min_cppstd
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -14,12 +13,7 @@ class MPUnitsConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "downcast_mode": ["off", "on", "auto"]
-    }
-    default_options = {
-        "downcast_mode": "on"
-    }
+    generators = "cmake_find_package_multi"
     no_copy_source = True
 
     @property
@@ -52,13 +46,6 @@ class MPUnitsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["UNITS_DOWNCAST_MODE"] = str(self.options.downcast_mode).upper()
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)

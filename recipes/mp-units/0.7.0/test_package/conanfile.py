@@ -1,23 +1,15 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.tools import Version
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake_find_package_multi"
     
     # TODO remove when https://github.com/conan-io/conan/issues/7680 is solved (or VS2019 is updated to at least 16.9)
     def _skip_check(self):
         return self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "16"
-
-    def generate(self):
-        if self._skip_check():
-            return
-        tc = CMakeToolchain(self)
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         if self._skip_check():
