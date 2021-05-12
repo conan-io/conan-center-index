@@ -18,9 +18,8 @@ set_target_properties(lmdb PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
-if(NOT WIN32)
-    target_link_libraries(lmdb PUBLIC pthread)
-endif()
+include(FindThreads)
+target_link_libraries(lmdb PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS lmdb)
 
