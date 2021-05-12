@@ -35,7 +35,7 @@ class UconfigConan(ConanFile):
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
 
-    def configure(self):
+    def validate(self):
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
