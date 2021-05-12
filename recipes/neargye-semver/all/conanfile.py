@@ -6,24 +6,20 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class SemverConan(ConanFile):
-    name = "semver"
+class NeargyeSemverConan(ConanFile):
+    name = "neargye-semver"
     description = "Semantic Versioning for modern C++"
     topics = ("conan", "semver", "semantic", "versioning")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Neargye/semver"
     license = "MIT"
     generators = "cmake", "cmake_find_package_multi"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def configure(self):
         compiler = str(self.settings.compiler)
