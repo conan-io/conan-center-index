@@ -37,6 +37,7 @@ class SentryNativeConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
+        # FIXME: set default backend for each platform (missing breakpad recipe)
         if self.settings.os == "Windows":
             del self.options.fPIC
 
