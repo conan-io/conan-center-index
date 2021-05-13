@@ -16,7 +16,7 @@ class CrashpadConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "http_transport": ["libcurl", "socket", "boringssl", None],
+        "http_transport": ["libcurl", "socket", None],
         "with_tls": ["openssl", False],
     }
     default_options = {
@@ -210,32 +210,51 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
 
     def package_info(self):
-        minichromium_libs = ["base"]
-        util_libs = ["util"]
-        if tools.is_apple_os(self.settings.os):
-            util_libs.append("mig_output")
-        if self.settings.os in ("Linux", "FreeBSD"):
-            util_libs.append("compat")
-        client_libs = ["client", "common"]
-        snapshot_libs = ["snapshot", "context"]
-        minidump_libs = ["minidump", "format"]
-        handler_libs = ["handler"]
-
-        self.output.info("DEBUG: contents of /lib: {}".format(os.listdir(os.path.join(self.package_folder, "lib"))))
-        self.cpp_info.libs = handler_libs + minidump_libs + snapshot_libs + client_libs + util_libs + minichromium_libs
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
-        # FIXME: what frameworks are missing?
+        self.cpp_info.components["mini_chromium_base"].libs = ["base"]
         if tools.is_apple_os(self.settings.os):
             if self.settings.os == "Macos":
-                # mini_chromium: ApplicationServices, CoreFoundation, Foundation, IOKit, Security
-                self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
-            else: #iOS
-                # mini_chromium: CoreFoundation, CoreGraphics, CoreText, Foundation, Security
-                self.cpp_info.frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
-            # util: bsm, IOKit
-            # util: ["CoreFoundation", "Foundation","IOKit"]
-            self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation","IOKit"])
-            # snapshot: ["OpenCL"]
-            self.cpp_info.frameworks.extend(["OpenCL"])
-            self.cpp_info.system_libs = ["bsm"]
+                self.cpp_info.components["mini_chromium_base"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+            else:  # iOS
+                self.cpp_info.components["mini_chromium_base"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
+
+        self.cpp_info.components["util"].libs = ["util"]
+        self.cpp_info.components["util"].requires = ["mini_chromium_base", "zlib::zlib"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["util"].libs.append("mig_output")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["util"].libs.append("compat")
+            self.cpp_info.components["util"].requires.append("linux-syscall-support::linux-syscall-support")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["util"].system_libs.extend(["dbghelp", "rpcrt4"])
+        if self.options.http_transport == "libcurl":
+            self.cpp_info.components["util"].requires.append("libcurl::libcurl")
+        elif self.options.get_safe("with_tls") == "openssl":
+            self.cpp_info.components["util"].requires.append("openssl::openssl")
+        if self.settings.os == "Macos":
+            self.cpp_info.components["util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
+            self.cpp_info.components["util"].system_libs.append("bsm")
+
+        self.cpp_info.components["common"].libs = ["common"]
+        self.cpp_info.components["common"].requires = ["util"]
+
+        self.cpp_info.components["client"].libs = ["client"]
+        self.cpp_info.components["client"].requires = ["common"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["client"].system_libs.append("rpcrt4")
+
+        self.cpp_info.components["context"].libs = ["context"]
+        self.cpp_info.components["context"].requires = ["util"]
+
+        self.cpp_info.components["snapshot"].libs = ["snapshot"]
+        self.cpp_info.components["snapshot"].requires = ["common", "mini_chromium_base", "util"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["snapshot"].frameworks.extend(["OpenCL"])
+
+        self.cpp_info.components["format"].libs = ["format"]
+        self.cpp_info.components["format"].requires = ["snapshot", "mini_chromium_base", "util"]
+
+        self.cpp_info.components["minidump"].libs = ["minidump"]
+        self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
+
+        self.cpp_info.components["handler"].libs = ["handler"]
+        self.cpp_info.components["handler"].requires = ["common", "minidump", "snapshot"]
