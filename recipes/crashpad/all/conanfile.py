@@ -192,7 +192,7 @@ class CrashpadConan(ConanFile):
                 self.run("gn gen out/Default --args=\"{}\"".format(" ".join(gn_args)), run_environment=True)
                 for target in ("client", "minidump", "crashpad_handler", "snapshot"):
                     # FIXME: Remove verbose once everything is working hunky dory
-                    self.run("ninja -v -C out/Default {target} -j{parallel}".format(
+                    self.run("ninja -C out/Default {target} -j{parallel}".format(
                         target=target,
                         parallel=tools.cpu_count()), run_environment=True)
 
