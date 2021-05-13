@@ -56,7 +56,7 @@ class SentryNativeConan(ConanFile):
         if self.options.transport == "curl":
             self.requires("libcurl/7.75.0")
         if self.options.backend == "crashpad":
-            raise ConanInvalidConfiguration("crashpad not available yet in CCI")
+            self.requires("crashpad/cci.20210507")
         elif self.options.backend == "breakpad":
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
 
@@ -70,6 +70,7 @@ class SentryNativeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend
+        self._cmake.definitions["SENTRY_CRASHPAD_SYSTEM"] = True
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
         self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
@@ -105,6 +106,6 @@ class SentryNativeConan(ConanFile):
                 self.cpp_info.system_libs.append("Version")
             if self.options.transport == "winhttp":
                 self.cpp_info.system_libs.append("winhttp")
-            
+
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
