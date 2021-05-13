@@ -70,7 +70,10 @@ class CrashpadConan(ConanFile):
     @property
     def _gn_os(self):
         if tools.is_apple_os(self.settings.os):
-            return "mac"
+            if self.settings.os == "Macos":
+                return "mac"
+            else:
+                return "ios"
         return {
             "Windows": "win",
         }.get(str(self.settings.os), str(self.settings.os).lower())
@@ -223,5 +226,15 @@ class CrashpadConan(ConanFile):
             self.cpp_info.system_libs = ["rpcrt4", "dbghelp"]
         # FIXME: what frameworks are missing?
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.frameworks = ["CoreFoundation"]
-            # self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+            if self.settings.os == "Macos":
+                # mini_chromium: ApplicationServices, CoreFoundation, Foundation, IOKit, Security
+                self.cpp_info.frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+            else: #iOS
+                # mini_chromium: CoreFoundation, CoreGraphics, CoreText, Foundation, Security
+                self.cpp_info.frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
+            # util: bsm, IOKit
+            # util: ["CoreFoundation", "Foundation","IOKit"]
+            self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation","IOKit"]
+            # snapshot: ["OpenCL"]
+            self.cpp_info.frameworks.extend(["OpenCL"]
+            self.cpp_info.system_libs = ["bsm"]
