@@ -236,5 +236,5 @@ class CrashpadConan(ConanFile):
             # util: ["CoreFoundation", "Foundation","IOKit"]
             self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation","IOKit"]
             # snapshot: ["OpenCL"]
-            self.cpp_info.frameworks.extend(["OpenCL"]
+            self.cpp_info.frameworks.extend(["OpenCL"])
             self.cpp_info.system_libs = ["bsm"]
