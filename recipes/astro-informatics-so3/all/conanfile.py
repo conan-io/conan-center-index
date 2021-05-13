@@ -4,8 +4,8 @@ from glob import glob
 import os
 
 
-class So3Conan(ConanFile):
-    name = "so3"
+class AstroInformaticsSO3(ConanFile):
+    name = "astro-informatics-so3"
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/astro-informatics/so3"
@@ -57,6 +57,6 @@ class So3Conan(ConanFile):
         self.cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["so3"]
+        self.cpp_info.libs = ["astro-informatics-so3"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
