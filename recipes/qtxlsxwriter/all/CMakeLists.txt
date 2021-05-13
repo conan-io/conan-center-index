@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 
 project(qtxlsxwriter)
 
-find_package(qt REQUIRED CONFIG)
+include(conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 set(QTXLSXWRITER_TARGET_NAME qtxlsxwriter)
 
@@ -35,17 +36,27 @@ target_compile_features(${QTXLSXWRITER_TARGET_NAME}
 		cxx_range_for
 )
 
+# TODO: remove when the qt recipe is fixed
+# and this package is linked to the target for qt
+target_include_directories(${PROJECT_NAME} PRIVATE ${CONAN_INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${CONAN_LIB_DIRS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${CONAN_DEFINES_QTXLSXWRITER})
+
+# get the actual library file name of the Qt GUI module (for ex. it can be `Qt5Gui_debug`)
+foreach(lib ${CONAN_LIBS})
+    string(FIND ${lib} "Qt5Gui" qtgui_found)
+    if(NOT (qtgui_found EQUAL -1))
+        set(qtgui_name ${lib})
+        break()
+    endif()
+endforeach()
+
 # place qt::Gui before qt::Core (important for some toolchains)
 # since the current qt recipe provides an incorrect order of libraries
+# TODO: link to the target when the qt recipe is fixed
 target_link_libraries(${QTXLSXWRITER_TARGET_NAME}
-	$<$<TARGET_EXISTS:CONAN_LIB::qt_Qt5Gui_RELEASE>:CONAN_LIB::qt_Qt5Gui_RELEASE>
-	$<$<TARGET_EXISTS:CONAN_LIB::qt_Qt5Gui_DEBUG>:CONAN_LIB::qt_Qt5Gui_DEBUG>
-	$<$<TARGET_EXISTS:CONAN_LIB::qt_Qt5Gui_RELWITHDEBINFO>:CONAN_LIB::qt_Qt5Gui_RELWITHDEBINFO>
-	$<$<TARGET_EXISTS:CONAN_LIB::qt_Qt5Gui_MINSIZEREL>:CONAN_LIB::qt_Qt5Gui_MINSIZEREL>
-)
-
-target_link_libraries(${QTXLSXWRITER_TARGET_NAME}
-	qt::qt
+	${qtgui_name}
+	${CONAN_LIBS}
 )
 
 get_target_property(target_type ${QTXLSXWRITER_TARGET_NAME} TYPE)

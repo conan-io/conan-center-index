@@ -1,6 +1,5 @@
 import os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conans import ConanFile, tools
+from conans import CMake, ConanFile, tools
 
 
 class QtXlsxWriterConan(ConanFile):
@@ -21,7 +20,7 @@ class QtXlsxWriterConan(ConanFile):
         "fPIC": True
     }
 
-    generators = "CMakeDeps"
+    generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
@@ -34,6 +33,7 @@ class QtXlsxWriterConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["QT_ROOT"] = self.deps_cpp_info["qt"].rootpath.replace("\\", "/")
         self._cmake.configure()
         return self._cmake
 
@@ -47,16 +47,6 @@ class QtXlsxWriterConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/5.15.2")
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        version = tools.Version(self.version)
-        tc.variables["PROJECT_VERSION"] = version
-        tc.variables["PROJECT_VERSION_MAJOR"] = version.major
-        tc.variables["PROJECT_VERSION_MINOR"] = version.minor
-        tc.variables["PROJECT_VERSION_PATCH"] = version.patch
-        tc.variables["QT_ROOT"] = self.deps_cpp_info["qt"].rootpath.replace("\\", "/")
-        tc.generate()
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
