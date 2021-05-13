@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -209,8 +210,17 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
 
+        tools.save(os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
+                   textwrap.dedent("""\
+                    if(TARGET crashpad::mini_chromium_base)
+                        target_compile_features(crashpad::mini_chromium_base INTERFACE cxx_std_14)
+                    endif()
+                   """))
+
     def package_info(self):
         self.cpp_info.components["mini_chromium_base"].libs = ["base"]
+        self.cpp_info.components["mini_chromium_base"].build_modules = [os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake")]
+        self.cpp_info.components["mini_chromium_base"].builddirs = [os.path.join("lib", "cmake")]
         if tools.is_apple_os(self.settings.os):
             if self.settings.os == "Macos":
                 self.cpp_info.components["mini_chromium_base"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
