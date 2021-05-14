@@ -27,8 +27,9 @@ class DCMTKConan(ConanFile):
         "with_libsndfile": [True, False, "deprecated"],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
+        "builtin_dictionary": [None, True, False],
         "builtin_private_tags": [True, False],
-        "external_dictionary": [True, False],
+        "external_dictionary": [None, True, False],
         "wide_io": [True, False],
     }
     default_options = {
@@ -45,8 +46,9 @@ class DCMTKConan(ConanFile):
         "with_libsndfile": "deprecated",
         "with_libtiff": True,
         "with_tcpwrappers": False,
+        "builtin_dictionary": None,
         "builtin_private_tags": False,
-        "external_dictionary": True,
+        "external_dictionary": None,
         "wide_io": False,
     }
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -71,6 +73,7 @@ class DCMTKConan(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.with_tcpwrappers
+        
         # Looking into source code, it appears that OpenJPEG and libsndfile are not used
         if self.options.with_openjpeg != "deprecated":
             self.output.warn("with_openjpeg option is deprecated, do not use anymore")
@@ -148,7 +151,10 @@ class DCMTKConan(ConanFile):
         self._cmake.definitions["DCMTK_WITH_DOXYGEN"] = False
 
         self._cmake.definitions["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
-        self._cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+        if self.options.external_dictionary is not None:
+            self._cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+        if self.options.builtin_dictionary is not None:
+            self._cmake.definitions["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
         self._cmake.definitions["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         self._cmake.definitions["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
 

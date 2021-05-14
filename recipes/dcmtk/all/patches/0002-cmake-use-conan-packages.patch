@@ -1,5 +1,3 @@
-diff --git CMake/3rdparty.cmake CMake/3rdparty.cmake
-index 43aa282ef..3d1b00a7b 100644
 --- CMake/3rdparty.cmake
 +++ CMake/3rdparty.cmake
 @@ -21,7 +21,7 @@ mark_as_advanced(DCMTK_USE_FIND_PACKAGE)
