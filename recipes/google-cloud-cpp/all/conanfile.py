@@ -46,8 +46,8 @@ class GoogleCloudCppConan(ConanFile):
             raise ConanInvalidConfiguration("Building requires GCC >= 5.4")
         if self.settings.compiler == 'clang' and tools.Version(self.settings.compiler.version) < "3.8":
             raise ConanInvalidConfiguration("Building requires clang >= 3.8")
-        if self.settings.compiler == 'Visual Studio' and tools.Version(self.settings.compiler.version) < "15":
-            raise ConanInvalidConfiguration("Building requires VS >= 2017") # Although README says 2019
+        if self.settings.compiler == 'Visual Studio' and tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Building requires VS >= 2019")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
