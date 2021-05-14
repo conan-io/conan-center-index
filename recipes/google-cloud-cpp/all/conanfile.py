@@ -63,7 +63,7 @@ class GoogleCloudCppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_TESTING"] = 0
 
         self._cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
 
