@@ -13,4 +13,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "storage")
-            self.run("%s -s" % bin_path, run_environment=True)
+            self.run("%s bucket_name" % bin_path, run_environment=True)

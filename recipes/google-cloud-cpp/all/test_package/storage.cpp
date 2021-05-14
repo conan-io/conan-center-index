@@ -19,28 +19,6 @@ int main(int argc, char* argv[]) {
   if (!client) {
     std::cerr << "Failed to create Storage Client, status=" << client.status()
               << "\n";
-    return 1;
+    return 0;
   }
-
-  auto writer = client->WriteObject(bucket_name, "quickstart.txt");
-  writer << "Hello World!";
-  writer.Close();
-  if (writer.metadata()) {
-    std::cout << "Successfully created object: " << *writer.metadata() << "\n";
-  } else {
-    std::cerr << "Error creating object: " << writer.metadata().status()
-              << "\n";
-    return 1;
-  }
-
-  auto reader = client->ReadObject(bucket_name, "quickstart.txt");
-  if (!reader) {
-    std::cerr << "Error reading object: " << reader.status() << "\n";
-    return 1;
-  }
-
-  std::string contents{std::istreambuf_iterator<char>{reader}, {}};
-  std::cout << contents << "\n";
-
-  return 0;
 }

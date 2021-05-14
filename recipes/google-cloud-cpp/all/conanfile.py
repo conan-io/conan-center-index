@@ -57,12 +57,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('abseil/20210324.0')
         self.requires('libcurl/7.75.0')
         self.requires('openssl/1.1.1k')
-        
-        # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
-        #   self.requires("gRPC")
-        #   self.requires('googleapis)
-        pass
-
+        # TODO: Add googleapis once it is available in CCI (now it is embedded)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -95,13 +90,9 @@ class GoogleCloudCppConan(ConanFile):
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        # googleapis
-        #   Although it can be considered an embedded dependency, this library is generating
-        #   its targets. In the future we might want to add the requirement and make this targets an alias.
-
         self.cpp_info.components["experimental-bigquery"].requires = ["grpc_utils", "common", "cloud_bigquery_protos"]
         self.cpp_info.components["experimental-bigquery"].libs = ["google_cloud_cpp_bigquery"]
 
