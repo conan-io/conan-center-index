@@ -54,9 +54,9 @@ class GoogleCloudCppConan(ConanFile):
         self.requires('grpc/1.37.1')
         self.requires('nlohmann_json/3.9.1')
         self.requires('crc32c/1.1.1')
-        # Components requires doesn't work with transitive deps
         self.requires('abseil/20210324.0')
         self.requires('libcurl/7.75.0')
+        self.requires('openssl/1.1.1k')
         
         # if bigquery, bigtable, logging, iam, spanner, pubsub, generator
         #   self.requires("gRPC")
@@ -273,6 +273,6 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["spanner"].requires = ["abseil::absl_fixed_array", "abseil::absl_memory", "abseil::absl_numeric", "abseil::absl_strings", "abseil::absl_time", "grpc_utils", "common", "spanner_protos"]
         self.cpp_info.components["spanner"].libs = ["google_cloud_cpp_spanner"]
 
-        self.cpp_info.components["storage"].requires = ["abseil::absl_memory", "abseil::absl_strings", "abseil::absl_str_format", "abseil::absl_time", "abseil::absl_variant", "common", "nlohmann_json::nlohmann_json", "crc32c::crc32c", "libcurl::libcurl"]
+        self.cpp_info.components["storage"].requires = ["abseil::absl_memory", "abseil::absl_strings", "abseil::absl_str_format", "abseil::absl_time", "abseil::absl_variant", "common", "nlohmann_json::nlohmann_json", "crc32c::crc32c", "libcurl::libcurl", "openssl::ssl", "openssl::crypto"]
         self.cpp_info.components["storage"].libs = ["google_cloud_cpp_storage"]
 
