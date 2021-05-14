@@ -24,6 +24,7 @@ class GoogleCloudCppConan(ConanFile):
         "fPIC": True
         }
 
+    short_paths = True
     _cmake = None
 
     @property
