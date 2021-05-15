@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class DatadogOpenTracingConan(ConanFile):
@@ -25,6 +26,15 @@ class DatadogOpenTracingConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
+            "Visual Studio": "15",
+            "clang": "3.4",
+            "apple-clang": "7",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -36,7 +46,12 @@ class DatadogOpenTracingConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
 
-        self.options["msgpack"].cpp_api = True
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("Datadog-opentracing requires C++14, which your compiler does not support.")
+        else:
+            self.output.warn("Datadog-opentracing requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def requirements(self):
         self.requires("opentracing-cpp/1.6.0")
@@ -49,7 +64,7 @@ class DatadogOpenTracingConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -83,6 +98,8 @@ class DatadogOpenTracingConan(ConanFile):
         self.cpp_info.components["dd_opentracing"].names["cmake_find_package_multi"] = "dd_opentracing" + target_suffix
         self.cpp_info.components["dd_opentracing"].libs = ["dd_opentracing"]
         self.cpp_info.components["dd_opentracing"].requires = ["opentracing-cpp::opentracing-cpp", "zlib::zlib", "libcurl::libcurl", "msgpack::msgpack", "nlohmann_json::nlohmann_json"]
+
+        self.cpp_info.components["dd_opentracing"].defines.append("DD_OPENTRACING_SHARED" if self.options.shared else "DD_OPENTRACING_STATIC")
 
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["dd_opentracing"].system_libs.append("pthread")
