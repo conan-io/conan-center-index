@@ -3,6 +3,8 @@ import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
+
 
 class SentryNativeConan(ConanFile):
     name = "sentry-native"
@@ -62,9 +64,7 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
