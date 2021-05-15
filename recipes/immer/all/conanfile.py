@@ -40,7 +40,7 @@ class ImmerConan(ConanFile):
         return {
             "apple-clang": "5.1",
             "clang": "3.4",
-            "gcc": "5",
+            "gcc": "6",
             "intel": "17",
             "sun-cc": "5.15",
             "Visual Studio": "15"
