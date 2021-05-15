@@ -14,7 +14,7 @@ class CrashpadConan(ConanFile):
     topics = ("conan", "crashpad", "crash", "error", "stacktrace", "collecting", "reporting")
     license = "Apache-2.0"
     homepage = "https://chromium.googlesource.com/crashpad/crashpad/+/master/README.md"
-    provides = "crashpad"
+    provides = "crashpad", "mini_chromium"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -269,3 +269,7 @@ class CrashpadConan(ConanFile):
 
         self.cpp_info.components["handler"].libs = ["handler"]
         self.cpp_info.components["handler"].requires = ["common", "minidump", "snapshot"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
