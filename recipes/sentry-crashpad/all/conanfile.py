@@ -96,7 +96,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["util"].libs = ["crashpad_util"]
         self.cpp_info.components["util"].requires = ["compat", "mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["util"].system_libs.append("pthread")
+            self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
         if self.options.with_tls == "openssl":
             self.cpp_info.components["util"].requires.append("openssl::openssl")
 
@@ -109,8 +109,9 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].libs = ["crashpad_minidump"]
         self.cpp_info.components["minidump"].requires = ["compat", "snapshot", "util", "mini_chromium"]
 
-        self.cpp_info.components["handler"].libs = ["crashpad_handler_lib"]
-        self.cpp_info.components["handler"].requires = ["compat", "minidump", "snapshot", "util", "mini_chromium"]
+        if tools.Version(self.version) > "0.3":
+            self.cpp_info.components["handler"].libs = ["crashpad_handler_lib"]
+            self.cpp_info.components["handler"].requires = ["compat", "minidump", "snapshot", "util", "mini_chromium"]
 
         self.cpp_info.components["tools"].libs = ["crashpad_tools"]
 
