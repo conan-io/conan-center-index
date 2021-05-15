@@ -36,10 +36,14 @@ class ImmerConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        # Reference: https://en.cppreference.com/w/cpp/compiler_support/14
         return {
-            "Visual Studio": "15",
-            "gcc": "8",
-            "clang": "8",
+            "apple-clang": "5.1",
+            "clang": "3.4",
+            "gcc": "5",
+            "intel": "17",
+            "sun-cc": "5.15",
+            "Visual Studio": "15"
         }
 
     def validate(self):
