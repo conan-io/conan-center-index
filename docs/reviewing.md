@@ -16,7 +16,8 @@ The following policies are preferred during the review, but not mandatory:
     * [CMake Configure Method](#cmake-configure-method)
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
-    * [Verifying Components](#verifying-components)<!-- endToc -->
+    * [Verifying Components](#verifying-components)
+    * [Recommended feature options names](#recommended-feature-options-names)<!-- endToc -->
 
 ## Trailing white-spaces
 
