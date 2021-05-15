@@ -8,15 +8,18 @@ conan_basic_setup(TARGETS)
 
 find_package(cfgfile REQUIRED)
 
-add_custom_target(gencfg
-   COMMAND ${CONAN_BIN_DIRS_CFGFILE}/cfgfile.generator${CMAKE_EXECUTABLE_SUFFIX} -i ${CMAKE_CURRENT_SOURCE_DIR}/session_cfg.conf -o ${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp
-	)
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
+    COMMAND cfgfile.generator -i "${CMAKE_CURRENT_SOURCE_DIR}/session_cfg.conf" -o "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/session_cfg.conf"
+)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(${PROJECT_NAME} example.cpp)
-
-add_dependencies(${PROJECT_NAME} gencfg)
+add_executable(${PROJECT_NAME}
+    example.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
+)
 
 target_link_libraries(${PROJECT_NAME} cfgfile)
 
