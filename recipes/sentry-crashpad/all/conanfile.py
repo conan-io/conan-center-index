@@ -50,8 +50,11 @@ class SentryCrashpadConan(ConanFile):
 
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-                # FIXME: need to test for availability of SYS_memfd_create syscall availability (Linux kernel >= 3.17)
+                # FIXME: need to test for availability of SYS_memfd_create syscall (Linux kernel >= 3.17)
                 raise ConanInvalidConfiguration("sentry-crashpad needs SYS_memfd_create syscall support.")
+
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
+            raise ConanInvalidConfiguration("Require at least Visual Studio 2017 (15)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
