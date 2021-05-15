@@ -41,7 +41,7 @@ index 8914e835b..628a71378 100644
 +    // Handle plugins
 +    if (plugins) {
 +        // Set the plugins search directory
-+        deploymentInfo.pluginPath = QLibraryInfo::path(QLibraryInfo::PluginsPath);
++        deploymentInfo.pluginPath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 +
 +        // Sanity checks
 +        if (deploymentInfo.pluginPath.isEmpty()) {
