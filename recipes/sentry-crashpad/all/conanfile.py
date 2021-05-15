@@ -35,14 +35,23 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_tls:
             self.requires("openssl/1.1.1k")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
+        if tools.is_apple_os(self.settings.os):
+            # FIXME: add Apple support
+            raise ConanInvalidConfiguration("This recipe does not support Apple.")
+
+        if self.settings.os == "Linux":
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+                # FIXME: need to test for availability of SYS_memfd_create syscall availability (Linux kernel >= 3.17)
+                raise ConanInvalidConfiguration("sentry-crashpad needs SYS_memfd_create syscall support.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
@@ -56,12 +65,6 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
         self._cmake.configure()
         return self._cmake
-
-    def validate(self):
-        if self.settings.os == "Linux":
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-                # FIXME: need to test for availability of SYS_memfd_create syscall availability (Linux kernel >= 3.17)
-                raise ConanInvalidConfiguration("sentry-crashpad needs SYS_memfd_create syscall support.")
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
