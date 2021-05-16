@@ -31,8 +31,8 @@ class AutoconfConan(ConanFile):
         self.info.requires.clear()
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @property
     def _datarootdir(self):
