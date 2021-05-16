@@ -77,8 +77,8 @@ class KtxConan(ConanFile):
         # It's worth noting that vendored jpeg-compressor can't be replaced by CCI equivalent
         basisu_dir = os.path.join(self.build_folder, self._source_subfolder, "lib", "basisu")
         ## lodepng (the patch file 0002-lodepng-no-export-symbols is important, in order to not try to export lodepng symbols)
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
+        tools.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
+        tools.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
         tools.replace_in_file(cmakelists, "lib/basisu/encoder/lodepng.cpp", "")
         tools.replace_in_file(cmakelists, "lib/basisu/encoder/lodepng.h", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "tools", "toktx", "pngimage.cc"),
