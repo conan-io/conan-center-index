@@ -1,7 +1,5 @@
 import os
-import stat
-import shutil
-from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, CMake
 
 
 class LibiglConan(ConanFile):
@@ -11,7 +9,7 @@ class LibiglConan(ConanFile):
     topics = ("conan", "libigl", "geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libigl.github.io/"
-    license = "MPL2"
+    license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -34,20 +32,10 @@ class LibiglConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
  
-        tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt",
-                                  "project(libigl)",
-                                  """project(libigl)
-# libIGL must find the Eigen3 library imported by conan
-# otherwise it downloads a own copy from internet
-find_package(Eigen3 REQUIRED) """)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -73,7 +61,7 @@ find_package(Eigen3 REQUIRED) """)
         cmake.definitions["LIBIGL_WITH_XML"] = "OFF"
         cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
         cmake.definitions["LIBIGL_WITH_PREDICATES"] = "OFF"
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
 
         return cmake
 
@@ -90,9 +78,10 @@ find_package(Eigen3 REQUIRED) """)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.cppflags = ["-pthread"]
+        if self.setting.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
 
         if not self.options.shared:
             self.cpp_info.libdirs = ["lib"]
             self.cpp_info.libs = ["libigl.a"]
-            self.cpp_info.cppflags += ["-DIGL_STATIC_LIBRARY"]
+            self.cpp_info.defines = ["IGL_STATIC_LIBRARY"]
