@@ -17,7 +17,7 @@ class LibiglConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
-    requires = ("eigen/3.3.9",)
+    requires = ("eigen/3.3.9")
 
     @property
     def _source_subfolder(self):
