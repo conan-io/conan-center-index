@@ -48,9 +48,6 @@ class LibiglConan(ConanFile):
 # libIGL must find the Eigen3 library imported by conan
 # otherwise it downloads a own copy from internet
 find_package(Eigen3 REQUIRED) """)
-        #for patch in self.conan_data.get("patches", {}).get(self.version, []):
-        #    print(patch)
-        #    tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -86,10 +83,12 @@ find_package(Eigen3 REQUIRED) """)
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
+        self.copy("LICENSE.*", dst="licenses", src=self._source_subfolder)
 
     def package(self):
-        make = self._configure_cmake()
-        make.install()
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.cppflags = ["-pthread"]
