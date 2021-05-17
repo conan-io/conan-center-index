@@ -51,11 +51,7 @@ find_package(Eigen3 REQUIRED) """)
 
     def _configure_cmake(self):
         cmake = CMake(self)
-
-        if self.options.shared:
-            cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = "OFF"
-        else:
-            cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = "ON"
+        cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.shared
 
         # All these dependencies are needed to build the examples or the tests
         cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
