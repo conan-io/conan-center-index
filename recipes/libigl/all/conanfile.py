@@ -61,6 +61,7 @@ find_package(Eigen3 REQUIRED) """)
         cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
         cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
         cmake.definitions["LIBIGL_BUILD_PYTHON"] = "OFF"
+
         cmake.definitions["LIBIGL_WITH_CGAL"] = "OFF"
         cmake.definitions["LIBIGL_WITH_COMISO"] = "OFF"
         cmake.definitions["LIBIGL_WITH_CORK"] = "OFF"
@@ -83,9 +84,11 @@ find_package(Eigen3 REQUIRED) """)
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-        self.copy("LICENSE.*", dst="licenses", src=self._source_subfolder)
 
     def package(self):
+        self.copy("LICENSE.GPL", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.MPL2", dst="licenses", src=self._source_subfolder)
+
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
