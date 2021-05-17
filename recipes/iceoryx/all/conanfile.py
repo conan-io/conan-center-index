@@ -108,14 +108,16 @@ class IceoryxConan(ConanFile):
             tools.patch(**patch)
 
     def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows currently not supported")
 
     def config_options(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1")
+    
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
