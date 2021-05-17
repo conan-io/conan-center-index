@@ -19,8 +19,11 @@ class Nmslib(ConanFile):
     _cmake = None
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
-            raise ConanInvalidConfiguration("Builds fail for VS 14")  # TODO: add reason in message -> unsupported?
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.version == "14":
+                raise ConanInvalidConfiguration("Visual Studio 14 builds are not supported")  # TODO: add reason in message
+            if self.options.shared:
+                raise ConanInvalidConfiguration("Visual Studio shared builds are not supported (.lib artifacts missing)")
 
     def configure(self):
         if self.options.shared:
