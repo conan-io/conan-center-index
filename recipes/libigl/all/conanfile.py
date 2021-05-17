@@ -61,7 +61,6 @@ find_package(Eigen3 REQUIRED) """)
         cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
         cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
         cmake.definitions["LIBIGL_BUILD_PYTHON"] = "OFF"
-
         cmake.definitions["LIBIGL_WITH_CGAL"] = "OFF"
         cmake.definitions["LIBIGL_WITH_COMISO"] = "OFF"
         cmake.definitions["LIBIGL_WITH_CORK"] = "OFF"
@@ -76,6 +75,7 @@ find_package(Eigen3 REQUIRED) """)
         cmake.definitions["LIBIGL_WITH_TRIANGLE"] = "OFF"
         cmake.definitions["LIBIGL_WITH_XML"] = "OFF"
         cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
+        cmake.definitions["LIBIGL_WITH_PREDICATES"] = "OFF"
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
 
         return cmake
