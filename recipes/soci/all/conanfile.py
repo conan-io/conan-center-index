@@ -8,7 +8,7 @@ class SociConan(ConanFile):
     homepage = "https://github.com/SOCI/soci"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The C++ Database Access Library "
-    topics = ("cpp", "database-library", "oracle", "postgresql", "mysql", "odbc", "db2", "firebird", "sqlite3", "boost" )
+    topics = ("mysql", "odbc", "postgresql", "sqlite3")
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
@@ -151,6 +151,7 @@ class SociConan(ConanFile):
                 tools.rename(os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
         os.remove(os.path.join(self.package_folder, "include", "soci", "soci-config.h.in"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["soci_core"]

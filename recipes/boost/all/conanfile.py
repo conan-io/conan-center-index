@@ -16,7 +16,7 @@ try:
 except ImportError:
     from io import StringIO
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 # When adding (or removing) an option, also add this option to the list in
@@ -139,6 +139,9 @@ class BoostConan(ConanFile):
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
+        if self.settings.compiler == "apple-clang":
+            # For now, assume apple-clang will enable c++11 in the distant future
+            return 99
         return {
             "gcc": 6,
             "clang": 6,
@@ -174,6 +177,19 @@ class BoostConan(ConanFile):
             for dependency in dependencies:
                 new_dependencies.update(set(self._dependencies["dependencies"][dependency]))
                 new_dependencies.update(dependencies)
+            if len(new_dependencies) > len(dependencies):
+                dependencies = new_dependencies
+            else:
+                break
+        return dependencies
+
+    def _all_super_modules(self, name):
+        dependencies = {name}
+        while True:
+            new_dependencies = set(dependencies)
+            for module in self._dependencies["dependencies"]:
+                if dependencies.intersection(set(self._dependencies["dependencies"][module])):
+                    new_dependencies.add(module)
             if len(new_dependencies) > len(dependencies):
                 dependencies = new_dependencies
             else:
@@ -247,17 +263,65 @@ class BoostConan(ConanFile):
             # Shared builds of numa do not link on Visual Studio due to missing symbols
             self.options.numa = False
 
+        if tools.Version(self.version) >= "1.76.0":
+            # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_math():
+                super_modules = self._all_super_modules("math")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, "without_{}".format(smod), True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.cppstd:
+                if not tools.valid_min_cppstd(self, 11):
+                    disable_math()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx11
+                if min_compiler_version is None:
+                    self.output.warn("Assuming the compiler supports c++11 by default")
+                elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_math()
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
 
+    @property
+    def _fPIC(self):
+        return self.options.get_safe("fPIC", self.default_options["fPIC"])
+
+    @property
+    def _shared(self):
+        return self.options.get_safe("shared", self.default_options["shared"])
+
     def configure(self):
+        if self.options.header_only:
+            del self.options.shared
+            del self.options.fPIC
+        elif self.options.shared:
+            del self.options.fPIC
+
         if self.options.without_locale:
             self.options.i18n_backend = None
         else:
             if not self.options.i18n_backend:
                 raise ConanInvalidConfiguration("Boost.locale library requires a i18n_backend (either 'icu' or 'iconv')")
 
+        if not self.options.without_python:
+            if not self.options.python_version:
+                self.options.python_version = self._detect_python_version()
+                self.options.python_executable = self._python_executable
+
+        if self.options.layout == "b2-default":
+            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
+
+        if self.options.without_fiber:
+            del self.options.numa
+
+    def validate(self):
         if not self.options.multithreading:
             # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
             #   Look also on the comments of the answer for more details
@@ -267,11 +331,11 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
-        if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime) and self.options.shared:
-            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared and self.options.numa:
-            raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
+        if self.settings.compiler == "Visual Studio" and self._shared:
+            if "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+            if self.options.numa:
+                raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -279,11 +343,6 @@ class BoostConan(ConanFile):
                 for mod_dep in mod_deps:
                     if self.options.get_safe("without_{}".format(mod_dep), False):
                         raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
-
-        if not self.options.without_python:
-            if not self.options.python_version:
-                self.options.python_version = self._detect_python_version()
-                self.options.python_executable = self._python_executable
 
         if not self.options.get_safe("without_nowide", True):
             # nowide require a c++11-able compiler with movable std::fstream
@@ -303,10 +362,6 @@ class BoostConan(ConanFile):
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
 
-        # FIXME: check this + shouldn't default be on self._is_msvc?
-        # if self.options.layout == "b2-default":
-        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
         if not all((self.options.without_fiber, self.options.get_safe("without_json", True))):
             # fiber/json require a c++11-able compiler.
             if self.settings.compiler.cppstd:
@@ -320,15 +375,20 @@ class BoostConan(ConanFile):
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
 
-        if self.options.layout == "b2-default":
-            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
-        if self.options.without_fiber:
-            del self.options.numa
+        if tools.Version(self.version) >= "1.76.0":
+            # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
+            if not self.options.without_math:
+                if self.settings.compiler.cppstd:
+                    tools.check_min_cppstd(self, 11)
+                else:
+                    min_compiler_version = self._min_compiler_version_default_cxx11
+                    if min_compiler_version is not None:
+                        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                            raise ConanInvalidConfiguration("Boost.Math requires a C++11 capable compiler")
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.build_requires("b2/4.2.0")
+            self.build_requires("b2/4.5.0")
 
     def _with_dependency(self, dependency):
         """
@@ -372,7 +432,7 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.4.9")
 
         if self._with_icu:
             self.requires("icu/68.2")
@@ -808,7 +868,7 @@ class BoostConan(ConanFile):
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
         flags.append("visibility=%s" % self.options.visibility)
 
-        flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
+        flags.append("link=%s" % ("shared" if self._shared else "static"))
         if self.settings.build_type == "Debug":
             flags.append("variant=debug")
         else:
@@ -829,9 +889,8 @@ class BoostConan(ConanFile):
         # CXX FLAGS
         cxx_flags = []
         # fPIC DEFINITION
-        if self.settings.os != "Windows":
-            if self.options.fPIC:
-                cxx_flags.append("-fPIC")
+        if self._fPIC:
+            cxx_flags.append("-fPIC")
         if self.settings.build_type == "RelWithDebInfo":
             if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
                 cxx_flags.append("-g")
@@ -1007,7 +1066,11 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' %s' % self._cxx.replace("\\", "/")
+        
+        if self._is_msvc:
+            contents += ' "%s"' % self._cxx.replace("\\", "/")
+        else:
+            contents += ' %s' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -1101,7 +1164,7 @@ class BoostConan(ConanFile):
         if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
 
-        if self._is_msvc and self.options.shared:
+        if self._is_msvc and self._shared:
             # Some boost releases contain both static and shared variants of some libraries (if shared=True)
             all_libs = set(tools.collect_libs(self, "lib"))
             static_libs = set(l for l in all_libs if l.startswith("lib"))
@@ -1219,7 +1282,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
             self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
-            if self.options.shared:
+            if self._shared:
                 # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
                 self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
 
@@ -1273,7 +1336,7 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
-                if self.settings.compiler == "Visual Studio" and (not self.options.shared or n in self._dependencies["static_only"]):
+                if self.settings.compiler == "Visual Studio" and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
                 return libprefix + n
 
@@ -1343,7 +1406,7 @@ class BoostConan(ConanFile):
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
-                if not self.options.shared:
+                if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
                 self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]

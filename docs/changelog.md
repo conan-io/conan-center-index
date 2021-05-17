@@ -1,5 +1,26 @@
 # Changelog
 
+### 13-May-2021 - 17:20 CEST
+
+- [fix] Add `--dry-build` to `conan info` commands, it will expand also the build-requires that would have
+  failed during the build stage.
+- [fix] Escape character comma when assigning properties to Artifactory.
+- [fix] Add `--force` when adding remotes.
+
+### 30-April-2021 - 13:52 CEST
+
+- [feature] Add mark in logs to indicate output has been trimmed.
+- [feature] Stop uploading packages to Bintray.
+- [job] RequestReviews: Automatically request team reviews for PRs ready for review.
+- [job] Add checks to validate infrastructure: MacOS version and AVX2 in CPU features.
+
+### 08-April-2021 - 17:01 CEST
+
+- [feature] Hide previous comments by the bot.
+- [feature] Use Artifactory API to promote packages from one repository to another.
+- [job] Add ability to specify a repository and branch for the hooks when running the export check.
+- [job] Add checks to validate infrastructure: Python version, Macos features.
+
 ### 05-March-2021 - 15:28 CET
 
 - [feature] Stop generating packages for apple-clang 9.1.

@@ -20,18 +20,12 @@ class ConanFileDefault(ConanFile):
         "with_zlib": [True, False],
         "with_libevent": [True, False],
         "with_openssl": [True, False],
-        "with_boost_functional": [True, False],
-        "with_boost_smart_ptr": [True, False],
-        "with_boost_static": [True, False],
-        "with_boostthreads": [True, False],
-        "with_stdthreads": [True, False],
         "with_c_glib": [True, False],
         "with_cpp": [True, False],
         "with_java": [True, False],
         "with_python": [True, False],
         "with_qt": [True, False],
         "with_haskell": [True, False],
-        "with_plugin": [True, False]
     }
     default_options = {
         "shared": False,
@@ -39,18 +33,12 @@ class ConanFileDefault(ConanFile):
         "with_zlib": True,
         "with_libevent": True,
         "with_openssl": True,
-        "with_boost_functional": False,
-        "with_boost_smart_ptr": False,
-        "with_boost_static": False,
-        "with_boostthreads": False,
-        "with_stdthreads": True,
         "with_c_glib": False,
         "with_cpp": True,
         "with_java": False,
         "with_python": False,
         "with_qt": False,
         "with_haskell": False,
-        "with_plugin": False
     }
     short_paths = True
 
@@ -79,42 +67,39 @@ class ConanFileDefault(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows:
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.1")
 
     def requirements(self):
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.75.0")
 
         if self.options.with_qt:
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cci")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1j")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_libevent:
-            self.requires("libevent/2.1.11")
+            self.requires("libevent/2.1.12")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         for option, value in self.options.items():
-            self._cmake.definitions[option.upper()] = value
+            if option.startswith("with_"):
+                self._cmake.definitions[option.upper()] = value
 
-        # Make thrift use correct thread lib (see repo/build/cmake/config.h.in)
-        self._cmake.definitions["USE_STD_THREAD"] = self.options.with_stdthreads
-        self._cmake.definitions["USE_BOOST_THREAD"] = self.options.with_boostthreads
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
         self._cmake.definitions["BUILD_LIBRARIES"] = True
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TUTORIALS"] = False
 
         if self.settings.compiler == "Visual Studio":
@@ -169,7 +154,7 @@ class ConanFileDefault(ConanFile):
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
-        self.cpp_info.components["libthrift"].requires.append("boost::boost")
+        self.cpp_info.components["libthrift"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libthrift"].requires.append("openssl::openssl")
         if self.options.with_libevent:
