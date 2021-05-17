@@ -6,10 +6,8 @@ on:
     branches: [master]
 
 permissions:
-  actions: write
-  checks: write
-  issues: write 
-  pull-requests: write
+  issues: write # Required to add labels
+  pull-requests: read
 
 jobs:
   auto-label:
