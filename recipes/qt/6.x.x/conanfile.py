@@ -97,7 +97,7 @@ class QtConan(ConanFile):
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
-        "with_harfbuzz": False,
+        "with_harfbuzz": True,
         "with_libjpeg": False,
         "with_libpng": True,
         "with_sqlite3": True,
