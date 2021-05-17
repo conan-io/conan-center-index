@@ -275,9 +275,9 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.35")
+            self.requires("pcre2/10.36")
 
         if self.options.with_glib:
             self.requires("glib/2.67.1")
@@ -288,11 +288,11 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.10.4")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/68.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.7.4")
+            self.requires("harfbuzz/2.8.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.0.6")
@@ -309,7 +309,7 @@ class QtConan(ConanFile):
             self.requires("libpq/12.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
-                self.requires("odbc/2.3.7")
+                self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
             self.requires("openal/1.20.1")
         if self.options.get_safe("with_libalsa", False):
@@ -321,7 +321,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.5.0")
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("expat/2.2.10")
             self.requires("opus/1.3.1")
