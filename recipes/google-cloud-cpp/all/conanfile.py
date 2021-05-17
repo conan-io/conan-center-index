@@ -38,6 +38,10 @@ class GoogleCloudCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        
+        if self.settings.os == 'Windows' and self.options.shared:
+            raise ConanInvalidConfiguration("Fails to compile for Windows as a DLL")
+
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
