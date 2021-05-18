@@ -648,6 +648,9 @@ class QtConan(ConanFile):
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
 
+    def _cmake_qt5_private_file(self, module):
+        return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
+
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
@@ -730,37 +733,187 @@ Examples = bin/datadir/examples""")
                 self.info.settings.compiler.runtime = "MT/MTd"
 
     def package_info(self):
-        # FIXME add components
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "Qt5"
+        self.cpp_info.names["cmake_find_package_multi"] = "Qt5"
 
-        # Add top level include directory, so code compile if someone uses
-        # includes with prefixes (e.g. "#include <QtCore/QString>")
-        self.cpp_info.includedirs = ["include"]
+        libsuffix = ""
+        if self.settings.build_type == "Debug":
+            if self.settings.os == "Windows":
+                libsuffix = "d"
+            if tools.is_apple_os(self.settings.os):
+                libsuffix = "_debug"
 
-        # Add all Qt module directories (QtCore, QtGui, QtWidgets and so on), so prefix
-        # can be omited in includes (e.g. "#include <QtCore/QString>" => "#include <QString>")
-        fu = ["include/" + f.name for f in os.scandir("include") if f.is_dir()]
-        self.cpp_info.includedirs.extend(fu)
+        def _get_corrected_reqs(requires):
+            reqs = []
+            for r in requires:
+                reqs.append(r if "::" in r else "qt%s" % r)
+            return reqs
+
+        def _create_module(module, requires=[]):
+            componentname = "qt%s" % module
+            assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
+            self.cpp_info.components[componentname].names["cmake_find_package"] = module
+            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
+            self.cpp_info.components[componentname].libs = ["Qt5%s%s" % (module, libsuffix)]
+            self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
+            self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
+            if module != "Core" and "Core" not in requires:
+                requires.append("Core")
+            self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
+
+        def _create_plugin(pluginname, libname, type, requires):
+            componentname = "qt%s" % pluginname
+            assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
+            self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
+            self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
+            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].includedirs = []
+            if "Core" not in requires:
+                requires.append("Core")
+            self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
+
+        core_reqs = ["zlib::zlib"]
+        if self.options.with_pcre2:
+            core_reqs.append("pcre2::pcre2")
+        if self.options.with_doubleconversion:
+            core_reqs.append("double-conversion::double-conversion")
+        if self.options.get_safe("with_icu", False):
+            core_reqs.append("icu::icu")
+        if self.options.with_zstd:
+            core_reqs.append("zstd::zstd")
+
+        _create_module("Core", core_reqs)
+        if self.options.gui:
+            gui_reqs = ["DBus"]
+            if self.options.with_freetype:
+                gui_reqs.append("freetype::freetype")
+            if self.options.with_libpng:
+                gui_reqs.append("libpng::libpng")
+            if self.options.get_safe("with_fontconfig", False):
+                gui_reqs.append("fontconfig::fontconfig")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                gui_reqs.append("xorg::xorg")
+                if not tools.cross_building(self, skip_x64_x86=True):
+                    gui_reqs.append("xkbcommon::xkbcommon")
+            if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
+                gui_reqs.append("opengl::opengl")
+            if self.options.with_harfbuzz:
+                gui_reqs.append("harfbuzz::harfbuzz")
+            if self.options.with_libjpeg == "libjpeg-turbo":
+                gui_reqs.append("libjpeg-turbo::libjpeg-turbo")
+            if self.options.with_libjpeg == "libjpeg":
+                gui_reqs.append("libjpeg::libjpeg")
+            _create_module("Gui", gui_reqs)
+        if self.options.with_sqlite3:
+            _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
+        if self.options.with_pq:
+            _create_plugin("QPSQLDriverPlugin", "qsqlpsql", "sqldrivers", ["libpq::libpq"])
+        if self.options.with_mysql:
+            _create_plugin("QMySQLDriverPlugin", "qsqlmysql", "sqldriver", ["libmysqlclient::libmysqlclient"])
+        if self.options.with_odbc:
+            if self.settings.os != "Windows":
+                _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
+        networkReqs = []
+        if self.options.openssl:
+            networkReqs.append("openssl::openssl")
+        _create_module("Network", networkReqs)
+        _create_module("Sql")
+        _create_module("Test")
+        if self.options.widgets:
+            _create_module("Widgets", ["Gui"])
+        if self.options.gui and self.options.widgets:
+            _create_module("PrintSupport", ["Gui", "Widgets"])
+        if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
+            _create_module("OpenGL", ["Gui"])
+        if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
+            _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
+        _create_module("DBus")
+        _create_module("Concurrent")
+        _create_module("Xml")
+
+        if self.options.qtdeclarative:
+            _create_module("Qml", ["Network"])
+            #self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Qml"))
+            #self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Qml"))
+            _create_module("QmlModels", ["Qml"])
+            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
+            self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
+            self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
+            if self.options.gui:
+                _create_module("Quick", ["Gui", "Qml", "QmlModels"])
+                if self.options.widgets:
+                    _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
+                _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
+            _create_module("QmlWorkerScript", ["Qml"])
+            _create_module("QuickTest", ["Test"])
+
+        if self.options.qttools and self.options.gui and self.options.widgets:
+            _create_module("UiPlugin", ["Gui", "Widgets"])
+            self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
+            self.cpp_info.components["qtUiPlugin"].libdirs = []
+            _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
+            _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
+            _create_module("Help", ["Gui", "Sql", "Widgets"])
+
+        if self.options.qtquick3d and self.options.gui:
+            _create_module("Quick3DUtils", ["Gui"])
+            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DUtils"])
+            _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
+            _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
+
+        if self.options.qtquickcontrols2 and self.options.gui:
+            _create_module("QuickControls2", ["Gui", "Quick"])
+            _create_module("QuickTemplates2", ["Gui", "Quick"])
+
+        if self.options.qtsvg and self.options.gui:
+            _create_module("Svg", ["Gui"])
+            if self.options.widgets:
+                _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
+
+        if self.options.qtwayland and self.options.gui:
+            _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
+            _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+
 
         if not self.options.shared:
             if self.settings.os == "Windows":
-                self.cpp_info.system_libs.append("Version")   # "Qt5Cored.lib" require "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
-                self.cpp_info.system_libs.append("Winmm")     # "Qt5Cored.lib" require "__imp_timeSetEvent" which is in "Winmm.lib" library
-                self.cpp_info.system_libs.append("Netapi32")  # "Qt5Cored.lib" require "NetApiBufferFree" which is in "Netapi32.lib" library
-                self.cpp_info.system_libs.append("UserEnv")   # "Qt5Cored.lib" require "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("winmm")    # qtcore requires "__imp_timeSetEvent" which is in "Winmm.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
+                self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
+                self.cpp_info.components["qtNetwork"].system_libs.append("DnsApi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
+
 
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.extend(["IOKit"])    # "libQt5Core.a" require "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
-                self.cpp_info.frameworks.extend(["Cocoa"])    # "libQt5Core.a" require "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
-                self.cpp_info.frameworks.extend(["Security"]) # "libQt5Core.a" require "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
+                self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        #self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
+        #self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
-            self.cpp_info.build_modules["cmake_find_package"].append(module)
-            self.cpp_info.build_modules["cmake_find_package_multi"].append(module)
-            self.cpp_info.builddirs.append(os.path.join("lib", "cmake", m))
-        self.cpp_info.build_modules["cmake_find_package"].append(self._cmake_executables_file)
-        self.cpp_info.build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+            component_name = m.replace("Qt5", "qt")
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+
+        objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
+        for object_dir in objects_dirs:
+            for m in os.listdir(object_dir):
+                submodules_dir = os.path.join(object_dir, m)
+                component = "qt" + m[:m.find("_")]
+                for sub_dir in os.listdir(submodules_dir):
+                    submodule_dir = os.path.join(submodules_dir, sub_dir)
+                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                    self.cpp_info.components[component].exelinkflags.extend(obj_files)
+                    self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
 
     @staticmethod
