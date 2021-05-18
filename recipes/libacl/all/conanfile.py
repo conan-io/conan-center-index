@@ -74,14 +74,13 @@ class LibACLConan(ConanFile):
     def package(self):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            autotools.install()
-            #autotools.make(target="install-lib-headers")
-            #with tools.chdir("librhash"):
-            #    if self.options.shared:
-            #        autotools.make(target="install-so-link")
-        #tools.rmdir(os.path.join(self.package_folder, "bin"))
-        #tools.rmdir(os.path.join(self.package_folder, "etc"))
+            autotools.install()            
+        #tools.rename(
+        #    os.path.join(self._pkg_etc, "xattr.conf"),
+        #    os.path.join(self._pkg_lib, "xattr.conf")
+        #)
         #tools.rmdir(os.path.join(self.package_folder, "share"))
+        #tools.rmdir(os.path.join(self.package_folder, "etc"))      
 
     def package_id(self):
         pass 
