@@ -26,3 +26,5 @@ patches:
       patch_file: "patches/0008-find-openssl-debug-8.0.24.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0009-remove-man-8.0.24.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0011-remove-test.patch"

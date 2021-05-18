@@ -31,6 +31,8 @@ class LibMysqlClientCConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
+        self.requires("lz4/1.9.3")
+
     def source(self):
         archive_name = "mysql-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
@@ -51,8 +53,6 @@ class LibMysqlClientCConan(ConanFile):
         if self.settings.os == "Macos":
             if tools.Version(self.version) <= "8.0.17":
                 tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
-            else:
-                tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND libmysql_api_test", "COMMAND DYLD_LIBRARY_PATH=%s libmysql_api_test" % os.path.join(self.build_folder, "library_output_directory"))
 
     def config_options(self):
         if self.settings.os == "Windows":

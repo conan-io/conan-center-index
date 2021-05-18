@@ -1,0 +1,46 @@
+--- a/libmysql/CMakeLists.txt
++++ b/libmysql/CMakeLists.txt
+@@ -390,43 +390,3 @@ ENDFOREACH()
+ FOREACH(api ${CLIENT_API_NONBLOCKING_FUNCTIONS})
+   SET(CLIENT_API_FUNCTION_LIST "${CLIENT_API_FUNCTION_LIST} ${api},")
+ ENDFOREACH()
+-
+-#
+-# Generate api_test.c source, substituting @CLIENT_API_FUNCTION_LIST@
+-# with the list of API functions.
+-#
+-CONFIGURE_FILE(api_test.c.in ${CMAKE_CURRENT_BINARY_DIR}/api_test.c)
+-
+-#
+-# Note: Compiling this test application will fail if not all symbols
+-# from @CLIENT_API_FUNCTIONS@ are declared by <mysql.h>. It will fail
+-# to run if not all of these symbols are exported by the library.
+-#
+-MYSQL_ADD_EXECUTABLE(libmysql_api_test
+-  ${CMAKE_CURRENT_BINARY_DIR}/api_test.c
+-  LINK_LIBRARIES libmysql ${LIBRT}
+-  SKIP_INSTALL
+-  )
+-# Clang/UBSAN needs this on some platforms.
+-SET_TARGET_PROPERTIES(libmysql_api_test PROPERTIES LINKER_LANGUAGE CXX)
+-
+-IF(MY_COMPILER_IS_GNU)
+-  ADD_COMPILE_FLAGS(
+-    ${CMAKE_CURRENT_BINARY_DIR}/api_test.c
+-    COMPILE_FLAGS -Wstrict-prototypes
+-    )
+-ENDIF()
+-
+-MY_CHECK_CXX_COMPILER_WARNING("-Wmissing-profile" HAS_WARN_FLAG)
+-IF(HAS_WARN_FLAG)
+-  ADD_COMPILE_FLAGS(
+-    ${CMAKE_CURRENT_BINARY_DIR}/api_test.c
+-    COMPILE_FLAGS ${HAS_WARN_FLAG}
+-    )
+-ENDIF()
+-
+-# Verify that libmysql_api_test runs OK
+-ADD_CUSTOM_COMMAND(TARGET libmysql_api_test POST_BUILD
+-  COMMAND libmysql_api_test
+-  > ${CMAKE_CURRENT_BINARY_DIR}/libmysql_api_test.out
+-  )
