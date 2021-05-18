@@ -74,16 +74,9 @@ class LibACLConan(ConanFile):
     def package(self):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            autotools.install()            
-        #tools.rename(
-        #    os.path.join(self._pkg_etc, "xattr.conf"),
-        #    os.path.join(self._pkg_lib, "xattr.conf")
-        #)
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
-        #tools.rmdir(os.path.join(self.package_folder, "etc"))      
+            autotools.install()    
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        pass 
-        #self.cpp_info.names["cmake_find_package"] = "LibACL"
-        #self.cpp_info.names["cmake_find_package_multi"] = "LibACL"
-        #self.cpp_info.libs = tools.collect_libs(self)
+    def package_info(self):
+        self.cpp_info.name = "LibACL"
+        self.cpp_info.libs = tools.collect_libs(self)
