@@ -112,7 +112,7 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["bigtable"].requires = ["abseil::absl_memory", "bigtable_protos", "google-cloud-common", "grpc_utils", "grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf"]
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
 
-        self.cpp_info.components["experimental-firestore"].requires = ["common"]
+        self.cpp_info.components["experimental-firestore"].requires = ["google-cloud-common"]
         self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
 
         self.cpp_info.components["bigtable_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "iam_v1_iam_policy_protos", "iam_v1_policy_protos", "longrunning_operations_protos", "rpc_status_protos", "api_auth_protos"]
