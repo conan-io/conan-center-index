@@ -7,7 +7,7 @@ class LibAttrConan(ConanFile):
     name = "libattr"
     description = "Commands for Manipulating Filesystem Extended Attributes"
     topics = ("conan", "attr", "filesystem")
-    license = "MIT"
+    license = "GPL-2.0-or-later"
     homepage = "https://savannah.nongnu.org/projects/attr/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
