@@ -11,7 +11,7 @@ class LibAttrConan(ConanFile):
     homepage = "https://savannah.nongnu.org/projects/attr/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -29,7 +29,7 @@ class LibAttrConan(ConanFile):
     @property
     def _build_folder(self):
         return "build"
-    
+
     @property
     def _pkg_etc(self):
         return os.path.join(
@@ -42,6 +42,13 @@ class LibAttrConan(ConanFile):
         return os.path.join(
             self.package_folder,
             "lib"
+        )
+
+    @property
+    def _doc_folder(self):
+        return os.path.join(
+            self._source_subfolder,
+            "doc"
         )
 
     def config_options(self):
@@ -88,11 +95,17 @@ class LibAttrConan(ConanFile):
     def package(self):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            autotools.install()            
+            autotools.install()
         tools.rename(
             os.path.join(self._pkg_etc, "xattr.conf"),
             os.path.join(self._pkg_lib, "xattr.conf")
         )
+        self.copy("COPYING", dst="licenses", src=self._doc_folder)
+        if not self.options.shared:
+            os.remove(os.path.join(self.package_folder, "lib","libattr.la"))
+        tools.rmdir(os.path.join(self.package_folder,"lib","pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))      
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
 
+    def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
