@@ -275,12 +275,12 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.35")
+            self.requires("pcre2/10.36")
 
         if self.options.with_glib:
-            self.requires("glib/2.67.1")
+            self.requires("glib/2.68.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -288,42 +288,42 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.10.4")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/68.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.7.4")
+            self.requires("harfbuzz/2.8.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.0.6")
+                self.requires("libjpeg-turbo/2.1.0")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.35.5")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_pq:
-            self.requires("libpq/12.2")
+            self.requires("libpq/13.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
-                self.requires("odbc/2.3.7")
+                self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.20.1")
+            self.requires("openal/1.21.0")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.4")
         if self.options.gui and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.0.3")
+                self.requires("xkbcommon/1.2.1")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.5.0")
         if self.options.qtwebengine and self.settings.os == "Linux":
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.3.0")
             self.requires("opus/1.3.1")
 
     def source(self):
