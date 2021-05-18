@@ -775,6 +775,7 @@ class QtConan(ConanFile):
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
+        self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
