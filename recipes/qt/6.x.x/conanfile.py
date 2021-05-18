@@ -480,8 +480,12 @@ class QtConan(ConanFile):
         try:
             self._cmake.configure(source_folder="qt6")
         except:
-            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")))
-            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")))
+            cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
+            cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
+            if (os.path.isfile(cmake_err_log)):
+                self.output.info(tools.load(cmake_err_log))
+            if (os.path.isfile(cmake_out_log)):
+                self.output.info(tools.load(cmake_out_log))
             raise
         return self._cmake
 
