@@ -10,8 +10,7 @@ class LibACLConan(ConanFile):
     license = "MIT"
     homepage = "https://savannah.nongnu.org/projects/acl"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "arch", "compiler", "build_type"
-    version = "2.2.53"
+    settings = "os", "arch", "compiler", "build_type"    
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -20,6 +19,7 @@ class LibACLConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    requires = ["libattr/2.4.48"]
     _autotools = None
 
     @property
@@ -79,9 +79,9 @@ class LibACLConan(ConanFile):
             #with tools.chdir("librhash"):
             #    if self.options.shared:
             #        autotools.make(target="install-so-link")
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        #tools.rmdir(os.path.join(self.package_folder, "bin"))
+        #tools.rmdir(os.path.join(self.package_folder, "etc"))
+        #tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         pass 
