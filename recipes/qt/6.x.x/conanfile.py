@@ -125,7 +125,7 @@ class QtConan(ConanFile):
         self.copy("qtmodules%s.conf" % self.version)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.0")
+        self.build_requires("cmake/3.20.2")
         self.build_requires("ninja/1.10.2")
         self.build_requires('pkgconf/1.7.3')
         if self.settings.compiler == "Visual Studio":
