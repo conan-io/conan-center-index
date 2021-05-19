@@ -238,7 +238,7 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
-        # libbacktrace cannot be built on Visual Studio
+        # libbacktrace is not usable with Visual Studio
         if self.settings.compiler == "Visual Studio":
             del self.options.with_stacktrace_backtrace
 
@@ -460,7 +460,6 @@ class BoostConan(ConanFile):
             self.requires("zstd/1.5.0")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118")
-            self.requires("libunwind/1.5.0")
 
         if self._with_icu:
             self.requires("icu/68.2")
@@ -1137,9 +1136,8 @@ class BoostConan(ConanFile):
         asflags = tools.get_env("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
-            for l in ("libbacktrace", "libunwind"):
-                cppflags += " ".join("-I{}".format(p) for p in self.deps_cpp_info[l].include_paths) + " "
-                ldflags += " ".join("-L{}".format(p) for p in self.deps_cpp_info[l].lib_paths) + " "
+            cppflags += " ".join("-I{}".format(p) for p in self.deps_cpp_info["libbacktrace"].include_paths) + " "
+            ldflags += " ".join("-L{}".format(p) for p in self.deps_cpp_info["libbacktrace"].lib_paths) + " "
 
         if cxxflags.strip():
             contents += '<cxxflags>"%s" ' % cxxflags.strip()
@@ -1474,10 +1472,7 @@ class BoostConan(ConanFile):
                 if self._with_stacktrace_backtrace:
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
                     self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
-                    self.cpp_info.components["stacktrace_backtrace"].requires.extend([
-                        "libunwind::libunwind",
-                        "libbacktrace::libbacktrace",
-                    ])
+                    self.cpp_info.components["stacktrace_backtrace"].requires.append("libbacktrace::libbacktrace")
 
                 self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 
