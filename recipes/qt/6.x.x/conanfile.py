@@ -97,7 +97,7 @@ class QtConan(ConanFile):
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
-        "with_harfbuzz": False,
+        "with_harfbuzz": True,
         "with_libjpeg": False,
         "with_libpng": True,
         "with_sqlite3": True,
@@ -125,7 +125,7 @@ class QtConan(ConanFile):
         self.copy("qtmodules%s.conf" % self.version)
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.0")
+        self.build_requires("cmake/3.20.2")
         self.build_requires("ninja/1.10.2")
         self.build_requires('pkgconf/1.7.3')
         if self.settings.compiler == "Visual Studio":
@@ -480,8 +480,12 @@ class QtConan(ConanFile):
         try:
             self._cmake.configure(source_folder="qt6")
         except:
-            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")))
-            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")))
+            cmake_err_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")
+            cmake_out_log = os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")
+            if (os.path.isfile(cmake_err_log)):
+                self.output.info(tools.load(cmake_err_log))
+            if (os.path.isfile(cmake_out_log)):
+                self.output.info(tools.load(cmake_out_log))
             raise
         return self._cmake
 
@@ -771,6 +775,7 @@ class QtConan(ConanFile):
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
+        self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
@@ -786,6 +791,8 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
+                self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
