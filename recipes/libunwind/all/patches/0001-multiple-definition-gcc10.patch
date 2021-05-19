@@ -1,0 +1,252 @@
+Fix from https://github.com/libunwind/libunwind/pull/166
+
+--- a/src/aarch64/Ginit.c
++++ b/src/aarch64/Ginit.c
+@@ -61,7 +61,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -78,7 +77,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/arm/Ginit.c
++++ b/src/arm/Ginit.c
+@@ -57,7 +57,6 @@ tdep_uc_addr (unw_tdep_context_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -68,7 +67,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/hppa/Ginit.c
++++ b/src/hppa/Ginit.c
+@@ -64,7 +64,6 @@ _Uhppa_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -81,7 +80,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/mips/Ginit.c
++++ b/src/mips/Ginit.c
+@@ -69,7 +69,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -86,7 +85,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) (intptr_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/ppc32/Ginit.c
++++ b/src/ppc32/Ginit.c
+@@ -91,7 +91,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ 
+ static void
+@@ -104,7 +103,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/ppc64/Ginit.c
++++ b/src/ppc64/Ginit.c
+@@ -95,7 +95,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ 
+ static void
+@@ -108,7 +107,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/sh/Ginit.c
++++ b/src/sh/Ginit.c
+@@ -58,7 +58,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -75,7 +74,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/tilegx/Ginit.c
++++ b/src/tilegx/Ginit.c
+@@ -64,7 +64,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -81,7 +80,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) (intptr_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/x86/Ginit.c
++++ b/src/x86/Ginit.c
+@@ -54,7 +54,6 @@ tdep_uc_addr (ucontext_t *uc, int reg)
+ 
+ # endif /* UNW_LOCAL_ONLY */
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -71,7 +70,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 
+--- a/src/x86_64/Ginit.c
++++ b/src/x86_64/Ginit.c
+@@ -49,7 +49,6 @@ static struct unw_addr_space local_addr_space;
+ 
+ unw_addr_space_t unw_local_addr_space = &local_addr_space;
+ 
+-HIDDEN unw_dyn_info_list_t _U_dyn_info_list;
+ 
+ /* XXX fix me: there is currently no way to locate the dyn-info list
+        by a remote unwinder.  On ia64, this is done via a special
+@@ -66,7 +65,13 @@ static int
+ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
+                         void *arg)
+ {
+-  *dyn_info_list_addr = (unw_word_t) &_U_dyn_info_list;
++#ifndef UNW_LOCAL_ONLY
++# pragma weak _U_dyn_info_list_addr
++  if (!_U_dyn_info_list_addr)
++    return -UNW_ENOINFO;
++#endif
++  // Access the `_U_dyn_info_list` from `LOCAL_ONLY` library, i.e. libunwind.so.
++  *dyn_info_list_addr = _U_dyn_info_list_addr ();
+   return 0;
+ }
+ 

@@ -28,6 +28,7 @@ class LiunwindConan(ConanFile):
         "setjmp": True,
     }
 
+    exports_sources = "patches/**"
     _autotools = None
 
     @property
@@ -65,6 +66,8 @@ class LiunwindConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch_data)
         autotools = self._configure_autotools()
         autotools.make()
 
