@@ -72,16 +72,20 @@ class LibiglConan(ConanFile):
     def package(self):
         self.copy("LICENSE.GPL", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.MPL2", dst="licenses", src=self._source_subfolder)
-
-        cmake = self._configure_cmake()
-        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        self.copy(pattern="*.h", src=self._source_subfolder)
+
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", keep_path=False)
+
     def package_info(self):
-        if self.setting.os == "Linux":
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
 
+        self.cpp_info.libs = tools.collect_libs(self)
+
         if not self.options.shared:
-            self.cpp_info.libdirs = ["lib"]
-            self.cpp_info.libs = ["libigl.a"]
             self.cpp_info.defines = ["IGL_STATIC_LIBRARY"]
