@@ -2,6 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class LibAttrConan(ConanFile):
     name = "libattr"
@@ -27,10 +28,6 @@ class LibAttrConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _build_folder(self):
-        return "build"
-
-    @property
     def _pkg_etc(self):
         return os.path.join(
             self.package_folder,
@@ -50,8 +47,23 @@ class LibAttrConan(ConanFile):
             self._source_subfolder,
             "doc"
         )
+    
+    @property
+    def _inc_attr_folder(self):
+        return os.path.join(
+            self._source_subfolder,
+            "include",
+            "attr"
+        )
 
-    def config_options(self):
+    @property
+    def _libs_folder(self):
+        return os.path.join(
+            self._source_subfolder,
+            ".libs"
+        )
+
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "libattr is just supported for Linux")
@@ -82,9 +94,7 @@ class LibAttrConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-
-        self._autotools.configure(
-            args=conf_args, use_default_install_dirs=False)
+        self._autotools.configure(args=conf_args)
         return self._autotools
 
     def build(self):
@@ -101,11 +111,13 @@ class LibAttrConan(ConanFile):
             os.path.join(self._pkg_lib, "xattr.conf")
         )
         self.copy("COPYING", dst="licenses", src=self._doc_folder)
-        if not self.options.shared:
-            os.remove(os.path.join(self.package_folder, "lib","libattr.la"))
         tools.rmdir(os.path.join(self.package_folder,"lib","pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
-
+        
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libattr"
+        self.cpp_info.names["cmake_find_package"] = "libattr"
+        self.cpp_info.names["cmake_find_package_multi"] = "libattr"
+        self.cpp_info.libs = ["attr"]
