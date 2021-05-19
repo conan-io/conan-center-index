@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
@@ -74,9 +73,7 @@ class LiunwindConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
-            for filename in glob.glob("*.la"):
-                os.unlink(filename)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.components["unwind"].names["pkg_config"] = "libunwind"
