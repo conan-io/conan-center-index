@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.parallel = False # to mitigate CCI-CI build errors
         cmake.configure()
         cmake.build()
 
