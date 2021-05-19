@@ -481,8 +481,8 @@ class BoostConan(ConanFile):
                 self.info.options.python_version = self._python_version
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
@@ -1238,7 +1238,7 @@ class BoostConan(ConanFile):
         if dll_pdbs:
             tools.mkdir(os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
-                os.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
+                tools.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
