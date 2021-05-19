@@ -14,7 +14,7 @@ class LiunwindConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "coredump": [True, False], "ptrace": [True, False], "setjmp": [True, False]}
     default_options = {"shared": False, "fPIC": True, "coredump": True, "ptrace": True, "setjmp": True}
-    requires = "xz_utils/5.2.4"
+
     _autotools = None
 
     @property
@@ -28,6 +28,9 @@ class LiunwindConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("xz_utils/5.2.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
