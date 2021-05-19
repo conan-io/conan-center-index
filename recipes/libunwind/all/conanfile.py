@@ -12,8 +12,20 @@ class LiunwindConan(ConanFile):
     homepage = "https://github.com/libunwind/libunwind"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "coredump": [True, False], "ptrace": [True, False], "setjmp": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "coredump": True, "ptrace": True, "setjmp": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "coredump": [True, False],
+        "ptrace": [True, False],
+        "setjmp": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "coredump": True,
+        "ptrace": True,
+        "setjmp": True,
+    }
 
     _autotools = None
 
@@ -60,7 +72,7 @@ class LiunwindConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         with tools.chdir(os.path.join(self.package_folder, "lib")):
             for filename in glob.glob("*.la"):
                 os.unlink(filename)
