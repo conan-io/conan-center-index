@@ -10,5 +10,7 @@ sources:
     sha256: "3dfa02e873ff51a11ee02b9ca391807f0c8ea0529a4924afa645fbf97163f9d4"
 patches:
   "1.1.9":
-    - patch_file: "patches/1.1.9-fix-inlining-failure.patch"
+    - patch_file: "patches/1.1.9-0001-fix-inlining-failure.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.1.9-0002-no-Werror.patch"
       base_path: "source_subfolder"
