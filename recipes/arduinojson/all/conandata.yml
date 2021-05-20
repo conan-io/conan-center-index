@@ -1,7 +1,10 @@
 sources:
-  "6.15.2":
-    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.15.2/ArduinoJson-v6.15.2.zip"
-    sha256: "84f89197bf5161ddccaf74dc288ce7bcc307f5ffef4b17e2ddab3c2f88cc6da9"
+  "6.18.0":
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.18.0/ArduinoJson-v6.18.0.zip"
+    sha256: "2ade6a0097845d6bc0292a7f9ffa58cbd7e11a34a26616ac9e40a7754a18f1a9"
   "6.16.1":
     url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.16.1/ArduinoJson-v6.16.1.zip"
     sha256: "d8cab18d50a9487766e195c68c14a552403994ecae3e5051d509e62914444ecd"
+  "6.15.2":
+    url: "https://github.com/bblanchon/ArduinoJson/releases/download/v6.15.2/ArduinoJson-v6.15.2.zip"
+    sha256: "84f89197bf5161ddccaf74dc288ce7bcc307f5ffef4b17e2ddab3c2f88cc6da9"
