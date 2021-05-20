@@ -17,10 +17,11 @@ class LibbacktraceConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    build_requires = "autoconf/2.69", "libtool/2.4.6"
+    _autotools = None
 
-    __autotools = None
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,33 +36,36 @@ class LibbacktraceConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("libbacktrace-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    @property
-    def _autotools(self):
-        if self.__autotools is None:
-            self.__autotools = AutoToolsBuildEnvironment(self)
-        return self.__autotools
-
-    def _autotools_configure(self):
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self.options.shared:
             args = ["--enable-shared", "--disable-static"]
         else:
             args = ["--disable-shared", "--enable-static"]
-        self._autotools.configure(args=args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True)
-            self._autotools_configure()
-            self._autotools.make()
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
-            self._autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
