@@ -75,6 +75,7 @@ class LibiglConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         self.copy(pattern="*.h", src=self._source_subfolder)
+        self.copy(pattern="*.cpp", src=self._source_subfolder)
 
         self.copy(pattern="*.a", dst="lib", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", keep_path=False)
