@@ -227,7 +227,7 @@ class QtConan(ConanFile):
             self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
-        if self.options.with_vulkan:
+        if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
@@ -592,7 +592,7 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
-        
+
         def _create_private_module(module, dependencies=[]):
             dependencies_string = ';'.join('Qt6::%s' % dependency for dependency in dependencies)
             contents = textwrap.dedent("""\
@@ -603,18 +603,18 @@ class QtConan(ConanFile):
                     INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
                     INTERFACE_LINK_LIBRARIES "{2}"
                 )
-                
+
                 add_library(Qt::{0}Private INTERFACE IMPORTED)
                 set_target_properties(Qt::{0}Private PROPERTIES
                     INTERFACE_LINK_LIBRARIES "Qt6::{0}Private"
                     _qt_is_versionless_target "TRUE"
                 )
             endif()""".format(module, self.version, dependencies_string))
-            
+
             tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
-        
+
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
 
