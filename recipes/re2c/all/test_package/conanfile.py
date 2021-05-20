@@ -1,10 +1,13 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.36.0"
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    test_type = "build_requires"
 
     def build(self):
         if not tools.cross_building(self.settings):
