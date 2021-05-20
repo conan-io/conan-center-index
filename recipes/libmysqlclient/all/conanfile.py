@@ -98,6 +98,12 @@ class LibMysqlClientCConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", keep_path=False)
+
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         os.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
@@ -110,7 +116,7 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
+        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "MySQL"
         self.cpp_info.names["cmake_find_package_multi"] = "MySQL"
         self.cpp_info.names["pkg_config"] = "mysqlclient"
