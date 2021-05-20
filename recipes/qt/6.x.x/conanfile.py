@@ -266,7 +266,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.0")
         if self.options.qtwayland:
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
