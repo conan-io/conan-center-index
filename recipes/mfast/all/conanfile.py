@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-import glob
 import os
 import shutil
 import textwrap
@@ -50,26 +49,25 @@ class mFASTConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.76.0")
         self.requires("tinyxml2/8.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("mFAST-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTS"] = False
-            self._cmake.definitions["BUILD_EXAMPLES"] = False
-            self._cmake.definitions["BUILD_PACKAGES"] = False
-            if self.version != "1.2.1":
-                if not self.settings.compiler.cppstd:
-                    self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
-                else:
-                    tools.check_min_cppstd(self, 14)
-            self._cmake.configure(build_folder=self._build_subfolder)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_PACKAGES"] = False
+        if self.version != "1.2.1":
+            if not self.settings.compiler.cppstd:
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
+            else:
+                tools.check_min_cppstd(self, 14)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):

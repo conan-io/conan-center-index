@@ -1,7 +1,5 @@
-diff --git a/cmake/SetCXXStandard.cmake b/cmake/SetCXXStandard.cmake
-index a0402ee..e69de29 100644
---- a/cmake/SetCXXStandard.cmake
-+++ b/cmake/SetCXXStandard.cmake
+--- cmake/SetCXXStandard.cmake
++++ cmake/SetCXXStandard.cmake
 @@ -1,14 +0,0 @@
 -
 -find_package(Boost 1.59.0 REQUIRED)
