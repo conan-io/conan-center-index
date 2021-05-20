@@ -81,7 +81,7 @@ class QtConan(ConanFile):
         "cross_compile": "ANY",
         "sysroot": "ANY",
         "config": "ANY",
-        "multiconfiguration": [True, False],
+        "multiconfiguration": [True, False]
     }
     options.update({module: [True, False] for module in _submodules})
 
@@ -117,7 +117,7 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "config": None,
-        "multiconfiguration": False,
+        "multiconfiguration": False
     }
     default_options.update({module: False for module in _submodules})
 
@@ -148,10 +148,11 @@ class QtConan(ConanFile):
                 msg = ("Python2 must be available in PATH "
                        "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
+                    
             # In any case, check its actual version for compatibility
             from six import StringIO  # Python 2 and 3 compatible
             mybuf = StringIO()
-            cmd_v = "{} --version".format(python_exe)
+            cmd_v = "\"{}\" --version".format(python_exe)
             self.run(cmd_v, output=mybuf)
             verstr = mybuf.getvalue().strip().split("Python ")[1]
             if verstr.endswith("+"):
@@ -167,7 +168,7 @@ class QtConan(ConanFile):
             else:
                 msg = ("Found Python 2 in path, but with invalid version {}"
                        " (QtWebEngine requires >= {} & < "
-                       "{})".format(verstr, v_min, v_max))
+                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
     def config_options(self):
@@ -796,7 +797,7 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("xorg::xorg")
                 if not tools.cross_building(self, skip_x64_x86=True):
                     gui_reqs.append("xkbcommon::xkbcommon")
-            if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
+            if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
@@ -874,6 +875,9 @@ Examples = bin/datadir/examples""")
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            
+        if self.options.qtwebengine and self.options.gui:
+            _create_module("WebEngine", ["Gui", "Quick"])
 
 
         if not self.options.shared:
