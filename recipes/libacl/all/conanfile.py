@@ -2,15 +2,17 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
-class LibACLConan(ConanFile):
+class LibAclConan(ConanFile):
     name = "libacl"
     description = "Commands for Manipulating POSIX Access Control Lists"
-    topics = ("conan", "acl", "POSIX", "access controll")
-    license = "MIT"
-    homepage = "https://savannah.nongnu.org/projects/acl"
+    topics = ("conan", "acl", "POSIX")
+    license = "GPL-2.0-or-later"
+    homepage = "https://savannah.nongnu.org/projects/acl/"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "arch", "compiler", "build_type"    
+    settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -19,7 +21,7 @@ class LibACLConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    requires = ["libattr/2.4.48"]
+    requires = ["libattr/2.5.1"]
     _autotools = None
 
     @property
@@ -27,10 +29,13 @@ class LibACLConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _build_folder(self):
-        return "build"
+    def _doc_folder(self):
+        return os.path.join(
+            self._source_subfolder,
+            "doc"
+        )
 
-    def config_options(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "libacl is just supported for Linux")
@@ -61,9 +66,7 @@ class LibACLConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-
-        self._autotools.configure(
-            args=conf_args, use_default_install_dirs=False)
+        self._autotools.configure(args=conf_args)
         return self._autotools
 
     def build(self):
@@ -74,9 +77,14 @@ class LibACLConan(ConanFile):
     def package(self):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            autotools.install()    
+            autotools.install()
+        self.copy("COPYING", dst="licenses", src=self._doc_folder)
+        tools.rmdir(os.path.join(self.package_folder,"lib","pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
+        
     def package_info(self):
-        self.cpp_info.name = "LibACL"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libacl"
+        self.cpp_info.names["cmake_find_package"] = "libacl"
+        self.cpp_info.names["cmake_find_package_multi"] = "libacl"
+        self.cpp_info.libs = ["acl"]
