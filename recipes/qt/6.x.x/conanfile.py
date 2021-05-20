@@ -124,13 +124,6 @@ class QtConan(ConanFile):
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
 
-    def build_requirements(self):
-        self.build_requires("cmake/3.20.2")
-        self.build_requires("ninja/1.10.2")
-        self.build_requires('pkgconf/1.7.3')
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires('strawberryperl/5.30.0.1')
-
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
@@ -227,7 +220,7 @@ class QtConan(ConanFile):
             self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
-        if self.options.with_vulkan:
+        if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
@@ -266,11 +259,18 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.0")
         if self.options.qtwayland:
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.20.2")
+        self.build_requires("ninja/1.10.2")
+        self.build_requires("pkgconf/1.7.4")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires('strawberryperl/5.30.0.1')
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -405,7 +405,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        self._cmake.definitions["INPUT_opengl"] = self.options.opengl
+        self._cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
 
         # openSSL
         if not self.options.openssl:
@@ -592,7 +592,7 @@ class QtConan(ConanFile):
                 endif()
                 """.format(target, extension))
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
-        
+
         def _create_private_module(module, dependencies=[]):
             dependencies_string = ';'.join('Qt6::%s' % dependency for dependency in dependencies)
             contents = textwrap.dedent("""\
@@ -603,18 +603,18 @@ class QtConan(ConanFile):
                     INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
                     INTERFACE_LINK_LIBRARIES "{2}"
                 )
-                
+
                 add_library(Qt::{0}Private INTERFACE IMPORTED)
                 set_target_properties(Qt::{0}Private PROPERTIES
                     INTERFACE_LINK_LIBRARIES "Qt6::{0}Private"
                     _qt_is_versionless_target "TRUE"
                 )
             endif()""".format(module, self.version, dependencies_string))
-            
+
             tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
-        
+
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
 
