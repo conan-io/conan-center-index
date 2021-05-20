@@ -307,7 +307,7 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
-        return not self.options.header_only and not self.options.without_stacktrace and self.settings.compiler != "Visual Studio"
+        return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
     def configure(self):
         if self.options.header_only:
