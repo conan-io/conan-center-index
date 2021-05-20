@@ -405,7 +405,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        self._cmake.definitions["INPUT_opengl"] = self.options.opengl
+        self._cmake.definitions["INPUT_opengl"] = self.options.get_safe("opengl", "no")
 
         # openSSL
         if not self.options.openssl:
