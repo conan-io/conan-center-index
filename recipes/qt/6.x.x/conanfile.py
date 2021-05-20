@@ -124,13 +124,6 @@ class QtConan(ConanFile):
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
 
-    def build_requirements(self):
-        self.build_requires("cmake/3.20.2")
-        self.build_requires("ninja/1.10.2")
-        self.build_requires('pkgconf/1.7.3')
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires('strawberryperl/5.30.0.1')
-
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
@@ -271,6 +264,13 @@ class QtConan(ConanFile):
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.20.2")
+        self.build_requires("ninja/1.10.2")
+        self.build_requires("pkgconf/1.7.4")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires('strawberryperl/5.30.0.1')
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
