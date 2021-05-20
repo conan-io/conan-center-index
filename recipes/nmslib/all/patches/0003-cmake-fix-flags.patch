@@ -21,8 +21,8 @@
          # MACOSX
 -        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread -fpic ${SIMD_FLAGS}")
 -        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread -fpic ${SIMD_FLAGS}")
-+        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS}")
-+        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS}")
++        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread")
++        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread")
      else()
 -        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed -fpic")
 -        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed -fpic")
