@@ -26,8 +26,8 @@
      else()
 -        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed -fpic")
 -        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed -fpic")
-+        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed")
-+        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread ${SIMD_FLAGS} -Wl,--no-as-needed")
++        set (CMAKE_CXX_FLAGS_RELEASE "${WARN_FLAGS} -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread -Wl,--no-as-needed")
++        set (CMAKE_CXX_FLAGS_DEBUG   "${WARN_FLAGS} -ggdb  -DNDEBUG -std=c++11 -DHAVE_CXX0X -pthread -Wl,--no-as-needed")
      endif()
  elseif(WIN32)
      # TODO how can we add support for later versions? There seems to be no flag with the semantics "version x or higher"
