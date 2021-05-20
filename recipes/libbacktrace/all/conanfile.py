@@ -28,13 +28,14 @@ class LibbacktraceConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("libsafec doesn't support {}/{}".format(
-                self.settings.compiler, self.settings.compiler.version))
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("libbacktrace can't be built with Visual Studio")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
