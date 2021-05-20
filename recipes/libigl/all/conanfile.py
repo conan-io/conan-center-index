@@ -72,10 +72,14 @@ class LibiglConan(ConanFile):
     def package(self):
         self.copy("LICENSE.GPL", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE.MPL2", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         self.copy(pattern="*.h", src=self._source_subfolder)
         self.copy(pattern="*.cpp", src=self._source_subfolder)
+
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "tutorial"))
+        tools.rmdir(os.path.join(self.package_folder, "tests"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         self.copy(pattern="*.a", dst="lib", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", keep_path=False)
