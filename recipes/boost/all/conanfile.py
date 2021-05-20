@@ -1471,7 +1471,6 @@ class BoostConan(ConanFile):
 
                 if self._with_stacktrace_backtrace:
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
-                    self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
                     self.cpp_info.components["stacktrace_backtrace"].requires.append("libbacktrace::libbacktrace")
 
                 self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
