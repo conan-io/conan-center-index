@@ -14,3 +14,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/1.1.9-0002-no-Werror.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/1.1.9-0003-fix-clobber-list-older-llvm.patch"
+      base_path: "source_subfolder"
