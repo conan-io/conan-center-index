@@ -19,3 +19,7 @@ class TestPackageConan(ConanFile):
             handler_exe = "crashpad_handler.exe" if self.settings.os == "Windows" else "crashpad_handler"
             handler_bin_path = os.path.join(self.deps_cpp_info["crashpad"].rootpath, "bin", handler_exe)
             self.run("%s %s/db %s" % (bin_path, test_env_dir, handler_bin_path), run_environment=True)
+            if self.settings.os == "Windows":
+                handler_exe = "crashpad_handler_com.com"
+                handler_bin_path = os.path.join(self.deps_cpp_info["crashpad"].rootpath, "bin", handler_exe)
+                self.run("%s %s/db %s" % (bin_path, test_env_dir, handler_bin_path), run_environment=True)

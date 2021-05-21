@@ -62,8 +62,8 @@ class CrashpadConan(ConanFile):
             if not self.options["libcurl"].shared:
                 # FIXME: is this true?
                 self.output.warn("crashpad needs a shared libcurl library")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not (yet) supported by this recipe because the build system requires python 2.x which is not (yet) available on CCI.")
+        # if self.settings.os == "Windows":
+        #     raise ConanInvalidConfiguration("Windows is not (yet) supported by this recipe because the build system requires python 2.x which is not (yet) available on CCI.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["url"]["crashpad"], destination=self._source_subfolder, strip_root=True)
@@ -123,42 +123,18 @@ class CrashpadConan(ConanFile):
             return str(self.options.http_transport)
 
     def build(self):
-        # Order of ssl and crypto is wrong (first ssl, then crypto)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "\"crypto\"", "SSL_LABEL")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "\"ssl\"", "\"crypto\"")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "util", "BUILD.gn"), "SSL_LABEL", "\"ssl\"")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"), "zlib_source = \"embedded\"", "zlib_source = \"system\"")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "common.gypi"), "-fPIC", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party","mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),   "-fPIC", "")
-
-        # Allow compiling crashpad with gcc (fetch compiler from environment variables)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),
-                              "\"clang\"", "getenv(\"CC\")")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),
-                              "\"clang++\"", "getenv(\"CXX\")")
-        toolchain_path = os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn")
-
-        # Use conan linux-syscall-support package
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "lss", "lss.h"),
-                              "include \"third_party/lss/linux_syscall_support.h\"",
-                              "include <linux_syscall_support.h>")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "lss", "lss.h"),
-                              "include \"third_party/lss/lss/linux_syscall_support.h\"",
-                              "include <linux_syscall_support.h>")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn"),
-                              "assert(false, \"Unsupported architecture\")",
-                              "print(\"Unknown architecture -> assume conan knows how to handle it\")")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "win_helper.py"),
-                              "print line", "print(line)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "win_helper.py"),
-                              "print result", "print(result)")
+        if self.settings.compiler == "Visual Studio":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "third_party", "zlib", "BUILD.gn"),
+                                  "libs = [ \"z\" ]",
+                                  "libs = [ {} ]".format(", ".join("\"{}.lib\"".format(l) for l in self.deps_cpp_info["zlib"].libs)))
 
         if self.settings.compiler == "gcc":
+            toolchain_path = os.path.join(self._source_subfolder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn")
             # Remove gcc-incompatible compiler arguments
-            for comp_arg in ("-Werror", "-Wheader-hygiene", "-Wnewline-eof", "-Wstring-conversion", "-Wexit-time-destructors", "-fobjc-call-cxx-cdtors", "-Wextra-semi", "-Wimplicit-fallthrough"):
+            for comp_arg in ("-Wheader-hygiene", "-Wnewline-eof", "-Wstring-conversion", "-Wexit-time-destructors", "-fobjc-call-cxx-cdtors", "-Wextra-semi", "-Wimplicit-fallthrough"):
                 tools.replace_in_file(toolchain_path,
                                       "\"{}\"".format(comp_arg), "\"\"")
 
@@ -169,8 +145,8 @@ class CrashpadConan(ConanFile):
         extra_ldflags = autotools.link_flags
         if self.options.get_safe("fPIC"):
             extra_cflags.append("-fPIC")
-        extra_cflags.extend("-I'{}'".format(inc) for inc in autotools.include_paths)
-        extra_ldflags.extend("-L'{}'".format(libdir) for libdir in autotools.library_paths)
+        extra_cflags.extend("-I {}".format(inc) for inc in autotools.include_paths)
+        extra_ldflags.extend("-{}{}".format("LIBPATH:" if self.settings.compiler == "Visual Studio" else "L ", libdir) for libdir in autotools.library_paths)
         if self.settings.compiler == "clang":
             if self.settings.compiler.get_safe("libcxx"):
                 stdlib = {
@@ -195,11 +171,9 @@ class CrashpadConan(ConanFile):
                 targets = ["client", "minidump", "crashpad_handler", "snapshot"]
                 if self.settings.os == "Windows":
                     targets.append("crashpad_handler_com")
-                for target in targets:
-                    # FIXME: Remove verbose once everything is working hunky dory
-                    self.run("ninja -C out/Default {target} -j{parallel}".format(
-                        target=target,
-                        parallel=tools.cpu_count()), run_environment=True)
+                self.run("ninja -C out/Default {targets} -j{parallel}".format(
+                    targets=" ".join(targets),
+                    parallel=tools.cpu_count()), run_environment=True)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
@@ -211,9 +185,13 @@ class CrashpadConan(ConanFile):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "out", "Default", "gen", "build"), dst=os.path.join("include", "build"))
 
         self.copy("*.a", src=os.path.join(self._source_subfolder, "out", "Default"), dst="lib", keep_path=False)
+        self.copy("*.lib", src=os.path.join(self._source_subfolder, "out", "Default"), dst="lib", keep_path=False)
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
-        self.copy("crashpad_handler.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
+        self.copy("crashpad_handler_com.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
+
+        # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*getopt*")
 
         tools.save(os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
                    textwrap.dedent("""\

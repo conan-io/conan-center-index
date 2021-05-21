@@ -7,3 +7,19 @@ sources:
       mini_chromium:
         url: "https://github.com/chromium/mini_chromium/archive/ccb198907cecf072d8f5b2543d4d348e834a298a.zip"
         sha256: "d526f659b0d44932bb4b5ff1277d855569572eb3fcad6ec1c69a71aac6a3d6ee"
+patches:
+  "cci.20210507":
+    - patch_file: "patches/cci.20210507-0001-fix-openssl-link-order.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0002-remove-fPIC-Werror-LTO.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0003-compilers-from-env.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0004-use-conan-linux-syscall-support-package.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0005-allow-all-archs.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0006-mini_chromium-win_helper-py3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
+      base_path: "source_subfolder"
