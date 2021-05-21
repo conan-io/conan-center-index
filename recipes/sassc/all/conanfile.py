@@ -14,10 +14,6 @@ class SasscConan(ConanFile):
     topics = ("Sass", "sassc", "compiler")
     settings = "os", "compiler", "build_type", "arch"
 
-    build_requires = "autoconf/2.69", "libtool/2.4.6"
-
-    requires = "libsass/3.6.4"
-
     _autotools = None
 
     @property
@@ -31,6 +27,12 @@ class SasscConan(ConanFile):
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD and Macos at this time, contributions are welcomed")
+
+    def requirements(self):
+        self.requires("libsass/3.6.4")
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
