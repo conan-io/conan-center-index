@@ -66,17 +66,17 @@ class CairoConan(ConanFile):
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.68.0")
+            self.requires("glib/2.68.1")
         self.requires("zlib/1.2.11")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.37")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires('msys2/20200517')
+            self.build_requires('msys2/cci.latest')
         if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
 
     @property
     def _is_msvc(self):
