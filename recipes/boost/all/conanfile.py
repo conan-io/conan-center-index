@@ -1480,6 +1480,8 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace_windb"].system_libs.extend(["ole32", "dbgeng"])
                     self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
                     self.cpp_info.components["stacktrace_windb_cached"].system_libs.extend(["ole32", "dbgeng"])
+                elif tools.is_apple_os(self.settings.os):
+                    self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
