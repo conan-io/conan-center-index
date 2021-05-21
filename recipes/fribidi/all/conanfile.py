@@ -57,8 +57,9 @@ class FriBiDiCOnan(ConanFile):
         self._meson = Meson(self)
         self._meson.options["deprecated"] = self.options.with_deprecated
         self._meson.options["docs"] = False
-        self._meson.options["bin"] = False
-        self._meson.options["tests"] = False
+        if tools.Version(self.version) >= "1.0.10":
+            self._meson.options["bin"] = False
+            self._meson.options["tests"] = False
         self._meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._meson
 
@@ -88,6 +89,9 @@ class FriBiDiCOnan(ConanFile):
         self.cpp_info.libs = ["fribidi"]
         self.cpp_info.includedirs.append(os.path.join("include", "fribidi"))
         if not self.options.shared:
-            self.cpp_info.defines.append("FRIBIDI_STATIC")
+            if tools.Version(self.version) >= "1.0.10":
+                self.cpp_info.defines.append("FRIBIDI_LIB_STATIC")
+            else:
+                self.cpp_info.defines.append("FRIBIDI_STATIC")
 
         self.cpp_info.names["pkg_config"] = "fribidi"
