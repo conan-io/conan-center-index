@@ -7,7 +7,7 @@ class CopperSpiceConan(ConanFile):
     settings = {
         'os': ['Windows'],
         'compiler': {'Visual Studio': {'version': ['16']}},
-        'arch': ['x86_64'],
+        'arch': ['x86_64', 'x86'],
         'build_type': ['Debug', 'Release']
     }
     generators = 'cmake_paths'
@@ -24,7 +24,7 @@ class CopperSpiceConan(ConanFile):
 
     def package(self):
         src_dir = os.getcwd()
-        build_type = str(self.settings.build_type).lower()
+        build_type = str(self.settings.arch) + '-' + str(self.settings.build_type).lower()
         self.copy('**', dst=os.path.join('include'), src=os.path.join(src_dir, build_type, 'include'))
         self.copy('**', dst=os.path.join('bin'), src=os.path.join(src_dir, build_type, 'bin'))
         self.copy('**', dst=os.path.join('lib'), src=os.path.join(src_dir, build_type, 'lib'))
