@@ -13,10 +13,10 @@
 +  </Target>-->
 --- PCbuild/_freeze_importlib.vcxproj
 +++ PCbuild/_freeze_importlib.vcxproj
-@@ -149,1 +149,1 @@
+@@ -151,1 +151,1 @@
 -  <Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
 +  <!--<Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
-@@ -151,1 +151,1 @@
+@@ -153,1 +153,1 @@
 -  </Target>
 +  </Target>-->
 --- PCbuild/_bz2.vcxproj
@@ -190,16 +190,10 @@
 +    </ProjectReference>-->
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
-@@ -70,7 +70,7 @@
-     <ProjectGuid>{CF7AC3D1-E2DF-41D2-BEA6-1E2556CDEA26}</ProjectGuid>
-     <RootNamespace>pythoncore</RootNamespace>
-   </PropertyGroup>
+@@ -73,1 +73,1 @@
 -  <Import Project="python.props" />
 +  <Import Project="python.props" /><Import Project="../../conan_zlib.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
-@@ -300,7 +300,7 @@
+@@ -302,7 +302,7 @@
      <ClInclude Include="..\Python\wordcode_helpers.h" />
    </ItemGroup>
    <ItemGroup Condition="$(IncludeExternals)">
@@ -208,7 +202,7 @@
      <ClInclude Include="$(zlibDir)\deflate.h" />
      <ClInclude Include="$(zlibDir)\inffast.h" />
      <ClInclude Include="$(zlibDir)\inffixed.h" />
-@@ -310,7 +310,7 @@
+@@ -312,7 +312,7 @@
      <ClInclude Include="$(zlibDir)\zconf.h" />
      <ClInclude Include="$(zlibDir)\zconf.in.h" />
      <ClInclude Include="$(zlibDir)\zlib.h" />
@@ -217,7 +211,7 @@
    </ItemGroup>
    <ItemGroup>
      <ClCompile Include="..\Modules\_abc.c" />
-@@ -493,7 +493,7 @@
+@@ -496,7 +496,7 @@
    </ItemGroup>
    <ItemGroup Condition="$(IncludeExternals)">
      <ClCompile Include="..\Modules\zlibmodule.c" />
@@ -226,7 +220,7 @@
      <ClCompile Include="$(zlibDir)\compress.c" />
      <ClCompile Include="$(zlibDir)\crc32.c" />
      <ClCompile Include="$(zlibDir)\deflate.c" />
-@@ -503,7 +503,7 @@
+@@ -506,7 +506,7 @@
      <ClCompile Include="$(zlibDir)\inftrees.c" />
      <ClCompile Include="$(zlibDir)\trees.c" />
      <ClCompile Include="$(zlibDir)\uncompr.c" />

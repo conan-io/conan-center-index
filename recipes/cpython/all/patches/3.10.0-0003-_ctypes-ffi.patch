@@ -1,6 +1,6 @@
 --- Modules/_ctypes/cfield.c
 +++ Modules/_ctypes/cfield.c
-@@ -1490,7 +1490,11 @@
+@@ -1491,7 +1491,11 @@
      return PyLong_FromVoidPtr(*(void **)ptr);
  }
  
@@ -13,7 +13,7 @@
      { 's', s_set, s_get, &ffi_type_pointer},
      { 'b', b_set, b_get, &ffi_type_schar},
      { 'B', B_set, B_get, &ffi_type_uchar},
-@@ -1542,6 +1546,11 @@
+@@ -1543,6 +1547,11 @@
      { 'O', O_set, O_get, &ffi_type_pointer},
      { 0, NULL, NULL, NULL},
  };
@@ -25,14 +25,14 @@
  
  /*
    Ideas: Implement VARIANT in this table, using 'V' code.
-@@ -1556,5 +1565,6 @@
+@@ -1557,5 +1566,6 @@
  
      if (!initialized) {
          initialized = 1;
 +        formattable_init();
          if (sizeof(wchar_t) == sizeof(short))
              _ctypes_get_fielddesc("u")->pffi_type = &ffi_type_sshort;
-@@ -1616,7 +1626,7 @@ typedef struct _ffi_type
+@@ -1617,7 +1627,7 @@ typedef struct _ffi_type
      struct _ffi_type **elements;
  } ffi_type;
  */
@@ -41,7 +41,7 @@
  /* align and size are bogus for void, but they must not be zero */
  ffi_type ffi_type_void = { 1, 1, FFI_TYPE_VOID };
  
-@@ -1643,5 +1653,5 @@
+@@ -1644,5 +1654,5 @@
                                   FFI_TYPE_LONGDOUBLE };
  
  ffi_type ffi_type_pointer = { sizeof(void *), VOID_P_ALIGN, FFI_TYPE_POINTER };

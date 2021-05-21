@@ -1,9 +1,10 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 import re
 import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class CPythonConan(ConanFile):
