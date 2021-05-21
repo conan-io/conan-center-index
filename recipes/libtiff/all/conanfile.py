@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibtiffConan(ConanFile):
     name = "libtiff"
@@ -97,8 +99,7 @@ class LibtiffConan(ConanFile):
             self.requires("libwebp/1.2.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("tiff-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -120,7 +121,8 @@ class LibtiffConan(ConanFile):
         tools.replace_in_file(cmakefile,
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
-        tools.replace_in_file(cmakefile, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
+        if tools.Version(self.version) < "4.3.0":
+            tools.replace_in_file(cmakefile, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
 
     def _configure_cmake(self):
         if not self._cmake:
