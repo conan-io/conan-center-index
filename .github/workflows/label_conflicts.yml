@@ -2,11 +2,10 @@ name: Auto Label Conflicts
 on:
   push:
     branches: [master]
-  pull_request:
+  pull_request_target:
     branches: [master]
 
 permissions: # Required to add labels
-  actions: write
   issues: write
   pull-requests: write
 
