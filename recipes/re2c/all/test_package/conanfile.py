@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.36.0"
+# FIXME: uncomment the line below once conan 1.36.0 becomes available on c3i
+# required_conan_version = ">=1.36.0"
 
 
 class TestPackageConan(ConanFile):
