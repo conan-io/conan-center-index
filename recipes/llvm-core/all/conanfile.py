@@ -184,11 +184,13 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.9.10')
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        if self.settings.os == 'Windows' and self.options.shared:
-            message = 'Shared build not supported on Windows'
+        if self.options.shared:  # Shared builds disabled just due to the CI
+            message = 'Shared builds not currently supported'
             raise ConanInvalidConfiguration(message)
+            # del self.options.fPIC
+        # if self.settings.os == 'Windows' and self.options.shared:
+        #     message = 'Shared builds not supported on Windows'
+        #     raise ConanInvalidConfiguration(message)
         if self.options.exceptions and not self.options.rtti:
             message = 'Cannot enable exceptions without rtti support'
             raise ConanInvalidConfiguration(message)
