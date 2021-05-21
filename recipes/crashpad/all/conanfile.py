@@ -32,6 +32,14 @@ class CrashpadConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def _minimum_compiler_cxx14(self):
+        return {
+            "apple-clang": 10,
+            "gcc": 5,
+            "clang": "3.9",
+            "Visual Studio": 14,
+        }.get(str(self.settings.compiler))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -64,7 +72,12 @@ class CrashpadConan(ConanFile):
             if not self.options["libcurl"].shared:
                 # FIXME: is this true?
                 self.output.warn("crashpad needs a shared libcurl library")
-        # FIXME: check compilers
+        min_compiler_version = self._minimum_compiler_cxx14()
+        if min_compiler_version:
+            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
+        else:
+            self.output.warn("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
 
