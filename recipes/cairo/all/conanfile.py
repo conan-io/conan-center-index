@@ -83,8 +83,8 @@ class CairoConan(ConanFile):
         return self.settings.compiler == 'Visual Studio'
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename('cairo-%s' % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -145,7 +145,8 @@ class CairoConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             self._env_build.flags.append("-Wno-enum-conversion")
 
-        self._env_build.configure(args=configure_args)
+        with tools.run_environment(self):
+            self._env_build.configure(args=configure_args)
         return self._env_build
 
     def _build_configure(self):
