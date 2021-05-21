@@ -192,7 +192,10 @@ class CrashpadConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             with self._build_context():
                 self.run("gn gen out/Default --args=\"{}\"".format(" ".join(gn_args)), run_environment=True)
-                for target in ("client", "minidump", "crashpad_handler", "snapshot"):
+                targets = ["client", "minidump", "crashpad_handler", "snapshot"]
+                if self.settings.os == "Windows":
+                    targets.append("crashpad_handler_com")
+                for target in targets:
                     # FIXME: Remove verbose once everything is working hunky dory
                     self.run("ninja -C out/Default {target} -j{parallel}".format(
                         target=target,
@@ -210,6 +213,7 @@ class CrashpadConan(ConanFile):
         self.copy("*.a", src=os.path.join(self._source_subfolder, "out", "Default"), dst="lib", keep_path=False)
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
+        self.copy("crashpad_handler.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
 
         tools.save(os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake"),
                    textwrap.dedent("""\
