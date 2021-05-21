@@ -1,3 +1,23 @@
+--- cmake/FindZSTD.cmake
++++ cmake/FindZSTD.cmake
+@@ -1,0 +1,9 @@
++include("${cmake_wrapper_SOURCE_DIR}/Findzstd.cmake")
++if(NOT TARGET ZSTD::ZSTD)
++  add_library(ZSTD::ZSTD INTERFACE IMPORTED)
++  if(TARGET zstd::libzstd_shared)
++    target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_shared)
++  else()
++    target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_static)
++  endif()
++endif()
+--- cmake/FindJBIG.cmake
++++ cmake/FindJBIG.cmake
+@@ -1,0 +1,5 @@
++include("${cmake_wrapper_SOURCE_DIR}/Findjbig.cmake")
++if(NOT TARGET JBIG::JBIG)
++  add_library(JBIG::JBIG INTERFACE IMPORTED)
++  target_link_libraries(JBIG::JBIG INTERFACE jbig::jbig)
++endif()
 --- cmake/JPEGCodec.cmake
 +++ cmake/JPEGCodec.cmake
 @@ -24,11 +24,11 @@

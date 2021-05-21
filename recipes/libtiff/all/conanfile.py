@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -123,6 +124,25 @@ class LibtiffConan(ConanFile):
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
         if tools.Version(self.version) < "4.3.0":
             tools.replace_in_file(cmakefile, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
+        if tools.Version(self.version) >= "4.3.0":
+            if self.options.get_safe("jbig"):
+                tools.save("Findjbig.cmake", textwrap.dedent("""\
+                    if(NOT TARGET JBIG::JBIG)
+                        add_library(JBIG::JBIG INTERFACE IMPORTED)
+                        target_link_libraries(JBIG::JBIG INTERFACE jbig::jbig)
+                    endif()
+                """), append=True)
+            if self.options.get_safe("zstd"):
+                tools.save("Findjbig.cmake", textwrap.dedent("""\
+                    if(NOT TARGET ZSTD::ZSTD)
+                        add_library(ZSTD::ZSTD INTERFACE IMPORTED)
+                        if(TARGET zstd::libzstd_shared)
+                            target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_shared)
+                        else()
+                            target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_static)
+                        endif()
+                    endif()
+                """), append=True)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -134,7 +154,8 @@ class LibtiffConan(ConanFile):
             if self._has_libdeflate_option:
                 self._cmake.definitions["libdeflate"] = self.options.libdeflate
                 if self.options.libdeflate:
-                    self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
+                    if tools.Version(self.version) < "4.3.0":
+                        self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
             if self._has_zstd_option:
                 self._cmake.definitions["zstd"] = self.options.zstd
             if self._has_webp_option:
