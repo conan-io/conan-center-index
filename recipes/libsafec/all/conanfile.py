@@ -18,7 +18,6 @@ class LibSafeCConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    build_requires = "autoconf/2.69", "libtool/2.4.6"
     exports_sources = "patches/*"
 
     __autotools = None
@@ -47,6 +46,9 @@ class LibSafeCConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
