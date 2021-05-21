@@ -2,6 +2,7 @@ import os
 import shutil
 
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class DocgenConan(ConanFile):
@@ -15,6 +16,18 @@ class DocgenConan(ConanFile):
         'compiler': None
     }
     topics = ('doxygen',)
+
+    # Doxygen requires GCC 5 or newer and Doxygen is required by the test_package folder, so do not attempt to provide
+    # a package if the compiler version is older than GCC 5
+    _minimum_compiler_version = {
+        "gcc": 5,
+    }
+
+    def configure(self):
+        minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
+        if minimum_compiler_version is not None:
+            if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
+                raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
 
     @property
     def _source_subfolder(self):
