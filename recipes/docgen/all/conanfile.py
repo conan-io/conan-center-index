@@ -6,7 +6,7 @@ from conans import ConanFile, tools
 
 class DocgenConan(ConanFile):
     name = 'docgen'
-    license = '0BSD'
+    license = 'MIT'
     homepage = 'https://github.com/DavidZemon/docgen.git'
     url = 'https://github.com/conan-io/conan-center-index'
     description = 'Doxygen documentation generation utilities'
