@@ -148,7 +148,7 @@ class QtConan(ConanFile):
                 msg = ("Python2 must be available in PATH "
                        "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
-                    
+
             # In any case, check its actual version for compatibility
             from six import StringIO  # Python 2 and 3 compatible
             mybuf = StringIO()
@@ -168,7 +168,8 @@ class QtConan(ConanFile):
             else:
                 msg = ("Found Python 2 in path, but with invalid version {}"
                        " (QtWebEngine requires >= {} & < "
-                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to python2(.exe)".format(verstr, v_min, v_max))
+                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
+                       "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
     def config_options(self):
@@ -192,9 +193,6 @@ class QtConan(ConanFile):
         #if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
-        if self.options.widgets and not self.options.gui:
-            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
-                                            "You can either disable qt:widgets or enable qt:gui")
         if not self.options.gui:
             del self.options.opengl
             del self.options.with_vulkan
@@ -208,38 +206,12 @@ class QtConan(ConanFile):
             del self.options.with_libalsa
             del self.options.with_openal
 
-        if self.options.qtwebengine:
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
-
-            if tools.cross_building(self.settings, skip_x64_x86=True):
-                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
-
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
-
-        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
-
-        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
-            raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
-
-        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
-            raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
-
-        if self.options.multiconfiguration:
-            del self.settings.build_type
-
-        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
-            raise ConanInvalidConfiguration("Qt without libc++ needs qt:with_doubleconversion. "
-                                            "Either enable qt:with_doubleconversion or switch to libc++")
-
         if tools.os_info.is_linux:
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
 
-        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
-            raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
+        if self.options.multiconfiguration:
+            del self.settings.build_type
 
         config = configparser.ConfigParser()
         config.read(os.path.join(self.recipe_folder, "qtmodules%s.conf" % self.version))
@@ -272,6 +244,48 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if self.options.get_safe(module):
                 _enablemodule(module)
+
+    def validate(self):
+        if self.options.widgets and not self.options.gui:
+            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
+                                            "You can either disable qt:widgets or enable qt:gui")
+
+        if self.options.qtwebengine:
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
+
+            if tools.cross_building(self.settings, skip_x64_x86=True):
+                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
+
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
+
+            if self.settings.os == "Linux":
+                #Linking of QtWebEngine shared library fails with unresolved error to freetype.
+                raise ConanInvalidConfiguration("Building QtWebEngine on Linux will currently result in a build error.")
+
+        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
+            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+
+        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
+            raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
+
+        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
+            raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
+
+        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
+            raise ConanInvalidConfiguration("Qt without libc++ needs qt:with_doubleconversion. "
+                                            "Either enable qt:with_doubleconversion or switch to libc++")
+
+        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
+            raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
+
+        if self.settings.compiler == "apple-clang":
+            if tools.Version(self.settings.compiler.version) < "10.0":
+                raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
+        if self.settings.compiler in ["gcc", "clang"]:
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -875,7 +889,7 @@ Examples = bin/datadir/examples""")
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
-            
+
         if self.options.qtwebengine and self.options.gui:
             _create_module("WebEngine", ["Gui", "Quick"])
 
