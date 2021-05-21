@@ -39,7 +39,6 @@ class LibsassConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.build_requires("autoconf/2.69")
             self.build_requires("libtool/2.4.6")
 
     def source(self):
