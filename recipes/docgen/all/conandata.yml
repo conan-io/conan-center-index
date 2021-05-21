@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/DavidZemon/docgen/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "347daa50ab481f53735d854a04c9696e7feb8f663fc7bcbba002e6632d0846d3"
