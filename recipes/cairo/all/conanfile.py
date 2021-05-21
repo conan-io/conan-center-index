@@ -51,6 +51,8 @@ class CairoConan(ConanFile):
             del self.options.with_xcb
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self._is_msvc:
