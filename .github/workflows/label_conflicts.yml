@@ -5,9 +5,10 @@ on:
   pull_request:
     branches: [master]
 
-permissions:
-  issues: write # Required to add labels
-  pull-requests: write # Required to add labels
+permissions: # Required to add labels
+  actions: write
+  issues: write
+  pull-requests: write
 
 jobs:
   auto-label:
