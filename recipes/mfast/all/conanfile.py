@@ -51,10 +51,10 @@ class mFASTConan(ConanFile):
 
     def requirements(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-            self.requires("boost/1.76.0")
-        else:
             # gcc < 5 does not support all required c++11 features (used by multiprecision)
             self.requires("boost/1.75.0")
+        else:
+            self.requires("boost/1.76.0")
         self.requires("tinyxml2/8.0.0")
 
     def source(self):
