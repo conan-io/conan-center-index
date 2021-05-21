@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import textwrap
@@ -49,7 +50,11 @@ class mFASTConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            self.requires("boost/1.76.0")
+        else:
+            # gcc < 5 does not support all required c++11 features (used by multiprecision)
+            self.requires("boost/1.75.0")
         self.requires("tinyxml2/8.0.0")
 
     def source(self):
@@ -70,7 +75,14 @@ class mFASTConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _validate(self):
+        # FIXME: cannot access version of dependencies (https://github.com/conan-io/conan/issues/8982)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            if tools.Version(self.deps_cpp_info["boost"].version) >= "1.76.0":
+                raise ConanInvalidConfiguration("gcc < 5 needs a Boost library with a version lower then 1.76.0")
+
     def build(self):
+        self._validate()
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
