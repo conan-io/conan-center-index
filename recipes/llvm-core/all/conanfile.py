@@ -33,6 +33,16 @@ class LLVMCoreConan(ConanFile):
         'unwind_tables': [True, False],
         'expensive_checks': [True, False],
         'use_perf': [True, False],
+        'use_sanitizer': [
+            'Address',
+            'Memory',
+            'MemoryWithOrigins',
+            'Undefined',
+            'Thread',
+            'DataFlow',
+            'Address;Undefined',
+            'None'
+        ],
         'with_ffi': [True, False],
         'with_zlib': [True, False],
         'with_xml2': [True, False]
@@ -50,6 +60,7 @@ class LLVMCoreConan(ConanFile):
         'unwind_tables': True,
         'expensive_checks': False,
         'use_perf': False,
+        'use_sanitizer': 'None',
         'with_ffi': False,
         'with_zlib': True,
         'with_xml2': True
@@ -142,6 +153,11 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_USE_NEWPM'] = False
         cmake.definitions['LLVM_USE_OPROFILE'] = False
         cmake.definitions['LLVM_USE_PERF'] = self.options.use_perf
+        if self.options.use_sanitizer == 'None':
+            cmake.definitions['LLVM_USE_SANITIZER'] = ''
+        else:
+            cmake.definitions['LLVM_USE_SANITIZER'] = \
+                self.options.use_sanitizer
 
         cmake.definitions['LLVM_ENABLE_Z3_SOLVER'] = False
         cmake.definitions['LLVM_ENABLE_LIBPFM'] = False
