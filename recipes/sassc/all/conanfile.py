@@ -41,13 +41,13 @@ class SasscConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self.run("autoreconf -fiv", run_environment=True)
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(args=["--disable-tests"])
         return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
             tools.save(path="VERSION", content="%s" % self.version)
             autotools = self._configure_autotools()
             autotools.make()
