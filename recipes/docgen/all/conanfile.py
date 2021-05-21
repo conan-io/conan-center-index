@@ -54,9 +54,6 @@ class DocgenConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.builddirs = [os.path.join('res')]
 
-        self.cpp_info.set_property('cmake_file_name', 'DocGen')
-        self.cpp_info.set_property('cmake_target_name', 'DocGen')
-        self.cpp_info.set_property(
-            'cmake_build_modules',
-            [os.path.join('res', 'DocGen-functions.cmake')]
-        )
+        self.cpp_info.filenames['cmake_find_package'] = 'DocGen'
+        self.cpp_info.filenames['cmake_find_package_multi'] = 'DocGen'
+        self.cpp_info.build_modules = [os.path.join('res', 'DocGen-functions.cmake')]
