@@ -122,27 +122,6 @@ class LibtiffConan(ConanFile):
         tools.replace_in_file(cmakefile,
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
-        if tools.Version(self.version) < "4.3.0":
-            tools.replace_in_file(cmakefile, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
-        if tools.Version(self.version) >= "4.3.0":
-            if self.options.get_safe("jbig"):
-                tools.save("Findjbig.cmake", textwrap.dedent("""\
-                    if(NOT TARGET JBIG::JBIG)
-                        add_library(JBIG::JBIG INTERFACE IMPORTED)
-                        target_link_libraries(JBIG::JBIG INTERFACE jbig::jbig)
-                    endif()
-                """), append=True)
-            if self.options.get_safe("zstd"):
-                tools.save("Findjbig.cmake", textwrap.dedent("""\
-                    if(NOT TARGET ZSTD::ZSTD)
-                        add_library(ZSTD::ZSTD INTERFACE IMPORTED)
-                        if(TARGET zstd::libzstd_shared)
-                            target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_shared)
-                        else()
-                            target_link_libraries(ZSTD::ZSTD INTERFACE zstd::libzstd_static)
-                        endif()
-                    endif()
-                """), append=True)
 
     def _configure_cmake(self):
         if not self._cmake:
