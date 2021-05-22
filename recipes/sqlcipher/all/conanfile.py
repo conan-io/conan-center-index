@@ -39,6 +39,10 @@ class SqlcipherConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build_requirements(self):
         # It is possible to have a MinGW cross-build toolchain (Linux to Windows)
         # Only require msys2 when building on an actual Windows system
@@ -48,7 +52,7 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         else:
             self.requires("libressl/3.2.0")
 
