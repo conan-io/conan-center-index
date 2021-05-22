@@ -117,6 +117,14 @@ class OpenSSLConan(ConanFile):
                "no_ssl": [True, False],
                "no_ts": [True, False],
                "no_whirlpool": [True, False],
+               "no_ec": [True, False],
+               "no_ecdh": [True, False],
+               "no_ecdsa": [True, False],
+               "no_rfc3779": [True, False],
+               "no_seed": [True, False],
+               "no_sock": [True, False],
+               "no_ssl3": [True, False],
+               "no_tls1": [True, False],
                "capieng_dialog": [True, False],
                "enable_capieng": [True, False],
                "openssldir": "ANY"}
@@ -144,6 +152,8 @@ class OpenSSLConan(ConanFile):
             del self.options.no_idea
             del self.options.no_md4
             del self.options.no_ocsp
+            del self.options.no_seed
+            del self.options.no_sock
             del self.options.no_srp
             del self.options.no_ts
             del self.options.no_whirlpool
