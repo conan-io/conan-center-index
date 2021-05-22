@@ -9,7 +9,7 @@ conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
 
-find_package(Qt5Core REQUIRED CONFIG)
+find_package(Qt5 COMPONENTS Core REQUIRED CONFIG)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
