@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 
 
@@ -44,8 +44,8 @@ class ICCConan(ConanFile):
         }
 
     def _is_runtime_and_shared_option_compatible(self):
-        return (self.settings.compiler.runtime == "MT" and self.options.shared) or \
-               (self.settings.compiler.runtime == "MD" and not self.options.shared)
+        return (self.settings.compiler.runtime == "MT" and not self.options.shared) or \
+               (self.settings.compiler.runtime == "MD" and self.options.shared)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -75,16 +75,22 @@ class ICCConan(ConanFile):
                     "{} requires C++{} features which are not supported by compiler {} {} !!"
                 ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
                 raise ConanInvalidConfiguration(msg)
-            if self._is_runtime_and_shared_option_compatible():
-                msg = (
-                    "Incompatible compiler runtime {} and package shared option {} !!"
-                ).format(compiler.runtime, self.options.shared)
-                raise ConanInvalidConfiguration(msg)
         except KeyError:
             msg = (
                 "{} recipe lacks information about the {} compiler, "
                 "support for the required C++{} features is assumed"
             ).format(self.name, compiler, self._minimum_cpp_standard)
+            self.output.warn(msg)
+        try:
+            if not self._is_runtime_and_shared_option_compatible():
+                msg = (
+                    "Incompatible compiler runtime {} and package shared option {} !!"
+                ).format(compiler.runtime, self.options.shared)
+                raise ConanInvalidConfiguration(msg)
+        except ConanException:
+            msg = (
+                "OS {} compiler does not have attribute runtime"
+            ).format(os)
             self.output.warn(msg)
 
     def config_options(self):
