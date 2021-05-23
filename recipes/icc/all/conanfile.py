@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class IccConan(ConanFile):
+class ICCConan(ConanFile):
     name = 'icc'
     homepage = 'https://github.com/redradist/Inter-Component-Communication'
     license = 'MIT'
@@ -12,7 +12,7 @@ class IccConan(ConanFile):
                   "components inside of single application. It is thread safe and could be used for creating " \
                   "components that works in different threads. "
     topics = ("thread-safe", "active object")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = {"os": ["Windows", "Linux"], "compiler": None, "build_type": None, "arch": None}
     options = {
         "shared": [True, False],
         'fPIC': [True, False],
@@ -35,7 +35,7 @@ class IccConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-			"Visual Studio": "15",
+            "Visual Studio": "15",
             "apple-clang": "9.4",
             "clang": "3.3",
             "gcc": "4.8.1"
@@ -64,6 +64,10 @@ class IccConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         tools.rename('Inter-Component-Communication-{}'.format(self.version), dst=self._source_subfolder)
@@ -82,10 +86,10 @@ class IccConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        cpp_info.names["cmake"] = "icc"
-        cpp_info.names["cmake_find_package"] = "icc"
-        cpp_info.names["cmake_find_multi_package"] = "icc"
+        self.cpp_info.names["cmake_find_package"] = "icc"
+        self.cpp_info.names["cmake_find_multi_package"] = "icc"
         self.cpp_info.libs = ["ICC"]
+        self.cpp_info.libdirs = ["bin", "lib"]
 
         if self.settings.os == 'Android':
             self.cpp_info.system_libs = ['atomic']
