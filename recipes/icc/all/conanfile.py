@@ -11,7 +11,7 @@ class ICCConan(ConanFile):
     description = "I.C.C. - Inter Component Communication, This is a library created to simplify communication between " \
                   "components inside of single application. It is thread safe and could be used for creating " \
                   "components that works in different threads. "
-    topics = ("thread-safe", "active object")
+    topics = ("thread-safe", "active-object", "communication")
     settings = {"os": ["Windows", "Linux"], "compiler": None, "build_type": None, "arch": None}
     options = {
         "shared": [True, False],
