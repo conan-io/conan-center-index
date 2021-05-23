@@ -8,7 +8,14 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if tools.cross_building(self.settings):
-            self.build_requires(str(self.requires['protobuf']))
+            # this would depend on same version from upstream
+            # which may block package tests for not yet existing upstream packages
+            self.build_requires(str(self.requires["grpc"]).split("@")[0])
+            self.output.warn(self.requires) 
+            # this the version number should be derived from conan package itself
+            # self.build_requires("grpc/1.37.1")
+            # this uses the correct conan packag version, but is not able to build locally in cross-compile toolchain like conanio/gcc9-armv7hf
+            # self.build_requires(str(self.requires["grpc"]))
             
     def build(self):
         cmake = CMake(self)
