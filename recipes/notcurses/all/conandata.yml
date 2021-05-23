@@ -1,4 +1,4 @@
 sources:
-  "2.1.7":
-    url: "https://github.com/dankamongmen/notcurses/archive/v2.1.7.tar.gz"
-    sha256: "f6be3cf9654f2a9ccb30ed89aacf248f4edcf5a3c61d2353560e161166fc2d35"
+  "2.4.8":
+    url: "https://github.com/dankamongmen/notcurses/archive/v2.4.8.tar.gz"
+    sha256: "d06971005e4cf637cc90a694323c580791d1450a77b1700ae8deb453678d3243"
