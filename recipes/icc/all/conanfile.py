@@ -38,7 +38,7 @@ class ICCConan(ConanFile):
             "Visual Studio": "15",
             "apple-clang": "9.4",
             "clang": "3.3",
-            "gcc": "4.8.1"
+            "gcc": "4.9.4"
         }
 
     def validate(self):
@@ -75,13 +75,13 @@ class ICCConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
         cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
         cmake.install()
 
@@ -91,5 +91,7 @@ class ICCConan(ConanFile):
         self.cpp_info.libs = ["ICC"]
         self.cpp_info.libdirs = ["bin", "lib"]
 
-        if self.settings.os == 'Android':
-            self.cpp_info.system_libs = ['atomic']
+        if self.settings.os == 'Windows':
+            self.cpp_info.system_libs = ['ws2_32', 'wsock32']
+        if self.settings.os == 'Linux':
+            self.cpp_info.system_libs = ['pthread']
