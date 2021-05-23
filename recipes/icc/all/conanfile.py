@@ -43,6 +43,10 @@ class ICCConan(ConanFile):
             "gcc": "4.9.4"
         }
 
+    def _is_runtime_and_shared_option_compatible(self):
+        return (self.settings.compiler.runtime == "MT" and self.options.shared) or \
+               (self.settings.compiler.runtime == "MD" and not self.options.shared)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -70,6 +74,11 @@ class ICCConan(ConanFile):
                 msg = (
                     "{} requires C++{} features which are not supported by compiler {} {} !!"
                 ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                raise ConanInvalidConfiguration(msg)
+            if self._is_runtime_and_shared_option_compatible():
+                msg = (
+                    "Incompatible compiler runtime {} and package shared option {} !!"
+                ).format(compiler.runtime, self.options.shared)
                 raise ConanInvalidConfiguration(msg)
         except KeyError:
             msg = (
