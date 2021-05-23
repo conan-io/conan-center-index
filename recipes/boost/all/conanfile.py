@@ -238,8 +238,8 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
-        # libbacktrace cannot be built on Visual Studio
-        if self.settings.compiler == "Visual Studio":
+        # stacktrace_backtrace not supported on Windows
+        if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
@@ -307,7 +307,7 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
-        return not self.options.header_only and not self.options.without_stacktrace and self.settings.compiler != "Visual Studio"
+        return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
     def configure(self):
         if self.options.header_only:
@@ -457,10 +457,9 @@ class BoostConan(ConanFile):
         if self._with_lzma:
             self.requires("xz_utils/5.2.5")
         if self._with_zstd:
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.0")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118")
-            self.requires("libunwind/1.5.0")
 
         if self._with_icu:
             self.requires("icu/68.2")
@@ -481,8 +480,8 @@ class BoostConan(ConanFile):
                 self.info.options.python_version = self._python_version
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
@@ -740,7 +739,7 @@ class BoostConan(ConanFile):
                               "/* thread_local */", "thread_local", strict=False)
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                               "/* static __thread */", "static __thread", strict=False)
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < 6:
+        if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < 6):
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "thread_local", "/* thread_local */")
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
@@ -1137,9 +1136,8 @@ class BoostConan(ConanFile):
         asflags = tools.get_env("ASFLAGS", "") + " "
 
         if self._with_stacktrace_backtrace:
-            for l in ("libbacktrace", "libunwind"):
-                cppflags += " ".join("-I{}".format(p) for p in self.deps_cpp_info[l].include_paths) + " "
-                ldflags += " ".join("-L{}".format(p) for p in self.deps_cpp_info[l].lib_paths) + " "
+            cppflags += " ".join("-I{}".format(p) for p in self.deps_cpp_info["libbacktrace"].include_paths) + " "
+            ldflags += " ".join("-L{}".format(p) for p in self.deps_cpp_info["libbacktrace"].lib_paths) + " "
 
         if cxxflags.strip():
             contents += '<cxxflags>"%s" ' % cxxflags.strip()
@@ -1238,7 +1236,7 @@ class BoostConan(ConanFile):
         if dll_pdbs:
             tools.mkdir(os.path.join(self.package_folder, "bin"))
             for bin_file in dll_pdbs:
-                os.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
+                tools.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
@@ -1407,7 +1405,7 @@ class BoostConan(ConanFile):
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.compiler == "Visual Studio":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
@@ -1473,17 +1471,17 @@ class BoostConan(ConanFile):
 
                 if self._with_stacktrace_backtrace:
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
-                    self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
-                    self.cpp_info.components["stacktrace_backtrace"].requires.extend([
-                        "libunwind::libunwind",
-                        "libbacktrace::libbacktrace",
-                    ])
+                    self.cpp_info.components["stacktrace_backtrace"].requires.append("libbacktrace::libbacktrace")
 
                 self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 
                 if self.settings.os == "Windows":
                     self.cpp_info.components["stacktrace_windb"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
+                    self.cpp_info.components["stacktrace_windb"].system_libs.extend(["ole32", "dbgeng"])
                     self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
+                    self.cpp_info.components["stacktrace_windb_cached"].system_libs.extend(["ole32", "dbgeng"])
+                elif tools.is_apple_os(self.settings.os):
+                    self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
