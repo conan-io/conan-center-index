@@ -60,6 +60,13 @@ class grpcConan(ConanFile):
         self.requires('abseil/20210324.0')
         self.requires('re2/20210202')
 
+    def build_requirements(self):
+        if tools.cross_building(self.settings):
+            # we need protoc for build architecture, since grpc uses protoc during compilation
+            self.build_requires("protobuf/3.15.5")
+            # we need grpc for build architecture, since it provides plugins for protoc
+            self.build_requires("grpc/"+self.version)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -88,6 +95,24 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_CODEGEN"] = self.options.codegen
         self._cmake.definitions["gRPC_BUILD_CSHARP_EXT"] = self.options.csharp_ext
         self._cmake.definitions["gRPC_BUILD_TESTS"] = False
+        if tools.cross_building(self.settings):
+            # We need to find the protoc binary folder from build profile. This should be used have to override the protoc executable path.
+            # Motivation: protoc is present twice, once for host and once for build, but we get the wrong order of the PATHEs, so the host protoc is used during build. 
+            potential_protoc_pathes = [ os.path.join(self.dependencies.build_requires["protobuf"].cpp_info.rootpath, bindir, "protoc")
+                for bindir in self.dependencies.build_requires["protobuf"].cpp_info.bindirs ]
+
+            protoc_binary_build_path = [ path for path in potential_protoc_pathes if os.path.isfile(path) or os.path.islink(path) ]
+            if len(protoc_binary_build_path) == 0:
+                self.output.error("did not find protoc binary path of build profile for cross-compilation")
+            elif len(protoc_binary_build_path) > 1:
+                self.output.warn("found more than one protoc binary path of build profile for cross-compilation: " + protoc_binary_build_path)
+                self.output.warn("will default to: " + protoc_binary_build_path[0])
+                protoc_binary_build_path = protoc_binary_build_path[0]
+            else:
+                self.output.info("found protoc binary path of build profile for cross-compilation: " + protoc_binary_build_path[0])
+                protoc_binary_build_path = protoc_binary_build_path[0]
+
+            self._cmake.definitions["_gRPC_PROTOBUF_PROTOC_EXECUTABLE"] = protoc_binary_build_path
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         self._cmake.definitions["gRPC_INSTALL"] = True
