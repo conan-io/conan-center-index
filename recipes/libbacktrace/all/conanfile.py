@@ -40,9 +40,10 @@ class LibbacktraceConan(ConanFile):
             raise ConanInvalidConfiguration("libbacktrace shared is not supported with Visual Studio")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -80,8 +81,6 @@ class LibbacktraceConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -91,7 +90,11 @@ class LibbacktraceConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        lib_folder = os.path.join(self.package_folder, "lib")
+        if self.settings.compiler == "Visual Studio":
+            tools.rename(os.path.join(lib_folder, "libbacktrace.lib"),
+                         os.path.join(lib_folder, "backtrace.lib"))
+        tools.remove_files_by_mask(lib_folder, "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["backtrace"]
