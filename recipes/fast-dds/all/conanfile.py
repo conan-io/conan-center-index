@@ -57,7 +57,7 @@ class FastDDSConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.options.shared:
-            self.options["fast-cdr"].shared = True
+            self.options["fast-cdr"].shared = False
 
     def _get_configured_cmake(self):
         if self._cmake:
@@ -66,6 +66,7 @@ class FastDDSConan(ConanFile):
             self._cmake = CMake(self)
         self._cmake.definitions["BUILD_MEMORY_TOOLS"] = False
         self._cmake.definitions["NO_TLS"] = True
+        self._cmake.definitions["EPROSIMA_INSTALLER_MINION"] = False
         self._cmake.configure(
             source_dir = self._source_subfolder
         )
