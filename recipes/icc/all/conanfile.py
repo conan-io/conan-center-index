@@ -21,7 +21,7 @@ class ICCConan(ConanFile):
         'shared': False,
         'fPIC': True,
     }
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi"
     exports_sources = ['CMakeLists.txt', 'patches/*']
 
     _cmake = None
