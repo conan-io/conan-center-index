@@ -12,7 +12,7 @@ class ICCConan(ConanFile):
                   "components inside of single application. It is thread safe and could be used for creating " \
                   "components that works in different threads. "
     topics = ("thread-safe", "active object")
-    settings = {"os": ["Windows", "Linux"], "compiler": None, "build_type": None, "arch": None}
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         'fPIC': [True, False],
@@ -23,6 +23,8 @@ class ICCConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ['CMakeLists.txt', 'patches/*']
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -41,16 +43,32 @@ class ICCConan(ConanFile):
             "gcc": "4.9.4"
         }
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        cmake = CMake(self)
+        cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
+        cmake.configure()
+        self._cmake = cmake
+        return self._cmake
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        os = self.settings.os
+        if os not in ("Windows", "Linux"):
+            msg = (
+                "OS {} is not supported !!"
+            ).format(os)
+            raise ConanInvalidConfiguration(msg)
 
         compiler = self.settings.compiler
         try:
             min_version = self._minimum_compilers_version[str(compiler)]
             if tools.Version(compiler.version) < min_version:
                 msg = (
-                    "{} requires C++{} features which are not supported by compiler {} {}."
+                    "{} requires C++{} features which are not supported by compiler {} {} !!"
                 ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
                 raise ConanInvalidConfiguration(msg)
         except KeyError:
@@ -69,20 +87,14 @@ class ICCConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        tools.rename('Inter-Component-Communication-{}'.format(self.version), dst=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
-        cmake.configure()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
-        cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
-        cmake.configure()
-        cmake.build()
+        cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
