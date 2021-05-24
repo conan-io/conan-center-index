@@ -39,6 +39,23 @@ class PdalConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_unwind
+
+    def configure(self):
+        # upstream export/install targets do not work with static builds
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("pdal does not support building as a static lib yet")
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            raise ConanInvalidConfiguration ("This compiler version is unsupported")
+
     def requirements(self):
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
@@ -56,23 +73,6 @@ class PdalConan(ConanFile):
             self.requires("libunwind/1.3.1")
         # vendored nanoflann is 1.3.1 with minor code removal
         self.requires("nanoflann/1.3.1")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_unwind
-
-    def configure(self):
-        # upstream export/install targets do not work with static builds
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("pdal does not support building as a static lib yet")
-        if self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-            raise ConanInvalidConfiguration ("This compiler version is unsupported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
