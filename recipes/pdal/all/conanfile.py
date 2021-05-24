@@ -19,6 +19,7 @@ class PdalConan(ConanFile):
         "fPIC": [True, False],
         "with_unwind": [True, False],
         "with_xml": [True, False],
+        "with_lazperf": [True, False],
         "with_laszip": [True, False],
         "with_zlib": [True, False],
         "with_lzma": [True, False],
@@ -29,6 +30,7 @@ class PdalConan(ConanFile):
         "fPIC": True,
         "with_unwind": False,
         "with_xml": True,
+        "with_lazperf": False, # TODO: should be True
         "with_laszip": True,
         "with_zlib": True,
         "with_lzma": False,
@@ -71,6 +73,8 @@ class PdalConan(ConanFile):
             self.requires("libxml2/2.9.10")
         if self.options.with_zstd:
             self.requires("zstd/1.5.0")
+        if self.options.with_lazperf:
+            raise ConanInvalidConfiguration("lazperf recipe not yet available in CCI")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
         if self.options.with_zlib:
@@ -99,7 +103,7 @@ class PdalConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PDAL_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["WITH_TESTS"] = False
-        self._cmake.definitions["WITH_LAZPERF"] = False
+        self._cmake.definitions["WITH_LAZPERF"] = self.options.with_lazperf
         self._cmake.definitions["WITH_LASZIP"] = self.options.with_laszip
         self._cmake.definitions["WITH_STATIC_LASZIP"] = True # doesn't really matter but avoids to inject useless definition
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
