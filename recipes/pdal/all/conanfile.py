@@ -132,6 +132,8 @@ class PdalConan(ConanFile):
         tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "${CONAN_LIBS}")
         tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
                               "pdalboost::", "boost::")
+        # No rpath manipulation
+        tools.replace_in_file(top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
         # No reexport
         tools.replace_in_file(top_cmakelists,
                               "set(PDAL_REEXPORT \"-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>\")",
