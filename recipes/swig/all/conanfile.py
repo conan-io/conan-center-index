@@ -116,9 +116,6 @@ class SwigConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
-            if self.settings.compiler in ("gcc", "clang"):
-                # FIXME: remove
-                self.run("strings {}".format(os.path.join(self.package_folder, "bin", "swig")), run_environment=True)
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
@@ -127,6 +124,9 @@ class SwigConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
+            if self.settings.compiler in ("gcc", "clang"):
+                # FIXME: remove
+                self.run("strings {}".format(os.path.join(self.package_folder, "bin", "swig")), run_environment=True)
 
     @property
     def _swiglibdir(self):
