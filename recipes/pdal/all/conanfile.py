@@ -66,7 +66,7 @@ class PdalConan(ConanFile):
         self.requires("boost/1.76.0")
         self.requires("eigen/3.3.9")
         self.requires("gdal/3.2.1")
-        self.requires("libcurl/7.75.0") # mandotory dependency of arbiter (to remove if arbiter is unvendored)
+        self.requires("libcurl/7.75.0") # mandatory dependency of arbiter (to remove if arbiter is unvendored)
         self.requires("libgeotiff/1.6.0")
         self.requires("nanoflann/1.3.2")
         if self.options.with_xml:
