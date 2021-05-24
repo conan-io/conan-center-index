@@ -4,7 +4,7 @@
    }
  }
  
-+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
++#if defined(HAVE_UNISTD_H)
 +#include <libgen.h>
 +#include <unistd.h>
 +
@@ -36,7 +36,7 @@
      }
      if (Len(SWIG_LIB_WIN_UNIX) > 0)
        SwigLibWinUnix = NewString(SWIG_LIB_WIN_UNIX); // Unix installation path using a drive letter (for msys/mingw)
-+#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
++#elif defined(HAVE_UNISTD_H)
 +    SwigLib = get_exe_path();
  #else
      SwigLib = NewString(SWIG_LIB);

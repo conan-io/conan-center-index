@@ -29,7 +29,7 @@ class SwigConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.24")
         else:
@@ -116,6 +116,9 @@ class SwigConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
+            if self.settings.compiler in ("gcc", "clang"):
+                # FIXME: remove
+                self.run("strings {}".format(os.path.join(self.package_folder, "bin", "swig")), run_environment=True)
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
