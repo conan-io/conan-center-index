@@ -79,5 +79,5 @@ class ExpatConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
-        if self.options.char_type == "wchar_t":
+        if self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
