@@ -91,7 +91,7 @@ class LibAttrConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        os.mkdir(self._pkg_res)
+        tools.mkdir(self._pkg_res)
         tools.rename(
             os.path.join(self._pkg_etc, "xattr.conf"),
             os.path.join(self._pkg_res, "xattr.conf")
