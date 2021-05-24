@@ -35,10 +35,10 @@ class LibAttrConan(ConanFile):
         )
 
     @property
-    def _pkg_lib(self):
+    def _pkg_res(self):
         return os.path.join(
             self.package_folder,
-            "lib"
+            "res"
         )
 
     @property
@@ -46,21 +46,6 @@ class LibAttrConan(ConanFile):
         return os.path.join(
             self._source_subfolder,
             "doc"
-        )
-    
-    @property
-    def _inc_attr_folder(self):
-        return os.path.join(
-            self._source_subfolder,
-            "include",
-            "attr"
-        )
-
-    @property
-    def _libs_folder(self):
-        return os.path.join(
-            self._source_subfolder,
-            ".libs"
         )
 
     def validate(self):
@@ -106,9 +91,10 @@ class LibAttrConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
+        os.mkdir(self._pkg_res)
         tools.rename(
             os.path.join(self._pkg_etc, "xattr.conf"),
-            os.path.join(self._pkg_lib, "xattr.conf")
+            os.path.join(self._pkg_res, "xattr.conf")
         )
         self.copy("COPYING", dst="licenses", src=self._doc_folder)
         tools.rmdir(os.path.join(self.package_folder,"lib","pkgconfig"))
