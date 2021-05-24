@@ -1,6 +1,9 @@
-import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
+
 
 class PdalConan(ConanFile):
     name = "pdal"
@@ -66,8 +69,8 @@ class PdalConan(ConanFile):
             raise ConanInvalidConfiguration ("This compiler version is unsupported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("PDAL-%s-src" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
