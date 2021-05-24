@@ -62,10 +62,12 @@ class FastCDRConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
     
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-        if self.options.shared:
             del self.options.fPIC
 
     def validate(self):
@@ -74,6 +76,11 @@ class FastCDRConan(ConanFile):
                 raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
             if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++"):
                 raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
+            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"):
+                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
+        if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio":
+                raise ConanInvalidConfiguration("This package dont not compile with Visual Studio.")
 
     def build(self):
         self._patch_sources()
