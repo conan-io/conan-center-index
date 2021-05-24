@@ -110,6 +110,10 @@ class PdalConan(ConanFile):
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
                 "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
+        # disabling libunwind support is only done via patching
+        if not self.options.get_safe("with_unwind", False):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "CMakeLists.txt"),
+                                  "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
         # remove vendored nanoflann. include path is patched
         tools.rmdir(os.path.join(self._source_subfolder, "vendor", "nanoflann"))
 
