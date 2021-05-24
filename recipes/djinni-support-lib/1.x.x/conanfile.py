@@ -3,6 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class DjinniSuppotLib(ConanFile):
     name = "djinni-support-lib"
     homepage = "https://djinni.xlcpp.dev"
@@ -12,22 +13,22 @@ class DjinniSuppotLib(ConanFile):
     license = "Apache-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
-                "fPIC": [True, False],
-                "target": ["jni", "objc", "python", "cppcli", "auto", "deprecated"],
-                "with_jni": [True, False, "auto"],
-                "with_objc": [True, False, "auto"],
-                "with_python": [True, False, "auto"],
-                "with_cppcli": [True, False, "auto"],
-                "system_java": [True, False]
+               "fPIC": [True, False],
+               "target": ["jni", "objc", "python", "cppcli", "auto", "deprecated"],
+               "with_jni": [True, False, "auto"],
+               "with_objc": [True, False, "auto"],
+               "with_python": [True, False, "auto"],
+               "with_cppcli": [True, False, "auto"],
+               "system_java": [True, False]
                }
     default_options = {"shared": False,
-                        "fPIC": True ,
-                        "target": "deprecated",
-                        "with_jni": "auto",
-                        "with_objc": "auto",
-                        "with_python": "auto",
-                        "with_cppcli": "auto",
-                        "system_java": False,
+                       "fPIC": True,
+                       "target": "deprecated",
+                       "with_jni": "auto",
+                       "with_objc": "auto",
+                       "with_python": "auto",
+                       "with_cppcli": "auto",
+                       "system_java": False,
                        }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
@@ -55,7 +56,7 @@ class DjinniSuppotLib(ConanFile):
     @property
     def _cppcli_support(self):
         if self.options.with_cppcli == "auto" or self.options.target == "auto":
-            return self.settings.os  == "Windows"
+            return self.settings.os == "Windows"
         else:
             return self.options.with_cppcli == True or self.options.target == "cppcli"
 
@@ -99,7 +100,8 @@ class DjinniSuppotLib(ConanFile):
             if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
                 raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
             if self._objc_support or self._jni_support or self._python_support:
-                raise ConanInvalidConfiguration("C++/CLI is not yet supported with other languages enabled as well. Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration.")
+                raise ConanInvalidConfiguration(
+                    "C++/CLI is not yet supported with other languages enabled as well. Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration.")
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
