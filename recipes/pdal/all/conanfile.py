@@ -61,18 +61,17 @@ class PdalConan(ConanFile):
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
         # - evaluate dependency to boost instead of boost parts in vendor/pdalboost
-        self.requires("gdal/3.1.4")
+        self.requires("gdal/3.2.1")
         self.requires("libgeotiff/1.6.0")
+        self.requires("nanoflann/1.3.2")
         if self.options.with_xml:
             self.requires("libxml2/2.9.10")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.5.0")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.3.1")
-        # vendored nanoflann is 1.3.1 with minor code removal
-        self.requires("nanoflann/1.3.1")
+            self.requires("libunwind/1.5.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
