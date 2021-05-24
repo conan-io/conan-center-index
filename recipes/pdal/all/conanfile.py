@@ -8,30 +8,36 @@ required_conan_version = ">=1.33.0"
 class PdalConan(ConanFile):
     name = "pdal"
     description = "PDAL is Point Data Abstraction Library. GDAL for point cloud data."
+    topics = ("conan", "pdal", "gdal")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdal.io"
     license = "BSD-3-Clause"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_unwind": [True, False],
+        "with_xml": [True, False],
+        "with_zstd": [True, False],
+        "with_laszip": [True, False],
+    }
+    default_options = {
+        "shared": True,
+        "fPIC": True,
+        "with_unwind": False,
+        "with_xml": True,
+        "with_zstd": True,
+        "with_laszip": True,
+    }
+
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_unwind": [True, False],
-               "with_xml": [True, False],
-               "with_zstd": [True, False],
-               "with_laszip": [True, False],
-               }
-    default_options = {"shared": True,
-                       "fPIC": True,
-                       "with_unwind": False,
-                       "with_xml": True,
-                       "with_zstd": True,
-                       "with_laszip": True}
-    topics = ("conan", "pdal", "gdal")
-
-    _source_subfolder = "source_subfolder"
-
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def requirements(self):
         # TODO package improvements:
@@ -92,7 +98,7 @@ class PdalConan(ConanFile):
             tools.patch(**patch)
         # drop conflicting CMake files
         # LASzip works fine
-        for module in ('ZSTD', 'ICONV', 'GeoTIFF', 'Curl'):
+        for module in ("ZSTD", "ICONV", "GeoTIFF", "Curl"):
             os.remove(os.path.join(self._source_subfolder, "cmake", "modules", "Find"+module+".cmake"))
         # disabling libxml2 support is only done via patching
         if not self.options.with_xml:
@@ -101,7 +107,7 @@ class PdalConan(ConanFile):
                 "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
                 "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
         # remove vendored nanoflann. include path is patched
-        tools.rmdir(os.path.join(self._source_subfolder, 'vendor', 'nanoflann'))
+        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "nanoflann"))
 
     def build(self):
         self._patch_sources()
@@ -112,8 +118,8 @@ class PdalConan(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PDAL"
