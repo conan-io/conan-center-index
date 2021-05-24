@@ -69,10 +69,11 @@ class FastCDRConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if (self.settings.compiler == "gcc" and self.settings.compiler.libcxx == "libstdc++"):
-            raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
-        if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++"):
-            raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
+        if self.settings.os == "Linux":
+            if (self.settings.compiler == "gcc" and self.settings.compiler.libcxx == "libstdc++"):
+                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
+            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++"):
+                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
 
     def build(self):
         self._patch_sources()
