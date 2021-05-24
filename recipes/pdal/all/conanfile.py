@@ -21,6 +21,7 @@ class PdalConan(ConanFile):
         "with_xml": [True, False],
         "with_laszip": [True, False],
         "with_zlib": [True, False],
+        "with_lzma": [True, False],
         "with_zstd": [True, False],
     }
     default_options = {
@@ -30,6 +31,7 @@ class PdalConan(ConanFile):
         "with_xml": True,
         "with_laszip": True,
         "with_zlib": True,
+        "with_lzma": False,
         "with_zstd": True,
     }
 
@@ -73,6 +75,8 @@ class PdalConan(ConanFile):
             self.requires("laszip/3.4.3")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+        if self.options.with_lzma:
+            self.requires("xz_utils/5.2.5")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.5.0")
 
@@ -100,6 +104,7 @@ class PdalConan(ConanFile):
         self._cmake.definitions["WITH_STATIC_LASZIP"] = True # doesn't really matter but avoids to inject useless definition
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["WITH_LZMA"] = self.options.with_lzma
         # disable plugin that requires postgresql
         self._cmake.definitions["BUILD_PLUGIN_PGPOINTCLOUD"] = False
         self._cmake.configure()
@@ -186,5 +191,7 @@ class PdalConan(ConanFile):
             self.cpp_info.requires.append("laszip::laszip")
         if self.options.with_zlib:
             self.cpp_info.requires.append("zlib::zlib")
+        if self.options.with_lzma:
+            self.cpp_info.requires.append("xz_utils::xz_utils")
         if self.options.get_safe("with_unwind"):
             self.cpp_info.requires.append("libunwind::libunwind")
