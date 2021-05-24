@@ -62,7 +62,8 @@ class PdalConan(ConanFile):
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
-        # - evaluate dependency to boost instead of boost parts in vendor/pdalboost
+        self.requires("boost/1.76.0")
+        self.requires("eigen/3.3.9")
         self.requires("gdal/3.2.1")
         self.requires("libcurl/7.75.0") # mandotory dependency of arbiter (to remove if arbiter is unvendored)
         self.requires("libgeotiff/1.6.0")
@@ -77,6 +78,15 @@ class PdalConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.5.0")
+
+    @property
+    def _required_boost_components(self):
+        return ["filesystem"]
+
+    def validate(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -104,18 +114,26 @@ class PdalConan(ConanFile):
         # LASzip works fine
         for module in ("ZSTD", "ICONV", "GeoTIFF", "Curl"):
             os.remove(os.path.join(self._source_subfolder, "cmake", "modules", "Find"+module+".cmake"))
+
+        top_cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        util_cmakelists = os.path.join(self._source_subfolder, "pdal", "util", "CMakeLists.txt")
+
         # disabling libxml2 support is only done via patching
         if not self.options.with_xml:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
-                "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
+            tools.replace_in_file(top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
         # disabling libunwind support is only done via patching
         if not self.options.get_safe("with_unwind", False):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "CMakeLists.txt"),
-                                  "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
+            tools.replace_in_file(util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
+        # remove vendored eigen
+        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "eigen"))
         # remove vendored nanoflann. include path is patched
         tools.rmdir(os.path.join(self._source_subfolder, "vendor", "nanoflann"))
+        # remove vendored boost
+        tools.rmdir(os.path.join(self._source_subfolder, "vendor", "pdalboost"))
+        tools.replace_in_file(top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
+        tools.replace_in_file(util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "${CONAN_LIBS}")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "pdal", "util", "FileUtils.cpp"),
+                              "pdalboost::", "boost::")
 
     def build(self):
         self._patch_sources()
@@ -137,3 +155,17 @@ class PdalConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
+        self.cpp_info.requires = [
+            "boost::filesystem", "eigen::eigen", "gdal::gdal",
+            "libcurl::libcurl", "libgeotiff::libgeotiff", "nanoflann::nanoflann"
+        ]
+        if self.options.with_xml:
+            self.cpp_info.requires.append("libxml2::libxml2")
+        if self.options.with_zstd:
+            self.cpp_info.requires.append("zstd::zstd")
+        if self.options.with_laszip:
+            self.cpp_info.requires.append("laszip::laszip")
+        if self.options.with_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+        if self.options.get_safe("with_unwind"):
+            self.cpp_info.requires.append("libunwind::libunwind")
