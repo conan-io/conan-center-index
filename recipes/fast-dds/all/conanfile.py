@@ -57,7 +57,7 @@ class FastDDSConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.options.shared:
-            self.options["fast-cdr"].shared = False
+            self.options["fast-cdr"].shared = True
 
     def _get_configured_cmake(self):
         if self._cmake:
@@ -85,9 +85,6 @@ class FastDDSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
-
-    def imports(self):
-        self.copy("*")
 
     def build(self):
         self._patch_sources()
