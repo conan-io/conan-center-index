@@ -53,8 +53,7 @@ class QwtConan(ConanFile):
         self.requires("qt/5.15.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("qwt-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_qwt_config_files(self):
         # qwtconfig.pri
