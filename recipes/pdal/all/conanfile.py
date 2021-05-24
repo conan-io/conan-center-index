@@ -19,16 +19,18 @@ class PdalConan(ConanFile):
         "fPIC": [True, False],
         "with_unwind": [True, False],
         "with_xml": [True, False],
-        "with_zstd": [True, False],
         "with_laszip": [True, False],
+        "with_zlib": [True, False],
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": True,
         "fPIC": True,
         "with_unwind": False,
         "with_xml": True,
-        "with_zstd": True,
         "with_laszip": True,
+        "with_zlib": True,
+        "with_zstd": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -62,6 +64,7 @@ class PdalConan(ConanFile):
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
         # - evaluate dependency to boost instead of boost parts in vendor/pdalboost
         self.requires("gdal/3.2.1")
+        self.requires("libcurl/7.75.0") # mandotory dependency of arbiter (to remove if arbiter is unvendored)
         self.requires("libgeotiff/1.6.0")
         self.requires("nanoflann/1.3.2")
         if self.options.with_xml:
@@ -70,6 +73,8 @@ class PdalConan(ConanFile):
             self.requires("zstd/1.5.0")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.5.0")
 
@@ -86,7 +91,7 @@ class PdalConan(ConanFile):
         self._cmake.definitions["WITH_LAZPERF"] = False
         self._cmake.definitions["WITH_LASZIP"] = self.options.with_laszip
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["WITH_ZLIB"] = True
+        self._cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
         # disable plugin that requires postgresql
         self._cmake.definitions["BUILD_PLUGIN_PGPOINTCLOUD"] = False
         self._cmake.configure()
