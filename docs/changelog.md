@@ -1,5 +1,12 @@
 # Changelog
 
+### 24-May-2021 - 15:59 CEST
+
+- [feature] Start to crossbuild Apple M1 using two profiles approach (extra build).
+- [feature] Detect and report when a PR has missing dependencies.
+- [feature] Upgrade Conan version to 1.35.2.
+- [feature] Use only one Artifactory repository per pull request.
+
 ### 13-May-2021 - 17:20 CEST
 
 - [fix] Add `--dry-build` to `conan info` commands, it will expand also the build-requires that would have
