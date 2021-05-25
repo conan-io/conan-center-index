@@ -775,7 +775,8 @@ class QtConan(ConanFile):
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
-        self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
@@ -784,7 +785,8 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].system_libs.append("netapi32") # qtcore requires "NetApiBufferFree" which is in "Netapi32.lib" library
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
-                self.cpp_info.components["qtNetwork"].system_libs.append("DnsApi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
+                self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
+                self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
 
 
             if self.settings.os == "Macos":
