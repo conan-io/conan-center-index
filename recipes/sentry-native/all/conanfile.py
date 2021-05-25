@@ -16,7 +16,7 @@ class SentryNativeConan(ConanFile):
     license = "MIT"
     topics = ("conan", "breakpad", "crashpad",
               "error-reporting", "crash-reporting")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -24,12 +24,14 @@ class SentryNativeConan(ConanFile):
         "fPIC": [True, False],
         "backend": ["none", "inproc", "crashpad", "breakpad"],
         "transport": ["none", "curl", "winhttp"],
+        "qt": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "backend": "inproc",
-        "transport": "curl"
+        "transport": "curl",
+        "qt": False,
     }
 
     _cmake = None
@@ -62,6 +64,11 @@ class SentryNativeConan(ConanFile):
             self.requires("crashpad/cci.20210507")
         elif self.options.backend == "breakpad":
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
+        if self.options.qt:
+            self.requires("qt/5.15.2")
+            self.requires("openssl/1.1.1k")
+            if tools.Version(self.version) < "0.4.5":
+                raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
@@ -75,10 +82,13 @@ class SentryNativeConan(ConanFile):
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
         self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["SENTRY_INTEGRATION_QT"] = self.options.qt
         self._cmake.configure()
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
