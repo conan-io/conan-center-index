@@ -57,7 +57,7 @@ class LibsndfileConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_sqlite != "deprecated":
+        if self.options.get_safe("with_sqlite", "deprecated") != "deprecated":
             self.output.warn("with_sqlite is a deprecated option. Do not use.")
         del self.options.with_sqlite
 
