@@ -57,9 +57,11 @@ class LibsndfileConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.get_safe("with_sqlite", "deprecated") != "deprecated":
+        if self.options.with_sqlite != "deprecated":
             self.output.warn("with_sqlite is a deprecated option. Do not use.")
-        del self.options.with_sqlite
+
+    def package_id(self):
+        del self.info.options.with_sqlite
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
