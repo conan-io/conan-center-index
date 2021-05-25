@@ -2,8 +2,10 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.tools import Version
 from contextlib import contextmanager
 import os
+import shutil
 import platform
 
+required_conan_version = ">=1.29"
 
 class LibffiConan(ConanFile):
     name = "libffi"
@@ -36,6 +38,7 @@ class LibffiConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20200517")
+        self.build_requires("gnu-config/cci.20201022")
 
     def configure(self):
         if self.options.shared:
@@ -128,6 +131,11 @@ class LibffiConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()

@@ -1,9 +1,9 @@
 #include <backtrace-supported.h>
 #include <backtrace.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 void
 error_callback(void* data, const char* msg, int errnum)
@@ -12,13 +12,13 @@ error_callback(void* data, const char* msg, int errnum)
     if (errnum > 0)
         fprintf(stderr, ": %s", strerror(errnum));
     fprintf(stderr, "\n");
-    exit(EXIT_FAILURE);
+    exit(0);
 }
 
 int
 simple_callback(void* data, uintptr_t pc)
 {
-    printf("  0x%016lx\n", pc);
+    printf("  0x%016llx\n", pc);
     return 1;
 }
 
