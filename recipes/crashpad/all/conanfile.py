@@ -214,6 +214,9 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler_com.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
+        if self.setings.os == "Windows":
+            tools.rename(os.path.join(self.package_folder, "bin", "crashpad_handler_com.com"),
+                         os.path.join(self.package_folder, "bin", "crashpad_handler.com"))
 
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*getopt*")
