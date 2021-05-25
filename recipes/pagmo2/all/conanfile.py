@@ -41,6 +41,18 @@ class Pagmo2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("boost/1.76.0")
+        self.requires("tbb/2020.3")
+        if self.options.with_eigen:
+            self.requires("eigen/3.3.9")
+        if self.options.with_nlopt:
+            self.requires("nlopt/2.7.0")
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -50,9 +62,11 @@ class Pagmo2Conan(ConanFile):
             "apple-clang": "9.1"
         }
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+    @property
+    def _required_boost_components(self):
+        return ["serialization"]
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
 
@@ -68,21 +82,10 @@ class Pagmo2Conan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
-    def requirements(self):
-        self.requires("boost/1.76.0")
-        self.requires("tbb/2020.3")
-        if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
-        if self.options.with_nlopt:
-            self.requires("nlopt/2.7.0")
+        # TODO: add ipopt support
         if self.options.with_ipopt:
             raise ConanInvalidConfiguration("ipopt recipe not available yet in CCI")
 
-    @property
-    def _required_boost_components(self):
-        return ["serialization"]
-
-    def validate(self):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
