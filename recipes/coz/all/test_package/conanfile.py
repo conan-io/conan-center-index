@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self, build_type="RelWithDebInfo")
+        cmake = CMake(self, build_type="RelWithDebInfo") # To work properly Coz tool requires debug information https://github.com/plasma-umass/coz
         cmake.configure()
         cmake.build()
 
