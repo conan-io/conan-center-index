@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class SDLConan(ConanFile):
@@ -133,9 +133,7 @@ class SDLConan(ConanFile):
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SDL2-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -168,10 +166,11 @@ class SDLConan(ConanFile):
             self._check_pkg_config(self.options.wayland, "wayland-protocols")
             self._check_pkg_config(self.options.directfb, "directfb")
 
+    def validate(self):
+        self._check_dependencies()
+
     def _configure_cmake(self):
         if not self._cmake:
-            self._check_dependencies()
-
             self._cmake = CMake(self)
             # FIXME: self.install_folder not defined? Neccessary?
             self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
@@ -233,7 +232,7 @@ class SDLConan(ConanFile):
     def _build_cmake(self):
         if self.settings.os == "Linux":
             if self.options.pulse:
-                os.rename("libpulse.pc", "libpulse-simple.pc")
+                tools.rename("libpulse.pc", "libpulse-simple.pc")
         lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
         with tools.environment_append({"LIBRARY_PATH": os.pathsep.join(lib_paths)}):
             cmake = self._configure_cmake()
