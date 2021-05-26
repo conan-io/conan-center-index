@@ -231,9 +231,7 @@ class BoostConan(ConanFile):
 
     @property
     def _is_windows_platform(self):
-        return ((self.settings.os == "Windows") and
-                (self.settings.os.subsystem in [None, "cygwin"]) or
-                self.settings.os in ["WindowsStore", "WindowsCE"])
+        return self.settings.os in ["Windows", "WindowsStore", "WindowsCE"]
 
     def config_options(self):
         if self.settings.os == "Windows":
