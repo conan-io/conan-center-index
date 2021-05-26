@@ -11,7 +11,8 @@ class BreakpadConan( ConanFile ):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://chromium.googlesource.com/breakpad/breakpad/"
-    settings = 'os', 'compiler', 'build_type', 'arch'
+    settings = "os", "compiler", "build_type", "arch"
+    provides = "breakpad"
     options = {
         "fPIC": [True, False]
     }
