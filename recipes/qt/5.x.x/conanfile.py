@@ -893,6 +893,12 @@ Examples = bin/datadir/examples""")
         if self.options.qtwebengine and self.options.gui:
             _create_module("WebEngine", ["Gui", "Quick"])
 
+        if self.options.qtserialport:
+            _create_module("SerialPort")
+
+        if self.options.qtserialbus:
+            _create_module("SerialBus")
+
 
         if not self.options.shared:
             if self.settings.os == "Windows":
