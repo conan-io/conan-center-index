@@ -1,0 +1,4 @@
+sources:
+  "cci.20210521":
+    url: "https://github.com/google/breakpad/archive/f7428bc.tar.gz"
+    sha256: "55a688a49ffc476d94d92c3fd73f9264c974c25af8d6371c3901bd3451081e47"
