@@ -214,7 +214,7 @@ class CrashpadConan(ConanFile):
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler_com.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
-        if self.setings.os == "Windows":
+        if self.settings.os == "Windows":
             tools.rename(os.path.join(self.package_folder, "bin", "crashpad_handler_com.com"),
                          os.path.join(self.package_folder, "bin", "crashpad_handler.com"))
 
