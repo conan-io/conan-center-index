@@ -33,7 +33,7 @@ class ConfuBoostConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, 14)
 
     def requirements(self):
         self.requires("boost/1.76.0")
