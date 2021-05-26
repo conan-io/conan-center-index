@@ -93,7 +93,7 @@ class BoostConan(ConanFile):
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None, "deprecated"],
-        "i18n_backend_iconv": ["libc", True, False],
+        "i18n_backend_iconv": ["libc", "libiconv", "off"],
         "i18n_backend_icu": [True, False],
         "visibility": ["global", "protected", "hidden"],
     }
@@ -263,7 +263,7 @@ class BoostConan(ConanFile):
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
-            self.options.i18n_backend_iconv = False
+            self.options.i18n_backend_iconv = "off"
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
@@ -318,19 +318,19 @@ class BoostConan(ConanFile):
         if self.options.i18n_backend != "deprecated":
             self.output.warn("i18n_backend option is deprecated, do not use anymore.")
             if self.options.i18n_backend == "iconv":
-                self.options.i18n_backend_iconv = True
+                self.options.i18n_backend_iconv = "libiconv"
                 self.options.i18n_backend_icu = False
             if self.options.i18n_backend == "icu":
-                self.options.i18n_backend_iconv = False
+                self.options.i18n_backend_iconv = "off"
                 self.options.i18n_backend_icu = True
             if self.options.i18n_backend == "None":
-                self.options.i18n_backend_iconv = False
+                self.options.i18n_backend_iconv = "off"
                 self.options.i18n_backend_icu = False
         if self.options.without_locale:
-            self.options.i18n_backend_iconv = False
+            self.options.i18n_backend_iconv = "off"
             self.options.i18n_backend_icu = False
         else:
-            if not self.options.i18n_backend_iconv and not self.options.i18n_backend_icu and not self._is_windows_platform:
+            if self.options.i18n_backend_iconv == "off" and not self.options.i18n_backend_icu and not self._is_windows_platform:
                 raise ConanInvalidConfiguration("Boost.Locale library needs either iconv or ICU library to be built on non windows platforms")
 
         if not self.options.without_python:
@@ -445,7 +445,7 @@ class BoostConan(ConanFile):
 
     @property
     def _with_iconv(self):
-        return not self.options.header_only and self._with_dependency("iconv") and self.options.i18n_backend_iconv == True
+        return not self.options.header_only and self._with_dependency("iconv") and self.options.i18n_backend_iconv == "libc"
 
     def requirements(self):
         if self._with_zlib:
@@ -867,7 +867,7 @@ class BoostConan(ConanFile):
         else:
             flags.append("boost.locale.icu=off")
             flags.append("--disable-icu")
-        if self.options.i18n_backend_iconv:
+        if self.options.i18n_backend_iconv in ["libc", "libiconv"]:
             flags.append("boost.locale.iconv=on")
         else:
             flags.append("boost.locale.iconv=off")
