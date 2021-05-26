@@ -10,6 +10,7 @@ import sys
 import shlex
 import shutil
 import yaml
+import re
 
 try:
     from cStringIO import StringIO
@@ -385,6 +386,13 @@ class BoostConan(ConanFile):
                     if min_compiler_version is not None:
                         if tools.Version(self.settings.compiler.version) < min_compiler_version:
                             raise ConanInvalidConfiguration("Boost.Math requires a C++11 capable compiler")
+                            
+        if not self.options.without_python:
+            #Boost python library build will fail if python package numpy is not installed
+            try:
+                import numpy
+            except ImportError as e:
+                raise ConanInvalidConfiguration("Boost.python library requires numpy but this is not installed in your python environment")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -478,6 +486,8 @@ class BoostConan(ConanFile):
         # Conan is broken when run_to_output = True
         if "\n-----------------\n" in output:
             output = output.split("\n-----------------\n", 1)[1]
+        elif re.search('\n----+$', output) != None: 
+            output = ''
         return output if output != "None" else None
 
     def _get_python_path(self, name):
