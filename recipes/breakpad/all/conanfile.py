@@ -4,7 +4,7 @@ import textwrap
 
 required_conan_version = ">=1.33.0"
 
-class BreakpadConan( ConanFile ):
+class BreakpadConan(ConanFile):
     name = "breakpad"
     description = "A set of client and server components which implement a crash-reporting system"
     topics = ["crash", "report", "breakpad"]
@@ -108,11 +108,23 @@ class BreakpadConan( ConanFile ):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info( self ):
-        self.cpp_info.libs = ["breakpad", "breakpad_client"]
-        self.cpp_info.includedirs = [os.path.join("include", "breakpad")]
+        self.cpp_info.components["libbreakpad"].libs = ["breakpad"]
+        self.cpp_info.components["libbreakpad"].includedirs.append(os.path.join("include", "breakpad"))
+        self.cpp_info.components["libbreakpad"].names["pkg_config"] = "breakpad"
+
+        self.cpp_info.components["client"].libs = ["breakpad_client"]
+        self.cpp_info.components["client"].includedirs.append(os.path.join("include", "breakpad"))
+        self.cpp_info.components["client"].names["pkg_config"] = "breakpad-client"
+
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["client"].frameworks.append("CoreFoundation")
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["libbreakpad"].system_libs.append("pthread")
+            self.cpp_info.components["libbreakpad"].requires.append("linux-syscall-support::linux-syscall-support")
+
+            self.cpp_info.components["client"].system_libs.append("pthread")
+            self.cpp_info.components["client"].requires.append("linux-syscall-support::linux-syscall-support")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

@@ -1,5 +1,6 @@
-#include <iostream>
 #include "client/linux/handler/exception_handler.h"
+
+#include <iostream>
 
 using namespace google_breakpad;
 
@@ -17,8 +18,7 @@ bool callback(const MinidumpDescriptor &descriptor,
 }
 
 int main(int argc, char *argv[]) {
-
-    std::cout << "Breakpad test_package" << std::endl;
+    std::cout << "Breakpad test_package\n";
 
     MinidumpDescriptor descriptor("path/to/cache");
     ExceptionHandler eh(
