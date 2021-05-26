@@ -6,7 +6,7 @@ from conans import ConanFile, CMake, tools
 
 class ConfuBoostConan(ConanFile):
     name = "confu_boost"
-    version = "0.0.1"
+    version = "1.0.0"
     license = "BSL-1.0"
     author = "werto87"
     url = "<Package recipe repository url here, for issues about the package>"
@@ -16,12 +16,9 @@ class ConfuBoostConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
-    scm = {
-        "type": "git",
-        "subfolder": "confu_boost",
-        "url": "https://github.com/werto87/confu_boost.git",
-        "revision": "main"
-    }
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,12 +30,12 @@ class ConfuBoostConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="confu_boost")
+        cmake.configure(source_folder="confu_boost-"+self.version)
         cmake.build()
 
     def package(self):
         self.copy("*.h*", dst="include/confu_boost",
-                  src="confu_boost/confu_boost")
+                  src="confu_boost-"+self.version+"/confu_boost")
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
