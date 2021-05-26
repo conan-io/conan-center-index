@@ -28,8 +28,7 @@ class ConfuBoostConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("magic_enum/0.6.6")
+        self.requires("boost/1.76.0")
         self.requires("catch2/2.13.1")
 
     def build(self):
