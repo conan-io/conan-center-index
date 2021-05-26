@@ -14,9 +14,8 @@ class ConfuBoostConan(ConanFile):
     name = "confu_boost"
     version = "1.0.0"
     license = "BSL-1.0"
-    author = "werto87"
-    url = "<Package recipe repository url here, for issues about the \
-        package>"
+    homepage = "https://github.com/werto87/confu_boost"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "convenience functions \
         for reducing boilerplate while working with boost"
     topics = ("boost boilerplate")
