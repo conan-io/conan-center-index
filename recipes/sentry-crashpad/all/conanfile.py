@@ -76,7 +76,7 @@ class SentryCrashpadConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=os.path.join(self._source_subfolder, "external", "crashpad"))
         cmake = self._configure_cmake()
         cmake.install()
 
