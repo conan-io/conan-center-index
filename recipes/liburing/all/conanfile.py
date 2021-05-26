@@ -31,6 +31,10 @@ side implementation."""
 
     _autotools = None
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -54,6 +58,9 @@ side implementation."""
         if tools.Version(platform.release()) < "5.1":
             raise ConanInvalidConfiguration(
                 "This linux kernel version does not support io uring")
+
+        if self.options.shared:
+            del self.options.fPIC
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
