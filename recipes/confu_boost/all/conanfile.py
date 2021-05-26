@@ -1,7 +1,13 @@
 import shutil
 import os
-from conans.tools import download, unzip, check_md5, check_sha1, check_sha256
-from conans import ConanFile, CMake, tools
+from conans.tools import download
+from conans.tools import unzip
+from conans.tools import check_md5
+from conans.tools import check_sha1
+from conans.tools import check_sha256
+from conans import ConanFile
+from conans import tools
+from conans import CMake
 
 
 class ConfuBoostConan(ConanFile):
@@ -9,8 +15,10 @@ class ConfuBoostConan(ConanFile):
     version = "1.0.0"
     license = "BSL-1.0"
     author = "werto87"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "convenience functions for reducing boilerplate while working with boost"
+    url = "<Package recipe repository url here, for issues about the \
+        package>"
+    description = "convenience functions \
+        for reducing boilerplate while working with boost"
     topics = ("boost boilerplate")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -30,12 +38,12 @@ class ConfuBoostConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="confu_boost-"+self.version)
+        cmake.configure(source_folder="confu_boost-" + self.version)
         cmake.build()
 
     def package(self):
         self.copy("*.h*", dst="include/confu_boost",
-                  src="confu_boost-"+self.version+"/confu_boost")
+                  src="confu_boost-" + self.version + "/confu_boost")
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
