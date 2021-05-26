@@ -4,6 +4,8 @@ import platform
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
 
 class LiburingConan(ConanFile):
     name = "liburing"
@@ -42,9 +44,8 @@ side implementation."""
         return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{0}-{1}".format(self.name, self.version),
-                  self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
         if self.settings.os != "Linux":
