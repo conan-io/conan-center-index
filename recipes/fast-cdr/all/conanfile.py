@@ -74,6 +74,14 @@ class FastCDRConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_cmake)
         tools.rmdir(self._pkg_share)
+        tools.remove_files_by_mask(
+            directory = os.path.join(self.package_folder,"lib"),
+            pattern = "*.pdb"
+        )
+        tools.remove_files_by_mask(
+            directory = os.path.join(self.package_folder,"bin"),
+            pattern = "*.pdb"
+        )
         
     def package_info(self):
         #FIXME: FastCDR does not install under a CMake namespace 
