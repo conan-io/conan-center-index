@@ -441,11 +441,11 @@ class BoostConan(ConanFile):
 
     @property
     def _with_icu(self):
-        return not self.options.header_only and self._with_dependency("icu") and self.options.i18n_backend_icu
+        return not self.options.header_only and self._with_dependency("icu") and self.options.get_safe("i18n_backend_icu")
 
     @property
     def _with_iconv(self):
-        return not self.options.header_only and self._with_dependency("iconv") and self.options.get_safe("i18n_backend_iconv") == "libc"
+        return not self.options.header_only and self._with_dependency("iconv") and self.options.get_safe("i18n_backend_iconv") == "libiconv"
 
     def requirements(self):
         if self._with_zlib:
@@ -862,13 +862,17 @@ class BoostConan(ConanFile):
         flags.append("-sNO_LZMA=%s" % ("0" if self._with_lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self._with_zstd else "1"))
 
-        if self.options.i18n_backend_icu:
+        if self.options.get_safe("i18n_backend_icu"):
             flags.append("boost.locale.icu=on")
         else:
             flags.append("boost.locale.icu=off")
             flags.append("--disable-icu")
         if self.options.get_safe("i18n_backend_iconv") in ["libc", "libiconv"]:
             flags.append("boost.locale.iconv=on")
+            if self.options.get_safe("i18n_backend_iconv") == "libc":
+                flags.append("boost.locale.iconv.lib=libc")
+            else:
+                flags.append("boost.locale.iconv.lib=libiconv")
         else:
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
