@@ -100,19 +100,17 @@ class GoogleCloudCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        # Using componen google-cloud-common, so it reduces the risk of conflict (pkgconfig generator)
-        self.cpp_info.components["google-cloud-common"].requires = ["abseil::absl_any", "abseil::absl_flat_hash_map", "abseil::absl_memory", "abseil::absl_optional", "abseil::absl_time"]
-        self.cpp_info.components["google-cloud-common"].libs = ["google_cloud_cpp_common"]
-        self.cpp_info.components["google-cloud-common"].names["cmake_find_package"] = "common"
-        self.cpp_info.components["google-cloud-common"].names["cmake_find_package_multi"] = "common"
+        self.cpp_info.components["common"].requires = ["abseil::absl_any", "abseil::absl_flat_hash_map", "abseil::absl_memory", "abseil::absl_optional", "abseil::absl_time"]
+        self.cpp_info.components["common"].libs = ["google_cloud_cpp_common"]
+        self.cpp_info.components["common"].names["pkg_config"] = "google_cloud_cpp_common"
 
-        self.cpp_info.components["experimental-bigquery"].requires = ["grpc_utils", "google-cloud-common", "cloud_bigquery_protos"]
+        self.cpp_info.components["experimental-bigquery"].requires = ["grpc_utils", "common", "cloud_bigquery_protos"]
         self.cpp_info.components["experimental-bigquery"].libs = ["google_cloud_cpp_bigquery"]
 
-        self.cpp_info.components["bigtable"].requires = ["abseil::absl_memory", "bigtable_protos", "google-cloud-common", "grpc_utils", "grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf"]
+        self.cpp_info.components["bigtable"].requires = ["abseil::absl_memory", "bigtable_protos", "common", "grpc_utils", "grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf"]
         self.cpp_info.components["bigtable"].libs = ["google_cloud_cpp_bigtable"]
 
-        self.cpp_info.components["experimental-firestore"].requires = ["google-cloud-common"]
+        self.cpp_info.components["experimental-firestore"].requires = ["common"]
         self.cpp_info.components["experimental-firestore"].libs = ["google_cloud_cpp_firestore"]
 
         self.cpp_info.components["bigtable_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "iam_v1_iam_policy_protos", "iam_v1_policy_protos", "longrunning_operations_protos", "rpc_status_protos", "api_auth_protos"]
@@ -259,21 +257,21 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].requires = ["grpc::grpc++", "grpc::grpc", "protobuf::libprotobuf", "api_annotations_protos", "api_client_protos", "api_field_behavior_protos", "api_resource_protos", "longrunning_operations_protos", "rpc_status_protos", "type_latlng_protos"]
         self.cpp_info.components["cloud_dialogflow_v2beta1_protos"].libs = ["google_cloud_cpp_cloud_dialogflow_v2beta1_protos"]
 
-        self.cpp_info.components["grpc_utils"].requires = ["abseil::absl_function_ref", "abseil::absl_memory", "abseil::absl_time", "rpc_status_protos", "google-cloud-common", "grpc::grpc++", "grpc::grpc"]
+        self.cpp_info.components["grpc_utils"].requires = ["abseil::absl_function_ref", "abseil::absl_memory", "abseil::absl_time", "rpc_status_protos", "common", "grpc::grpc++", "grpc::grpc"]
         self.cpp_info.components["grpc_utils"].libs = ["google_cloud_cpp_grpc_utils"]
 
-        self.cpp_info.components["experimental-iam"].requires = ["grpc_utils", "google-cloud-common", "iam_protos"]
+        self.cpp_info.components["experimental-iam"].requires = ["grpc_utils", "common", "iam_protos"]
         self.cpp_info.components["experimental-iam"].libs = ["google_cloud_cpp_iam"]
 
-        self.cpp_info.components["experimental-logging"].requires = ["grpc_utils", "google-cloud-common", "logging_protos"]
+        self.cpp_info.components["experimental-logging"].requires = ["grpc_utils", "common", "logging_protos"]
         self.cpp_info.components["experimental-logging"].libs = ["google_cloud_cpp_logging"]
 
-        self.cpp_info.components["pubsub"].requires = ["grpc_utils", "google-cloud-common", "pubsub_protos", "abseil::absl_flat_hash_map"]
+        self.cpp_info.components["pubsub"].requires = ["grpc_utils", "common", "pubsub_protos", "abseil::absl_flat_hash_map"]
         self.cpp_info.components["pubsub"].libs = ["google_cloud_cpp_pubsub"]
 
-        self.cpp_info.components["spanner"].requires = ["abseil::absl_fixed_array", "abseil::absl_memory", "abseil::absl_numeric", "abseil::absl_strings", "abseil::absl_time", "grpc_utils", "google-cloud-common", "spanner_protos"]
+        self.cpp_info.components["spanner"].requires = ["abseil::absl_fixed_array", "abseil::absl_memory", "abseil::absl_numeric", "abseil::absl_strings", "abseil::absl_time", "grpc_utils", "common", "spanner_protos"]
         self.cpp_info.components["spanner"].libs = ["google_cloud_cpp_spanner"]
 
-        self.cpp_info.components["storage"].requires = ["abseil::absl_memory", "abseil::absl_strings", "abseil::absl_str_format", "abseil::absl_time", "abseil::absl_variant", "google-cloud-common", "nlohmann_json::nlohmann_json", "crc32c::crc32c", "libcurl::libcurl", "openssl::ssl", "openssl::crypto"]
+        self.cpp_info.components["storage"].requires = ["abseil::absl_memory", "abseil::absl_strings", "abseil::absl_str_format", "abseil::absl_time", "abseil::absl_variant", "common", "nlohmann_json::nlohmann_json", "crc32c::crc32c", "libcurl::libcurl", "openssl::ssl", "openssl::crypto"]
         self.cpp_info.components["storage"].libs = ["google_cloud_cpp_storage"]
 
