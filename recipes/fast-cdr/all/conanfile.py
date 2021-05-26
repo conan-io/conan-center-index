@@ -1,9 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
-from conans.tools import load
 from conans.errors import ConanInvalidConfiguration
-from pathlib import Path
-import textwrap
 
 class FastCDRConan(ConanFile):
 
@@ -22,7 +19,8 @@ class FastCDRConan(ConanFile):
         "shared":            False,
         "fPIC":              True
     }
-    exports_sources = ["patches/**"]
+    generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
     _cmake = None
 
     @property
@@ -44,18 +42,12 @@ class FastCDRConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def _get_configured_cmake(self):
         if self._cmake:
             pass 
         else:
             self._cmake = CMake(self)
-        self._cmake.configure(
-            source_dir = self._source_subfolder
-        )
+        self._cmake.configure()
         return self._cmake
 
     def source(self):
@@ -65,26 +57,14 @@ class FastCDRConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os == "Linux":
-            if (self.settings.compiler == "gcc" and self.settings.compiler.libcxx == "libstdc++"):
-                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
-            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++"):
-                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
-            if (self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++"):
-                raise ConanInvalidConfiguration("This package requires libstdc++11 for libcxx setting")
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                raise ConanInvalidConfiguration("This package dont not compile with Visual Studio.")
-
     def build(self):
-        self._patch_sources()
-
         cmake = self._get_configured_cmake()
         cmake.build()
 
@@ -96,6 +76,8 @@ class FastCDRConan(ConanFile):
         tools.rmdir(self._pkg_share)
         
     def package_info(self):
+        #FIXME: FastCDR does not install under a CMake namespace 
+        # https://github.com/eProsima/Fast-CDR/blob/cff6ea98f66d5fd4d53541e183676257a42a6c23/src/cpp/CMakeLists.txt#L156
         self.cpp_info.names["cmake_find_package"] = "fastcdr"
         self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
-        self.cpp_info.libs = ["fastcdr"]
+        self.cpp_info.libs = tools.collect_libs(self)
