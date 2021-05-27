@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -24,6 +25,10 @@ class BreakpadConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Breakpad can only be built on Linux. For other OSs check sentry-breakpad")
 
     def config_options(self):
         if self.settings.os == "Windows":
