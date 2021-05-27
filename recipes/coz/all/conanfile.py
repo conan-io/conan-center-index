@@ -53,6 +53,7 @@ class CozConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Coz"
+        self.cpp_info.names["cmake_find_package_multi"] = "Coz"
         self.cpp_info.syslibs = ["dl", "rt"]
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = [
