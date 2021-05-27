@@ -42,7 +42,6 @@ class SMLConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        print(os.getcwd())
         tools.patch(patch_file="patches/clang12.patch")
         extracted_dir = "sml-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
