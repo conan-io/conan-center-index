@@ -46,7 +46,7 @@ class ICUBase(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-    
+
     @property
     def _make_tool(self):
         return "make" if self.settings.os != "FreeBSD" else "gmake"
@@ -54,6 +54,7 @@ class ICUBase(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.data_packaging
 
     def configure(self):
         if self.options.shared:
@@ -93,6 +94,8 @@ class ICUBase(ConanFile):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
+                    # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
+                    tools.save(os.path.join("data", "out", "tmp", "dirs.timestamp"), "")
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
                     command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
@@ -163,7 +166,11 @@ class ICUBase(ConanFile):
             if env_build.target:
                 args.append("--target=%s" % env_build.target)
 
-        args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+        if self.settings.os != "Windows":
+            # http://userguide.icu-project.org/icudata
+            # This is the only directly supported behavior on Windows builds.
+            args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+
         datadir = os.path.join(self.package_folder, "lib")
         datadir = datadir.replace("\\", "/") if tools.os_info.is_windows else datadir
         args.append("--datarootdir=%s" % datadir)  # do not use share
@@ -209,7 +216,7 @@ class ICUBase(ConanFile):
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             tools.mkdir(os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
 
@@ -307,7 +314,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
         self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
