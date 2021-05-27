@@ -5,3 +5,10 @@ sources:
   "5.0.1":
     sha256: d10542c95e3e05dece4d97bb273eba2dfeeedb37a78fb3417fd4d5e94d879192
     url: https://github.com/assimp/assimp/archive/v5.0.1.zip
+patches:
+  "5.0.0":
+    - patch_file: "patches/0001-unvendor-deps.patch"
+      base_path: "source_subfolder"
+  "5.0.1":
+    - patch_file: "patches/0001-unvendor-deps.patch"
+      base_path: "source_subfolder"
