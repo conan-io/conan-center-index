@@ -21,7 +21,7 @@ class CozConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
         if self.settings.os == "Macos" or compiler == "Visual Studio" or (
