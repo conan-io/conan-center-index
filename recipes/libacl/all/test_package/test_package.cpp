@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 		printf("%s -- get access control lists of files\n"
 			"Usage: %s file ...\n",
 			progname, progname);
-		return 1;
+		return 0;
 	}
 
 	for (n = 1; n < argc; n++) {
