@@ -1,4 +1,3 @@
-import glob
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -33,9 +32,8 @@ class CozConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     __cmake = None
 
