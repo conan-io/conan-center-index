@@ -30,13 +30,8 @@ class BreakpadConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Breakpad can only be built on Linux. For other OSs check sentry-breakpad")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("linux-syscall-support/cci.20200813")
+        self.requires("linux-syscall-support/cci.20200813")
 
     def _patch_sources(self):
         # Use Conan's lss instead of the submodule
@@ -99,9 +94,7 @@ class BreakpadConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        if self.settings.os == "Linux":
-            self._patch_sources()
-
+        self._patch_sources()
         env_build = self._configure_autotools()
         env_build.make()
 
@@ -121,15 +114,12 @@ class BreakpadConan(ConanFile):
         self.cpp_info.components["client"].includedirs.append(os.path.join("include", "breakpad"))
         self.cpp_info.components["client"].names["pkg_config"] = "breakpad-client"
 
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["client"].frameworks.append("CoreFoundation")
 
-        if self.settings.os == "Linux":
-            self.cpp_info.components["libbreakpad"].system_libs.append("pthread")
-            self.cpp_info.components["libbreakpad"].requires.append("linux-syscall-support::linux-syscall-support")
+        self.cpp_info.components["libbreakpad"].system_libs.append("pthread")
+        self.cpp_info.components["libbreakpad"].requires.append("linux-syscall-support::linux-syscall-support")
 
-            self.cpp_info.components["client"].system_libs.append("pthread")
-            self.cpp_info.components["client"].requires.append("linux-syscall-support::linux-syscall-support")
+        self.cpp_info.components["client"].system_libs.append("pthread")
+        self.cpp_info.components["client"].requires.append("linux-syscall-support::linux-syscall-support")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
