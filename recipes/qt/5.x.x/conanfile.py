@@ -33,7 +33,7 @@ Examples = bin/datadir/examples""" % self.conanfile.deps_cpp_info["qt"].rootpath
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns",
-    "qttranslations", "qtdoc", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
+    "qttranslations", "qtdoc", "qtlocation", "qtsensors", "qtbluetooth", "qtwayland",
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
@@ -890,14 +890,114 @@ Examples = bin/datadir/examples""")
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
+        if self.options.qtlocation:
+            _create_module("Positioning")
+            _create_module("Location", ["Gui", "Quick"])
+            _create_plugin("QGeoServiceProviderFactoryMapbox", "qtgeoservices_mapbox", "geoservices", [])
+            _create_plugin("QGeoServiceProviderFactoryMapboxGL", "qtgeoservices_mapboxgl", "geoservices", [])
+            _create_plugin("GeoServiceProviderFactoryEsri", "qtgeoservices_esri", "geoservices", [])
+            _create_plugin("QGeoServiceProviderFactoryItemsOverlay", "qtgeoservices_itemsoverlay", "geoservices", [])
+            _create_plugin("QGeoServiceProviderFactoryNokia", "qtgeoservices_nokia", "geoservices", [])
+            _create_plugin("QGeoServiceProviderFactoryOsm", "qtgeoservices_osm", "geoservices", [])
+            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue", "qtposition_geoclue", "position", [])
+            _create_plugin("QGeoPositionInfoSourceFactoryGeoclue2", "qtposition_geoclue2", "position", [])
+            _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
+            _create_plugin("QGeoPositionInfoSourceFactorySerialNmea", "qtposition_serialnmea", "position", [])
+
+        if self.options.qtwebchannel:
+            _create_module("WebChannel", ["Qml"])
+
         if self.options.qtwebengine and self.options.gui:
-            _create_module("WebEngine", ["Gui", "Quick"])
+            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat"]
+            _create_module("WebEngine", ["WebEngineCore"])
+            _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
         if self.options.qtserialport:
             _create_module("SerialPort")
 
         if self.options.qtserialbus:
-            _create_module("SerialBus")
+            _create_module("SerialBus", ["SerialPort"])
+            _create_plugin("PassThruCanBusPlugin", "qtpassthrucanbus", "canbus", [])
+            _create_plugin("PeakCanBusPlugin", "qtpeakcanbus", "canbus", [])
+            _create_plugin("SocketCanBusPlugin", "qtsocketcanbus", "canbus", [])
+            _create_plugin("TinyCanBusPlugin", "qttinycanbus", "canbus", [])
+            _create_plugin("VirtualCanBusPlugin", "qtvirtualcanbus", "canbus", [])
+
+        if self.options.qtsensors:
+            _create_module("Sensors")
+            _create_plugin("genericSensorPlugin", "qtsensors_generic", "sensors", [])
+            _create_plugin("IIOSensorProxySensorPlugin", "qtsensors_iio-sensor-proxy", "sensors", [])
+            if self.settings.os == "Linux":
+                _create_plugin("LinuxSensorPlugin", "qtsensors_linuxsys", "sensors", [])
+            _create_plugin("QtSensorGesturePlugin", "qtsensorgestures_plugin", "sensorgestures", [])
+            _create_plugin("QShakeSensorGesturePlugin", "qtsensorgestures_shakeplugin", "sensorgestures", [])
+
+        if self.options.qtscxml:
+            _create_module("Scxml", ["Qml"])
+
+        if self.options.qtpurchasing:
+            _create_module("Purchasing")
+
+        if self.options.qtcharts:
+            _create_module("Charts", ["Gui", "Widgets"])
+
+        if self.options.qt3d:
+            _create_module("3DCore", ["Gui", "Network"])
+
+            _create_module("3DRender", ["3DCore"])
+            _create_plugin("DefaultGeometryLoaderPlugin", "defaultgeometryloader", "geometryloaders", [])
+            _create_plugin("GLTFGeometryLoaderPlugin", "gltfgeometryloader", "geometryloaders", [])
+            _create_plugin("GLTFSceneExportPlugin", "gltfsceneexport", "sceneparsers", [])
+            _create_plugin("GLTFSceneImportPlugin", "gltfsceneimport", "sceneparsers", [])
+            _create_plugin("OpenGLRendererPlugin", "openglrenderer", "renderers", [])
+            _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
+
+            _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
+            _create_module("3DInput", ["3DCore", "GamePad", "Gui"])
+            _create_module("3DLogic", ["3DCore", "Gui"])
+            _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
+            _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])
+            _create_module("3DQuickAnimation", ["3DAnimation", "3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+            _create_module("3DQuickExtras", ["3DExtras", "3DInput", "3DQuick", "3DRender", "3DLogic", "3DCore", "Gui", "Qml"])
+            _create_module("3DQuickInput", ["3DInput", "3DQuick", "3DCore", "Gui", "Qml"])
+            _create_module("3DQuickRender", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+            _create_module("3DQuickScene2D", ["3DRender", "3DQuick", "3DCore", "Gui", "Qml"])
+
+        if self.options.qtgamepad:
+            _create_module("Gamepad", ["Gui"])
+            if self.settings.os == "Linux":
+                _create_plugin("QEvdevGamepadBackendPlugin", "evdevgamepad", "gamepads", [])
+            if self.settings.os == "Macos":
+                #TODO
+                pass
+            if self.settings.os =="Windows":
+                _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
+
+        if self.options.qtmultimedia:
+            _create_module("Multimedia", ["Network", "Gui"])
+            _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
+            _create_module("MultimediaQuick", ["Multimedia", "Quick"])
+            _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
+            if self.settings.os == "Linux":
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui"])
+                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
+                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
+                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
+            if self.settings.os == "Windows":
+                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
+                _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
+                _create_plugin("QWindowsAudioPlugin", "qtaudio_windows", "audio", [])
+            if self.settings.os == "Macos":
+                #TODO
+                pass
+
+        if self.options.qtwebsockets:
+            _create_module("WebSockets", ["Network"])
+
+        if self.options.qtbluetooth:
+            _create_module("Bluetooth", [])
 
 
         if not self.options.shared:
