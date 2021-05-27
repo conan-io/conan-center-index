@@ -33,7 +33,7 @@ Examples = bin/datadir/examples""" % self.conanfile.deps_cpp_info["qt"].rootpath
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns",
-    "qttranslations", "qtdoc", "qtlocation", "qtsensors", "qtbluetooth", "qtwayland",
+    "qttranslations", "qtdoc", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
     "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
     "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
@@ -908,7 +908,7 @@ Examples = bin/datadir/examples""")
             _create_module("WebChannel", ["Qml"])
 
         if self.options.qtwebengine and self.options.gui:
-            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat"]
+            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat"])
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
@@ -996,8 +996,9 @@ Examples = bin/datadir/examples""")
         if self.options.qtwebsockets:
             _create_module("WebSockets", ["Network"])
 
-        if self.options.qtbluetooth:
-            _create_module("Bluetooth", [])
+        if self.options.qtconnectivity:
+            _create_module("Bluetooth", ["Network"])
+            _create_module("Nfc", [])
 
 
         if not self.options.shared:
