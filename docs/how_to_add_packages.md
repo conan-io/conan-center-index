@@ -190,7 +190,7 @@ Please be aware that ConanCenter only builds from sources and [pre-compiled bina
 Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
 
     cd conan-center-index/recipes/boost/all
-    conan create . 1.74.0@
+    conan create . boost/1.74.0@
 
 ### Updating conan hooks on your machine
 
