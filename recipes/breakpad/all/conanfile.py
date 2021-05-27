@@ -14,6 +14,7 @@ class BreakpadConan(ConanFile):
     homepage = "https://chromium.googlesource.com/breakpad/breakpad/"
     settings = "os", "compiler", "build_type", "arch"
     provides = "breakpad"
+    exports_sources = "patches/**"
     options = {
         "fPIC": [True, False]
     }
@@ -33,57 +34,6 @@ class BreakpadConan(ConanFile):
     def requirements(self):
         self.requires("linux-syscall-support/cci.20200813")
 
-    def _patch_sources(self):
-        # Use Conan's lss instead of the submodule
-        # 1. Remove from include dirs
-        # 2. Remove from list of headers to install
-        # 3. Patch all #include statements
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
-                            "$(includegbc_HEADERS) $(includelss_HEADERS) ",
-                            "$(includegbc_HEADERS) "
-        )
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
-                            "install-includelssHEADERS install-includepHEADERS ",
-                            "iinstall-includepHEADERS "
-        )
-        files_to_patch = [
-            "src/tools/linux/md2core/minidump-2-core.cc",
-            "src/processor/testdata/linux_test_app.cc",
-            "src/common/memory_allocator.h",
-            "src/common/linux/memory_mapped_file.cc",
-            "src/common/linux/file_id.cc",
-            "src/common/linux/safe_readlink.cc",
-            "src/client/minidump_file_writer.cc",
-            "src/client/linux/handler/exception_handler.cc",
-            "src/client/linux/handler/exception_handler_unittest.cc",
-            "src/client/linux/log/log.cc",
-            "src/client/linux/crash_generation/crash_generation_client.cc",
-            "src/client/linux/minidump_writer/linux_dumper.cc",
-            "src/client/linux/minidump_writer/linux_dumper_unittest_helper.cc",
-            "src/client/linux/minidump_writer/proc_cpuinfo_reader.h",
-            "src/client/linux/minidump_writer/minidump_writer.cc",
-            "src/client/linux/minidump_writer/linux_ptrace_dumper.cc",
-            "src/client/linux/minidump_writer/cpu_set.h",
-            "src/client/linux/minidump_writer/directory_reader.h",
-            "src/client/linux/minidump_writer/line_reader.h"
-        ]
-
-        for file in files_to_patch:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, file),
-                "#include \"third_party/lss/linux_syscall_support.h\"",
-                "#include <linux_syscall_support.h>"
-            )
-
-        # Let Conan handle fPIC
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "Makefile.in"),
-            textwrap.dedent("""\
-                @LINUX_HOST_TRUE@am__append_2 = -fPIC
-                @LINUX_HOST_TRUE@am__append_3 = -fPIC"""),
-            ""
-        )
-
     def _configure_autotools(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
@@ -94,7 +44,8 @@ class BreakpadConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         env_build = self._configure_autotools()
         env_build.make()
 
