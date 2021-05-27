@@ -26,7 +26,7 @@ class qt(Generator):
             Qml2Imports = {1}/archdatadir/qml
             Translations = {1}/datadir/translations
             Documentation = {1}/datadir/doc
-            Examples = {1}/datadir/examples""").format(path, folder, "bin" if os_ == "Windows" else "libexec")
+            Examples = {1}/datadir/examples""").format(path, folder, "bin" if os_ == "Windows" else "lib")
 
     @property
     def filename(self):
@@ -397,7 +397,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["INSTALL_MKSPECSDIR"] = os.path.join(self.package_folder, "res", "archdatadir", "mkspecs")
         self._cmake.definitions["INSTALL_ARCHDATADIR"] = os.path.join(self.package_folder, "res", "archdatadir")
-        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "libexec")
+        self._cmake.definitions["INSTALL_LIBEXECDIR"] = os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "lib")
         self._cmake.definitions["INSTALL_DATADIR"] = os.path.join(self.package_folder, "res", "datadir")
         self._cmake.definitions["INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res", "sysconfdir")
 
@@ -601,7 +601,7 @@ class QtConan(ConanFile):
         for target in targets:
             exe_path = None
             for path_ in ["bin/{0}{1}".format(target, extension),
-                          "libexec/{0}{1}".format(target, extension)]:
+                          "lib/{0}{1}".format(target, extension)]:
                 if os.path.isfile(os.path.join(self.package_folder, path_)):
                     exe_path = path_
                     break
