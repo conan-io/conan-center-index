@@ -16,13 +16,13 @@ class Assimp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "double_precision": [True, False],
         "fPIC": [True, False],
+        "double_precision": [True, False],
     }
     default_options = {
         "shared": False,
-        "double_precision": False,
         "fPIC": True,
+        "double_precision": False,
     }
 
     _format_option_map = {
