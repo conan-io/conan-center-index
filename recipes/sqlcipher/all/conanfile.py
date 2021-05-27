@@ -229,7 +229,7 @@ class SqlcipherConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "dl"])
         self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLITE_TEMP_STORE=%s' % self._temp_store_nmake_value]
         if self._use_commoncrypto():
-            self.cpp_info.frameworks = ["Seurity", "CoreFoundation"]
+            self.cpp_info.frameworks = ["Security", "CoreFoundation"]
         else:
             self.cpp_info.defines.extend(['SQLCIPHER_CRYPTO_OPENSSL'])
         # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
