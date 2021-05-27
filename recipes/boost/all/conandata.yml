@@ -124,3 +124,6 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+  1.76.0:
+    - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
