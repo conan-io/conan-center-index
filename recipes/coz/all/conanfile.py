@@ -54,8 +54,5 @@ class CozConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Coz"
         self.cpp_info.names["cmake_find_package_multi"] = "Coz"
-        self.cpp_info.syslibs = ["dl", "rt"]
-        if self.settings.os != "Windows":
-            self.cpp_info.system_libs = [
-                "-Wl,--push-state,--no-as-needed", "-ldl", "-Wl,--pop-state"
-            ]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl", "rt", "pthread"]
