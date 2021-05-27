@@ -1,7 +1,4 @@
 sources:
-  "2.2.53":
-    url: "http://download.savannah.nongnu.org/releases/acl/acl-2.2.53.tar.gz"
-    sha256: "06BE9865C6F418D851FF4494E12406568353B891FFE1F596B34693C387AF26C7"
   "2.3.1":
     url: "http://download.savannah.nongnu.org/releases/acl/acl-2.2.53.tar.gz"
     sha256: "06BE9865C6F418D851FF4494E12406568353B891FFE1F596B34693C387AF26C7"
