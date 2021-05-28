@@ -968,8 +968,7 @@ Examples = bin/datadir/examples""")
             if self.settings.os == "Linux":
                 _create_plugin("QEvdevGamepadBackendPlugin", "evdevgamepad", "gamepads", [])
             if self.settings.os == "Macos":
-                #TODO
-                pass
+                _create_plugin("QDarwinGamepadBackendPlugin", "darwingamepad", "gamepads", [])
             if self.settings.os =="Windows":
                 _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
 
@@ -990,8 +989,10 @@ Examples = bin/datadir/examples""")
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
                 _create_plugin("QWindowsAudioPlugin", "qtaudio_windows", "audio", [])
             if self.settings.os == "Macos":
-                #TODO
-                pass
+                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
+                _create_plugin("AVFMediaPlayerServicePlugin", "qavfmediaplayer", "mediaservice", [])
+                _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
+                _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
         if self.options.qtwebsockets:
             _create_module("WebSockets", ["Network"])
@@ -1014,7 +1015,6 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")  # qtcore requires "__imp_GetUserProfileDirectoryW " which is in "UserEnv.Lib" library
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("DnsApi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
-
 
             if self.settings.os == "Macos":
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
