@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
-import glob
 
 
 class LibMysqlClientCConan(ConanFile):
@@ -137,13 +136,16 @@ class LibMysqlClientCConan(ConanFile):
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         os.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(f)
-        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-            os.remove(f)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.options.shared:
+            tools.remove_files_by_mask(self.package_folder, "*.a")
+        else:
+            tools.remove_files_by_mask(self.package_folder, "*.dll")
+            tools.remove_files_by_mask(self.package_folder, "*.dylib")
+            tools.remove_files_by_mask(self.package_folder, "*.so*")
 
     def package_info(self):
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
