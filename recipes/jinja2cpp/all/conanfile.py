@@ -49,9 +49,8 @@ class Jinja2cppConan(ConanFile):
         self.requires("variant-lite/2.0.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "Jinja2Cpp-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
