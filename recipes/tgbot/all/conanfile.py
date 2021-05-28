@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -47,6 +48,15 @@ class TgbotConan(ConanFile):
         self.requires("libcurl/7.76.0")
         self.requires("openssl/1.1.1k")
 
+    @property
+    def _required_boost_components(self):
+        return ["system"]
+
+    def validate(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -79,3 +89,4 @@ class TgbotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
+        self.cpp_info.requires = ["boost::headers", "boost::system", "libcurl::libcurl", "openssl::openssl"]
