@@ -146,6 +146,7 @@ class ThriftConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "Thrift"
         self.cpp_info.names["cmake_find_package"] = "thrift"
         self.cpp_info.names["cmake_find_package_multi"] = "thrift"
+        self.cpp_info.names["pkg_config"] = "thrift_full_package" # unofficial, for conan internal purpose, it avoids conflict with libthrift component
 
         self.cpp_info.components["libthrift"].libs = ["thrift" + libsuffix]
         self.cpp_info.components["libthrift"].names["cmake_find_package"] = "thrift"
