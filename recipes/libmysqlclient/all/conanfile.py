@@ -36,8 +36,7 @@ class LibMysqlClientCConan(ConanFile):
         archive_name = "mysql-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
-        for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf", "libedit"]:
-            tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
+        tools.rmdir(os.path.join(self._source_subfolder, "extra"))
         for folder in ['client', 'man', 'mysql-test']:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
         tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
