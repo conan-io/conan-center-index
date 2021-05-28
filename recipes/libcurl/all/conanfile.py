@@ -487,6 +487,8 @@ class LibcurlConan(ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif self.settings.os == "Macos":
+            if tools.Version(self.version) >= "7.77.0":
+                self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
