@@ -5,7 +5,7 @@ import os
 required_conan_version = ">1.33.0"
 
 
-class ConanFileDefault(ConanFile):
+class ThriftConan(ConanFile):
     name = "thrift"
     description = "Thrift is an associated code generation mechanism for RPC"
     topics = ("conan", "thrift", "serialization", "rpc")
