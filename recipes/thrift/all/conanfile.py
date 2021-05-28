@@ -66,26 +66,26 @@ class ThriftConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build_requirements(self):
-        if tools.os_info.is_windows:
-            self.build_requires("winflexbison/2.5.24")
-        else:
-            self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.7.1")
-
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.76.0")
 
         if self.options.with_qt:
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cci")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
+
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            self.build_requires("winflexbison/2.5.24")
+        else:
+            self.build_requires("flex/2.6.4")
+            self.build_requires("bison/3.7.1")
 
     def _configure_cmake(self):
         if self._cmake:
