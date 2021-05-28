@@ -63,10 +63,6 @@ class ThriftConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
     def requirements(self):
         self.requires("boost/1.76.0")
 
@@ -87,6 +83,10 @@ class ThriftConan(ConanFile):
         else:
             self.build_requires("flex/2.6.4")
             self.build_requires("bison/3.7.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
