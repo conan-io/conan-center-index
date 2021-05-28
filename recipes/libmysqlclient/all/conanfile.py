@@ -30,6 +30,7 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+        self.requires("lz4/1.9.3")
 
     def source(self):
         archive_name = "mysql-" + self.version
@@ -81,6 +82,7 @@ class LibMysqlClientCConan(ConanFile):
         self._cmake.definitions["WITH_UNIT_TESTS"] = False
         self._cmake.definitions["ENABLED_PROFILING"] = False
         self._cmake.definitions["WIX_DIR"] = False
+        self._cmake.definitions["WITH_LZ4"] = "system"
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in str(self.settings.compiler.runtime)
