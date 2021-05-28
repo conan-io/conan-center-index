@@ -173,7 +173,7 @@ class Assimp(ConanFile):
         self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
         self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
         self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
-
+        self._cmake.definitions["IGNORE_GIT_HASH"] = True
         self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
 
         self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
