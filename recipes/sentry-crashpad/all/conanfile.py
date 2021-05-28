@@ -75,7 +75,7 @@ class SentryCrashpadConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if tools.Version(self.version) > "0.4":
-            openssl_repl  = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
+            openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
             tools.replace_in_file(os.path.join(self._source_subfolder, "external", "crashpad", "CMakeLists.txt"),
                                   "find_package(OpenSSL)", openssl_repl)
         cmake = self._configure_cmake()
@@ -109,7 +109,7 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["util"].requires = ["compat", "mini_chromium", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
-        if self.options.with_tls == "openssl":
+        if self.options.get_safe("with_tls") == "openssl":
             self.cpp_info.components["util"].requires.append("openssl::openssl")
 
         self.cpp_info.components["client"].libs = ["crashpad_client"]
