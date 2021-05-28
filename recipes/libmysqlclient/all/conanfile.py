@@ -34,12 +34,31 @@ class LibMysqlClientCConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def _patch_files(self):
+        for lib in ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "MYSQL_CHECK_%s()\n" % lib.upper(),
+                "",
+                strict=False)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "INCLUDE(%s)\n" % lib,
+                "",
+                strict=False)
         tools.rmdir(os.path.join(self._source_subfolder, "extra"))
         for folder in ['client', 'man', 'mysql-test']:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "ADD_SUBDIRECTORY(%s)\n" % folder,
+                "",
+                strict=False)
         tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
+        for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                t,
+                "",
+                strict=False)
 
-    def _patch_files(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES ssl",
             "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
