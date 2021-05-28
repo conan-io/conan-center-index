@@ -34,10 +34,12 @@ class SentryCrashpadConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ("Linux", "Android") or tools.Version(self.version) < "0.4":
+            del self.options.with_tls
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        if self.options.with_tls:
+        if self.options.get_safe("with_tls"):
             self.requires("openssl/1.1.1k")
 
     def validate(self):
@@ -72,6 +74,10 @@ class SentryCrashpadConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if tools.Version(self.version) > "0.4":
+            openssl_repl  = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
+            tools.replace_in_file(os.path.join(self._source_subfolder, "external", "crashpad", "CMakeLists.txt"),
+                                  "find_package(OpenSSL)", openssl_repl)
         cmake = self._configure_cmake()
         cmake.build()
 
