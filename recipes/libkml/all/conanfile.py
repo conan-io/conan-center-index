@@ -37,10 +37,10 @@ class LibkmlConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("expat/2.2.10")
+        self.requires("boost/1.76.0")
+        self.requires("expat/2.4.1")
         self.requires("minizip/1.2.11")
-        self.requires("uriparser/0.9.4")
+        self.requires("uriparser/0.9.5")
         self.requires("zlib/1.2.11")
 
     def source(self):
