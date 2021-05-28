@@ -21,6 +21,10 @@ class LibMysqlClientCConan(ConanFile):
     _cmake = None
 
     @property
+    def _with_zstd(self):
+        return tools.Version(self.version) > "8.0.17"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -30,6 +34,8 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+        if self._with_zstd:
+            self.requires("zstd/1.5.0")
         self.requires("lz4/1.9.3")
 
     def source(self):
@@ -46,7 +52,7 @@ class LibMysqlClientCConan(ConanFile):
                 "",
                 strict=False)
         tools.rmdir(os.path.join(self._source_subfolder, "extra"))
-        for folder in ['client', 'man', 'mysql-test']:
+        for folder in ['client', 'man', 'mysql-test', "libbinlogstandalone"]:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "ADD_SUBDIRECTORY(%s)\n" % folder,
@@ -58,6 +64,10 @@ class LibMysqlClientCConan(ConanFile):
                 t,
                 "",
                 strict=False)
+        if self._with_zstd:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
+                "NAMES zstd",
+                "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
             "NAMES ssl",
@@ -99,6 +109,10 @@ class LibMysqlClientCConan(ConanFile):
         self._cmake.definitions["ENABLED_PROFILING"] = False
         self._cmake.definitions["WIX_DIR"] = False
         self._cmake.definitions["WITH_LZ4"] = "system"
+
+        if self._with_zstd:
+            self._cmake.definitions["WITH_ZSTD"] = "system"
+            self._cmake.definitions["ZSTD_INCLUDE_DIR"] = self.deps_cpp_info["zstd"].include_paths[0]
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in str(self.settings.compiler.runtime)
