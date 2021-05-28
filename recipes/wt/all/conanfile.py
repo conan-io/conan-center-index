@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class WtConan(ConanFile):
@@ -117,9 +117,8 @@ class WtConan(ConanFile):
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
