@@ -24,7 +24,7 @@ class TgbotConan(ConanFile):
     }
 
     generators = "cmake", "cmake_find_package"
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ["CMakeLists.txt"]
 
     _cmake = None
 
@@ -78,4 +78,4 @@ class TgbotConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = ['TgBot']
+        self.cpp_info.libs = ["TgBot"]
