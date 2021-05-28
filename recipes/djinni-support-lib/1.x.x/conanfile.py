@@ -87,6 +87,9 @@ class DjinniSuppotLib(ConanFile):
             "apple-clang": "10",
         }
 
+    def package_id(self):
+        del self.options.target
+
     def validate(self):
         if self.options.target != "deprecated":
             self.output.warn("The 'target' option is deprecated and will be removed soon. Use 'with_jni', 'with_objc', 'with_python' or 'with_cppcli' options instead.")
