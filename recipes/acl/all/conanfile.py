@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.33.0"
 
 class LibAclConan(ConanFile):
-    name = "libacl"
+    name = "acl"
     description = "Commands for Manipulating POSIX Access Control Lists"
     topics = ("conan", "acl", "POSIX")
     license = "GPL-2.0-or-later"
@@ -52,8 +52,7 @@ class LibAclConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(self)
         conf_args = [
             "--prefix={}".format(tools.unix_path(self.package_folder)),
             "--bindir={}".format(tools.unix_path(
@@ -65,20 +64,18 @@ class LibAclConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
         self.copy("COPYING", dst="licenses", src=self._doc_folder)
-        tools.rmdir(os.path.join(self.package_folder,"lib","pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         
