@@ -16,12 +16,12 @@ class TgbotConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
-        "shared": [True, False]
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
-        "shared": False
     }
 
     generators = "cmake", "cmake_find_package"
