@@ -12,7 +12,7 @@ class ConanFileDefault(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/apache/thrift"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/*.diff"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
