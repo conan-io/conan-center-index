@@ -2,6 +2,8 @@ from conans import tools, CMake, ConanFile
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">1.33.0"
+
 
 class ConanFileDefault(ConanFile):
     name = "thrift"
@@ -61,9 +63,8 @@ class ConanFileDefault(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "thrift-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
         if tools.os_info.is_windows:
