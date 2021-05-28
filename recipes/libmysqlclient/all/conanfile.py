@@ -42,7 +42,14 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
 
     def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+            "NAMES ssl",
+            "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+            "NAMES crypto",
+            "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
