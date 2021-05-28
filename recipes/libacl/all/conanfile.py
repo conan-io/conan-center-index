@@ -37,8 +37,7 @@ class LibAclConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "libacl is just supported for Linux")
+            raise ConanInvalidConfiguration("libacl is just supported for Linux")
 
     def configure(self):
         del self.settings.compiler.cppstd
@@ -85,6 +84,4 @@ class LibAclConan(ConanFile):
         
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libacl"
-        self.cpp_info.names["cmake_find_package"] = "libacl"
-        self.cpp_info.names["cmake_find_package_multi"] = "libacl"
         self.cpp_info.libs = ["acl"]
