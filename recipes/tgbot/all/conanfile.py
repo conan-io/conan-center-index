@@ -43,9 +43,9 @@ class TgbotConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("libcurl/7.75.0")
-        self.requires("openssl/1.1.1j")
+        self.requires("boost/1.76.0")
+        self.requires("libcurl/7.76.0")
+        self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
