@@ -1,8 +1,14 @@
 sources:
+  "1.1.1":
+    url: "https://github.com/jgarzik/univalue/archive/v1.1.1.tar.gz"
+    sha256: "72760ce6cdaa7b3cc1d47c54ca3e3f494d213084796b4c7694c4aba85a447db2"
   "1.0.5":
     url: "https://github.com/jgarzik/univalue/archive/v1.0.5.tar.gz"
     sha256: "59eee225b078066c60277cab6dd93e74a0e7bed2be455db507eb39bd4f8e4319"
 patches:
+  "1.1.1":
+    - patch_file: "patches/1.1.1-0001-fix-windows.patch"
+      base_path: "source_subfolder"
   "1.0.5":
-    - patch_file: "patches/0001-fix-windows.patch"
+    - patch_file: "patches/1.0.5-0001-fix-windows.patch"
       base_path: "source_subfolder"

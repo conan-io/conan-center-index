@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class UnivalueConan(ConanFile):
     name = "univalue"
@@ -37,13 +39,11 @@ class UnivalueConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("univalue-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -64,7 +64,7 @@ class UnivalueConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     @contextmanager
@@ -98,8 +98,9 @@ class UnivalueConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            os.unlink(os.path.join(self.package_folder, "lib",  "libunivalue.la"))
+
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         suffix = ".dll" if self.options.shared and self.settings.os == "Windows" else ""
@@ -108,3 +109,5 @@ class UnivalueConan(ConanFile):
         self.cpp_info.libs = ["univalue{}".format(suffix)]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
+
+        self.cpp_info.names["pkg_config"] = "univalue"
