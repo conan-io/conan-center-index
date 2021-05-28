@@ -33,9 +33,7 @@ class LibMysqlClientCConan(ConanFile):
         self.requires("lz4/1.9.3")
 
     def source(self):
-        archive_name = "mysql-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         tools.rmdir(os.path.join(self._source_subfolder, "extra"))
         for folder in ['client', 'man', 'mysql-test']:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
