@@ -40,7 +40,7 @@ class Jinja2cppConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.76.0")
         self.requires("expected-lite/0.5.0")
         self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
         self.requires("optional-lite/3.4.0")
