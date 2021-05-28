@@ -34,7 +34,7 @@ class LibcdsConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.76.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
