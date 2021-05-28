@@ -47,3 +47,6 @@ sources:
   "2.68.1":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.1/glib-2.68.1.tar.gz"
     sha256: "10b8786f533efd2bf253ce1978ec39fe0f0848c963a57cd51c760eee5595ca8b"
+  "2.68.2":
+    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.2/glib-2.68.2.tar.gz"
+    sha256: "904b5f63792f34ee40a31637806f63f5e5dd81ed18acd1380e184a257b4976e3"
