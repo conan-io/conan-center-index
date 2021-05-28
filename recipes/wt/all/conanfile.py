@@ -54,7 +54,7 @@ class WtConan(ConanFile):
         "connector_http": True,
         "connector_isapi": True,
         "connector_fcgi": False
-        }
+    }
 
     _cmake = None
 
