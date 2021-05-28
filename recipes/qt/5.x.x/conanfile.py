@@ -1000,6 +1000,11 @@ Examples = bin/datadir/examples""")
             _create_module("Bluetooth", ["Network"])
             _create_module("Nfc", [])
 
+        if self.options.qtdatavis3d:
+            _create_module("DataVisualization", ["Gui"])
+
+        if self.options.qtnetworkauth:
+            _create_module("NetworkAuth", ["Network"])
 
         if not self.options.shared:
             if self.settings.os == "Windows":
