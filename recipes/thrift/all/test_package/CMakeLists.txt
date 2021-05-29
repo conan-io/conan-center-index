@@ -16,5 +16,5 @@ set(SOURCE_FILES    calculator_constants.cpp
                     test_package.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} thrift::thriftnb)  # FIXME: shoulbe be thriftnb::thriftnb
+target_link_libraries(${PROJECT_NAME} thriftnb::thriftnb)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
