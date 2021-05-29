@@ -1,8 +1,21 @@
 sources:
+  "2.0.0":
+    url: https://github.com/ceres-solver/ceres-solver/archive/2.0.0.tar.gz
+    sha256: 2ab0348e0f65fdf43bebcd325a1c73f7e8999691ee75e2a2981281931c42e9fa
   "1.14.0":
     url: https://github.com/ceres-solver/ceres-solver/archive/1.14.0.tar.gz
     sha256: 1296330fcf1e09e6c2f926301916f64d4a4c5c0ff12d460a9bc5d4c48411518f
+  "1.13.0":
+    url: https://github.com/ceres-solver/ceres-solver/archive/1.13.0.tar.gz
+    sha256: 51ccb201b61ac71501fb6ccef158f078a750bc796ee6a271cd535cfe338202e5
 patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-find-libraries-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.0-0002-fix-eigen-version.patch"
+      base_path: "source_subfolder"
   "1.14.0":
-    - patch_file: "patches/find-libraries-conan.patch"
+    - patch_file: "patches/1.14.0-0001-find-libraries-conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.14.0-0002-fix-msvc-c++17.patch"
       base_path: "source_subfolder"

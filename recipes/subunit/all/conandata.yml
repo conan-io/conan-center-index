@@ -1,0 +1,4 @@
+sources:
+  "1.4.0":
+    url: "https://launchpad.net/subunit/trunk/1.4.0/+download/subunit-1.4.0.tar.gz"
+    sha256: "00792096e96cbf1d5f9394dadd0ea73309a4f8b2214822949f1888ce5c2cf1c0"

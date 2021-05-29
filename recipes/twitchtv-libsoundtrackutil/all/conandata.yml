@@ -1,0 +1,8 @@
+sources:
+  "0.0.8":
+    url: https://github.com/twitchtv/libsoundtrackutil/archive/v0.0.8.tar.gz
+    sha256: "95546c40850ee02c03424ca189d66cb4359117b47c87ccc18c5ebe348fd4e040"
+patches:
+  "0.0.8":
+    - patch_file: "patches/clang-8-fix.patch"
+      base_path: "source_subfolder"

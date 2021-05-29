@@ -1,0 +1,8 @@
+sources:
+  "0.2":
+    sha256: f52445e0b236ecf0fda50ac5a1b7a2da511401c885071fb97a74b6b9844a9e64
+    url: https://github.com/CrowCpp/crow/archive/0.2.tar.gz
+patches:
+  "0.2":
+    - patch_file: "patches/001-disable-examples.patch"
+      base_path: "source_subfolder"

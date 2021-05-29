@@ -1,33 +1,45 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
-import sys
 
 
-class DefaultNameConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
+
+    def _boost_option(self, name, default):
+        try:
+            return getattr(self.options["boost"], name, default)
+        except (AttributeError, ConanException):
+            return default
 
     def build(self):
+        # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
         with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
             cmake = CMake(self)
-            if self.options["boost"].header_only:
-                cmake.definitions["HEADER_ONLY"] = "TRUE"
-            else:
+            cmake.definitions["HEADER_ONLY"] = self.options["boost"].header_only
+            if not self.options["boost"].header_only:
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
-                cmake.definitions["WITH_PYTHON"] = "TRUE"
-            if not self.options["boost"].without_random:
-                cmake.definitions["WITH_RANDOM"] = "TRUE"
-            if not self.options["boost"].without_regex:
-                cmake.definitions["WITH_REGEX"] = "TRUE"
-            if not self.options["boost"].without_test:
-                cmake.definitions["WITH_TEST"] = "TRUE"
-            if not self.options["boost"].without_coroutine:
-                cmake.definitions["WITH_COROUTINE"] = "TRUE"
-            if not self.options["boost"].without_chrono:
-                cmake.definitions["WITH_CHRONO"] = "TRUE"
-            cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
+                pyversion = tools.Version(self.options["boost"].python_version)
+                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
+                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
+            cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
+            cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
+            cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
+            cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
+            cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
+            cmake.definitions["WITH_FIBER"] = not self.options["boost"].without_fiber
+            cmake.definitions["WITH_LOCALE"] = not self.options["boost"].without_locale
+            cmake.definitions["WITH_NOWIDE"] = not self._boost_option("without_nowide", True)
+            cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
+            cmake.definitions["WITH_STACKTRACE"] = not self.options["boost"].without_stacktrace
+            cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
+            cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
             cmake.configure()
+            # Disable parallel builds because c3i (=conan-center's test/build infrastructure) seems to choke here
+            cmake.parallel = False
             cmake.build()
 
     def test(self):
@@ -46,8 +58,26 @@ class DefaultNameConan(ConanFile):
             self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
+        if not self.options["boost"].without_fiber:
+            self.run(os.path.join("bin", "fiber_exe"), run_environment=True)
+        if not self.options["boost"].without_locale:
+            self.run(os.path.join("bin", "locale_exe"), run_environment=True)
+        if not self._boost_option("without_nowide", True):
+            self.run("{} {}".format(os.path.join("bin", "nowide_exe"), os.path.join(self.source_folder, "conanfile.py")), run_environment=True)
+        if not self._boost_option("without_json", True):
+            self.run(os.path.join("bin", "json_exe"), run_environment=True)
         if not self.options["boost"].without_python:
-            os.chdir("bin")
-            sys.path.append(".")
-            import hello_ext
-            hello_ext.greet()
+            with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
+                self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
+            self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
+        if not self.options["boost"].without_stacktrace:
+            self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
+            if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
+                self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
+            if self.settings.os == "Windows":
+                self.run(os.path.join("bin", "stacktrace_windbg_exe"), run_environment=True)
+                self.run(os.path.join("bin", "stacktrace_windbg_cached_exe"), run_environment=True)
+            else:
+                self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
+            if self._boost_option("with_stacktrace_backtrace", False):
+                self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)

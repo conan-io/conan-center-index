@@ -1,0 +1,13 @@
+sources:
+  "0.1.0":
+    url: "https://gitlab-lepuy.iut-clermont.uca.fr/opengl/imagl/-/archive/v0.1.0/imagl-v0.1.0.tar.gz"
+    sha256: "9dcfba4c2efa8d44bf4cc9edd324794865dd6d6331467d3c69f5c5574db3844e"
+  "0.1.1":
+    url: "https://gitlab-lepuy.iut-clermont.uca.fr/opengl/imagl/-/archive/v0.1.1/imagl-v0.1.1.tar.gz"
+    sha256: "4a7502cc733431af6423246fe5144e2eddb984454a66cca51742c852980ac862"
+  "0.1.2":
+    url: "https://gitlab-lepuy.iut-clermont.uca.fr/opengl/imagl/-/archive/v0.1.2/imagl-v0.1.2.tar.gz"
+    sha256: "d1edf74e00f969a47dc56e4400b805600d6997270339d49e91b7c6112a2cb37e"
+  "0.2.1":
+    url: "https://gitlab-lepuy.iut-clermont.uca.fr/opengl/imagl/-/archive/v0.2.1/imagl-v0.2.1.tar.gz"
+    sha256: "5a68cdeff4338e411695cca16c4230567de298f8efee2a9fadcc6fa644a70248"

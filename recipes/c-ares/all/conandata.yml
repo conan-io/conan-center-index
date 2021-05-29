@@ -1,4 +1,7 @@
 sources:
+  "1.17.1":
+    sha256: 61f7cf09605f5e38d4828f82d0e2ddb9de8e355ecfd6819b740691c644583b8f
+    url: https://github.com/c-ares/c-ares/archive/cares-1_17_1.tar.gz
   "1.16.1":
     sha256: 870962cc8f6b352303c404ce848e2ea1f1072f3c0a940042209a72179511c08c
     url: https://github.com/c-ares/c-ares/archive/cares-1_16_1.tar.gz
@@ -8,3 +11,18 @@ sources:
   "1.14.0":
     sha256: 62dd12f0557918f89ad6f5b759f0bf4727174ae9979499f5452c02be38d9d3e8
     url: https://github.com/c-ares/c-ares/archive/cares-1_14_0.tar.gz
+patches:
+  "1.17.1":
+    - patch_file: "patches/upstream-pr-395-bundle-destination-v16-17.patch"
+      base_path: "source_subfolder"
+  "1.16.1":
+    - patch_file: "patches/upstream-pr-395-bundle-destination-v16-17.patch"
+      base_path: "source_subfolder"
+  "1.15.0":
+    - patch_file: "patches/upstream-pr-395-bundle-destination-v15.patch"
+      base_path: "source_subfolder"
+  "1.14.0":
+    - patch_file: "patches/option-tools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/upstream-pr-395-bundle-destination-v14.patch"
+      base_path: "source_subfolder"

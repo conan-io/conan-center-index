@@ -149,5 +149,7 @@ class GladConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.shared:
+            self.cpp_info.defines = ["GLAD_GLAPI_EXPORT"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("dl")

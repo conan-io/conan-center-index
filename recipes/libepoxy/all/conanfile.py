@@ -25,17 +25,27 @@ class EpoxyConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "glx": True,
-        "egl": False,
+        "egl": True,
         "x11": True
     }
+    
+    required_conan_version = ">=1.33.0"
 
     _meson = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds on Windows are not supported")
@@ -43,24 +53,26 @@ class EpoxyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.glx
             del self.options.egl
             del self.options.x11
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.57.1")
 
     def requirements(self):
         self.requires("opengl/system")
         if self.settings.os == "Linux":
             if self.options.x11:
                 self.requires("xorg/system")
+            if self.options.egl:
+                self.requires("egl/system")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_meson(self):
         if self._meson:
@@ -70,9 +82,9 @@ class EpoxyConan(ConanFile):
         defs["docs"] = "false"
         defs["tests"] = "false"
         for opt in ["glx", "egl"]:
-            defs[opt] = "yes" if self.settings.os == "Linux" and getattr(self.options, opt) else "no"
+            defs[opt] = "yes" if self.options.get_safe(opt, False) else "no"
         for opt in ["x11"]:
-            defs[opt] = "true" if self.settings.os == "Linux" and getattr(self.options, opt) else "false"
+            defs[opt] = "true" if self.options.get_safe(opt, False) else "false"
         args=[]
         args.append("--wrap-mode=nofallback")
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)

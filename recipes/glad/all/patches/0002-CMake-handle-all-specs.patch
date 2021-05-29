@@ -1,0 +1,24 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -73,10 +73,17 @@ elseif(GLAD_GENERATOR STREQUAL "volt")
+   )
+ else()
+   set(GLAD_INCLUDE_DIRS "${GLAD_OUT_DIR}/include")
+-  list(APPEND GLAD_SOURCES
+-    "${GLAD_OUT_DIR}/src/glad.c"
+-    "${GLAD_INCLUDE_DIRS}/glad/glad.h"
+-  )
++  if(GLAD_SPEC STREQUAL "gl")
++    list(APPEND GLAD_SOURCES
++      "${GLAD_OUT_DIR}/src/glad.c"
++      "${GLAD_INCLUDE_DIRS}/glad/glad.h"
++    )
++  else()
++    list(APPEND GLAD_SOURCES
++      "${GLAD_OUT_DIR}/src/glad_${GLAD_SPEC}.c"
++      "${GLAD_INCLUDE_DIRS}/glad/glad_${GLAD_SPEC}.h"
++    )
++  endif()
+ endif()
+ 
+ if(NOT GLAD_ALL_EXTENSIONS)

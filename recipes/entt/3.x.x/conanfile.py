@@ -1,13 +1,14 @@
-import os
-
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class EnttConan(ConanFile):
     name = "entt"
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
-    topics = ("conan," "entt", "gaming", "entity", "ecs")
+    topics = ("conan", "entt", "gaming", "entity", "ecs")
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
@@ -38,8 +39,14 @@ class EnttConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+        # Compare versions asuming minor satisfies if not explicitly set
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        if lazy_lt_semver(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
@@ -47,8 +54,8 @@ class EnttConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

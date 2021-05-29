@@ -1,0 +1,10 @@
+sources:
+  "1.8.2":
+    url: "https://gitlab.com/gromacs/tng/-/archive/v1.8.2/tng-v1.8.2.tar.gz"
+    sha256: "7010eb68e586efe23dd553b306ac1a4eea6a4b9028b32a3408744d9e4ae4205e"
+patches:
+  "1.8.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-BuildTNG.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-CMakeLists.patch"

@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -21,7 +21,7 @@
+ 
+ #   Define the target
+ add_library(properties buf.c properties.c)
+-set_target_properties(properties PROPERTIES
++set_target_properties(properties PROPERTIES C_STANDARD 99 C_EXTENSIONS OFF C_STANDARD_REQUIRED ON
+     VERSION             ${PROJECT_VERSION}
+     SOVERSION           ${PROJECT_VERSION_MAJOR}
+     EXPORT_NAME         libproperties

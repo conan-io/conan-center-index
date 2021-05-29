@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_CXX"] = self.options["gmp"].enable_cxx
+        cmake.definitions["TEST_PIC"] = "fPIC" in self.options["gmp"] and self.options["gmp"].fPIC
         cmake.configure()
         cmake.build()
 

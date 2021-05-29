@@ -1,0 +1,64 @@
+Adapted from https://patch-diff.githubusercontent.com/raw/arvidn/libtorrent/pull/5170
+
+From e771e347fc7559bc238264f47c8e9cb372628e59 Mon Sep 17 00:00:00 2001
+From: Arvid Norberg <arvid@libtorrent.org>
+Date: Sat, 19 Sep 2020 10:14:44 +0200
+Subject: [PATCH] increase handler storage sizes
+
+---
+ include/libtorrent/aux_/allocating_handler.hpp | 2 ++
+ include/libtorrent/aux_/session_impl.hpp       | 4 ++--
+ include/libtorrent/torrent.hpp                 | 2 +-
+ 3 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/include/libtorrent/aux_/allocating_handler.hpp b/include/libtorrent/aux_/allocating_handler.hpp
+index f2353f724d..7014560273 100644
+--- a/include/libtorrent/aux_/allocating_handler.hpp
++++ b/include/libtorrent/aux_/allocating_handler.hpp
+@@ -123,6 +123,7 @@ namespace libtorrent { namespace aux {
+ 		{
+ 			TORRENT_UNUSED(size);
+ 			TORRENT_ASSERT_VAL(size <= Size, size);
++			if (size > Size) std::abort();
+ #if TORRENT_USE_ASSERTS
+ 			TORRENT_ASSERT(!ctx->storage.used);
+ 			ctx->storage.used = true;
+@@ -138,6 +139,7 @@ namespace libtorrent { namespace aux {
+ 			TORRENT_UNUSED(ctx);
+ 
+ 			TORRENT_ASSERT_VAL(size <= Size, size);
++			if (size > Size) std::abort();
+ 			TORRENT_ASSERT(ptr == &ctx->storage.bytes);
+ #if TORRENT_USE_ASSERTS
+ 			ctx->storage.used = false;
+diff --git a/include/libtorrent/aux_/session_impl.hpp b/include/libtorrent/aux_/session_impl.hpp
+index 4456c364cc..573039a4db 100644
+--- a/include/libtorrent/aux_/session_impl.hpp
++++ b/include/libtorrent/aux_/session_impl.hpp
+@@ -1220,9 +1220,9 @@ namespace aux {
+ 
+ 			// abort may not fail and cannot allocate memory
+ #if defined BOOST_ASIO_ENABLE_HANDLER_TRACKING
+-			aux::handler_storage<100> m_abort_handler_storage;
++			aux::handler_storage<104> m_abort_handler_storage;
+ #elif defined _M_AMD64
+-			aux::handler_storage<88> m_abort_handler_storage;
++			aux::handler_storage<96> m_abort_handler_storage;
+ #else
+-			aux::handler_storage<56> m_abort_handler_storage;
++			aux::handler_storage<64> m_abort_handler_storage;
+ #endif
+diff --git a/include/libtorrent/torrent.hpp b/include/libtorrent/torrent.hpp
+index d1cc872ace..0df00263f1 100644
+--- a/include/libtorrent/torrent.hpp
++++ b/include/libtorrent/torrent.hpp
+@@ -1441,7 +1441,7 @@ namespace libtorrent {
+ 		// used to post a message to defer disconnecting peers
+ 		std::vector<std::shared_ptr<peer_connection>> m_peers_to_disconnect;
+ 		aux::deferred_handler m_deferred_disconnect;
+ #ifdef _M_AMD64
+-		aux::handler_storage<96> m_deferred_handler_storage;
++		aux::handler_storage<104> m_deferred_handler_storage;
+ #else
+-		aux::handler_storage<64> m_deferred_handler_storage;
++		aux::handler_storage<72> m_deferred_handler_storage;

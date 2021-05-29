@@ -1,0 +1,114 @@
+--- cmake/FindEigen.cmake
++++ cmake/FindEigen.cmake
+@@ -180,12 +180,12 @@
+ if (NOT EIGEN_FOUND)
+   # Search user-installed locations first, so that we prefer user installs
+   # to system installs where both exist.
+-  list(APPEND EIGEN_CHECK_INCLUDE_DIRS
+-    /usr/local/include
+-    /usr/local/homebrew/include # Mac OS X
+-    /opt/local/var/macports/software # Mac OS X.
+-    /opt/local/include
+-    /usr/include)
++  list(APPEND EIGEN_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
++    #/usr/local/include
++    #/usr/local/homebrew/include # Mac OS X
++    #/opt/local/var/macports/software # Mac OS X.
++    #/opt/local/include
++    #/usr/include)
+   # Additional suffixes to try appending to each search path.
+   list(APPEND EIGEN_CHECK_PATH_SUFFIXES
+     eigen3 # Default root directory for Eigen.
+--- cmake/FindGflags.cmake
++++ cmake/FindGflags.cmake
+@@ -434,21 +434,21 @@
+ 
+   # Search user-installed locations first, so that we prefer user installs
+   # to system installs where both exist.
+-  list(APPEND GFLAGS_CHECK_INCLUDE_DIRS
+-    /usr/local/include
+-    /usr/local/homebrew/include # Mac OS X
+-    /opt/local/var/macports/software # Mac OS X.
+-    /opt/local/include
+-    /usr/include)
++  list(APPEND GFLAGS_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
++    #/usr/local/include
++    #/usr/local/homebrew/include # Mac OS X
++    #/opt/local/var/macports/software # Mac OS X.
++    #/opt/local/include
++    #/usr/include)
+   list(APPEND GFLAGS_CHECK_PATH_SUFFIXES
+     gflags/include # Windows (for C:/Program Files prefix).
+     gflags/Include ) # Windows (for C:/Program Files prefix).
+ 
+-  list(APPEND GFLAGS_CHECK_LIBRARY_DIRS
+-    /usr/local/lib
+-    /usr/local/homebrew/lib # Mac OS X.
+-    /opt/local/lib
+-    /usr/lib)
++  list(APPEND GFLAGS_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
++    #/usr/local/lib
++    #/usr/local/homebrew/lib # Mac OS X.
++    #/opt/local/lib
++    #/usr/lib)
+   list(APPEND GFLAGS_CHECK_LIBRARY_SUFFIXES
+     gflags/lib # Windows (for C:/Program Files prefix).
+     gflags/Lib ) # Windows (for C:/Program Files prefix).
+@@ -467,7 +467,7 @@
+   endif (NOT GFLAGS_INCLUDE_DIR OR
+     NOT EXISTS ${GFLAGS_INCLUDE_DIR})
+ 
+-  find_library(GFLAGS_LIBRARY NAMES gflags
++  find_library(GFLAGS_LIBRARY NAMES gflags gflags_static
+     HINTS ${GFLAGS_LIBRARY_DIR_HINTS}
+     PATHS ${GFLAGS_CHECK_LIBRARY_DIRS}
+     PATH_SUFFIXES ${GFLAGS_CHECK_LIBRARY_SUFFIXES})
+--- cmake/FindGlog.cmake
++++ cmake/FindGlog.cmake
+@@ -228,12 +228,12 @@
+ 
+   # Search user-installed locations first, so that we prefer user installs
+   # to system installs where both exist.
+-  list(APPEND GLOG_CHECK_INCLUDE_DIRS
+-    /usr/local/include
+-    /usr/local/homebrew/include # Mac OS X
+-    /opt/local/var/macports/software # Mac OS X.
+-    /opt/local/include
+-    /usr/include)
++  list(APPEND GLOG_CHECK_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH})
++    #/usr/local/include
++    #/usr/local/homebrew/include # Mac OS X
++    #/opt/local/var/macports/software # Mac OS X.
++    #/opt/local/include
++    #/usr/include)
+   # Windows (for C:/Program Files prefix).
+   list(APPEND GLOG_CHECK_PATH_SUFFIXES
+     glog/include
+@@ -243,11 +243,11 @@
+     google-glog/include # CMake installs with project name prefix.
+     google-glog/Include)
+ 
+-  list(APPEND GLOG_CHECK_LIBRARY_DIRS
+-    /usr/local/lib
+-    /usr/local/homebrew/lib # Mac OS X.
+-    /opt/local/lib
+-    /usr/lib)
++  list(APPEND GLOG_CHECK_LIBRARY_DIRS ${CMAKE_LIB_PATH})
++    #/usr/local/lib
++    #/usr/local/homebrew/lib # Mac OS X.
++    #/opt/local/lib
++    #/usr/lib)
+   # Windows (for C:/Program Files prefix).
+   list(APPEND GLOG_CHECK_LIBRARY_SUFFIXES
+     glog/lib
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -336,7 +336,7 @@
+ # GFlags.
+ if (GFLAGS)
+   # Don't search with REQUIRED as we can continue without gflags.
+-  find_package(Gflags)
++  find_package(Gflags REQUIRED)
+   if (GFLAGS_FOUND)
+     message("-- Found Google Flags header in: ${GFLAGS_INCLUDE_DIRS}, "
+       "in namespace: ${GFLAGS_NAMESPACE}")

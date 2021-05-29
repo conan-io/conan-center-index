@@ -1,5 +1,4 @@
 import os
-import glob
 from conans import ConanFile, tools
 
 
@@ -13,15 +12,20 @@ class NanoflannConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jlblancoc/nanoflann"
     license = "BSD-2-Clause"
+    settings = "compiler"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
+        extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):

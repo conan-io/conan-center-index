@@ -107,8 +107,10 @@ class NloptConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "NLopt"
         self.cpp_info.names["cmake_find_package_multi"] = "NLopt"
+        self.cpp_info.names["pkg_config"] = "nlopt"
         self.cpp_info.components["nloptlib"].names["cmake_find_package"] = "nlopt"
         self.cpp_info.components["nloptlib"].names["cmake_find_package_multi"] = "nlopt"
+        self.cpp_info.components["nloptlib"].names["pkg_config"] = "nlopt"
         self.cpp_info.components["nloptlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.components["nloptlib"].system_libs.append("m")

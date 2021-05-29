@@ -1,0 +1,4 @@
+sources:
+  "2.5.1":
+    url: "http://download.savannah.nongnu.org/releases/attr/attr-2.5.1.tar.gz"
+    sha256: "BAE1C6949B258A0D68001367CE0C741CEBDACDD3B62965D17E5EB23CD78ADAF8"

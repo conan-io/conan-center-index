@@ -47,9 +47,14 @@ class ICUBase(ConanFile):
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
+    @property
+    def _make_tool(self):
+        return "make" if self.settings.os != "FreeBSD" else "gmake"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.data_packaging
 
     def configure(self):
         if self.options.shared:
@@ -89,13 +94,17 @@ class ICUBase(ConanFile):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
+                    # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
+                    tools.save(os.path.join("data", "out", "tmp", "dirs.timestamp"), "")
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
-                    command = "make {silent} -j {cpu_count}".format(silent=self._silent,
-                                                                    cpu_count=tools.cpu_count())
+                    command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
+                                                                      silent=self._silent,
+                                                                      cpu_count=tools.cpu_count())
                     self.run(command, win_bash=tools.os_info.is_windows)
                     if self.options.with_unit_tests:
-                        command = "make {silent} check".format(silent=self._silent)
+                        command = "{make} {silent} check".format(make=self._make_tool,
+                                                                 silent=self._silent)
                         self.run(command, win_bash=tools.os_info.is_windows)
 
     def _configure_autotools(self):
@@ -106,10 +115,6 @@ class ICUBase(ConanFile):
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
         if tools.is_apple_os(self.settings.os):
             self._env_build.defines.append("_DARWIN_C_SOURCE")
-            if self.settings.get_safe("os.version"):
-                self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                            self.settings.os.version))
-
         if "msys2" in self.deps_user_info:
             self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
         return self._env_build
@@ -135,8 +140,10 @@ class ICUBase(ConanFile):
                     ("Linux", "clang"): "Linux",
                     ("Macos", "gcc"): "MacOSX",
                     ("Macos", "clang"): "MacOSX",
-                    ("Macos", "apple-clang"): "MacOSX"}.get((str(self.settings.os),
-                                                             str(self.settings.compiler)))
+                    ("Macos", "apple-clang"): "MacOSX",
+                    ("FreeBSD", "gcc"): "FreeBSD",
+                    ("FreeBSD", "clang"): "FreeBSD"}.get((str(self.settings.os),
+                                                          str(self.settings.compiler)))
         arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
@@ -159,13 +166,20 @@ class ICUBase(ConanFile):
             if env_build.target:
                 args.append("--target=%s" % env_build.target)
 
-        args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+        if self.settings.os != "Windows":
+            # http://userguide.icu-project.org/icudata
+            # This is the only directly supported behavior on Windows builds.
+            args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+
         datadir = os.path.join(self.package_folder, "lib")
         datadir = datadir.replace("\\", "/") if tools.os_info.is_windows else datadir
         args.append("--datarootdir=%s" % datadir)  # do not use share
         bindir = os.path.join(self.package_folder, "bin")
         bindir = bindir.replace("\\", "/") if tools.os_info.is_windows else bindir
         args.append("--sbindir=%s" % bindir)
+        libdir = os.path.join(self.package_folder, "lib")
+        libdir = libdir.replace("\\", "/") if tools.os_info.is_windows else libdir
+        args.append("--libdir=%s" % libdir)
 
         if self._is_mingw:
             mingw_chost = "i686-w64-mingw32" if self.settings.arch == "x86" else "x86_64-w64-mingw32"
@@ -194,14 +208,15 @@ class ICUBase(ConanFile):
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(env_build.vars):
                 with tools.chdir(build_dir):
-                    command = "make {silent} install".format(silent=self._silent)
+                    command = "{make} {silent} install".format(make=self._make_tool,
+                                                               silent=self._silent)
                     self.run(command, win_bash=tools.os_info.is_windows)
         self._install_name_tool()
 
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             tools.mkdir(os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
 
@@ -257,7 +272,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-uc"].names["pkg_config"] = "icu-uc"
         self.cpp_info.components["icu-uc"].libs = [self._lib_name("icuuc")]
         self.cpp_info.components["icu-uc"].requires = ["icu-data"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["icu-uc"].system_libs = ["m", "pthread"]
             if self.options.with_dyload:
                 self.cpp_info.components["icu-uc"].system_libs.append("dl")
@@ -270,7 +285,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-i18n"].names["pkg_config"] = "icu-i18n"
         self.cpp_info.components["icu-i18n"].libs = [self._lib_name("icuin" if self.settings.os == "Windows" else "icui18n")]
         self.cpp_info.components["icu-i18n"].requires = ["icu-uc"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["icu-i18n"].system_libs = ["m"]
 
         # Alias of i18n CMake component
@@ -290,7 +305,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
         self.cpp_info.components["icu-tu"].libs = [self._lib_name("icutu")]
         self.cpp_info.components["icu-tu"].requires = ["icu-i18n", "icu-uc"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["icu-tu"].system_libs = ["pthread"]
 
         # icutest
@@ -299,7 +314,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
         self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)

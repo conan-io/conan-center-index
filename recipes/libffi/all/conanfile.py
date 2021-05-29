@@ -2,8 +2,10 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.tools import Version
 from contextlib import contextmanager
 import os
+import shutil
 import platform
 
+required_conan_version = ">=1.29"
 
 class LibffiConan(ConanFile):
     name = "libffi"
@@ -22,8 +24,27 @@ class LibffiConan(ConanFile):
         "fPIC": True,
     }
     exports_sources = "patches/**"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     _autotools = None
-    _source_subfolder = "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20200517")
+        self.build_requires("gnu-config/cci.20201022")
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -47,20 +68,6 @@ class LibffiConan(ConanFile):
 
                 # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
                 tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20190524")
 
     @contextmanager
     def _build_context(self):
@@ -91,14 +98,12 @@ class LibffiConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         config_args = [
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            config_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            config_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.defines.append("FFI_BUILDING")
         if self.options.shared:
             self._autotools.defines.append("FFI_BUILDING_DLL")
@@ -126,6 +131,11 @@ class LibffiConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -142,8 +152,7 @@ class LibffiConan(ConanFile):
         else:
             with self._build_context():
                 autotools = self._configure_autotools()
-                with tools.chdir(self.build_folder):
-                    autotools.install()
+                autotools.install()
 
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))

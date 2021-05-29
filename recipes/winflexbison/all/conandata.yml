@@ -2,3 +2,6 @@ sources:
   "2.5.22":
     url: "https://github.com/lexxmark/winflexbison/archive/v2.5.22.tar.gz"
     sha256: "697c2c4af3308625605b75498bd63a9a294660f8e43a4c35452cf4334fa4a530"
+  "2.5.24":
+    url: "https://github.com/lexxmark/winflexbison/archive/v2.5.24.tar.gz"
+    sha256: "a49d6e310636e3487e1e066e411d908cfeae2d5b5fde1f3cf74fe1d6d4301062"

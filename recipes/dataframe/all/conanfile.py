@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -21,6 +20,9 @@ class DataFrameConan(ConanFile):
         "financial-data-analysis",
         "trading-strategies",
         "machine-learning",
+        "trading-algorithms",
+        "financial-engineering",
+        "large-data",
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -79,11 +81,11 @@ class DataFrameConan(ConanFile):
             )
             return
 
-        # Exclude compilers not supported by cpp-taskflow
+        # Exclude compilers not supported
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++17. {} {} is not supported.".format(
-                    self.name, compiler, Version(self.settings.compiler.version.value)
+                    self.name, compiler, tools.Version(self.settings.compiler.version)
                 )
             )
 
@@ -96,6 +98,8 @@ class DataFrameConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.Version(self.version) >= "1.14.0":
+            self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.configure()
         return self._cmake
 

@@ -2,16 +2,6 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 3721f76..847f587 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -10,6 +10,9 @@ endif()
- 
- project (mFAST)
- 
-+include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
-+conan_basic_setup()
-+
- if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
- 	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
- 	include(CodeCoverage)
 @@ -69,9 +72,6 @@ include_directories ("${PROJECT_BINARY_DIR}"
  ## Setting up Boost Library
  ################################

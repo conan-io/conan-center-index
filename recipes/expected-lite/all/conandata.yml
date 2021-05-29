@@ -5,3 +5,6 @@ sources:
   "0.4.0":
     url: https://github.com/martinmoene/expected-lite/archive/v0.4.0.tar.gz
     sha256: bf4c0ceec0f1197f33dbab1d5cce43af8722d9507143c6ec837ee3288e29f80c
+  "0.5.0":
+    url: https://github.com/martinmoene/expected-lite/archive/v0.5.0.tar.gz
+    sha256: 80f8c91d228cdc5cac3698141c0321d51dcdb0239c2fdcdeae7d46a9a58f2297

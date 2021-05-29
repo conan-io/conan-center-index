@@ -10,8 +10,8 @@ class GslLiteConan(ConanFile):
     generators = "cmake"
     homepage = "https://github.com/martinmoene/gsl-lite"
     topics = ("GSL")
-    description = ("A single-file header-only version of ISO C++ ",
-                   "Guideline Support Library (GSL) for C++98, C++11 and later")
+    description = "A single-file header-only version of ISO C++ " \
+                  "Guideline Support Library (GSL) for C++98, C++11 and later"
     no_copy_source = True
     #  There are three configuration options for this GSL implementation's behavior
     #  when pre/post conditions on the GSL types are violated:

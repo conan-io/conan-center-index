@@ -1,0 +1,16 @@
+sources:
+  3.6.5:
+    sha256: aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12
+    url: https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.tar.gz
+patches:
+  3.6.5:
+    - patch_file: patches/0001-fix-to_cmake_path-usage.patch
+      base_path: source_subfolder
+    - patch_file: patches/0002-Use-standard-CMake-name-for-gif.patch
+      base_path: source_subfolder
+    - patch_file: patches/0003-Correct-usage-of-_LIBRARY-to-_LIBRARIES.patch
+      base_path: source_subfolder
+    - patch_file: patches/0004-Allow-explicit-control-of-plugins.patch
+      base_path: source_subfolder
+    - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
+      base_path: source_subfolder

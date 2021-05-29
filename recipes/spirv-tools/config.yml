@@ -1,5 +1,13 @@
 versions:
-  "v2019.2":
+  "2020.5":
+    folder: all
+  "v2020.5":
+    folder: all
+  "2020.3":
     folder: all
   "v2020.3":
+    folder: all
+  "2019.2":
+    folder: all
+  "v2019.2":
     folder: all

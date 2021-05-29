@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Re2CConan(ConanFile):
     name = "re2c"
@@ -9,7 +11,7 @@ class Re2CConan(ConanFile):
     topics = ("conan", "re2c", "lexer", "language", "tokenizer", "flex")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://re2c.org/"
-    license = "Public domain"
+    license = "Unlicense"
     settings = "os", "arch", "build_type", "compiler"
     exports_sources = "patches/**"
 
@@ -27,14 +29,15 @@ class Re2CConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("re2c-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):

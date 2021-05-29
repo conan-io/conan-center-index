@@ -26,7 +26,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -106,22 +106,14 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    @property
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ("libstdc++", "libstdc++11"):
-            return "stdc++"
-        elif libcxx in ("libc++",):
-            return "c++"
-        else:
-            return False
-
     def package_info(self):
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
         self.cpp_info.names["cmake_find_package"] = "MySQL"
         self.cpp_info.names["cmake_find_package_multi"] = "MySQL"
+        self.cpp_info.names["pkg_config"] = "mysqlclient"
         if not self.options.shared:
-            if self._stdcpp_library:
-                self.cpp_info.system_libs.append(self._stdcpp_library)
+            stdcpp_library = tools.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.system_libs.append(stdcpp_library)
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.append('m')

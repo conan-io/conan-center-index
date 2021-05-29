@@ -1,0 +1,17 @@
+--- libsrc/Makefile
++++ libsrc/Makefile
+@@ -254,10 +254,10 @@
+ 
+ $(foreach drvtype,$(DRVTYPES),$(eval $(call DRVTYPE_template,$(drvtype))))
+ 
+-AR65 := $(if $(wildcard ../bin/ar65*),../bin/ar65,ar65)
+-CA65 := $(if $(wildcard ../bin/ca65*),../bin/ca65,ca65)
+-CC65 := $(if $(wildcard ../bin/cc65*),../bin/cc65,cc65)
+-LD65 := $(if $(wildcard ../bin/ld65*),../bin/ld65,ld65)
++AR65 := $(if $(wildcard ../bin/ar65*),../bin/ar65,ar65)$(EXE_SUFFIX)
++CA65 := $(if $(wildcard ../bin/ca65*),../bin/ca65,ca65)$(EXE_SUFFIX)
++CC65 := $(if $(wildcard ../bin/cc65*),../bin/cc65,cc65)$(EXE_SUFFIX)
++LD65 := $(if $(wildcard ../bin/ld65*),../bin/ld65,ld65)$(EXE_SUFFIX)
+ 
+ export CC65_HOME := $(abspath ..)
+ 

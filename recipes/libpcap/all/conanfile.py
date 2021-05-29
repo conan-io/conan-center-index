@@ -28,6 +28,7 @@ class LibPcapConan(ConanFile):
     # TODO: Add dbus-glib when available
     # TODO: Add libnl-genl when available
     # TODO: Add libbluetooth when available
+    # TODO: Add libibverbs when available
 
     @property
     def _source_subfolder(self):
@@ -61,7 +62,13 @@ class LibPcapConan(ConanFile):
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--disable-universal" if not self.options.enable_universal else "")
             configure_args.append("--enable-usb" if self.options.enable_libusb else "--disable-usb")
-            configure_args.extend(["--without-libnl", "--disable-bluetooth", "--disable-packet-ring", "--disable-dbus"])
+            configure_args.extend([
+                "--without-libnl",
+                "--disable-bluetooth",
+                "--disable-packet-ring",
+                "--disable-dbus",
+                "--disable-rdma"
+            ])
             if tools.cross_building(self.settings):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 configure_args.append("--with-pcap=%s" % target_os)

@@ -11,7 +11,7 @@ class AutomakeConan(ConanFile):
     exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
-    settings = "os"
+    settings = "os", "arch", "compiler"
     _autotools = None
 
     @property
@@ -23,18 +23,25 @@ class AutomakeConan(ConanFile):
         [major, minor, _] = self.version.split(".", 2)
         return '{}.{}'.format(major, minor)
 
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+
+    def requirements(self):
+        self.requires("autoconf/2.71")
+        # automake requires perl-Thread-Queue package
+
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.compiler
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-
-    def requirements(self):
-        self.requires("autoconf/2.69")
-        # automake requires perl-Thread-Queue package
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
 
     @property
     def _datarootdir(self):

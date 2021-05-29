@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -18,6 +19,7 @@ class LibtiffConan(ConanFile):
         "lzma": [True, False],
         "jpeg": [False, "libjpeg-turbo", "libjpeg"],
         "zlib": [True, False],
+        "libdeflate": [True, False],
         "zstd": [True, False],
         "jbig": [True, False],
         "webp": [True, False],
@@ -29,6 +31,7 @@ class LibtiffConan(ConanFile):
         "lzma": True,
         "jpeg": "libjpeg",
         "zlib": True,
+        "libdeflate": True,
         "zstd": True,
         "jbig": True,
         "webp": True,
@@ -44,31 +47,52 @@ class LibtiffConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_webp_option(self):
+        return tools.Version(self.version) >= "4.0.10"
+
+    @property
+    def _has_zstd_option(self):
+        return tools.Version(self.version) >= "4.0.10"
+
+    @property
+    def _has_libdeflate_option(self):
+        return tools.Version(self.version) >= "4.2.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "4.1.0":
+        if not self._has_webp_option:
             del self.options.webp
+        if not self._has_zstd_option:
             del self.options.zstd
+        if not self._has_libdeflate_option:
+            del self.options.libdeflate
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
+        if self.options.get_safe("libdeflate") and not self.options.zlib:
+            raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
+        if self.options.get_safe("libdeflate"):
+            self.requires("libdeflate/1.7")
         if self.options.lzma:
-            self.requires("xz_utils/5.2.4")
+            self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.get_safe("webp"):
             self.requires("libwebp/1.1.0")
 
@@ -87,9 +111,10 @@ class LibtiffConan(ConanFile):
                                   r"WINDOWS_EXPORT_ALL_SYMBOLS ON)")
         cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            tools.replace_in_file(cmakefile,
-                                  "find_library(M_LIBRARY m)",
-                                  "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
+            if tools.Version(self.version) < "4.2.0":
+                tools.replace_in_file(cmakefile,
+                                    "find_library(M_LIBRARY m)",
+                                    "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
             if tools.Version(self.version) < "4.0.9":
                 tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
         tools.replace_in_file(cmakefile,
@@ -104,8 +129,14 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["jpeg"] = self.options.jpeg != False
             self._cmake.definitions["jbig"] = self.options.jbig
             self._cmake.definitions["zlib"] = self.options.zlib
-            self._cmake.definitions["zstd"] = self.options.get_safe("zstd", False)
-            self._cmake.definitions["webp"] = self.options.get_safe("webp", False)
+            if self._has_libdeflate_option:
+                self._cmake.definitions["libdeflate"] = self.options.libdeflate
+                if self.options.libdeflate:
+                    self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
+            if self._has_zstd_option:
+                self._cmake.definitions["zstd"] = self.options.zstd
+            if self._has_webp_option:
+                self._cmake.definitions["webp"] = self.options.webp
             self._cmake.definitions["cxx"] = self.options.cxx
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

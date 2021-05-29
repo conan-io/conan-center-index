@@ -10,7 +10,7 @@ class AutoconfConan(ConanFile):
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     exports_sources = "patches/**"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     _autotools = None
 
     @property
@@ -24,9 +24,15 @@ class AutoconfConan(ConanFile):
     def requirements(self):
         self.requires("m4/1.4.18")
 
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.compiler
+        # The m4 requirement does not change the contents of this package
+        self.info.requires.clear()
+
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @property
     def _datarootdir(self):
@@ -53,7 +59,7 @@ class AutoconfConan(ConanFile):
         return self._autotools
 
     def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
@@ -75,10 +81,6 @@ class AutoconfConan(ConanFile):
                 if not os.path.isfile(fullpath):
                     continue
                 os.rename(fullpath, fullpath + ".exe")
-
-    def package_id(self):
-        # The m4 requirement does not change the contents of this package
-        self.info.requires.clear()
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

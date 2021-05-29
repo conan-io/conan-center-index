@@ -1,0 +1,7 @@
+sources:
+  "1.2.5":
+    url: "https://github.com/oatpp/oatpp-openssl/archive/1.2.5.tar.gz"
+    sha256: "55c023c4149bb57ea1dde4b455c4b36d52eac04fbf3f864a91785665080e6169"
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp-openssl/archive/1.2.0.tar.gz"
+    sha256: "ac65c53e75fbd2a5df15a456d329fbafb61a6e7a7933b310972b1573f8ec1794"

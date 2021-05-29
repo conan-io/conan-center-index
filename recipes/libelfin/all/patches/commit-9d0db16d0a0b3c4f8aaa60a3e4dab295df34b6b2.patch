@@ -1,0 +1,173 @@
+#
+# Updates v0.3 to the commit 9d0db16d0a0b3c4f8aaa60a3e4dab295df34b6b2:
+#   9d0db16 fix data initialization of elf segment
+#   74f1116 ignore dwarf extensions of gcc in the line table
+#   ac45a09 Added #include <errno.h> to files that use errno.
+#   4a678c7 Don't mandate that compilation units need a DW_AT_comp_dir for line table parsing
+#   85812f6 Fix typos
+#
+diff --git a/dwarf/abbrev.cc b/dwarf/abbrev.cc
+index c780b8e..f77dc0c 100644
+--- a/dwarf/abbrev.cc
++++ b/dwarf/abbrev.cc
+@@ -133,6 +133,10 @@ resolve_type(DW_AT name, DW_FORM form)
+                 case DW_AT::ranges:
+                         return value::type::rangelist;
+ 
++                case DW_AT::lo_user...DW_AT::hi_user:
++                        //HACK: ignore vendor extensions
++                        return value::type::invalid;
++
+                 default:
+                         throw format_error("DW_FORM_sec_offset not expected for attribute " +
+                                            to_string(name));
+diff --git a/dwarf/dwarf.cc b/dwarf/dwarf.cc
+index fe9b947..2465eef 100644
+--- a/dwarf/dwarf.cc
++++ b/dwarf/dwarf.cc
+@@ -289,8 +289,7 @@ compilation_unit::get_line_table() const
+ {
+         if (!m->lt.valid()) {
+                 const die &d = root();
+-                if (!d.has(DW_AT::stmt_list) || !d.has(DW_AT::name) ||
+-                    !d.has(DW_AT::comp_dir))
++                if (!d.has(DW_AT::stmt_list) || !d.has(DW_AT::name))
+                         goto done;
+ 
+                 shared_ptr<section> sec;
+@@ -300,8 +299,10 @@ compilation_unit::get_line_table() const
+                         goto done;
+                 }
+ 
++                auto comp_dir = d.has(DW_AT::comp_dir) ? at_comp_dir(d) : "";
++                
+                 m->lt = line_table(sec, d[DW_AT::stmt_list].as_sec_offset(),
+-                                   m->subsec->addr_size, at_comp_dir(d),
++                                   m->subsec->addr_size, comp_dir,
+                                    at_name(d));
+         }
+ done:
+diff --git a/elf/elf++.hh b/elf/elf++.hh
+index 562d1de..ee59ed0 100644
+--- a/elf/elf++.hh
++++ b/elf/elf++.hh
+@@ -48,7 +48,7 @@ public:
+  * section data.  Hence, callers must ensure that the loader passed to
+  * this file remains live as long as any such pointer is in use.
+  * Keeping any object that can return such a pointer live is
+- * sufficieint to keep the loader live.
++ * sufficient to keep the loader live.
+  */
+ class elf
+ {
+@@ -204,7 +204,7 @@ public:
+ 
+        /**
+         * Return the in-memory size of this segment in bytes.
+-        * Bytes between file_size() and mem_size() are implicity zeroes.
++        * Bytes between file_size() and mem_size() are implicitly zeroes.
+         */
+        size_t mem_size() const;
+ 
+diff --git a/elf/elf.cc b/elf/elf.cc
+index 587329f..61172ac 100644
+--- a/elf/elf.cc
++++ b/elf/elf.cc
+@@ -167,12 +167,10 @@ elf::get_segment(unsigned index) const
+ 
+ struct segment::impl {
+         impl(const elf &f)
+-                : f(f) { }
++                : f(f), data(nullptr) { }
+ 
+         const elf f;
+         Phdr<> hdr;
+-        //  const char *name;
+-        //  size_t name_len;
+         const void *data;
+ };
+ 
+diff --git a/elf/mmap_loader.cc b/elf/mmap_loader.cc
+index 69d8acb..875d7bd 100644
+--- a/elf/mmap_loader.cc
++++ b/elf/mmap_loader.cc
+@@ -9,6 +9,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/mman.h>
++#include <errno.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+ 
+diff --git a/examples/dump-lines.cc b/examples/dump-lines.cc
+index ec58be1..9fed1fa 100644
+--- a/examples/dump-lines.cc
++++ b/examples/dump-lines.cc
+@@ -1,6 +1,7 @@
+ #include "elf++.hh"
+ #include "dwarf++.hh"
+ 
++#include <errno.h>
+ #include <fcntl.h>
+ #include <inttypes.h>
+ 
+diff --git a/examples/dump-sections.cc b/examples/dump-sections.cc
+index 12e7569..22526ec 100644
+--- a/examples/dump-sections.cc
++++ b/examples/dump-sections.cc
+@@ -2,6 +2,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <errno.h>
+ #include <fcntl.h>
+ #include <inttypes.h>
+ 
+diff --git a/examples/dump-segments.cc b/examples/dump-segments.cc
+index f9e07d3..4c6319f 100644
+--- a/examples/dump-segments.cc
++++ b/examples/dump-segments.cc
+@@ -2,6 +2,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <errno.h>
+ #include <fcntl.h>
+ #include <inttypes.h>
+ 
+diff --git a/examples/dump-syms.cc b/examples/dump-syms.cc
+index e7c2c3b..af7f484 100644
+--- a/examples/dump-syms.cc
++++ b/examples/dump-syms.cc
+@@ -2,6 +2,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <errno.h>
+ #include <fcntl.h>
+ #include <inttypes.h>
+ 
+diff --git a/examples/dump-tree.cc b/examples/dump-tree.cc
+index 57d2b70..8bf2a63 100644
+--- a/examples/dump-tree.cc
++++ b/examples/dump-tree.cc
+@@ -1,6 +1,7 @@
+ #include "elf++.hh"
+ #include "dwarf++.hh"
+ 
++#include <errno.h>
+ #include <fcntl.h>
+ #include <inttypes.h>
+ 
+diff --git a/examples/find-pc.cc b/examples/find-pc.cc
+index dc40b85..2e324fc 100644
+--- a/examples/find-pc.cc
++++ b/examples/find-pc.cc
+@@ -1,6 +1,7 @@
+ #include "elf++.hh"
+ #include "dwarf++.hh"
+ 
++#include <errno.h>
+ #include <fcntl.h>
+ #include <string>
+ #include <inttypes.h>

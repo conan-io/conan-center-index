@@ -42,6 +42,20 @@ class SomeRecipe(ConanFile):
             del self.options.fPIC
 ```
 
+Or, a package is built as `shared` library and `fPIC` is declared. The option `fPIC` should be removed:
+
+```python
+class SomeRecipe(ConanFile):
+    ...
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+```
+
+Here we use `configure()` method, because user options are loaded after `config_options()` only.
+
+
 #### **<a name="KB-H008">#KB-H008</a>: "VERSION RANGES"**
 
 It is not allowed to use version ranges for the recipes in Conan center, where the dependency graph should be deterministic.

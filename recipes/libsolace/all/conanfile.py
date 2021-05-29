@@ -2,7 +2,6 @@ import os
 
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
 
 class LibsolaceConan(ConanFile):
     name = "libsolace"
@@ -28,7 +27,7 @@ class LibsolaceConan(ConanFile):
         return ["17", "gnu17", "20", "gnu20"]
 
     def configure(self):
-        compiler_version = Version(str(self.settings.compiler.version))
+        compiler_version = tools.Version(str(self.settings.compiler.version))
 
         if self.settings.os == "Windows":
           raise ConanInvalidConfiguration("This library is not yet compatible with Windows")

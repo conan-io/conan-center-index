@@ -57,6 +57,11 @@ class JSONCConan(ConanFile):
                                   "execute_process(COMMAND ./configure --host %s " % host)
 
         self._cmake = CMake(self)
+
+        if tools.Version(self.version) >= "0.15":
+            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+            self._cmake.definitions["DISABLE_STATIC_FPIC"] = not self.options.get_safe("fPIC", True)
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
