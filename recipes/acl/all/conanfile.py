@@ -53,13 +53,7 @@ class AclConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        conf_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-            "--bindir={}".format(tools.unix_path(
-                os.path.join(self.package_folder, "bin"))),
-            "--libdir={}".format(tools.unix_path(
-                os.path.join(self.package_folder, "lib")))
-        ]
+        conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
