@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
-class LibAclConan(ConanFile):
+class AclConan(ConanFile):
     name = "acl"
     description = "Commands for Manipulating POSIX Access Control Lists"
     topics = ("conan", "acl", "POSIX")
