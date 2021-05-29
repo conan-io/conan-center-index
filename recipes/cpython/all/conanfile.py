@@ -690,10 +690,7 @@ class CPythonConan(ConanFile):
             pythonhome = os.path.join(self.package_folder, "bin")
         else:
             pythonhome = self.package_folder
-        self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
         self.user_info.pythonhome = pythonhome
-        if self.options.env_vars:
-            self.env_info.PYTHONHOME = pythonhome
 
         if self._is_py2:
             python_root = ""
