@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class MDSpanConan(ConanFile):
+class LAConan(ConanFile):
     name = "linear_algebra"
     homepage = "https://github.com/BobSteagall/wg21"
     description = "Production-quality reference implementation of P1385: A proposal to add linear algebra support to the C++ standard library"
@@ -19,7 +19,7 @@ class MDSpanConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 14
+        return 17
 
     @property
     def _minimum_compilers_version(self):
