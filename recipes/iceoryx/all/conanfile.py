@@ -8,6 +8,7 @@ import textwrap
 class IceoryxConan(ConanFile):
 
     name = "iceoryx"
+    version = "1.0.0"
     license = "	Apache-2.0"
     homepage = "https://iceoryx.io/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -23,8 +24,8 @@ class IceoryxConan(ConanFile):
         "toml_config":      True
     }
     generators = ["cmake", "cmake_find_package"]
-    exports_sources = ["patches/**"]
-    cmake = None
+    exports_sources = ["patches/**","CMakeLists.txt"]
+    _cmake = None
 
     @staticmethod
     def _create_cmake_module_alias_target(module_file, alias, aliased):
@@ -42,13 +43,6 @@ class IceoryxConan(ConanFile):
         return os.path.join(
             "lib",
             "cmake"
-        )
-
-    @property
-    def _conan_cmake_file(self):
-        return os.path.join(
-            os.getcwd(),
-            "conanbuildinfo.cmake"
         )
 
     @property
@@ -119,28 +113,27 @@ class IceoryxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
+    def _get_configured_cmake(self):
+        if self._cmake:
+            pass 
+        else:
+            self._cmake = CMake(self)
+        self._cmake.definitions["TOML_CONFIG"] = self.options.toml_config
+        self._cmake.configure()
+        return self._cmake
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
 
     def build(self):
         self._patch_sources()
-
-        self.cmake = CMake(self)
-        self.cmake.definitions["BUILD_SHARED_LIBS"]     = self.options.shared
-        self.cmake.definitions["TOML_CONFIG"]           = self.options.toml_config
-        self.cmake.definitions["CONAN_BUILD_INFO_FILE"] = self._conan_cmake_file
-
-        self.cmake.configure(
-            build_folder=self._build_folder,
-            source_folder=self._cmake_folder
-        )
-
-        self.cmake.build()
+        cmake = self._get_configured_cmake()
+        cmake.build()
 
     def package(self):
-        self.cmake.install()
-
+        cmake = self._get_configured_cmake()
+        cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_share)
         tools.rmdir(self._pkg_cmake)
