@@ -51,6 +51,8 @@ class CairoConan(ConanFile):
             del self.options.with_xcb
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self._is_msvc:
@@ -66,25 +68,25 @@ class CairoConan(ConanFile):
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.67.5")
+            self.requires("glib/2.68.1")
         self.requires("zlib/1.2.11")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.37")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires('msys2/20200517')
+            self.build_requires('msys2/cci.latest')
         if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
 
     @property
     def _is_msvc(self):
         return self.settings.compiler == 'Visual Studio'
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename('cairo-%s' % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -145,7 +147,8 @@ class CairoConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             self._env_build.flags.append("-Wno-enum-conversion")
 
-        self._env_build.configure(args=configure_args)
+        with tools.run_environment(self):
+            self._env_build.configure(args=configure_args)
         return self._env_build
 
     def _build_configure(self):

@@ -100,6 +100,7 @@ The list includes conan-center-index contributors who are very active and proven
 - [@theirix](https://github.com/theirix)
 - [@gocarlos](https://github.com/gocarlos)
 - [@mathbunnyru](https://github.com/mathbunnyru)
+- [@ericriff](https://github.com/ericriff)
 
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.

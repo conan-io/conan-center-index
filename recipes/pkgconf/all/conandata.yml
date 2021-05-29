@@ -7,8 +7,14 @@ sources:
     sha256: "d73f32c248a4591139a6b17777c80d4deab6b414ec2b3d21d0a24be348c476ab"
 patches:
   "1.7.3":
-    - patch_file: "patches/0001-meson-use-declare-dependencies.patch"
+    - patch_file: "patches/1.7.3-0001-meson-use-declare-dependencies.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-0002-clang-12-strndup-not-in-string-h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-0003-meson-use-library.patch"
       base_path: "source_subfolder"
   "1.7.4":
-    - patch_file: "patches/0003-fix-static-link.patch"
+    - patch_file: "patches/1.7.4-0001-clang-12-strndup-not-in-string-h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.4-0002-fix-static-link.patch"
       base_path: "source_subfolder"
