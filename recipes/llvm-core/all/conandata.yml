@@ -1,9 +1,19 @@
 sources:
+  "11.0.1":
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/llvm-11.0.1.src.tar.xz
+    sha256: ccd87c254b6aebc5077e4e6977d08d4be888e7eb672c6630a26a15d58b59b528
   "11.1.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.1.0/llvm-11.1.0.src.tar.xz
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "11.0.1":
+    - base_path: "source"
+      patch_file: "patches/11.0.1-vs2019.patch"
+    - base_path: "source"
+      patch_file: "patches/11.0.1-cmake.patch"
+    - base_path: "source"
+      patch_file: "patches/11.0.1-native.patch"
   "11.1.0":
     - base_path: "source"
       patch_file: "patches/11.1.0-vs2019.patch"
