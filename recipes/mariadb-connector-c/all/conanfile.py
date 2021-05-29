@@ -60,7 +60,7 @@ class MariadbConnectorcConan(ConanFile):
         if self.options.with_curl:
             self.requires("libcurl/7.75.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         elif self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 

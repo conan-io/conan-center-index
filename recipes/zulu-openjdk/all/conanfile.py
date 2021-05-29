@@ -28,10 +28,8 @@ class ZuluOpenJDK(ConanFile):
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
     def source(self):
-        url = self.conan_data["sources"][self.version]["url"][str(self.settings.os)]
-        checksum = self.conan_data["sources"][self.version]["sha256"][str(self.settings.os)]
-        tools.get(url, sha256=checksum)
-        os.rename(glob.glob("zulu*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         pass # nothing to do, but this shall trigger no warnings ;-)

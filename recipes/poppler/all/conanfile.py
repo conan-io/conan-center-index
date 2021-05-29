@@ -72,6 +72,23 @@ class PopplerConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _cppstd_required(self):
+        if self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6":
+            return 17
+        else:
+            return 14
+
+    @property
+    def _minimum_compilers_version(self):
+        # Poppler requires C++14 
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1"
+        }
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -84,32 +101,35 @@ class PopplerConan(ConanFile):
             del self.options.with_libiconv
         if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
-        if self.settings.compiler == "gcc":
-            if tools.Version(self.settings.compiler.version) < 5:
-                raise ConanInvalidConfiguration("poppler requires at least gcc 5")
-        elif self.settings.compiler == "Visual Studio":
-            if tools.Version(self.settings.compiler.version) < 15:
-                raise ConanInvalidConfiguration("poppler requires at least Visual Studio 15 (2017)")
+        
+        # C++ standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
+        if not minimum_version: 
+            self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.") 
+        elif tools.Version(self.settings.compiler.version) < minimum_version: 
+            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.") 
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
-        self.requires("poppler-data/0.4.9")
+        self.requires("poppler-data/0.4.10")
         self.requires("freetype/2.10.4")
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.with_cairo:
-            self.requires("cairo/1.17.2")
+            self.requires("cairo/1.17.4")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.67.1")
+            self.requires("glib/2.68.1")
         if self.options.get_safe("with_gobject_introspection"):
-            self.requires("gobject-introspection/1.66.1")
+            self.requires("gobject-introspection/1.68.0")
         if self.options.with_qt:
-            # FIXME: missing qt recipe
-            raise ConanInvalidConfiguration("qt is not (yet) available on cii")
+            self.requires("qt/6.0.3")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/3.24.24")
         if self.options.with_openjpeg:
@@ -122,13 +142,13 @@ class PopplerConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_nss:
             # FIXME: missing nss recipe
-            raise ConanInvalidConfiguration("nss is not (yet) available on cii")
+            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.splash:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.76.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.74.0")
+            self.requires("libcurl/7.75.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
@@ -147,6 +167,8 @@ class PopplerConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
+        self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._cppstd_required
 
         self._cmake.definitions["ENABLE_UNSTABLE_API_ABI_HEADERS"] = True
         self._cmake.definitions["BUILD_GTK_TESTS"] = False
@@ -278,7 +300,7 @@ class PopplerConan(ConanFile):
             qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
             self.cpp_info.components["libpoppler-qt"].libs = ["poppler-qt{}".format(qt_major)]
             self.cpp_info.components["libpoppler-qt"].names["pkg_config"] = "poppler-qt{}".format(qt_major)
-            self.cpp_info.components["libpoppler-qt"].requires = ["libpoppler", "qt::qt"]
+            self.cpp_info.components["libpoppler-qt"].requires = ["libpoppler", "qt::qtCore", "qt::qtGui", "qt::qtWidgets"]
 
         datadir = self.deps_user_info["poppler-data"].datadir
         self.output.info("Setting POPPLER_DATADIR env var: {}".format(datadir))

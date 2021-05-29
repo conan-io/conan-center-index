@@ -1,0 +1,4 @@
+sources:
+  "4.0":
+    sha256: "39b542e326d5ff2e3dd1782080cc5de2d21d15f70b9321714938824b2b37bc30"
+    url: "https://github.com/mikke89/RmlUi/archive/refs/tags/4.0.zip"

@@ -1,0 +1,29 @@
+--- third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
++++ third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
+@@ -193,7 +193,7 @@
+           "arm64",
+         ]
+       } else {
+-        assert(false, "Unsupported architecture")
++        print("Unknown architecture -> assume conan knows how to handle it")
+       }
+     }
+ 
+@@ -268,7 +268,7 @@
+         "-m64",
+       ]
+     } else {
+-      assert(false, "Unsupported architecture")
++      print("Unknown architecture -> assume conan knows how to handle it")
+     }
+ 
+     # This is currently required by the clang toolchain build that DEPS uses
+@@ -302,7 +302,7 @@
+     } else if (target_cpu == "x64") {
+       common_flags += [ "--target=x86_64-fuchsia" ]
+     } else {
+-      assert(false, "Unsupported architecture")
++      print("Unknown architecture -> assume conan knows how to handle it")
+     }
+ 
+     # fdio is listed in ldflags instead of libs because it’s important for it to

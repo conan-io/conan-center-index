@@ -1,7 +1,10 @@
-import glob
-import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
+import glob
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class XZUtils(ConanFile):
@@ -11,7 +14,7 @@ class XZUtils(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
     topics = ("conan", "lzma", "xz", "compression")
-    license = "Public Domain, GNU LGPLv2.1, GNU GPLv2, or GNU GPLv3"
+    license = "Unlicense", "LGPL-2.1-or-later",  "GPL-2.0-or-later", "GPL-3.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -39,7 +42,7 @@ class XZUtils(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+           not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
     def source(self):
@@ -126,6 +129,40 @@ class XZUtils(ConanFile):
             for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
                 os.remove(la_file)
 
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            tools.Version(self.version)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file, version):
+        # TODO: also add LIBLZMA_HAS_AUTO_DECODER, LIBLZMA_HAS_EASY_ENCODER & LIBLZMA_HAS_LZMA_PRESET
+        content = textwrap.dedent("""\
+            if(DEFINED LibLZMA_FOUND)
+                set(LIBLZMA_FOUND ${{LibLZMA_FOUND}})
+            endif()
+            if(DEFINED LibLZMA_INCLUDE_DIRS)
+                set(LIBLZMA_INCLUDE_DIRS ${{LibLZMA_INCLUDE_DIRS}})
+            endif()
+            if(DEFINED LibLZMA_LIBRARIES)
+                set(LIBLZMA_LIBRARIES ${{LibLZMA_LIBRARIES}})
+            endif()
+            set(LIBLZMA_VERSION_MAJOR {major})
+            set(LIBLZMA_VERSION_MINOR {minor})
+            set(LIBLZMA_VERSION_PATCH {patch})
+            set(LIBLZMA_VERSION_STRING "{major}.{minor}.{patch}")
+        """.format(major=version.major, minor=version.minor, patch=version.patch))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
+
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines.append("LZMA_API_STATIC")
@@ -135,3 +172,5 @@ class XZUtils(ConanFile):
         self.cpp_info.names["pkg_config"] = "liblzma"
         self.cpp_info.names["cmake_find_package"] = "LibLZMA"
         self.cpp_info.names["cmake_find_package_multi"] = "LibLZMA"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

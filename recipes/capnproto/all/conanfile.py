@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class CapnprotoConan(ConanFile):
     name = "capnproto"
@@ -66,7 +68,7 @@ class CapnprotoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
@@ -75,8 +77,8 @@ class CapnprotoConan(ConanFile):
             self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -127,8 +129,7 @@ class CapnprotoConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_folder, "*")):
             if os.path.basename(cmake_file) != "CapnProtoMacros.cmake":
@@ -170,7 +171,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             self.cpp_info.components["kj-async"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
-        self.cpp_info.components["kj"].builddirs = self._cmake_folder
+        self.cpp_info.components["kj"].builddirs.append(self._cmake_folder)
         self.cpp_info.components["kj"].build_modules = [os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")]
 
         bin_path = os.path.join(self.package_folder, "bin")
