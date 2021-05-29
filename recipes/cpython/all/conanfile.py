@@ -60,7 +60,7 @@ class CPythonConan(ConanFile):
         "with_lzma": True,
 
         # options that don't change package id
-        "env_vars": False,
+        "env_vars": True,
     }
 
     _autotools = None
@@ -82,7 +82,7 @@ class CPythonConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options.shared
 
     @property
-    def _version_major_minor(self):
+    def _version_suffix(self):
         if self.settings.compiler == "Visual Studio":
             joiner = ""
         else:
@@ -121,8 +121,6 @@ class CPythonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
         if not self._supports_modules:
                 del self.options.with_bz2
                 del self.options.with_sqlite3
@@ -130,17 +128,23 @@ class CPythonConan(ConanFile):
 
                 del self.options.with_bsddb
                 del self.options.with_lzma
+        if self.settings.compiler == "Visual Studio":
+            # The msbuild generator only works with Visual Studio
+            self.generators.append("msbuild")
+
+    def validate(self):
+        if self.options.shared:
+            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
         if tools.is_apple_os(self.settings.os):
             if self._is_py2:
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
                 raise ConanInvalidConfiguration("This recipe (currently) does not support building python2 for apple products.")
         if self.settings.compiler == "Visual Studio":
-            # The msbuild generator only works with Visual Studio
-            self.generators.append("msbuild")
             if self.options.optimizations:
                 raise ConanInvalidConfiguration("This recipe does not support optimized MSVC cpython builds (yet)")
                 # FIXME: should probably throw when cross building
-                # FIXME: optimizations for Visual Studio can be added by, before building the final `build_type`:
+                # FIXME: optimizations for Visual Studio, before building the final `build_type`:
                 # 1. build the MSVC PGInstrument build_type,
                 # 2. run the instrumented binaries, (PGInstrument should have created a `python.bat` file in the PCbuild folder)
                 # 3. build the MSVC PGUpdate build_type
@@ -148,9 +152,12 @@ class CPythonConan(ConanFile):
                 raise ConanInvalidConfiguration("Building debug cpython requires a debug runtime (Debug cpython requires _CrtReportMode symbol, which only debug runtimes define)")
             if self._is_py2:
                 if self.settings.compiler.version >= tools.Version("14"):
-                    self.output.warn("Visual Studio versions 14 and higher were never officially supported by the cpython developers")
+                    self.output.warn("Visual Studio versions 14 and higher were never officially supported by the CPython developers")
             if str(self.settings.arch) not in self._msvc_archs:
-                raise ConanInvalidConfiguration("Visual Studio does not support this architecure")
+                raise ConanInvalidConfiguration("Visual Studio does not support this architecture")
+
+            if not self.options.shared and tools.Version(self._version_number_only) >= "3.10":
+                raise ConanInvalidConfiguration("Static msvc build disabled (>=3.10) due to \"AttributeError: module 'sys' has no attribute 'winver'\"")
 
     def package_id(self):
         del self.info.options.env_vars
@@ -495,7 +502,7 @@ class CPythonConan(ConanFile):
         self.copy("*.exe", src=build_path, dst=os.path.join(self.package_folder, self._msvc_install_subprefix))
         self.copy("*.dll", src=build_path, dst=os.path.join(self.package_folder, self._msvc_install_subprefix))
         self.copy("*.pyd", src=build_path, dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "DLLs"))
-        self.copy("python{}{}.lib".format(self._version_major_minor, infix), src=build_path, dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "libs"))
+        self.copy("python{}{}.lib".format(self._version_suffix, infix), src=build_path, dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "libs"))
         self.copy("*", src=os.path.join(self._source_subfolder, "Include"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "include"))
         self.copy("pyconfig.h", src=os.path.join(self._source_subfolder, "PC"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "include"))
         self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib"))
@@ -555,11 +562,11 @@ class CPythonConan(ConanFile):
                         done
                         exec "$(dirname "$__file__")/python{}" "$0" "$@"
                         '''
-                        """.format(self._version_major_minor)).encode())
+                        """.format(self._version_suffix)).encode())
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
-                os.symlink("python{}".format(self._version_major_minor), self._cpython_symlink)
+                os.symlink("python{}".format(self._version_suffix), self._cpython_symlink)
 
     @property
     def _cpython_symlink(self):
@@ -573,7 +580,7 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             suffix = ""
         else:
-            suffix = self._version_major_minor
+            suffix = self._version_suffix
         python = "python{}".format(suffix)
         if self.settings.compiler == "Visual Studio":
             if self.settings.build_type == "Debug":
@@ -606,7 +613,7 @@ class CPythonConan(ConanFile):
                 lib_ext = ""
         else:
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
-        return "python{}{}".format(self._version_major_minor, lib_ext)
+        return "python{}{}".format(self._version_suffix, lib_ext)
 
     def package_info(self):
         # FIXME: conan components Python::Interpreter component, need a target type
@@ -621,7 +628,7 @@ class CPythonConan(ConanFile):
             self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
             self.cpp_info.components["python"].libdirs = [os.path.join(self._msvc_install_subprefix, "libs")]
         else:
-            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}{}".format(self._version_major_minor, self._abi_suffix)))
+            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}{}".format(self._version_suffix, self._abi_suffix)))
         if self.options.shared:
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:

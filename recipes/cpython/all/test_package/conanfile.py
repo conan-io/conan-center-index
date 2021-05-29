@@ -177,4 +177,5 @@ class TestPackageConan(ConanFile):
                         self.output.info("Testing module (spam) using setup.py built module")
                         self._test_module("spam", True)
 
+        if self.options["cpython"].env_vars:
             self.run(os.path.join("bin", "test_package"), run_environment=True)
