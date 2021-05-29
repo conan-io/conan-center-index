@@ -45,7 +45,7 @@ class TgbotConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.76.0")
-        self.requires("libcurl/7.76.0")
+        self.requires("libcurl/7.77.0")
         self.requires("openssl/1.1.1k")
 
     @property
