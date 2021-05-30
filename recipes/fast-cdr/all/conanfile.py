@@ -66,10 +66,8 @@ class FastCDRConan(ConanFile):
                     add_library(fastcdr INTERFACE IMPORTED)
                     set_property(TARGET fastcdr PROPERTY INTERFACE_LINK_LIBRARIES fastcdr::fastcdr)
                     set_property(TARGET fastcdr PROPERTY INTERFACE_COMPILE_DEFINITIONS FASTCDR_DYN_LINK)
-                    set_property(TARGET fastcdr PROPERTY POSITION_INDEPENDENT_CODE True)
                 endif()
                 set_property(TARGET fastcdr::fastcdr PROPERTY INTERFACE_COMPILE_DEFINITIONS FASTCDR_DYN_LINK)
-                set_property(TARGET fastcdr::fastcdr PROPERTY POSITION_INDEPENDENT_CODE True)
             """)
         else:
             content += textwrap.dedent("""\
