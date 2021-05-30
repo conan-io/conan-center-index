@@ -70,6 +70,10 @@ class AzureStorageCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build(self):
         self._patch_sources()
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
