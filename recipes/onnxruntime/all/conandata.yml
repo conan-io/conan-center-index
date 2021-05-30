@@ -2,13 +2,5 @@ sources:
   "1.7.1":
     sha256: e24ff9a2a21dab74e6dfa821e9a267baa10e9423ffae5f5e404e3a2949eb41e2
     url: https://github.com/microsoft/onnxruntime/archive/v1.7.1.tar.gz
-  "1.5.3":
-    sha256: 40fc79f8a3126caba5fcdced260439c7b18c72214fb8f7268d87fac22098dfba
-    url: https://github.com/microsoft/onnxruntime/archive/v1.5.3.tar.gz
-  "1.2.0":
-    sha256: 1ed2a4303d621682c42ebaf99fb9a8ecdc386035b15925b148aa56944abc38c8
-    url: https://github.com/microsoft/onnxruntime/archive/v1.2.0.tar.gz
 patches:
   "1.7.1": []
-  "1.5.3": []
-  "1.2.0": []
