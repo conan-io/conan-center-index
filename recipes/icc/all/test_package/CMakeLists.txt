@@ -9,4 +9,4 @@ conan_basic_setup()
 find_package(icc REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example icc::icc)
+target_link_libraries(example PRIVATE icc::icc)

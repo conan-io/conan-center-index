@@ -21,7 +21,7 @@ class ICCConan(ConanFile):
         'shared': False,
         'fPIC': True,
     }
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ['CMakeLists.txt', 'patches/*']
 
     _cmake = None
@@ -43,14 +43,11 @@ class ICCConan(ConanFile):
             "gcc": "4.9.4"
         }
 
-    def _is_runtime_and_shared_option_compatible(self):
-        return (self.settings.compiler.runtime == "MT" and not self.options.shared) or \
-               (self.settings.compiler.runtime == "MD" and self.options.shared)
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         cmake = CMake(self)
+        cmake.definitions['ICC_BUILD_LIBRARY'] = True
         cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
         cmake.configure()
         self._cmake = cmake
@@ -81,17 +78,6 @@ class ICCConan(ConanFile):
                 "support for the required C++{} features is assumed"
             ).format(self.name, compiler, self._minimum_cpp_standard)
             self.output.warn(msg)
-        try:
-            if not self._is_runtime_and_shared_option_compatible():
-                msg = (
-                    "Incompatible compiler runtime {} and package shared option {} !!"
-                ).format(compiler.runtime, self.options.shared)
-                raise ConanInvalidConfiguration(msg)
-        except ConanException:
-            msg = (
-                "OS {} compiler does not have attribute runtime"
-            ).format(os)
-            self.output.warn(msg)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -116,7 +102,6 @@ class ICCConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "icc"
         self.cpp_info.names["cmake_find_multi_package"] = "icc"
         self.cpp_info.libs = ["ICC"]
-        self.cpp_info.libdirs = ["bin", "lib"]
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'wsock32']
