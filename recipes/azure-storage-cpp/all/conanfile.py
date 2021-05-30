@@ -36,7 +36,7 @@ class AzureStorageCppConan(ConanFile):
             self.requires("libxml2/2.9.10")
             self.requires("libuuid/1.0.3")
         if self.settings.os == "Macos":
-            self.requires("gettext/0.20.1")
+            self.requires("libgettext/0.20.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
