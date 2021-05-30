@@ -131,9 +131,9 @@ class LibffiConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_SUB,
+        shutil.copy(self.user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self.deps_user_info["gnu-config"].CONFIG_GUESS,
+        shutil.copy(self.user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
 
         with self._build_context():
