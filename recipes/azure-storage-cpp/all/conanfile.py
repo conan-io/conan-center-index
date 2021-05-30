@@ -50,6 +50,8 @@ class AzureStorageCppConan(ConanFile):
         self._cmake.definitions["CMAKE_FIND_FRAMEWORK"] = "LAST"
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_SAMPLES"] = False
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
 
         if self.settings.os == "Macos":
             self._cmake.definitions["GETTEXT_LIB_DIR"] = self.deps_cpp_info["libgettext"].lib_paths[0]
@@ -69,6 +71,8 @@ class AzureStorageCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
