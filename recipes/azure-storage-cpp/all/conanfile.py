@@ -36,7 +36,7 @@ class AzureStorageCppConan(ConanFile):
             self.requires("libxml2/2.9.10")
             self.requires("libuuid/1.0.3")
         if self.settings.os == "Macos":
-            self.requires("libgettext/0.20.1")
+            self.requires("gettext/0.20.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -65,6 +65,10 @@ class AzureStorageCppConan(ConanFile):
         tools.replace_in_file(cmake_lists, "CASABLANCA", "cpprestsdk")
         tools.replace_in_file(cmake_lists, " -stdlib=libc++", "")
         tools.replace_in_file(cmake_lists, " -std=c++11", "")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def build(self):
         self._patch_sources()
