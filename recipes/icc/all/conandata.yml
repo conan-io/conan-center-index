@@ -1,4 +1,4 @@
 sources:
   "1.0.0":
-    sha256: 207c9e5bce41dc3ad8e0c1a0c9c37bb30eda26bf4a33753846a71e3ec6c8bd32
+    sha256: f2d8060bc1f78b0b6272978577d2712bc199e8a1b62d9394db0f69f4da416f58
     url: https://github.com/redradist/Inter-Component-Communication/archive/refs/tags/v1.0.0.zip

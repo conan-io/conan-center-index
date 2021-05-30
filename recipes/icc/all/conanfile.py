@@ -47,7 +47,6 @@ class ICCConan(ConanFile):
         if self._cmake:
             return self._cmake
         cmake = CMake(self)
-        cmake.definitions['ICC_BUILD_LIBRARY'] = True
         cmake.definitions['ICC_BUILD_SHARED'] = self.options.shared
         cmake.configure()
         self._cmake = cmake
