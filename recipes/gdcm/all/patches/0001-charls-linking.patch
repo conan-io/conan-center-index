@@ -1,0 +1,38 @@
+--- a/Utilities/gdcmcharls/CMakeLists.txt
++++ b/Utilities/gdcmcharls/CMakeLists.txt
+@@ -61,12 +61,10 @@ endif()
+ #option(charls_BUILD_SHARED_LIBS "Build CharLS with shared libraries." OFF)
+ #set(BUILD_SHARED_LIBS ${charls_BUILD_SHARED_LIBS})
+ 
+-if(WIN32)
+-  if(BUILD_SHARED_LIBS)
+-    add_definitions(-DCHARLS_DLL_BUILD)
+-  else()
+-    add_definitions(-DCHARLS_STATIC)
+-  endif()
++if(BUILD_SHARED_LIBS)
++  add_definitions(-DCHARLS_DLL_BUILD)
++else()
++  add_definitions(-DCHARLS_STATIC)
+ endif()
+ 
+ add_library(${CHARLS_LIBRARY_NAME}
+--- a/Utilities/gdcmcharls/charls.h
++++ b/Utilities/gdcmcharls/charls.h
+@@ -13,12 +13,12 @@
+ #define CHARLS_IMEXPORT(returntype) __declspec(dllexport) returntype __stdcall
+ #endif
+ 
+-// Non-windows (static linking)
+-#if !defined(CHARLS_IMEXPORT) && !defined(_WIN32)
+-#  define CHARLS_IMEXPORT(returntype) returntype
++// Non-windows (dynamic linking)
++#if !defined(WIN32) && (defined(CHARLS_DLL) || defined(CHARLS_DLL_BUILD))
++#define CHARLS_IMEXPORT(returntype) __attribute__((visibility("default"))) returntype
+ #endif
+ 
+-// Windows static linking
++// Static linking
+ #if !defined(CHARLS_IMEXPORT) && defined(CHARLS_STATIC)
+ #  define CHARLS_IMEXPORT(returntype) returntype
+ #endif
