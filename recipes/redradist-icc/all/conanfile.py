@@ -4,7 +4,7 @@ import os
 
 
 class ICCConan(ConanFile):
-    name = 'icc'
+    name = 'redradist-icc'
     homepage = 'https://github.com/redradist/Inter-Component-Communication'
     license = 'MIT'
     url = 'https://github.com/conan-io/conan-center-index'
