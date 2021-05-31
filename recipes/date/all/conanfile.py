@@ -87,6 +87,7 @@ class DateConan(ConanFile):
             dst = os.path.join("include", "date")
             self.copy(pattern="date.h", dst=dst, src=src)
             self.copy(pattern="tz.h", dst=dst, src=src)
+            self.copy(pattern="ptz.h", dst=dst, src=src)
             self.copy(pattern="iso_week.h", dst=dst, src=src)
             self.copy(pattern="julian.h", dst=dst, src=src)
             self.copy(pattern="islamic.h", dst=dst, src=src)
