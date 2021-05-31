@@ -2,9 +2,11 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LAConan(ConanFile):
-    name = "linear_algebra"
+    name = "wg21-linear_algebra"
     homepage = "https://github.com/BobSteagall/wg21"
     description = "Production-quality reference implementation of P1385: A proposal to add linear algebra support to the C++ standard library"
     topics = ("linear-algebra", "multi-dimensional", "maths")
@@ -17,9 +19,12 @@ class LAConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def requirements(self):
+        self.requires("mdspan/0.1.0")
+
     @property
     def _minimum_cpp_standard(self):
-        return 17
+        return 20
 
     @property
     def _minimum_compilers_version(self):
@@ -55,7 +60,16 @@ class LAConan(ConanFile):
     def package(self):
         self.copy(pattern="*", dst="include",
                   src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        self.copy("*LICENSE*", dst="licenses", keep_path=False)
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "wg21_linear_algebra"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "wg21_linear_algebra"
+        self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
+        self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"
+        self.cpp_info.components["_wg21_linear_algebra"].names["cmake_find_package"] = "wg21_linear_algebra"
+        self.cpp_info.components["_wg21_linear_algebra"].names["cmake_find_package_multi"] = "wg21_linear_algebra"
+        self.cpp_info.components["_wg21_linear_algebra"].requires = ["mdspan::mdspan"]
