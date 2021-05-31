@@ -72,6 +72,9 @@ class GDCMConan(ConanFile):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.os == "Windows":
+            bin_dir = os.path.join(self.package_folder, "bin")
+            tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
         lib_dir = os.path.join(self.package_folder, "lib")
         tools.rmdir(os.path.join(lib_dir, "gdcmopenjpeg-2.3"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
