@@ -80,9 +80,8 @@ class FastCDRConan(ConanFile):
 
     def _get_configured_cmake(self):
         if self._cmake:
-            pass
-        else:
-            self._cmake = CMake(self)
+            return self._cmake
+        self._cmake = CMake(self)
         self._cmake.configure()
         return self._cmake
 
@@ -93,6 +92,13 @@ class FastCDRConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
+        if self.settings.os == "Windows":
+            if (str(self.settings.compiler.runtime).startswith("MT") and self.options.shared):
+                # This combination leads to an fast-cdr error when linking
+                # linking dynamic '*.dll' and static MT runtime
+                # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
+                # (2021-05-31)
+                raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
 
     def configure(self):
         if self.options.shared:
