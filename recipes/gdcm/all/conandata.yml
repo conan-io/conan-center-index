@@ -6,4 +6,3 @@ patches:
   "3.0.9":
     - patch_file: "patches/0001-charls-linking.patch"
       base_path: "source_subfolder"
-      description: "fixes linking problem with -fvisibility=hidden"
