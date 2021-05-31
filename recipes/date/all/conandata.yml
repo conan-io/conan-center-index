@@ -18,7 +18,7 @@ patches:
       patch_file: patches/string_view.patch
   "3.0.0":
     - base_path: source_subfolder
-      patch_file: patches/cmake-3.0.x.patch
+      patch_file: patches/cmake-3.0.0.patch
   "3.0.1":
     - base_path: source_subfolder
-      patch_file: patches/cmake-3.0.x.patch
+      patch_file: patches/cmake-3.0.1.patch
