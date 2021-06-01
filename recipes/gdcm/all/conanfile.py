@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -77,16 +78,58 @@ class GDCMConan(ConanFile):
             tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
         lib_dir = os.path.join(self.package_folder, "lib")
         tools.rmdir(os.path.join(lib_dir, "gdcmopenjpeg-2.3"))
+        tools.rmdir(os.path.join(lib_dir, "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "GDCMTargets*.cmake")
-        self._create_cmake_aliases(os.path.join(lib_dir, self._gdcm_subdir, "GDCMTargets.cmake"), self._gdcm_libraries)
+        tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._gdcm_cmake_module_aliases_path),
+            self._gdcm_libraries
+        )
+        self._create_cmake_variables(os.path.join(self.package_folder, self._gdcm_cmake_variables_path))
+
+    def _create_cmake_variables(self, variables_file):
+        v = tools.Version(self.version)
+        build_shared_libs = "ON" if self.options.shared else "OFF"
+        content = textwrap.dedent(f"""\
+            # The GDCM version number.
+            set(GDCM_MAJOR_VERSION "{v.major}")
+            set(GDCM_MINOR_VERSION "{v.minor}")
+            set(GDCM_BUILD_VERSION "{v.patch}")
+            
+            get_filename_component(SELF_DIR "${{CMAKE_CURRENT_LIST_FILE}}" PATH)
+            
+            # The libraries.
+            set(GDCM_LIBRARIES "")
+            
+            # The CMake macros dir.
+            set(GDCM_CMAKE_DIR "")
+            
+            # The configuration options.
+            set(GDCM_BUILD_SHARED_LIBS "{build_shared_libs}")
+            
+            set(GDCM_USE_VTK "OFF")
+
+            # The "use" file.
+            set(GDCM_USE_FILE ${{SELF_DIR}}/UseGDCM.cmake)
+            
+            # The VTK options.
+            set(GDCM_VTK_DIR "")
+            
+            get_filename_component(GDCM_INCLUDE_ROOT "${{SELF_DIR}}/../../include/{self._gdcm_subdir}" ABSOLUTE)
+            set(GDCM_INCLUDE_DIRS ${{GDCM_INCLUDE_ROOT}})
+            get_filename_component(GDCM_LIB_ROOT "${{SELF_DIR}}/../../lib" ABSOLUTE)
+            set(GDCM_LIBRARY_DIRS ${{GDCM_LIB_ROOT}})
+        """)
+        tools.save(variables_file, content)
 
     @staticmethod
-    def _create_cmake_aliases(targets_file, libraries):
-        content = "\n".join([f"""if(TARGET GDCM::{l} AND NOT TARGET {l})
-  add_library({l} INTERFACE IMPORTED)
-  set_property(TARGET {l} PROPERTY INTERFACE_LINK_LIBRARIES GDCM::{l})
-endif()""" for l in libraries])
+    def _create_cmake_module_alias_targets(targets_file, libraries):
+        content = "\n".join([textwrap.dedent(f"""\
+            if(TARGET GDCM::{l} AND NOT TARGET {l})
+                add_library({l} INTERFACE IMPORTED)
+                set_property(TARGET {l} PROPERTY INTERFACE_LINK_LIBRARIES GDCM::{l})
+            endif()
+            """) for l in libraries])
         tools.save(targets_file, content)
 
     @property 
@@ -95,8 +138,16 @@ endif()""" for l in libraries])
         return f"gdcm-{v.major}.{v.minor}"
 
     @property
-    def _gdcm_config_cmake_path(self):
-        return os.path.join("lib", self._gdcm_subdir, "GDCMConfig.cmake")
+    def _gdcm_builddir(self):
+        return os.path.join("lib", self._gdcm_subdir)
+
+    @property
+    def _gdcm_cmake_module_aliases_path(self):
+        return os.path.join("lib", self._gdcm_subdir, f"conan-official-{self.name}-targets.cmake")
+
+    @property
+    def _gdcm_cmake_variables_path(self):
+        return os.path.join("lib", self._gdcm_subdir, f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _gdcm_libraries(self):
@@ -124,16 +175,17 @@ endif()""" for l in libraries])
         self.cpp_info.names["cmake_find_multi_package"] = "GDCM"
         gdcm_libs = self._gdcm_libraries
         self.cpp_info.components["headers"].includedirs = [os.path.join("include", self._gdcm_subdir)]
-        self.cpp_info.components["headers"].build_modules["cmake"] = [self._gdcm_config_cmake_path]
-        self.cpp_info.components["headers"].build_modules["cmake_find_package"] = [self._gdcm_config_cmake_path]
-        self.cpp_info.components["headers"].build_modules["cmake_find_multi_package"] = [self._gdcm_config_cmake_path]
+        self.cpp_info.components["headers"].builddirs = [self._gdcm_builddir] 
+        self.cpp_info.components["headers"].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+        self.cpp_info.components["headers"].build_modules["cmake_find_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+        self.cpp_info.components["headers"].build_modules["cmake_find_multi_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
         for lib in gdcm_libs:
             self.cpp_info.components[lib].libs = [lib]
             self.cpp_info.components[lib].requires = ["headers"]
-            self.cpp_info.components[lib].builddirs = [os.path.join("lib", self._gdcm_subdir)]
-            self.cpp_info.components[lib].build_modules["cmake"] = [self._gdcm_config_cmake_path]
-            self.cpp_info.components[lib].build_modules["cmake_find_package"] = [self._gdcm_config_cmake_path]
-            self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = [self._gdcm_config_cmake_path]
+            self.cpp_info.components[lib].builddirs = [self._gdcm_builddir] 
+            self.cpp_info.components[lib].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+            self.cpp_info.components[lib].build_modules["cmake_find_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+            self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_multi_package"] = lib
             
