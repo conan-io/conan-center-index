@@ -236,7 +236,7 @@ class grpcConan(ConanFile):
         # gRPC::grpc_cpp_plugin
         if self.options.cpp_plugin:
             module_target_rel_path = os.path.join("lib", "cmake", "grpc_cpp_plugin.cmake")
-            self.cpp_info.components["execs"].builddirs = os.path.join("lib", "cmake")
+            self.cpp_info.components["execs"].builddirs.append(os.path.join("lib", "cmake"))
             self.cpp_info.components["execs"].build_modules["cmake_find_package"] = [module_target_rel_path]
             self.cpp_info.components["execs"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
         # gRPC::grpc_csharp_plugin
