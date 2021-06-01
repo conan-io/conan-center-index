@@ -24,6 +24,10 @@ class LibMysqlClientCConan(ConanFile):
         return tools.Version(self.version) > "8.0.17"
 
     @property
+    def _with_lz4(self):
+        return tools.Version(self.version) > "8.0.17"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -35,13 +39,17 @@ class LibMysqlClientCConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self._with_zstd:
             self.requires("zstd/1.5.0")
-        self.requires("lz4/1.9.3")
+        if self._with_lz4:
+            self.requires("lz4/1.9.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_files(self):
-        for lib in ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]:
+        libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
+        if not self._with_lz4:
+            libs_to_remove.append("lz4")
+        for lib in libs_to_remove:
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "MYSQL_CHECK_%s()\n" % lib.upper(),
                 "",
@@ -112,7 +120,8 @@ class LibMysqlClientCConan(ConanFile):
         self._cmake.definitions["WITH_UNIT_TESTS"] = False
         self._cmake.definitions["ENABLED_PROFILING"] = False
         self._cmake.definitions["WIX_DIR"] = False
-        self._cmake.definitions["WITH_LZ4"] = "system"
+        if self._with_lz4:
+            self._cmake.definitions["WITH_LZ4"] = "system"
 
         if self._with_zstd:
             self._cmake.definitions["WITH_ZSTD"] = "system"
