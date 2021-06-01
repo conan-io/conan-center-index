@@ -404,6 +404,13 @@ class GdalConan(ConanFile):
                                       "-lz ",
                                       "-l{} ".format(zlib_name))
 
+        # Redhat 7 needs an existing config.rpath file
+        major_version = str(tools.os_info.os_version.major(False))
+
+        if tools.os_info.linux_distro in ["rhel", "centos"] and major_version == "7":
+            with open(os.path.join(self._source_subfolder,"config.rpath"),"w"):
+                pass
+
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
         if simd_intrinsics != "avx":
