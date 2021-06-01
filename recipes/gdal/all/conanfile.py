@@ -403,6 +403,9 @@ class GdalConan(ConanFile):
                 tools.replace_in_file(configure_ac,
                                       "-lz ",
                                       "-l{} ".format(zlib_name))
+            # Workaround for autoconf 2.71
+            with open(os.path.join(self._source_subfolder, "config.rpath"), "w"):
+                pass
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
