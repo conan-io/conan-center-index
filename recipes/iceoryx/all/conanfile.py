@@ -108,6 +108,8 @@ class IceoryxConan(ConanFile):
     def config_options(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1")
+        if self.settings.os == "Linux":
+            self.requires("acl/2.3.1")
     
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -168,7 +170,7 @@ class IceoryxConan(ConanFile):
 
         self.cpp_info.components["utils"].name = "utils"
         self.cpp_info.components["utils"].libs = ["iceoryx_utils"]
-        self.cpp_info.components["utils"].requires = ["platform"]
+        self.cpp_info.components["utils"].requires = ["platform","acl::acl"]
         self.cpp_info.components["utils"].builddirs = self._pkg_cmake
         self.cpp_info.components["utils"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_utils-targets.cmake")
@@ -179,7 +181,6 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["utils"].system_libs.extend(
             [
                 "pthread",
-                "acl",
                 "rt"
             ]
         )
