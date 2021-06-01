@@ -1,5 +1,12 @@
 # Changelog
 
+### 01-June-2021 - 08:59 CEST
+
+ - [request_reviews] Add column to enable/disable review requests (any user)
+ - [testing] Use declared Conan version to run tests
+ - [internal] Pay some technical debt
+ - [internal] Simplify workflow, all packages already have properties
+
 ### 24-May-2021 - 15:59 CEST
 
 - [feature] Start to crossbuild Apple M1 using two profiles approach (extra build).
