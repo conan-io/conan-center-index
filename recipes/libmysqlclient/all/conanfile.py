@@ -96,6 +96,8 @@ class LibMysqlClientCConan(ConanFile):
                 raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "6":
+            raise ConanInvalidConfiguration("clang 6 or newer is required")
 
     def _configure_cmake(self):
         if self._cmake:
