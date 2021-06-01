@@ -78,7 +78,7 @@ class FastCDRConan(ConanFile):
             """)
         tools.save(os.path.join(self.package_folder, self._module_file_rel_path), content)
 
-    def _get_configured_cmake(self):
+    def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
@@ -93,7 +93,7 @@ class FastCDRConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows":
-            if (str(self.settings.compiler.runtime).startswith("MT") and self.options.shared):
+            if ("MT" in self.settings.compiler.runtime and self.options.shared):
                 # This combination leads to an fast-cdr error when linking
                 # linking dynamic '*.dll' and static MT runtime
                 # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
@@ -109,16 +109,15 @@ class FastCDRConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        cmake = self._get_configured_cmake()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = self._get_configured_cmake()
+        cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_cmake)
         tools.rmdir(self._pkg_share)
-        self._create_cmake_module_alias_target()
         tools.remove_files_by_mask(
             directory=os.path.join(self.package_folder, "lib"),
             pattern="*.pdb"
@@ -132,6 +131,7 @@ class FastCDRConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "fastcdr"
         self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
         self.cpp_info.libs = tools.collect_libs(self)
+        self._create_cmake_module_alias_target()
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
