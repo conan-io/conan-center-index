@@ -136,6 +136,7 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_APPEND_VC_REV'] = False
         cmake.definitions['LLVM_BUILD_DOCS'] = False
         cmake.definitions['LLVM_ENABLE_IDE'] = False
+        cmake.definitions['LLVM_ENABLE_TERMINFO'] = False
 
         cmake.definitions['LLVM_ENABLE_EH'] = self.options.exceptions
         cmake.definitions['LLVM_ENABLE_RTTI'] = self.options.rtti
@@ -268,6 +269,9 @@ class LLVMCoreConan(ConanFile):
                 os.remove(os.path.join(lib_path, name))
 
         if not self.options.shared:
+            if self.options.get_safe('with_zlib', False):
+                if not 'z' in components['LLVMSupport']:
+                    components['LLVMSupport'].append('z')
             components_path = \
                 os.path.join(self.package_folder, 'lib', 'components.json')
             with open(components_path, 'w') as components_file:
@@ -282,10 +286,9 @@ class LLVMCoreConan(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = tools.collect_libs(self)
             if self.settings.os == 'Linux':
-                self.cpp_info.system_libs = ['tinfo', 'pthread']
-                self.cpp_info.system_libs.extend(['rt', 'dl', 'm'])
+                self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
             elif self.settings.os == 'Macos':
-                self.cpp_info.system_libs = ['curses', 'm']
+                self.cpp_info.system_libs = ['m']
             return
 
         components_path = \
