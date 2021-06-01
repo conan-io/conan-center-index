@@ -100,7 +100,10 @@ class ICCConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "icc"
         self.cpp_info.names["cmake_find_multi_package"] = "icc"
-        self.cpp_info.libs = ["ICC"]
+        if self.options.shared:
+            self.cpp_info.libs = ["ICC"]
+        else:
+            self.cpp_info.libs = ["ICC_static"]
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'wsock32']
