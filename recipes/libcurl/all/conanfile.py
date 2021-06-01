@@ -177,6 +177,13 @@ class LibcurlConan(ConanFile):
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/20200517")
 
+    def system_requirements(self):
+        major_version = str(tools.os_info.os_version.major(False))        
+
+        if tools.os_info.linux_distro in ["rhel", "centos"] and major_version == "7":
+            installer = tools.SystemPackageTool()
+            installer.install("perl-Thread-Queue")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
