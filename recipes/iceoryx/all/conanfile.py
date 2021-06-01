@@ -9,7 +9,7 @@ class IceoryxConan(ConanFile):
 
     name = "iceoryx"
     version = "1.0.0"
-    license = "	Apache-2.0"
+    license = "Apache-2.0"
     homepage = "https://iceoryx.io/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Eclipse iceoryx - true zero-copy inter-process-communication"
@@ -115,11 +115,10 @@ class IceoryxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
-    def _get_configured_cmake(self):
+    def _configure_cmake(self):
         if self._cmake:
-            pass 
-        else:
-            self._cmake = CMake(self)
+            return self._cmake
+        self._cmake = CMake(self)
         self._cmake.definitions["TOML_CONFIG"] = self.options.toml_config
         self._cmake.configure()
         return self._cmake
@@ -130,11 +129,11 @@ class IceoryxConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake = self._get_configured_cmake()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = self._get_configured_cmake()
+        cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_share)
@@ -160,14 +159,11 @@ class IceoryxConan(ConanFile):
             )
 
     def package_info(self):
-
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
         self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
-
         self.cpp_info.components["platform"].name = "platform"
         self.cpp_info.components["platform"].libs = ["iceoryx_platform"]
         self.cpp_info.components["platform"].system_libs.extend(["pthread"])
-
         self.cpp_info.components["utils"].name = "utils"
         self.cpp_info.components["utils"].libs = ["iceoryx_utils"]
         self.cpp_info.components["utils"].requires = ["platform","acl::acl"]
@@ -184,7 +180,6 @@ class IceoryxConan(ConanFile):
                 "rt"
             ]
         )
-
         self.cpp_info.components["posh"].name = "posh"
         self.cpp_info.components["posh"].libs = ["iceoryx_posh"]
         self.cpp_info.components["posh"].builddirs = self._pkg_cmake
@@ -196,7 +191,6 @@ class IceoryxConan(ConanFile):
         ]
         self.cpp_info.components["posh"].system_libs.extend(["pthread"])
         self.cpp_info.components["posh"].requires = ["utils"]
-
         self.cpp_info.components["posh_roudi"].name = "posh_roudi"
         self.cpp_info.components["posh_roudi"].libs = ["iceoryx_posh_roudi"]
         self.cpp_info.components["posh_roudi"].builddirs = self._pkg_cmake
@@ -212,7 +206,6 @@ class IceoryxConan(ConanFile):
             "utils",
             "posh"
         ]
-
         self.cpp_info.components["posh_config"].name = "posh_config"
         self.cpp_info.components["posh_config"].libs = ["iceoryx_posh_config"]
         self.cpp_info.components["posh_config"].system_libs.extend(["pthread"])
@@ -221,14 +214,12 @@ class IceoryxConan(ConanFile):
             "utils",
             "posh"
         ]
-
         self.cpp_info.components["posh_gw"].name = "posh_gw"
         self.cpp_info.components["posh_gw"].libs = ["iceoryx_posh_gateway"]
         self.cpp_info.components["posh_gw"].requires = [
             "utils",
             "posh"
         ]
-
         self.cpp_info.components["bind_c"].name = "binding_c"
         self.cpp_info.components["bind_c"].libs = ["iceoryx_binding_c"]
         self.cpp_info.components["bind_c"].builddirs = self._pkg_cmake
@@ -238,6 +229,10 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["bind_c"].build_modules["cmake_find_package_multi"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_binding_c-targets.cmake")
         ]
+        libcxx = tools.stdcpp_library(self)
+        print("---------------------------------------------------------------------------")
+        print(libcxx)
+        print("---------------------------------------------------------------------------")
         self.cpp_info.components["bind_c"].system_libs.extend(
             [
                 "pthread",

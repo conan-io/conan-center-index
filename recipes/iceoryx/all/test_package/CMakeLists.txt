@@ -18,13 +18,10 @@
 
 cmake_minimum_required(VERSION 3.5)
 project(examples)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_subdirectory(ice_access_control)
 add_subdirectory(single_process)
-add_subdirectory(callbacks)
 add_subdirectory(icedelivery)
-add_subdirectory(icehello)
 add_subdirectory(icedelivery_in_c)
-add_subdirectory(callbacks_in_c)
