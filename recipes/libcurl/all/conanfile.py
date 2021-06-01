@@ -178,7 +178,7 @@ class LibcurlConan(ConanFile):
                 self.build_requires("msys2/20200517")
 
     def system_requirements(self):
-        major_version = str(tools.os_info.os_version.major(False))        
+        major_version = str(tools.os_info.os_version.major(False))
 
         if tools.os_info.linux_distro in ["rhel", "centos"] and major_version == "7":
             installer = tools.SystemPackageTool()
