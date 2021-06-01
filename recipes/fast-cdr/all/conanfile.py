@@ -59,23 +59,12 @@ class FastCDRConan(ConanFile):
 
     def _create_cmake_module_alias_target(self):
         content = ""
-        if self.options.shared and self.settings.os == "Windows":
-            # alias plus special properties which are required
-            content += textwrap.dedent("""\
-                if(TARGET fastcdr::fastcdr AND NOT TARGET fastcdr)
-                    add_library(fastcdr INTERFACE IMPORTED)
-                    set_property(TARGET fastcdr PROPERTY INTERFACE_LINK_LIBRARIES fastcdr::fastcdr)
-                    set_property(TARGET fastcdr PROPERTY INTERFACE_COMPILE_DEFINITIONS FASTCDR_DYN_LINK)
-                endif()
-                set_property(TARGET fastcdr::fastcdr PROPERTY INTERFACE_COMPILE_DEFINITIONS FASTCDR_DYN_LINK)
-            """)
-        else:
-            content += textwrap.dedent("""\
-                if(TARGET fastcdr::fastcdr AND NOT TARGET fastcdr)
-                    add_library(fastcdr INTERFACE IMPORTED)
-                    set_property(TARGET fastcdr PROPERTY INTERFACE_LINK_LIBRARIES fastcdr::fastcdr)
-                endif()
-            """)
+        content += textwrap.dedent("""\
+            if(TARGET fastcdr::fastcdr AND NOT TARGET fastcdr)
+                add_library(fastcdr INTERFACE IMPORTED)
+                set_property(TARGET fastcdr PROPERTY INTERFACE_LINK_LIBRARIES fastcdr::fastcdr)
+            endif()
+        """)
         tools.save(os.path.join(self.package_folder, self._module_file_rel_path), content)
 
     def _configure_cmake(self):
@@ -131,6 +120,8 @@ class FastCDRConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "fastcdr"
         self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("FASTCDR_DYN_LINK")
         self._create_cmake_module_alias_target()
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
