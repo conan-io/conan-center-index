@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -40,6 +41,12 @@ class GDCMConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if (self.settings.compiler == "Visual Studio"
+                and self.options.shared
+                and str(self.settings.compiler.runtime).startswith("MT")):
+            raise ConanInvalidConfiguration("shared gdcm can't be built with MT or MTd")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
