@@ -1,0 +1,132 @@
+// Warning MOC uses the C preprocessor (CPP) to preprocess the include
+// files and macros. However this has its own issues such as
+// the CPP handling of single quotes. You'll get warnings from
+// the CPP about missing terminated quotes. Those you can generally
+// ignore if your output matches your expectations.  Instead,
+// you can use the sequence \x27 for a quote inside a code block
+// like so:
+header_code {
+   The customer\x27s trial went ok. 
+};
+
+
+#include "test_app.moh"
+header_code {
+   // There can be 3 top level code blocks. header_code, header_end_code
+   // and source_code. The last string associated with each is
+   // what is used.
+   static char header_code= "\
+   typically this is code inserted at the beginning of a header file.\
+   Comments are removed.";
+};
+
+// Warning MOC uses the C preprocessor to preprocess the include
+// files and macros. However this has its own issues such as
+// the CPP handling of single quotes. You'll get warnings from
+// the CPP about missing terminated quotes. Those you can generally
+// ignore if your output matches your expectations.
+
+// a few ways of adding a key-value annotation:
+// [[ annotation-name {annotation-value}]] or
+// key annotation-name value annotation-value  or
+// key annotation-name value code { free form text until closing } 
+
+class Product : BizObject {
+    [[ description { A product SKU for sell } ]];
+
+    class_id(1);
+    String description, [[ description {Customer\x27s description of the product}]];
+};
+
+class Item : BizObject {
+    [[ description { A specific inventory item belonging to a product SKU for sell } ]];
+
+    class_id(2);
+    String description, [[ description {Customer\x27s description of the product item}]];
+    Long productId, [[ description {The associated product for this item}]];
+};
+
+class Address : BizObject {
+    [[ description { An address of some real world entity } ]];
+
+    class_id(3);
+    String street1, [[ description {The street}]];
+    String street2, [[ description {2nd line of street info}]];
+    String city, [[ description {The City}]];
+    String state, [[ description {The State}]];
+    String zipcode, [[ description {The Zip Code}]];
+    Long CountryId, [[ description {The Country}]];
+};
+
+class Country : BizObject {
+    [[ description { The country code and name } ]];
+
+    class_id(4);
+    String printableName, [[ description {GUI name}]];
+    String numcode, [[ description {A numeric code}]];
+};
+
+type CreditCardType {
+    [[ description {enum of the type of card} ]];
+
+    class_id(4);
+    Header none;
+};
+
+class CreditCard : BizObject {
+    [[ description {A credit card number.} ]];
+
+    class_id(6);
+    String creditCardNumber, [[ description {the credit card number}]];
+    CreditCardType creditCardType, [[ description {the type of credit card}]];
+    String creditCardExpDate, [[ description {the credit card expiration date}]];
+};
+
+class Customer : BizObject {
+    [[ description {A customer\x27s account} ]];
+
+    class_id(7);
+    String firstName, [[ description {the first name of the customer}]];
+    String lastName, [[ description {the last name}]];
+    String telephone, [[ description {the telephone}]];
+    String email, [[ description {the email address}]];
+    String login, [[ description {the login}]];
+    String password, [[ description {the password}]];
+    String uuid, [[ description {a UUID for the customer}]];
+    Date dateOfBirth, [[ description {The date of birth}]];
+    Integer age, [[ description {The age of the customer}]];
+    Long homeAddressId, [[ description {The home address}]];
+};
+
+class PurchaseOrder : BizObject {
+    [[ description {An order to purchase 1 or more items.} ]];
+
+    class_id(8);
+    Date orderDate, [[ description {The date the customer placed the order}]];
+    Float total, [[ description {The total for the order}]];
+    Long customerId, [[ description {The customer that made the purchase}]];
+    Long deliveryAddressId, [[ description {the delivery address}]];
+    Long creditCardId, [[ description {the credit card}]];
+};
+
+class PurchaseOrderEntry : BizObject {
+    [[ description {Associates a particular item with a purchase order} ]];
+
+    class_id(9);
+    Long itemId, [[ description {The item that was ordered}]];
+    Long purchaseOrderId, [[ description {The purchase order}]];
+};
+
+
+source_code {
+   static char source_code= "\
+   typically this is code inserted in a source file.\
+   Comments are removed.";
+};
+
+header_end_code {
+   // A top level code block
+   static char header_end_code= "\
+   typically this is code inserted at the end of a header file.";
+};
+

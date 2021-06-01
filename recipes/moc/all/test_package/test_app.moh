@@ -1,0 +1,168 @@
+
+type String {
+    Header "<string>";
+    [[ header_name {string}]];
+    [[ namespace {std} ]];
+    [[ type {std::string} ]];
+    [[ dbGetResult {rs.getString(col++)} ]];
+    [[ dbcoltype {VARCHAR(255)}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Integer {
+    Header "<cstdint>";
+    [[ header_name {cstdint}]];
+    [[ type {int64_t} ]];
+    [[ dbcoltype {NUMERIC}]];
+    [[ dbType {int}]];
+    [[ dbConvertPref {new Integer(}]];
+    [[ dbConvertSuf {)}]];
+    [[ convertToDbPref {}]];
+    [[ convertToDbSuf {.intValue() }]];
+    [[ dbGetResult {new Integer( rs.getInt(col++) )}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Long {
+    Header "<cstdint>";
+    [[ header_name {cstdint}]];
+    [[ type {int64_t} ]];
+    [[ dbcoltype {NUMERIC}]];
+    [[ dbType {long}]];
+    [[ dbConvertPref {new Long(}]];
+    [[ dbConvertSuf {)}]];
+    [[ convertToDbPref {}]];
+    [[ convertToDbSuf {.longValue()}]];
+    [[ dbGetResult {new Long( rs.getLong(col++) )}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Double {
+    [[ header_name {}]];
+    [[ type {double} ]];
+    [[ dbcoltype {FLOAT}]];
+    [[ dbType {double}]];
+    [[ dbConvertPref {new Double(}]];
+    [[ dbConvertSuf {)}]];
+    [[ convertToDbPref {}]];
+    [[ convertToDbSuf {.doubleValue()}]];
+    [[ dbGetResult {new Double( rs.getDouble(col++) )}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Float {
+    [[ header_name {}]];
+    [[ type {float} ]];
+    [[ dbcoltype {FLOAT}]];
+    [[ dbType {double}]];
+    [[ dbConvertPref {new Double(}]];
+    [[ dbConvertSuf {)}]];
+    [[ convertToDbPref {}]];
+    [[ convertToDbSuf {.doubleValue()}]];
+    [[ dbGetResult {new Double( rs.getDouble(col++) )}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Boolean {
+    [[ header_name {}]];
+    [[ type {bool} ]];
+    [[ dbcoltype {NUMERIC}]];
+    [[ dbType {int}]];
+    [[ dbConvertPref {new Boolean( }]];
+    [[ dbConvertSuf { != 0 )}]];
+    [[ convertToDbPref {( }]];
+    [[ convertToDbSuf {.booleanValue() ? 1 : 0) }]];
+    [[ dbGetResult {new Boolean( rs.getBoolean(col++) )}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Date {
+    Header "<ctime>";
+    [[ header_name {ctime}]];
+    [[ namespace {std} ]];
+    [[ type {std::time_t} ]];
+    [[ dbcoltype {TIMESTAMP DEFAULT CURRENT TIMESTAMP}]];
+    [[ dbType {java.sql.Timestamp}]];
+    [[ dbConvertPref {new Date(}]];
+    [[ dbConvertSuf {.getTime())}]];
+    [[ convertToDbPref {new java.sql.Timestamp(}]];
+    [[ convertToDbSuf {.getTime())}]];
+    [[ dbGetResult {rs.getTimestamp(col++)}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type double {
+    [[ header_name {}]];
+    [[ dbcoltype {FLOAT}]];
+    [[ dbGetResult {new Double( rs.getDouble(col++) )}]];
+    [[ objectArrayTypePref {String.valueOf(}]];
+    [[ objectArrayTypeSuf {)}]];
+};
+
+type long {
+    [[ header_name {}]];
+    [[ dbcoltype {NUMERIC}]];
+    [[ dbGetResult {new Long( rs.getLong(col++) )}]];
+    [[ objectArrayTypePref {String.valueOf(}]];
+    [[ objectArrayTypeSuf {)}]];
+};
+
+
+type void {
+    [[ header_name {}]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+type Vector {
+    Header "<vector>";
+    [[ header_name {vector}]];
+    [[ namespace {std} ]];
+    [[ type {std::vector} ]];
+    [[ objectArrayTypePref {}]];
+    [[ objectArrayTypeSuf {}]];
+};
+
+#define PROP_READONLY [[ read {1}]]
+#define PROP_READWRITE [[ read {1}]], [[ _write {1}]]
+#define PROP_WRITEONLY [[ write {1}]]
+#define PROP_CREATE [[ create {1}]]
+#define PROP_DBCOL(v) [[ dbcol {v}]]
+
+#define METH_CLASS_METHOD [[ class_method {1}]]
+#define METH_CLASS_METHOD_WITH_IMPL [[ class_method {1}]], [[ class_method_impl {1}]]
+#define METH_CREATE_METHOD METH_CLASS_METHOD_WITH_IMPL
+#define METH_FIND_METHOD METH_CLASS_METHOD, key db_find value code 
+
+#define ALL_DESCRIPTION key description value code
+
+#ifdef __APPLE__
+#define class_id(id) [[ classId {id} ]]
+#else
+#define class_id(id) [[ classId {# id }]]
+#endif
+
+class Exception { String message; };
+class CreateException : public Exception {};
+
+interface BizObject {
+    Long id, PROP_READONLY, PROP_DBCOL(id),
+        ALL_DESCRIPTION { blah blah @the primary [[ for the object };
+    String name, PROP_CREATE, PROP_READWRITE, PROP_DBCOL(name),
+        ALL_DESCRIPTION { free form text : the name of the object };
+    Integer version;
+};
+
+interface BizProcess  {
+};
+
+interface DbTable {
+};
+

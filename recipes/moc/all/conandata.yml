@@ -1,0 +1,16 @@
+_program:
+    info:
+        version: "0.9.1"
+    requirements:
+        - "flex/2.6.4"
+        - "bison/3.7.1"
+  
+sources:
+  "0.9":
+    # to calculate sha, shasum -a 256 {file}
+    sha256: 2b8eba8aa8abcca60a3ffad971d3e76b6784510dab7941e845a96b825d909d41
+    url: "https://github.com/zuut/moc/archive/refs/tags/0.9.tar.gz"
+  "0.9.1":
+    # to calculate sha, shasum -a 256 {file}
+    sha256: 779efaffd8fb528d39a0e774a38fe004e1e9650a3f1326271a536f97e202b704
+    url: "https://github.com/zuut/moc/archive/refs/tags/0.9.1.tar.gz"
