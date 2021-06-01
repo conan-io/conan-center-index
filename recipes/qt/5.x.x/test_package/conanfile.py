@@ -10,7 +10,6 @@ class TestPackageConan(ConanFile):
     generators = "qt", "cmake", "cmake_find_package_multi", "qmake"
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.2")
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
