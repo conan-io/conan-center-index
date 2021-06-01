@@ -57,7 +57,7 @@ class grpcConan(ConanFile):
         self.requires('openssl/1.1.1k')
         self.requires('protobuf/3.17.1')
         self.requires('c-ares/1.17.1')
-        self.requires('abseil/20210324.0')
+        self.requires('abseil/20210324.1')
         self.requires('re2/20210401')
 
     def config_options(self):
