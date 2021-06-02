@@ -149,4 +149,3 @@ type Vector {
 #define class_id(id) [[ classId {# id }]]
 #endif
 
-
