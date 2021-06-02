@@ -85,6 +85,7 @@ class GDCMConan(ConanFile):
         if self.settings.os == "Windows":
             bin_dir = os.path.join(self.package_folder, "bin")
             tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
+            tools.remove_files_by_mask(bin_dir, "*.pdb")
         lib_dir = os.path.join(self.package_folder, "lib")
         tools.rmdir(os.path.join(lib_dir, "gdcmopenjpeg-2.3"))
         tools.rmdir(os.path.join(lib_dir, "pkgconfig"))
