@@ -87,8 +87,8 @@ class LibMysqlClientCConan(ConanFile):
             tools.patch(**patch)
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        os.rename(sources_cmake, sources_cmake_orig)
-        os.rename("CMakeLists.txt", sources_cmake)
+        tools.rename(sources_cmake, sources_cmake_orig)
+        tools.rename("CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
             libmysql_api_test = "$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
@@ -154,7 +154,7 @@ class LibMysqlClientCConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         os.mkdir(os.path.join(self.package_folder, "licenses"))
-        os.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
+        tools.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
