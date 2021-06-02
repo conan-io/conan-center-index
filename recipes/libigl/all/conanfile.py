@@ -46,21 +46,21 @@ class LibiglConan(ConanFile):
         cmake.definitions["LIBIGL_BUILD_TESTS"] = "OFF"
         cmake.definitions["LIBIGL_BUILD_PYTHON"] = "OFF"
 
-        cmake.definitions["LIBIGL_WITH_CGAL"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_COMISO"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_CORK"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_EMBREE"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_MATLAB"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_MOSEK"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_OPENGL"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_OPENGL_GLFW"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_PNG"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_TETGEN"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_TRIANGLE"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_XML"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
-        cmake.definitions["LIBIGL_WITH_PREDICATES"] = "OFF"
+        cmake.definitions["LIBIGL_WITH_CGAL"] = False
+        cmake.definitions["LIBIGL_WITH_COMISO"] = False
+        cmake.definitions["LIBIGL_WITH_CORK"] = False
+        cmake.definitions["LIBIGL_WITH_EMBREE"] = False
+        cmake.definitions["LIBIGL_WITH_MATLAB"] = False
+        cmake.definitions["LIBIGL_WITH_MOSEK"] = False
+        cmake.definitions["LIBIGL_WITH_OPENGL"] = False
+        cmake.definitions["LIBIGL_WITH_OPENGL_GLFW"] = False
+        cmake.definitions["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
+        cmake.definitions["LIBIGL_WITH_PNG"] = False
+        cmake.definitions["LIBIGL_WITH_TETGEN"] = False
+        cmake.definitions["LIBIGL_WITH_TRIANGLE"] = False
+        cmake.definitions["LIBIGL_WITH_XML"] = False
+        cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF" // This could be removed since it's off
+        cmake.definitions["LIBIGL_WITH_PREDICATES"] = False
         cmake.configure(build_folder=self._build_subfolder)
 
         return cmake
@@ -87,10 +87,10 @@ class LibiglConan(ConanFile):
         self.copy(pattern="*.so*", dst="lib", keep_path=False)
 
     def package_info(self):
+        # FIXME: CMake targets are not installed under a namespace https://github.com/libigl/libigl/blob/36e8435a2f724e83e14f79d128102d06b514a4f4/cmake/libigl.cmake#L543
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
-
-        self.cpp_info.libs = tools.collect_libs(self)
 
         if not self.options.shared:
             self.cpp_info.defines = ["IGL_STATIC_LIBRARY"]
