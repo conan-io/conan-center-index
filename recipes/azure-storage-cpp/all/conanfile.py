@@ -11,7 +11,7 @@ class AzureStorageCppConan(ConanFile):
     topics = ("azure", "cpp", "cross-platform", "microsoft", "cloud")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -73,13 +73,8 @@ class AzureStorageCppConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        cmake_lists = os.path.join(self._source_subfolder, "Microsoft.WindowsAzure.Storage", "CMakeLists.txt")
-        tools.replace_in_file(cmake_lists, "UUID", "libuuid")
-        tools.replace_in_file(cmake_lists, "LibXML2", "LibXml2")
-        tools.replace_in_file(cmake_lists, "Casablanca", "cpprestsdk")
-        tools.replace_in_file(cmake_lists, "CASABLANCA", "cpprestsdk")
-        tools.replace_in_file(cmake_lists, " -stdlib=libc++", "")
-        tools.replace_in_file(cmake_lists, " -std=c++11", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -101,8 +96,6 @@ class AzureStorageCppConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
