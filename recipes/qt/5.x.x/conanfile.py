@@ -181,7 +181,7 @@ class QtConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang"]:
             if tools.Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.3":
+        if self.settings.compiler in ["gcc", "clang"] and tools.Version(self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
             self.options.with_mysql = False
