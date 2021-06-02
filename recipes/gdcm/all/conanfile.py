@@ -160,6 +160,10 @@ class GDCMConan(ConanFile):
         return os.path.join("lib", self._gdcm_subdir, f"conan-official-{self.name}-variables.cmake")
 
     @property
+    def _gdcm_build_modules(self):
+        return [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+
+    @property
     def _gdcm_libraries(self):
         gdcm_libs = ["gdcmcharls",
                      "gdcmCommon",
@@ -186,43 +190,39 @@ class GDCMConan(ConanFile):
         gdcm_libs = self._gdcm_libraries
         self.cpp_info.components["headers"].includedirs = [os.path.join("include", self._gdcm_subdir)]
         self.cpp_info.components["headers"].builddirs = [self._gdcm_builddir] 
-        self.cpp_info.components["headers"].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
-        self.cpp_info.components["headers"].build_modules["cmake_find_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
-        self.cpp_info.components["headers"].build_modules["cmake_find_multi_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+        self.cpp_info.components["headers"].build_modules["cmake"] = self._gdcm_build_modules
+        self.cpp_info.components["headers"].build_modules["cmake_find_package"] = self._gdcm_build_modules
+        self.cpp_info.components["headers"].build_modules["cmake_find_multi_package"] = self._gdcm_build_modules
         for lib in gdcm_libs:
             self.cpp_info.components[lib].libs = [lib]
             self.cpp_info.components[lib].requires = ["headers"]
             self.cpp_info.components[lib].builddirs = [self._gdcm_builddir] 
-            self.cpp_info.components[lib].build_modules["cmake"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
-            self.cpp_info.components[lib].build_modules["cmake_find_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
-            self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = [self._gdcm_cmake_module_aliases_path, self._gdcm_cmake_variables_path]
+            self.cpp_info.components[lib].build_modules["cmake"] = self._gdcm_build_modules
+            self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
+            self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = self._gdcm_build_modules
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_multi_package"] = lib
-            
+
+        self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
+        self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon"])
+        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT"])
         if not self.options.shared:
+            self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
+            self.cpp_info.components["gdcmIOD"].requires.append("gdcmexpat")
+            self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
+            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmopenjp2", "gdcmcharls"])
+
             if self.settings.os == "Windows":
-                self.cpp_info.components["socketxx"].system_libs = ["ws2_32"]
                 self.cpp_info.components["gdcmCommon"].system_libs = ["ws2_32", "crypt32"]
-                self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
-                self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
-                self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "gdcmexpat"])
-                self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmopenjp2", "gdcmcharls"])
                 self.cpp_info.components["gdcmMSFF"].system_libs = ["rpcrt4"]
-                self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
+                self.cpp_info.components["socketxx"].system_libs = ["ws2_32"]
             else:
-                self.cpp_info.components["gdcmopenjp2"].system_libs = ["pthread"]
+                self.cpp_info.components["gdcmMSFF"].requires.append("gdcmuuid")
+
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
                 if tools.is_apple_os(self.settings.os):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
-                self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
-                self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
-                self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "gdcmexpat"])
-                self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmopenjp2", "gdcmcharls", "gdcmuuid"])
-                self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
-        else:
-            self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
-            self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon"])
-            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT"])
-            if self.settings.os != "Windows":
-                self.cpp_info.components["gdcmopenjp2"].system_libs = ["pthread"]
+
+        if self.settings.os != "Windows":
+            self.cpp_info.components["gdcmopenjp2"].system_libs = ["pthread"]
 
