@@ -99,10 +99,12 @@ class LibMysqlClientCConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+            self.copy(pattern="*.so*", dst="lib", keep_path=False)
+        else:
+            self.copy(pattern="*.a", dst="lib", keep_path=False)
 
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         os.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
