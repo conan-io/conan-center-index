@@ -12,6 +12,9 @@ class MatplotlibCppConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
+    options = {"with_numpy": [True, False]}
+    default_options = {"with_numpy": False}
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -31,3 +34,6 @@ class MatplotlibCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "matplotlib-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "matplotlib-cpp"
+
+        if not self.options.with_numpy:
+            self.cpp_info.defines = ["WITHOUT_NUMPY"]
