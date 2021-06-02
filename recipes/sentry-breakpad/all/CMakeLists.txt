@@ -8,4 +8,5 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(LINUX ON)
 endif()
 
+set(CMAKE_CXX_STANDARD 11)
 add_subdirectory(source_subfolder/external)
