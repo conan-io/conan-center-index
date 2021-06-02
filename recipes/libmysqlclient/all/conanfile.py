@@ -162,6 +162,8 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Windows" and self.options.shared:
+            self.copy("*.dll", "bin", keep_path=False)
         if self.options.shared:
             tools.remove_files_by_mask(self.package_folder, "*.a")
         else:
