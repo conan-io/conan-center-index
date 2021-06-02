@@ -42,12 +42,11 @@ class OatppPostgresqlConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp-postgresql requires GCC >=5")
 
     def requirements(self):
-        self.requires("oatpp/" + self.version)
-        self.requires("libpq/13.0")
+        self.requires("oatpp/{}".format(self.version))
+        self.requires("libpq/13.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("oatpp-postgresql-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
