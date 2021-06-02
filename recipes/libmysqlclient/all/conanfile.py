@@ -102,9 +102,15 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) < "15":
-                raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
+            if tools.Version(self.version) > "8.0.17":
+                if Version(self.settings.compiler.version) < "16":
+                    raise ConanInvalidConfiguration("Visual Studio 2019 or newer is requiredd")
+            else:
+                if Version(self.settings.compiler.version) < "15":
+                    raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "6":
