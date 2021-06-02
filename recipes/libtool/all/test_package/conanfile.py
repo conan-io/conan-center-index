@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
 from contextlib import contextmanager
+import glob
 import os
 import shutil
 
@@ -9,9 +10,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     @contextmanager
     def _build_context(self):
@@ -50,7 +50,7 @@ class TestPackageConan(ConanFile):
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 autotools.libs = []
                 autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, "autotools"))
-                autotools.make(args=["V=1", "-j1"])
+                autotools.make(args=["V=1"])
                 autotools.install()
 
     def _test_autotools(self):
@@ -81,10 +81,59 @@ class TestPackageConan(ConanFile):
             lib_path = os.path.join(libdir, "liba.{}".format(lib_suffix))
             self.run("{} {}".format(bin_path, lib_path), run_environment=True)
 
+    def _build_static_lib_in_shared(self):
+        """ Build shared library using libtool (while linking to a static library) """
+
+        # Copy static-in-shared directory to build folder
+        autotools_folder = os.path.join(self.build_folder, "static-in-shared")
+        shutil.copytree(os.path.join(self.source_folder, "static-in-shared"), autotools_folder)
+
+        install_prefix = os.path.join(autotools_folder, "prefix")
+
+        # Build static library using CMake
+        cmake_build_folder = os.path.join(autotools_folder, "cmake_build")
+        cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
+        cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
+        cmake.build()
+        cmake.install()
+
+        # Copy autotools directory to build folder
+        with tools.chdir(autotools_folder):
+            self.run("{} -ifv -Wall".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+
+        with tools.chdir(autotools_folder):
+            conf_args = [
+                "--enable-shared",
+                "--disable-static",
+                "--prefix={}".format(tools.unix_path(os.path.join(install_prefix))),
+            ]
+            with self._build_context():
+                autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+                autotools.libs = []
+                autotools.link_flags.append("-L{}".format(tools.unix_path(os.path.join(install_prefix, "lib"))))
+                autotools.configure(args=conf_args, configure_dir=autotools_folder)
+                autotools.make(args=["V=1"])
+                autotools.install()
+
+    def _test_static_lib_in_shared(self):
+        """ Test existence of shared library """
+        install_prefix = os.path.join(self.build_folder, "static-in-shared", "prefix")
+
+        with tools.chdir(install_prefix):
+            if self.settings.os == "Windows":
+                assert len(list(glob.glob(os.path.join("bin", "*.dll")))) > 0
+            elif tools.is_apple_os(self.settings.os):
+                assert len(list(glob.glob(os.path.join("lib", "*.dylib")))) > 0
+            else:
+                assert len(list(glob.glob(os.path.join("lib", "*.so")))) > 0
+
     def build(self):
         self._build_autotools()
         self._build_ltdl()
+        self._build_static_lib_in_shared()
 
     def test(self):
         self._test_autotools()
         self._test_ltdl()
+        self._test_static_lib_in_shared()

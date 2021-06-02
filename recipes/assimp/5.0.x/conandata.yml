@@ -1,7 +1,18 @@
 sources:
   "5.0.0":
-    sha256: 0c81f2d6c2b18272c98727e21846a9a8a203b15e8957c2ff7a6e76a1c52af2d3
-    url: https://github.com/assimp/assimp/archive/v5.0.0.zip
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.0.tar.gz"
+    sha256: "b0110a91650d6bb4000e3d5c2185bf77b0ff0a2e7a284bc2c4af81b33988b63c"
   "5.0.1":
-    sha256: d10542c95e3e05dece4d97bb273eba2dfeeedb37a78fb3417fd4d5e94d879192
-    url: https://github.com/assimp/assimp/archive/v5.0.1.zip
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.1.tar.gz"
+    sha256: "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc"
+patches:
+  "5.0.0":
+    - patch_file: "patches/0001-unvendor-deps.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
+      base_path: "source_subfolder"
+  "5.0.1":
+    - patch_file: "patches/0001-unvendor-deps.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
+      base_path: "source_subfolder"

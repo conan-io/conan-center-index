@@ -15,8 +15,8 @@ class GetTextConan(ConanFile):
     deprecated = "gettext"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"]}
+    default_options = {"shared": False, "fPIC": True, "threads": "auto"}
 
     @property
     def _source_subfolder(self):
@@ -43,6 +43,9 @@ class GetTextConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if(self.options.threads == "auto"):
+            self.options.threads = { "Solaris": "solaris", "Windows": "windows" }.get(str(self.settings.os), "posix")
 
     def requirements(self):
         self.requires("libiconv/1.16")
@@ -75,6 +78,7 @@ class GetTextConan(ConanFile):
                 "--disable-csharp",
                 "--disable-libasprintf",
                 "--disable-curses",
+                "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
                 "--with-libiconv-prefix=%s" % libiconv_prefix]
         build = None
         host = None

@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class Assimp(ConanFile):
@@ -9,18 +11,17 @@ class Assimp(ConanFile):
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
     topics = ("conan", "assimp", "3d")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "double_precision": [True, False],
         "fPIC": [True, False],
+        "double_precision": [True, False],
     }
     default_options = {
         "shared": False,
-        "double_precision": False,
         "fPIC": True,
+        "double_precision": False,
     }
 
     _format_option_map = {
@@ -90,6 +91,8 @@ class Assimp(ConanFile):
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -100,10 +103,6 @@ class Assimp(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-        self.requires("irrxml/1.2")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -112,14 +111,61 @@ class Assimp(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @property
+    def _depends_on_kuba_zip(self):
+        return self.options.with_3mf_exporter
+
+    @property
+    def _depends_on_poly2tri(self):
+        return self.options.with_blend or self.options.with_ifc
+
+    @property
+    def _depends_on_rapidjson(self):
+        return self.options.with_gltf or self.options.with_gltf_exporter
+
+    @property
+    def _depends_on_zlib(self):
+        return self.options.with_assbin or self.options.with_assbin_exporter or \
+               self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
+               self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
+
+    def requirements(self):
+        # TODO: unvendor others libs:
+        # - clipper (required by IFC importer): can't be unvendored because CCI
+        #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
+        # - Open3DGC
+        # - openddlparser
+        self.requires("irrxml/1.2")
+        self.requires("minizip/1.2.11")
+        self.requires("utfcpp/3.1.2")
+        if self._depends_on_kuba_zip:
+            self.requires("kuba-zip/0.1.31")
+        if self._depends_on_poly2tri:
+            self.requires("poly2tri/cci.20130502")
+        if self._depends_on_rapidjson:
+            self.requires("rapidjson/cci.20200410")
+        if self._depends_on_zlib:
+            self.requires("zlib/1.2.11")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("assimp-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't force several compiler flags
+        for before, after in [("-fPIC", ""), ("-g ", ""), ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', "")]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), before, after)
+        # Take care to not use these vendored libs
+        for vendor in ["irrXML", "poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]:
+            tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["HUNTER_ENABLED"] = False
         self._cmake.definitions["SYSTEM_IRRXML"] = True
         self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
         self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
@@ -127,7 +173,7 @@ class Assimp(ConanFile):
         self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
         self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
         self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
-
+        self._cmake.definitions["IGNORE_GIT_HASH"] = True
         self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
 
         self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
@@ -139,8 +185,7 @@ class Assimp(ConanFile):
         return self._cmake
 
     def build(self):
-        for before, after in [("-fPIC", ""), ("-g ", ""), ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', "")]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), before, after)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -152,18 +197,15 @@ class Assimp(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "assimp"
+        self.cpp_info.names["cmake_find_package_multi"] = "assimp"
+        self.cpp_info.names["pkg_config"] = "assimp"
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            self.cpp_info.defines.append("ASSIMP_DLL")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
-        if not self.options.shared and self._stdcpp_library:
-            self.cpp_info.system_libs.append(self._stdcpp_library)
-
-    @property
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ("libstdc++", "libstdc++11"):
-            return "stdc++"
-        elif libcxx in ("libc++",):
-            return "c++"
-        else:
-            return False
+        if not self.options.shared:
+            stdcpp_library = tools.stdcpp_library(self)
+            if stdcpp_library:
+                self.cpp_info.system_libs.append(stdcpp_library)

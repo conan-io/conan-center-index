@@ -1,6 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
+
+required_conan_version = ">=1.32.0"
 
 
 class ITKConan(ConanFile):
@@ -35,7 +38,6 @@ class ITKConan(ConanFile):
 
     # TODO: Some packages can be added as optional, but they are not in CCI:
     # - mkl
-    # - fftw
     # - vtk
     # - opencv
 
@@ -56,15 +58,20 @@ class ITKConan(ConanFile):
         self.requires("libjpeg/9d")
         self.requires("dcmtk/3.6.5")
         self.requires("double-conversion/3.1.5")
-        self.requires("eigen/3.3.7")
-        self.requires("expat/2.2.9")
-        self.requires("fftw/3.3.8")
+        self.requires("eigen/3.3.9")
+        self.requires("expat/2.2.10")
+        self.requires("fftw/3.3.9")
         self.requires("hdf5/1.12.0")
-        self.requires("icu/67.1")
-        self.requires("libtiff/4.1.0")
+        self.requires("icu/68.2")
+        self.requires("libtiff/4.2.0")
         self.requires("libpng/1.6.37")
-        self.requires("openjpeg/2.3.1")
+        self.requires("openjpeg/2.4.0")
         self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.options.shared and not self.options["hdf5"].shared:
+            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
+                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -211,9 +218,6 @@ class ITKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.shared and not self.options["hdf5"].shared:
-            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
-                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
@@ -223,16 +227,31 @@ class ITKConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
+        # Do not remove UseITK.cmake and *.h.in files
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
+            if os.path.basename(cmake_file) != "UseITK.cmake":
+                os.remove(cmake_file)
+
+    @property
+    def _cmake_module_dir(self):
+        return os.path.join("lib", "cmake", self._itk_subdir)
+
+    @property
+    def _itk_subdir(self):
+        v = tools.Version(self.version)
+        return "ITK-{}.{}".format(v.major, v.minor)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)  # FIXME: correct order?
-        v = tools.Version(self.version)
-        self.cpp_info.includedirs.append(os.path.join("include", "ITK-{}.{}".format(v.major, v.minor)))
+        self.cpp_info.includedirs.append(os.path.join("include", self._itk_subdir))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
 
         # FIXME: use conan components
         self.cpp_info.names["cmake_find_package"] = "ITK"
         self.cpp_info.names["cmake_find_package_multi"] = "ITK"
+
+        self.cpp_info.builddirs.append(self._cmake_module_dir)
+        self.cpp_info.build_modules = [os.path.join(self._cmake_module_dir, "UseITK.cmake")]

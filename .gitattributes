@@ -6,3 +6,4 @@
 *.py text eol=lf
 *.txt text eol=lf
 *.yml text eol=lf
+*.am text eol=lf

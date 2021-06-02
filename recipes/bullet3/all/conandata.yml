@@ -8,3 +8,12 @@ sources:
   "3.07":
     url: "https://github.com/bulletphysics/bullet3/archive/3.07.tar.gz"
     sha256: "068ecf8acbf256d3976eebee75d7d6f5af16c049f10f6b2d8ba28bb638bef3b0"
+  "3.08":
+    url: "https://github.com/bulletphysics/bullet3/archive/3.08.tar.gz"
+    sha256: "05826c104b842bcdd1339b86894cb44c84ac2525ac296689d34b38a14bbba0dd"
+  "3.09":
+    url: "https://github.com/bulletphysics/bullet3/archive/3.09.tar.gz"
+    sha256: "f2feef9322329c0571d9066fede2db0ede92b19f7f7fdf54def3b4651f02af03"
+  "3.17":
+    url: "https://github.com/bulletphysics/bullet3/archive/3.17.tar.gz"
+    sha256: "baa642c906576d4d98d041d0acb80d85dd6eff6e3c16a009b1abf1ccd2bc0a61"

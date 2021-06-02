@@ -1,0 +1,25 @@
+diff --git a/acado/code_generation/export_templated_file.cpp b/acado/code_generation/export_templated_file.cpp
+index 76ec47a2..937a9c7b 100644
+--- a/acado/code_generation/export_templated_file.cpp
++++ b/acado/code_generation/export_templated_file.cpp
+@@ -34,6 +34,8 @@
+ #include <acado/code_generation/export_templated_file.hpp>
+ #include <acado/code_generation/templates/templates.hpp>
+ 
++#include <cstdlib>
++
+ using namespace std;
+ 
+ BEGIN_NAMESPACE_ACADO
+@@ -66,7 +68,10 @@ returnValue ExportTemplatedFile::setup(	const std::string& _templateName,
+ {
+     ExportFile::setup( _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString );
+     
+-	folders = TEMPLATE_PATHS;
++	if(const char* template_paths = std::getenv("ACADO_TEMPLATE_PATHS"))
++	{
++		folders = template_paths;
++	}
+ 	templateName = _templateName;
+     
+     return SUCCESSFUL_RETURN;

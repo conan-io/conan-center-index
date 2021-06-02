@@ -1,3 +1,5 @@
 versions:
+  "40":
+    folder: all
   "39":
     folder: all

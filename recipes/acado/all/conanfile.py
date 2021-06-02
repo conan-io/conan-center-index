@@ -59,6 +59,10 @@ class AcadoConan(ConanFile):
         self._cmake.definitions["ACADO_INTERNAL"] = False
         self._cmake.definitions["ACADO_BUILD_CGT_ONLY"] = self.options.codegen_only
 
+        # ACADO logs 170.000 lines of warnings, so we disable them
+        self._cmake.definitions["CMAKE_C_FLAGS"] = "-w"
+        self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-w"
+
         self._cmake.configure()
         return self._cmake
 
@@ -89,6 +93,10 @@ class AcadoConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
+        acado_template_paths = os.path.join(self.package_folder, "include", "acado", "code_generation", "templates")
+        self.output.info("Setting ACADO_TEMPLATE_PATHS environment variable: {}".format(acado_template_paths))
+        self.env_info.ACADO_TEMPLATE_PATHS = acado_template_paths
+
         if self.options.shared:
             self.cpp_info.libs = ["acado_toolkit_s", "acado_casadi"]
         else:

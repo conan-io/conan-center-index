@@ -1,0 +1,25 @@
+sources:
+  "cci.20210507":
+    url:
+      crashpad:
+        url: "https://github.com/chromium/crashpad/archive/d9bc7cf06aef74e928f9afc3dee33b60121b9c73.zip"
+        sha256: "34c2d4bf7be49c2db1d2f50e3410b506aab15a06d245f8c02ea0046e9295eaa6"
+      mini_chromium:
+        url: "https://github.com/chromium/mini_chromium/archive/ccb198907cecf072d8f5b2543d4d348e834a298a.zip"
+        sha256: "d526f659b0d44932bb4b5ff1277d855569572eb3fcad6ec1c69a71aac6a3d6ee"
+patches:
+  "cci.20210507":
+    - patch_file: "patches/cci.20210507-0001-fix-openssl-link-order.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0002-remove-fPIC-Werror-LTO.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0003-compilers-from-env.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0004-use-conan-linux-syscall-support-package.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0005-allow-all-archs.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0006-mini_chromium-win_helper-py3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
+      base_path: "source_subfolder"

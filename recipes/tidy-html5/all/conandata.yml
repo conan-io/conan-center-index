@@ -1,0 +1,4 @@
+sources:
+  "5.7.28":
+    url: "https://github.com/htacg/tidy-html5/archive/refs/tags/5.7.28.tar.gz"
+    sha256: "5caa2c769204f506e24ea4986a45abe23f71d14f0fe968314f20065f342ffdba"

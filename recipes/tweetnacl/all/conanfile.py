@@ -5,7 +5,7 @@ import os
 
 class TweetnaclConan(ConanFile):
     name = "tweetnacl"
-    license = "Public Domain"
+    license = "Unlicense"
     homepage = "https://tweetnacl.cr.yp.to"
     url = "https://github.com/conan-io/conan-center-index"
     description = "TweetNaCl is the world's first auditable high-security cryptographic library"

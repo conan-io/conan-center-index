@@ -1,0 +1,4 @@
+sources:
+  "cci.20200728":
+    url: "https://github.com/google/libnop/archive/45dfe0f2cbb055010068f81e2d094b3805c068fb.zip"
+    sha256: "c9828ee844dcef31292459c15d1ec8ee384e8f949ae31d026c71ad4c35aaf50a"

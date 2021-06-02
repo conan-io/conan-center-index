@@ -4,6 +4,9 @@ import glob
 import os
 
 
+required_conan_version = ">=1.32.0"
+
+
 class AprUtilConan(ConanFile):
     name = "apr-util"
     description = "The Apache Portable Runtime (APR) provides a predictable and consistent interface to underlying platform-specific implementations"
@@ -70,7 +73,7 @@ class AprUtilConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
         if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
@@ -95,15 +98,19 @@ class AprUtilConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.35.1")
         if self.options.with_expat:
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
         if self.options.with_postgresql:
-            self.requires("libpq/11.5")
+            self.requires("libpq/13.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+
+    def validate(self):
+        if self.options.shared != self.options["apr"].shared:
+            raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -141,7 +148,6 @@ class AprUtilConan(ConanFile):
             "--with-berkeley-db={}".format(tools.unix_path(self.deps_cpp_info["libdb"].rootpath)) if self.options.dbm == "db" else "--without-berkeley-db",
             "--with-gdbm={}".format(tools.unix_path(self.deps_cpp_info["gdbm"].rootpath)) if self.options.dbm == "gdbm" else "--without-gdbm",
             "--with-ndbm={}".format(tools.unix_path(self.deps_cpp_info["ndbm"].rootpath)) if self.options.dbm == "ndbm" else "--without-ndbm",
-
         ]
         if self.options.dbm:
             conf_args.append("--with-dbm={}".format(self.options.dbm))
@@ -153,9 +159,6 @@ class AprUtilConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.shared != self.options["apr"].shared:
-            raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
-
         self._patch_sources()
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()

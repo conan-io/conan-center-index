@@ -1,0 +1,10 @@
+sources:
+  "3.4.1":
+    url: "https://github.com/CGNS/CGNS/archive/v3.4.1.tar.gz"
+    sha256: "d32595e7737b9332243bd3de1eb8c018a272f620f09b289dea8292eba1365994"
+patches:
+  "3.4.1":
+    - patch_file: "patches/fix_find_hdf5.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix_static_or_shared.patch"
+      base_path: "source_subfolder"

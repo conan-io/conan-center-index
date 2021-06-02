@@ -1,0 +1,10 @@
+sources:
+  "4.0.0":
+    - url: "https://raw.githubusercontent.com/bazelbuild/bazel/4.0.0/LICENSE"
+      sha256: cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+    - url: "https://github.com/bazelbuild/bazel/releases/download/4.0.0/bazel-4.0.0-darwin-x86_64"
+      sha256: "349f3c9dd24191369c1073c57cc1386fc3c2d4ad7d44135c3d873c9dc67fae1f"
+    - url: "https://github.com/bazelbuild/bazel/releases/download/4.0.0/bazel-4.0.0-linux-x86_64"
+      sha256: "7bee349a626281fc8b8d04a7a0b0358492712377400ab12533aeb39c2eb2b901"
+    - url: "https://github.com/bazelbuild/bazel/releases/download/4.0.0/bazel-4.0.0-windows-x86_64.exe"
+      sha256: "43930bbbc8b5d618884ee8145e1ec181760bf9eea42d16217a30381d176e4cf6"

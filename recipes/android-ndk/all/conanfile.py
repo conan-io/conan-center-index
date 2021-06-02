@@ -140,7 +140,16 @@ class AndroidNDKInstallerConan(ConanFile):
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
         self.env_info.PATH.append(self.package_folder)
 
-        # this is not enough, I can kill that .....
+        # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located. 
+        # That's what most NDK-related scripts use (inside the NDK, and outside of it).
+        # https://groups.google.com/g/android-ndk/c/qZjhOaynHXc
+        self.output.info('Creating ANDROID_NDK_ROOT environment variable: %s' % self.package_folder)
+        self.env_info.ANDROID_NDK_ROOT = self.package_folder
+
+        self.output.info('Creating ANDROID_NDK_HOME environment variable: %s' % self.package_folder)
+        self.env_info.ANDROID_NDK_HOME = self.package_folder
+
+        #  this is not enough, I can kill that .....
         if not hasattr(self, 'settings_target'):
             return
 
@@ -155,7 +164,7 @@ class AndroidNDKInstallerConan(ConanFile):
 
         self.output.info('Creating NDK_ROOT environment variable: %s' % self._ndk_root)
         self.env_info.NDK_ROOT = self._ndk_root
-
+        
         self.output.info('Creating CHOST environment variable: %s' % self._llvm_triplet)
         self.env_info.CHOST = self._llvm_triplet
 

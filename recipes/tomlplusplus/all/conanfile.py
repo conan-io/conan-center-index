@@ -12,12 +12,8 @@ class TomlPlusPlusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     settings = ("compiler",)
-    options = {
-        "multiple_headers": [True, False]
-    }
-    default_options = {
-        "multiple_headers": False
-    }
+    options = {"multiple_headers": [True, False, "deprecated"]}
+    default_options = {"multiple_headers": "deprecated"}
     no_copy_source = True
 
     @property
@@ -38,6 +34,9 @@ class TomlPlusPlusConan(ConanFile):
         }
 
     def configure(self):
+        if self.options.multiple_headers != "deprecated":
+            self.output.warn("The {} option 'multiple_headers' has been deprecated. Both formats are in the same package.")
+
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -57,13 +56,8 @@ class TomlPlusPlusConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.options.multiple_headers:
-            header_dir = os.path.join(
-                self._source_subfolder, "include", "toml++")
-            self.copy(pattern="*.h", dst="include", src=header_dir)
-        else:
-            self.copy(pattern="toml.hpp", dst="include",
-                      src=self._source_subfolder)
+        self.copy(pattern="*.h**", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="toml.hpp", dst="include", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()

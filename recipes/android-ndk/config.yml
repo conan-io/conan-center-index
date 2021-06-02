@@ -2,3 +2,5 @@
     versions:
       "r21d":
         folder: all
+      "r22":
+        folder: all

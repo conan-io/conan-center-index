@@ -14,19 +14,31 @@ sources:
   "2.7.4":
     sha256: "daff8a4003ac420a8550760ed303ce33b310c8ea17b7f15b307d1969cabcebcb"
     url: "https://github.com/harfbuzz/harfbuzz/archive/2.7.4.tar.gz"
+  "2.8.0":
+    sha256: "9444358d1d8c1884c3a25b02fe702bd244172c4fdd2e98f5a165bc0987ef34f6"
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.8.0.tar.gz"
+  "2.8.1":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.8.1.tar.gz"
+    sha256: "b3f17394c5bccee456172b2b30ddec0bb87e9c5df38b4559a973d14ccd04509d"
 patches:
   "2.6.8":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.0":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.1":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.2":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
   "2.7.4":
-    - patch_file: "patches/source_subfolder.patch"
-      base_path: "."
+    - patch_file: "patches/icu.patch"
+      base_path: "source_subfolder"
+  "2.8.0":
+    - patch_file: "patches/icu-2.8.x.patch"
+      base_path: "source_subfolder"
+  "2.8.1":
+    - patch_file: "patches/icu-2.8.x.patch"
+      base_path: "source_subfolder"

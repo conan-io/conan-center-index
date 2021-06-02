@@ -33,7 +33,7 @@ class NameofConan(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
             return True
-        if compiler == "gcc" and version >= "7":
+        if compiler == "gcc" and version >= "7.4":
             return True
         if compiler == "clang" and version >= "5":
             return True

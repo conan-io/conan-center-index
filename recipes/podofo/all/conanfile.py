@@ -1,8 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans import tools
 import os
 
-class OatppSwaggerConan(ConanFile):
+class PodofoConan(ConanFile):
     name = "podofo"
     license = "GPL-3.0", "LGPL-3.0"
     homepage = "http://podofo.sourceforge.net"
@@ -36,6 +37,8 @@ class OatppSwaggerConan(ConanFile):
         if self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("currently this recipe doesn't support shared libraries on MacOS")
 
+        if self.settings.compiler.cppstd and tools.Version("0.9.7") <= self.version:
+            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("freetype/2.10.4")
@@ -45,7 +48,7 @@ class OatppSwaggerConan(ConanFile):
         self.requires("libunistring/0.9.10")
         self.requires("libtiff/4.1.0")
         self.requires("libidn/1.36")
-        self.requires("openssl/1.1.1h")
+        self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,6 +61,8 @@ class OatppSwaggerConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
         self._cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
+        if tools.Version("0.9.7") <= self.version and not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
