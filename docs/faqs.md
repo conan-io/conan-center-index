@@ -198,4 +198,5 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 ## What is the policy for adding older versions of a package?
 
-We discourage adding older versions without a direct requirement. This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
+This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
