@@ -48,8 +48,8 @@ class LibMysqlClientCConan(ConanFile):
             tools.patch(**patch)
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        os.rename(sources_cmake, sources_cmake_orig)
-        os.rename("CMakeLists.txt", sources_cmake)
+        tools.rename(sources_cmake, sources_cmake_orig)
+        tools.rename("CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
             if tools.Version(self.version) <= "8.0.17":
                 tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
