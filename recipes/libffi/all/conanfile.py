@@ -131,10 +131,16 @@ class LibffiConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        shutil.copy(self.user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self.user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
+        if hasattr(self, "user_info_build"):
+            shutil.copy(self.user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self.user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
+        else:
+            shutil.copy(self.deps_user_info["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self.deps_user_info["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
 
         with self._build_context():
             autotools = self._configure_autotools()
