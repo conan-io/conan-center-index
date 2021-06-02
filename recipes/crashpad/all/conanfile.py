@@ -191,6 +191,14 @@ class CrashpadConan(ConanFile):
                     targets=" ".join(targets),
                     parallel=tools.cpu_count()), run_environment=True)
 
+        def lib_filename(name):
+            prefix, suffix = ("", ".lib")  if self.settings.compiler == "Visual Studio" else ("lib", ".a")
+            return "{}{}{}".format(prefix, name, suffix)
+        tools.rename(os.path.join(self._source_subfolder, "out", "Default", "obj", "client", lib_filename("common")),
+                     os.path.join(self._source_subfolder, "out", "Default", "obj", "client", lib_filename("client_common")))
+        tools.rename(os.path.join(self._source_subfolder, "out", "Default", "obj", "handler", lib_filename("common")),
+                     os.path.join(self._source_subfolder, "out", "Default", "obj", "handler", lib_filename("handler_common")))
+
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
@@ -201,10 +209,14 @@ class CrashpadConan(ConanFile):
         self.copy("*.h", src=os.path.join(self._source_subfolder, "out", "Default", "gen", "build"), dst=os.path.join("include", "build"))
 
         self.copy("*.a", src=os.path.join(self._source_subfolder, "out", "Default"), dst="lib", keep_path=False)
+
         self.copy("*.lib", src=os.path.join(self._source_subfolder, "out", "Default"), dst="lib", keep_path=False)
         self.copy("crashpad_handler", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler.exe", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
         self.copy("crashpad_handler_com.com", src=os.path.join(self._source_subfolder, "out", "Default"), dst="bin", keep_path=False)
+        if self.settings.os == "Windows":
+            tools.rename(os.path.join(self.package_folder, "bin", "crashpad_handler_com.com"),
+                         os.path.join(self.package_folder, "bin", "crashpad_handler.com"))
 
         # Remove accidentally copied libraries. These are used by the executables, not by the libraries.
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*getopt*")
@@ -243,11 +255,11 @@ class CrashpadConan(ConanFile):
             self.cpp_info.components["util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
             self.cpp_info.components["util"].system_libs.append("bsm")
 
-        self.cpp_info.components["common"].libs = ["common"]
-        self.cpp_info.components["common"].requires = ["util"]
+        self.cpp_info.components["client_common"].libs = ["client_common"]
+        self.cpp_info.components["client_common"].requires = ["util", "mini_chromium_base"]
 
         self.cpp_info.components["client"].libs = ["client"]
-        self.cpp_info.components["client"].requires = ["common"]
+        self.cpp_info.components["client"].requires = ["util", "mini_chromium_base", "client_common"]
         if self.settings.os == "Windows":
             self.cpp_info.components["client"].system_libs.append("rpcrt4")
 
@@ -255,7 +267,7 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["context"].requires = ["util"]
 
         self.cpp_info.components["snapshot"].libs = ["snapshot"]
-        self.cpp_info.components["snapshot"].requires = ["common", "mini_chromium_base", "util"]
+        self.cpp_info.components["snapshot"].requires = ["client_common", "mini_chromium_base", "util"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["snapshot"].frameworks.extend(["OpenCL"])
 
@@ -265,8 +277,11 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["minidump"].libs = ["minidump"]
         self.cpp_info.components["minidump"].requires = ["snapshot", "mini_chromium_base", "util"]
 
+        self.cpp_info.components["handler_common"].libs = ["handler_common"]
+        self.cpp_info.components["handler_common"].requires = ["client_common", "snapshot", "util"]
+
         self.cpp_info.components["handler"].libs = ["handler"]
-        self.cpp_info.components["handler"].requires = ["common", "minidump", "snapshot"]
+        self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
