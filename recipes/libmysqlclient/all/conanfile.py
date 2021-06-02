@@ -93,6 +93,9 @@ class LibMysqlClientCConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
                 "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
                 "COMMAND DYLD_LIBRARY_PATH=%s %s" %(os.path.join(self.build_folder, "library_output_directory"), os.path.join(self.build_folder, "runtime_output_directory", "libmysql_api_test")))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
+            "  INSTALL_DEBUG_SYMBOLS(",
+            "  # INSTALL_DEBUG_SYMBOLS(")
 
     def config_options(self):
         if self.settings.os == "Windows":
