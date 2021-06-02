@@ -1,8 +1,6 @@
 from conans import ConanFile, CMake, tools
-import os
-from conans.tools import load
 from conans.errors import ConanInvalidConfiguration
-from pathlib import Path
+import os
 import textwrap
 
 class IceoryxConan(ConanFile):
@@ -28,7 +26,7 @@ class IceoryxConan(ConanFile):
     _cmake = None
 
     @staticmethod
-    def _create_cmake_module_alias_target(module_file, alias, aliased):
+    def _create_cmake_module_alias_targets(module_file, alias, aliased):
         content = ""
         content += textwrap.dedent("""\
             if(TARGET {aliased} AND NOT TARGET {alias})
@@ -82,13 +80,6 @@ class IceoryxConan(ConanFile):
         )
 
     @property
-    def _cmake_folder(self):
-        return os.path.join(
-            self._source_subfolder,
-            "iceoryx_meta"
-        )
-
-    @property
     def _target_aliases(self):
         return {
             "iceoryx_posh::iceoryx_posh": "iceoryx::posh",
@@ -101,10 +92,6 @@ class IceoryxConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
-    def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows currently not supported")
-
     def config_options(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1")
@@ -112,8 +99,22 @@ class IceoryxConan(ConanFile):
             self.requires("acl/2.3.1")
     
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        os = self.settings.os
+        compiler = self.settings.compiler
+        version = tools.Version(self.settings.compiler.version)
+        if os == "Windows":
+            raise ConanInvalidConfiguration("Windows currently not supported")
+        if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
+        if compiler == "gcc" and compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration(
+                'Using Iceoryx with gcc on Linux requires "compiler.libcxx=libstdc++11"')
+        if os == "Linux" and compiler == "gcc" and version <= '5':
+            raise ConanInvalidConfiguration(
+                "Using Iceoryx with gcc on Linux requires gcc 6 or higher.")
+        if os == "Linux" and compiler == "gcc" and version == '6':
+            self.output.warn(
+                "Iceoryx package is compiled with gcc 6 - that is ok but it is recommended to use 7 or higher.")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -138,17 +139,17 @@ class IceoryxConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_share)
         tools.rmdir(self._pkg_cmake)
-        tools.rename(
-            os.path.join(self._pkg_etc, "roudi_config_example.toml"),
-            os.path.join(self._pkg_bin, "roudi_config_example.toml")
-        )
+        if self.options.toml_config:
+            tools.rename(
+                os.path.join(self._pkg_etc, "roudi_config_example.toml"),
+                os.path.join(self._pkg_bin, "roudi_config_example.toml")
+            )
         tools.rmdir(self._pkg_etc)
-
         for alias, aliased in self._target_aliases.items():
             cmake_file = "conan-official-{}-targets.cmake".format(
                 aliased.replace("::", "_")
             )
-            self._create_cmake_module_alias_target(
+            self._create_cmake_module_alias_targets(
                 os.path.join(
                     self.package_folder,
                     self._module_subfolder,
@@ -229,10 +230,6 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["bind_c"].build_modules["cmake_find_package_multi"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_binding_c-targets.cmake")
         ]
-        libcxx = tools.stdcpp_library(self)
-        print("---------------------------------------------------------------------------")
-        print(libcxx)
-        print("---------------------------------------------------------------------------")
         self.cpp_info.components["bind_c"].system_libs.extend(
             [
                 "pthread",

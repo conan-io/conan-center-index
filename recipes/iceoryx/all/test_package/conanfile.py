@@ -1,7 +1,5 @@
 import os
-
-from conans import ConanFile, CMake, tools
-
+from conans import ConanFile, CMake
 
 class IceoryxTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -9,12 +7,16 @@ class IceoryxTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
-        # in "test_package"
         cmake.configure()
         cmake.build()
 
     def test(self):
+        # ToDo : add an executable which can be 
+        # executed in container. 
+        # currently seems shared memory in container is 
+        # a bad idea (checked on 3 different linux devices
+        # always ok - but in container get 
+        # "fatal SIGBUS signal appeared caused by memset")
         path, dirs, files = next(os.walk("bin"))
-        assert len(files) == 19
+        assert len(files) == 7
         print("All %d example files are present" % (len(files)))
