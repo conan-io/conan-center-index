@@ -59,7 +59,7 @@ class LibiglConan(ConanFile):
         cmake.definitions["LIBIGL_WITH_TETGEN"] = False
         cmake.definitions["LIBIGL_WITH_TRIANGLE"] = False
         cmake.definitions["LIBIGL_WITH_XML"] = False
-        cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF" // This could be removed since it's off
+        cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
         cmake.definitions["LIBIGL_WITH_PREDICATES"] = False
         cmake.configure(build_folder=self._build_subfolder)
 
