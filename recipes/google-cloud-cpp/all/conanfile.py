@@ -100,7 +100,6 @@ class GoogleCloudCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        # FIXME: Components require names["pkg_config"] = "???" https://github.com/googleapis/google-cloud-cpp/search?p=1&q=pc
         self.cpp_info.components["common"].requires = ["abseil::absl_any", "abseil::absl_flat_hash_map", "abseil::absl_memory", "abseil::absl_optional", "abseil::absl_time"]
         self.cpp_info.components["common"].libs = ["google_cloud_cpp_common"]
         self.cpp_info.components["common"].names["pkg_config"] = "google_cloud_cpp_common"
