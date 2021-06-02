@@ -56,6 +56,8 @@ class DateConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
@@ -87,6 +89,7 @@ class DateConan(ConanFile):
             dst = os.path.join("include", "date")
             self.copy(pattern="date.h", dst=dst, src=src)
             self.copy(pattern="tz.h", dst=dst, src=src)
+            self.copy(pattern="ptz.h", dst=dst, src=src)
             self.copy(pattern="iso_week.h", dst=dst, src=src)
             self.copy(pattern="julian.h", dst=dst, src=src)
             self.copy(pattern="islamic.h", dst=dst, src=src)
