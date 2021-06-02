@@ -553,7 +553,6 @@ class QtConan(ConanFile):
         for package in self.deps_cpp_info.deps:
             args += ["-I \"%s\"" % s for s in self.deps_cpp_info[package].include_paths]
             args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
-            args += ["-L \"%s\"" % s for s in self.deps_cpp_info[package].lib_paths]
 
         if "libmysqlclient" in self.deps_cpp_info.deps:
             args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info["libmysqlclient"].rootpath, "bin", "mysql_config"))
@@ -627,6 +626,9 @@ class QtConan(ConanFile):
                 build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
+
+                build_env["LIB" if self.settings.compiler == "Visual Studio" else "LIBRARY_PATH"] = \
+                    [l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths]
                 with tools.environment_append(build_env):
 
                     if tools.os_info.is_macos:
