@@ -12,7 +12,7 @@ class GDCMConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     description = "C++ library for DICOM medical files"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,6 +52,7 @@ class GDCMConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.4.1")
+        self.requires("openjpeg/2.3.1")
         self.requires("zlib/1.2.11")
 
     def source(self):
@@ -70,6 +71,7 @@ class GDCMConan(ConanFile):
         self._cmake.definitions["GDCM_BUILD_DOCBOOK_MANPAGES"] = "OFF"
         self._cmake.definitions["GDCM_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = "ON"
+        self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = "ON"
         self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = "ON"
 
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -180,7 +182,6 @@ class GDCMConan(ConanFile):
                      "gdcmjpeg8",
                      "gdcmMEXD",
                      "gdcmMSFF",
-                     "gdcmopenjp2",
                      "socketxx"]
         if self.settings.os == "Windows":
             gdcm_libs.append("gdcmgetopt")
@@ -209,11 +210,11 @@ class GDCMConan(ConanFile):
 
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
-        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT"])
+        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "openjpeg::openjpeg"])
         if not self.options.shared:
             self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
             self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
-            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmopenjp2", "gdcmcharls"])
+            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmcharls"])
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["gdcmCommon"].system_libs = ["ws2_32", "crypt32"]
@@ -225,7 +226,4 @@ class GDCMConan(ConanFile):
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
                 if tools.is_apple_os(self.settings.os):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
-
-        if self.settings.os != "Windows":
-            self.cpp_info.components["gdcmopenjp2"].system_libs = ["pthread"]
 
