@@ -99,53 +99,56 @@ class GDCMConan(ConanFile):
 
     def _create_cmake_variables(self, variables_file):
         v = tools.Version(self.version)
-        build_shared_libs = "ON" if self.options.shared else "OFF"
-        content = textwrap.dedent(f"""\
+        content = textwrap.dedent("""\
             # The GDCM version number.
-            set(GDCM_MAJOR_VERSION "{v.major}")
-            set(GDCM_MINOR_VERSION "{v.minor}")
-            set(GDCM_BUILD_VERSION "{v.patch}")
-            
+            set(GDCM_MAJOR_VERSION "{v_major}")
+            set(GDCM_MINOR_VERSION "{v_minor}")
+            set(GDCM_BUILD_VERSION "{v_patch}")
+
             get_filename_component(SELF_DIR "${{CMAKE_CURRENT_LIST_FILE}}" PATH)
-            
+
             # The libraries.
             set(GDCM_LIBRARIES "")
-            
+
             # The CMake macros dir.
             set(GDCM_CMAKE_DIR "")
-            
+
             # The configuration options.
             set(GDCM_BUILD_SHARED_LIBS "{build_shared_libs}")
-            
+
             set(GDCM_USE_VTK "OFF")
 
             # The "use" file.
             set(GDCM_USE_FILE ${{SELF_DIR}}/UseGDCM.cmake)
-            
+
             # The VTK options.
             set(GDCM_VTK_DIR "")
-            
-            get_filename_component(GDCM_INCLUDE_ROOT "${{SELF_DIR}}/../../include/{self._gdcm_subdir}" ABSOLUTE)
+
+            get_filename_component(GDCM_INCLUDE_ROOT "${{SELF_DIR}}/../../include/{gdcm_subdir}" ABSOLUTE)
             set(GDCM_INCLUDE_DIRS ${{GDCM_INCLUDE_ROOT}})
             get_filename_component(GDCM_LIB_ROOT "${{SELF_DIR}}/../../lib" ABSOLUTE)
             set(GDCM_LIBRARY_DIRS ${{GDCM_LIB_ROOT}})
-        """)
+        """.format(v_major=v.major,
+                   v_minor=v.minor,
+                   v_patch=v.patch,
+                   build_shared_libs="ON" if self.options.shared else "OFF",
+                   gdcm_subdir=self._gdcm_subdir))
         tools.save(variables_file, content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(targets_file, libraries):
-        content = "\n".join([textwrap.dedent(f"""\
-            if(TARGET GDCM::{l} AND NOT TARGET {l})
-                add_library({l} INTERFACE IMPORTED)
-                set_property(TARGET {l} PROPERTY INTERFACE_LINK_LIBRARIES GDCM::{l})
+        content = "\n".join([textwrap.dedent("""\
+            if(TARGET {aliased} AND NOT TARGET {alias})
+                add_library({alias} INTERFACE IMPORTED)
+                set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
             endif()
-            """) for l in libraries])
+            """.format(alias=library, aliased="GDCM::"+library)) for library in libraries])
         tools.save(targets_file, content)
 
     @property 
     def _gdcm_subdir(self):
         v = tools.Version(self.version)
-        return f"gdcm-{v.major}.{v.minor}"
+        return "gdcm-{}.{}".format(v.major, v.minor)
 
     @property
     def _gdcm_builddir(self):
@@ -153,11 +156,11 @@ class GDCMConan(ConanFile):
 
     @property
     def _gdcm_cmake_module_aliases_path(self):
-        return os.path.join("lib", self._gdcm_subdir, f"conan-official-{self.name}-targets.cmake")
+        return os.path.join("lib", self._gdcm_subdir, "conan-official-gdcm-targets.cmake")
 
     @property
     def _gdcm_cmake_variables_path(self):
-        return os.path.join("lib", self._gdcm_subdir, f"conan-official-{self.name}-variables.cmake")
+        return os.path.join("lib", self._gdcm_subdir, "conan-official-gdcm-variables.cmake")
 
     @property
     def _gdcm_build_modules(self):
