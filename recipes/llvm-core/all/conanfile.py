@@ -116,6 +116,11 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_PIC'] = \
             self.options.get_safe('fPIC', default=False)
 
+        if self.settings.compiler == 'Visual Studio':
+            build_type = str(self.settings.build_type).upper()
+            cmake.definitions['LLVM_USE_CRT_{}'.format(build_type)] = \
+                self.settings.compiler.runtime
+
         cmake.definitions['LLVM_ABI_BREAKING_CHECKS'] = 'WITH_ASSERTS'
         cmake.definitions['LLVM_ENABLE_WARNINGS'] = True
         cmake.definitions['LLVM_ENABLE_PEDANTIC'] = True
