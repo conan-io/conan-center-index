@@ -91,8 +91,6 @@ class GDCMConan(ConanFile):
             tools.remove_files_by_mask(bin_dir, "[!gs]*.dll")
             tools.remove_files_by_mask(bin_dir, "*.pdb")
         lib_dir = os.path.join(self.package_folder, "lib")
-        tools.rmdir(os.path.join(lib_dir, "gdcmopenjpeg-2.3"))
-        tools.rmdir(os.path.join(lib_dir, "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(os.path.join(lib_dir, self._gdcm_subdir), "[!U]*.cmake") #leave UseGDCM.cmake untouched
         self._create_cmake_module_alias_targets(
@@ -200,8 +198,6 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].build_modules["cmake"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._gdcm_build_modules
             self.cpp_info.components[lib].build_modules["cmake_find_multi_package"] = self._gdcm_build_modules
-            self.cpp_info.components[lib].names["cmake_find_package"] = lib
-            self.cpp_info.components[lib].names["cmake_find_multi_package"] = lib
 
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
@@ -221,4 +217,3 @@ class GDCMConan(ConanFile):
                 self.cpp_info.components["gdcmCommon"].system_libs = ["dl"]
                 if tools.is_apple_os(self.settings.os):
                     self.cpp_info.components["gdcmCommon"].frameworks = ["CoreFoundation"]
-
