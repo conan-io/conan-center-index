@@ -51,6 +51,7 @@ class GDCMConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def requirements(self):
+        self.requires("expat/2.4.1")
         self.requires("zlib/1.2.11")
 
     def source(self):
@@ -68,6 +69,7 @@ class GDCMConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["GDCM_BUILD_DOCBOOK_MANPAGES"] = "OFF"
         self._cmake.definitions["GDCM_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
+        self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = "ON"
         self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = "ON"
 
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -172,7 +174,6 @@ class GDCMConan(ConanFile):
                      "gdcmCommon",
                      "gdcmDICT",
                      "gdcmDSED",
-                     "gdcmexpat",
                      "gdcmIOD",
                      "gdcmjpeg12",
                      "gdcmjpeg16",
@@ -207,11 +208,10 @@ class GDCMConan(ConanFile):
             self.cpp_info.components[lib].names["cmake_find_multi_package"] = lib
 
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", "zlib::zlib"])
-        self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon"])
+        self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
         self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT"])
         if not self.options.shared:
             self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
-            self.cpp_info.components["gdcmIOD"].requires.append("gdcmexpat")
             self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
             self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmopenjp2", "gdcmcharls"])
 
