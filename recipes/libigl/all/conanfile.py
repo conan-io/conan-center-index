@@ -40,6 +40,7 @@ class LibiglConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.shared
+        cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
 
         # All these dependencies are needed to build the examples or the tests
         cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
