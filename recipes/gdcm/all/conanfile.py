@@ -68,11 +68,11 @@ class GDCMConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["GDCM_BUILD_DOCBOOK_MANPAGES"] = "OFF"
-        self._cmake.definitions["GDCM_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
-        self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = "ON"
-        self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = "ON"
-        self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = "ON"
+        self._cmake.definitions["GDCM_BUILD_DOCBOOK_MANPAGES"] = False
+        self._cmake.definitions["GDCM_BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = True
+        self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = True
+        self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
