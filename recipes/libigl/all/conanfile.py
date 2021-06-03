@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibiglConan(ConanFile):
@@ -28,6 +29,9 @@ class LibiglConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            
+        if self.settings.os == "Macos" and self.options.shared: # Move to validate
+            raise ConanInvalidConfiguration("MacOS shared is currently unsupported please open a PR")
 
     def configure(self):
         if self.options.shared:
