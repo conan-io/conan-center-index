@@ -21,6 +21,7 @@ class OpenCVConan(ConanFile):
         "contrib_freetype": [True, False],
         "contrib_sfm": [True, False],
         "parallel": [False, "tbb", "openmp"],
+        "with_ade": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_png": [True, False],
         "with_tiff": [True, False],
@@ -45,6 +46,7 @@ class OpenCVConan(ConanFile):
         "contrib": False,
         "contrib_freetype": False,
         "contrib_sfm": False,
+        "with_ade": False,
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
@@ -326,6 +328,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
 
         self._cmake.definitions["WITH_CUDA"] = self.options.with_cuda
+        self._cmake.definitions["WITH_ADE"] = self.options.with_ade
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
