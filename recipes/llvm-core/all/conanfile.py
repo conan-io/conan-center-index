@@ -219,6 +219,8 @@ class LLVMCoreConan(ConanFile):
             for ext in ['.a', '.lib']:
                 lib = '**/lib/*LLVMTableGenGlobalISel{}'.format(ext)
                 self.copy(lib, dst='lib', keep_path=False)
+                lib = '*LLVMTableGenGlobalISel{}'.format(ext)
+                self.copy(lib, dst='lib', src='lib')
 
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
