@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9.2)
 project(test_package)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
+if(NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 11)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
