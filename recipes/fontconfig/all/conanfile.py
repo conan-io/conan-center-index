@@ -37,7 +37,7 @@ class FontconfigConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.10.4")
-        self.requires("expat/2.3.0")
+        self.requires("expat/2.4.1")
         if self.settings.os == "Linux":
             self.requires("libuuid/1.0.3")
 
@@ -48,9 +48,7 @@ class FontconfigConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extrated_dir = self.name + "-" + self.version
-        os.rename(extrated_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
