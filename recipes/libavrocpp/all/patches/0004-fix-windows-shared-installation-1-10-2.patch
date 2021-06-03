@@ -1,0 +1,34 @@
+From 303259ea4480493e148187193e8c0f6833a61aea Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Tue, 2 Feb 2021 21:27:31 -0500
+Subject: [PATCH] fix windows shared installation
+
+---
+ lang/c++/CMakeLists.txt | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/lang/c++/CMakeLists.txt b/lang/c++/CMakeLists.txt
+index ee59f806..e0f855c1 100644
+--- a/lang/c++/CMakeLists.txt
++++ b/lang/c++/CMakeLists.txt
+@@ -169,8 +169,6 @@ unittest (AvrogencppTests)
+ unittest (CompilerTests)
+ unittest (AvrogencppTestReservedWords)
+ 
+-include (InstallRequiredSystemLibraries)
+-
+ set (CPACK_PACKAGE_FILE_NAME "avrocpp-${AVRO_VERSION_MAJOR}")
+ 
+ include (CPack)
+@@ -178,7 +176,7 @@ include (CPack)
+ install (TARGETS avrocpp avrocpp_s
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib
+-    RUNTIME DESTINATION lib)
++    RUNTIME DESTINATION bin)
+ 
+ install (TARGETS avrogencpp RUNTIME DESTINATION bin)
+ 
+-- 
+2.32.0.rc0
+
