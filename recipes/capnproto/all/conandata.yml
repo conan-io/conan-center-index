@@ -20,3 +20,7 @@ patches:
   "0.7.0":
     - patch_file: patches/0006-symlink.patch
       base_path: source_subfolder
+    - patch_file: patches/0007-cmake-module-path.patch
+      base_path: source_subfolder
+    - patch_file: patches/0008-disable-tests.patch
+      base_path: source_subfolder
