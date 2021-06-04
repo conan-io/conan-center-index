@@ -44,11 +44,8 @@ class SentryCrashpadConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-
-        if tools.is_apple_os(self.settings.os):
-            # FIXME: add Apple support
-            raise ConanInvalidConfiguration("This recipe does not support Apple.")
+            # Set as required in crashpad CMake file
+            tools.check_min_cppstd(self, 14)
 
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
