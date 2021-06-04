@@ -42,9 +42,8 @@ class CmpConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        self._cmake = cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
