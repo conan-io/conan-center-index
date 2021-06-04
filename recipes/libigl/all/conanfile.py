@@ -26,12 +26,14 @@ class LibiglConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def validate(self):
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "libigl can not be built as dynamic library on Macos currently. Please open a PR")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            
-        if self.settings.os == "Macos" and self.options.shared: # Move to validate
-            raise ConanInvalidConfiguration("MacOS shared is currently unsupported please open a PR")
 
     def configure(self):
         if self.options.shared:
@@ -39,7 +41,6 @@ class LibiglConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
- 
 
     def _configure_cmake(self):
         cmake = CMake(self)
