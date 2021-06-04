@@ -1,0 +1,4 @@
+sources:
+  "21.08":
+    url: https://fast.dpdk.org/rel/dpdk-21.08.tar.xz
+    sha256: 5352944f65ca6f870df124cca83bf18c2506f7992ece3490346e91654263abb1
