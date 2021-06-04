@@ -2,6 +2,9 @@ import os
 from conans import ConanFile, CMake, tools
 
 
+required_conan_version = ">= 1.33.0"
+
+
 class CmpConan(ConanFile):
     name = "cmp"
     license = "MIT"
