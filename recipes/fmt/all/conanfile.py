@@ -106,6 +106,9 @@ class FmtConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "fmt"
+        self.cpp_info.names["cmake_find_package_multi"] = "fmt"
+        self.cpp_info.names["pkg_config"] = "fmt"
         if self.options.header_only:
             self.cpp_info.components["fmt-header-only"].defines.append("FMT_HEADER_ONLY=1")
             if self.options.with_fmt_alias:
