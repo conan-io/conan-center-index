@@ -106,15 +106,17 @@ class IceoryxConan(ConanFile):
             raise ConanInvalidConfiguration("Windows currently not supported")
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if compiler == "gcc" and compiler.libcxx != "libstdc++11":
+        if (compiler == "gcc" or compiler == "clang") and compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(
-                'Using Iceoryx with gcc on Linux requires "compiler.libcxx=libstdc++11"')
+                'Using Iceoryx with gcc or clang on Linux requires "compiler.libcxx=libstdc++11"')
         if os == "Linux" and compiler == "gcc" and version <= '5':
             raise ConanInvalidConfiguration(
                 "Using Iceoryx with gcc on Linux requires gcc 6 or higher.")
         if os == "Linux" and compiler == "gcc" and version == '6':
             self.output.warn(
-                "Iceoryx package is compiled with gcc 6 - that is ok but it is recommended to use 7 or higher.")
+                "Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
+            self.output.warn(
+                "GCC 6 will built with warnings.")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -181,6 +183,8 @@ class IceoryxConan(ConanFile):
                 "rt"
             ]
         )
+        if self.settings.os == "Linux":
+            self.cpp_info.components["utils"].system_libs.append("atomic")
         self.cpp_info.components["posh"].name = "posh"
         self.cpp_info.components["posh"].libs = ["iceoryx_posh"]
         self.cpp_info.components["posh"].builddirs = self._pkg_cmake
