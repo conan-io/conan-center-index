@@ -13,8 +13,20 @@ class FmtConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "header_only": [True, False], "fPIC": [True, False], "with_fmt_alias": [True, False]}
-    default_options = {"shared": False, "header_only": False, "fPIC": True, "with_fmt_alias": False}
+    options = {
+        "header_only": [True, False],
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_fmt_alias": [True, False],
+        "with_os": [True, False],
+    }
+    default_options = {
+        "header_only": False,
+        "shared": False,
+        "fPIC": True,
+        "with_fmt_alias": False,
+        "with_os": True,
+    }
 
     _cmake = None
 
@@ -26,15 +38,22 @@ class FmtConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_with_os_option(self):
+        return tools.Version(self.version) >= "7.0.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_with_os_option:
+            del self.options.with_os
 
     def configure(self):
         if self.options.header_only:
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
+            del self.options.with_os
         elif self.options.shared:
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
@@ -53,6 +72,8 @@ class FmtConan(ConanFile):
         self._cmake.definitions["FMT_TEST"] = False
         self._cmake.definitions["FMT_INSTALL"] = True
         self._cmake.definitions["FMT_LIB_DIR"] = "lib"
+        if self._has_with_os_option:
+            self._cmake.definitions["FMT_OS"] = self.options.with_os
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
