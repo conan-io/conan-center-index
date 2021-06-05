@@ -58,8 +58,11 @@ class FmtConan(ConanFile):
             del self.options.with_os
         elif self.options.shared:
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
-                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+
+    def validate(self):
+        if self.options.get_safe("shared") and self.settings.compiler == "Visual Studio" and \
+           "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def package_id(self):
         if self.options.header_only:
