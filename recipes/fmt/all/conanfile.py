@@ -114,7 +114,8 @@ class FmtConan(ConanFile):
             if self.options.with_fmt_alias:
                 self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
         else:
-            self.cpp_info.libs = tools.collect_libs(self)
+            postfix = "d" if self.settings.build_type == "Debug" else ""
+            self.cpp_info.libs = ["fmt" + postfix]
             if self.options.with_fmt_alias:
                 self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
