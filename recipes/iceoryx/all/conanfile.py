@@ -169,7 +169,9 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["platform"].system_libs.extend(["pthread"])
         self.cpp_info.components["utils"].name = "utils"
         self.cpp_info.components["utils"].libs = ["iceoryx_utils"]
-        self.cpp_info.components["utils"].requires = ["platform","acl::acl"]
+        self.cpp_info.components["utils"].requires = ["platform"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["utils"].requires.append("acl::acl")
         self.cpp_info.components["utils"].builddirs = self._pkg_cmake
         self.cpp_info.components["utils"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_utils-targets.cmake")
