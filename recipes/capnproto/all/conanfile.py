@@ -52,9 +52,8 @@ class CapnprotoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) == "0.7.0":
+        if tools.Version(self.version) < "0.8.0":
             del self.options.with_zlib
-            del self.options.with_openssl
 
     def configure(self):
         if self.options.shared:
@@ -70,7 +69,7 @@ class CapnprotoConan(ConanFile):
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
 
     def requirements(self):
-        if self.options.get_safe("with_openssl"):
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1k")
         if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
@@ -90,7 +89,7 @@ class CapnprotoConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["EXTERNAL_CAPNP"] = False
         self._cmake.definitions["CAPNP_LITE"] = False
-        self._cmake.definitions["WITH_OPENSSL"] = self.options.get_safe("with_openssl")
+        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -100,10 +99,11 @@ class CapnprotoConan(ConanFile):
         args = [
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--disable-static" if self.options.shared else "--enable-static",
-            "--with-openssl" if self.options.get_safe("with_openssl") else "--without-openssl",
-            "--with-zlib" if self.options.get_safe("with_zlib") else "--without-zlib",
+            "--with-openssl" if self.options.with_openssl else "--without-openssl",
             "--enable-reflection"
         ]
+        if tools.Version(self.version) >= "0.8.0":
+            args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(args=args, configure_dir=os.path.join(self._source_subfolder, "c++"))
         return self._autotools
@@ -162,7 +162,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
         ]
         if self.options.get_safe("with_zlib"):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
-        if self.options.get_safe("with_openssl"):
+        if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
 
         for component in components:
