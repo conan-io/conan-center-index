@@ -61,6 +61,12 @@ class FmtConan(ConanFile):
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
+        else:
+            del self.info.options.with_fmt_alias
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -95,12 +101,6 @@ class FmtConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
-        else:
-            del self.info.options.with_fmt_alias
 
     def package_info(self):
         if self.options.header_only:
