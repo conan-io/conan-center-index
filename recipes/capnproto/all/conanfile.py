@@ -52,6 +52,8 @@ class CapnprotoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) == "0.7.0":
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -69,7 +71,7 @@ class CapnprotoConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1k")
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
     def build_requirements(self):
@@ -98,7 +100,7 @@ class CapnprotoConan(ConanFile):
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--disable-static" if self.options.shared else "--enable-static",
             "--with-openssl" if self.options.with_openssl else "--without-openssl",
-            "--with-zlib" if self.options.with_zlib else "--without-zlib",
+            "--with-zlib" if self.options.get_safe("with_zlib") else "--without-zlib",
             "--enable-reflection"
         ]
         self._autotools = AutoToolsBuildEnvironment(self)
@@ -157,7 +159,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             {"name": "kj-http", "requires": ["kj", "kj-async"]},
             {"name": "kj-test", "requires": ["kj"]},
         ]
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
