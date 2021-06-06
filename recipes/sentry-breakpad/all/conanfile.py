@@ -28,10 +28,6 @@ class SentryBreakpadConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,7 +47,7 @@ class SentryBreakpadConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
