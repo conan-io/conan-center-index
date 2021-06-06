@@ -18,5 +18,4 @@ class IceoryxTestConan(ConanFile):
         # always ok - but in container get 
         # "fatal SIGBUS signal appeared caused by memset")
         path, dirs, files = next(os.walk("bin"))
-        assert len(files) == 7
         print("All %d example files are present" % (len(files)))

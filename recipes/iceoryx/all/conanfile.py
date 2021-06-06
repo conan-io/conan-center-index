@@ -176,8 +176,9 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["utils"].requires = ["platform"]
         if self.settings.os == "Linux":
             self.cpp_info.components["utils"].requires.append("acl::acl")
+            self.cpp_info.components["utils"].system_libs.append("rt")
         if self.settings.os in ["Linux","Macos","Neutrino"]:
-            self.cpp_info.components["utils"].system_libs.extend(["pthread", "rt"])
+            self.cpp_info.components["utils"].system_libs.append("pthread")
         if self.settings.os == "Linux":
             self.cpp_info.components["utils"].system_libs.append("atomic")
         self.cpp_info.components["utils"].builddirs = self._pkg_cmake
