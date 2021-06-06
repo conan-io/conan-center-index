@@ -1,5 +1,7 @@
 #ifdef _WIN32
 # include "client/windows/handler/exception_handler.h"
+#elif defined(__APPLE__)
+# include "client/mac/handler/exception_handler.h"
 #else
 # include "client/linux/handler/exception_handler.h"
 #endif
@@ -27,6 +29,17 @@ bool callback(const wchar_t* dump_path,
     // succeeded indicates whether a minidump file was successfully written.
     return succeeded;
 }
+
+#elif defined(__APPLE__)
+
+bool callback(void* context,
+              int exception_type,
+              int exception_code,
+              int exception_subcode,
+              mach_port_t thread_name) {
+    return true;
+}
+
 #else
 bool callback(const MinidumpDescriptor &descriptor,
               void *context,
@@ -50,6 +63,12 @@ int main(int argc, char *argv[]) {
       callback,
       /* context */ nullptr,
       ExceptionHandler::HANDLER_ALL
+    );
+#elif defined(__APPLE__)
+    ExceptionHandler eh(
+      callback,
+      /* context */ nullptr,
+      /* install_handler*/ true
     );
 #else
     MinidumpDescriptor descriptor("path/to/cache");
