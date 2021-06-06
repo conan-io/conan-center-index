@@ -20,14 +20,14 @@ class FmtConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_fmt_alias": [True, False],
-        "with_os": [True, False],
+        "with_os_api": [True, False],
     }
     default_options = {
         "header_only": False,
         "shared": False,
         "fPIC": True,
         "with_fmt_alias": False,
-        "with_os": True,
+        "with_os_api": True,
     }
 
     _cmake = None
@@ -41,21 +41,21 @@ class FmtConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _has_with_os_option(self):
+    def _has_with_os_api_option(self):
         return tools.Version(self.version) >= "7.0.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_with_os_option:
-            del self.options.with_os
+        if not self._has_with_os_api_option:
+            del self.options.with_os_api
 
     def configure(self):
         if self.options.header_only:
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
-            del self.options.with_os
+            del self.options.with_os_api
         elif self.options.shared:
             del self.options.fPIC
 
@@ -82,8 +82,8 @@ class FmtConan(ConanFile):
         self._cmake.definitions["FMT_TEST"] = False
         self._cmake.definitions["FMT_INSTALL"] = True
         self._cmake.definitions["FMT_LIB_DIR"] = "lib"
-        if self._has_with_os_option:
-            self._cmake.definitions["FMT_OS"] = self.options.with_os
+        if self._has_with_os_api_option:
+            self._cmake.definitions["FMT_OS"] = self.options.with_os_api
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
