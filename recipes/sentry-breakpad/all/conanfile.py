@@ -44,6 +44,9 @@ class SentryBreakpadConan(ConanFile):
         if tools.Version(self.version) <= "0.4.1":
             if self.settings.os == "Android" or tools.is_apple_os(self.settings.os):
                 raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
+        if tools.Version(self.version) <= "0.2.6":
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Versions <=0.2.6 do not support Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
