@@ -1,5 +1,6 @@
-import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.28.0"
 
@@ -39,6 +40,10 @@ class SentryBreakpadConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+
+        if tools.Version(self.version) <= "0.4.1":
+            if self.settings.os == "Android" or tools.is_apple_os(self.settings.os):
+                raise ConanInvalidConfiguration("Versions <=0.4.1 do not support Apple or Android")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
