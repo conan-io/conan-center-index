@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-using namespace google_breakpad;
-
 namespace {
 
 #ifdef _WIN32
@@ -41,7 +39,7 @@ bool callback(void* context,
 }
 
 #else
-bool callback(const MinidumpDescriptor &descriptor,
+bool callback(const google_breakpad::MinidumpDescriptor &descriptor,
               void *context,
               bool succeeded) {
     // if succeeded is true, descriptor.path() contains a path
@@ -57,22 +55,22 @@ int main(int argc, char *argv[]) {
     std::cout << "Breakpad test_package\n";
 
 #ifdef _WIN32
-    ExceptionHandler eh(
+    google_breakpad::ExceptionHandler eh(
       /* dump_path */ L".",
       filter_callback,
       callback,
       /* context */ nullptr,
-      ExceptionHandler::HANDLER_ALL
+      google_breakpad::ExceptionHandler::HANDLER_ALL
     );
 #elif defined(__APPLE__)
-    ExceptionHandler eh(
+    google_breakpad::ExceptionHandler eh(
       callback,
       /* context */ nullptr,
       /* install_handler*/ true
     );
 #else
-    MinidumpDescriptor descriptor("path/to/cache");
-    ExceptionHandler eh(
+    google_breakpad::MinidumpDescriptor descriptor("path/to/cache");
+    google_breakpad::ExceptionHandler eh(
       descriptor,
       /* filter */ nullptr,
       callback,
