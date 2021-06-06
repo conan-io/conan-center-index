@@ -110,14 +110,17 @@ class IceoryxConan(ConanFile):
         if (compiler == "gcc" or compiler == "clang") and compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration(
                 'Using Iceoryx with gcc or clang on Linux requires "compiler.libcxx=libstdc++11"')
-        if os == "Linux" and compiler == "gcc" and version <= '5':
+        if os == "Linux" and compiler == "gcc" and version <= "5":
             raise ConanInvalidConfiguration(
                 "Using Iceoryx with gcc on Linux requires gcc 6 or higher.")
-        if os == "Linux" and compiler == "gcc" and version == '6':
+        if os == "Linux" and compiler == "gcc" and version == "6":
             self.output.warn(
                 "Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
             self.output.warn(
                 "GCC 6 will built with warnings.")
+        if compiler == "Visual Studio" and version < "16":
+            raise ConanInvalidConfiguration(
+                "Iceoryx is just supported for Visual Studio compiler 16 and higher.")
 
     def _configure_cmake(self):
         if self._cmake:
