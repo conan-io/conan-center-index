@@ -31,6 +31,15 @@ class SentryCrashpadConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,13 +56,12 @@ class SentryCrashpadConan(ConanFile):
             # Set as required in crashpad CMake file
             tools.check_min_cppstd(self, 14)
 
-        if self.settings.os == "Linux":
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-                # FIXME: need to test for availability of SYS_memfd_create syscall (Linux kernel >= 3.17)
-                raise ConanInvalidConfiguration("sentry-crashpad needs SYS_memfd_create syscall support.")
-
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
-            raise ConanInvalidConfiguration("Require at least Visual Studio 2017 (15)")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
+                .format(str(self.settings.compiler), minimum_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
