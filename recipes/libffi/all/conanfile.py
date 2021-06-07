@@ -36,7 +36,7 @@ class LibffiConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         self.build_requires("gnu-config/cci.20201022")
 
