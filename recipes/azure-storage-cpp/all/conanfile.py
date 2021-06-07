@@ -95,6 +95,11 @@ class AzureStorageCppConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
+        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
+        # https://github.com/conan-io/conan-center-index/issues/4195
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe")
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
