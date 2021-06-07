@@ -51,3 +51,6 @@ patches:
   "6.1.0":
     - patch_file: "patches/fix-mingw-msvc2015-export-assert-fail-6.1.0.patch"
       base_path: "source_subfolder"
+  "7.1.3":
+    - patch_file: "patches/0001-Install-fmt-args.h-2096_7.1.3.patch"
+      base_path: "source_subfolder"
