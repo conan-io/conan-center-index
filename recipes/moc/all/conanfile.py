@@ -72,8 +72,7 @@ class MocConan(ConanFile):
         self.options["moc"].shared = False
         self.options["uf"].shared = False
         if not self._supported_compiler():
-            raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.setting
-s.compiler, self.settings.compiler.version))
+            raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.settings.compiler, self.settings.compiler.version))
 
 
         if self.settings.compiler.cppstd :
