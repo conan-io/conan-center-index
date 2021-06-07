@@ -22,7 +22,8 @@ This section gathers the most common questions from the community related to pac
   * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
-  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)<!-- endToc -->
+  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -194,3 +195,8 @@ def validate(self):
 ```
 
 As a result, all calls to `tools.check_min_cppstd` must be guarded by a check for the setting and the only way to ensure the C++ standard is to check the compiler's version to know if it offers sufficient support. An example of this can be found [here](https://github.com/conan-io/conan/issues/8002).
+
+## What is the policy for adding older versions of a package?
+
+We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
+This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.

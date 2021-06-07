@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class LibsassConan(ConanFile):
@@ -39,13 +39,11 @@ class LibsassConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.build_requires("autoconf/2.69")
             self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:

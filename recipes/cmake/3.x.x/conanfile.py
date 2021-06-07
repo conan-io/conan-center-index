@@ -2,6 +2,7 @@ import os
 from conans import tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
+required_conan_version = ">=1.33.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -63,9 +64,7 @@ class CMakeConan(ConanFile):
             self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
