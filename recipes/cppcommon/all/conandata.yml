@@ -11,17 +11,17 @@ sources:
 
 patches:
   "1.0.0.0":
-    - patch_file: "patches/00001-update-cmakelists.patch"
+    - patch_file: "patches/0001-update-cmakelists-1-0-0-0.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/00002-fix-cross-platform-issues.patch"
+    - patch_file: "patches/0002-fix-cross-platform-issues.patch"
       base_path: "source_subfolder"
   "cci.20201104":
-    - patch_file: "patches/00001-update-cmakelists.patch"
+    - patch_file: "patches/0001-update-cmakelists-1-0-0-0.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/00003-define-win32-winnt.patch"
+    - patch_file: "patches/0003-define-win32-winnt-cci-20201104.patch"
       base_path: "source_subfolder"
   "1.0.1.0":
-    - patch_file: "patches/00001-update-cmakelists.patch"
+    - patch_file: "patches/0001-update-cmakelists-1-0-1-0.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/00002-fix-cross-platform-issues-patch"
+    - patch_file: "patches/0003-define-win32-winnt-1-0-1-0.patch"
       base_path: "source_subfolder"
