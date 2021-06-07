@@ -86,7 +86,7 @@ class MocConan(ConanFile):
             ("Linux", "clang", "6"),
             ("Macos", "gcc", "5"),
             ("Macos", "clang", "6"),
-            ("Macos", "apple-clang", "10")
+            #("Macos", "apple-clang", "10")
             ]
         os = self.settings.os
         compiler = self.settings.compiler
