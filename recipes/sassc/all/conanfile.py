@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class SasscConan(ConanFile):
     name = "sassc"
@@ -11,10 +13,6 @@ class SasscConan(ConanFile):
     description = "libsass command line driver"
     topics = ("Sass", "sassc", "compiler")
     settings = "os", "compiler", "build_type", "arch"
-
-    build_requires = "autoconf/2.69", "libtool/2.4.6"
-
-    requires = "libsass/3.6.4"
 
     _autotools = None
 
@@ -29,22 +27,27 @@ class SasscConan(ConanFile):
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD and Macos at this time, contributions are welcomed")
-            
+
+    def requirements(self):
+        self.requires("libsass/3.6.4")
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self.run("autoreconf -fiv", run_environment=True)
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(args=["--disable-tests"])
         return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
             tools.save(path="VERSION", content="%s" % self.version)
             autotools = self._configure_autotools()
             autotools.make()
