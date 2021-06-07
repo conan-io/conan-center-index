@@ -68,7 +68,7 @@ class CapnprotoConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
         if self.settings.os == "Windows" and tools.Version(self.version) < "0.8.0" and self.options.with_openssl:
-            raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pr 0.8.0")
+            raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pre 0.8.0")
 
     def requirements(self):
         if self.options.with_openssl:
