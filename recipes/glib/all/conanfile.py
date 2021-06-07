@@ -64,8 +64,8 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.58.0")
+        self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -77,7 +77,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.36.2")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.1")
+            self.requires("libselinux/3.2")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
