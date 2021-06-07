@@ -66,7 +66,7 @@ class SentryCrashpadConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
-    def _configure_cmake(self):
+    def _configure_common_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
@@ -75,6 +75,13 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
         self._cmake.configure()
         return self._cmake
+
+    def _configure_cmake(self):
+        if (tools.is_apple_os(self.settings.os)):
+            with tools.environment_append({"SDKROOT": tools.XCRun(self.settings).sdk_path}):
+                return self._configure_common_cmake();
+        else:
+            return self._configure_common_cmake();
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
