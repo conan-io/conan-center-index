@@ -6,7 +6,7 @@ import os
 class TestPackageConan(ConanFile):
 
     build_requires = (
-        "wayland/1.18.0"
+        "wayland/1.19.0"
     )
 
     generators = "pkg_config"

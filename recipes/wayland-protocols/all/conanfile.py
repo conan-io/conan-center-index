@@ -22,7 +22,7 @@ class WaylandProtocolsConan(ConanFile):
     _autotools = None
 
     build_requires = (
-        "wayland/1.18.0"
+        "wayland/1.19.0"
     )
 
     def source(self):
