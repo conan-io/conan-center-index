@@ -36,16 +36,16 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration("%s recipe does not support windows. Contributions are welcome!" % self.name)
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.57.1")
         self.build_requires("pkgconf/1.7.3")
         if self.settings.os == "Windows":
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
             self.build_requires("bison/3.7.1")
 
     def requirements(self):
-        self.requires("glib/2.67.1")
+        self.requires("glib/2.68.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
