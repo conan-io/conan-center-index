@@ -109,3 +109,7 @@ class AzureStorageCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "AzureStorage"
 
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["Ws2_32", "rpcrt4", "xmllite", "bcrypt"]
+            if not self.options.shared:
+                self.cpp_info.defines = ["_NO_WASTORAGE_API"]
