@@ -5,11 +5,12 @@ import sys
 
 
 class MocTestConan(ConanFile):
+    _versionToTest = '0.9.3' # CHECKRECIPE REPLACE ME
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
     def requirements(self):
-        self.requires('moc/0.9.2')
+        self.requires('moc/' + self._versionToTest)
 
     def build(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):

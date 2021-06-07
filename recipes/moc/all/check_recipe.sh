@@ -89,7 +89,7 @@ e.g: $PROGRM $0 0.9.2
     mkdir -p "${RECIPE_FOLDER}"
     cd "${RECIPE_FOLDER}"
 
-    checkExeExists curl shasum awk
+    checkExeExists curl shasum awk sed
 
     tag=$1
     if grep >/dev/null 2>&1 "\"$tag\":" ../conandata.yml; then
@@ -109,6 +109,12 @@ found '$tag' in conandata already. Nothing to be done
     sha256: $sha
     url: "$tar_url"
 EOF
+    if [ -f "$scriptDir/test_package/conanfile.py" ] ; then
+        local tmpFile=/tmp/check_recipe.$$
+        cp "$scriptDir/test_package/conanfile.py" $tmpFile
+        # can't use sed -i on all systems.
+        sed "s/_versionToTest = '[^']*' # CHECKRECIPE REPLACE ME/_versionToTest = '$tag' # CHECKRECIPE REPLACE ME/" <$tmpFile >"$scriptDir/test_package/conanfile.py"
+    fi
     return 0
 }
 
@@ -161,9 +167,8 @@ main() {
             return 0
             ;;
         *)
-            echo >&2 "Unknown command $PROGRAM $command"
-            Usage;
-            return 0
+            fatal 6 "Unknown command $PROGRAM $command"
+            return 6
             ;;
     esac
 }
