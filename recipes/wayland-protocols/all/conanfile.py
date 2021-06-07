@@ -26,9 +26,7 @@ class WaylandProtocolsConan(ConanFile):
     )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -48,5 +46,7 @@ class WaylandProtocolsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "res", "pkgconfig"))
 
     def package_info(self):
-        pass
+        self.cpp_info.set_property("pkg_config_custom_content",
+                                   "datarootdir=${prefix}/res\n"
+                                   "pkgdatadir=${datarootdir}/wayland-protocols")
 
