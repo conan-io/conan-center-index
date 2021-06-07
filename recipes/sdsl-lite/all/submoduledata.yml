@@ -1,0 +1,10 @@
+submodules:
+  2.1.1:
+    "googletest":
+      sha256: eacfc8bc062dad68c4e8f33eb318655b7ff17911bf4bf7eebaea506f30e7a608
+      url: https://github.com/google/googletest/archive/c2d90bddc6a2a562ee7750c14351e9ca16a6a37a.zip
+      destination: "external/googletest"
+    "libdivsufsort":
+      sha256: 9f9811d17a04abc0ec632d388aa3b1fc11d40fab81c752802d7460a2e2e9222b
+      url: https://github.com/simongog/libdivsufsort/archive/0f24acd8de208464769c782119dacf158647f7ed.zip
+      destination: "external/libdivsufsort"
