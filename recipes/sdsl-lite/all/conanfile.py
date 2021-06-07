@@ -4,6 +4,7 @@ from conans import ConanFile, CMake, tools
 
 import yaml
 
+
 class SDSLLite(ConanFile):
     name = "sdsl-lite"
     libname = "sdsl"
@@ -22,9 +23,11 @@ class SDSLLite(ConanFile):
     topics = ("conan", "sdsl", "succint", "data structure")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
-        submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
+        submodule_filename = os.path.join(
+            self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
