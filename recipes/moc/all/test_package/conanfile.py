@@ -5,7 +5,7 @@ import sys
 
 
 class MocTestConan(ConanFile):
-    _versionToTest = '0.9.3' # CHECKRECIPE REPLACE ME
+    _versionToTest = '0.9.302' # CHECKRECIPE REPLACE ME
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
