@@ -6,7 +6,7 @@ from six import StringIO
 
 
 class MocTestConan(ConanFile):
-    _versionToTest = '0.9.302' # CHECKRECIPE REPLACE ME
+    _versionToTest = '0.9.304' # CHECKRECIPE REPLACE ME
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
