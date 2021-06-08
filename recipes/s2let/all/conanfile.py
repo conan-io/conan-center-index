@@ -1,7 +1,5 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from glob import glob
-import os
 
 
 class S2let(ConanFile):
@@ -14,7 +12,7 @@ class S2let(ConanFile):
     topics = ("physics", "astrophysics", "radio interferometry")
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-    requires = "astro-informatics-so3/[>=1.3.4]", "cfitsio/[>=3.490]"
+    requires = "astro-informatics-so3/1.3.4", "cfitsio/3.490"
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
 
@@ -33,29 +31,31 @@ class S2let(ConanFile):
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                "SO3 requires C99 support for complex numbers."
+                "S2LET requires C99 support for complex numbers."
             )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob("s2let-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder
+        )
 
     @property
-    def cmake(self):
-        if not hasattr(self, "_cmake"):
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTING"] = False
-            self._cmake.definitions["cfitsio"] = True
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def _cmake(self):
+        if not hasattr(self, "_cmake_instance"):
+            self._cmake_instance = CMake(self)
+            self._cmake_instance.definitions["BUILD_TESTING"] = False
+            self._cmake_instance.definitions["cfitsio"] = True
+            self._cmake_instance.configure(build_folder=self._build_subfolder)
+        return self._cmake_instance
 
     def build(self):
-        self.cmake.build()
+        self._cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.cmake.install()
+        self._cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["s2let"]
