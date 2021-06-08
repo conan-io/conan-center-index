@@ -5,6 +5,7 @@ import shutil
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
+required_conan_version = ">=1.33.0"
 
 class ICUBase(ConanFile):
     name = "icu"
@@ -69,8 +70,7 @@ class ICUBase(ConanFile):
             self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("icu", self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
