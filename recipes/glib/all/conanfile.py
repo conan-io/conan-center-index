@@ -4,6 +4,7 @@ import os
 import shutil
 import glob
 
+required_conan_version = ">=1.36.0"
 
 class GLibConan(ConanFile):
     name = "glib"
