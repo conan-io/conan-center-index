@@ -1,5 +1,8 @@
-import os, glob
+import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+
+
+required_conan_version = ">=1.33.0"
 
 
 class GenieConan(ConanFile):
@@ -8,7 +11,7 @@ class GenieConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bkaradzic/GENie"
     description = "Project generator tool"
-    topics = ("conan", "genie", "project", "generator", "build")
+    topics = ("conan", "genie", "project", "generator", "build", "build-systems")
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -27,9 +30,7 @@ class GenieConan(ConanFile):
                 self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("GENie-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _os(self):
