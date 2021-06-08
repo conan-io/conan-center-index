@@ -13,7 +13,7 @@ class SMLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
     no_copy_source = True
-    exports_sources = ['patches/*']
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -41,10 +41,7 @@ class SMLConan(ConanFile):
                 "SML requires C++14, which your compiler does not support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        tools.patch(patch_file="patches/clang12.patch")
-        extracted_dir = "sml-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="*", dst="include",
