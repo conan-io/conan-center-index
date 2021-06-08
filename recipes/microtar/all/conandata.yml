@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/rxi/microtar/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "eb30a906d714c6547841d67f8d49739c56dd8a506fda4c61dd7d6f4da0a9d9aa"
