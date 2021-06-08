@@ -28,8 +28,8 @@ class MocConan(ConanFile):
     license = "Apache-2.0"    
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = { "shared": [ True, False ], "fPIC": [True, False] }
+    default_options = { "shared": False, "fPIC": True }
     _cmake = None
 
     # picks a reasonable version if not specified
@@ -76,6 +76,8 @@ class MocConan(ConanFile):
         self.output.info("do configure for %s" % self._version)
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared == True:
+            raise ConanInvalidConfiguration("%s package does not support shared libraries." % (self.name))
         if not self._check_compiler():
             raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.settings.compiler, self.settings.compiler.version))
 
