@@ -28,7 +28,7 @@ class MocConan(ConanFile):
     license = "Apache-2.0"    
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
+    options = {"shared": [False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     _cmake = None
 
@@ -52,7 +52,7 @@ class MocConan(ConanFile):
             except:
                 self.output.error("unable to compare %s to %s" %(lv,lvmax))
         self.version = vmax
-        return self.version    
+        return self.version
 
     @property
     def _source_fullpath(self):
