@@ -4,14 +4,14 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.33.0"
 
 
-class Version2Conan(ConanFile):
-    name = "version2"
+class VectorclassConan(ConanFile):
+    name = "vectorclass"
     description = "C++ class library for using the Single Instruction Multiple " \
                   "Data (SIMD) instructions to improve performance on modern " \
                   "microprocessors with the x86 or x86/64 instruction set on " \
                   "Windows, Linux, and Mac platforms."
     license = "Apache-2.0"
-    topics = ("conan", "version2", "vector", "simd")
+    topics = ("conan", "vectorclass", "vector", "simd")
     homepage = "https://github.com/vectorclass/version2"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
@@ -32,7 +32,7 @@ class Version2Conan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "Windows", "Macos"] or self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("version2 supports Linux/Windows/macOS and x86/x86_64 only.")
+            raise ConanInvalidConfiguration("vectorclass supports Linux/Windows/macOS and x86/x86_64 only.")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
