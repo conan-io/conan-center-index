@@ -55,17 +55,15 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
-        self.requires("openssl/1.1.1i")
+        self.requires("boost/1.76.0")
+        self.requires("openssl/1.1.1k")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
