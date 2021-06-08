@@ -48,5 +48,5 @@ class SMLConan(ConanFile):
                   src=os.path.join(self._source_subfolder, "include"))
         self.copy("*LICENSE.md", dst="licenses", keep_path=False)
 
-        def package_id(self):
-            self.info.header_only()
+    def package_id(self):
+        self.info.header_only()
