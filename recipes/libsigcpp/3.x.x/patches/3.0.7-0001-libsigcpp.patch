@@ -1,0 +1,31 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -89,8 +89,6 @@
+ 
+ 
+ add_subdirectory (sigc++)
+-add_subdirectory (examples)
+-add_subdirectory (tests)
+ 
+ 
+ set (PROJECT_CMAKE_NAME		"${PROJECT_NAME}-3")
+--- sigc++/CMakeLists.txt
++++ sigc++/CMakeLists.txt
+@@ -23,7 +23,7 @@
+ 
+ set (SIGCPP_LIB_NAME sigc-${SIGCXX_API_VERSION})
+ 
+-add_library(${SIGCPP_LIB_NAME} SHARED ${SOURCE_FILES})
++add_library(${SIGCPP_LIB_NAME} ${SOURCE_FILES})
+ 
+ set_property (TARGET ${SIGCPP_LIB_NAME} PROPERTY VERSION ${PACKAGE_VERSION})
+ set_property(TARGET ${SIGCPP_LIB_NAME}  PROPERTY SOVERSION ${LIBSIGCPP_SOVERSION})
+@@ -42,6 +42,8 @@
+ install (
+     TARGETS ${SIGCPP_LIB_NAME}
+     EXPORT "${PROJECT_CMAKE_NAME}Targets"
++    ARCHIVE DESTINATION "lib"
+     LIBRARY DESTINATION "lib"
++    RUNTIME DESTINATION "bin"
+     INCLUDES DESTINATION "${INCLUDE_INSTALL_DIR}"
+ )
