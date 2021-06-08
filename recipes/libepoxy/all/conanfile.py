@@ -59,7 +59,7 @@ class EpoxyConan(ConanFile):
             del self.options.x11
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
+        self.build_requires("meson/0.58.0")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -108,9 +108,11 @@ class EpoxyConan(ConanFile):
             self.cpp_info.system_libs = ["dl"]
         self.cpp_info.names["pkg_config"] = "epoxy"
         
-        pkgconfig_variables = [
-            'epoxy_has_glx=%s' % '1' if self.options.glx else '0',
-            'epoxy_has_egl=%s' % '1' if self.options.egl else '0',
-            'epoxy_has_wgl=%s' % '1' if self.settings.os == "Windows" else '0',
-        ]
-        self.cpp_info.set_property("pkg_config_custom_content", "\n".join(pkgconfig_variables))
+        pkgconfig_variables = {
+            'epoxy_has_glx': '1' if self.options.glx else '0',
+            'epoxy_has_egl': '1' if self.options.egl else '0',
+            'epoxy_has_wgl': '1' if self.settings.os == "Windows" else '0',
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
