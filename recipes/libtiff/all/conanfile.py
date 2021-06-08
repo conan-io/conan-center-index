@@ -92,9 +92,9 @@ class LibtiffConan(ConanFile):
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.5.0")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.1.0")
+            self.requires("libwebp/1.2.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
