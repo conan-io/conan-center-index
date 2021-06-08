@@ -683,7 +683,8 @@ class QtConan(ConanFile):
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            if not self.options.shared:
+                self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
