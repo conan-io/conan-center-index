@@ -26,6 +26,7 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": [True, False],
         "enable_initial_exec_tls": [True, False],
         "enable_libdl": [True, False],
+        "enable_prof": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,6 +41,7 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": False,
         "enable_initial_exec_tls": True,
         "enable_libdl": True,
+        "enable_prof": False,
     }
     exports_sources = ["patches/**"]
 
@@ -99,6 +101,8 @@ class JemallocConan(ConanFile):
             "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
             "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
         ]
+        if self.options.enable_prof:
+            conf_args.append("--enable-prof")
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
