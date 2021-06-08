@@ -30,6 +30,7 @@ class LibsystemdConan(ConanFile):
         "with_zstd": True,
     }
     generators = "pkg_config"
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -116,9 +117,17 @@ class LibsystemdConan(ConanFile):
         for opt in unrelated:
             defs[opt] = "false"
 
+        # 'rootprefix' is unused during libsystemd packaging but systemd v248
+        # build files require 'prefix' to be a subdirectory of 'rootprefix'.
+        defs["rootprefix"] = self.package_folder
+
         meson.configure(source_folder=self._source_subfolder,
                         build_folder=self._build_subfolder, defs=defs)
         return meson
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
@@ -127,6 +136,8 @@ class LibsystemdConan(ConanFile):
                                    '--relative-to=@0@'.format(project_build_root),
                                    project_source_root).stdout().strip()""",
             "relative_source_path = '../{}'".format(self._source_subfolder))
+
+        self._patch_sources()
 
         meson = self._configure_meson()
         target = ("libsystemd.so.{}".format(self._so_version)
