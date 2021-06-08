@@ -120,7 +120,7 @@ class AprConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "apr-1"
-        self.cpp_info.libs = ["apr-1"]
+        self.cpp_info.libs = ["libapr-1" if self.settings.compiler == "Visual Studio" and self.options.shared else "apr-1"]
         if not self.options.shared:
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os == "Linux":
