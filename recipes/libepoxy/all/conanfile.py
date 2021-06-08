@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.36.0"
 
 class EpoxyConan(ConanFile):
     name = "libepoxy"
@@ -111,7 +112,7 @@ class EpoxyConan(ConanFile):
         
         pkgconfig_variables = [
             'epoxy_has_glx=%s' % '1' if self.options.glx else '0',
-            'epoxy_has_egl=%s' % '1' if self.options.elg else '0',
+            'epoxy_has_egl=%s' % '1' if self.options.egl else '0',
             'epoxy_has_wgl=%s' % '1' if self.settings.os == "Windows" else '0',
         ]
         self.cpp_info.set_property("pkg_config_custom_content", "\n".join(pkgconfig_variables))
