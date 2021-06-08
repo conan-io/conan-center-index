@@ -112,14 +112,16 @@ class GobjectIntrospectionConan(ConanFile):
 
         exe_ext = ".exe" if self.settings.os == "Windows" else ""
 
-        pkgconfig_variables = [
-            'datadir=${prefix}/res',
-            'bindir=${prefix}/bin',
-            'g_ir_scanner=${bindir}/g-ir-scanner',
-            'g_ir_compiler=${bindir}/g-ir-compiler%s' % exe_ext,
-            'g_ir_generate=${bindir}/g-ir-generate%s' % exe_ext,
-            'gidatadir=${datadir}/gobject-introspection-1.0',
-            'girdir="${datadir}/gir-1.0',
-            'typelibdir=${libdir}/girepository-1.0',
-        ]
-        self.cpp_info.set_property("pkg_config_custom_content", "\n".join(pkgconfig_variables))
+        pkgconfig_variables = {
+            'datadir': '${prefix}/res',
+            'bindir': '${prefix}/bin',
+            'g_ir_scanner': '${bindir}/g-ir-scanner',
+            'g_ir_compiler': '${bindir}/g-ir-compiler%s' % exe_ext,
+            'g_ir_generate': '${bindir}/g-ir-generate%s' % exe_ext,
+            'gidatadir': '${datadir}/gobject-introspection-1.0',
+            'girdir': '${datadir}/gir-1.0',
+            'typelibdir': '${libdir}/girepository-1.0',
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
