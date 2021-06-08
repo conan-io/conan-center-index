@@ -296,22 +296,30 @@ class GLibConan(ConanFile):
         self.output.info("Appending PATH env var with: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        pkgconfig_variables = ['datadir=${prefix}/res',
-               'schemasdir=${datadir}/glib-2.0/schemas',
-               'bindir=${prefix}/bin',
-               'giomoduledir=${libdir}/gio/modules',
-               'gio=${bindir}/gio',
-               'gio_querymodules=${bindir}/gio-querymodules',
-               'glib_compile_schemas=${bindir}/glib-compile-schemas',
-               'glib_compile_resources=${bindir}/glib-compile-resources',
-               'gdbus=${bindir}/gdbus',
-               'gdbus_codegen=${bindir}/gdbus-codegen',
-               'gresource=${bindir}/gresource',
-               'gsettings=${bindir}/gsettings']
-        self.cpp_info.components["gio-2.0"].set_property("pkg_config_custom_content","\n".join(pkgconfig_variables))
+        pkgconfig_variables = {
+            'datadir': '${prefix}/res',
+            'schemasdir': '${datadir}/glib-2.0/schemas',
+            'bindir': '${prefix}/bin',
+            'giomoduledir': '${libdir}/gio/modules',
+            'gio': '${bindir}/gio',
+            'gio_querymodules': '${bindir}/gio-querymodules',
+            'glib_compile_schemas': '${bindir}/glib-compile-schemas',
+            'glib_compile_resources': '${bindir}/glib-compile-resources',
+            'gdbus': '${bindir}/gdbus',
+            'gdbus_codegen': '${bindir}/gdbus-codegen',
+            'gresource': '${bindir}/gresource',
+            'gsettings': '${bindir}/gsettings'
+        }
+        self.cpp_info.components["gio-2.0"].set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
 
-        pkgconfig_variables = ['bindir=${prefix}/bin',
-               'glib_genmarshal=${bindir}/glib-genmarshal',
-               'gobject_query=${bindir}/gobject-query',
-               'glib_mkenums=${bindir}/glib-mkenums']
-        self.cpp_info.components["glib-2.0"].set_property("pkg_config_custom_content","\n".join(pkgconfig_variables))
+        pkgconfig_variables = {
+            'bindir': '${prefix}/bin',
+            'glib_genmarshal': '${bindir}/glib-genmarshal',
+            'gobject_query': '${bindir}/gobject-query',
+            'glib_mkenums': '${bindir}/glib-mkenums'
+        }
+        self.cpp_info.components["glib-2.0"].set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))
