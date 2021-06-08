@@ -29,8 +29,6 @@ class EpoxyConan(ConanFile):
         "egl": True,
         "x11": True
     }
-    
-    required_conan_version = ">=1.33.0"
 
     _meson = None
     
