@@ -37,20 +37,22 @@ class CozConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    __cmake = None
+    _cmake = None
 
-    @property
-    def _cmake(self):
-        if self.__cmake is None:
-            self.__cmake = CMake(self)
-        return self.__cmake
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        self._cmake.configure()
-        self._cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self._cmake.install()
+        cmake = self._configure_cmake()
+        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
