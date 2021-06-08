@@ -17,7 +17,7 @@ class CozConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     requires = "libelfin/0.3"
-    exports_sources = "CMakeLists.txt", "patches/*"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
 
     _source_subfolder = "source_subfolder"
