@@ -17,7 +17,7 @@ USAGE: $PROGRAM [build|clean|add_version|calcsha|test-package}
     build - builds the app
     clean - removes the build folders
     add_version {verision-tag} - adds a new version to the conandata.yml file
-    test-package  {verision-tag} - adds a new version to the conandata.yml file
+    test-package  {verision-tag} - builds the test_package using the desired version
     calcsha {file} - calculate the sha256 of the file
     help - show this usage.
 "
@@ -127,6 +127,7 @@ e.g: $PROGRM $0 0.9.2
         return 5
     fi
     checkExeExists conan
+    clean
     conan create . moc/$1@
 }
 

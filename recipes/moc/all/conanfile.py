@@ -12,6 +12,13 @@ class MocConan(ConanFile):
         "flex/2.6.4",
         "bison/3.7.1"
     ]
+    _supported_compilers = [
+        ("Linux", "gcc", "6"),
+        ("Linux", "clang", "6"),
+        ("Macos", "gcc", "6"),
+        ("Macos", "clang", "6"),
+        #("Macos", "apple-clang", "10")
+    ]
     name = "moc"
     homepage = "https://www.github.com/zuut/moc"
     description = "Moc, the marked-up object compiler"
@@ -69,29 +76,16 @@ class MocConan(ConanFile):
 
     def configure(self):
         print("do configure for %s" % self._version)
-        self.options["moc"].shared = False
-        self.options["uf"].shared = False
-        if not self._supported_compiler():
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+        if not self._check_compiler():
             raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.settings.compiler, self.settings.compiler.version))
 
-
-        if self.settings.compiler.cppstd :
-            tools.check_min_cppstd(self, 11)
-
-        del self.settings.compiler.libcxx
-
-    def _supported_compiler(self):
-        supported_compilers = [
-            ("Linux", "gcc", "6"),
-            ("Linux", "clang", "6"),
-            ("Macos", "gcc", "5"),
-            ("Macos", "clang", "6"),
-            #("Macos", "apple-clang", "10")
-            ]
+    def _check_compiler(self):
         os = self.settings.os
         compiler = self.settings.compiler
         compiler_version = tools.Version(compiler.version)
-        return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in supported_compilers)
+        return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
 
     def requirements(self):
         print("calc requirements for %s" % self._version)
