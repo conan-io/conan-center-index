@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import os
 
 required_conan_version = ">=1.35.0"
@@ -83,7 +84,7 @@ class AzureStorageCppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-   def validate(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compiler_version.get(str(self.settings.compiler))
@@ -101,7 +102,7 @@ class AzureStorageCppConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe")
 
     def build(self):
-        tools.files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 
