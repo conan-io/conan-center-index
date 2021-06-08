@@ -50,7 +50,7 @@ class MocConan(ConanFile):
                     vmax = v
                     lvmax = LooseVersion(vmax)
             except:
-                print("unable to compare %s to %s" %(lv,lvmax))
+                self.output.error("unable to compare %s to %s" %(lv,lvmax))
         self.version = vmax
         return self.version    
 
@@ -58,7 +58,6 @@ class MocConan(ConanFile):
     def _source_fullpath(self):
         src_dir= join(self.source_folder,
                       self._source_subfolder).replace("\\", "/")
-        print("Source='%s'" % src_dir)
         return src_dir
 
     @property
@@ -70,12 +69,11 @@ class MocConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        print("do config_options for %s" % self._version)
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        print("do configure for %s" % self._version)
+        self.output.info("do configure for %s" % self._version)
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if not self._check_compiler():
@@ -88,14 +86,14 @@ class MocConan(ConanFile):
         return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
 
     def requirements(self):
-        print("calc requirements for %s" % self._version)
+        self.output.info("calc requirements for %s" % self._version)
         for req in self._requirements:
-            print( "override requirement: %s" % req )
+            self.output.info( "override requirement: %s" % req )
             self.requires(req)
 
     # Retrieve the source code.
     def source(self):
-        print("Retrieving source for moc/%s@" % self._version)
+        self.output.info("Retrieving source for moc/%s@" % self._version)
         tools.get(**self.conan_data["sources"][self._version])
         rename(self.name + "-" + self._version, self._source_fullpath)
 
@@ -121,7 +119,7 @@ class MocConan(ConanFile):
         cmake.install()
         if self._noCmakeConfigFiles:
             for file in glob(self.package_folder + "/lib/**/*-config.cmake") :
-                print("conan forbids having file %s " % file )
+                self.output.info("conan-center forbids having file %s " % file )
                 move(file, file + "-sample")
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder,

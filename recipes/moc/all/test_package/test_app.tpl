@@ -1,4 +1,3 @@
-@# Copyright (c) 1994-2021.
 @# Template for the moc compiler.
 @# ///////////////////////////////////////////////
 @# //
@@ -42,7 +41,7 @@
 @>		      set _TasksPackage=bizprocess
 @}		  end if ! exists _Package
 @{		  if ! exists BizObjIntfDir
-@> 		      set BizObjIntfDir=include/@(_Package)/@(:lowercase-all @(Name))
+@> 		      set BizObjIntfDir=@(_Package)/@(:lowercase-all @(Name))
 @}		  end if ! exists BizObjIntfDir
 @{		  if ! exists BizObjIntfPkg
 @> 		      set BizObjIntfPkg=@(_Package)/@(:lowercase-all @(Name)).h
@@ -51,7 +50,7 @@
 @> 		      set BizObjDefineGuards=@(:uppercase-all @(_Package))_@(:uppercase-all @(Name))
 @}		  end if ! exists BizObjDefineGuards
 @{		  if ! exists BizTasksIntfDir
-@> 		      set BizTasksIntfDir=include/@(_TasksPackage)/@(:lowercase-all @(Name))tasks
+@> 		      set BizTasksIntfDir=@(_TasksPackage)/@(:lowercase-all @(Name))tasks
 @}		  end if ! exists BizTasksIntfDir
 @{		  if ! exists BizTasksIntfPkg
 @> 		      set BizTasksIntfPkg=@(_TasksPackage)/@(:lowercase-all @(Name))tasks.h
@@ -77,10 +76,7 @@
 @# //
 @# //
 @# ///////////////////////////////////////////////
-@{    		  open @(BizObjIntfDir)/@(Name).h
-/*
- *  COPYRIGHT (C) 2000-2021 ZUUT, INC. ALL RIGHTS RESERVED.
- */
+@{    		  open include/@(BizObjIntfDir)/@(Name).h
 #ifndef @(BizObjDefineGuards)
 #define @(BizObjDefineGuards)
 
@@ -90,7 +86,6 @@
 #line @(OUTPUT_NEXT_LINENO) "@(OUTPUT_FILENAME)" 
 @}                    endif exists HEADER_CODE
 
-#include <memory>
 @{        foreach my-type in ALL_TYPES
 @{            if exists header_name
 @{                if ! exists "file::@(header_name)Inc_Hdr"
@@ -141,7 +136,7 @@ private:
 @}                    endif exists HEADER_END_CODE
 
 #endif // @(BizObjDefineGuards)
-@}    		  end open @(BizObjIntfDir)/@(Name).h
+@}    		  end open include/@(BizObjIntfDir)/@(Name).h
 @# ///////////////////////////////////////////////
 @# //
 @# //
@@ -152,20 +147,16 @@ private:
 @# //
 @# ///////////////////////////////////////////////
 @{		  open @(BizObjImplDir)/@(Name).cpp
-/*
- *  COPYRIGHT (C) 2000-2021 ZUUT, INC. ALL RIGHTS RESERVED.
- */
 #include "@(BizObjIntfDir)/@(Name).h"
-@(Name)::@(Name) :
-@{                foreach parent in parents
-    @(Name)(),
-@}                end foreach parent in parents
-@{                foreach p in properties
-     @(Name)(),
-@}                end foreach p in properties
+
+
+@(Name)::@(Name)() :
+     @(:format-list : suffix-sep=','                           @\
+                    :foreach p in parents     : @(Name)()      @\
+                    :foreach p in properties  : @(Name)()      @\
+     )
 {
 }
-};
 
 @{                    if exists SOURCE_CODE
 #line @(SOURCE_CODE.Lineno) "@(SOURCE_CODE.Filename)" 
@@ -211,7 +202,7 @@ INSERT INTO dbDatabaseId
     ( id, db_table, db_column, min, max, idx_value, class_id )
   values
     ( '@(BizObjImplPkg).@(Name)Bean',
-      'db@(Name)', 'id', 1000, 1000000, 1000, @(classId) )
+      'db@(Name)', 'id', 1000, 1000000, 1000, NULL )
 ;
 
 @}		  end open @(BizObjImplDir)/@(Name).ddl.sample

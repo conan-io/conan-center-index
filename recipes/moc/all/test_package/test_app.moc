@@ -5,7 +5,6 @@ class Address  {
     [[ bizObject {1} ]];
     [[ description { An address of some real world entity } ]];
 
-    class_id(3);
     String street1, [[ description {The street}]];
     String street2, [[ description {2nd line of street info}]];
     String city, [[ description {The City}]];

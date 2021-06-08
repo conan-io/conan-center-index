@@ -10,9 +10,6 @@ class MocTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def requirements(self):
-        self.requires('moc/' + self._versionToTest)
-
     def build(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
             moc_bin = tools.which("moc")
