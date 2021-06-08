@@ -13,7 +13,7 @@ class SMLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
     no_copy_source = True
-    exports_sources = ['patches/*']
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
