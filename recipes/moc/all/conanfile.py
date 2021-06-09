@@ -20,10 +20,7 @@ class MocConan(ConanFile):
     _cmake = None
     _supported_compilers = [
         ("Linux", "gcc", "6"),
-        ("Linux", "clang", "6"),
-        ("Macos", "gcc", "6"),
-        ("Macos", "clang", "6"),
-        ("Macos", "apple-clang", "10")
+        ("Linux", "clang", "6")
     ]
 
     @property
