@@ -25,8 +25,6 @@ class SentryCrashpadConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
-    no_copy_source = True
-
     _cmake = None
 
     @property
@@ -68,12 +66,6 @@ class SentryCrashpadConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if tools.Version(self.version) > "0.4":
-            openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
-            tools.replace_in_file(os.path.join(self._source_subfolder, "external", "crashpad", "CMakeLists.txt"),
-                                  "find_package(OpenSSL)", openssl_repl)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -82,10 +74,17 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL"] = True
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL_DEV"] = True
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
-        self._cmake.configure()
+        tools.mkdir("cmake-build")
+        self._cmake.configure(build_dir="cmake-build")
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if tools.Version(self.version) > "0.4":
+            openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
+            tools.replace_in_file(os.path.join(self._source_subfolder, "external", "crashpad", "CMakeLists.txt"),
+                                  "find_package(OpenSSL)", openssl_repl)
         cmake = self._configure_cmake()
         cmake.build()
 
