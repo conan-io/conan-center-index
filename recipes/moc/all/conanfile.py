@@ -13,14 +13,15 @@ class MocConan(ConanFile):
     topics = ("conan", "moc", "idl", "code generation")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"    
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = { "fPIC": [True, False] }
     default_options = { "fPIC": True }
     _cmake = None
     _supported_compilers = [
         ("Linux", "gcc", "6"),
-        ("Linux", "clang", "6")
+        ("Linux", "clang", "6"),
+        ("Macos", "apple-clang", "10")
     ]
 
     @property
