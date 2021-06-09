@@ -59,6 +59,11 @@ class GperfConan(ConanFile):
             autotools.make()
 
     def build(self):
+        if tools.valid_min_cppstd(self, "17"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "getline.cc"),
+                                  "register int c = getc (stream);",
+                                  "int c = getc (stream);")
+
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 self._build_configure()
