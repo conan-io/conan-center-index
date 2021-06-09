@@ -227,7 +227,10 @@ class ICUBase(ConanFile):
             tools.mkdir(os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
 
-        self.copy("*", src=os.path.join(build_dir, "config"), dst="config")  # This is required to cross-compile
+        # Copy some files required for cross-compiling
+        self.copy("icucross.mk", src=os.path.join(build_dir, "config"), dst="config")
+        self.copy("icucross.inc", src=os.path.join(build_dir, "config"), dst="config")
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "icu"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
