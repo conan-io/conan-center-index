@@ -7,7 +7,7 @@ from six import StringIO
 
 class MocTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
