@@ -24,12 +24,11 @@ class MocConan(ConanFile):
     description = "Moc, the marked-up object compiler"
     topics = ("conan", "moc", "idl", "code generation")
     url = "https://github.com/conan-io/conan-center-index"
-    # see https://spdx.dev/licenses/
     license = "Apache-2.0"    
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = { "shared": [ True, False ], "fPIC": [True, False] }
-    default_options = { "shared": False, "fPIC": True }
+    options = { "fPIC": [True, False] }
+    default_options = { "fPIC": True }
     _cmake = None
 
     # picks a reasonable version if not specified
@@ -55,12 +54,6 @@ class MocConan(ConanFile):
         return self.version
 
     @property
-    def _source_fullpath(self):
-        src_dir= join(self.source_folder,
-                      self._source_subfolder).replace("\\", "/")
-        return src_dir
-
-    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -73,11 +66,8 @@ class MocConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.output.info("do configure for %s" % self._version)
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.shared == True:
-            raise ConanInvalidConfiguration("%s package does not support shared libraries." % (self.name))
         if not self._check_compiler():
             raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.settings.compiler, self.settings.compiler.version))
 
@@ -88,16 +78,13 @@ class MocConan(ConanFile):
         return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
 
     def requirements(self):
-        self.output.info("calc requirements for %s" % self._version)
         for req in self._requirements:
-            self.output.info( "override requirement: %s" % req )
             self.requires(req)
 
     # Retrieve the source code.
     def source(self):
-        self.output.info("Retrieving source for moc/%s@" % self._version)
         tools.get(**self.conan_data["sources"][self._version])
-        rename(self.name + "-" + self._version, self._source_fullpath)
+        rename(self.name + "-" + self._version, self._source_subfolder)
 
     # builds the project items
     def build(self):
@@ -121,7 +108,6 @@ class MocConan(ConanFile):
         cmake.install()
         if self._noCmakeConfigFiles:
             for file in glob(self.package_folder + "/lib/**/*-config.cmake") :
-                self.output.info("conan-center forbids having file %s " % file )
                 move(file, file + "-sample")
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder,
