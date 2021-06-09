@@ -7,12 +7,12 @@ from glob import glob
 from distutils.version import LooseVersion
 
 class MocConan(ConanFile):
-    _noCmakeConfigFiles = True
     _supported_compilers = [
         ("Linux", "gcc", "6"),
         ("Linux", "clang", "6"),
         ("Macos", "gcc", "6"),
-        ("Macos", "clang", "6")
+        ("Macos", "clang", "6"),
+        ("Macos", "apple-clang", "10")
     ]
     name = "moc"
     homepage = "https://www.github.com/zuut/moc"
@@ -25,26 +25,6 @@ class MocConan(ConanFile):
     options = { "fPIC": [True, False] }
     default_options = { "fPIC": True }
     _cmake = None
-
-    @property
-    def _version(self):
-        if hasattr(self, "version") and self.version != None:
-            return self.version
-        if hasattr(self, "_default_version") and self._default_version != None:
-            self.version = self._default_version
-            return self.version
-        vmax="0"
-        lvmax = LooseVersion(vmax)
-        for v in self.conan_data["sources"]:
-            lv = LooseVersion(v)
-            try:
-                if lv > lvmax:
-                    vmax = v
-                    lvmax = LooseVersion(vmax)
-            except:
-                self.output.error("unable to compare %s to %s" %(lv,lvmax))
-        self.version = vmax
-        return self.version
 
     @property
     def _source_subfolder(self):
@@ -75,8 +55,8 @@ class MocConan(ConanFile):
         self.build_requires("bison/3.7.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self._version])
-        rename(self.name + "-" + self._version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version])
+        rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -92,9 +72,7 @@ class MocConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        if self._noCmakeConfigFiles:
-            for file in glob(self.package_folder + "/lib/**/*-config.cmake") :
-                move(file, file + "-sample")
+        tools.remove_files_by_mask(join(self.package_folder, "lib"), "*-config.cmake")
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder,
                   keep_path=False)
@@ -104,17 +82,15 @@ class MocConan(ConanFile):
         return
 
     def package_info(self):
-        self.cpp_info.libs = ["uf"]
         self.env_info.MOC_TOOL = join(self.package_folder, "bin", "moc").replace("\\", "/")
 
         self.env_info.PATH.append(join(self.package_folder, "bin"))
 
-        self.env_info.CMAKE_MODULE_PATH.append(join(self.package_folder, "lib", "cmake"))
-        self.env_info.CMAKE_MODULE_PATH.append(join(self.package_folder, "lib", "moc"))
-        self.env_info.CMAKE_MODULE_PATH.append(join(self.package_folder, "lib", "uf"))
         self.cpp_info.names["cmake_find_package"] = "Moc"
         self.cpp_info.names["cmake_find_package_multi"] = "Moc"
 
+        self.cpp_info.build_modules.append(join("lib", "cmake", "BisonFlex.cmake"))
+        self.cpp_info.build_modules.append(join("lib", "cmake", "Moc.cmake"))
         self.cpp_info.builddirs.append(join("lib", "cmake"))
         self.cpp_info.builddirs.append(join("lib", "moc"))
         self.cpp_info.builddirs.append(join("lib", "uf"))
