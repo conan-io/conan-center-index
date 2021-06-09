@@ -310,6 +310,13 @@ class QtConan(ConanFile):
             if os.path.isfile(file):
                 os.remove(file)
 
+        # workaround QTBUG-94356
+        if tools.Version(self.version) >= "6.1.1":
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "FindWrapZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
+                "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
+                "")
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
