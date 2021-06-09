@@ -103,4 +103,4 @@ class VectorclassConan(ConanFile):
 
     def package_info(self):
         if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.libs = ["vectorclass"]
