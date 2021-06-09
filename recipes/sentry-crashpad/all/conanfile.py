@@ -24,6 +24,7 @@ class SentryCrashpadConan(ConanFile):
     }
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
+    short_paths = True
 
     _cmake = None
 
