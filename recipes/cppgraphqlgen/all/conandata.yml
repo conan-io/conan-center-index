@@ -1,0 +1,4 @@
+sources:
+  "3.6.0":
+    url: "https://github.com/microsoft/cppgraphqlgen/archive/refs/tags/v3.6.0.tar.gz"
+    sha256: "ca4550e56ddd5c33b9f31060a24be281eacb4ecf569628ee85aed66c22976063"
