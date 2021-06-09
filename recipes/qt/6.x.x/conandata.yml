@@ -40,4 +40,4 @@ sources:
       - "https://qt-mirror.dannhauer.de/archive/qt/6.1/6.1.1/single/qt-everywhere-src-6.1.1.tar.xz"
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.1/6.1.1/single/qt-everywhere-src-6.1.1.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.1/6.1.1/single/qt-everywhere-src-6.1.1.tar.xz"
-    sha256: "326a710b08b0973bb4f5306a786548d8b8dd656db75ce9f3f85ea32680d3c88a"
+    sha256: "6ac937aae4c7b5a3eac90ea4d13f31ded9f78ebc93007bb919fae65c58c808c3"
