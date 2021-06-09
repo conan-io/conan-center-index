@@ -26,10 +26,6 @@ class LibiglConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
-        if self.settings.os == "Macos" and not self.options.header_only:
-            raise ConanInvalidConfiguration("libigl can not be built as dynamic library on Macos currently. Please open a PR")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC

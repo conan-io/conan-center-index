@@ -14,5 +14,7 @@ class LibiglTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "example")
-            self.run(bin_path, run_environment=True)
+            if self.settings.os == "Macos":
+                self.run(os.path.join(self.build_folder, "bin", "example"))
+            else:
+                self.run(os.path.join(self.build_folder, "example"))
