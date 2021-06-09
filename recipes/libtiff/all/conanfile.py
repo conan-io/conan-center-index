@@ -88,7 +88,7 @@ class LibtiffConan(ConanFile):
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.6")
+            self.requires("libjpeg-turbo/2.1.0")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
