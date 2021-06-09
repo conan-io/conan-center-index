@@ -7,13 +7,6 @@ from glob import glob
 from distutils.version import LooseVersion
 
 class MocConan(ConanFile):
-    _supported_compilers = [
-        ("Linux", "gcc", "6"),
-        ("Linux", "clang", "6"),
-        ("Macos", "gcc", "6"),
-        ("Macos", "clang", "6"),
-        ("Macos", "apple-clang", "10")
-    ]
     name = "moc"
     homepage = "https://www.github.com/zuut/moc"
     description = "Moc, the marked-up object compiler"
@@ -25,6 +18,13 @@ class MocConan(ConanFile):
     options = { "fPIC": [True, False] }
     default_options = { "fPIC": True }
     _cmake = None
+    _supported_compilers = [
+        ("Linux", "gcc", "6"),
+        ("Linux", "clang", "6"),
+        ("Macos", "gcc", "6"),
+        ("Macos", "clang", "6"),
+        ("Macos", "apple-clang", "10")
+    ]
 
     @property
     def _source_subfolder(self):
@@ -33,10 +33,6 @@ class MocConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
