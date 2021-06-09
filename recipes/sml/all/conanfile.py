@@ -27,6 +27,10 @@ class SMLConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
+
     def configure(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, "14")
@@ -39,8 +43,10 @@ class SMLConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "SML requires C++14, which your compiler does not support.")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # tools.patch(patch_file="patches/0001-fix-clang12-error.patch")
 
     def package(self):
         self.copy(pattern="*", dst="include",

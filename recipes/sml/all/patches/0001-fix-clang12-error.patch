@@ -1,8 +1,8 @@
 diff --git a/sml-1.1.4/include/boost/ b/sml-1.1.4/include/boost/
 index b75b41f..a4e6430 100644
 
---- a/sml-1.1.4/include/boost/sml.hpp
-+++ b/sml-1.1.4/include/boost/sml.hpp
+--- a/include/boost/sml.hpp
++++ b/include/boost/sml.hpp
 @@ -549,6 +549,8 @@ template <class T>
  const char *get_type_name() {
  #if defined(_MSC_VER) && !defined(__clang__)
