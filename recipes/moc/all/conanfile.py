@@ -84,8 +84,10 @@ class MocConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Moc"
         self.cpp_info.names["cmake_find_package_multi"] = "Moc"
 
-        self.cpp_info.build_modules.append(join("lib", "cmake", "BisonFlex.cmake"))
-        self.cpp_info.build_modules.append(join("lib", "cmake", "Moc.cmake"))
+        self.cpp_info.build_modules["cmake_find_package"].append(join("lib", "cmake", "BisonFlex.cmake"))
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(join("lib", "cmake", "BisonFlex.cmake"))
+        self.cpp_info.build_modules["cmake_find_package"].append(join("lib", "cmake", "Moc.cmake"))
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(join("lib", "cmake", "Moc.cmake"))
         self.cpp_info.builddirs.append(join("lib", "cmake"))
         self.cpp_info.builddirs.append(join("lib", "moc"))
         self.cpp_info.builddirs.append(join("lib", "uf"))
