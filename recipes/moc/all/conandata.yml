@@ -1,0 +1,9 @@
+sources:
+  "0.9.302":
+    # to calculate sha, shasum -a 256 {file}
+    sha256: 7d804111d78a62ba12859fa91bf63f2f879b01a5e8fcf874a174fcce3656a877
+    url: "https://github.com/zuut/moc/archive/refs/tags/0.9.302.tar.gz"
+  "0.9.304":
+    # to calculate sha, shasum -a 256 {file}
+    sha256: 2a435d438ddc86a5445b50d8c9fa3a109b4a939ba86cc988ed3c636a4e63e88b
+    url: "https://github.com/zuut/moc/archive/refs/tags/0.9.304.tar.gz"

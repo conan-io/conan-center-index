@@ -1,0 +1,8 @@
+build
+recipe_check
+install_conan_local.sh
+cmake-build-debug
+*~
+*.bak
+*.old
+*.log
