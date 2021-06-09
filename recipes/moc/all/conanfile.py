@@ -46,9 +46,9 @@ class MocConan(ConanFile):
         compiler_version = tools.Version(compiler.version)
         return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
 
-    def build_requirements(self):
-        self.build_requires("flex/2.6.4")
-        self.build_requires("bison/3.7.1")
+    def requirements(self):
+        self.requires("flex/2.6.4")
+        self.requires("bison/3.7.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
