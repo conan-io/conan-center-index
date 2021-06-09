@@ -12,7 +12,6 @@ class SMLConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
-    no_copy_source = True
     exports_sources = "patches/*"
 
     @property
