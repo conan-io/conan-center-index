@@ -8,16 +8,11 @@ from distutils.version import LooseVersion
 
 class MocConan(ConanFile):
     _noCmakeConfigFiles = True
-    _requirements = [
-        "flex/2.6.4",
-        "bison/3.7.1"
-    ]
     _supported_compilers = [
         ("Linux", "gcc", "6"),
         ("Linux", "clang", "6"),
         ("Macos", "gcc", "6"),
-        ("Macos", "clang", "6"),
-        #("Macos", "apple-clang", "10")
+        ("Macos", "clang", "6")
     ]
     name = "moc"
     homepage = "https://www.github.com/zuut/moc"
@@ -31,7 +26,6 @@ class MocConan(ConanFile):
     default_options = { "fPIC": True }
     _cmake = None
 
-    # picks a reasonable version if not specified
     @property
     def _version(self):
         if hasattr(self, "version") and self.version != None:
@@ -39,7 +33,6 @@ class MocConan(ConanFile):
         if hasattr(self, "_default_version") and self._default_version != None:
             self.version = self._default_version
             return self.version
-        # default to the latest version
         vmax="0"
         lvmax = LooseVersion(vmax)
         for v in self.conan_data["sources"]:
@@ -77,16 +70,14 @@ class MocConan(ConanFile):
         compiler_version = tools.Version(compiler.version)
         return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
 
-    def requirements(self):
-        for req in self._requirements:
-            self.requires(req)
+    def build_requirements(self):
+        self.build_requires("flex/2.6.4")
+        self.build_requires("bison/3.7.1")
 
-    # Retrieve the source code.
     def source(self):
         tools.get(**self.conan_data["sources"][self._version])
         rename(self.name + "-" + self._version, self._source_subfolder)
 
-    # builds the project items
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
@@ -95,15 +86,10 @@ class MocConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
-        self._cmake.definitions["Verbose"] = True
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
-    # the installs the project items
     def package(self):
-        # export CMAKE_INSTALL_PREFIX=???
-        # cmake --build . --target install
         cmake = self._configure_cmake()
         cmake.install()
         if self._noCmakeConfigFiles:
