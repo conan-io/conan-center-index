@@ -66,6 +66,7 @@ class LibiglConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
+        cmake.install()
 
     def package(self):
         cmake = self._configure_cmake()
