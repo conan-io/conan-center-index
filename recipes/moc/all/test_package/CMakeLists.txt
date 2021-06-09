@@ -4,8 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-#find_package(Moc REQUIRED)
-find_package(Moc)
+find_package(Moc REQUIRED CONFIG)
 include(Moc)
 
 
