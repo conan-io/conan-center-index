@@ -1,4 +1,7 @@
 sources:
+  "4.1.1":
+    url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.1.1.zip"
+    sha256: "ca425c97eb871400de4bd2307ddaf3c557c9c1bae50d6a0db6507d72f435830c"
   "4.1.0":
     url: "https://github.com/hazelcast/hazelcast-cpp-client/archive/v4.1.0.zip"
     sha256: "8356bc76077fea354e83ffcd506096797137af10b292809c6b7843a8fbd084e3"
