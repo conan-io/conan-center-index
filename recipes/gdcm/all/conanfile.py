@@ -70,6 +70,7 @@ class GDCMConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["GDCM_BUILD_DOCBOOK_MANPAGES"] = False
         self._cmake.definitions["GDCM_BUILD_SHARED_LIBS"] = self.options.shared
+        # FIXME: unvendor deps https://github.com/conan-io/conan-center-index/pull/5705#discussion_r647224146
         self._cmake.definitions["GDCM_USE_SYSTEM_EXPAT"] = True
         self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = True
         self._cmake.definitions["GDCM_USE_SYSTEM_ZLIB"] = True
