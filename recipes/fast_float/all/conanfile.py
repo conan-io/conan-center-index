@@ -1,6 +1,8 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class FastFloatConan(ConanFile):
     name = "fast_float"
@@ -27,8 +29,8 @@ class FastFloatConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
