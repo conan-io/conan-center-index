@@ -22,7 +22,8 @@ class MocConan(ConanFile):
         ("Linux", "gcc", "6"),
         ("Linux", "clang", "6"),
         ("Macos", "gcc", "6"),
-        ("Macos", "clang", "6")
+        ("Macos", "clang", "6"),
+        ("Macos", "apple-clang", "10")
     ]
 
     @property
