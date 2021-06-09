@@ -109,7 +109,9 @@ class SentryCrashpadConan(ConanFile):
             self.cpp_info.components["mini_chromium"].system_libs.append("pthread")
 
         self.cpp_info.components["compat"].includedirs.append(os.path.join("include", "crashpad"))
-        self.cpp_info.components["compat"].libs = ["crashpad_compat"]
+        # On Apple crashpad_compat is an interface library
+        if not tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["compat"].libs = ["crashpad_compat"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["compat"].system_libs.append("dl")
 
