@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["VECTORCLASS_HEADER_ONLY"] = self.options["vectorclass"].header_only
         cmake.configure()
         cmake.build()
 
