@@ -15,12 +15,12 @@ index 2c0e7a5bf..bb963512c 100644
 +    endif()
 +    install(
 +      FILES ${AOM_INSTALL_INCS}
-+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/aom")
++      DESTINATION "include/aom")
 +    install(
 +      TARGETS ${AOM_INSTALL_LIBS}
-+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++      RUNTIME DESTINATION bin
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib)
 +  endif()
 +
  endmacro()
