@@ -190,6 +190,8 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.9.10')
 
     def configure(self):
+        if self.settings.os != 'Windows':
+            raise ConanInvalidConfiguration('Want to check something')
         if self.options.shared:  # Shared builds disabled just due to the CI
             message = 'Shared builds not currently supported'
             raise ConanInvalidConfiguration(message)
@@ -283,6 +285,9 @@ class LLVMCoreConan(ConanFile):
                 os.path.join(self.package_folder, 'lib', 'components.json')
             with open(components_path, 'w') as components_file:
                 json.dump(components, components_file, indent=4)
+            self.output.info('*' * 12)
+            self.output.info(tools.load(components_path))
+            self.output.info('*' * 12)
         else:
             suffixes = ['.dylib', '.so']
             for name in os.listdir(lib_path):
