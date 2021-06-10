@@ -30,8 +30,15 @@ class LibmortonConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "libmorton", "include"))
+        if tools.Version(self.version) < "0.2.7":
+            src_hdrs = os.path.join(self._source_subfolder, "libmorton", "include")
+        else:
+            src_hdrs = os.path.join(self._source_subfolder, "libmorton")
+        self.copy("*.h", dst=os.path.join("include", "libmorton"), src=src_hdrs)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "libmorton"
+        self.cpp_info.names["cmake_find_package_multi"] = "libmorton"
+        self.cpp_info.names["pkg_config"] = "libmorton"
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
