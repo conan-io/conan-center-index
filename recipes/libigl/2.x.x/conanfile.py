@@ -11,8 +11,8 @@ class LibiglConan(ConanFile):
     homepage = "https://libigl.github.io/"
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": True, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     requires = ("eigen/3.3.9")
@@ -33,8 +33,10 @@ class LibiglConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
+        if self.options.shared == False:
+            raise ConanInvalidConfiguration("Recipe is only available as a static lib. Open a PR to add a shared option")
 
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
