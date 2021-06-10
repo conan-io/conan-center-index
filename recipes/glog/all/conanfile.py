@@ -9,12 +9,23 @@ class GlogConan(ConanFile):
     description = "Google logging library"
     topics = ("conan", "glog", "logging")
     license = "BSD-3-Clause"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_gflags": [True, False],
+        "with_threads": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_gflags": True,
+        "with_threads": True,
+    }
+
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_gflags": [True, False], "with_threads": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_gflags": True, "with_threads": True}
-
     _cmake = None
 
     @property
