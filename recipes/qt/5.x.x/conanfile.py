@@ -821,7 +821,7 @@ Examples = bin/datadir/examples""")
         if self.options.with_pq:
             _create_plugin("QPSQLDriverPlugin", "qsqlpsql", "sqldrivers", ["libpq::libpq"])
         if self.options.get_safe("with_mysql", False):
-            _create_plugin("QMySQLDriverPlugin", "qsqlmysql", "sqldriver", ["libmysqlclient::libmysqlclient"])
+            _create_plugin("QMySQLDriverPlugin", "qsqlmysql", "sqldrivers", ["libmysqlclient::libmysqlclient"])
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", ["odbc::odbc"])
