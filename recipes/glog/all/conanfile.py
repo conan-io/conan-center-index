@@ -63,8 +63,10 @@ class GlogConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "glog"
+        self.cpp_info.names["cmake_find_package_multi"] = "glog"
+        self.cpp_info.names["pkgconfig"] = "libglog"
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["pkgconfig"] = ["libglog"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
