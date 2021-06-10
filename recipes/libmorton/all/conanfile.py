@@ -33,7 +33,5 @@ class LibmortonConan(ConanFile):
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "libmorton", "include"))
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines = ["NOMINMAX"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
