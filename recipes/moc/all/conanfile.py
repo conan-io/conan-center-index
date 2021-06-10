@@ -4,7 +4,6 @@ from os import rename
 from os.path import isdir, join
 from shutil import move
 from glob import glob
-from distutils.version import LooseVersion
 
 class MocConan(ConanFile):
     name = "moc"
