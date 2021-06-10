@@ -29,6 +29,10 @@ class SentryCrashpadConan(ConanFile):
     _cmake = None
 
     @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -75,8 +79,7 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL"] = True
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL_DEV"] = True
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
-        tools.mkdir("cmake-build")
-        self._cmake.configure(build_dir="cmake-build")
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -107,6 +110,11 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["mini_chromium"].system_libs.append("pthread")
+        if tools.is_apple_os(self.settings.os):
+            if self.settings.os == "Macos":
+                self.cpp_info.components["mini_chromium"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+            else:  # iOS
+                self.cpp_info.components["mini_chromium"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
 
         self.cpp_info.components["compat"].includedirs.append(os.path.join("include", "crashpad"))
         # On Apple crashpad_compat is an interface library
@@ -121,6 +129,10 @@ class SentryCrashpadConan(ConanFile):
             self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
         if self.options.get_safe("with_tls") == "openssl":
             self.cpp_info.components["util"].requires.append("openssl::openssl")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.components["util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
+            self.cpp_info.components["util"].system_libs.append("bsm")
 
         self.cpp_info.components["client"].libs = ["crashpad_client"]
         self.cpp_info.components["client"].requires = ["util", "mini_chromium"]
