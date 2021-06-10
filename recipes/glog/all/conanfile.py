@@ -26,7 +26,7 @@ class GlogConan(ConanFile):
         "with_threads": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -52,6 +52,12 @@ class GlogConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # do not force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
+                              "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -63,8 +69,7 @@ class GlogConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
