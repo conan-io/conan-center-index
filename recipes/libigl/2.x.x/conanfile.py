@@ -12,7 +12,7 @@ class LibiglConan(ConanFile):
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     requires = ("eigen/3.3.9")
@@ -33,11 +33,8 @@ class LibiglConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if self.options.shared == False:
+        if self.options.shared == True:  
             raise ConanInvalidConfiguration("Recipe is only available as a static lib. Open a PR to add a shared option")
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -46,7 +43,7 @@ class LibiglConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
-            self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = False
+            self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = True
 
             # All these dependencies are needed to build the examples or the tests
             self._cmake.definitions["LIBIGL_BUILD_TUTORIALS"] = "OFF"
@@ -101,3 +98,6 @@ class LibiglConan(ConanFile):
         self.cpp_info.components["igl_core"].names["cmake_find_package"] = "core"
         self.cpp_info.components["igl_core"].names["cmake_find_package_multi"] = "core"
         self.cpp_info.components["igl_core"].requires = ["igl_common"]
+
+        self.cpp_info.components["igl_core"].libs = ["igl"]
+        self.cpp_info.components["igl_core"].defines = ["IGL_STATIC_LIBRARY"]
