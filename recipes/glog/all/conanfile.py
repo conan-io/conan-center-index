@@ -83,6 +83,7 @@ class GlogConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["dbghelp"]
             self.cpp_info.defines = ["GLOG_NO_ABBREVIATED_SEVERITIES"]
             decl = "__declspec(dllimport)" if self.options.shared else ""
             self.cpp_info.defines.append("GOOGLE_GLOG_DLL_DECL={}".format(decl))
