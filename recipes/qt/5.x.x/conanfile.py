@@ -247,22 +247,21 @@ class QtConan(ConanFile):
 
     def validate(self):
         if self.options.widgets and not self.options.gui:
-            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
-                                            "You can either disable qt:widgets or enable qt:gui")
+            raise ConanInvalidConfiguration("using option qt5:widgets without option qt5:gui is not possible. "
+                                            "You can either disable qt5:widgets or enable qt5:gui")
 
         if self.options.qtwebengine:
             if not self.options.shared:
-                raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
+                raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
+
+            if not self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel:
+                raise ConanInvalidConfiguration("option qt5:qtwebengine requires also qt5:gui, qt5:qtdeclarative, qt5:qtlocation and qt5:qtwebchannel")
 
             if tools.cross_building(self.settings, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
-
-            if self.settings.os == "Linux":
-                #Linking of QtWebEngine shared library fails with unresolved error to freetype.
-                raise ConanInvalidConfiguration("Building QtWebEngine on Linux will currently result in a build error.")
 
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
@@ -779,7 +778,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", type)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -839,7 +838,7 @@ Examples = bin/datadir/examples""")
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
-            _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
+            _create_module("OpenGLExtensions", ["Gui"])
         _create_module("DBus")
         _create_module("Concurrent")
         _create_module("Xml")
@@ -902,8 +901,8 @@ Examples = bin/datadir/examples""")
         if self.options.qtwebchannel:
             _create_module("WebChannel", ["Qml"])
 
-        if self.options.qtwebengine and self.options.gui:
-            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat"])
+        if self.options.qtwebengine:
+            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat", "opus::libopus"])
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
@@ -1016,7 +1015,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
 
