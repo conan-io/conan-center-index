@@ -83,6 +83,10 @@ class LibiglConan(ConanFile):
             tools.remove_files_by_mask(self.package_folder, "*.c")
             tools.remove_files_by_mask(self.package_folder, "*.cpp")
 
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
+
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "libigl"
         self.cpp_info.filenames["cmake_find_package_multi"] = "libigl"
@@ -101,4 +105,5 @@ class LibiglConan(ConanFile):
         self.cpp_info.components["igl_core"].requires = ["igl_common"]
         if not self.options.header_only:
             self.cpp_info.components["igl_core"].libs = ["igl"]
-            self.cpp_info.components["igl_core"].defines = ["IGL_STATIC_LIBRARY"]
+            self.cpp_info.components["igl_core"].defines.append("IGL_STATIC_LIBRARY")
+
