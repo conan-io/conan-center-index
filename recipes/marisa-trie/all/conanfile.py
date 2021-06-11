@@ -1,5 +1,9 @@
 import os
+from contextlib import contextmanager
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+
+
+required_conan_version = ">=1.33.0"
 
 
 class MarisaTrieConan(ConanFile):
@@ -12,7 +16,6 @@ class MarisaTrieConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
 
     _autotools = None
 
@@ -29,8 +32,9 @@ class MarisaTrieConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
         self.build_requires("automake/1.16.3")
 
@@ -38,31 +42,55 @@ class MarisaTrieConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @contextmanager
+    def _build_context(self):
+        env = {}
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CFLAGS": "-{}".format(self.settings.compiler.runtime),
+                    "LD": "link",
+                    "NM": "dumpbin -symbols",
+                    "STRIP": ":",
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "RANLIB": ":",
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            with tools.environment_append(env):
+                yield
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
         conf_args = [
             ("--enable-shared" if self.options.shared else "--enable-static"),
             ("--disable-static" if self.options.shared else "--disable-shared"),
             ("--with-pic" if self.options.get_safe("fPIC") or self.options.shared else "--without-pic"),
         ]
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
+            self._autotools.cxx_flags.append("-EHsc")
         self._autotools.configure(args=conf_args)
         return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+            with self._build_context():
+                autotools = self._configure_autotools()
+                autotools.make()
 
     def package(self):
         self.copy("COPYING.md", src=self._source_subfolder, dst="licenses")
         with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+            with self._build_context():
+                autotools = self._configure_autotools()
+                autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
