@@ -93,7 +93,7 @@ class JemallocConan(ConanFile):
             "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
             "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
             "--enable-log" if self.options.enable_debug_logging else "--disable-log",
-            "--enable-initial-exec-tld" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
+            "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
             "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
         ]
         if self.options.shared:
