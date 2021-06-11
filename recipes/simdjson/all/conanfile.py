@@ -53,7 +53,9 @@ class SimdjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
 
         def lazy_lt_semver(v1, v2):
