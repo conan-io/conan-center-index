@@ -23,7 +23,7 @@ class VectorclassConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "header_only": True
+        "header_only": False
     }
 
     _cmake = None
