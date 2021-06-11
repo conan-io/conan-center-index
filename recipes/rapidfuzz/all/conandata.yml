@@ -1,0 +1,4 @@
+sources:
+  "cci.20210513":
+    url: "https://github.com/maxbachmann/rapidfuzz-cpp/archive/d1e82379395cafc6d439c1c1e2cbe7512eaf2518.zip"
+    sha256: "88d6279665a7fe4473594d034c13be83b9b923db7a15755f51b43d6be5b8ba78"
