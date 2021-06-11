@@ -40,7 +40,7 @@ class LibmediainfoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libcurl/7.75.0")
+        self.requires("libcurl/7.77.0")
         self.requires("libzen/0.4.38")
         self.requires("tinyxml2/8.0.0")
         self.requires("zlib/1.2.11")
