@@ -101,5 +101,7 @@ class VectorclassConan(ConanFile):
             cmake.install()
 
     def package_info(self):
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.defines = ["VECTORCLASS_HEADER_ONLY"]
+        else:
             self.cpp_info.libs = ["vectorclass"]
