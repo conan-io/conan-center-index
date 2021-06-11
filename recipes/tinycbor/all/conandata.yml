@@ -4,6 +4,6 @@ sources:
     sha256: "956eb4b670ea4969eaee67395b5bb6437b153960385b77357d6692e979d1b12d"
 patches:
   "0.5.3":
-    - patch_file: "patches/conan.patch"
+    - patch_file: "patches/001-build-system.patch"
       base_path: "source_subfolder"
 
