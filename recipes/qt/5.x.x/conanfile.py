@@ -247,15 +247,15 @@ class QtConan(ConanFile):
 
     def validate(self):
         if self.options.widgets and not self.options.gui:
-            raise ConanInvalidConfiguration("using option qt5:widgets without option qt5:gui is not possible. "
-                                            "You can either disable qt5:widgets or enable qt5:gui")
+            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
+                                            "You can either disable qt:widgets or enable qt:gui")
 
         if self.options.qtwebengine:
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
 
-            if not self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel:
-                raise ConanInvalidConfiguration("option qt5:qtwebengine requires also qt5:gui, qt5:qtdeclarative, qt5:qtlocation and qt5:qtwebchannel")
+            if not (self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel):
+                raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative, qt:qtlocation and qt:qtwebchannel")
 
             if tools.cross_building(self.settings, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
@@ -777,7 +777,8 @@ Examples = bin/datadir/examples""")
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            if not self.options.shared:
+                self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", type)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
