@@ -51,9 +51,8 @@ class LibiglConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
             
-        # Remove runtime and use always default (MD/MDd)
-        if self.settings.compiler == "Visual Studio":
-            del self.settings.compiler.runtime
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -135,4 +134,3 @@ class LibiglConan(ConanFile):
         if not self.options.header_only:
             self.cpp_info.components["igl_core"].libs = ["igl"]
             self.cpp_info.components["igl_core"].defines.append("IGL_STATIC_LIBRARY")
-
