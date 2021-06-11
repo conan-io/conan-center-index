@@ -42,8 +42,7 @@ class VectorclassConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            if self.settings.os != 'Windows':
-                del self.options.fPIC
+            del self.options.fPIC
 
     @property
     def _compilers_minimum_version(self):
