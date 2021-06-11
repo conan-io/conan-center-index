@@ -1,3 +1,5 @@
 versions:
+  "21.03":
+    folder: "all"
   "20.03":
     folder: "all"
