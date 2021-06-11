@@ -232,6 +232,9 @@ class LLVMCoreConan(ConanFile):
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
                 dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
+            self.output.info('*' * 12)
+            self.output.info('\n' + tools.load(dot_text))
+            self.output.info('*' * 12)
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
@@ -285,9 +288,6 @@ class LLVMCoreConan(ConanFile):
                 os.path.join(self.package_folder, 'lib', 'components.json')
             with open(components_path, 'w') as components_file:
                 json.dump(components, components_file, indent=4)
-            self.output.info('*' * 12)
-            self.output.info(tools.load(components_path))
-            self.output.info('*' * 12)
         else:
             suffixes = ['.dylib', '.so']
             for name in os.listdir(lib_path):
