@@ -109,7 +109,13 @@ class LibmediainfoConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.libs = ["mediainfo"]
+        postfix = ""
+        if self.settings.build_type == "Debug":
+            if self.settings.os == "Windows":
+                postfix += "d"
+            elif tools.is_apple_os(self.settings.os):
+                postfix += "_debug"
+        self.cpp_info.libs = ["mediainfo" + postfix]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "MediaInfoLib"
