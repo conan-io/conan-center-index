@@ -4,6 +4,7 @@ import re
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class LibsystemdConan(ConanFile):
     name = "libsystemd"
@@ -72,9 +73,8 @@ class LibsystemdConan(ConanFile):
             self.requires("zstd/1.5.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        src_folder = "systemd-stable-{}".format(self.version)
-        os.rename(src_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _so_version(self):
@@ -134,7 +134,6 @@ class LibsystemdConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-    def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
         tools.replace_in_file(
             meson_build, """relative_source_path = run_command('realpath',
@@ -142,6 +141,7 @@ class LibsystemdConan(ConanFile):
                                    project_source_root).stdout().strip()""",
             "relative_source_path = '../{}'".format(self._source_subfolder))
 
+    def build(self):
         self._patch_sources()
 
         meson = self._configure_meson()
