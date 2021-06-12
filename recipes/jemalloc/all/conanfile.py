@@ -73,7 +73,7 @@ class JemallocConan(ConanFile):
             raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
         if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
-        if self.settings.compile == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
             raise ConanInvalidConfiguration("Unsupported compiler version")
 
     def source(self):
