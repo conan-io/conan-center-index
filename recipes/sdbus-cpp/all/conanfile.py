@@ -67,12 +67,12 @@ class SdbusCppConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
         if self.options.with_code_gen:
-            self.build_requires("expat/2.2.10")
+            self.build_requires("expat/2.4.1")
 
     def requirements(self):
-        self.requires("libsystemd/247.2")
+        self.requires("libsystemd/248.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
