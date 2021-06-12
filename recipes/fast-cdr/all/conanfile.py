@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import textwrap	
+import textwrap
 
 class FastCDRConan(ConanFile):
 
@@ -57,21 +57,23 @@ class FastCDRConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _create_cmake_module_alias_target(self):
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
-        content += textwrap.dedent("""\
-            if(TARGET fastcdr::fastcdr AND NOT TARGET fastcdr)
-                add_library(fastcdr INTERFACE IMPORTED)
-                set_property(TARGET fastcdr PROPERTY INTERFACE_LINK_LIBRARIES fastcdr::fastcdr)
-            endif()
-        """)
-        tools.save(os.path.join(self.package_folder, self._module_file_rel_path), content)
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
 
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+            self._cmake.configure()
         return self._cmake
 
     def source(self):
@@ -115,6 +117,10 @@ class FastCDRConan(ConanFile):
             directory=os.path.join(self.package_folder, "bin"),
             pattern="*.pdb"
         )
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"fastcdr": "fastcdr::fastcdr"}
+        )
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fastcdr"
@@ -122,7 +128,6 @@ class FastCDRConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("FASTCDR_DYN_LINK")
-        self._create_cmake_module_alias_target()
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
