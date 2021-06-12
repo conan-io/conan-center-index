@@ -3,15 +3,14 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-class FastCDRConan(ConanFile):
+class FoonathanMemory(ConanFile):
 
     name = "foonathan-memory"
-    version = "0.7.0"
     license = "Zlib"
-    homepage = "https://github.com/eProsima/Fast-CDR"
+    homepage = "https://github.com/foonathan/memory"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "eProsima FastCDR library for serialization"
-    topics = ("conan", "DDS", "Middleware", "Serialization")
+    description = "STL compatible C++ memory allocator library"
+    topics = ("conan", "memory", "STL", "RawAllocator")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared":          [True, False],
@@ -32,6 +31,13 @@ class FastCDRConan(ConanFile):
             "lib",
             "foonathan_memory",
             "cmake"
+        )
+    
+    @property
+    def _pkg_share(self):
+        return os.path.join(
+            self.package_folder,
+            "share"
         )
 
     @property
@@ -94,12 +100,9 @@ class FastCDRConan(ConanFile):
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_cmake)
+        tools.rmdir(self._pkg_share)
         tools.remove_files_by_mask(
             directory=os.path.join(self.package_folder, "lib"),
-            pattern="*.pdb"
-        )
-        tools.remove_files_by_mask(
-            directory=os.path.join(self.package_folder, "bin"),
             pattern="*.pdb"
         )
         self._create_cmake_module_alias_targets(
@@ -111,6 +114,9 @@ class FastCDRConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "foonathan_memory"
         self.cpp_info.names["cmake_find_package_multi"] = "foonathan_memory"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.includedirs = [
             os.path.join("include", "foonathan_memory"),
             os.path.join("include", "foonathan_memory", "comp")
