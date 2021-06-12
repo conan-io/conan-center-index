@@ -41,6 +41,7 @@ class JemallocConan(ConanFile):
         "enable_initial_exec_tls": True,
         "enable_libdl": True,
     }
+    exports_sources = ["patches/**"]
 
     _autotools = None
 
@@ -129,6 +130,9 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
+
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
