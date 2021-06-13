@@ -16,6 +16,7 @@ class CppcheckConan(ConanFile):
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
+    build_policy = "always"
 
     _cmake = None
     
@@ -50,6 +51,7 @@ class CppcheckConan(ConanFile):
         self._cmake.definitions["HAVE_RULES"] = self.options.have_rules
         self._cmake.definitions["USE_MATCHCOMPILER"] = "Auto"
         self._cmake.definitions["ENABLE_OSS_FUZZ"] = False
+        self._cmake.definitions["FILESDIR"] = os.path.join(self.package_folder, "bin/Cppcheck")
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -60,8 +62,8 @@ class CppcheckConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst=os.path.join("bin","cfg"), src=os.path.join(self._source_subfolder,"cfg"))
         cmake = self._configure_cmake()
+
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         
@@ -69,3 +71,4 @@ class CppcheckConan(ConanFile):
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
         self.env_info.PATH.append(bin_folder)
+
