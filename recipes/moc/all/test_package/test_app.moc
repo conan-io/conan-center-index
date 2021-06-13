@@ -1,0 +1,16 @@
+
+#include "test_app.moh"
+
+class Address  {
+    [[ bizObject {1} ]];
+    [[ description { An address of some real world entity } ]];
+
+    String street1, [[ description {The street}]];
+    String street2, [[ description {2nd line of street info}]];
+    String city, [[ description {The City}]];
+    String state, [[ description {The State}]];
+    String zipcode, [[ description {The Zip Code}]];
+    Long CountryId, [[ description {The Country}]];
+};
+
+
