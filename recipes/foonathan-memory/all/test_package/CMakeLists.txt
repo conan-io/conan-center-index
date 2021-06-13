@@ -12,5 +12,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #check if the alias target fastcdr works 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME}
-    foonathan_memory::foonathan_memory
+    foonathan_memory
 )

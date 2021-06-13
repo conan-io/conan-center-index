@@ -14,11 +14,13 @@ class FoonathanMemory(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared":          [True, False],
-        "fPIC":            [True, False]
+        "fPIC":            [True, False],
+        "with_tools":      [True, False]
     }
     default_options = {
         "shared":            False,
-        "fPIC":              True
+        "fPIC":              True,
+        "with_tools":        False
     }
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
@@ -61,9 +63,9 @@ class FoonathanMemory(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_MEMORY_EXAMPLES"] = False
-            self._cmake.definitions["BUILD_MEMORY_TOOLS"] = False
-            self._cmake.definitions["BUILD_MEMORY_TOOLS"] = False
+            self._cmake.definitions["FOONATHAN_MEMORY_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["FOONATHAN_MEMORY_BUILD_TESTS"] = False
+            self._cmake.definitions["FOONATHAN_MEMORY_BUILD_TOOLS"] = self.options.with_tools
             self._cmake.configure()
         return self._cmake
 
