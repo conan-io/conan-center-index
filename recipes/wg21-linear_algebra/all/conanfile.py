@@ -10,7 +10,7 @@ class LAConan(ConanFile):
     homepage = "https://github.com/BobSteagall/wg21"
     description = "Production-quality reference implementation of P1385: A proposal to add linear algebra support to the C++ standard library"
     topics = ("linear-algebra", "multi-dimensional", "maths")
-    license = "BSD-3-Clause"
+    license = "NCSA"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "compiler"
     no_copy_source = True
