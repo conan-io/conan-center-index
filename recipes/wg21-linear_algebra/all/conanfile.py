@@ -66,8 +66,6 @@ class LAConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "wg21_linear_algebra"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "wg21_linear_algebra"
         self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
         self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"
         self.cpp_info.components["_wg21_linear_algebra"].names["cmake_find_package"] = "wg21_linear_algebra"
