@@ -3,7 +3,6 @@ from conans.errors import ConanInvalidConfiguration
 from os import rename
 from os.path import isdir, join
 from shutil import move
-from glob import glob
 
 class MocConan(ConanFile):
     name = "moc"
@@ -14,12 +13,17 @@ class MocConan(ConanFile):
     license = "Apache-2.0"    
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
+    settings = {"os": ["Linux", "Macos"],
+                "arch": ["x86_64"],
+                "compiler" : [ "gcc", "clang", "apple-clang" ],
+                "build_type" : [ "Release", "Debug" ] }
     options = { "fPIC": [True, False] }
     default_options = { "fPIC": True }
     _cmake = None
     _supported_compilers = [
         ("Linux", "gcc", "6"),
-        ("Linux", "clang", "6")
+        ("Linux", "clang", "6"),
+        ("Macos", "apple-clang", "10")
     ]
 
     @property
