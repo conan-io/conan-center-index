@@ -65,6 +65,9 @@ class LLVMCoreConan(ConanFile):
         'with_zlib': True,
         'with_xml2': True
     }
+    build_requires = [
+        'cmake/3.20.3'
+    ]
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
     generators = ['cmake', 'cmake_find_package']
