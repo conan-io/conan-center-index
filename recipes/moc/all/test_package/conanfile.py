@@ -31,12 +31,23 @@ class MocTestConan(ConanFile):
 
             if not "version" in versionInfo:
                 raise ConanException("Moc version not found. Moc may not have been built correctly")
+            cppExe = "/usr/lib/cpp"
+            cpp_bin = tools.which(cppExe)
+            if cpp_bin == None:
+                self.output.warn("%s is required by moc, but cpp was not found" % cppExe);
+                return
+
             cmake = CMake(self)
             cmake.definitions["MOC_ROOT"] = self.deps_cpp_info["moc"].rootpath
             cmake.configure()
             cmake.build()
 
     def test(self):
+        cppExe = "/usr/lib/cpp"
+        cpp_bin = tools.which(cppExe)
+        if cpp_bin == None:
+            self.output.warn("%s is required by moc, but cpp was not found" % cppExe);
+            return
         if not tools.cross_building(self.settings, skip_x64_x86=True):
             os.chdir("bin")
             self.run(".%stest_package" % os.sep)
