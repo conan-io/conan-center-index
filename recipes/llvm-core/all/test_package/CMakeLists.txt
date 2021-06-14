@@ -11,6 +11,7 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 
 if(TARGET llvm-core::interpreter)  # static libraries
     target_link_libraries(${PROJECT_NAME} PRIVATE
+        llvm-core::lto
         llvm-core::interpreter
         llvm-core::irreader
         llvm-core::x86codegen
