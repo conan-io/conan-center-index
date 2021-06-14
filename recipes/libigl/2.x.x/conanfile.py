@@ -8,13 +8,12 @@ class LibiglConan(ConanFile):
     description = ("Simple C++ geometry processing library")
     topics = ("conan", "libigl", "geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     homepage = "https://libigl.github.io/"
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"header_only": [True, False], "fPIC": [True, False]}
     default_options = {"header_only": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     requires = ("eigen/3.3.9")
     _cmake = None
