@@ -190,8 +190,6 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.9.10')
 
     def configure(self):
-        if self.settings.os != 'Windows':
-            raise ConanInvalidConfiguration('Want to check something')
         if self.options.shared:  # Shared builds disabled just due to the CI
             message = 'Shared builds not currently supported'
             raise ConanInvalidConfiguration(message)
@@ -232,9 +230,6 @@ class LLVMCoreConan(ConanFile):
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
                 dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
-            self.output.info('*' * 12)
-            self.output.info('\n' + tools.load(dot_text))
-            self.output.info('*' * 12)
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
