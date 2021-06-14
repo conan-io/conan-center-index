@@ -70,7 +70,7 @@ class MocConan(ConanFile):
                   keep_path=False)
         cmakeModulesDir=join(self.package_folder, "cmake-modules")
         if isdir(cmakeModulesDir):
-            move(cmakeModulesDir,join(self.package_folder, "lib/cmake"))
+            move(cmakeModulesDir,join(self.package_folder, "lib", "cmake"))
         return
 
     def package_info(self):
