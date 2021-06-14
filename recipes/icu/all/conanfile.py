@@ -69,7 +69,7 @@ class ICUBase(ConanFile):
             self.build_requires("msys2/20200517")
 
         if tools.cross_building(self.settings, skip_x64_x86=True) and hasattr(self, 'settings_build'):
-            self.build_requires("icu/{}".format(self.version)) # TODO: This is a problem if we want to introduce new versions
+            self.build_requires("icu/{}".format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -161,12 +161,8 @@ class ICUBase(ConanFile):
 
         env_build = self._configure_autotools()
         if tools.cross_building(self.settings, skip_x64_x86=True):
-            #if env_build.build:
-            #    args.append("--build=%s" % env_build.build)
             if env_build.host:
                 args.append("--host=%s" % env_build.host)
-            #if env_build.target:
-            #    args.append("--target=%s" % env_build.target)
             bin_path = self.deps_env_info["icu"].PATH[0]
             base_path, _ = bin_path.rsplit('/', 1)
             args.append("--with-cross-build={}".format(base_path))
