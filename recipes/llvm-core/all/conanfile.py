@@ -245,6 +245,8 @@ class LLVMCoreConan(ConanFile):
                 if not target.startswith('LLVM'):
                     dummy_targets[target].append(dep)
 
+            self.output.info(json.dumps(dummy_targets, indent=4))
+
             cmake_targets = {
                 'libffi::libffi': 'ffi',
                 'ZLIB::ZLIB': 'z',
