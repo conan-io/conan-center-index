@@ -37,7 +37,8 @@ class VtkConan(ConanFile):
                         "vtk_group_enable_views" : "DEFAULT",
                         "vtk_group_enable_web" : "DEFAULT",
                         "fPIC": True}
-    generators = "cmake_find_package"
+    generators = "cmake"
+    version = "9.0.1"
 
     _cmake = None
 
@@ -54,6 +55,8 @@ class VtkConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
+        if self.version is None:
+            self.version = "9.0.1"
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
     
     def _configure_cmake(self):
