@@ -13,10 +13,6 @@ class MocConan(ConanFile):
     license = "Apache-2.0"    
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    settings = {"os": ["Linux", "Macos"],
-                "arch": ["x86_64"],
-                "compiler" : [ "gcc", "clang", "apple-clang" ],
-                "build_type" : [ "Release", "Debug" ] }
     options = { "fPIC": [True, False] }
     default_options = { "fPIC": True }
     _cmake = None
@@ -34,9 +30,7 @@ class MocConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def validate(self):
         if not self._check_compiler():
             raise ConanInvalidConfiguration("%s package is not compatible with os %s and compiler %s version %s." % (self.name, self.settings.os, self.settings.compiler, self.settings.compiler.version))
 
@@ -45,6 +39,10 @@ class MocConan(ConanFile):
         compiler = self.settings.compiler
         compiler_version = tools.Version(compiler.version)
         return any(os == sc[0] and compiler == sc[1] and compiler_version >= sc[2] for sc in self._supported_compilers)
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("flex/2.6.4")

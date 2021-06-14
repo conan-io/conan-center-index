@@ -10,7 +10,6 @@ class Address  {
     String city, [[ description {The City}]];
     String state, [[ description {The State}]];
     String zipcode, [[ description {The Zip Code}]];
-    Long CountryId, [[ description {The Country}]];
 };
 
 

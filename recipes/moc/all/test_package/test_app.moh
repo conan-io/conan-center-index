@@ -1,24 +1,5 @@
 
 type String {
     Header "<string>";
-    [[ namespace {std} ]];
     [[ type {std::string} ]];
-    [[ dbGetResult {rs.getString(col++)} ]];
-    [[ dbcoltype {VARCHAR(255)}]];
-    [[ objectArrayTypePref {}]];
-    [[ objectArrayTypeSuf {}]];
-};
-
-type Long {
-    Header "<cstdint>";
-    [[ type {int64_t} ]];
-    [[ dbcoltype {NUMERIC}]];
-    [[ dbType {long}]];
-    [[ dbConvertPref {new Long(}]];
-    [[ dbConvertSuf {)}]];
-    [[ convertToDbPref {}]];
-    [[ convertToDbSuf {.longValue()}]];
-    [[ dbGetResult {new Long( rs.getLong(col++) )}]];
-    [[ objectArrayTypePref {}]];
-    [[ objectArrayTypeSuf {}]];
 };
