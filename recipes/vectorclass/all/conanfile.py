@@ -18,12 +18,10 @@ class VectorclassConan(ConanFile):
     generators = "cmake"
     settings = ("os", "arch", "compiler", "build_type")
     options = {
-        "fPIC": [True, False],
-        "header_only": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
-        "fPIC": True,
-        "header_only": False
+        "fPIC": True
     }
 
     _cmake = None
@@ -38,10 +36,6 @@ class VectorclassConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == 'Windows':
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.header_only:
             del self.options.fPIC
 
     @property
@@ -72,10 +66,6 @@ class VectorclassConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -88,20 +78,13 @@ class VectorclassConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if not self.options.header_only:
-            cmake = self._configure_cmake()
-            cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.options.header_only:
-            self.copy("*.h", dst="include", src=self._source_subfolder)
-        else:
-            cmake = self._configure_cmake()
-            cmake.install()
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
-        if self.options.header_only:
-            self.cpp_info.defines = ["VECTORCLASS_HEADER_ONLY"]
-        else:
-            self.cpp_info.libs = ["vectorclass"]
+        self.cpp_info.libs = ["vectorclass"]

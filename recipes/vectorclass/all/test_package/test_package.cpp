@@ -1,8 +1,6 @@
 #include <vectorclass.h>
 
 #include <iostream>
-
-#if !VECTORCLASS_HEADER_ONLY
 #include <stdexcept>
 #include <string>
 
@@ -47,13 +45,9 @@ void print_instruction_set() {
             throw std::runtime_error("Unexpected instruction set " + std::to_string(instruction_set));
    }
 }
-#endif
 
 int main() {
-#if !VECTORCLASS_HEADER_ONLY
-    //function is available only in cpp
     print_instruction_set();
-#endif
 
     Vec4i a(10, 11, 12, 13);
     Vec4i b(20, 21, 22, 23);
