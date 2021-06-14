@@ -12,7 +12,7 @@ instead.  Also add return type for main().
  3 files changed, 15 insertions(+), 5 deletions(-)
 
 diff --git a/config/c-compiler.m4 b/config/c-compiler.m4
-index a7f6773..7d901e1 100644
+index f87beb0..8bc6d32 100644
 --- a/config/c-compiler.m4
 +++ b/config/c-compiler.m4
 @@ -71,8 +71,10 @@ int does_int64_work()
@@ -28,7 +28,7 @@ index a7f6773..7d901e1 100644
  [Ac_cachevar=yes],
  [Ac_cachevar=no],
 diff --git a/config/c-library.m4 b/config/c-library.m4
-index 50d068d..56658b5 100644
+index 82b1614..a893d68 100644
 --- a/config/c-library.m4
 +++ b/config/c-library.m4
 @@ -204,8 +204,10 @@ int does_int64_snprintf_work()
@@ -44,10 +44,10 @@ index 50d068d..56658b5 100644
  [pgac_cv_snprintf_long_long_int_modifier=$pgac_modifier; break],
  [],
 diff --git a/configure b/configure
-index 45c8eef..36d9a54 100755
+index d4442f3..394f658 100755
 --- a/configure
 +++ b/configure
-@@ -13563,8 +13563,10 @@ int does_int64_work()
+@@ -13853,8 +13853,10 @@ int does_int64_work()
      return 0;
    return 1;
  }
@@ -59,7 +59,7 @@ index 45c8eef..36d9a54 100755
  }
  _ACEOF
  if ac_fn_c_try_run "$LINENO"; then :
-@@ -13645,8 +13647,10 @@ int does_int64_work()
+@@ -13935,8 +13937,10 @@ int does_int64_work()
      return 0;
    return 1;
  }
@@ -71,7 +71,7 @@ index 45c8eef..36d9a54 100755
  }
  _ACEOF
  if ac_fn_c_try_run "$LINENO"; then :
-@@ -13739,8 +13743,10 @@ int does_int64_snprintf_work()
+@@ -14011,8 +14015,10 @@ int does_int64_snprintf_work()
      return 0;			/* either multiply or snprintf is busted */
    return 1;
  }
@@ -83,5 +83,3 @@ index 45c8eef..36d9a54 100755
  }
  _ACEOF
  if ac_fn_c_try_run "$LINENO"; then :
--- 
-2.9.3
