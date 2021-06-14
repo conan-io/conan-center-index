@@ -34,6 +34,8 @@ class MocTestConan(ConanFile):
 
 
             cppExe = "/usr/lib/cpp"
+            cpp_bin = tools.which(cppExe)
+            self.output.info("cpp was located at '%s'" % cpp_bin);
             try:
                 mybuf = StringIO()
                 self.run(cppExe + " -I" + self.source_folder + " " + self.source_folder + "/test_app.moc", output=mybuf, run_environment=True)
