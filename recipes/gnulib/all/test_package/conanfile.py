@@ -11,8 +11,8 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-        self.build_requires("automake/1.16.1")
+            self.build_requires("msys2/cci.latest")
+        self.build_requires("automake/1.16.3")
 
     @contextmanager
     def _build_context(self):
