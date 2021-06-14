@@ -9,7 +9,7 @@ find_package(foonathan_memory REQUIRED)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#check if the alias target fastcdr works 
+#check if the alias target foonathan_memory works 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME}
     foonathan_memory
