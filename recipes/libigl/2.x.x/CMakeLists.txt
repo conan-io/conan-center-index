@@ -6,4 +6,8 @@ conan_basic_setup()
 
 find_package(Eigen3 REQUIRED)
 
+if(MSVC)
+  add_definitions(/Zm)
+endif()
+
 add_subdirectory(source_subfolder)
