@@ -18,3 +18,5 @@ patches:
   2.0.0:
     - patch_file: "patches/0001-buildflatbuffers-cmake.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-versionflatbuffers-cmake.patch"
+      base_path: "source_subfolder"
