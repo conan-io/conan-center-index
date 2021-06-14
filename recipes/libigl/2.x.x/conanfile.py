@@ -8,6 +8,7 @@ class LibiglConan(ConanFile):
     description = ("Simple C++ geometry processing library")
     topics = ("conan", "libigl", "geometry", "matrices", "algorithms")
     url = "https://github.com/conan-io/conan-center-index"
+    exports_sources = "patches/**"
     homepage = "https://libigl.github.io/"
     license = "MPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
@@ -62,6 +63,10 @@ class LibiglConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -96,6 +101,7 @@ class LibiglConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
         cmake.install()
