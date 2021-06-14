@@ -34,6 +34,9 @@ class TestPackageConan(ConanFile):
             yield
 
     def build(self):
+        if tools.cross_building(self):
+            return
+
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), dst=os.path.join(self.build_folder, src))
         with tools.chdir(self.build_folder):
@@ -49,6 +52,6 @@ class TestPackageConan(ConanFile):
                 autotools.make()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
             self.run(bin_path, run_environment=True)

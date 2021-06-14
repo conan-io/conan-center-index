@@ -14,7 +14,7 @@ class GnuLibConanFile(ConanFile):
     no_copy_source = True
 
     # Added to test on CI
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
 
     _source_subfolder = "source_subfolder"
 
@@ -42,9 +42,6 @@ class GnuLibConanFile(ConanFile):
                 src = os.path.join(root, file)
                 dst = os.path.join(dstdir, file)
                 shutil.copy(src, dst)
-
-    def package_id(self):
-        self.info.include_build_settings()
 
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
