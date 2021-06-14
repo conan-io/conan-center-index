@@ -4,6 +4,7 @@ import re
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class LibsystemdConan(ConanFile):
     name = "libsystemd"
@@ -49,27 +50,31 @@ class LibsystemdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.3")
+        if tools.Version(self.version) >= "248.3":
+            self.build_requires("meson/0.58.1")
+        else:
+            # incompatible change in meson/0.57.2:
+            # https://github.com/mesonbuild/meson/pull/8526
+            self.build_requires("meson/0.57.1")
         self.build_requires("m4/1.4.18")
         self.build_requires("gperf/3.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.45")
-        self.requires("libmount/2.36")
+        self.requires("libcap/2.50")
+        self.requires("libmount/2.36.2")
         if self.options.with_selinux:
-            self.requires("libselinux/3.1")
+            self.requires("libselinux/3.2")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/1.9.3")
         if self.options.with_xz:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.5.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        src_folder = "systemd-stable-{}".format(self.version)
-        os.rename(src_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @property
     def _so_version(self):
@@ -129,7 +134,6 @@ class LibsystemdConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-    def build(self):
         meson_build = os.path.join(self._source_subfolder, "meson.build")
         tools.replace_in_file(
             meson_build, """relative_source_path = run_command('realpath',
@@ -137,6 +141,7 @@ class LibsystemdConan(ConanFile):
                                    project_source_root).stdout().strip()""",
             "relative_source_path = '../{}'".format(self._source_subfolder))
 
+    def build(self):
         self._patch_sources()
 
         meson = self._configure_meson()
