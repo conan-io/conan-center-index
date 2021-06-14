@@ -13,8 +13,8 @@ class XercesCConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "char_type": ["uint16_t", "wchar_t"]}
+    default_options = {"shared": False, "fPIC": True, "char_type": "uint16_t"}
 
     _cmake = None
 
@@ -29,6 +29,8 @@ class XercesCConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.char_type
 
     def configure(self):
         if self.settings.os not in ("Windows", "Macos", "Linux"):
@@ -51,7 +53,11 @@ class XercesCConan(ConanFile):
                                                  "Macos": "macosunicodeconverter",
                                                  "Linux": "gnuiconv"}.get(str(self.settings.os))
         self._cmake.definitions["message-loader"] = "inmemory"
-        self._cmake.definitions["xmlch-type"] = "uint16_t"
+        
+        self._cmake.definitions["xmlch-type"] = {"Windows": self.options.char_type,
+                                                 "Macos": "uint16_t",
+                                                 "Linux": "uint16_t"}.get(str(self.settings.os))
+                                                 
         self._cmake.definitions["mutex-manager"] = {"Windows": "windows",
                                                     "Macos": "posix",
                                                     "Linux": "posix"}.get(str(self.settings.os))
