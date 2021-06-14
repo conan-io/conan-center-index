@@ -190,7 +190,7 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.9.10')
 
     def configure(self):
-        if self.settings.os != 'Windows' and self.settings.build_type != "Release" and self.settings.compiler.version != "16":
+        if self.settings.os != 'Windows' or self.settings.build_type != "Release" or self.settings.compiler.version != "16":
             raise ConanInvalidConfiguration('Want to check something')
 
         if self.options.shared:  # Shared builds disabled just due to the CI
