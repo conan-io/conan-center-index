@@ -100,6 +100,8 @@ class AzureStorageCppConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/issues/4195
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
             raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe")
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def build(self):
         apply_conandata_patches(self)
