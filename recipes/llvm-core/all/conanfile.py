@@ -197,8 +197,7 @@ class LLVMCoreConan(ConanFile):
         self._supports_compiler()
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        os.rename('llvm-{}.src'.format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data['sources'][self.version], destination=self._source_subfolder, strip_root=True)
         self._patch_sources()
 
     def build(self):
