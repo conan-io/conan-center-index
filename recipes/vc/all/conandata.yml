@@ -1,0 +1,4 @@
+sources:
+  "1.4.1":
+    url: "https://github.com/VcDevel/Vc/releases/download/1.4.1/Vc-1.4.1.tar.gz"
+    sha256: "68e609a735326dc3625e98bd85258e1329fb2a26ce17f32c432723b750a4119f"
