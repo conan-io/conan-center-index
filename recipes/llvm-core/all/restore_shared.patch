@@ -2,10 +2,10 @@ diff --git a/recipes/llvm-core/all/conanfile.py b/recipes/llvm-core/all/conanfil
 index bff27b41..f70578d8 100644
 --- a/recipes/llvm-core/all/conanfile.py
 +++ b/recipes/llvm-core/all/conanfile.py
-@@ -184,13 +184,11 @@ class LLVMCoreConan(ConanFile):
+@@ -184,13 +184,11 @@
              self.requires('libxml2/2.9.10')
  
-     def configure(self):
+     def validate(self):
 -        if self.options.shared:  # Shared builds disabled just due to the CI
 -            message = 'Shared builds not currently supported'
 +        if self.options.shared:

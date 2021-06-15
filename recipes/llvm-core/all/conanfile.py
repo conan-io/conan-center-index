@@ -192,7 +192,7 @@ class LLVMCoreConan(ConanFile):
         if self.options.get_safe('with_xml2', False):
             self.requires('libxml2/2.9.10')
 
-    def configure(self):
+    def validate(self):
         if self.options.shared:  # Shared builds disabled just due to the CI
             message = 'Shared builds not currently supported'
             raise ConanInvalidConfiguration(message)
@@ -204,6 +204,8 @@ class LLVMCoreConan(ConanFile):
             message = 'Cannot enable exceptions without rtti support'
             raise ConanInvalidConfiguration(message)
         self._supports_compiler()
+        if tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
