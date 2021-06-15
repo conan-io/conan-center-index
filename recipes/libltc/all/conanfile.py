@@ -60,6 +60,7 @@ class LibltcConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+        os.unlink(os.path.join(self.package_folder, "lib", "libltc.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["ltc"]
