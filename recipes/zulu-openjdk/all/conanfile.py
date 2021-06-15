@@ -1,12 +1,13 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os, glob
+import os
+import glob
 
 
 class ZuluOpenJDK(ConanFile):
     name = "zulu-openjdk"
     url = "https://github.com/conan-io/conan-center-index/"
-    description = "A OpenJDK distribution"
+    description = "An OpenJDK distribution"
     homepage = "https://www.azul.com"
     license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
     topics = ("java", "jdk", "openjdk")
@@ -18,33 +19,34 @@ class ZuluOpenJDK(ConanFile):
 
     @property
     def _jni_folder(self):
-        folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self.settings.os))
+        folder = {"Linux": "linux", "Macos": "darwin",
+                  "Windows": "win32"}.get(str(self.settings.os))
         return os.path.join("include", folder)
 
+    @property
+    def _binary_key(self):
+        return '{0}_{1}'.format(self.settings.os, self.settings.arch)
+
     def configure(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
+        data = self.conan_data["sources"][self.version].get(self._binary_key, None)
+        if data is None:
+            raise ConanInvalidConfiguration("Unsupported Architecture.  No data was found in {0} for OS "
+                                            "{1} with arch {2}".format(self.version, self.settings.os,
+                                                                       self.settings.arch))
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
-            raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
+            raise ConanInvalidConfiguration("Unsupported os. This package currently only"
+                                            " supports Linux/Macos/Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version][self._binary_key],
+                  destination=self._source_subfolder, strip_root=True, keep_permissions=True)
 
     def build(self):
-        pass # nothing to do, but this shall trigger no warnings ;-)
+        pass  # nothing to do, but this shall trigger no warnings ;-)
 
     def package(self):
-        self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"), excludes=("msvcp140.dll", "vcruntime140.dll"))
-        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy(pattern="*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
-        self.copy(pattern="*", dst="res", src=os.path.join(self._source_subfolder, "conf"))
-        # conf folder is required for security settings, to avoid
-        # java.lang.SecurityException: Can't read cryptographic policy directory: unlimited
-        # https://github.com/conan-io/conan-center-index/pull/4491#issuecomment-774555069
-        self.copy(pattern="*", dst="conf", src=os.path.join(self._source_subfolder, "conf"))
-        self.copy(pattern="*", dst="licenses", src=os.path.join(self._source_subfolder, "legal"))
-        self.copy(pattern="*", dst=os.path.join("lib", "jmods"), src=os.path.join(self._source_subfolder, "jmods"))
+        self.copy(pattern='*', dst='.', src=self._source_subfolder,
+                  excludes=("msvcp140.dll", "vcruntime140.dll"))
 
     def package_info(self):
         self.cpp_info.includedirs.append(self._jni_folder)
