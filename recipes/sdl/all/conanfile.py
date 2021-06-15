@@ -108,6 +108,10 @@ class SDLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Macos" and not self.options.iconv:
+            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
+        if self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
@@ -164,10 +168,6 @@ class SDLConan(ConanFile):
 
     def validate(self):
         self._check_dependencies()
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def _configure_cmake(self):
         if not self._cmake:
