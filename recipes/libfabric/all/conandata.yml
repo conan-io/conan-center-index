@@ -1,0 +1,7 @@
+sources:
+  "1.12.1":
+    url: https://github.com/ofiwg/libfabric/releases/download/v1.12.1/libfabric-1.12.1.tar.bz2
+    sha256: db3c8e0a495e6e9da6a7436adab905468aedfbd4579ee3da5232a5c111ba642c
+  "1.9.0amzn1.1":
+    url: https://github.com/aws/libfabric/releases/download/v1.9.0amzn1.1/libfabric-1.9.0amzn1.1.tar.gz
+    sha256: 4e3912c379ca351f5039b01cfd168750030d919f1ce3f46531b5396b6a4266e5
