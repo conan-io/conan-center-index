@@ -25,6 +25,7 @@ class FastDDSConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
     _cmake = None
+    exports_sources =  ["patches/**"]
 
     @property
     def _pkg_cmake(self):
@@ -56,8 +57,6 @@ class FastDDSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.options.shared:
-            self.options["fast-cdr"].shared = True
 
     def _get_configured_cmake(self):
         if self._cmake:
@@ -76,7 +75,7 @@ class FastDDSConan(ConanFile):
         self.requires("tinyxml2/7.1.0")
         self.requires("asio/1.11.0@bincrafters/stable")
         self.requires("fast-cdr/1.0.21")
-        self.requires("foo-mem-ven/1.1.0")
+        self.requires("foonathan-memory/0.7.0")
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -102,6 +101,8 @@ class FastDDSConan(ConanFile):
         self.cpp_info.names["cmake_find_multi_package"] = "fast-dds"
         self.cpp_info.libs = ["fastrtps"]
         self.cpp_info.requires = [
-            "fastcdr::fastcdr",
-            "tinyxml2::tinyxml2"
+            "fast-cdr::fast-cdr",
+            "tinyxml2::tinyxml2",
+            "asio::asio",
+            "foonathan-memory::foonathan-memory"
         ]
