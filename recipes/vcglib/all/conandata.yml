@@ -1,0 +1,8 @@
+sources:
+  "2020.12":
+    url: "https://github.com/cnr-isti-vclab/vcglib/archive/refs/tags/2020.12.tar.gz"
+    sha256: "731c57435e39c4b958a1d766cadd9865d9db35e36410708f2da7818e9fa5f786"
+patches:
+  "2020.12":
+    - patch_file: "patches/0001-use-external-eigen.patch"
+      base_path: "source_subfolder"
