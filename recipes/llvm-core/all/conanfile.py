@@ -65,6 +65,9 @@ class LLVMCoreConan(ConanFile):
         'with_zlib': True,
         'with_xml2': True
     }
+
+    # Older cmake versions may have issues generating the graphviz output used
+    # to model the components
     build_requires = [
         'cmake/3.20.3'
     ]
