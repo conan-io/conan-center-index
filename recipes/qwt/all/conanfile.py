@@ -104,16 +104,13 @@ class QwtConan(ConanFile):
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include']
+        postfix = ""
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
-                self.cpp_info.libs = ["qwtd"]
+                postfix += "d"
             elif self.settings.os == "Macos":
-                self.cpp_info.libs = ["qwt_debug"]
-            else:
-                self.cpp_info.libs = ["qwt"]
-        else:
-            self.cpp_info.libs = ["qwt"]
+                postfix += "_debug"
+        self.cpp_info.libs = ["qwt" + postfix]
         self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'bin'))
         self.env_info.QT_PLUGIN_PATH.append(os.path.join(self.package_folder, 'lib'))
         self.cpp_info.defines = ['HAVE_QWT', 'QWT_DLL'] if self.options.shared else ['HAVE_QWT']
