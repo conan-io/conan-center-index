@@ -43,7 +43,7 @@ class LibltcConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = []
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
