@@ -57,6 +57,8 @@ class GTestConan(ConanFile):
             del self.options.debug_postfix
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -77,9 +79,7 @@ class GTestConan(ConanFile):
                     self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("googletest-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -96,8 +96,9 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
