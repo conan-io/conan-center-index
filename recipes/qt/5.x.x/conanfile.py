@@ -337,7 +337,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.0")
         if self.options.qtwebengine and self.settings.os == "Linux":
-            self.requires("expat/2.3.0")
+            self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
 
     def source(self):
