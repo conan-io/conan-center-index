@@ -128,3 +128,8 @@ class FoonathanMemory(ConanFile):
             os.path.join("include", "foonathan_memory"),
             os.path.join("include", "foonathan_memory", "comp")
         ]
+        if self.options.with_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path)),
+            self.env_info.PATH.append(bin_path)
+
