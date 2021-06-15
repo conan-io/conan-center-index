@@ -16,13 +16,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     @property
-    def _build_context(self):
-        if hasattr(self, 'settings_build'):
-            return self.settings_build.os
-        else:
-            return self.settings.os
-
-    @property
     def _test_executable(self):
         if self.settings.os == "Windows":
             return os.path.join("bin", "test_package.exe")
