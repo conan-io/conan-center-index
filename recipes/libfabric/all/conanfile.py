@@ -41,7 +41,7 @@ class LibfabricConan(ConanFile):
     _autotools = None
 
     def configure(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == 'Windows' or self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
