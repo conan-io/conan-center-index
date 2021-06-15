@@ -1,0 +1,4 @@
+sources:
+  "3.0.14":
+    url: "https://get.videolan.org/vlc/3.0.14/vlc-3.0.14.tar.xz"
+    sha256: "49b93e5b33deaa37060e6b24a98200cad70c407947f14eb2a8b6a0c64d8535a6"
