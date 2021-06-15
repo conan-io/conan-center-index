@@ -29,6 +29,9 @@ class LibltcConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
