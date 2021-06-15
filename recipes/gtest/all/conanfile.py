@@ -96,7 +96,7 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        if self.version in self.conan_data["patches"]:
+        if "patches" in self.conan_data:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
         cmake = self._configure_cmake()
