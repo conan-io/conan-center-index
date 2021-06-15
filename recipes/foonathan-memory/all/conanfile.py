@@ -23,7 +23,7 @@ class FoonathanMemory(ConanFile):
         "with_tools":        False
     }
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources =  ["patches/**","CMakeLists.txt"]
     _cmake = None
 
     @property
@@ -60,6 +60,10 @@ class FoonathanMemory(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -94,6 +98,7 @@ class FoonathanMemory(ConanFile):
             del self.options.fPIC
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
