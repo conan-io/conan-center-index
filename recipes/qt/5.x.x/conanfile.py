@@ -291,10 +291,10 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.36")
+            self.requires("pcre2/10.37")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.1")
+            self.requires("glib/2.68.3")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -304,7 +304,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.8.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -318,7 +318,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.35.5")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_pq:
             self.requires("libpq/13.2")
         if self.options.with_odbc:
@@ -331,7 +331,7 @@ class QtConan(ConanFile):
         if self.options.gui and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.2.1")
+                self.requires("xkbcommon/1.3.0")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -751,7 +751,7 @@ Examples = bin/datadir/examples""")
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 libsuffix = "d"
-            if tools.is_apple_os(self.settings.os):
+            elif tools.is_apple_os(self.settings.os):
                 libsuffix = "_debug"
 
         def _get_corrected_reqs(requires):
