@@ -4,8 +4,10 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(${PROJECT_NAME} "test_package.cpp")
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+file(GLOB SOURCE_FILES *.cpp)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 enable_testing()
