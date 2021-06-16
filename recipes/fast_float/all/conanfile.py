@@ -1,12 +1,14 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class FastFloatConan(ConanFile):
     name = "fast_float"
     description = "Fast and exact implementation of the C++ from_chars " \
                   "functions for float and double types."
-    license = "Apache-2.0"
+    license = ("Apache-2.0", "MIT")
     topics = ("conan", "fast_float", "conversion", "from_chars")
     homepage = "https://github.com/fastfloat/fast_float"
     url = "https://github.com/conan-io/conan-center-index"
@@ -27,11 +29,11 @@ class FastFloatConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):

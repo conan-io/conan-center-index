@@ -1,6 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class SimdjsonConan(ConanFile):
@@ -51,7 +53,9 @@ class SimdjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
 
         def lazy_lt_semver(v1, v2):
@@ -67,9 +71,8 @@ class SimdjsonConan(ConanFile):
             raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not fully support.".format(self.name))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         simd_flags_file = os.path.join(self._source_subfolder, "cmake", "simdjson-flags.cmake")

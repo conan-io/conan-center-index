@@ -1,0 +1,4 @@
+sources:
+  "cci.20121212":
+    url: "https://github.com/macosforge/alac/archive/3814718153165b15b30804f525d3c4e93cf86300.zip"
+    sha256: "17636c24343e43a6543a0fc513945e331b0bef6d813139e20464316acf4d985d"
