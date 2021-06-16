@@ -5,6 +5,7 @@ class VtkConan(ConanFile):
     name = "vtk"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://vtk.org/"
     description = "VTK is an open-source software system for" \
                     "image processing, 3D graphics, volume rendering and visualization."
     topics = ("conan", "vtk", "geometry", "algorithms")
@@ -103,3 +104,4 @@ class VtkConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "VTK"
         self.cpp_info.names["cmake_find_package_multi"] = "VTK"
+
