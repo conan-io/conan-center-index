@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conans import ConanFile, CMake, tools
 
 
 class PlatformInterfacesConan(ConanFile):
@@ -8,7 +9,7 @@ class PlatformInterfacesConan(ConanFile):
     homepage = "https://github.com/linksplatform/Interfaces"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Contains common interfaces that did not fit in any major category."
-    topics = ("platform", "concepts", "header.only")
+    topics = ("platform", "concepts", "header-only")
     settings = "os", "compiler", "build_type", "arch"
 
     @property
@@ -18,6 +19,10 @@ class PlatformInterfacesConan(ConanFile):
     @property
     def _subfolder_sources(self):
         return os.path.join(self._source_subfolder, "cpp", self.name)
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 20)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -35,3 +40,7 @@ class PlatformInterfacesConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "platform.interfaces"
+        self.cpp_info.names["cmake_find_package_multi"] = "platform.interfaces"
