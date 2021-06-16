@@ -1,7 +1,7 @@
 sources:
   "0.20.0":
-    url: "https://github.com/karastojko/mailio/archive/version_0-20-0.tar.gz"
-    sha256: "2ecf57ec467aa8c5d1d2c51a6cc44476c53e890466b7a240304106eeab993245"
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.20.0.tar.gz"
+    sha256: "073d6b1ff891444b54a01c2a3f17074fd612f9e2e14d9ebd61863c70737b1882"
 patches:
   "0.20.0":
     - patch_file: "patches/adapt-cmakelists.patch"
