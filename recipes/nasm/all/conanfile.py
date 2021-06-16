@@ -53,11 +53,15 @@ class NASMConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder)
             # GCC9 - "pure" attribute on function returning "void"
             tools.replace_in_file("Makefile", "-Werror=attributes", "")
+            # Need "-arch" flag for the linker when cross-compiling
+            tools.replace_in_file("Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(CFLAGS) $(LDFLAGS) -o")
         return self._autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+
         if self.settings.os == "Windows":
             self._build_vs()
         else:
