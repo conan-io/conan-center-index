@@ -12,16 +12,12 @@ class PlatformInterfacesConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     @property
-    def _self_name(self):
-        return "interfaces"
-
-    @property
     def _source_subfolder(self):
-        return "Interfaces"
+        return self.name
 
     @property
     def _subfolder_sources(self):
-        return os.path.join(self._source_subfolder, "cpp", f"Platform.{self._self_name}")
+        return os.path.join(self._source_subfolder, "cpp", self.name)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
