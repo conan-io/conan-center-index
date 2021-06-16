@@ -4,6 +4,6 @@
 #include <iostream>
 
 int main () {
-    const auto version = fi_version();
+    const uint32_t version = fi_version();
     std::cout << "hello libfabric version " << FI_MAJOR(version) << "." << FI_MINOR(version) << "\n";
 }
