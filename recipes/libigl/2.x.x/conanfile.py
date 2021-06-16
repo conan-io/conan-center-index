@@ -51,7 +51,7 @@ class LibiglConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
             
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def config_options(self):
