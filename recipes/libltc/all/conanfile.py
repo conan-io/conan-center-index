@@ -35,6 +35,10 @@ class LibltcConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
+            self.build_requires("msys2/20200517")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
