@@ -26,33 +26,60 @@
 using namespace eprosima;
 using namespace fastrtps;
 using namespace rtps;
-int main(int argc, char **argv)
+int main()
 {
-    std::cout << "Starting " << std::endl;
-    int type = 1;
-    int count = 1;
-    long sleep = 1;
+    std::cout << "Starting "<< std::endl;
+    
+    int argc = 2;
+    const char *argv[2] = {"", "subscribe"};
 
-    switch (type)
+    int type = 1;
+    int count = 10;
+    long sleep = 100;
+    if(argc > 1)
     {
-    case 1:
-    {
-        HelloWorldPublisher mypub;
-        if (mypub.init())
+        if(strcmp(argv[1],"publisher")==0)
         {
-            mypub.run(count, sleep);
+            type = 1;
+            if (argc >= 3)
+            {
+                count = atoi(argv[2]);
+                if (argc == 4)
+                {
+                    sleep = atoi(argv[3]);
+                }
+            }
         }
-        break;
+        else if(strcmp(argv[1],"subscriber")==0)
+            type = 2;
     }
-    case 2:
+    else
     {
-        HelloWorldSubscriber mysub;
-        if (mysub.init())
-        {
-            mysub.run();
-        }
-        break;
+        std::cout << "publisher OR subscriber argument needed" << std::endl;
+        Log::Reset();
+        return 0;
     }
+
+    switch(type)
+    {
+        case 1:
+            {
+                HelloWorldPublisher mypub;
+                if(mypub.init())
+                {
+                    mypub.run(count, sleep);
+                }
+                break;
+            }
+        case 2:
+            {
+                HelloWorldSubscriber mysub;
+                if(mysub.init())
+                {
+                    mysub.run();
+                }
+                break;
+            }
     }
     Domain::stopAll();
     Log::Reset();

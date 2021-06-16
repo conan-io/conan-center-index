@@ -121,7 +121,7 @@ void HelloWorldPublisher::runThread(
     {
         for (uint32_t i = 0; i < samples; ++i)
         {
-            if (!publish())
+            if (!publish(false))
             {
                 --i;
             }
