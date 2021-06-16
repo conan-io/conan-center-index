@@ -43,6 +43,21 @@ class LibltcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
 
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -56,13 +71,15 @@ class LibltcConan(ConanFile):
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, "lib", "libltc.la"))
