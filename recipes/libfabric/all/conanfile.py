@@ -81,9 +81,13 @@ class LibfabricConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "blob", "main"))
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = self.collect_libs()
