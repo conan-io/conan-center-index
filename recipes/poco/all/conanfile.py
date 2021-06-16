@@ -135,9 +135,9 @@ class PocoConan(ConanFile):
         self.requires("pcre/8.44")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.1")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.35.5")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
@@ -146,15 +146,15 @@ class PocoConan(ConanFile):
         if self.options.get_safe("enable_netssl", False) or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/13.1")
+            self.requires("libpq/13.2")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
-            self.requires('apr-util/1.6.1')
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("apr-util/1.6.1")
+            self.requires("libmysqlclient/8.0.25")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
