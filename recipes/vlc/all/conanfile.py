@@ -34,6 +34,17 @@ class VlcConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def system_requirements(self):
+        packages = []
+        if tools.os_info.is_linux and self.settings.os == "Linux":
+            if tools.os_info.with_apt:
+                packages = ["libxcb-composite0-dev", "libxcb-xv0-dev"]
+            else:
+                self.output.warn("Do not know how to install dependencies for {}.".format(tools.os_info.linux_distro))
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
+            package_tool.install_packages(update=True, packages=packages)
+
     def requirements(self):
         if self.options.with_lua:
             self.output.warn("VLC requires luac which is not included in the CCI lua package")
@@ -46,6 +57,7 @@ class VlcConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
             "--disable-swscale",  # swscale appears to be something included with ffmpeg
