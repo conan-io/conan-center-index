@@ -110,6 +110,12 @@ class PocoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.enable_xml:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoXML"))
+        if not self.options.enable_json:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoJSON"))
 
     def validate(self):
         if self.options.enable_apacheconnector:
@@ -237,5 +243,11 @@ class PocoConan(ConanFile):
                 self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
                 if self.options.enable_data_odbc:
                     self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
+        self.cpp_info.defines.append("POCO_UNBUNDLED")
+        if self.options.enable_util:
+            if not self.options.enable_json:
+                self.cpp_info.defines.append("POCO_UTIL_NO_JSONCONFIGURATION")
+            if not self.options.enable_xml:
+                self.cpp_info.defines.append("POCO_UTIL_NO_XMLCONFIGURATION")
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
