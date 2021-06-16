@@ -1,0 +1,8 @@
+sources:
+  "1.3.0":
+    url: "https://github.com/fallahn/tmxlite/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "f5d2abd23d4516168eb82bbe879998ce41cb17768f8cd72f643f394939123efe"
+patches:
+  "1.3.0":
+    - patch_file: "patches/0001-include-external-pugixml.patch"
+      base_path: "source_subfolder"
