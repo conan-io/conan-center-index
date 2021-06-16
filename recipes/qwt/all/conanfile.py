@@ -41,6 +41,10 @@ class QwtConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def build_requirements(self):
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+            self.build_requires("jom/1.1.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,7 +93,7 @@ class QwtConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             vcvars = tools.vcvars_command(self.settings)
             self.run("{} && qmake {}".format(vcvars, self._source_subfolder), run_environment=True)
-            self.run("{} && nmake".format(vcvars))
+            self.run("{} && jom".format(vcvars))
         else:
             self.run("qmake {}".format(self._source_subfolder), run_environment=True)
             self.run("make -j {}".format(tools.cpu_count()))
