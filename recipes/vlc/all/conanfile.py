@@ -64,8 +64,6 @@ class VlcConan(ConanFile):
             "--disable-a52",  # a52 is not currently available on CCI
             '--enable-lua' if self.options.with_lua else '--disable-lua',
         ]
-        if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
-            args.append("--with-pic")
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
         else:
