@@ -169,6 +169,7 @@ class PocoConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         if tools.Version(self.version) < "1.10.1":
             self._cmake.definitions["POCO_STATIC"] = not self.options.shared
         for comp in self._poco_component_tree.values():
