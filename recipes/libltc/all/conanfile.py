@@ -36,9 +36,8 @@ class LibltcConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+    tools.get(**self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -49,23 +48,23 @@ class LibltcConan(ConanFile):
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=args)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, "lib", "libltc.la"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "ltc"
         self.cpp_info.libs = ["ltc"]
-
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
