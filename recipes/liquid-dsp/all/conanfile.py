@@ -67,10 +67,11 @@ class LiquidDspConan(ConanFile):
             "--enable-debug-messages",
         ]
 
-        self._autotools.configure(
-            args=configure_args,
-            configure_dir=os.path.join(self.source_folder, self._source_subfolder),
-        )
+        with tools.chdir(self._source_subfolder):
+            self._autotools.configure(
+                args=configure_args,
+                configure_dir=os.path.join(self.source_folder, self._source_subfolder),
+            )
 
         return self._autotools
 
