@@ -11,6 +11,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
     homepage = "https://github.com/andreasbuhr/cppcoro"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
+    provides = "cppcoro"
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -43,7 +44,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def validate(self):
         # We can't simply check for C++20, because clang and MSVC support the coroutine TS despite not having labeled (__cplusplus macro) C++20 support
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
@@ -65,6 +66,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "11":
             raise ConanInvalidConfiguration("WIP: {} currently doesn't build on clang 11".format(self.name))
 
+    def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
