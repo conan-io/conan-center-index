@@ -139,6 +139,9 @@ class RocksDB(ConanFile):
 
         self._cmake.definitions["WITH_NUMA"] = False
 
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
