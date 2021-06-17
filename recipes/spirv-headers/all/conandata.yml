@@ -8,3 +8,6 @@ sources:
   1.5.4:
     sha256: fc026b6566167f6db03dc48779f0f986f9ff8c93ed651a557f28cfbe2dff4ede
     url: https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.4.tar.gz
+  "sdk-1.2.176.1":
+    sha256: e1c8530c95fc8c70fa6a7cbc269ebd1b10da3872efa0e3c6eb82452c3e180cda
+    url: https://github.com/KhronosGroup/SPIRV-Headers/archive/dafead1765f6c1a5f9f8a76387dcb2abe4e54acd.tar.gz

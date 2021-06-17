@@ -1,8 +1,14 @@
 sources:
+  "sdk-1.2.176.1":
+    url: "https://github.com/KhronosGroup/glslang/archive/18eef33bd7a4bf5ad8c69f99cb72022608cf6e73.tar.gz"
+    sha256: "f264669b59272feb62ec49a6173c694ed89fda0fac91be5647e759e8ce1aaeee"
   "8.13.3559":
     url: "https://github.com/KhronosGroup/glslang/archive/8.13.3559.tar.gz"
     sha256: "c58fdcf7e00943ba10f9ae565b2725ec9d5be7dab7c8e82cac72fcaa83c652ca"
 patches:
+  "sdk-1.2.176.1":
+    - patch_file: "patches/conanize-cmake-sdk-1.2.176.1.patch"
+      base_path: "source_subfolder"
   "8.13.3559":
     - patch_file: "patches/conanize-cmake-8.13.3559.patch"
       base_path: "source_subfolder"

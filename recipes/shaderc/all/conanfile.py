@@ -1,4 +1,4 @@
-import os
+import os, re
 
 from conans import ConanFile, CMake, tools
 
@@ -44,18 +44,31 @@ class ShadercConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("glslang/8.13.3559")
-        self.requires("spirv-tools/2020.5")
-        if self.options.spvc:
-           self.requires("spirv-cross/20210115")
+        if self.version.startswith("sdk-"):
+            self.requires("glslang/{}".format(self.version))
+            self.requires("spirv-tools/{}".format(self.version))
+            if self.options.spvc:
+                self.requires("spirv-cross/{}".format(self.version))
+        else:
+            self.requires("glslang/8.13.3559")
+            self.requires("spirv-tools/2020.5")
+            if self.options.spvc:
+                self.requires("spirv-cross/20210115")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        if self.version.startswith("sdk-"):
+            commit_id = re.sub(r'\..*$', '', os.path.basename(self.conan_data["sources"][self.version]["url"]))
+            os.rename(self.name + "-" + commit_id, self._source_subfolder)
+        else:
+            os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if self.version.startswith("sdk-"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "libshaderc_util/src/compiler.cc"),
+                "#include \"SPIRV/GlslangToSpv.h\"", "#include <glslang/SPIRV/GlslangToSpv.h>")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -100,6 +113,6 @@ class ShadercConan(ConanFile):
         libs = ["shaderc_shared" if self.options.shared else "shaderc"]
         if not self.options.shared:
             libs.append("shaderc_util")
-        if self.options.spvc:
+        if self.options.spvc and not self.version.startswith("sdk-"):
             libs.append("shaderc_spvc_shared" if self.options.shared else "shaderc_spvc")
         return libs

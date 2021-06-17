@@ -1,4 +1,7 @@
 sources:
+  "sdk-1.2.176.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/c624d5387c88f9a7a0068a06e2e9d188c392eb68.tar.gz"
+    sha256: "9145cbeed1395145d3024ca6ad2b8c5b7dbf06cd250341a5448792cbe2d00adf"
   "20210115":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2021-01-15.tar.gz"
     sha256: "d700863b548cbc7f27a678cee305f561669a126eb2cc11d36a7023dfc462b9c4"

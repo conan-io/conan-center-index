@@ -19,12 +19,14 @@ class VulkanValidationLayersConan(ConanFile):
     options = {
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
-        "with_wsi_wayland": [True, False]
+        "with_wsi_wayland": [True, False],
+        "with_robin_hood_hashing": [True, False]
     }
     default_options = {
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
-        "with_wsi_wayland": True
+        "with_wsi_wayland": True,
+        "with_robin_hood_hashing": True
     }
 
     short_paths = True
@@ -50,12 +52,17 @@ class VulkanValidationLayersConan(ConanFile):
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def requirements(self):
-        self.requires("spirv-tools/2020.5", private=True)
+        if self.version.startswith("sdk-"):
+            self.requires("spirv-tools/{}".format(self.version), private=True)
+        else:
+            self.requires("spirv-tools/2020.5", private=True)
         self.requires("vulkan-headers/{}".format(self.version))
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.18.0")
+        if self.options.get_safe("with_robin_hood_hashing"):
+            self.requires("robin-hood-hashing/3.11.1")
 
     def validate(self):
         if self.options["spirv-tools"].shared:
@@ -77,12 +84,17 @@ class VulkanValidationLayersConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        if self.version.startswith("sdk-"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(ROBIN_HOOD_HASHING_INCLUDE_DIR \"${ROBIN_HOOD_HASHING_INSTALL_DIR}/src/include\" PATH \"Path to robin-hood-hashing/include\")",
+                              "set(ROBIN_HOOD_HASHING_INCLUDE_DIR \"${ROBIN_HOOD_HASHING_INSTALL_DIR}/include\" PATH \"Path to robin-hood-hashing/include\")")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
+        self._cmake.definitions["ROBIN_HOOD_HASHING_INSTALL_DIR"] = self.deps_cpp_info["robin-hood-hashing"].rootpath
         self._cmake.definitions["USE_CCACHE"] = False
         if self.settings.os == "Linux":
             self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb

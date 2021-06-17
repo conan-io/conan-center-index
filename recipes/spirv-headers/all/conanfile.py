@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, CMake
-import os
+import os, re
 
 
 class SpirvheadersConan(ConanFile):
@@ -30,6 +30,9 @@ class SpirvheadersConan(ConanFile):
         extracted_dir = "SPIRV-Headers-" + self.version
         if self.version == "1.5.1":
             extracted_dir = extracted_dir + ".corrected"
+        if self.version.startswith("sdk-"):
+            commit_id = re.sub(r'\..*$', '', os.path.basename(self.conan_data["sources"][self.version]["url"]))
+            extracted_dir = "SPIRV-Headers-" + commit_id
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):

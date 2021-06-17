@@ -5,3 +5,5 @@ versions:
     folder: all
   1.5.4:
     folder: all
+  "sdk-1.2.176.1":
+    folder: all

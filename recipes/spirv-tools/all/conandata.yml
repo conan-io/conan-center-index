@@ -1,4 +1,7 @@
 sources:
+  "sdk-1.2.176.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/dc72924cb31cd9f3dbc3eb47e9d926cf641e3a07.tar.gz"
+    sha256: "d9766d716e36e1524fe53cfb60fb174d75f6ca1f093a32c712f192d293d45b9d"
   "2020.5":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.5.tar.gz"
     sha256: "947ee994ba416380bd7ccc1c6377ac28a4802a55ca81ccc06796c28e84c00b71"

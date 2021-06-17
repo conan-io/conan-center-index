@@ -1,5 +1,5 @@
 import glob
-import os
+import os, re
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -68,6 +68,9 @@ class SpirvCrossConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = "SPIRV-Cross-" + os.path.basename(url).replace(".tar.gz", "").replace(".zip", "")
+        if self.version.startswith("sdk-"):
+            commit_id = re.sub(r'\..*$', '', os.path.basename(self.conan_data["sources"][self.version]["url"]))
+            extracted_dir = "SPIRV-Cross-" + commit_id
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
