@@ -18,7 +18,7 @@ class PlatformInterfacesConan(ConanFile):
 
     @property
     def _subfolder_sources(self):
-        return os.path.join(self._source_subfolder, "cpp", self.name)
+        return os.path.join(self._source_subfolder, "cpp", "Platform.Interfaces")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
