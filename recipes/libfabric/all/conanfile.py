@@ -7,10 +7,10 @@ required_conan_version = ">=1.35.0"
 class LibfabricConan(ConanFile):
     name = "libfabric"
     description = "Open Fabric Interfaces"
-    topics = ("conan", "fabric")
+    topics = ("fabric", "communication", "framework", "service")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://libfabric.org"
-    license = "BSD"
+    license = "BSD-2-Clause", "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     _providers = ['gni', 'psm', 'psm2', 'psm3', 'rxm', 'sockets', 'tcp', 'udp', 'usnic', 'verbs', 'bgq']
     options = {
@@ -40,8 +40,12 @@ class LibfabricConan(ConanFile):
 
     _autotools = None
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
     def configure(self):
-        if self.settings.os == 'Windows' or self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -91,3 +95,5 @@ class LibfabricConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = self.collect_libs()
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "m"]
