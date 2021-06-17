@@ -75,8 +75,8 @@ class LiquidDspConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
-            autotools = self._configure_autotools()
+        autotools = self._configure_autotools()
+        with tools.chdir(self._source_subfolder):
             autotools.make(target="all")
 
     def package(self):
