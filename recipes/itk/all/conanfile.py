@@ -62,6 +62,7 @@ class ITKConan(ConanFile):
         self.requires("libtiff/4.2.0")
         self.requires("libpng/1.6.37")
         self.requires("openjpeg/2.4.0")
+        self.requires("tbb/2020.3")
         self.requires("zlib/1.2.11")
 
     @property
@@ -215,6 +216,7 @@ class ITKConan(ConanFile):
         self._cmake.definitions["Module_ITKSignedDistanceFunction"] = True
         self._cmake.definitions["Module_ITKSmoothing"] = True
         self._cmake.definitions["Module_ITKSpatialFunction"] = True
+        self._cmake.definitions["Module_ITKTBB"] = True
         self._cmake.definitions["Module_ITKThresholding"] = True
         self._cmake.definitions["Module_ITKVideoCore"] = True
         self._cmake.definitions["Module_ITKVideoFiltering"] = True
