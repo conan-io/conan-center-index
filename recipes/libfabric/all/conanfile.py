@@ -94,6 +94,7 @@ class LibfabricConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libfabric"
         self.cpp_info.libs = self.collect_libs()
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "m"]
