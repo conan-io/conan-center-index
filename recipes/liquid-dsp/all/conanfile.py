@@ -57,7 +57,7 @@ class LiquidDspConan(ConanFile):
 
         with tools.environment_append(self._autotools.vars):
             with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
+                self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
 
         configure_args = [
             # "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
