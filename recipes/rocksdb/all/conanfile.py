@@ -76,6 +76,9 @@ class RocksDB(ConanFile):
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
