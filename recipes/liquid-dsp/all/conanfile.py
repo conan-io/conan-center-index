@@ -34,7 +34,7 @@ class LiquidDspConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx~
+        del self.settings.compiler.libcxx
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
@@ -52,7 +52,8 @@ class LiquidDspConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows)
+            self, win_bash=tools.os_info.is_windows
+        )
 
         with tools.environment_append(self._autotools.vars):
             with tools.chdir(self._source_subfolder):
@@ -64,8 +65,9 @@ class LiquidDspConan(ConanFile):
             # Eventually I'll have some
         ]
 
-        self._autotools.configure(args=configure_args,
-                                  configure_dir=self._source_subfolder)
+        self._autotools.configure(
+            args=configure_args, configure_dir=self._source_subfolder
+        )
 
         return self._autotools
 
