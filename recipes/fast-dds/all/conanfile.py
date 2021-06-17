@@ -27,7 +27,7 @@ class FastDDSConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
     _cmake = None
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["patches/*","CMakeLists.txt"]
 
     @property
     def _pkg_share(self):
@@ -53,6 +53,10 @@ class FastDDSConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def configure(self):
         if self.options.shared:
@@ -85,6 +89,7 @@ class FastDDSConan(ConanFile):
                   destination=self._source_subfolder)
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -118,8 +123,8 @@ class FastDDSConan(ConanFile):
         self.cpp_info.components["fastrtps"].libs = ["fastrtps"]
         self.cpp_info.components["fastrtps"].requires = [
             "fast-cdr::fast-cdr",
-            "tinyxml2::tinyxml2",
             "asio::asio",
+            "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory"
         ]
         self.cpp_info.components["fastrtps"].system_libs = [
@@ -130,7 +135,8 @@ class FastDDSConan(ConanFile):
         # component fast-discovery
         self.cpp_info.components["fast-discovery"].name = "fast-discovery"
         self.cpp_info.components["fast-discovery"].requires = [
-            "fastrtps"
+            "fastrtps",
+            "tinyxml2::tinyxml2",
         ]
         if self.settings.os in ["Linux","Macos","Neutrino"]:        
             self.cpp_info.components["fast-discovery"].system_libs = [
