@@ -33,6 +33,8 @@ class LiquidDspConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows not supported for now")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
