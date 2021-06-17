@@ -37,7 +37,7 @@ class CpuFeaturesConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def config_options(self):
