@@ -1,6 +1,7 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class RecastNavigationConan(ConanFile):
@@ -38,9 +39,7 @@ class RecastNavigationConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('recastnavigation-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
