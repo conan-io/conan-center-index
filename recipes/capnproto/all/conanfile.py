@@ -153,19 +153,20 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
         self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
 
         components = [
-            {"name": "capnp", "requires": ["kj"]},
-            {"name": "capnp-json", "requires": ["capnp", "kj"]},
-            {"name": "capnp-rpc", "requires": ["capnp", "kj", "kj-async"]},
-            {"name": "capnpc", "requires": ["capnp", "kj"]},
-            {"name": "kj", "requires": []},
-            {"name": "kj-async", "requires": ["kj"]},
-            {"name": "kj-http", "requires": ["kj", "kj-async"]},
-            {"name": "kj-test", "requires": ["kj"]},
+            {"name": "capnp",      "libs": ["capnp"],      "requires": ["kj"]},
+            {"name": "capnp-json", "libs": ["capnp-json"], "requires": ["capnp", "kj"]},
+            {"name": "capnp-rpc",  "libs": ["capnp-rpc"],  "requires": ["capnp", "kj", "kj-async"]},
+            {"name": "capnpc",     "libs": ["capnpc"],     "requires": ["capnp", "kj"]},
+            {"name": "kj",         "libs": ["kj"],         "requires": []},
+            {"name": "kj-async",   "libs": ["kj-async"],   "requires": ["kj"]},
+            {"name": "kj-http",    "libs": ["kj-http"],    "requires": ["kj", "kj-async"]},
+            {"name": "kj-test",    "libs": ["kj-test"],    "requires": ["kj"]},
+            {"name": "headers",    "libs": [],             "requires": []},
         ]
         if self.options.get_safe("with_zlib"):
-            components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
+            components.append({"name": "kj-gzip", "libs": ["kj-gzip"], "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
-            components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
+            components.append({"name": "kj-tls", "libs": ["kj-tls"], "requires": ["kj", "kj-async", "openssl::openssl"]})
 
         for component in components:
             self._register_component(component)
@@ -188,5 +189,5 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
         self.cpp_info.components[name].names["cmake_find_package"] = name
         self.cpp_info.components[name].names["cmake_find_package_multi"] = name
         self.cpp_info.components[name].names["pkg_config"] = name
-        self.cpp_info.components[name].libs = [name]
+        self.cpp_info.components[name].libs = component["libs"]
         self.cpp_info.components[name].requires = component["requires"]
