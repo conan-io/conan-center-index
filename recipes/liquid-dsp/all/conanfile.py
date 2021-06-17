@@ -75,7 +75,7 @@ class LiquidDspConan(ConanFile):
 
     def build(self):
         autotools = self._configure_autotools()
-        autotools.make()
+        autotools.make(target="all")
 
     def package(self):
         pass
