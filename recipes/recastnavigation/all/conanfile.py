@@ -67,6 +67,8 @@ class RecastNavigationConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "recastnavigation"
+        self.cpp_info.names["cmake_find_package_multi"] = "recastnavigation"
         self.cpp_info.components["Recast"].names["cmake_find_package"] = "Recast"
         self.cpp_info.components["Recast"].names["cmake_find_package_multi"] = "Recast"
         self.cpp_info.components["Recast"].libs = ["Recast"]
