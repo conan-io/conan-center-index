@@ -4,7 +4,8 @@ HEADERS += greeter.h
 
 RESOURCES = example.qrc
 
-QT += core widgets gui network concurrent
+QT -= gui
+QT += network sql
 
 CONFIG += console
 
