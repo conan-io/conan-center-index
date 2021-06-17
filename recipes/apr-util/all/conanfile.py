@@ -71,7 +71,9 @@ class AprUtilConan(ConanFile):
 
     def requirements(self):
         self.requires("apr/1.7.0")
-        self.requires("libiconv/1.16")
+        if self.settings.os != "Windows":
+            #cmake build doesn't allow injection of iconv yet
+            self.requires("libiconv/1.16")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1k")
         if self.options.with_nss:
