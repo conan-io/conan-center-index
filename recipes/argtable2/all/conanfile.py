@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
+import shutil
 
 
 class Argtable2Conan(ConanFile):
@@ -45,9 +46,20 @@ class Argtable2Conan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
             self.build_requires("msys2/20200517")
 
+        if self.settings.os != "Windows":
+            self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("argtable{}".format(self.version.replace(".", "-")), self._source_subfolder)
+
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def _configure_autotools(self):
         if self._autotools:
@@ -58,6 +70,14 @@ class Argtable2Conan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
+
+        # it contains outdated 'config.sub' and
+        # 'config.guess' files. It not allows to build libelf for armv8 arch.
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
