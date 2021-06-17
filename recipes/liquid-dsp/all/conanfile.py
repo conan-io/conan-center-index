@@ -62,9 +62,7 @@ class LiquidDspConan(ConanFile):
                 self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
 
         configure_args = [
-            # "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-            # "--enable-static=%s" % ("no" if self.options.shared else "yes")
-            # Eventually I'll have some
+            "--enable-debug-messages",
         ]
 
         self._autotools.configure(
