@@ -68,14 +68,16 @@ class LiquidDspConan(ConanFile):
         ]
 
         self._autotools.configure(
-            args=configure_args, configure_dir=self._source_subfolder
+            args=configure_args,
+            configure_dir=os.path.join(self.source_folder, self._source_subfolder),
         )
 
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make(target="all")
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make(target="all")
 
     def package(self):
         pass
