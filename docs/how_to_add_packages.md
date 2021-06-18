@@ -31,16 +31,16 @@ process helps conan-center-index against spam and malicious code.
 
 ## Submitting a Package
 
-:two: To contribute a packages, you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to this GitHub repository https://github.com/conan-io/conan-center-index.
+:two: To contribute a package, you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to this GitHub repository https://github.com/conan-io/conan-center-index.
 
 The specific steps to add new packages are:
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it locally.
-* Create a new folder with the Conan package recipe (conanfile.py) in the correct folder.
+* Create a new folder with the Conan package recipe (`conanfile.py`) in the correct folder.
 * Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 * Commit and Push to GitHub then submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
 
-:three: When the pull request is [reviewed and merged](review_process.md), those packages are published to [JFrog ConanCenter](https://conan.io/center/).
+:three: When the pull request is [reviewed and merged](review_process.md), those packages are published to [JFrog ConanCenter](https://conan.io/center/) and available for everyone.
 
 ### The Build Service
 
@@ -81,8 +81,8 @@ The system supports to use the same recipe for several versions of the library a
 
 - **1 version => 1 recipe**
 
-  When the recipe changes significantly between different library versions and reusing the recipe is not worth it, you can create a folder for each new version and
-  create both inside the `conanfile.py` and the `test_package` in the version folder:
+  When the recipe changes significantly between different library versions and reusing the recipe is not worth it, it is recommended to create different folders and group together the
+  versions that can share the same recipe. Each of these folders will require its own `conanfile.py` and `test_package` folder:
 
   ```
   .
