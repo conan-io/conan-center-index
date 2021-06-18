@@ -49,7 +49,7 @@ class CpuFeaturesConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
