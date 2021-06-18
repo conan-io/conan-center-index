@@ -53,7 +53,7 @@ class CpuFeaturesConan(ConanFile):
         return self._cmake
 
     def build(self):
-        cmake = self._configure_cmake(build_folder=self._build_subfolder)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
