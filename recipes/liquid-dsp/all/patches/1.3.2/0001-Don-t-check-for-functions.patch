@@ -1,0 +1,66 @@
+From 854fd10774338d3b70606897eefcc834954cf2ac Mon Sep 17 00:00:00 2001
+From: Rui Oliveira <ruimail24@gmail.com>
+Date: Fri, 18 Jun 2021 12:29:16 +0100
+Subject: [PATCH] Don't check for functions
+
+---
+ configure.ac | 16 +++++-----------
+ 1 file changed, 5 insertions(+), 11 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 5b591c87..0b177fcc 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,15 +1,15 @@
+ # Copyright (c) 2007 - 2019 Joseph Gaeddert
+-# 
++#
+ # Permission is hereby granted, free of charge, to any person obtaining a copy
+ # of this software and associated documentation files (the "Software"), to deal
+ # in the Software without restriction, including without limitation the rights
+ # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ # copies of the Software, and to permit persons to whom the Software is
+ # furnished to do so, subject to the following conditions:
+-# 
++#
+ # The above copyright notice and this permission notice shall be included in
+ # all copies or substantial portions of the Software.
+-# 
++#
+ # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+@@ -18,7 +18,7 @@
+ # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ # THE SOFTWARE.
+ 
+-# 
++#
+ # liquid-dsp library configure
+ # Process with autoconf to generate configure script
+ #
+@@ -81,12 +81,6 @@ AC_FUNC_ERROR_AT_LINE
+ AC_FUNC_MALLOC
+ AC_FUNC_REALLOC
+ 
+-# AC_CHECK_FUNC(function, [action-if-found], [action-if-not-found])
+-AC_CHECK_FUNCS([malloc realloc free memset memmove],[],
+-               [AC_MSG_ERROR(Could not use memory allocation functions)])
+-AC_CHECK_FUNCS([sinf cosf expf cargf cexpf crealf cimagf sqrtf],[],
+-               [AC_MSG_ERROR(Could not use special math functions)],)
+-
+ # Check for optional header files, libraries, programs
+ AC_CHECK_HEADERS(fec.h fftw3.h)
+ AC_CHECK_LIB([fftw3f], [fftwf_plan_dft_1d], [],
+@@ -240,7 +234,7 @@ esac
+ # autoconf variable substitutions
+ #
+ AC_SUBST(LIBS)                      # shared libraries (-lc, -lm, etc.)
+-AC_SUBST(MLIBS_DOTPROD)             # 
++AC_SUBST(MLIBS_DOTPROD)             #
+ AC_SUBST(MLIBS_VECTOR)              #
+ 
+ AC_SUBST(AR_LIB)                    # archive library
+-- 
+2.32.0.windows.1
+
