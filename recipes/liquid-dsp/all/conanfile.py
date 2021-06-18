@@ -56,6 +56,9 @@ class LiquidDspConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os != "Windows":
+            if not self.options.fPIC:
+                raise ConanInvalidConfiguration("This library hardcodes fPIC")
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("VS is not supported")
         if self.options.shared:
