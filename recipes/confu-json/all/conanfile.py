@@ -1,8 +1,8 @@
 from conans import ConanFile, tools
-from conans.model.version import Version
 from conans.tools import check_min_cppstd
 from conans.errors import ConanInvalidConfiguration, ConanException
 import os
+from conans.tools import Version
 
 
 class ConfuJson(ConanFile):
@@ -20,11 +20,7 @@ class ConfuJson(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, "20")
-        v = Version(str(self.settings.compiler.version))
-        if v < "10":
-            raise ConanException(f"gcc min version 10")
+        tools.check_min_cppstd(self, "20")
         self.options["boost"].header_only = True
 
     def requirements(self):
