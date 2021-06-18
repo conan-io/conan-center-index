@@ -56,14 +56,13 @@ class XegeConan(ConanFile):
             self.cpp_info.libs = ["graphics64"]
         else:
             self.cpp_info.libs = ["graphics"]
-        if self.settings.compiler == "gcc":
-            self.cpp_info.system_libs = [
-                "gdiplus",
-                "uuid",
-                "msimg32",
-                "gdi32",
-                "imm32",
-                "ole32",
-                "oleaut32",
-                "winmm"
-            ]
+        self.cpp_info.system_libs = [
+            "gdiplus",
+            "uuid",
+            "msimg32",
+            "gdi32",
+            "imm32",
+            "ole32",
+            "oleaut32",
+            "winmm"
+        ]
