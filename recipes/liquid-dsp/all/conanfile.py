@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanException
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import glob
@@ -54,6 +54,8 @@ class LiquidDspConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("VS is not supported")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -62,30 +64,11 @@ class LiquidDspConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("liquid-dsp-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
-
-    @contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "cl -nologo",
-                    "CXX": "cl -nologo",
-                    "LD": "link -nologo",
-                    "AR": "{} lib".format(
-                        tools.unix_path(self.deps_user_info["automake"].ar_lib)
-                    ),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -104,9 +87,6 @@ class LiquidDspConan(ConanFile):
         if self.settings.build_type == "Debug":
             configure_args.append("--enable-debug-messages")
 
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-
         with tools.chdir(self._source_subfolder):
             self._autotools.configure(
                 args=configure_args,
@@ -115,30 +95,10 @@ class LiquidDspConan(ConanFile):
 
         return self._autotools
 
-    def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio":
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-            # Make the files be MSVC friendly
-            for subdir, dirs, files in os.walk(
-                os.path.join(self.source_folder, self._source_subfolder)
-            ):
-                for file in files:
-                    filepath = os.path.join(
-                        self.source_folder, self._source_subfolder, subdir, file
-                    )
-                    try:
-                        tools.replace_in_file(filepath, "float complex", "_Fcomplex")
-                        tools.replace_in_file(filepath, "double complex", "_Dcomplex")
-                    except ConanException:  # ConanException: replace_in_file didn't find pattern
-                        continue
-
     def build(self):
-        self._patch_sources()
-        with self._build_context():
-            autotools = self._configure_autotools()
-            with tools.chdir(self._source_subfolder):
-                autotools.make(target=self._target_name)
+        autotools = self._configure_autotools()
+        with tools.chdir(self._source_subfolder):
+            autotools.make(target=self._target_name)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
@@ -147,9 +107,15 @@ class LiquidDspConan(ConanFile):
             dst="include/liquid",
             src=os.path.join(self._source_subfolder, "include"),
         )
-        self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" and self.options.shared:
+            # This makefile is so weird it doesn't create the proper file extension
+            with tools.chdir(self._source_subfolder):
+                os.rename("libliquid.so", "libliquid.dll")
             self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
+        if self.settings.os == "Windows" and not self.options.shared:
+            with tools.chdir(self._source_subfolder):
+                os.rename("libliquid.a", "libliquid.lib")
+        self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = [self._libname]
