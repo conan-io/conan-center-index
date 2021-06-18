@@ -5,7 +5,6 @@ import os
 
 class XegeConan(ConanFile):
     name = "xege"
-    version = "20.08"
     license = "LGPLv2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xege.org/"
