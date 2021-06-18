@@ -30,6 +30,8 @@ class LiquidDspConan(ConanFile):
 
     @property
     def _libname(self):
+        if self.settings.os != "Windows":
+            return "liquid"
         return "libliquid"
 
     def config_options(self):
