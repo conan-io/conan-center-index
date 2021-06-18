@@ -194,7 +194,10 @@ class FastDDSConan(ConanFile):
                 "iphlpapi",
                 "shlwapi"
             ]
-            self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
+            if self.options.shared:
+                self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["fastrtps"].system_libs.append("atomic")
         self.cpp_info.components["fastrtps"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
