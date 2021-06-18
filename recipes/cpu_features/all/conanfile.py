@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class CpuFeaturesConan(ConanFile):
     name = "cpu_features"
@@ -10,12 +12,10 @@ class CpuFeaturesConan(ConanFile):
     description = "A cross platform C99 library to get cpu features at runtime."
     topics = ("conan", "cpu", "features", "cpuid")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -42,14 +42,13 @@ class CpuFeaturesConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        cmake = CMake(self)
-        cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        cmake.configure()
-        self._cmake = cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = self._configure_cmake(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
