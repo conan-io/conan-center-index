@@ -12,7 +12,7 @@ class XegeConan(ConanFile):
     description = "Easy Graphics Engine, a lite graphics library in Windows"
     topics = ("ege", "graphics", "gui")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
+    options = {"shared": [False]}
     default_options = {"shared": False}
     generators = "cmake"
 
