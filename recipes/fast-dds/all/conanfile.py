@@ -163,6 +163,11 @@ class FastDDSConan(ConanFile):
                     "rt",
                     "dl"
                 ]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["fastrtps"].system_libs = [
+                "iphlpapi",
+                "shlwapi"
+            ]
         self.cpp_info.components["fastrtps"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
