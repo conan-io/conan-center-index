@@ -87,53 +87,6 @@ class LiquidDspConan(ConanFile):
         extracted_dir = glob.glob("liquid-dsp-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        have_to_rollback = False
-        if self.settings.compiler == "Visual Studio":
-            # Save current information
-            old_compiler = str(self.settings.compiler)
-            old_compiler_runtime = str(self.settings.compiler.runtime)
-            old_compiler_toolset = str(self.settings.compiler.toolset)
-
-            self.settings.compiler = "gcc"
-            self.settings.compiler.version = "8.1"
-            self.settings.compiler.threads = "win32"
-
-            have_to_rollback = True
-
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows
-        )
-
-        with tools.environment_append(self._autotools.vars):
-            with tools.chdir(self._source_subfolder):
-                self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
-
-        configure_args = []
-
-        if self.settings.build_type == "Debug":
-            configure_args.append("--enable-debug-messages")
-        if self.options.simdoverride:
-            configure_args.append("--enable-simdoverride")
-
-        with tools.chdir(self._source_subfolder):
-            self._autotools.configure(
-                args=configure_args,
-                configure_dir=os.path.join(self.source_folder, self._source_subfolder),
-            )
-
-        # Restore old settings
-        if have_to_rollback:
-            self.settings.compiler = old_compiler
-            self.settings.compiler.runtime = old_compiler_runtime
-            self.settings.compiler.toolset = old_compiler_toolset
-            del self.settings.compiler.cppstd
-
-        return self._autotools
-
     def _patch_sources(self):
         if self.settings.os == "Windows":
             for patch in self.conan_data["patches"][self.version]:
@@ -145,7 +98,7 @@ class LiquidDspConan(ConanFile):
         self.run("generate_link_library.bat")
         with tools.chdir(self._source_subfolder):
             self.run(
-                """lib /def:libliquid.def /out:libliquid.lib """
+                f"""{os.getenv("AR")} /def:libliquid.def /out:libliquid.lib """
                 f"""/machine:{"X86" if self.settings.arch=="x86" else "X64"}""",
                 win_bash=tools.os_info.is_windows,
             )
@@ -159,13 +112,59 @@ class LiquidDspConan(ConanFile):
             elif self.settings.os == "Macos" and not self.options.shared:
                 os.rename("libliquid.ar", "libliquid.a")
 
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            env = {
+                "CC": "gcc",
+                "CXX": "g++",
+                "LD": "ld",
+                "AR": "ar",
+            }
+            with tools.environment_append(env):
+                yield
+        else:
+            yield
+
+    @contextmanager
+    def _msvc_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
+                    "AR": "lib",
+                    "LD": "link",
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
-        with tools.chdir(self._source_subfolder):
-            autotools.make(target=self._target_name)
+        ncpus = os.cpu_count()
+        ncpus = ncpus if ncpus else 1
+        configure_args = []
+        if self.settings.build_type == "Debug":
+            configure_args.append("--enable-debug-messages")
+        if self.options.simdoverride:
+            configure_args.append("--enable-simdoverride")
+        configure_args_str = " ".join(configure_args)
+        with self._build_context():
+            with tools.chdir(self._source_subfolder):
+                self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
+                self.run(
+                    f"""./configure {configure_args_str}""",
+                    win_bash=tools.os_info.is_windows,
+                )
+                self.run(
+                    f"""make {self._target_name} -j{ncpus}""",
+                    win_bash=tools.os_info.is_windows,
+                )
         self._rename_libraries()
-        self._gen_link_library()
+        with self._msvc_context():
+            self._gen_link_library()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
