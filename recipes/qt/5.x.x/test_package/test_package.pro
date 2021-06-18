@@ -7,3 +7,6 @@ RESOURCES = example.qrc
 QT -= gui
 
 CONFIG += console
+
+CONFIG += conan_basic_setup
+include($$OUT_PWD/../conanbuildinfo.pri)

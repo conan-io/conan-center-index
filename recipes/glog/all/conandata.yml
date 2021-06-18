@@ -1,8 +1,11 @@
 sources:
+  "0.5.0":
+    sha256: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+    url: https://github.com/google/glog/archive/refs/tags/v0.5.0.tar.gz
   "0.4.0":
     sha256: f28359aeba12f30d73d9e4711ef356dc842886968112162bc73002645139c39c
     url: https://github.com/google/glog/archive/v0.4.0.tar.gz
 patches:
-  "0.4.0":
-    - patch_file: "patches/fix-cmake.patch"
+  "0.5.0":
+    - patch_file: "patches/0001-fix-msvc-snprintf.patch"
       base_path: "source_subfolder"

@@ -156,7 +156,7 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
 
 ### How to provide a good recipe
 
-The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe.
+The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe. However it is important to note Conan features change over time and our best practices evolve so some minor details may be out of date due to the vast number of recipes.
 
 If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
@@ -190,7 +190,7 @@ Please be aware that ConanCenter only builds from sources and [pre-compiled bina
 Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
 
     cd conan-center-index/recipes/boost/all
-    conan create . 1.74.0@
+    conan create . boost/1.74.0@
 
 ### Updating conan hooks on your machine
 

@@ -1,0 +1,34 @@
+From 07bd30c67a532be3c1f31aa383a1061c832a034d Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alejandro.colomar@exfo.com>
+Date: Sun, 30 May 2021 11:02:57 +0200
+Subject: [PATCH] Change library names
+
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d1129bce..14d9e7f0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,7 +54,7 @@ endif()
+ # }
+ 
+ # ZSTD {
+-find_package(ZSTD QUIET)
++find_package(zstd QUIET)
+ if(ZSTD_FOUND)
+   set(with_zstd_default ON)
+ else()
+@@ -152,7 +152,7 @@ endif()
+ option(ENABLE_LZ4_EXT "Enable external LZ4 library support" ON)
+ set(WITH_LZ4_EXT OFF)
+ if(ENABLE_LZ4_EXT)
+-  find_package(LZ4)
++  set(LZ4_FOUND ON)
+   if(LZ4_FOUND)
+     set(WITH_LZ4_EXT ON)
+     list(APPEND BUILT_WITH "LZ4_EXT")
+-- 
+2.32.0.rc0
+

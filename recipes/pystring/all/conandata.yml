@@ -1,0 +1,4 @@
+sources:
+  "1.1.3":
+    url: "https://github.com/imageworks/pystring/archive/refs/tags/v1.1.3.tar.gz"
+    sha256: "358a56e756e701836b69a31c75d3d9d41c34d447cf7b3775bbd5620dcd3203d9"

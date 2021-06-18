@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class CpuFeaturesConan(ConanFile):
@@ -34,6 +35,10 @@ class CpuFeaturesConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def config_options(self):
         if self.settings.os == "Windows":

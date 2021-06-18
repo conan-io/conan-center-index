@@ -2,6 +2,9 @@ import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
+
 class tinycborConan(ConanFile):
     name = "tinycbor"
     license = "MIT"
@@ -23,15 +26,16 @@ class tinycborConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration("Shared library only supported on Linux platform")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._env_build:
@@ -44,7 +48,6 @@ class tinycborConan(ConanFile):
             else:
                 self._env_vars["BUILD_SHARED"] = "1" if self.options.shared else "0"
                 self._env_vars["BUILD_STATIC"] = "1" if not self.options.shared else "0"
-                self._env_build.fpic = self.options.fPIC
         return self._env_build, self._env_vars
 
     def _build_nmake(self):

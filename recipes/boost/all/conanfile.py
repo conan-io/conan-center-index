@@ -92,7 +92,9 @@ class BoostConan(ConanFile):
         "debug_level": [i for i in range(0, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
-        "i18n_backend": ["iconv", "icu", None],
+        "i18n_backend": ["iconv", "icu", None, "deprecated"],
+        "i18n_backend_iconv": ["libc", "libiconv", "off"],
+        "i18n_backend_icu": [True, False],
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": "ANY",
         "with_stacktrace_backtrace": [True, False],
@@ -124,7 +126,9 @@ class BoostConan(ConanFile):
         "debug_level": 0,
         "pch": True,
         "extra_b2_flags": "None",
-        "i18n_backend": "iconv",
+        "i18n_backend": "deprecated",
+        "i18n_backend_iconv": "libc",
+        "i18n_backend_icu": False,
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
         "with_stacktrace_backtrace": True,
@@ -229,6 +233,10 @@ class BoostConan(ConanFile):
         exe = self.options.python_executable if self.options.python_executable else sys.executable
         return str(exe).replace('\\', '/')
 
+    @property
+    def _is_windows_platform(self):
+        return self.settings.os in ["Windows", "WindowsStore", "WindowsCE"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -261,6 +269,11 @@ class BoostConan(ConanFile):
                 self.options.without_json = True
                 self.options.without_nowide = True
 
+        # iconv is off by default on Windows and Solaris
+        if self._is_windows_platform or self.settings.os == "SunOS":
+            self.options.i18n_backend_iconv = "off"
+        elif self.settings.os == "Macos":
+            self.options.i18n_backend_iconv = "libiconv"
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
@@ -316,11 +329,23 @@ class BoostConan(ConanFile):
         elif self.options.shared:
             del self.options.fPIC
 
+        if self.options.i18n_backend != "deprecated":
+            self.output.warn("i18n_backend option is deprecated, do not use anymore.")
+            if self.options.i18n_backend == "iconv":
+                self.options.i18n_backend_iconv = "libiconv"
+                self.options.i18n_backend_icu = False
+            if self.options.i18n_backend == "icu":
+                self.options.i18n_backend_iconv = "off"
+                self.options.i18n_backend_icu = True
+            if self.options.i18n_backend == "None":
+                self.options.i18n_backend_iconv = "off"
+                self.options.i18n_backend_icu = False
         if self.options.without_locale:
-            self.options.i18n_backend = None
+            del self.options.i18n_backend_iconv
+            del self.options.i18n_backend_icu
         else:
-            if not self.options.i18n_backend:
-                raise ConanInvalidConfiguration("Boost.locale library requires a i18n_backend (either 'icu' or 'iconv')")
+            if self.options.i18n_backend_iconv == "off" and not self.options.i18n_backend_icu and not self._is_windows_platform:
+                raise ConanInvalidConfiguration("Boost.Locale library needs either iconv or ICU library to be built on non windows platforms")
 
         if not self.options.without_python:
             if not self.options.python_version:
@@ -439,11 +464,11 @@ class BoostConan(ConanFile):
 
     @property
     def _with_icu(self):
-        return not self.options.header_only and self._with_dependency("icu") and self.options.i18n_backend == "icu"
+        return not self.options.header_only and self._with_dependency("icu") and self.options.get_safe("i18n_backend_icu")
 
     @property
     def _with_iconv(self):
-        return not self.options.header_only and self._with_dependency("iconv") and self.options.i18n_backend == "iconv"
+        return not self.options.header_only and self._with_dependency("iconv") and self.options.get_safe("i18n_backend_iconv") == "libiconv"
 
     @property
     def _with_stacktrace_backtrace(self):
@@ -463,10 +488,12 @@ class BoostConan(ConanFile):
 
         if self._with_icu:
             self.requires("icu/68.2")
-        elif self._with_iconv:
+        if self._with_iconv:
             self.requires("libiconv/1.16")
 
     def package_id(self):
+        del self.info.options.i18n_backend
+
         if self.options.header_only:
             self.info.header_only()
             self.info.options.header_only = True
@@ -501,10 +528,11 @@ class BoostConan(ConanFile):
         except ConanException:
             self.output.info("(failed)")
             return None
-        output = output.getvalue().strip()
+        output = output.getvalue()
         # Conan is broken when run_to_output = True
         if "\n-----------------\n" in output:
             output = output.split("\n-----------------\n", 1)[1]
+        output = output.strip()
         return output if output != "None" else None
 
     def _get_python_path(self, name):
@@ -879,15 +907,20 @@ class BoostConan(ConanFile):
         flags.append("-sNO_LZMA=%s" % ("0" if self._with_lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self._with_zstd else "1"))
 
-        if self.options.i18n_backend == 'icu':
-            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
-            flags.append("boost.locale.iconv=off boost.locale.icu=on")
-        elif self.options.i18n_backend == 'iconv':
-            flags.append("boost.locale.iconv=on boost.locale.icu=off")
-            flags.append("--disable-icu")
+        if self.options.get_safe("i18n_backend_icu"):
+            flags.append("boost.locale.icu=on")
         else:
-            flags.append("boost.locale.iconv=off boost.locale.icu=off")
-            flags.append("--disable-icu --disable-iconv")
+            flags.append("boost.locale.icu=off")
+            flags.append("--disable-icu")
+        if self.options.get_safe("i18n_backend_iconv") in ["libc", "libiconv"]:
+            flags.append("boost.locale.iconv=on")
+            if self.options.get_safe("i18n_backend_iconv") == "libc":
+                flags.append("boost.locale.iconv.lib=libc")
+            else:
+                flags.append("boost.locale.iconv.lib=libiconv")
+        else:
+            flags.append("boost.locale.iconv=off")
+            flags.append("--disable-iconv")
 
         def add_defines(library):
             for define in self.deps_cpp_info[library].defines:
@@ -1044,7 +1077,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ar(self):
-        if "AR" in os.environ:
+        if os.environ.get("AR"):
             return os.environ["AR"]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ar
@@ -1052,7 +1085,7 @@ class BoostConan(ConanFile):
 
     @property
     def _ranlib(self):
-        if "RANLIB" in os.environ:
+        if os.environ.get("RANLIB"):
             return os.environ["RANLIB"]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).ranlib
@@ -1060,7 +1093,7 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx(self):
-        if "CXX" in os.environ:
+        if os.environ.get("CXX"):
             return os.environ["CXX"]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
@@ -1441,7 +1474,9 @@ class BoostConan(ConanFile):
                     if conan_requirement not in self.requires:
                         continue
                     if module == "locale" and requirement in ("icu", "iconv"):
-                        if requirement != self.options.i18n_backend:
+                        if requirement == "icu" and not self._with_icu:
+                            continue
+                        if requirement == "iconv" and not self._with_iconv:
                             continue
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
