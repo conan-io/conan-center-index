@@ -1,0 +1,36 @@
+From e3bed6d87c4d61cf88ddd4ba70d1ae36402554b2 Mon Sep 17 00:00:00 2001
+From: Rui Oliveira <ruimail24@gmail.com>
+Date: Fri, 18 Jun 2021 10:27:41 +0100
+Subject: [PATCH] Make header be MSVC friendly
+
+---
+ include/liquid.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/liquid.h b/include/liquid.h
+index 66f23e50..19429d5f 100644
+--- a/include/liquid.h
++++ b/include/liquid.h
+@@ -80,6 +80,8 @@ int liquid_libversion_number(void);
+ #if LIQUID_USE_COMPLEX_H==1
+ #   include <complex.h>
+ #   define LIQUID_DEFINE_COMPLEX(R,C) typedef R _Complex C
++typedef _Fcomplex liquid_float_complex;
++typedef _Dcomplex liquid_double_complex;
+ #elif defined _GLIBCXX_COMPLEX || defined _LIBCPP_COMPLEX
+ #   define LIQUID_DEFINE_COMPLEX(R,C) typedef std::complex<R> C
+ #else
+@@ -87,8 +89,10 @@ int liquid_libversion_number(void);
+ #endif
+ //#   define LIQUID_DEFINE_COMPLEX(R,C) typedef R C[2]
+ 
++#if LIQUID_USE_COMPLEX_H!=1
+ LIQUID_DEFINE_COMPLEX(float,  liquid_float_complex);
+ LIQUID_DEFINE_COMPLEX(double, liquid_double_complex);
++#endif
+ 
+ // 
+ // MODULE : agc (automatic gain control)
+-- 
+2.32.0.windows.1
+
