@@ -18,10 +18,14 @@ class LiquidDspConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "simdoverride": [True, False],
+        "withfftw": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "simdoverride": False,
+        "withfftw": False,
     }
 
     _autotools = None
@@ -67,6 +71,10 @@ class LiquidDspConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        if self.options.withfftw:
+            self.requires("fftw/3.3.9")
+
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -108,6 +116,8 @@ class LiquidDspConan(ConanFile):
 
         if self.settings.build_type == "Debug":
             configure_args.append("--enable-debug-messages")
+        if self.options.simdoverride:
+            configure_args.append("--enable-simdoverride")
 
         with tools.chdir(self._source_subfolder):
             self._autotools.configure(
