@@ -97,8 +97,7 @@ The system supports to use the same recipe for several versions of the library a
 
 - **N versions => 1 recipe**
 
-   Create a folder named `all` (just a convention) and put both the `conanfile.py` and the `test_package` folder there. With this approach, the `conanfile.py`
-   won’t declare the `version` attribute.
+   Create a folder named `all` (just a convention) and put both the `conanfile.py` and the `test_package` folder there.
 
    You will need to create a `config.yml` file to declare the matching between the versions and the folders. e.g:
 
