@@ -56,9 +56,10 @@ class LiquidDspConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
