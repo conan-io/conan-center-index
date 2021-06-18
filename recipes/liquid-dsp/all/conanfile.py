@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import glob
+from copy import copy
 
 
 class LiquidDspConan(ConanFile):
@@ -31,6 +32,8 @@ class LiquidDspConan(ConanFile):
 
     @property
     def _libname(self):
+        if self.settings.os == "Windows":
+            return "libliquid"
         return "liquid"
 
     @property
@@ -80,8 +83,14 @@ class LiquidDspConan(ConanFile):
         if self._autotools:
             return self._autotools
 
+        mingwConanFile = copy(self)
+        mingwConanFile.settings.compiler = "gcc"
+        mingwConanFile.settings.compiler.version = "8.1"
+        mingwConanFile.settings.compiler.threads = "win32"
+        del mingwConanFile.settings.compiler.libcxx
+        del mingwConanFile.settings.compiler.cppstd
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows
+            mingwConanFile, win_bash=tools.os_info.is_windows
         )
 
         with tools.environment_append(self._autotools.vars):
@@ -110,8 +119,7 @@ class LiquidDspConan(ConanFile):
         self._patch_sources()
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
-            self.run(f"make {self._target_name}", win_bash=tools.os_info.is_windows)
-            # autotools.make(target=self._target_name)
+            autotools.make(target=self._target_name)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
