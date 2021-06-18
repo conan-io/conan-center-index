@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import glob
-from copy import copy
+import copy
 
 
 class LiquidDspConan(ConanFile):
@@ -14,7 +14,7 @@ class LiquidDspConan(ConanFile):
     homepage = "https://github.com/jgaeddert/liquid-dsp"
     license = ("MIT",)
     settings = "os", "arch", "build_type", "compiler"
-    exports_sources = ["patches/**"]
+    exports_sources = ["generate_link_library.bat", "patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -83,14 +83,21 @@ class LiquidDspConan(ConanFile):
         if self._autotools:
             return self._autotools
 
-        mingwConanFile = copy(self)
-        mingwConanFile.settings.compiler = "gcc"
-        mingwConanFile.settings.compiler.version = "8.1"
-        mingwConanFile.settings.compiler.threads = "win32"
-        del mingwConanFile.settings.compiler.libcxx
-        del mingwConanFile.settings.compiler.cppstd
+        have_to_rollback = False
+        if self.settings.compiler == "Visual Studio":
+            # Save current information
+            old_compiler = str(self.settings.compiler)
+            old_compiler_runtime = str(self.settings.compiler.runtime)
+            old_compiler_toolset = str(self.settings.compiler.toolset)
+
+            self.settings.compiler = "gcc"
+            self.settings.compiler.version = "8.1"
+            self.settings.compiler.threads = "win32"
+
+            have_to_rollback = True
+
         self._autotools = AutoToolsBuildEnvironment(
-            mingwConanFile, win_bash=tools.os_info.is_windows
+            self, win_bash=tools.os_info.is_windows
         )
 
         with tools.environment_append(self._autotools.vars):
@@ -108,6 +115,13 @@ class LiquidDspConan(ConanFile):
                 configure_dir=os.path.join(self.source_folder, self._source_subfolder),
             )
 
+        # Restore old settings
+        if have_to_rollback:
+            self.settings.compiler = old_compiler
+            self.settings.compiler.runtime = old_compiler_runtime
+            self.settings.compiler.toolset = old_compiler_toolset
+            del self.settings.compiler.cppstd
+
         return self._autotools
 
     def _patch_sources(self):
@@ -115,11 +129,34 @@ class LiquidDspConan(ConanFile):
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
 
+    def _gen_link_library(self):
+        if self.settings.compiler != "Visual Studio":
+            return
+        with tools.environment_append(self._autotools.vars):
+            self.run("generate_link_library.bat")
+            with tools.chdir(self._source_subfolder):
+                self.run(
+                    """lib /def:libliquid.def /out:libliquid.lib """
+                    f"""/machine:{"X86" if self.settings.arch=="x86" else "X64"}""",
+                    win_bash=tools.os_info.is_windows,
+                )
+
+    def _rename_libraries(self):
+        with tools.chdir(self._source_subfolder):
+            if self.settings.os == "Windows" and self.options.shared:
+                os.rename("libliquid.so", "libliquid.dll")
+            elif self.settings.os == "Windows" and not self.options.shared:
+                os.rename("libliquid.a", "libliquid.lib")
+            elif self.settings.os == "Macos" and not self.options.shared:
+                os.rename("libliquid.ar", "libliquid.a")
+
     def build(self):
         self._patch_sources()
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
             autotools.make(target=self._target_name)
+        self._rename_libraries()
+        self._gen_link_library()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
@@ -130,12 +167,7 @@ class LiquidDspConan(ConanFile):
         )
         with tools.chdir(self._source_subfolder):
             if self.settings.os == "Windows" and self.options.shared:
-                os.rename("libliquid.so", "libliquid.dll")
                 self.copy(pattern="libliquid.dll", dst="bin")
-            elif self.settings.os == "Windows" and not self.options.shared:
-                os.rename("libliquid.a", "libliquid.lib")
-            elif self.settings.os == "Macos" and not self.options.shared:
-                os.rename("libliquid.ar", "libliquid.a")
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
