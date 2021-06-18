@@ -15,6 +15,7 @@ class XegeConan(ConanFile):
     options = {"shared": [False, True]}
     default_options = {"shared": False}
     generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
 
     def configure(self):
         if self.options.shared:
