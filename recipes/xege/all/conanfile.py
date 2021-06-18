@@ -15,9 +15,6 @@ class XegeConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
 
     def configure(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration(
-                "This library is always static")
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration(
                 "This library is only compatible for Windows")
