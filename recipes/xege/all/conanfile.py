@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+
 class XegeConan(ConanFile):
     name = "xege"
     version = "20.08"
@@ -17,7 +18,8 @@ class XegeConan(ConanFile):
 
     def configure(self):
         if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("This library is only compatible for Windows")
+            raise ConanInvalidConfiguration(
+                "This library is only compatible for Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
