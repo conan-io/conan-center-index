@@ -160,10 +160,11 @@ class FastDDSConan(ConanFile):
                 major=self.version.split(".")[0],
                 minor=self.version.split(".")[1]
             )
-            tools.rename(
-                src=os.path.join(self._pkg_bin, "discovery", dll_name),
-                dst=os.path.join(self._pkg_bin, dll_name)
-            )
+            if os.path.exists(os.path.join(self._pkg_bin, "discovery", dll_name)):
+                tools.rename(
+                    src=os.path.join(self._pkg_bin, "discovery", dll_name),
+                    dst=os.path.join(self._pkg_bin, dll_name)
+                )
         tools.rmdir(os.path.join(self.package_folder, "tmp"))
         tools.rename(
             src=self._pkg_tools,
