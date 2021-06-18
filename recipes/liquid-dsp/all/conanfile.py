@@ -35,6 +35,16 @@ class LiquidDspConan(ConanFile):
             return "liquid"
         return "libliquid"
 
+    @property
+    def _target_name(self):
+        if self.settings.os == "Macos":
+            if not self.info.settings.options.shared:
+                return "libliquid.ar"
+            return "libliquid.dylib"
+        if not self.info.settings.options.shared:
+            return "libliquid.a"
+        return "libliquid.so"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -123,7 +133,7 @@ class LiquidDspConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
-                autotools.make()
+                autotools.make(target=self._target_name)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
