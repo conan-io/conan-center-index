@@ -1,8 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
-from conans.tools import load
 from conans.errors import ConanInvalidConfiguration
-from pathlib import Path
 import textwrap
 
 class FastDDSConan(ConanFile):
@@ -114,13 +112,20 @@ class FastDDSConan(ConanFile):
                   destination=self._source_subfolder)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        os = self.settings.os
+        compiler = self.settings.compiler
+        version = tools.Version(self.settings.compiler.version)
+        if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
+        if os == "Linux" and compiler == "gcc" and version < "5":
+            raise ConanInvalidConfiguration(
+                "Using Fast-DDS with gcc on Linux requires gcc 5 or higher.")
         if self.settings.os == "Windows":
             if ("MT" in self.settings.compiler.runtime and self.options.shared):
                 # This combination leads to an fast-dds error when linking
                 # linking dynamic '*.dll' and static MT runtime
                 raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
+
 
     def build(self):
         self._patch_sources()
