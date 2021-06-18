@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException
 from contextlib import contextmanager
 import os
 import glob
@@ -13,6 +13,7 @@ class LiquidDspConan(ConanFile):
     homepage = "https://github.com/jgaeddert/liquid-dsp"
     license = ("MIT",)
     settings = "os", "arch", "build_type", "compiler"
+    exports_sources = ["patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -107,11 +108,15 @@ class LiquidDspConan(ConanFile):
             for subdir, dirs, files in os.walk(
                 os.path.join(self.source_folder, self._source_subfolder)
             ):
-                filepath = os.path.join(
-                    self.source_folder, self._source_subfolder, subdir, filepath
-                )
-                tools.replace_in_file(filepath, "float complex", "_Fcomplex")
-                tools.replace_in_file(filepath, "double complex", "_Dcomplex")
+                for file in files:
+                    filepath = os.path.join(
+                        self.source_folder, self._source_subfolder, subdir, file
+                    )
+                    try:
+                        tools.replace_in_file(filepath, "float complex", "_Fcomplex")
+                        tools.replace_in_file(filepath, "double complex", "_Dcomplex")
+                    except ConanException:  # ConanException: replace_in_file didn't find pattern
+                        continue
 
     def build(self):
         self._patch_sources()
