@@ -38,10 +38,10 @@ class LiquidDspConan(ConanFile):
     @property
     def _target_name(self):
         if self.settings.os == "Macos":
-            if not self.info.settings.options.shared:
+            if not self.options.shared:
                 return "libliquid.ar"
             return "libliquid.dylib"
-        if not self.info.settings.options.shared:
+        if not self.options.shared:
             return "libliquid.a"
         return "libliquid.so"
 
