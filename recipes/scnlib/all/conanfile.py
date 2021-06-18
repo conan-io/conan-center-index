@@ -48,6 +48,7 @@ class ScnlibConan(ConanFile):
         return {
             "gcc": "5",
             "clang": "6.0",
+            "Visual Studio": "15",
         }
 
     def validate(self):
