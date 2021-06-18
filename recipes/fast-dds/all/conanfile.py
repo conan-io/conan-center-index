@@ -120,6 +120,13 @@ class FastDDSConan(ConanFile):
         if os == "Linux" and compiler == "gcc" and version < "5":
             raise ConanInvalidConfiguration(
                 "Using Fast-DDS with gcc on Linux requires gcc 5 or higher.")
+        if os == "Linux" and compiler == "clang" and version < "5.0":
+            raise ConanInvalidConfiguration(
+                "Using Fast-DDS with gcc on Linux requires clang 5 or higher.")
+        if os == "Windows" and compiler == "Visual Studio" and version < "16":
+            raise ConanInvalidConfiguration(
+                "Fast-DDS was tested on Windows with VS Compiler 16")
+        
         if self.settings.os == "Windows":
             if ("MT" in self.settings.compiler.runtime and self.options.shared):
                 # This combination leads to an fast-dds error when linking
@@ -190,7 +197,10 @@ class FastDDSConan(ConanFile):
         ]
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs = [
-                    "pthread",
+                    "pthread"
+                ]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["fastrtps"].system_libs = [
                     "rt",
                     "dl"
                 ]
@@ -214,7 +224,10 @@ class FastDDSConan(ConanFile):
         ]
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:     
             self.cpp_info.components["fast-discovery"].system_libs = [
-                "pthread",
+                "pthread"
+            ]
+        if self.settings.os in ["Linux"]:
+            self.cpp_info.components["fast-discovery"].system_libs = [
                 "rt"
             ]
         self.cpp_info.components["fast-discovery"].bindirs = [os.path.join("bin", "discovery")]
