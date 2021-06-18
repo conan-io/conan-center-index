@@ -31,9 +31,7 @@ class LiquidDspConan(ConanFile):
 
     @property
     def _libname(self):
-        if self.settings.os != "Windows":
-            return "liquid"
-        return "libliquid"
+        return "liquid"
 
     @property
     def _target_name(self):
@@ -44,6 +42,12 @@ class LiquidDspConan(ConanFile):
         if not self.options.shared:
             return "libliquid.a"
         return "libliquid.so"
+
+    @property
+    def _lib_pattern(self):
+        if self.settings.os != "Windows":
+            return self._target_name
+        return "libliquid.lib"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -141,7 +145,9 @@ class LiquidDspConan(ConanFile):
         self.copy(
             pattern="include/liquid.h", dst="include/liquid", src=self._source_subfolder
         )
-        self.copy(pattern=self._target_name, dst="lib", src=self._source_subfolder)
+        self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
+        if self.settings.os == "Windows":
+            self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = [self._libname]
