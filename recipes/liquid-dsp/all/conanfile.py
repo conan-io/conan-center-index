@@ -138,10 +138,10 @@ class LiquidDspConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+        self.copy(
+            pattern="include/liquid.h", dst="include/liquid", src=self._source_subfolder
+        )
+        self.copy(pattern=self._target_name, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = [self._libname]
