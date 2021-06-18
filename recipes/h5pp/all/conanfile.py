@@ -40,7 +40,7 @@ class h5ppConan(ConanFile):
             self._cmake.definitions["H5PP_ENABLE_TESTS"]         = False
             self._cmake.definitions["H5PP_BUILD_EXAMPLES"]       = False
             self._cmake.definitions["H5PP_PRINT_INFO"]           = False
-            if Version(self.version) > "1.8.6":
+            if Version(self.version) >= "1.9.0":
                 self._cmake.definitions["H5PP_PACKAGE_MANAGER"]  = "none"
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
