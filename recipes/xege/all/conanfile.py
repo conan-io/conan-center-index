@@ -23,13 +23,6 @@ class XegeConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, "source_subfolder")
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
-#         tools.replace_in_file("hello/CMakeLists.txt", "PROJECT(HelloWorld)",
-#                               '''PROJECT(HelloWorld)
-# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-# conan_basic_setup()''')
 
     def build(self):
         cmake = CMake(self)
