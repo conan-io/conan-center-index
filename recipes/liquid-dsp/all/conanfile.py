@@ -173,9 +173,7 @@ class LiquidDspConan(ConanFile):
             dst="include/liquid",
             src=os.path.join(self._source_subfolder, "include"),
         )
-        with tools.chdir(self._source_subfolder):
-            if self.settings.os == "Windows" and self.options.shared:
-                self.copy(pattern="libliquid.dll", dst="bin")
+        self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
