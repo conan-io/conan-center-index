@@ -59,8 +59,6 @@ class LiquidDspConan(ConanFile):
         if self.settings.os != "Windows":
             if not self.options.fPIC:
                 raise ConanInvalidConfiguration("This library hardcodes fPIC")
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("VS is not supported")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -69,6 +67,9 @@ class LiquidDspConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("mingw-w64/8.1")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -100,10 +101,17 @@ class LiquidDspConan(ConanFile):
 
         return self._autotools
 
+    def _patch_sources(self):
+        if self.settings.os == "Windows":
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
-            autotools.make(target=self._target_name)
+            self.run(f"make {self._target_name}", win_bash=tools.os_info.is_windows)
+            # autotools.make(target=self._target_name)
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
