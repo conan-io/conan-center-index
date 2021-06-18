@@ -34,6 +34,7 @@ class ConfuJson(ConanFile):
     def package(self):
         self.copy("*.h*", dst="include/confu_json",
                   src="source_subfolder/confu_json")
+        self.copy("*LICENSE.md", dst="licenses", keep_path=False)
 
     def package_id(self):
         self.info.header_only()
