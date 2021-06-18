@@ -4,6 +4,8 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
+required_conan_version = ">=1.32.0"
+
 class gtsamConan(ConanFile):
     name = "gtsam"
     license = "BSD-3-Clause"
@@ -35,7 +37,7 @@ class gtsamConan(ConanFile):
                "install_matlab_toolbox": [True, False],
                "install_cython_toolbox": [True, False],
                "install_cppunitlite": [True, False],
-               "install_geographiclib": [True, False]}
+               "install_geographiclib": [True, False, "deprecated"]}
 
     default_options = {"shared": False,
                        "fPIC": True,
@@ -59,9 +61,10 @@ class gtsamConan(ConanFile):
                         "install_matlab_toolbox": False,
                         "install_cython_toolbox": False,
                         "install_cppunitlite": True,
-                        "install_geographiclib": False}
-    generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+                        "install_geographiclib": "deprecated"}
+
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -92,33 +95,37 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_BUILD_DOC_HTML"] = False
             self._cmake.definitions["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
             self._cmake.definitions["GTSAM_BUILD_WRAP"] = self.options.build_wrap
+            self._cmake.definitions["GTSAM_BUILD_WITH_MARCH_NATIVE"] = False
             self._cmake.definitions["GTSAM_WRAP_SERIALIZATION"] = self.options.wrap_serialization
             self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
-            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False #Use conan-provided geographiclib
+            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = True #Set to false to use eigen sources contained in GTSAM
+            self._cmake.definitions["GTSAM_BUILD_TYPE_POSTFIXES"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def _patch_sources(self): #Needed to build GTSam as a subproject using the conan CMake Wrapper.
-        for cmake in (os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "wrap", "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                      os.path.join(self._source_subfolder, "cmake", "GtsamPythonWrap.cmake")):
-            tools.replace_in_file(cmake,
-                                  "${CMAKE_SOURCE_DIR}",
-                                  "${GTSAM_SOURCE_DIR}")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
-                              "${CMAKE_BINARY_DIR}",
-                              "${GTSAM_BINARY_DIR}")
-        if self.settings.os == "Windows": #compiler.runtime field only exists on Windows
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        # compiler.runtime field only exists on Windows therefore we patch it on the recipe
+        if self.settings.os == "Windows":
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MD ",
                                   "/{} ".format(self.settings.compiler.runtime))
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
                                   "/MDd ",
                                   "/{} ".format(self.settings.compiler.runtime))
+
+    @property
+    def _required_boost_components(self):
+        return ["serialization", "system", "filesystem", "thread", "date_time", "regex", "timer", "chrono"]
+
+    def validate(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -128,18 +135,15 @@ class gtsamConan(ConanFile):
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
                 raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
-        if self.settings.os == "Linux":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5:
-                raise ConanInvalidConfiguration ("This recipe won't build on gcc 4.9 until uilianries:hotfix/gcc49-glibc gets merged")
+        if self.options.install_geographiclib != "deprecated":
+            self.output.warn("install_geographiclib option is deprecated (GTSAM doesn't use geographiclib). If you want it add is a requirement in your project")
 
     def requirements(self):
-        self.requires("boost/1.71.0")
-        self.requires("eigen/3.3.7")
+        self.requires("boost/1.75.0")
+        self.requires("eigen/3.3.9")
         if self.options.with_TBB:
-            self.requires("tbb/2020.0")
+            self.requires("tbb/2020.3")
             self.options["tbb"].tbbmalloc = True
-        if self.options.install_geographiclib:
-            self.requires("geographiclib/1.50.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -159,5 +163,40 @@ class gtsamConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
+    def package_id(self):
+        del self.info.options.install_geographiclib
+
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # FIXME: official imported targets are not namespaced
+        self.cpp_info.names["cmake_find_package"] = "GTSAM"
+        self.cpp_info.names["cmake_find_package_multi"] = "GTSAM"
+
+        self.cpp_info.components["libgtsam"].libs = ["libgtsam" if self.settings.os == "Windows" and not self.options.shared else "gtsam"]
+        self.cpp_info.components["libgtsam"].names["cmake_find_package"] = "gtsam"
+        self.cpp_info.components["libgtsam"].names["cmake_find_package_multi"] = "gtsam"
+        self.cpp_info.components["libgtsam"].requires = ["boost::{}".format(component) for component in self._required_boost_components]
+        self.cpp_info.components["libgtsam"].requires.append("eigen::eigen")
+        if self.options.with_TBB:
+            self.cpp_info.components["libgtsam"].requires.append("tbb::tbb")
+        if self.options.support_nested_dissection:
+            self.cpp_info.components["libgtsam"].requires.append("libmetis-gtsam")
+        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
+            self.cpp_info.components["libgtsam"].system_libs = ["dbghelp"]
+
+        if self.options.build_unstable:
+            self.cpp_info.components["libgtsam_unstable"].libs = ["libgtsam_unstable" if self.settings.os == "Windows" and not self.options.shared else "gtsam_unstable"]
+            self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package"] = "gtsam_unstable"
+            self.cpp_info.components["libgtsam_unstable"].names["cmake_find_package_multi"] = "gtsam_unstable"
+            self.cpp_info.components["libgtsam_unstable"].requires = ["libgtsam"]
+
+        if self.options.support_nested_dissection:
+            self.cpp_info.components["libmetis-gtsam"].libs = ["libmetis-gtsam" if self.settings.os == "Windows" and not self.options.shared else "metis-gtsam"]
+            self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package"] = "metis-gtsam"
+            self.cpp_info.components["libmetis-gtsam"].names["cmake_find_package_multi"] = "metis-gtsam"
+            self.cpp_info.components["libmetis-gtsam"].names["pkg_config"] = "metis-gtsam"
+
+        if self.options.install_cppunitlite:
+            self.cpp_info.components["gtsam_CppUnitLite"].libs = ["CppUnitLite"]
+            self.cpp_info.components["gtsam_CppUnitLite"].names["cmake_find_package"] = "CppUnitLite"
+            self.cpp_info.components["gtsam_CppUnitLite"].names["cmake_find_package_multi"] = "CppUnitLite"
+            self.cpp_info.components["gtsam_CppUnitLite"].requires = ["boost::boost"]

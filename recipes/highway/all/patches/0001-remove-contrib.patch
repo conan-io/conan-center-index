@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -52,9 +52,6 @@ check_cxx_source_compiles(
+ )
+ 
+ set(HWY_SOURCES
+-    contrib/image/image.cc
+-    contrib/image/image.h
+-    contrib/math/math-inl.h
+     hwy/aligned_allocator.cc
+     hwy/aligned_allocator.h
+     hwy/base.h

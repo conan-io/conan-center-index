@@ -8,3 +8,9 @@ sources:
   "10.35":
     url: "https://ftp.pcre.org/pub/pcre/pcre2-10.35.tar.gz"
     sha256: "8fdcef8c8f4cd735169dd0225fd010487970c1bcadd49e9b90e26c7250a33dc9"
+  "10.36":
+    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.36.tar.gz"
+    sha256: "b95ddb9414f91a967a887d69617059fb672b914f56fa3d613812c1ee8e8a1a37"
+  "10.37":
+    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.37.tar.gz"
+    sha256: "04e214c0c40a97b8a5c2b4ae88a3aa8a93e6f2e45c6b3534ddac351f26548577"

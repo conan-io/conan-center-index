@@ -34,10 +34,15 @@ class DoxygenConan(ConanFile):
         if minimum_compiler_version is not None:
             if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
                 raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+        if (self.settings.compiler == "Visual Studio" and
+            tools.Version(self.settings.compiler.version.value) <= 14 and
+                tools.Version(self.version) == "1.8.18"):
+            raise ConanInvalidConfiguration("Doxygen version {} broken with VS {}.".format(self.version,
+                                                                                           self.settings.compiler.version))
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("xapian-core/1.4.16")
+        self.requires("xapian-core/1.4.18")
         self.requires("zlib/1.2.11")
 
     def build_requirements(self):
@@ -76,6 +81,9 @@ class DoxygenConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

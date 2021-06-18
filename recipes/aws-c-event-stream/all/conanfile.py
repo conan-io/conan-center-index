@@ -59,12 +59,6 @@ class AwsCEventStream(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "AWS::aws-c-common",
-                              "CONAN_PKG::aws-c-common")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "AWS::aws-checksums",
-                              "CONAN_PKG::aws-checksums")
 
     def build(self):
         self._patch_sources()

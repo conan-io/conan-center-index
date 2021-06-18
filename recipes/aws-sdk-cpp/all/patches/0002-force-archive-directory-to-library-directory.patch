@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a653e38628..6761052856 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -295,11 +295,7 @@ if (CMAKE_INSTALL_INCLUDEDIR)
+     set(INCLUDE_DIRECTORY "${CMAKE_INSTALL_INCLUDEDIR}")
+ endif()
+ 
+-if(BUILD_SHARED_LIBS)
+-    set(ARCHIVE_DIRECTORY "${BINARY_DIRECTORY}")
+-else()
+-    set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
+-endif()
++set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
+ 
+ if (ENABLE_ADDRESS_SANITIZER)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -g -fno-omit-frame-pointer")

@@ -95,15 +95,15 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.24.0")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_regex == "pcre":
             self.requires("pcre/8.44")
         elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.35")
+            self.requires("pcre2/10.36")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -171,11 +171,6 @@ class LibGit2Conan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "HTTP_PARSER_",
                               "http_parser_")
-        tools.save("FindOpenSSL.cmake",
-                   "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-                   "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
-                   "set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n",
-                   append=True)
 
     def build(self):
         self._patch_sources()

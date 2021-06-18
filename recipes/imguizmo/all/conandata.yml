@@ -1,0 +1,4 @@
+sources:
+  "cci.20210223":
+    url: "https://github.com/CedricGuillemet/ImGuizmo/archive/f7bbbe39971d9d45816417a70e9b53a0f698c56e.tar.gz"
+    sha256: "77e618cd7cd6f8d6b3a1426ac90dbbc5b4dcdd674e0fe5e5dec2c158eb54acb5"

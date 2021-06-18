@@ -97,7 +97,8 @@ class LibCheckConan(ConanFile):
                 libsuffix = "Dynamic"
 
         self.cpp_info.components["liblibcheck"].libs = ["check" + libsuffix]
-        self.cpp_info.components["liblibcheck"].requires.append("subunit::libsubunit")
+        if self.options.with_subunit:
+            self.cpp_info.components["liblibcheck"].requires.append("subunit::libsubunit")
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.components["liblibcheck"].system_libs = ["m", "pthread", "rt"]

@@ -43,7 +43,6 @@ class LibxcryptConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.2")
         self.build_requires("libtool/2.4.6")
 
     def _configure_autotools(self):

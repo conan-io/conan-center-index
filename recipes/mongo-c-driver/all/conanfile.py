@@ -69,7 +69,7 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.2.1")
         if self.options.with_sasl == "cyrus":
@@ -100,12 +100,6 @@ class MongoCDriverConan(ConanFile):
              "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
             {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
             {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
-            # Fix Openssl
-            {"old": "OPENSSL_FOUND", "new": "OpenSSL_FOUND"},
-            {"old": "OPENSSL_VERSION", "new": "OpenSSL_VERSION"},
-            {"old": "OPENSSL_CRYPTO_LIBRARY", "new": "OpenSSL_Crypto_LIBS"},
-            {"old": "OPENSSL_LIBRARIES", "new": "OpenSSL_LIBRARIES"},
-            {"old": "OPENSSL_INCLUDE_DIR", "new": "OpenSSL_INCLUDE_DIR"},
             # Fix LibreSSL
             {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
         ]
@@ -158,7 +152,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
         self._cmake.definitions["ENABLE_UNINSTALL"] = False
-        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
+        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":

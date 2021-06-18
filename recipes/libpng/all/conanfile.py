@@ -10,7 +10,7 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = ["cmake", "cmake_find_package"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "api_prefix": "ANY"}
     default_options = {'shared': False, 'fPIC': True, "api_prefix": None}
@@ -65,6 +65,9 @@ class LibpngConan(ConanFile):
             cmake.definitions["M_LIBRARY"] = ""
             cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
             cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
+        if self.settings.os == "Macos":
+            if 'arm' in self.settings.arch:
+                cmake.definitions["PNG_ARM_NEON"] = "on"
         if self.options.api_prefix:
             cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
         cmake.configure()

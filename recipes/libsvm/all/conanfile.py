@@ -1,5 +1,10 @@
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 import os
+
+
+required_conan_version = ">=1.32.0"
+
 
 class libsvmConan(ConanFile):
     name = "libsvm"
@@ -30,6 +35,19 @@ class libsvmConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if (
+            self.settings.compiler == "Visual Studio" and
+            "MT" in self.settings.compiler.runtime and
+            self.options.shared
+        ):
+            raise ConanInvalidConfiguration(
+                "{} can not be built as shared library + runtime {}.".format(
+                    self.name,
+                    self.settings.compiler.runtime
+                )
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -66,13 +66,13 @@ class LibGit2Conan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        self.requires("http_parser/2.9.2")
+        self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.8.2")
+            self.requires("libssh2/1.9.0")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.67.0")
+            self.requires("libcurl/7.75.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1j")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -131,12 +131,6 @@ class LibGit2Conan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "FIND_PKGLIBRARIES(CURL libcurl)",
                               "FIND_PACKAGE(CURL REQUIRED)\n")
-
-        tools.save("FindOpenSSL.cmake",
-                   "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-                   "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
-                   "set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n",
-                   append=True)
 
     def build(self):
         self._patch_sources()

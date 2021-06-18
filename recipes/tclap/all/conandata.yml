@@ -1,0 +1,4 @@
+sources:
+  "1.2.3":
+    sha256: ccccd3471776f3198bb360aa6c09a1cd527d18b44360ff4d2b8356cdf984e980
+    url: https://github.com/xguerin/tclap/archive/v1.2.3.tar.gz

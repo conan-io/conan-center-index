@@ -7,10 +7,10 @@ import re
 class PDCursesConan(ConanFile):
     name = "pdcurses"
     description = "PDCurses - a curses library for environments that don't fit the termcap/terminfo model"
-    topics = "conan", "pdcurses", "curses", "ncurses"
+    topics = ("conan", "pdcurses", "curses", "ncurses")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdcurses.org/"
-    license = "Public Domain", "MITX"
+    license = "Unlicense", "MITX", "CC-BY-4.0", "GPL", "FSFUL"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -39,26 +39,26 @@ class PDCursesConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ("FreeBSD", "Linux"):
             del self.options.enable_widec
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("pdcurses does not support Macos")
-        if self.settings.os == "Linux":
-            if not tools.get_env("PDCURSES_OVERRIDE_X11", False):
-                raise ConanInvalidConfiguration("conan-center-index has no packages for X11 (yet)")
+        if tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("pdcurses does not support Apple")
         if self.options.with_sdl:
-            raise ConanInvalidConfiguration("conan-center-index has no packages for sdl2 (yet)")
+            raise ConanInvalidConfiguration("conan-center-index has no packages for sdl (yet)")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.requires("xorg/system")
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            if not tools.which("make"):
-                self.build_requires("make/4.2.1")
+            self.build_requires("make/4.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -82,7 +82,7 @@ class PDCursesConan(ConanFile):
                 args.append("DLL=Y")
             args = " ".join(args)
             if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
+                with tools.vcvars(self):
                     self.run("nmake -f Makefile.vc {}".format(args))
             else:
                 self.run("{} libs {}".format(os.environ["CONAN_MAKE_PROGRAM"], args))
@@ -92,9 +92,6 @@ class PDCursesConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
                                   "$(CFLAGS)",
                                   "$(CFLAGS) -{}".format(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
-                                  "$(LDFLAGS)",
-                                  "$(LDFLAGS) -{}".format(self.settings.compiler.runtime))
         tools.replace_in_file(os.path.join(self._source_subfolder, "x11", "Makefile.in"),
                               "$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a",
                               "-$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a")
@@ -120,7 +117,7 @@ class PDCursesConan(ConanFile):
     @property
     def _license_text(self):
         readme = tools.load(os.path.join(self._source_subfolder, self._subsystem_folder, "README.md"))
-        match = re.search("Distribution Status\n[\\-]+(?:[\r\n])+((?:[0-9a-z .,;*]+[\r\n])+)", readme,
+        match = re.search(r"Distribution Status\n[\-]+(?:[\r\n])+((?:[0-9a-z .,;*]+[\r\n])+)", readme,
                           re.IGNORECASE | re.MULTILINE)
         if not match:
             raise ConanException("Cannot extract distribution status")
@@ -147,9 +144,6 @@ class PDCursesConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["pdcurses"]
-        else:
+        elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.includedirs.append(os.path.join("include", "xcurses"))
             self.cpp_info.libs = ["XCurses"]
-            if not self.options.shared:
-                if self.settings.os == "Linux":
-                    self.cpp_info.system_libs = ["Xaw", "Xmu", "Xt", "X11", "Xpm", "SM", "ICE", "Xext", "xcb", "Xau"]

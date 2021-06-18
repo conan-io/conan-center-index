@@ -125,22 +125,15 @@ class LibxsltConan(ConanFile):
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
 
-        xml_config = tools.unix_path(self.deps_cpp_info["libxml2"].rootpath) + "/bin/xml2-config"
-
-        configure_args.append('XML_CONFIG=%s' % xml_config)
+        libxml_src = "--with-libxml-src=" + tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)
+        configure_args.append(libxml_src)
 
         for name in self._option_names:
             value = getattr(self.options, name)
             value = ("--with-%s" % name) if value else ("--without-%s" % name)
             configure_args.append(value)
 
-        # Disable --build when building for iPhoneSimulator. The configure script halts on
-        # not knowing if it should cross-compile.
-        build = None
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
-
-        env_build.configure(args=configure_args, build=build, configure_dir=self._full_source_subfolder)
+        env_build.configure(args=configure_args, configure_dir=self._full_source_subfolder)
         env_build.make(args=["install", "V=1"])
 
     def package(self):
@@ -180,7 +173,7 @@ class LibxsltConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXSLT_STATIC"]
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')

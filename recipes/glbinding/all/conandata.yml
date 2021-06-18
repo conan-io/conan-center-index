@@ -1,0 +1,8 @@
+sources:
+  "3.1.0":
+    url: "https://github.com/cginternals/glbinding/archive/v3.1.0.tar.gz"
+    sha256: "6729b260787108462ec6d8954f32a3f11f959ada7eebf1a2a33173b68762849e"
+patches:
+  "3.1.0":
+    - patch_file: "patches/cmake-install.patch"
+      base_path: "source_subfolder"

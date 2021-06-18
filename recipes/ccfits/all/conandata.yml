@@ -1,0 +1,8 @@
+sources:
+  "2.5":
+    url: "https://heasarc.gsfc.nasa.gov/fitsio/ccfits/CCfits-2.5.tar.gz"
+    sha256: "e542f39fa496417c401be7fbca715d566462cf4c56c83e3d43b6df3cb8d92105"
+patches:
+  "2.5":
+    - patch_file: "patches/0001-adapt-cmakelists-for-conan.patch"
+      base_path: "source_subfolder"

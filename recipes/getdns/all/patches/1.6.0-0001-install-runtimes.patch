@@ -2,12 +2,6 @@ Based on https://github.com/getdnsapi/getdns/pull/477
 
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -330,1 +330,1 @@
--set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-+set(CMAKE_REQUIRED_INCLUDES ${OpenSSL_INCLUDE_DIR})
-@@ -338,1 +338,1 @@
--set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-+set(CMAKE_REQUIRED_LIBRARIES ${OpenSSL_LIBRARIES})
 @@ -1055,22 +1055,22 @@
    endif ()
  endif ()

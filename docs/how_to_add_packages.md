@@ -1,10 +1,28 @@
 # Adding Packages to ConanCenter
 
+<!-- toc -->
+## Contents
+
+  * [Join the Early Access Program](#join-the-early-access-program)
+  * [More Information about Recipes](#more-information-about-recipes)
+    * [Before start](#before-start)
+    * [The recipe folder](#the-recipe-folder)
+    * [The version folder/s](#the-version-folders)
+    * [The conanfile.py and `test_package` folder](#the-conanfilepy-and-test_package-folder)
+    * [The `conandata.yml`](#the-conandatayml)
+    * [How to provide a good recipe](#how-to-provide-a-good-recipe)
+    * [Test the recipe locally](#test-the-recipe-locally)
+    * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
+    * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
+
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please write a comment
+requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors
+to the new process.
 
-All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This process helps CCI against spam and malicious code.
+All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This
+process helps conan-center-index against spam and malicious code.
 
 The contribution of packages is done via pull requests to the recipes found in this Github repository https://github.com/conan-io/conan-center-index.
 
@@ -138,17 +156,25 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
 
 ### How to provide a good recipe
 
-The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe.
+The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe. However it is important to note Conan features change over time and our best practices evolve so some minor details may be out of date due to the vast number of recipes.
 
 If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
 
 For C/C++ projects which use CMake for building, you can take a look on [szip](https://github.com/conan-io/conan-center-index/blob/master/recipes/szip/all/conanfile.py) and [recastnavigation](https://github.com/conan-io/conan-center-index/blob/master/recipes/recastnavigation/all/conanfile.py).
 
+Another common use case for CMake based projects, both header only and compiled, is _modeling components_ to match the `find_package` and export the correct targets from Conan's generators. A basic examples of this is [cpu_features](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpu_features/all/conanfile.py), a moderate/intermediate example is [cpprestsdk](https://github.com/conan-io/conan-center-index/blob/master/recipes/cpprestsdk/all/conanfile.py), and a very complex example is [OpenCV](https://github.com/conan-io/conan-center-index/blob/master/recipes/opencv/4.x/conanfile.py).
+
 However, if you need to use autotools for building, you can take a look on [mpc](https://github.com/conan-io/conan-center-index/blob/master/recipes/mpc/all/conanfile.py), [libatomic_ops](https://github.com/conan-io/conan-center-index/blob/master/recipes/libatomic_ops/all/conanfile.py), [libev](https://github.com/conan-io/conan-center-index/blob/master/recipes/libev/all/conanfile.py).
+
+Many projects offer **pkg-config**'s `*.pc` files which need to be modeled using components. A prime example of this is [Wayland](https://github.com/conan-io/conan-center-index/blob/master/recipes/wayland/all/conanfile.py).
+
+For cases where a project only offers source files, but not a build script, you can add CMake support, but first, contact the upstream and open a PR offering building support. If it's rejected because the author doesn't want any kind of build script, or the project is abandoned, CCI can accept your build script. Take a look at [Bzip2](https://github.com/conan-io/conan-center-index/blob/master/recipes/bzip2/all/CMakeLists.txt) and [DirectShowBaseClasses](https://github.com/conan-io/conan-center-index/blob/master/recipes/directshowbaseclasses/all/CMakeLists.txt) as examples.
+
+Please be aware that ConanCenter only builds from sources and [pre-compiled binaries are not acceptable](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md)
 
 ### Test the recipe locally
 
- The system will use the [conan-center hook](https://github.com/conan-io/hooks.git) to perform some quality checks. You can install the hook running:
+ The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
 
 ```
     $ conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
@@ -164,7 +190,13 @@ However, if you need to use autotools for building, you can take a look on [mpc]
 Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
 
     cd conan-center-index/recipes/boost/all
-    conan create . 1.74.0@
+    conan create . boost/1.74.0@
+
+### Updating conan hooks on your machine
+
+The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
+
+    conan config install
 
 ### Debugging failed builds
 

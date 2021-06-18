@@ -1,6 +1,9 @@
 from conans import ConanFile, CMake, tools
 import os
 import shutil
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class CryptoPPConan(ConanFile):
@@ -58,6 +61,16 @@ class CryptoPPConan(ConanFile):
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         tools.rmdir(src_folder)
 
+    def _patch_sources(self):
+        if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
+            shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
+                            os.path.join(self._source_subfolder, "cpu-features.h"))
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Honor fPIC option
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "SET(CMAKE_POSITION_INDEPENDENT_CODE 1)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -69,15 +82,13 @@ class CryptoPPConan(ConanFile):
         self._cmake.definitions["USE_INTERMEDIATE_OBJECTS_TARGET"] = False
         if self.settings.os == "Android":
             self._cmake.definitions["CRYPTOPP_NATIVE_ARCH"] = True
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) <= "8.4.0":
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
-            shutil.copyfile(os.path.join(tools.get_env("ANDROID_NDK_HOME"), "sources", "android", "cpufeatures", "cpu-features.h"),
-                            os.path.join(self._source_subfolder, "cpu-features.h"))
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -86,15 +97,45 @@ class CryptoPPConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {
+                "cryptopp-shared": "cryptopp::cryptopp-shared",
+                "cryptopp-static": "cryptopp::cryptopp-static"
+            }
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        # TODO: CMake imported target shouldn't be namespaced (waiting https://github.com/conan-io/conan/issues/7615 to be implemented)
         self.cpp_info.names["cmake_find_package"] = "cryptopp"
         self.cpp_info.names["cmake_find_package_multi"] = "cryptopp"
         self.cpp_info.names["pkg_config"] = "libcryptopp"
         cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
         self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
         self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libcryptopp"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["libcryptopp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["libcryptopp"].names["pkg_config"] = "libcryptopp"
         self.cpp_info.components["libcryptopp"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":

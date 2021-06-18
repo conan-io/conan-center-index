@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/ikalnytskyi/termcolor/archive/v2.0.0.tar.gz"
+    sha256: "4a73a77053822ca1ed6d4a2af416d31028ec992fb0ffa794af95bd6216bb6a20"
   "1.0.1":
     url: "https://github.com/ikalnytskyi/termcolor/archive/v1.0.1.tar.gz"
     sha256: "612f9ff785c74dcbe081bb82e8c915858572cf97dcf396ea7bd6a7d21cf6026a"

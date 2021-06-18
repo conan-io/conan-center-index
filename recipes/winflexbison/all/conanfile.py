@@ -48,8 +48,11 @@ class WinflexbisonConan(ConanFile):
         tools.save("COPYING.GPL3", "\n".join(license_content))
 
     def package(self):
-        actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
-        self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
+        if self.settings.build_type in ("Release", "Debug") and tools.Version(self.version) < "2.5.23":
+            actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
+            self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
+        else:
+            self.copy(pattern="*.exe", dst="bin", src="bin", keep_path=False)
         self.copy(pattern="data/*", dst="bin", src="{}/bison".format(self._source_subfolder), keep_path=True)
         self.copy(pattern="FlexLexer.h", dst="include", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
 

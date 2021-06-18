@@ -1,9 +1,9 @@
-import glob
+from conans import ConanFile, CMake, tools
 import json
 import os
 import re
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+
+required_conan_version = ">=1.33.0"
 
 
 class ConanRecipe(ConanFile):
@@ -19,6 +19,7 @@ class ConanRecipe(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
+    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
@@ -39,9 +40,8 @@ class ConanRecipe(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('abseil-cpp-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -64,6 +64,7 @@ class ConanRecipe(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         cmake_folder = os.path.join(self.package_folder, "lib", "cmake")
         self._create_components_file_from_cmake_target_file(os.path.join(cmake_folder, "absl", "abslTargets.cmake"))
         tools.rmdir(cmake_folder)
@@ -128,20 +129,19 @@ class ConanRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "absl"
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
-        self._register_components()
 
-    def _register_components(self):
-        with open(self._components_helper_filepath, "r") as components_json_file:
-            abseil_components = json.load(components_json_file)
-            for conan_name, values in abseil_components.items():
-                self._register_component(conan_name, values)
+        def _register_components():
+            components_json_file = tools.load(self._components_helper_filepath)
+            abseil_components = json.loads(components_json_file)
+            for pkgconfig_name, values in abseil_components.items():
+                cmake_target = values["cmake_target"]
+                self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
+                self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[pkgconfig_name].names["pkg_config"] = pkgconfig_name
+                self.cpp_info.components[pkgconfig_name].libs = values.get("libs", [])
+                self.cpp_info.components[pkgconfig_name].defines = values.get("defines", [])
+                self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
+                self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
+                self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
 
-    def _register_component(self, conan_name, values):
-        cmake_target = values["cmake_target"]
-        self.cpp_info.components[conan_name].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components[conan_name].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components[conan_name].libs = values.get("libs", [])
-        self.cpp_info.components[conan_name].defines = values.get("defines", [])
-        self.cpp_info.components[conan_name].system_libs = values.get("system_libs", [])
-        self.cpp_info.components[conan_name].frameworks = values.get("frameworks", [])
-        self.cpp_info.components[conan_name].requires = values.get("requires", [])
+        _register_components()

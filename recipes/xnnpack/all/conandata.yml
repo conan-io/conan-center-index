@@ -1,0 +1,4 @@
+sources:
+  "cci.20210310":
+    url: "https://github.com/google/XNNPACK/archive/24c2dec2c451b7594eb6ef70c538923899bd541c.zip"
+    sha256: "a2869a5be477c47dcb5b3804ce07982da350ac63d4452fa4caa5409c74a848e9"

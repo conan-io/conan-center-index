@@ -10,9 +10,8 @@ class TestPackageConan(ConanFile):
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     @contextmanager
     def _build_context(self):

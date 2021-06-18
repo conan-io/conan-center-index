@@ -12,6 +12,7 @@ class OpenColorIOConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
+    topics = ("colors", "visual", "effects", "animation")
 
     _cmake = None
 
@@ -26,7 +27,7 @@ class OpenColorIOConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
-    
+
     def requirements(self):
         # TODO: add GLUT (needed for ociodisplay tool)
         self.requires("lcms/2.11")
@@ -54,7 +55,7 @@ class OpenColorIOConan(ConanFile):
         # FIXME: OpenColorIO uses old TinyXML which doesn't have Conan package.
         self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
         self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
-        
+
         self._cmake.configure()
         return self._cmake
 

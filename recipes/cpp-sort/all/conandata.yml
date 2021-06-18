@@ -14,3 +14,9 @@ sources:
   "1.8.1":
     sha256: 04d518dabb422614fcb4a2b4e258c515f31dd01d51c26e9eaaec76e77c4d3d40
     url: https://github.com/Morwenn/cpp-sort/archive/1.8.1.tar.gz
+  "1.9.0":
+    sha256: e83f3daad30bd91fed668bdb56ad379c4aeea39d7dc640484fdcc55149b6d0e4
+    url: https://github.com/Morwenn/cpp-sort/archive/1.9.0.tar.gz
+  "1.10.0":
+    sha256: 48951cac0051d48fee286c3bc02804975f9d83269d80c10dfc5589e76a542765
+    url: https://github.com/Morwenn/cpp-sort/archive/1.10.0.tar.gz

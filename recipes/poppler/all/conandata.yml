@@ -16,3 +16,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0006-missing-symbol-dll-windows.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0007-cmake-use_conan_qt.patch"
+      base_path: "source_subfolder"

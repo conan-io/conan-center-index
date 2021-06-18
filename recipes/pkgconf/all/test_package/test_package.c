@@ -1,4 +1,4 @@
-#include "libpkgconf.h"
+#include "libpkgconf/libpkgconf.h"
 
 #include <stdio.h>
 #include <stdlib.h>

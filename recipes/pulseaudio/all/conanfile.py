@@ -1,8 +1,9 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.0"
+required_conan_version = ">=1.32.0"
+
 
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
@@ -22,28 +23,24 @@ class PulseAudioConan(ConanFile):
         "with_fftw": [True, False],
         "with_x11": [True, False],
         "with_openssl": [True, False],
-        # FIXME: enable when #2147 is merged
-        # "with_dbus": [True, False],
+        "with_dbus": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_alsa": True,
         "with_glib": False,
-        "with_fftw": True,
+        "with_fftw": False,
         "with_x11": True,
         "with_openssl": True,
-        # FIXME: enable when #2147 is merged
-        # "with_dbus": False,
+        "with_dbus": False,
     }
 
-    build_requires = "gettext/0.20.1", "libtool/2.4.6"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    _autotools = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,62 +53,68 @@ class PulseAudioConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
+        if not self.options.with_dbus:
+            del self.options.with_fftw
 
     def requirements(self):
-        self.requires("libsndfile/1.0.30")
-        self.requires("libcap/2.45")
+        self.requires("libsndfile/1.0.31")
+        self.requires("libcap/2.48")
         if self.options.with_alsa:
             self.requires("libalsa/1.2.4")
         if self.options.with_glib:
-            self.requires("glib/2.64.0")
-        if self.options.with_fftw:
-            self.requires("fftw/3.3.8")
+            self.requires("glib/2.68.2")
+        if self.options.get_safe("with_fftw"):
+            self.requires("fftw/3.3.9")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
-        # FIXME: enable when #2147 is merged
-        # if self.options.with_dbus
-        #     self.requires("dbus/1.12.16")
+            self.requires("openssl/1.1.1k")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
+
+    def validate(self):
+        if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
+            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
+                                            "Either set option fftw:precision=single"
+                                            "or pulseaudio:with_fftw=False"
+                                            % self.options["fftw"].precision)
+
+    def build_requirements(self):
+        self.build_requires("gettext/0.20.1")
+        self.build_requires("libtool/2.4.6")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
             args=[]
 
-            # FIXME: add dbus when #2147 is merged
-            for lib in ["alsa", "x11", "openssl"]:
+            for lib in ["alsa", "x11", "openssl", "dbus"]:
                 args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
             args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
-            args.append("--%s-fftw" % ("with" if self.options.with_fftw else "without"))
+            args.append("--%s-fftw" % ("with" if self.options.get_safe("with_fftw") else "without"))
             if self.options.shared:
                 args.extend(["--enable-shared=yes", "--enable-static=no"])
             else:
                 args.extend(["--enable-shared=no", "--enable-static=yes"])
             args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
-            with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
-                with tools.environment_append({
-                        "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftw").libs}) if self.options.with_fftw else tools.no_op():
-                    with tools.environment_append(RunEnvironment(self).vars):
-                        self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
+            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))

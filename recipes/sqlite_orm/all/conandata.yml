@@ -1,0 +1,4 @@
+sources:
+  "1.6":
+    url: "https://github.com/fnc12/sqlite_orm/archive/1.6.tar.gz"
+    sha256: "2f1ac922aa564d2a8385515a7d39c7a354df192b370a4713862e41b92bd4e388"

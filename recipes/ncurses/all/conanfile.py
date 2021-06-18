@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import textwrap
 
 
 class NCursesConan(ConanFile):
@@ -182,6 +183,26 @@ class NCursesConan(ConanFile):
     def _major_version(self):
         return tools.Version(self.version).major
 
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file):
+        tools.save(module_file, textwrap.dedent("""\
+            set(CURSES_FOUND ON)
+            set(CURSES_INCLUDE_DIRS ${ncurses_libcurses_INCLUDE_DIRS})
+            set(CURSES_LIBRARIES ${ncurses_libcurses_LINK_LIBS})
+            set(CURSES_CFLAGS ${ncurses_DEFINITIONS} ${ncurses_COMPILE_OPTIONS_C})
+            set(CURSES_HAVE_CURSES_H OFF)
+            set(CURSES_HAVE_NCURSES_H OFF)
+            if(CURSES_NEED_NCURSES)
+                set(CURSES_HAVE_NCURSES_CURSES_H ON)
+                set(CURSES_HAVE_NCURSES_NCURSES_H ON)
+            endif()
+
+            # Backward Compatibility
+            set(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_DIRS})
+            set(CURSES_LIBRARY ${CURSES_LIBRARIES})
+        """))
+
     def package(self):
         # return
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
@@ -190,6 +211,8 @@ class NCursesConan(ConanFile):
             autotools.install()
 
             os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
+
+        self._create_cmake_module_alias_targets(os.path.join(self.package_folder, self._module_subfolder, self._module_file))
 
     @property
     def _suffix(self):
@@ -215,7 +238,17 @@ class NCursesConan(ConanFile):
         self.info.options.with_ticlib = self._with_ticlib
         self.info.options.with_tinfo = self._with_tinfo
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
+
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Curses"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
         if self._with_tinfo:
             self.cpp_info.components["tinfo"].libs = ["tinfo" + self._lib_suffix]
             self.cpp_info.components["tinfo"].names["pkg_config"] = "tinfo" + self._lib_suffix
@@ -238,6 +271,11 @@ class NCursesConan(ConanFile):
             ])
             if self.options.get_safe("with_extended_colors", False):
                 self.cpp_info.components["libcurses"].requires.append("naive-tsearch::naive-tsearch")
+
+        module_rel_path = os.path.join(self._module_subfolder, self._module_file)
+        self.cpp_info.components["libcurses"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["libcurses"].build_modules["cmake_find_package"] = [module_rel_path]
+        self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
 
         self.cpp_info.components["panel"].libs = ["panel" + self._lib_suffix]
         self.cpp_info.components["panel"].names["pkg_config"] = "panel" + self._lib_suffix

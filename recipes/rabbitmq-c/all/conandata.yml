@@ -5,11 +5,3 @@ sources:
   "0.9.0":
     url: "https://github.com/alanxz/rabbitmq-c/archive/v0.9.0.tar.gz"
     sha256: "316c0d156452b488124806911a62e0c2aa8a546d38fc8324719cd29aaa493024"
-patches:
-  "0.10.0":
-    - patch_file: patches/0001-Change-openssl-variable-names.patch
-      base_path: source_subfolder
-  "0.9.0":
-    - patch_file: patches/0001-Change-openssl-variable-names.patch
-      base_path: source_subfolder
-

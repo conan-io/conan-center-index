@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.32.0"
+
 
 class GlslangConan(ConanFile):
     name = "glslang"
@@ -56,7 +58,11 @@ class GlslangConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_optimizer:
-            self.requires("spirv-tools/v2020.3")
+            self.requires("spirv-tools/2020.5")
+
+    def validate(self):
+        if self.options.enable_optimizer and self.options["spirv-tools"].shared:
+            raise ConanInvalidConfiguration("glslang with enable_optimizer requires static spirv-tools, because SPIRV-Tools-opt is not built if shared")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -121,27 +127,28 @@ class GlslangConan(ConanFile):
 
     def package_info(self):
         # TODO: glslang exports non-namespaced targets but without config file...
+        lib_suffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # OSDependent
         self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
         self.cpp_info.components["osdependent"].names["cmake_find_package_multi"] = "OSDependent"
-        self.cpp_info.components["osdependent"].libs = [self._get_decorated_lib("OSDependent")]
+        self.cpp_info.components["osdependent"].libs = ["OSDependent" + lib_suffix]
         if self.settings.os == "Linux":
             self.cpp_info.components["osdependent"].system_libs.append("pthread")
         # OGLCompiler
         self.cpp_info.components["oglcompiler"].names["cmake_find_package"] = "OGLCompiler"
         self.cpp_info.components["oglcompiler"].names["cmake_find_package_multi"] = "OGLCompiler"
-        self.cpp_info.components["oglcompiler"].libs = [self._get_decorated_lib("OGLCompiler")]
+        self.cpp_info.components["oglcompiler"].libs = ["OGLCompiler" + lib_suffix]
         # glslang
         self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"
         self.cpp_info.components["glslang-core"].names["cmake_find_package_multi"] = "glslang"
-        self.cpp_info.components["glslang-core"].libs = [self._get_decorated_lib("glslang")]
+        self.cpp_info.components["glslang-core"].libs = ["glslang" + lib_suffix]
         if self.settings.os == "Linux":
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
         # SPIRV
         self.cpp_info.components["spirv"].names["cmake_find_package"] = "SPIRV"
         self.cpp_info.components["spirv"].names["cmake_find_package_multi"] = "SPIRV"
-        self.cpp_info.components["spirv"].libs = [self._get_decorated_lib("SPIRV")]
+        self.cpp_info.components["spirv"].libs = ["SPIRV" + lib_suffix]
         self.cpp_info.components["spirv"].requires = ["glslang-core"]
         if self.options.enable_optimizer:
             self.cpp_info.components["spirv"].requires.append("spirv-tools::spirv-tools-opt")
@@ -150,22 +157,16 @@ class GlslangConan(ConanFile):
         if self.options.hlsl:
             self.cpp_info.components["hlsl"].names["cmake_find_package"] = "HLSL"
             self.cpp_info.components["hlsl"].names["cmake_find_package_multi"] = "HLSL"
-            self.cpp_info.components["hlsl"].libs = [self._get_decorated_lib("HLSL")]
+            self.cpp_info.components["hlsl"].libs = ["HLSL" + lib_suffix]
             self.cpp_info.components["glslang-core"].requires.append("hlsl")
             self.cpp_info.components["glslang-core"].defines.append("ENABLE_HLSL")
         # SPVRemapper
         if self.options.spv_remapper:
             self.cpp_info.components["spvremapper"].names["cmake_find_package"] = "SPVRemapper"
             self.cpp_info.components["spvremapper"].names["cmake_find_package_multi"] = "SPVRemapper"
-            self.cpp_info.components["spvremapper"].libs = [self._get_decorated_lib("SPVRemapper")]
+            self.cpp_info.components["spvremapper"].libs = ["SPVRemapper" + lib_suffix]
 
         if self.options.build_executables:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
-
-    def _get_decorated_lib(self, name):
-        libname = name
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            libname += "d"
-        return libname

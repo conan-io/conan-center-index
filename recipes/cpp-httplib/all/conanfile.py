@@ -1,6 +1,8 @@
+from conans import ConanFile, tools
 import os
 
-from conans import ConanFile, tools
+required_conan_version = ">=1.33.0"
+
 
 class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
@@ -36,7 +38,7 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_brotli"):
@@ -46,8 +48,8 @@ class CpphttplibConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

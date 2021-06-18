@@ -1,5 +1,8 @@
 sources:
   "1.9":
     url: "https://github.com/p-ranav/indicators/archive/v1.9.tar.gz"
-    sha256: "390003899caac11a961d32cd16789ac2864920db9b8ab97a77554dc2b401ab5e"
+    sha256: "842e11fa542ac392a2a2ddee48620a06c3005ec38ca25cf352471e46e18f389d"
+  "2.0":
+    url: "https://github.com/p-ranav/indicators/archive/v2.0.tar.gz"
+    sha256: "ef296fa614edcd798db0ac6c3c0f2990682cae8b83724a4db34eed17521c75f7"
 

@@ -10,6 +10,7 @@ class DbgMacroConan(ConanFile):
     license = "MIT"
     description = "A dbg(...) macro for C++"
     topics = ("conan", "debugging", "macro", "pretty-printing", "header-only")
+    settings = ("compiler", )
     no_copy_source = True
 
     @property
@@ -20,6 +21,19 @@ class DbgMacroConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+    def configure(self):
+        minimal_cpp_standard = "11"
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration(
+                "dbg-mcro can't be used by {0} {1}".format(
+                    self.settings.compiler,
+                    self.settings.compiler.version
+                )
+            )
 
     def package(self):
         self.copy("dbg.h", dst="include", src=self._source_subfolder)

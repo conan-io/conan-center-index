@@ -1,4 +1,8 @@
-#include <toml.hpp>
+#include <toml.hpp> // Single header
+#ifndef TOMLPP_BUILD_SINGLE_ONLY
+#include <toml++/toml.h> // Multiple Headers
+#endif
+
 #include <fstream> //required for toml::parse_file()
 #include <iostream>
 

@@ -53,21 +53,21 @@ class LibnameConan(ConanFile):
             raise ConanInvalidConfiguration('This package does not support Macos currently')
     
     def build_requirements(self):
-        self.build_requires('meson/0.56.0')
+        self.build_requires('meson/0.57.1')
         self.build_requires('pkgconf/1.7.3')
     
     def requirements(self):
-        self.requires('glib/2.67.0')
+        self.requires('glib/2.68.0')
         if self.options.with_libpng:
             self.requires('libpng/1.6.37')
         if self.options.with_libtiff:
-            self.requires('libtiff/4.0.9')
+            self.requires('libtiff/4.2.0')
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.with_jasper:
-            self.requires('jasper/2.0.19')
+            self.requires('jasper/2.0.27')
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

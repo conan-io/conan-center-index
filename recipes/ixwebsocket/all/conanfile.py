@@ -49,7 +49,8 @@ class IXWebSocketConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
+            # After version 11.0.8, IXWebSocket is fully compatible with C++ 11. https://github.com/machinezone/IXWebSocket/commit/ee5a2eb46ee0e109415dc02b0db85a9c76256090
+            tools.check_min_cppstd(self, 14 if tools.Version(self.version) < "11.0.8" else 11)
         if self.options.tls == "applessl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
         elif not self._can_use_openssl() and self.options.tls == "openssl":
@@ -59,7 +60,7 @@ class IXWebSocketConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.tls == "openssl":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
         elif self.options.tls == "mbedtls":
             self.requires("mbedtls/2.16.3-apache")
 

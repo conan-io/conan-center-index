@@ -5,6 +5,9 @@ sources:
   "0.9.4":
     sha256: 095e8a358a9ccbbef9d1f10d40495ca0fcb3d4490a948ba6449b213a66e08ef0
     url: https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.4/uriparser-0.9.4.tar.gz
+  "0.9.5":
+    sha256: 1987466a798becb5441a491d29e762ab1a4817a525f82ef239e3d38f85605a77
+    url: https://github.com/uriparser/uriparser/releases/download/uriparser-0.9.5/uriparser-0.9.5.tar.gz
 patches:
   "0.9.3":
     - patch_file: "patches/fix-lib-name-mingw-0.9.3.patch"

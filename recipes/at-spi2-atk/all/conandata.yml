@@ -1,0 +1,4 @@
+sources:
+  "2.38.0":
+    url: "http://ftp.gnome.org/pub/gnome/sources/at-spi2-atk/2.38/at-spi2-atk-2.38.0.tar.xz"
+    sha256: "cfa008a5af822b36ae6287f18182c40c91dd699c55faa38605881ed175ca464f"

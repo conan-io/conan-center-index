@@ -85,8 +85,15 @@ class TclConan(ConanFile):
         win_makefile_vc = os.path.join(win_config_dir, "makefile.vc")
         tools.replace_in_file(win_makefile_vc, "@type << >$@", "type <<temp.tmp >$@")
 
+        win_rules_vc = os.path.join(self._source_subfolder, "win", "rules.vc")
         # do not treat nmake build warnings as errors
-        tools.replace_in_file(os.path.join(self._source_subfolder, "win", "rules.vc"), "cwarn = $(cwarn) -WX", "")
+        tools.replace_in_file(win_rules_vc, "cwarn = $(cwarn) -WX", "")
+        # disable whole program optimization to be portable across different MSVC versions.
+        # See conan-io/conan-center-index#4811 conan-io/conan-center-index#4094
+        tools.replace_in_file(
+            win_rules_vc,
+            "OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL",
+            "")
 
     def _build_nmake(self, targets):
         opts = []
@@ -199,7 +206,7 @@ class TclConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "TCL"
 
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["Cocoa"]
+            self.cpp_info.frameworks = ["CoreFoundation"]
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
         tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))

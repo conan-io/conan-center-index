@@ -76,9 +76,9 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1j")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.24.0")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
 
@@ -136,11 +136,6 @@ class LibGit2Conan(ConanFile):
                               "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
                               "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
                               "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
-        tools.save("FindOpenSSL.cmake",
-                   "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
-                   "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
-                   "set(OPENSSL_LIBRARIES ${OpenSSL_LIBRARIES})\n",
-                   append=True)
 
     def build(self):
         self._patch_sources()

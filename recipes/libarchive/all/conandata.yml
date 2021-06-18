@@ -1,7 +1,14 @@
 sources:
-  "3.4.0":
-    url: "https://github.com/libarchive/libarchive/releases/download/v3.4.0/libarchive-3.4.0.tar.gz"
-    sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
+  "3.5.1":
+    url: "https://github.com/libarchive/libarchive/releases/download/3.5.1/libarchive-3.5.1.tar.gz"
+    sha256: "9015d109ec00bb9ae1a384b172bf2fc1dff41e2c66e5a9eeddf933af9db37f5a"
   "3.4.3":
     url: "https://github.com/libarchive/libarchive/releases/download/v3.4.3/libarchive-3.4.3.tar.gz"
     sha256: "ee1e749213c108cb60d53147f18c31a73d6717d7e3d2481c157e1b34c881ea39"
+  "3.4.0":
+    url: "https://github.com/libarchive/libarchive/releases/download/v3.4.0/libarchive-3.4.0.tar.gz"
+    sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
+patches:
+  "3.4.0":
+    - patch_file: "patches/msvc-no-we4061.patch"
+      base_path: "source_subfolder"

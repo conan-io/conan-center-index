@@ -12,9 +12,17 @@ class CAresConan(ConanFile):
     topics = ("conan", "c-ares", "dns")
     homepage = "https://c-ares.haxx.se/"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "tools": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "tools": True
+    }
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     _cmake = None
@@ -47,12 +55,15 @@ class CAresConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["CARES_STATIC"] = not self.options.shared
         self._cmake.definitions["CARES_SHARED"] = self.options.shared
-        self._cmake.definitions["CARES_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = "OFF"
+        self._cmake.definitions["CARES_BUILD_TESTS"] = False
+        self._cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = False
+        self._cmake.definitions["CARES_BUILD_TOOLS"] = self.options.tools
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._cmake_configure()
         cmake.build()
 
@@ -77,9 +88,10 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].system_libs.append("rt")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "Advapi32"])
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

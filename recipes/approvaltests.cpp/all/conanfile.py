@@ -14,16 +14,18 @@ class ApprovalTestsCppConan(ConanFile):
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
     options = {
-        "with_boosttest": [True, False], # Should this be: with_boost_unit_test_framework?
+        "with_boosttest": [True, False],
         "with_catch2": [True, False],
         "with_gtest": [True, False],
-        "with_doctest": [True, False]
+        "with_doctest": [True, False],
+        "with_cpputest": [True, False],
     }
     default_options = {
         "with_boosttest": False,
         "with_catch2": False,
         "with_gtest": False,
-        "with_doctest": False
+        "with_doctest": False,
+        "with_cpputest": False,
     }
     no_copy_source = True
     settings = "compiler"
@@ -31,6 +33,8 @@ class ApprovalTestsCppConan(ConanFile):
     def configure(self):
         if not self._boost_test_supported():
             del self.options.with_boosttest
+        if not self._cpputest_supported():
+            del self.options.with_cpputest
         self._validate_compiler_settings()
 
     @property
@@ -46,6 +50,8 @@ class ApprovalTestsCppConan(ConanFile):
             self.requires("gtest/1.10.0")
         if self.options.with_doctest:
             self.requires("doctest/2.3.6")
+        if self.options.get_safe("with_cpputest"):
+            self.requires("cpputest/4.0")
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
@@ -69,6 +75,9 @@ class ApprovalTestsCppConan(ConanFile):
 
     def _boost_test_supported(self):
         return Version(self.version) >= "8.6.0"
+
+    def _cpputest_supported(self):
+        return Version(self.version) >= "10.4.0"
 
     def _std_puttime_required(self):
         return Version(self.version) >= "10.2.0"

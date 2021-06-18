@@ -1,0 +1,4 @@
+sources:
+    "0.7":
+        url: https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz
+        sha256: 8e2842cfe947f3a443af301bdd6d034455536c38a455c7a700d0c1ad165a7543

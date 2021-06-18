@@ -90,6 +90,7 @@ class OpenblasConan(ConanFile):
         self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["pkg_config"] = "openblas"
+        self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
         self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.use_thread:

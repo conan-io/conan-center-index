@@ -1,0 +1,14 @@
+sources:
+  "1.2.3":
+    sha256: 1a3336752133019c963e06c28667b96690d6395b804e5e326671777ff88982ea
+    url: https://github.com/sewenew/redis-plus-plus/archive/1.2.3.tar.gz
+  "1.2.1":
+    sha256: f09c9fcc362955edb887632cd008102887278c94934d7e8c9d0acb8707671902
+    url: https://github.com/sewenew/redis-plus-plus/archive/1.2.1.tar.gz
+patches:
+  "1.2.3":
+    - patch_file: "patches/fix-conan-cmake-package.patch"
+      base_path: "source_subfolder"
+  "1.2.1":
+    - patch_file: "patches/fix-hiredis-consumption.patch"
+      base_path: "source_subfolder"

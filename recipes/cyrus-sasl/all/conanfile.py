@@ -43,7 +43,7 @@ class CyrusSaslConan(ConanFile):
         "with_scram": True,
         "with_otp": True,
         "with_krb4": True,
-        "with_gssapi": True,
+        "with_gssapi": False, # FIXME: should be True
         "with_plain": True,
         "with_anon": True,
         "with_postgresql": False,
@@ -70,20 +70,19 @@ class CyrusSaslConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
             )
-        if self.options.with_gssapi and not self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Cyrus SASL package cannot link statically to libkrb5"
-            )
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
         if self.options.with_postgresql:
-            self.requires("libpq/12.2")
+            self.requires("libpq/13.1")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.32.3")
+            self.requires("sqlite3/3.34.0")
+        if self.options.with_gssapi:
+            raise ConanInvalidConfiguration("with_gssapi requires krb5 recipe, not yet available in CCI")
+            self.requires("krb5/1.18.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -193,7 +192,8 @@ class CyrusSaslConan(ConanFile):
             os.remove(la_file)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libsasl2"
+        self.cpp_info.libs = ["sasl2"]
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)

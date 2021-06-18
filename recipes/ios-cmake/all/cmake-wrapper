@@ -19,6 +19,5 @@ if [ $BUILD == "yes" ]; then
 else
   # TODO check if, based on log level, some configurable outbut of these values could be nice to have
   fix_cmake_flags="-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=NEVER"
-  cmake_call="cmake $@ ${CONAN_USER_CMAKE_FLAGS} ${fix_cmake_flags}"
-  ${cmake_call}
+  cmake "$@" ${CONAN_USER_CMAKE_FLAGS} ${fix_cmake_flags}
 fi

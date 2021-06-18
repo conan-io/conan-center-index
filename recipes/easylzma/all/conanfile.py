@@ -4,7 +4,7 @@ from conans import ConanFile, tools, CMake
 
 class EazylzmaConan(ConanFile):
     name = "easylzma"
-    license = "Public Domain"
+    license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lloyd/easylzma"
     description = ("An easy to use, tiny, public domain, C wrapper library around \
@@ -35,6 +35,8 @@ class EazylzmaConan(ConanFile):
            del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 

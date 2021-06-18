@@ -132,6 +132,7 @@ class LibjpegTurboConan(ConanFile):
         # remove unneeded directories
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         # remove binaries and pdb files
         for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
@@ -139,13 +140,19 @@ class LibjpegTurboConan(ConanFile):
                 os.remove(bin_file)
 
     def package_info(self):
-        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
-        self.cpp_info.components["jpeg"].libs = [self._lib_name("jpeg")]
-        if self.options.get_safe("turbojpeg"):
-            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
-            self.cpp_info.components["turbojpeg"].libs = [self._lib_name("turbojpeg")]
+        self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"
+        self.cpp_info.names["cmake_find_package_multi"] = "libjpeg-turbo"
 
-    def _lib_name(self, name):
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            return name + "-static"
-        return name
+        cmake_target_suffix = "-static" if not self.options.shared else ""
+        lib_suffix = "-static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
+
+        self.cpp_info.components["jpeg"].names["cmake_find_package"] = "jpeg" + cmake_target_suffix
+        self.cpp_info.components["jpeg"].names["cmake_find_package_multi"] = "jpeg" + cmake_target_suffix
+        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["jpeg"].libs = ["jpeg" + lib_suffix]
+
+        if self.options.get_safe("turbojpeg"):
+            self.cpp_info.components["turbojpeg"].names["cmake_find_package"] = "turbojpeg" + cmake_target_suffix
+            self.cpp_info.components["turbojpeg"].names["cmake_find_package_multi"] = "turbojpeg" + cmake_target_suffix
+            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["turbojpeg"].libs = ["turbojpeg" + lib_suffix]

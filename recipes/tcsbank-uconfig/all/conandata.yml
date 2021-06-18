@@ -1,0 +1,4 @@
+sources:
+  "2.0.3":
+    url: "https://github.com/TinkoffCreditSystems/uconfig/archive/refs/tags/v2.0.3.tar.gz"
+    sha256: "a1f6278ebd6c0c7ba391651ab6f0aceeb9cb77dc6936d45dc0e6fee3f27dfcbf"

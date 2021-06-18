@@ -1,5 +1,4 @@
 import os
-
 from conans import ConanFile, CMake, tools
 
 
@@ -28,7 +27,7 @@ class Mosquitto(ConanFile):
                        "clients": False,
                        "broker": False,
                        "apps": False,
-                       "cjson": False,
+                       "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
                        "build_cpp": True,
                        "websockets": False,
     }
@@ -80,6 +79,10 @@ class Mosquitto(ConanFile):
         self._cmake.definitions["WITH_PIC"] = self.options.get_safe("fPIC", False)
         self._cmake.definitions["WITH_TLS"] = self.options.ssl
         self._cmake.definitions["WITH_CLIENTS"] = self.options.clients
+        if tools.Version(self.version) < "2.0.6":
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_cJSON"] = not self.options.get_safe("cjson")
+        else:
+            self._cmake.definitions["WITH_CJSON"] = self.options.get_safe("cjson")
         self._cmake.definitions["WITH_BROKER"] = self.options.broker
         self._cmake.definitions["WITH_APPS"] = self.options.apps
         self._cmake.definitions["WITH_PLUGINS"] = False

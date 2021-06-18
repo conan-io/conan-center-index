@@ -8,7 +8,7 @@ class CLI11Conan(ConanFile):
     description = "A command line parser for C++11 and beyond."
     topics = ("cli-parser", "cpp11", "no-dependencies", "cli", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "BDS-3-Clause"
+    license = "BSD-3-Clause"
     settings = "os", "compiler", "build_type", "arch"
 
     @property

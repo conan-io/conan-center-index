@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-rc1":
+    url: "https://github.com/tylov/STC/archive/refs/tags/v1.0.0-rc1.tar.gz"
+    sha256: "503ae9c43c0584bd177c0c4bd69c0b31d26b213d84c6c2aabe4fd48eb3cf6b81"
