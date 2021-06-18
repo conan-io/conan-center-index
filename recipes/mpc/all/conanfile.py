@@ -2,6 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class MpcConan(ConanFile):
     name = "mpc"
@@ -15,19 +16,15 @@ class MpcConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "patches/**"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _autotools = None
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-
-    def requirements(self):
-        self.requires("mpfr/4.1.0")
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
@@ -35,10 +32,11 @@ class MpcConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("mpfr/4.1.0")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -63,7 +61,7 @@ class MpcConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libmpc.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["mpc"]
