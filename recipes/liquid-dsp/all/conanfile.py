@@ -95,7 +95,7 @@ class LiquidDspConan(ConanFile):
     def _gen_link_library(self):
         if self.settings.compiler != "Visual Studio":
             return
-        self.run("generate_link_library.bat")
+        self.run("generate_link_library.bat", win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             self.run(
                 f"""{os.getenv("AR")} /def:libliquid.def /out:libliquid.lib """
