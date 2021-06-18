@@ -81,9 +81,13 @@ class LiquidDspConan(ConanFile):
             autotools.make()
 
     def package(self):
-        pass
+        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["liquid-dsp"]
+        libname = "liquid"
+        self.cpp_info.libs = [libname]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
