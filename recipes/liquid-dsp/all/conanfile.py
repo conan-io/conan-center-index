@@ -143,7 +143,9 @@ class LiquidDspConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy(
-            pattern="include/liquid.h", dst="include/liquid", src=self._source_subfolder
+            pattern="liquid.h",
+            dst="include/liquid",
+            src=os.path.join(self._source_subfolder, "include"),
         )
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
         if self.settings.os == "Windows":
