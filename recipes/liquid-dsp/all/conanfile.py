@@ -28,28 +28,46 @@ class LiquidDspConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _libname(self):
+        return "libliquid"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported for now")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("liquid-dsp-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
+
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
+                    "LD": "link -nologo",
+                    "AR": "{} lib".format(
+                        tools.unix_path(self.deps_user_info["automake"].ar_lib)
+                    ),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -63,9 +81,13 @@ class LiquidDspConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
 
-        configure_args = [
-            "--enable-debug-messages",
-        ]
+        configure_args = []
+
+        if self.settings.build_type == "Debug":
+            configure_args.append("--enable-debug-messages")
+
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
 
         with tools.chdir(self._source_subfolder):
             self._autotools.configure(
@@ -75,19 +97,35 @@ class LiquidDspConan(ConanFile):
 
         return self._autotools
 
+    def _patch_sources(self):
+        if self.settings.compiler == "Visual Studio":
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+            # Make the files be MSVC friendly
+            for subdir, dirs, files in os.walk(
+                os.path.join(self.source_folder, self._source_subfolder)
+            ):
+                filepath = os.path.join(
+                    self.source_folder, self._source_subfolder, subdir, filepath
+                )
+                tools.replace_in_file(filepath, "float complex", "_Fcomplex")
+                tools.replace_in_file(filepath, "double complex", "_Dcomplex")
+
     def build(self):
-        autotools = self._configure_autotools()
-        with tools.chdir(self._source_subfolder):
-            autotools.make()
+        self._patch_sources()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            with tools.chdir(self._source_subfolder):
+                autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        with self._build_context():
+            with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autotools()
+                autotools.install()
 
     def package_info(self):
-        libname = "liquid"
-        self.cpp_info.libs = [libname]
+        self.cpp_info.libs = [self._libname]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
