@@ -20,4 +20,5 @@ file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CXX "*.cxx")
 file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CPP "*.cpp")
 
 add_executable(test_package ${HELLOWORLD_EXAMPLE_SOURCES_CXX} ${HELLOWORLD_EXAMPLE_SOURCES_CPP})
-target_link_libraries(test_package fastdds::fastrtps)
+# validate the alias
+target_link_libraries(test_package fastrtps)

@@ -34,7 +34,7 @@ int main()
     const char *argv[2] = {"", "subscribe"};
 
     int type = 1;
-    int count = 10;
+    int count = 9;
     long sleep = 100;
     if(argc > 1)
     {

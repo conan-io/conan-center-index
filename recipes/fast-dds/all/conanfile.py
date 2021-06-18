@@ -51,6 +51,32 @@ class FastDDSConan(ConanFile):
         )
 
     @property
+    def _module_subfolder(self):
+        return os.path.join(
+            "lib",
+            "cmake"
+        )
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(
+            self._module_subfolder,
+            "conan-target-properties.cmake"
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -114,24 +140,32 @@ class FastDDSConan(ConanFile):
             dst=os.path.join(self._pkg_bin,"tools")
         )
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"fastrtps": "fastdds::fastrtps"}
+        )
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "fastdds"
         self.cpp_info.names["cmake_find_multi_package"] = "fastdds"
         # component fastrtps 
         self.cpp_info.components["fastrtps"].name = "fastrtps"
-        self.cpp_info.components["fastrtps"].libs = ["fastrtps"]
+        self.cpp_info.components["fastrtps"].libs = tools.collect_libs(self)
         self.cpp_info.components["fastrtps"].requires = [
             "fast-cdr::fast-cdr",
             "asio::asio",
             "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory"
         ]
-        self.cpp_info.components["fastrtps"].system_libs = [
-                "pthread",
-                "rt",
-                "dl"
-            ]
+        if self.settings.os in ["Linux","Macos","Neutrino"]:
+            self.cpp_info.components["fastrtps"].system_libs = [
+                    "pthread",
+                    "rt",
+                    "dl"
+                ]
+        self.cpp_info.components["fastrtps"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         # component fast-discovery
         self.cpp_info.components["fast-discovery"].name = "fast-discovery"
         self.cpp_info.components["fast-discovery"].requires = [
