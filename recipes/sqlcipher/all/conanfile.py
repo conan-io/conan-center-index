@@ -1,4 +1,5 @@
 from conans import tools, ConanFile, AutoToolsBuildEnvironment, RunEnvironment
+from conans.errors import ConanInvalidConfiguration
 import platform
 import sys
 import os
@@ -14,7 +15,7 @@ class SqlcipherConan(ConanFile):
     options = {
                 "shared": [True, False],
                 "fPIC": [True, False],
-                "crypto_library": ["openssl", "libressl"],
+                "crypto_library": ["openssl", "libressl", "commoncrypto"],
                 "with_largefile": [True, False],
                 "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"]
               }
@@ -40,6 +41,8 @@ class SqlcipherConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.crypto_library == "commoncrypto" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
         if self.options.shared:
             del self.options.fPIC
 
@@ -53,7 +56,7 @@ class SqlcipherConan(ConanFile):
     def requirements(self):
         if self.options.crypto_library == "openssl":
             self.requires("openssl/1.1.1k")
-        else:
+        elif self.options.crypto_library == "libressl":
             self.requires("libressl/3.2.0")
 
     def source(self):
@@ -114,7 +117,9 @@ class SqlcipherConan(ConanFile):
             autotools_env.libs.append("dl")
             if not self.options.with_largefile:
                 autotools_env.defines.append("SQLITE_DISABLE_LFS=1")
-        autotools_env.defines.extend(["SQLITE_HAS_CODEC", "SQLCIPHER_CRYPTO_OPENSSL"])
+        autotools_env.defines.extend(["SQLITE_HAS_CODEC"])
+        if not self._use_commoncrypto():
+            autotools_env.defines.extend(["SQLCIPHER_CRYPTO_OPENSSL"])
 
         # sqlcipher config.sub does not contain android configurations...
         # elf is the most basic `os' for Android
@@ -144,6 +149,8 @@ class SqlcipherConan(ConanFile):
                 build = None
             tclsh_cmd = self.deps_env_info.TCLSH
             env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
+            if self._use_commoncrypto():
+                env_vars["LDFLAGS"] += " -framework Security -framework CoreFoundation "
             autotools_env.configure(args=configure_args, host=host, build=build, vars=env_vars)
             if self.settings.os == "Windows":
                 # sqlcipher will create .exe for the build machine, which we defined to Linux...
@@ -172,12 +179,17 @@ class SqlcipherConan(ConanFile):
         ]
         if self.settings.os == "Windows":
             args.extend(["config_BUILD_EXEEXT='.exe'", "config_TARGET_EXEEXT='.exe'"])
+        if self._use_commoncrypto():
+            args.extend(["--with-crypto-lib=commoncrypto"])
         return args
 
     def _autotools_bool_arg(self, arg_base_name, value):
         prefix = "--enable-" if value else "--disable-"
 
         return prefix + arg_base_name
+
+    def _use_commoncrypto(self):
+        return self.options.crypto_library == "commoncrypto" and tools.is_apple_os(self.settings.os)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -215,6 +227,10 @@ class SqlcipherConan(ConanFile):
         self.cpp_info.libs = ["sqlcipher"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
-        self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLCIPHER_CRYPTO_OPENSSL', 'SQLITE_TEMP_STORE=%s' % self._temp_store_nmake_value]
+        self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLITE_TEMP_STORE=%s' % self._temp_store_nmake_value]
+        if self._use_commoncrypto():
+            self.cpp_info.frameworks = ["Security", "CoreFoundation"]
+        else:
+            self.cpp_info.defines.extend(['SQLCIPHER_CRYPTO_OPENSSL'])
         # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
         self.cpp_info.includedirs.append(os.path.join("include", "sqlcipher"))

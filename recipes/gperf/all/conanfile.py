@@ -11,6 +11,7 @@ class GperfConan(ConanFile):
     settings = "os", "arch", "compiler"
     _source_subfolder = "source_subfolder"
     _autotools = None
+    exports_sources = "patches/**"
 
     @property
     def _is_msvc(self):

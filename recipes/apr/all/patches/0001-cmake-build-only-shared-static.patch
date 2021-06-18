@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -258,27 +258,27 @@
+@@ -258,27 +258,26 @@
  SET(install_targets)
  SET(install_bin_pdb)
  
@@ -11,7 +11,6 @@
  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/libapr-1.pdb)
  TARGET_LINK_LIBRARIES(libapr-1 ${APR_SYSTEM_LIBS})
  SET_TARGET_PROPERTIES(libapr-1 PROPERTIES COMPILE_DEFINITIONS "APR_DECLARE_EXPORT;WINNT")
-+SET_TARGET_PROPERTIES(libapr-1 PROPERTIES PREFIX "" OUTPUT_NAME "apr-1")
  ADD_DEPENDENCIES(libapr-1 test_char_header)
 -
 +ELSE()

@@ -1,0 +1,4 @@
+sources:
+  "1.9":
+    url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.9.tar.gz"
+    sha256: "909eb88c71268dc00cdda244a1fa40a0feefae45f68a779fbfddd5463559fa40"

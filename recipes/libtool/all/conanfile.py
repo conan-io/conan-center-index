@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import os
 import re
+import shutil
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanException
 
@@ -51,6 +52,7 @@ class LibtoolConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
+        self.build_requires("gnu-config/cci.20201022")
 
     @contextmanager
     def _build_context(self):
@@ -88,6 +90,16 @@ class LibtoolConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        if hasattr(self, "user_info_build"):
+            config_sub = self.user_info_build["gnu-config"].CONFIG_SUB
+            config_guess = self.user_info_build["gnu-config"].CONFIG_GUESS
+        else:
+            config_sub = self.deps_user_info["gnu-config"].CONFIG_SUB
+            config_guess = self.deps_user_info["gnu-config"].CONFIG_GUESS
+        shutil.copy(config_sub,
+                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
+        shutil.copy(config_guess,
+                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
