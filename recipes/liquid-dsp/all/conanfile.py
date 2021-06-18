@@ -112,9 +112,7 @@ class LiquidDspConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             if self.settings.os == "Windows" and self.options.shared:
                 os.rename("libliquid.so", "libliquid.dll")
-                self.copy(
-                    pattern="libliquid.dll", dst="bin", src=self._source_subfolder
-                )
+                self.copy(pattern="libliquid.dll", dst="bin")
             elif self.settings.os == "Windows" and not self.options.shared:
                 os.rename("libliquid.a", "libliquid.lib")
             elif self.settings.os == "Macos" and not self.options.shared:
