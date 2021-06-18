@@ -53,11 +53,9 @@ class XercesCConan(ConanFile):
                                                  "Macos": "macosunicodeconverter",
                                                  "Linux": "gnuiconv"}.get(str(self.settings.os))
         self._cmake.definitions["message-loader"] = "inmemory"
-        
-        self._cmake.definitions["xmlch-type"] = {"Windows": self.options.char_type,
-                                                 "Macos": "uint16_t",
-                                                 "Linux": "uint16_t"}.get(str(self.settings.os))
-                                                 
+
+        self._cmake.definitions["xmlch-type"] = self.options.char_type if "char_type" in self.options else "uint16_t"
+
         self._cmake.definitions["mutex-manager"] = {"Windows": "windows",
                                                     "Macos": "posix",
                                                     "Linux": "posix"}.get(str(self.settings.os))
