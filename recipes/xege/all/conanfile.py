@@ -12,11 +12,14 @@ class XegeConan(ConanFile):
     description = "Easy Graphics Engine, a lite graphics library in Windows"
     topics = ("ege", "graphics", "gui")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [False]}
+    options = {"shared": [False, True]}
     default_options = {"shared": False}
     generators = "cmake"
 
     def configure(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration(
+                "This library is always static")
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration(
                 "This library is only compatible for Windows")
