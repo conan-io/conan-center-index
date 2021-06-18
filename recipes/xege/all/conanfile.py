@@ -35,7 +35,7 @@ class XegeConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="source_subfolder")
+        cmake.configure()
         cmake.build()
 
         # Explicit way:
