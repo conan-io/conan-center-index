@@ -93,7 +93,7 @@ class LiquidDspConan(ConanFile):
                 tools.patch(**patch)
 
     def _gen_link_library(self):
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler != "Visual Studio" or (not self.options.shared):
             return
         self.run("cmd /c generate_link_library.bat")
         with tools.chdir(self._source_subfolder):
