@@ -4,7 +4,7 @@ import os
 
 
 class ConfuJson(ConanFile):
-    name = "confu_json"
+    name = "confu-json"
     homepage = "https://github.com/werto87/confu_json"
     description = "uses boost::fusion to help with serialization; json <-> user defined type"
     topics = ("json parse", "serialization", "user defined type")
