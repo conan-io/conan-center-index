@@ -4,7 +4,7 @@ from collections import namedtuple, OrderedDict
 import os
 
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class PocoConan(ConanFile):
@@ -91,9 +91,8 @@ class PocoConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "poco-poco-{}-release".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -111,6 +110,12 @@ class PocoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.enable_xml:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoXML"))
+        if not self.options.enable_json:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoJSON"))
 
     def validate(self):
         if self.options.enable_apacheconnector:
@@ -135,9 +140,9 @@ class PocoConan(ConanFile):
         self.requires("pcre/8.44")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.1")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.35.5")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
@@ -146,15 +151,15 @@ class PocoConan(ConanFile):
         if self.options.get_safe("enable_netssl", False) or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/13.1")
+            self.requires("libpq/13.2")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
-            self.requires('apr-util/1.6.1')
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("apr-util/1.6.1")
+            self.requires("libmysqlclient/8.0.25")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -164,6 +169,7 @@ class PocoConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         if tools.Version(self.version) < "1.10.1":
             self._cmake.definitions["POCO_STATIC"] = not self.options.shared
         for comp in self._poco_component_tree.values():
@@ -238,5 +244,11 @@ class PocoConan(ConanFile):
                 self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
                 if self.options.enable_data_odbc:
                     self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
+        self.cpp_info.defines.append("POCO_UNBUNDLED")
+        if self.options.enable_util:
+            if not self.options.enable_json:
+                self.cpp_info.defines.append("POCO_UTIL_NO_JSONCONFIGURATION")
+            if not self.options.enable_xml:
+                self.cpp_info.defines.append("POCO_UTIL_NO_XMLCONFIGURATION")
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
