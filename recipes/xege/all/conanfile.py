@@ -29,11 +29,6 @@ class XegeConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-        # Explicit way:
-        # self.run('cmake %s/hello %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
-
     def package(self):
         self.copy("*.h", dst="include", src="source_subfolder/src")
         self.copy("*.lib", dst="lib", keep_path=False)
