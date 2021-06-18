@@ -45,6 +45,8 @@ class LiquidDspConan(ConanFile):
 
     @property
     def _lib_pattern(self):
+        if self.settings.os == "Macos" and not self.options.shared:
+            return "libliquid.a"
         if self.settings.os != "Windows":
             return self._target_name
         return "libliquid.lib"
@@ -107,14 +109,16 @@ class LiquidDspConan(ConanFile):
             dst="include/liquid",
             src=os.path.join(self._source_subfolder, "include"),
         )
-        if self.settings.os == "Windows" and self.options.shared:
-            # This makefile is so weird it doesn't create the proper file extension
-            with tools.chdir(self._source_subfolder):
+        with tools.chdir(self._source_subfolder):
+            if self.settings.os == "Windows" and self.options.shared:
                 os.rename("libliquid.so", "libliquid.dll")
-            self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
-        if self.settings.os == "Windows" and not self.options.shared:
-            with tools.chdir(self._source_subfolder):
+                self.copy(
+                    pattern="libliquid.dll", dst="bin", src=self._source_subfolder
+                )
+            elif self.settings.os == "Windows" and not self.options.shared:
                 os.rename("libliquid.a", "libliquid.lib")
+            elif self.settings.os == "Macos" and not self.options.shared:
+                os.rename("libliquid.ar", "libliquid.a")
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
