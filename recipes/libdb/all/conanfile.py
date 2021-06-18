@@ -132,6 +132,7 @@ class LibdbConan(ConanFile):
         return self._msvc_platforms[str(self.settings.arch)]
 
     def _build_msvc(self):
+        # This seems to be broken for latest VS 16 2019 (16.10), even if it built in the past (16.4.4)
         projects = ["db", "db_sql", "db_stl"]
         if self.options.with_tcl:
             projects.append("db_tcl")
