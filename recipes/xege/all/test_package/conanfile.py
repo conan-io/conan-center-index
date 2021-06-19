@@ -1,5 +1,3 @@
-# Tested under MinGW-w64 32bit / 64bit and Visual Studio 2019.
-
 from conans import ConanFile, CMake, tools
 import os
 
