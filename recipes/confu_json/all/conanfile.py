@@ -31,7 +31,7 @@ class ConfuJson(ConanFile):
             "clang": "10",
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(
                 "apple-clang is not supported because of missing concept support")
