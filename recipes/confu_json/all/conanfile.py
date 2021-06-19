@@ -53,7 +53,10 @@ class ConfuJson(ConanFile):
                         self.name, self._minimum_cpp_standard,
                         self.settings.compiler,
                         self.settings.compiler.version))
-        self.options["boost"].header_only = True
+
+    def configure(self):
+        if not self.options["boost"].header_only:
+            raise ConanInvalidConfiguration("{} requires a header-only Boost. ".format(self.name))
 
     def requirements(self):
         self.requires("boost/1.76.0")
