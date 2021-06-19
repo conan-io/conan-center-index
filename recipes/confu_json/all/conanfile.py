@@ -4,6 +4,8 @@ from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 from conans.tools import Version
 
+required_conan_version = ">=1.33.0"
+
 
 class ConfuJson(ConanFile):
     name = "confu_json"
