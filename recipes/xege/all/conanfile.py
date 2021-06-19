@@ -21,10 +21,13 @@ class XegeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "This library is only compatible for Windows")
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, "source_subfolder")
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         cmake = CMake(self)
@@ -32,12 +35,12 @@ class XegeConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("*.h", dst="include", src="source_subfolder/src")
+        self.copy("*.h", dst="include", src=self._source_subfolder+"/src")
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
-        self.copy("LICENSE", dst="licenses", src="source_subfolder")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         if self.settings.arch == "x86_64":
@@ -51,6 +54,5 @@ class XegeConan(ConanFile):
             "gdi32",
             "imm32",
             "ole32",
-            "oleaut32",
-            "winmm"
+            "oleaut32"
         ]
