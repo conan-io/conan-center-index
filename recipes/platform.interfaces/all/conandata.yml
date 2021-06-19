@@ -1,4 +1,4 @@
 sources:
-  "0.0.3":
-    url: https://github.com/linksplatform/Interfaces/archive/refs/tags/0.4.0_0.0.3.zip
-    sha256: beec8f998f189690ddf1d58da5dde7163717cd6fe6e3c893e272eaeecbf55a7b
+  "0.1.0":
+    url: https://github.com/linksplatform/Interfaces/archive/refs/tags/0.4.0_0.1.0.zip
+    sha256: bf2023f4fd7c76daabb574d243b0c52fb5250de4db28d575ad120c69c5b89ac9
