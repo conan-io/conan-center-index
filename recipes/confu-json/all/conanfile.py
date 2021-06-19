@@ -26,7 +26,7 @@ class ConfuJson(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
+            "Visual Studio": "15",
             "gcc": "10",
             "clang": "10",
             "apple-clang": "20",
