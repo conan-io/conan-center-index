@@ -1,7 +1,8 @@
 import os
-import glob
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
 
 class AndreasbuhrCppCoroConan(ConanFile):
     name = "andreasbuhr-cppcoro"
@@ -71,9 +72,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("cppcoro-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+       tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:

@@ -4,14 +4,8 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(cppcoro CONFIG REQUIRED)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(${PROJECT_NAME} PRIVATE -fcoroutines)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang") # Both regular clang and apple clang
-  target_compile_options(${PROJECT_NAME} PRIVATE -fcoroutines-ts)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # Lower version MSVC/Visual Studio still requires /await to support coroutines, despite having /std:c++latest
-  target_compile_options(${PROJECT_NAME} PRIVATE /await)
-endif()
+target_link_libraries(${PROJECT_NAME} cppcoro::cppcoro)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
