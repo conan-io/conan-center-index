@@ -23,10 +23,6 @@ class CpuFeaturesConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -49,7 +45,7 @@ class CpuFeaturesConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure() # Does not support out of source builds
         return self._cmake
 
     def build(self):
