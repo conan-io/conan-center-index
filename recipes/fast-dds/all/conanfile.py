@@ -122,7 +122,7 @@ class FastDDSConan(ConanFile):
                 "Using Fast-DDS with gcc on Linux requires gcc 5 or higher.")
         if os == "Linux" and compiler == "clang" and version < "5.0":
             raise ConanInvalidConfiguration(
-                "Using Fast-DDS with gcc on Linux requires clang 5 or higher.")
+                "Using Fast-DDS with clang on Linux requires clang 5 or higher.")
         if os == "Windows" and compiler == "Visual Studio" and version < "16":
             raise ConanInvalidConfiguration(
                 "Fast-DDS was tested on Windows with VS Compiler 16")
@@ -143,34 +143,11 @@ class FastDDSConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(self._pkg_share)
-        # tmp because you cannot move bin to bin/discovery directly
-        tools.mkdir(os.path.join(self.package_folder, "tmp"))
-        tools.rename(
-            src=self._pkg_bin,
-            dst=os.path.join(self.package_folder, "tmp", "discovery")
-        )
-        tools.mkdir(self._pkg_bin)
-        tools.rename(
-            src=os.path.join(self.package_folder, "tmp", "discovery"),
-            dst=os.path.join(self._pkg_bin, "discovery")
-        )
-        # DLL on windows on bin level
-        if self.settings.os == "Windows" and self.options.shared:
-            dll_name = "fastrtps-{major}.{minor}.dll".format(
-                major=self.version.split(".")[0],
-                minor=self.version.split(".")[1]
-            )
-            if os.path.exists(os.path.join(self._pkg_bin, "discovery", dll_name)):
-                tools.rename(
-                    src=os.path.join(self._pkg_bin, "discovery", dll_name),
-                    dst=os.path.join(self._pkg_bin, dll_name)
-                )
-        tools.rmdir(os.path.join(self.package_folder, "tmp"))
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rename(
             src=self._pkg_tools,
             dst=os.path.join(self._pkg_bin, "tools")
         )
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.remove_files_by_mask(
             directory=os.path.join(self.package_folder, "lib"),
             pattern="*.pdb"
@@ -203,7 +180,8 @@ class FastDDSConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["fastrtps"].system_libs = [
                     "rt",
-                    "dl"
+                    "dl",
+                    "atomic"
                 ]
         elif self.settings.os == "Windows":
             self.cpp_info.components["fastrtps"].system_libs = [
@@ -212,32 +190,20 @@ class FastDDSConan(ConanFile):
             ]
             if self.options.shared:
                 self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
-        if self.settings.os == "Linux":
-            self.cpp_info.components["fastrtps"].system_libs.append("atomic")
+        if self.options.with_ssl:
+            self.cpp_info.components["fastrtps"].requires.append("openssl::openssl")
         self.cpp_info.components["fastrtps"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["fastrtps"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         # component fast-discovery
         self.cpp_info.components["fast-discovery"].name = "fast-discovery"
-        self.cpp_info.components["fast-discovery"].requires = [
-            "fastrtps",
-            "tinyxml2::tinyxml2",
-        ]
-        if self.settings.os in ["Linux", "Macos", "Neutrino"]:     
-            self.cpp_info.components["fast-discovery"].system_libs = [
-                "pthread"
-            ]
-        if self.settings.os in ["Linux"]:
-            self.cpp_info.components["fast-discovery"].system_libs = [
-                "rt"
-            ]
-        self.cpp_info.components["fast-discovery"].bindirs = [os.path.join("bin", "discovery")]
-        bin_path = os.path.join(self.package_folder, "bin", "discovery")
+        self.cpp_info.components["fast-discovery"].bindirs = ["bin"]
+        bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var for fast-dds::fast-discovery with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
         # component tools
         self.cpp_info.components["tools"].name = "tools"
-        self.cpp_info.components["tools"].bindirs = [os.path.join("bin", "tools")]
-        bin_path = os.path.join(self.package_folder, "bin", "tools")
+        self.cpp_info.components["tools"].bindirs = [os.path.join("bin","tools")]
+        bin_path = os.path.join(self._pkg_bin, "tools")
         self.output.info("Appending PATH env var for fast-dds::tools with : {}".format(bin_path)),
         self.env_info.PATH.append(bin_path)
