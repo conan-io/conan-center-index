@@ -1,10 +1,6 @@
 #include <ege.h>
 #include <windows.h>
 
-#ifdef _MSC_VER
-#pragma comment(lib,"msvcrtd.lib")
-#endif
-
 using namespace ege;
 
 int main() {
