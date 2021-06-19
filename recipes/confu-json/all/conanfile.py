@@ -28,7 +28,7 @@ class ConfuJson(ConanFile):
         return {
             "Visual Studio": "20",
             "gcc": "10",
-            "clang": "20",
+            "clang": "11",
             "apple-clang": "20",
         }
 
