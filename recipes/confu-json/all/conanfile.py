@@ -29,10 +29,12 @@ class ConfuJson(ConanFile):
             "Visual Studio": "15",
             "gcc": "10",
             "clang": "10",
-            "apple-clang": "20",
         }
 
     def configure(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(
+                "apple-clang is not supported because of missing concept support")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
