@@ -50,3 +50,6 @@ sources:
   "2.68.2":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.2/glib-2.68.2.tar.gz"
     sha256: "904b5f63792f34ee40a31637806f63f5e5dd81ed18acd1380e184a257b4976e3"
+  "2.68.3":
+    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.68.3/glib-2.68.3.tar.gz"
+    sha256: "465c0727dd5505e998ebb1dae7c38683440dc6d6beffbca6bbf3eaabdb4f6ac7"

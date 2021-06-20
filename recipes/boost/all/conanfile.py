@@ -528,10 +528,11 @@ class BoostConan(ConanFile):
         except ConanException:
             self.output.info("(failed)")
             return None
-        output = output.getvalue().strip()
+        output = output.getvalue()
         # Conan is broken when run_to_output = True
         if "\n-----------------\n" in output:
             output = output.split("\n-----------------\n", 1)[1]
+        output = output.strip()
         return output if output != "None" else None
 
     def _get_python_path(self, name):

@@ -16,11 +16,14 @@ sources:
     sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
 patches:
   "0.4.9":
-    - patch_file: "patches/find-conan-qt-0.4.9.patch"
+    - patch_file: "patches/0.4.9-0001-find-conan-qt.patch"
       base_path: "source_subfolder"
   "0.4.8":
-    - patch_file: "patches/find-conan-qt-0.4.8.patch"
+    - patch_file: "patches/0.4.8-0001-find-conan-qt.patch"
       base_path: "source_subfolder"
   "0.4.7":
-    - patch_file: "patches/find-conan-qt-0.4.7.patch"
+    - patch_file: "patches/0.4.7-0001-find-conan-qt.patch"
+      base_path: "source_subfolder"
+  "0.2.6":
+    - patch_file: "patches/0.2.6-0001-remove-sentry-handler-dependency.patch"
       base_path: "source_subfolder"

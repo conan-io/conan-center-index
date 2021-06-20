@@ -57,18 +57,18 @@ class PulseAudioConan(ConanFile):
             del self.options.with_fftw
 
     def requirements(self):
-        self.requires("libsndfile/1.0.30")
+        self.requires("libsndfile/1.0.31")
         self.requires("libcap/2.48")
         if self.options.with_alsa:
             self.requires("libalsa/1.2.4")
         if self.options.with_glib:
-            self.requires("glib/2.68.0")
+            self.requires("glib/2.68.2")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.9")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
@@ -82,12 +82,10 @@ class PulseAudioConan(ConanFile):
     def build_requirements(self):
         self.build_requires("gettext/0.20.1")
         self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
