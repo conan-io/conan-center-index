@@ -8,7 +8,7 @@ class MioConan(ConanFile):
     name = "mio"
     description = "Cross-platform C++11 header-only library for memory mapped file IO."
     license = "MIT"
-    topics = ("mio", "mmap", "memory-mapping", "flieviewer")
+    topics = ("mio", "mmap", "memory-mapping", "fileviewer")
     homepage = "https://github.com/mandreyel/mio"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler"
