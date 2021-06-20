@@ -44,6 +44,11 @@ class MiniupnpcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        # Do not force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "miniupnpc", "CMakeLists.txt"),
+                              "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -58,6 +63,7 @@ class MiniupnpcConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
