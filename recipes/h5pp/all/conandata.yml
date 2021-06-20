@@ -12,6 +12,6 @@ sources:
     sha256: 39d413c9383b00a87153b9480ab6a91ba356d3f30b3598de0c0c8f7f3bd802c7
     url: https://github.com/DavidAce/h5pp/archive/v1.8.6.tar.gz
   "1.9.0":
-    sha256: 72b9eb5ed2d57969fbf248511aa459cc69c44612daa1215b5c224605ee92bac1
+    sha256: f633b6f76ab20e1767f55068154cf8bf553e39d526ae80947388640c57ea2056
     url: https://github.com/DavidAce/h5pp/archive/v1.9.0.tar.gz
 
