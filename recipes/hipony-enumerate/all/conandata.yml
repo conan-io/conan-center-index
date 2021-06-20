@@ -1,0 +1,4 @@
+sources:
+  "2.2.1":
+    url: "https://github.com/hipony/enumerate/archive/refs/tags/v2.2.1.zip"
+    sha256: "0b6e208007fc0cdffe7f23686faddf5c2bc06f6794bacf2e612197e1e54140e7"
