@@ -20,8 +20,7 @@ class HiponyEnumerateConan(ConanFile):
         "aggregates": [True, False],
     }
     default_options = {
-        "aggregates": False,
-        "catch2:with_main": True
+        "aggregates": False
     }
 
     generators = "cmake", "cmake_find_package_multi"
@@ -32,9 +31,6 @@ class HiponyEnumerateConan(ConanFile):
     def requirements(self):
         if self.options.aggregates:
             self.requires("pfr/2.0.2")
-
-    def build_requirements(self):
-        self.build_requires("catch2/2.13.4")
 
     @property
     def _compilers_minimum_version(self):
