@@ -41,9 +41,8 @@ class Libde265Conan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def validate(self):
-        if self.options.sse:
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                raise ConanInvalidConfiguration("Option 'libde265:sse' with value True is not supported for Macos/armv8")
+        if self.options.sse and self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("Option 'libde265:sse' only supported for x86 and x86_64")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
