@@ -39,7 +39,7 @@ class GLibConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     def validate(self):
-        if tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def configure(self):
