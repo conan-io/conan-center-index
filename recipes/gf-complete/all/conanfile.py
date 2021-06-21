@@ -34,7 +34,7 @@ class GfCompleteConan(ConanFile):
     _autotools = None
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == 'Windows':
