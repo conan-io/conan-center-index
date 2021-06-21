@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     
     def build_requirements(self):
         if tools.cross_building(self.settings):
-            self.build_requires(str(self.requires['flatc']))
+            self.build_requires(str(self.requires["flatc"]))
         
     def build(self):
         cmake = CMake(self)
