@@ -77,9 +77,12 @@ class B2Conan(ConanFile):
         os.chdir(build_dir)
         command = os.path.join(
             engine_dir, "b2.exe" if use_windows_commands else "b2")
-        full_command = \
-            "{0} --ignore-site-config --prefix=../output --abbreviate-paths install".format(
-                command)
+        if self.options.toolset != 'auto':
+            full_command = "{0} --ignore-site-config --prefix=../output --abbreviate-paths" \
+                           " toolset={1} install".format(command, self.options.toolset)
+        else:
+            full_command = "{0} --ignore-site-config --prefix=../output --abbreviate-paths" \
+                           " install".format(command)
         self.run(full_command)
 
     def package(self):
