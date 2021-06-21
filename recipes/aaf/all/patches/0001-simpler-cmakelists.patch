@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e77cb93cc..fcad50524 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,25 +58,15 @@ set(AAFSDK_OUT_DIR "${AAFSDK_ROOT}/out" CACHE STRING "Path to AAFSDK output dire
+ 
+ project(AAF-SDK LANGUAGES CXX)
+ 
+-enable_testing()
+-
+ include(pdefs)
+ include(cdefs)
+ include(common)
+ include(ss)
+ 
+ add_subdirectory(DevUtils)
+-add_subdirectory(examples)
+-add_subdirectory(examples2)
+ add_subdirectory(ref-impl)
+-add_subdirectory(test)
+-add_subdirectory(Utilities)
+ 
+ add_custom_target(Everything)
+ add_dependencies(Everything
+     MakeSDK
+-    MakeSDKExamples
+-    MakeSDKExamples2
+-    MakeSDKTests
+-    MakeSDKUtilities
+ )
