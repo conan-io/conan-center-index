@@ -33,16 +33,14 @@ class Libde265Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch in ["x86", "x86_64"]:
+            del self.options.sse
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
-
-    def validate(self):
-        if self.options.sse and self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Option 'libde265:sse' only supported for x86 and x86_64")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,7 +58,7 @@ class Libde265Conan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["ENABLE_SDL"] = False
-        self._cmake.definitions["DISABLE_SSE"] = not self.options.sse
+        self._cmake.definitions["DISABLE_SSE"] = not self.options.get_safe("sse", False)
         self._cmake.configure()
         return self._cmake
 
