@@ -968,9 +968,10 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
 
         if self.options.qtmultimedia:
-            _create_module("Multimedia", ["Network", "Gui"])
+            _create_module("Multimedia", ["Network", "Gui", "openal::openal"])
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
-            _create_module("MultimediaQuick", ["Multimedia", "Quick"])
+            if self.options.qtdeclarative and self.options.gui:
+                _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.settings.os == "Linux":
                 _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui"])
