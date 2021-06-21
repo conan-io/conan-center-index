@@ -37,14 +37,15 @@ class AafConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if tools.is_apple_os(self.settings.os):
-            cmake = CMake(self, generator="Xcode")
-        elif self.settings.compiler == "Visual Studio":
-            cmake = CMake(self, generator="Visual Studio")
-        else:
-            cmake = CMake(self)
 
-        cmake.definitions["PLATFORM"] = self.settings.compiler
+        cmake = CMake(self)
+
+        if tools.is_apple_os(self.settings.os):
+            cmake.generator = "Xcode"
+            cmake.definitions["PLATFORM"] = "apple-clang"
+        elif self.settings.compiler == "Visual Studio":
+            cmake.definitions["PLATFORM"] = "vc"
+
         cmake.definitions["ARCH"] = "x86_64"
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
