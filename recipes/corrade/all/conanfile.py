@@ -80,6 +80,11 @@ class CorradeConan(ConanFile):
 
         return self._cmake
 
+
+    def build_requirements(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self.settings, skip_x64_x86=True):
+            self.build_requires("corrade/{}".format(self.version))
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
