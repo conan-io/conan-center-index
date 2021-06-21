@@ -46,7 +46,7 @@ class SdlttfConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("freetype/2.10.4",)
+        self.requires("freetype/2.10.4")
         self.requires("sdl/2.0.14")
 
     def validate(self):
