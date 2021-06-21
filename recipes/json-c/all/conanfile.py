@@ -50,8 +50,10 @@ class JSONCConan(ConanFile):
             return self._cmake
 
         if tools.Version(self.version) <= "0.13.1" and \
-           tools.cross_building(self.settings) and self.settings.os != "Windows":
+           tools.cross_building(self) and self.settings.os != "Windows":
             host = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch))
+            self.output.info(">?>>>>>>>>>>")
+            self.output.info(host)
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "execute_process(COMMAND ./configure ",
                                   "execute_process(COMMAND ./configure --host %s " % host)
@@ -62,7 +64,10 @@ class JSONCConan(ConanFile):
             self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
             self._cmake.definitions["DISABLE_STATIC_FPIC"] = not self.options.get_safe("fPIC", True)
 
-        self._cmake.configure(build_folder=self._build_subfolder)
+        try:
+            self._cmake.configure(build_folder=self._build_subfolder)
+        except:
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
