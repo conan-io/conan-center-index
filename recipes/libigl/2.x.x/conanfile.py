@@ -105,9 +105,8 @@ class LibiglConan(ConanFile):
         cmake = self._configure_cmake()
         arguments = ''
         if self.settings.compiler == "Visual Studio":
-           arguments += '-A x64'
+           arguments += '-T host=x64'
         self.run('cmake "%s" %s %s' % (self.source_folder, cmake.command_line, arguments))
-        self.run('cmake --build . %s %s' % (cmake.build_config, ' -j 1'))
         cmake.build()
         cmake.install()
 
