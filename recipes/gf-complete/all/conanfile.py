@@ -33,6 +33,9 @@ class GfCompleteConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
