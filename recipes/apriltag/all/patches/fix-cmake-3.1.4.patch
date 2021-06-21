@@ -12,10 +12,10 @@
 @@ -10,9 +10,9 @@
 -set(CMAKE_BUILD_TYPE Release)
 +#set(CMAKE_BUILD_TYPE Release)
- 
+-
  # Library
  file(GLOB TAG_FILES ${PROJECT_SOURCE_DIR}/tag*.c)
--set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
+ set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
 -add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
 +add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
 +set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
