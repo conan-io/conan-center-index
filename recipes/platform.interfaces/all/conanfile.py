@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class PlatformInterfacesConan(ConanFile):
@@ -20,7 +21,21 @@ class PlatformInterfacesConan(ConanFile):
     def _subfolder_sources(self):
         return os.path.join(self._source_subfolder, "cpp", "Platform.Interfaces")
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "10",
+            "Visual Studio": "19",
+            "clang": "11"
+        }
+
     def validate(self):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"platform.interfaces/{self.version} "
+                                            f"requires C++20 with {self.settings.compiler}, "
+                                            f"which is not supported "
+                                            f"by {self.settings.compiler} {self.settings.compiler.version} ")
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 20)
 
