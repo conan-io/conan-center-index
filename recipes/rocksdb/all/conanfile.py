@@ -76,6 +76,9 @@ class RocksDB(ConanFile):
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
 
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
@@ -138,6 +141,9 @@ class RocksDB(ConanFile):
         # not available yet in CCI
 
         self._cmake.definitions["WITH_NUMA"] = False
+
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

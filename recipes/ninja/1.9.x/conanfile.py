@@ -1,6 +1,7 @@
 import os
 import sys
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 
 class NinjaConan(ConanFile):
@@ -9,10 +10,17 @@ class NinjaConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     topics = ("conan", "ninja", "build")
 
     _source_subfolder = "source_subfolder"
+
+    def package_id(self):
+        del self.info.settings.compiler
+
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def _build_vs(self):
         with tools.chdir(self._source_subfolder):
@@ -22,10 +30,10 @@ class NinjaConan(ConanFile):
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             cxx = os.environ.get("CXX", "g++")
-            if self.settings.os_build == "Linux":
-                if self.settings.arch_build == "x86":
+            if self.settings.os == "Linux":
+                if self.settings.arch == "x86":
                     cxx += " -m32"
-                elif self.settings.arch_build == "x86_64":
+                elif self.settings.arch == "x86_64":
                     cxx += " -m64"
             env_build = AutoToolsBuildEnvironment(self)
             env_build_vars = env_build.vars
@@ -38,7 +46,7 @@ class NinjaConan(ConanFile):
         os.rename("ninja-%s" % self.version, self._source_subfolder)
 
     def build(self):
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             self._build_vs()
         else:
             self._build_configure()
@@ -53,11 +61,8 @@ class NinjaConan(ConanFile):
 
     def package_info(self):
         # ensure ninja is executable
-        if self.settings.os_build in ["Linux", "Macos"]:
+        if self.settings.os in ["Linux", "Macos"]:
             name = os.path.join(self.package_folder, "bin", "ninja")
             os.chmod(name, os.stat(name).st_mode | 0o111)
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.CONAN_CMAKE_GENERATOR = "Ninja"
-
-    def package_id(self):
-        del self.info.settings.compiler

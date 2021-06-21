@@ -1,0 +1,4 @@
+sources:
+  "1.0":
+    url: "https://github.com/rigtorp/SPSCQueue/archive/refs/tags/v1.0.tar.gz"
+    sha256: "ac7f88cc7716bb95810e1d5dfac627363cba24c685acfb35261dae13288a48ff"

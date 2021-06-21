@@ -69,6 +69,9 @@ class ICUBase(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
+        if tools.cross_building(self.settings, skip_x64_x86=True) and hasattr(self, 'settings_build'):
+            self.build_requires("icu/{}".format(self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -148,7 +151,6 @@ class ICUBase(ConanFile):
         bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
                 "--prefix={0}".format(prefix),
-                "--with-library-bits={0}".format(bits),
                 "--disable-samples",
                 "--disable-layout",
                 "--disable-layoutex",
@@ -159,12 +161,13 @@ class ICUBase(ConanFile):
 
         env_build = self._configure_autotools()
         if tools.cross_building(self.settings, skip_x64_x86=True):
-            if env_build.build:
-                args.append("--build=%s" % env_build.build)
             if env_build.host:
                 args.append("--host=%s" % env_build.host)
-            if env_build.target:
-                args.append("--target=%s" % env_build.target)
+            bin_path = self.deps_env_info["icu"].PATH[0]
+            base_path, _ = bin_path.rsplit('/', 1)
+            args.append("--with-cross-build={}".format(base_path))
+        else:
+            args.append("--with-library-bits={0}".format(bits),)
 
         if self.settings.os != "Windows":
             # http://userguide.icu-project.org/icudata
@@ -219,6 +222,10 @@ class ICUBase(ConanFile):
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             tools.mkdir(os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
+
+        # Copy some files required for cross-compiling
+        self.copy("icucross.mk", src=os.path.join(build_dir, "config"), dst="config")
+        self.copy("icucross.inc", src=os.path.join(build_dir, "config"), dst="config")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "icu"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
