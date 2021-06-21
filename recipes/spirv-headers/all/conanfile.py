@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
