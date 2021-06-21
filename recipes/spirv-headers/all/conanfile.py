@@ -2,6 +2,7 @@ from conans import ConanFile, tools, CMake
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
 
 class SpirvheadersConan(ConanFile):
     name = "spirv-headers"
@@ -27,13 +28,8 @@ class SpirvheadersConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SPIRV-Headers-" + self.version
-        if self.version == "1.5.1":
-            extracted_dir = extracted_dir + ".corrected"
-        if self.version.startswith('cci.'):
-            extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
