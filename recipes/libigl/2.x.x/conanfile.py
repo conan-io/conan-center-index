@@ -33,7 +33,7 @@ class LibiglConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "6",
             "clang": "3.4",
             "apple-clang": "5.1",
