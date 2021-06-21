@@ -97,7 +97,6 @@ class LibiglConan(ConanFile):
             self._cmake.definitions["LIBIGL_WITH_XML"] = False
             self._cmake.definitions["LIBIGL_WITH_PYTHON"] = "OFF"
             self._cmake.definitions["LIBIGL_WITH_PREDICATES"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
