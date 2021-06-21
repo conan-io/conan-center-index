@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -38,6 +39,11 @@ class Libde265Conan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+
+    def validate(self):
+        if self.options.sse:
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                raise ConanInvalidConfiguration("Option 'libde265:sse' with value True is not supported for Macos/armv8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
