@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
+import glob
 
 
 class SpirvheadersConan(ConanFile):
@@ -30,6 +31,8 @@ class SpirvheadersConan(ConanFile):
         extracted_dir = "SPIRV-Headers-" + self.version
         if self.version == "1.5.1":
             extracted_dir = extracted_dir + ".corrected"
+        if self.version.startswith('cci.'):
+            extracted_dir = glob.glob(self.name + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
