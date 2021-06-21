@@ -6,11 +6,14 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch"
     generators = "cmake", "cmake_find_package"
     
+    def build_requirements(self):
+        if tools.cross_building(self.settings):
+            self.build_requires(str(self.requires['flatc']))
+        
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build(target="flatbuffers")
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build(target="flatbuffers")
         
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):
