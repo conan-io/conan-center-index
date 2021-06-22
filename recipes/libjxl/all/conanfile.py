@@ -1,13 +1,15 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
 
-class JpegxlConan(ConanFile):
+
+class LibjxlConan(ConanFile):
     name = "libjxl"
     description = "JPEG XL image format reference implementation"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://gitlab.com/wg1/jpeg-xl"
+    homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
     requires = "brotli/1.0.9", "highway/0.11.1", "lcms/2.11"
 
@@ -32,8 +34,8 @@ class JpegxlConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("jpeg-xl-v" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -87,15 +89,15 @@ class JpegxlConan(ConanFile):
                                                         "lcms::lcms"]
         # jxl_threads
         self.cpp_info.components["jxl_threads"].names["pkg_config"] = \
-                                                               "libjxl_threads"
+            "libjxl_threads"
         self.cpp_info.components["jxl_threads"].libs = ["jxl_threads"]
         if self.settings.os == "Linux":
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["jxl"].system_libs.append(
-                                                    tools.stdcpp_library(self))
+                tools.stdcpp_library(self))
             self.cpp_info.components["jxl_dec"].system_libs.append(
-                                                    tools.stdcpp_library(self))
+                tools.stdcpp_library(self))
             self.cpp_info.components["jxl_threads"].system_libs.append(
-                                                    tools.stdcpp_library(self))
+                tools.stdcpp_library(self))

@@ -1,7 +1,7 @@
 sources:
   "0.3.7":
-    url: "https://gitlab.com/wg1/jpeg-xl/-/archive/v0.3.7/jpeg-xl-v0.3.7.tar.gz"
-    sha256: "1da84510a7e11f616fe55ac23db876b462585fd5916683ba8454761f5495a547"
+    url: "https://github.com/libjxl/libjxl/archive/v0.3.7.zip"
+    sha256: "671284bf97465cf969926594ce2dc5110919a0ea91b4a32df27227042ea64f2e"
 patches:
   "0.3.7":
     - patch_file: "patches/0001-disable-tools.patch"
