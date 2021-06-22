@@ -31,7 +31,7 @@ class PlatformInterfacesConan(ConanFile):
         }
 
     def validate(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
         if tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"platform.interfaces/{self.version} "
                                             f"requires C++20 with {self.settings.compiler}, "
