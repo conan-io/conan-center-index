@@ -72,6 +72,12 @@ class RocksDB(ConanFile):
            self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("Rocksdb requires Visual Studio 15 or later.")
+        
+        if self.version == "6.0.2" and \
+           self.settings.os == "Windows" and \
+           self.settings.compiler == "Visual Studio" and \
+           tools.Version(self.settings.compiler.version) > "15":
+            raise ConanInvalidConfiguration("Rocksdb 6.0.2 is not compilable with Visual Studio >15.") # See https://github.com/facebook/rocksdb/issues/6048
 
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
