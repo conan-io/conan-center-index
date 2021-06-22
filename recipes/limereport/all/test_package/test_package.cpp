@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QUuid>
 #include <limereport/LimeReport>
+#include <limereport/config.h>
 #include <iostream>
 #include <QDebug>
 #include <QDir>
@@ -11,6 +12,10 @@
   #include <io.h>
   #include <fcntl.h>
 #endif
+
+#include <QStaticPlugin>
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 int main(int argc, char *argv[])
 {
