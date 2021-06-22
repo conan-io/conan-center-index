@@ -107,14 +107,14 @@ class VtkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "vtk"))
-        self.copy("modules.json", dst="vtkmodules", src=self.build_folder)
+        self.copy("modules.json", dst="bin", src=self.build_folder)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "VTK"
         self.cpp_info.names["cmake_find_package_multi"] = "VTK"
 
         libs = tools.collect_libs(self)
-        with open(os.path.join(self.package_folder, "vtkmodules", "modules.json")) as reader:
+        with open(os.path.join(self.package_folder, "bin", "modules.json")) as reader:
             vtk_modules = json.load(reader)
 
         for name, content in vtk_modules["modules"].items():
