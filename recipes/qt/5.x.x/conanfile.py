@@ -209,6 +209,8 @@ class QtConan(ConanFile):
         if tools.os_info.is_linux:
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+        else:
+            del self.options.qtx11extras
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -1009,6 +1011,9 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
+
+        if self.options.qtx11extras:
+            _create_module("X11Extras")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
