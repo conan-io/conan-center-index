@@ -14,3 +14,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-exported-symbols-0.13.1.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-clang-build-0.13.1.patch"
+      base_path: "source_subfolder"
+      # patch_type: portability
+      # patch_source: https://svnweb.freebsd.org/ports/head/devel/json-c/files/patch-json_object.c?view=markup&pathrev=526713
+      # patch_description: Fix build with Clang
