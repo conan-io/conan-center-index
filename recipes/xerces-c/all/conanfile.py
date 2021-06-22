@@ -87,3 +87,5 @@ class XercesCConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
+
+        
