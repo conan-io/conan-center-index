@@ -3,13 +3,17 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
 
 class PlatformInterfacesConan(ConanFile):
     name = "platform.interfaces"
     license = "The Unlicense"
     homepage = "https://github.com/linksplatform/Interfaces"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Contains common interfaces that did not fit in any major category."
+    description = """platform.interfaces is one of the libraries of the LinksPlatform modular framework, which uses 
+    innovations from the C++20 standard, for easier use of static polymorphism. It also includes some auxiliary 
+    structures for more convenient work with containers."""
     topics = ("platform", "concepts", "header-only")
     settings = "os", "compiler", "build_type", "arch"
 
@@ -31,7 +35,7 @@ class PlatformInterfacesConan(ConanFile):
         }
 
     def validate(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"platform.interfaces/{self.version} "
                                             f"requires C++20 with {self.settings.compiler}, "
@@ -41,14 +45,7 @@ class PlatformInterfacesConan(ConanFile):
             tools.check_min_cppstd(self, 20)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-
-        url: str = self.conan_data["sources"][self.version]["url"]
-        version_pos: int = url.find(f"_{self.version}")
-        csharp_version: str = url[(version_pos - 5):version_pos]
-
-        extracted_folder = f"Interfaces-{csharp_version}_{self.version}"
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("*.h", dst="include", src=self._subfolder_sources)
