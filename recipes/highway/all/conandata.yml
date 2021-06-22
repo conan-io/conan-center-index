@@ -9,4 +9,3 @@ patches:
   "0.11.1":
     - patch_file: "patches/0001-remove-contrib.patch"
       base_path: "source_subfolder"
-  "0.12.2": []
