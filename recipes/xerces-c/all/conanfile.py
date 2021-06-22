@@ -25,16 +25,21 @@ class XercesCConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def validate(self):
+        if self.options.char_type == "wchar_t" and self.settings.os != Windows:
+            raise ConanInvalidConfiguration("Option 'char_type=wchar_t' is only supported in Windows")
+
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        else:
-            del self.options.char_type
 
     def configure(self):
         if self.settings.os not in ("Windows", "Macos", "Linux"):
             raise ConanInvalidConfiguration("OS is not supported")
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -54,7 +59,7 @@ class XercesCConan(ConanFile):
                                                  "Linux": "gnuiconv"}.get(str(self.settings.os))
         self._cmake.definitions["message-loader"] = "inmemory"
 
-        self._cmake.definitions["xmlch-type"] = self.options.char_type if "char_type" in self.options else "uint16_t"
+        self._cmake.definitions["xmlch-type"] = self.options.char_type
 
         self._cmake.definitions["mutex-manager"] = {"Windows": "windows",
                                                     "Macos": "posix",
@@ -87,5 +92,3 @@ class XercesCConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
-
-        
