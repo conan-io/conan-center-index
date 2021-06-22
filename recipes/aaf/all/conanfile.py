@@ -30,6 +30,8 @@ class AafConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
