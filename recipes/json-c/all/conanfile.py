@@ -54,8 +54,6 @@ class JSONCConan(ConanFile):
         if tools.Version(self.version) <= "0.13.1" and \
            tools.cross_building(self) and self.settings.os != "Windows":
             host = tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch))
-            self.output.info(">?>>>>>>>>>>")
-            self.output.info(host)
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "execute_process(COMMAND ./configure ",
                                   "execute_process(COMMAND ./configure --host %s " % host)
