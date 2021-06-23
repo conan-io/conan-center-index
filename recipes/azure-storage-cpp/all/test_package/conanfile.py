@@ -9,8 +9,6 @@ class AwsSdkCppTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if not self.settings.compiler.cppstd:
-            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         cmake.configure()
         cmake.build()
 
