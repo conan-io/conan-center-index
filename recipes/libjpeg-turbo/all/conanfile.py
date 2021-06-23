@@ -43,6 +43,10 @@ class LibjpegTurboConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def _simd_extensions_available(self):
+        macos_silicon = self.settings.os == "Macos" and self.settings.arch == "armv8"
+        return not (self.settings.os == "Emscripten" or macos_silicon)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,7 +61,7 @@ class LibjpegTurboConan(ConanFile):
         if self.options.enable12bit:
             del self.options.java
             del self.options.turbojpeg
-        if self.options.enable12bit or self.settings.os == "Emscripten":
+        if self.options.enable12bit or not self._simd_extensions_available():
             del self.options.SIMD
         if self.options.enable12bit or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
             del self.options.arithmetic_encoder
@@ -107,6 +111,12 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
+
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            # FIXME: Toolchain file should provide valid value here
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+
         self._cmake.configure()
         return self._cmake
 
