@@ -18,12 +18,14 @@ class SzipConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_encoding": [True, False]
+        "enable_encoding": [True, False],
+        "enable_large_file": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_encoding": False
+        "enable_encoding": False,
+        "enable_large_file": True
     }
 
     _cmake = None
@@ -66,6 +68,11 @@ class SzipConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["SZIP_BUILD_FRAMEWORKS"] = False
         self._cmake.definitions["SZIP_PACK_MACOSX_FRAMEWORK"] = False
+        self._cmake.definitions["SZIP_ENABLE_LARGE_FILE"] = self.options.enable_large_file
+        if tools.cross_building(self, skip_x64_x86=True) and self.options.enable_large_file:
+            # Assume it works, otherwise raise in 'validate' function
+            self._cmake.definitions["TEST_LFS_WORKS_RUN"] = True
+            self._cmake.definitions["TEST_LFS_WORKS_RUN__TRYRUN_OUTPUT"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
