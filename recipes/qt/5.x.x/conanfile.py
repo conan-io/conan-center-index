@@ -1012,7 +1012,7 @@ Examples = bin/datadir/examples""")
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
 
-        if self.options.qtx11extras:
+        if self.options.get_safe(qtx11extras):
             _create_module("X11Extras")
 
         if not self.options.shared:
