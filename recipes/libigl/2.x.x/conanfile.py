@@ -50,7 +50,8 @@ class LibiglConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-            
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Windows build is disabled due to a CI problem, open a PR to remove this check")
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
