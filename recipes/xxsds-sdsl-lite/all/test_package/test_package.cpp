@@ -1,5 +1,5 @@
-#include <iostream>
 #include <sdsl/bit_vectors.hpp>
+#include <iostream>
 
 int main()
 {
