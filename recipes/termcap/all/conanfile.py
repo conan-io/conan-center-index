@@ -30,6 +30,8 @@ class TermcapConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         archive_name = self.name + "-" + self.version
