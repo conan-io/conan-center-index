@@ -206,7 +206,7 @@ class QtConan(ConanFile):
             del self.options.with_libalsa
             del self.options.with_openal
 
-        if tools.os_info.is_linux:
+        if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
         else:
