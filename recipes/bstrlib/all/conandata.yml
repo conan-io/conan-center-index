@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: https://github.com/websnarf/bstrlib/archive/refs/tags/v1.0.0.tar.gz
+    sha256: 34bb6c7db30737df64e0221dafc15cb0fad3cc8ab05c2724eb500885e8907876
