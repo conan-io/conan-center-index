@@ -19,7 +19,7 @@ class PlatformInterfacesConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return self.name
+        return "source_subfolder"
 
     @property
     def _subfolder_sources(self):
