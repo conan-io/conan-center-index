@@ -33,8 +33,7 @@ class XXSDSSDSLLite(ConanFile):
             tools.patch(**patch)
 
     def package(self):
-        self.copy("*.hpp", dst=os.path.join("include", "sdsl"),
-                  src=os.path.join(self._source_subfolder, "include", "sdsl"))
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
