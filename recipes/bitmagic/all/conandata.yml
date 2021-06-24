@@ -1,0 +1,4 @@
+sources:
+  "7.3.1":
+    url: "https://github.com/tlk00/BitMagic/archive/refs/tags/v7.3.1.tar.gz"
+    sha256: "a45a764c3519d64afdc734a6606645007e102aef799390a36426d2dc77919303"
