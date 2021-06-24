@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 
 
 class PlatformInterfacesConan(ConanFile):
-    name = "linksplatform-interfaces"
+    name = "platform.interfaces"
     license = "Unlicense"
     homepage = "https://github.com/linksplatform/Interfaces"
     url = "https://github.com/conan-io/conan-center-index"
