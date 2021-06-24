@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class PlatformInterfacesConan(ConanFile):
     name = "platform.interfaces"
-    license = "The Unlicense"
+    license = "Unlicense"
     homepage = "https://github.com/linksplatform/Interfaces"
     url = "https://github.com/conan-io/conan-center-index"
     description = """platform.interfaces is one of the libraries of the LinksPlatform modular framework, which uses 
