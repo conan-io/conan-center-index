@@ -10,7 +10,7 @@ class XXSDSSDSLLite(ConanFile):
     license = "BSD-3-Clause"
     topics = ("conan", "sdsl", "succint", "data-structures")
     settings = "compiler"
-    exports = ["patches/*"]
+    exports_sources = "patches/*"
     provides = "sdsl-lite"
     no_copy_source = True
 
