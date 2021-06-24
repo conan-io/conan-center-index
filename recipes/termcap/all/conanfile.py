@@ -63,11 +63,13 @@ class TermcapConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version].get(str(self.settings.os), []):
             tools.patch(**patch)
-        for src in self._extract_sources()[0]:
-            txt = open(src).read()
-            with open(src, "w") as f:
-                f.write("#include \"termcap_intern.h\"\n\n")
-                f.write(txt)
+        
+        if self.settings.os == "Windows":
+            for src in self._extract_sources()[0]:
+                txt = open(src).read()
+                with open(src, "w") as f:
+                    f.write("#include \"termcap_intern.h\"\n\n")
+                    f.write(txt)
 
     def build(self):
         self._patch_sources()
