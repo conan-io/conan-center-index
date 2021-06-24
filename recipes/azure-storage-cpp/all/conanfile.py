@@ -50,6 +50,7 @@ class AzureStorageCppConan(ConanFile):
     def requirements(self):
         self.requires("cpprestsdk/2.10.18")
         if self.settings.os != "Windows":
+            self.requires("boost/1.76.0")
             self.requires("libxml2/2.9.10")
             self.requires("libuuid/1.0.3")
         if self.settings.os == "Macos":
@@ -114,11 +115,9 @@ class AzureStorageCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "AzureStorage"
-        self.cpp_info.names["cmake_find_package_multi"] = "AzureStorage"
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Ws2_32", "rpcrt4", "xmllite", "bcrypt"]
+            self.cpp_info.system_libs = ["ws2_32", "rpcrt4", "xmllite", "bcrypt"]
             if not self.options.shared:
                 self.cpp_info.defines = ["_NO_WASTORAGE_API"]

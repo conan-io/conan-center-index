@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(AzureStorage REQUIRED CONFIG)
+find_package(azure-storage-cpp REQUIRED CONFIG)
 
 add_executable(example example.cpp)
-target_link_libraries(example AzureStorage::AzureStorage)
+target_link_libraries(example azure-storage-cpp::azure-storage-cpp)
