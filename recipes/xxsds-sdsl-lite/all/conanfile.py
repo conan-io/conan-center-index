@@ -12,7 +12,6 @@ class XXSDSSDSLLite(ConanFile):
     settings = "compiler"
     exports_sources = "patches/*"
     provides = "sdsl-lite"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -29,11 +28,13 @@ class XXSDSSDSLLite(ConanFile):
             os.path.splitext(os.path.basename(source["url"]))[0]
         os.rename(extracted_folder, self._source_subfolder)
 
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("*.hpp", dst="include",
+                  src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
