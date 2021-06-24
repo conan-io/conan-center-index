@@ -3,7 +3,7 @@ from conans import ConanFile, tools
 
 
 class SDSLLite(ConanFile):
-    name = "sdsl-lite"
+    name = "xxsds-sdsl-lite"
     description = "SDSL - Succinct Data Structure Library"
     homepage = "https://github.com/xxsds/sdsl-lite"
     url = "https://github.com/conan-io/conan-center-index"
@@ -11,6 +11,8 @@ class SDSLLite(ConanFile):
     topics = ("conan", "sdsl", "succint", "data-structures")
     settings = "compiler"
     exports = ["patches/*"]
+    provides = "sdsl-lite"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -23,7 +25,7 @@ class SDSLLite(ConanFile):
     def source(self):
         source = self.conan_data["sources"][self.version]
         tools.get(**source)
-        extracted_folder = self.name + "-" + \
+        extracted_folder = "sdsl-lite-" + \
             os.path.splitext(os.path.basename(source["url"]))[0]
         os.rename(extracted_folder, self._source_subfolder)
 
