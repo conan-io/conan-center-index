@@ -16,6 +16,7 @@ class PlatformInterfacesConan(ConanFile):
     structures for more convenient work with containers."""
     topics = ("platform", "concepts", "header-only")
     settings = "os", "compiler", "build_type", "arch"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
