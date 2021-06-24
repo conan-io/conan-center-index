@@ -73,8 +73,8 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.0.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{1}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         # Do not accidentally enable dependencies we have disabled
