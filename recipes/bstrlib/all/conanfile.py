@@ -6,7 +6,7 @@ class BstrlibConan(ConanFile):
     description = "The Better String Library is an abstraction of a string data type which is superior to the C " \
                   "library char buffer string type, or C++'s std::string. "
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.lua.org/"
+    homepage = "https://github.com/websnarf/bstrlib"
     topics = "string"
     license = ("BSD", "GPL")
     generators = "cmake"
