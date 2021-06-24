@@ -1,7 +1,9 @@
 import glob
 import os
+import shutil
 
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+
 
 class FreexlConan(ConanFile):
     name = "freexl"
@@ -39,17 +41,27 @@ class FreexlConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
            "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20200517")
+        self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    @property 
+    def _user_info_build(self): 
+        return getattr(self, "user_info_build", None) or self.deps_user_info 
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
             autotools = self._configure_autotools()
             autotools.make()
 
