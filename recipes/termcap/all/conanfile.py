@@ -61,7 +61,7 @@ class TermcapConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data["patches"][self.version].get(self.settings.arch, []):
             tools.patch(**patch)
         for src in self._extract_sources()[0]:
             txt = open(src).read()
