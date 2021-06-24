@@ -5,4 +5,4 @@ sources:
 patches:
   cci.20210329:
     - patch_file: bits.hpp.patch
-      base_path: source_subfolder/include/sdsl
+      base_path: source_subfolder
