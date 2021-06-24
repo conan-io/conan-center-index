@@ -27,12 +27,9 @@ class ZuluOpenJDK(ConanFile):
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
-    def source(self):
+    def build(self):
         tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
                   destination=self._source_subfolder, strip_root=True)
-
-    def build(self):
-        pass # nothing to do, but this shall trigger no warnings ;-)
 
     def package(self):
         self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"), excludes=("msvcp140.dll", "vcruntime140.dll"))
