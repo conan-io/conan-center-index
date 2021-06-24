@@ -4,5 +4,5 @@ sources:
     sha256: 3ec5e85ee6caf5afe73c4077992aaaaffd5dfed711033e944937c6245adbfeca
 patches:
   cci.20210329:
-    - patch_file: bits.hpp.patch
+    - patch_file: patches/bits.hpp.patch
       base_path: source_subfolder
