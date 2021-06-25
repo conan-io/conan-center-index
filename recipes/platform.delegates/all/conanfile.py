@@ -22,7 +22,7 @@ class PlatformInterfacesConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _subfolder_sources(self):
+    def _internal_cpp_subfolder(self):
         return os.path.join(self._source_subfolder, "cpp", "Platform.Delegates")
 
     @property
@@ -49,7 +49,9 @@ class PlatformInterfacesConan(ConanFile):
             raise ConanInvalidConfiguration("platform.delegates/{} "
                                             "requires C++{} with {}, "
                                             "which is not supported "
-                                            "by {} {}.".format(self.version, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
+                                            "by {} {}.".format(
+                self.version, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler,
+                self.settings.compiler.version))
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
@@ -58,7 +60,7 @@ class PlatformInterfacesConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
-        self.copy("*.h", dst="include", src=self._subfolder_sources)
+        self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
