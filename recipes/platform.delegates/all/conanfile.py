@@ -34,15 +34,25 @@ class PlatformInterfacesConan(ConanFile):
             "apple-clang": "10"
         }
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
     def validate(self):
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+
+        if not minimum_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+
         if tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("platform.delegates/{} "
-                                            "requires C++17 with {}, "
+                                            "requires C++{} with {}, "
                                             "which is not supported "
-                                            "by {} {}.".format(self.version, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
+                                            "by {} {}.".format(self.version, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
+
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
