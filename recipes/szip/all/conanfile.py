@@ -1,6 +1,8 @@
 import os
-
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
+
 
 class SzipConan(ConanFile):
     name = "szip"
@@ -16,12 +18,14 @@ class SzipConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_encoding": [True, False]
+        "enable_encoding": [True, False],
+        "enable_large_file": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_encoding": False
+        "enable_encoding": False,
+        "enable_large_file": True
     }
 
     _cmake = None
@@ -39,15 +43,16 @@ class SzipConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
@@ -63,6 +68,11 @@ class SzipConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["SZIP_BUILD_FRAMEWORKS"] = False
         self._cmake.definitions["SZIP_PACK_MACOSX_FRAMEWORK"] = False
+        self._cmake.definitions["SZIP_ENABLE_LARGE_FILE"] = self.options.enable_large_file
+        if tools.cross_building(self, skip_x64_x86=True) and self.options.enable_large_file:
+            # Assume it works, otherwise raise in 'validate' function
+            self._cmake.definitions["TEST_LFS_WORKS_RUN"] = True
+            self._cmake.definitions["TEST_LFS_WORKS_RUN__TRYRUN_OUTPUT"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -72,7 +82,6 @@ class SzipConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "SZIP"
         self.cpp_info.names["cmake_find_package_multi"] = "SZIP"
-
-        self.cpp_info.libs = tools.collect_libs(self)

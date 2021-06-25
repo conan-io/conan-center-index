@@ -37,14 +37,12 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
-        self.requires("expat/2.2.10")
+        self.requires("expat/2.4.1")
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.68.2")
 
         if self.options.with_x11:
             self.requires("xorg/system")

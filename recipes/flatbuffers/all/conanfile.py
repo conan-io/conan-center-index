@@ -3,7 +3,7 @@ import os
 import shutil
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 class FlatbuffersConan(ConanFile):
@@ -34,15 +34,16 @@ class FlatbuffersConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
     def configure(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
         # Detect if host or build context
         if self.options.options_from_context:
             settings_target = getattr(self, 'settings_target', None)
@@ -70,9 +71,7 @@ class FlatbuffersConan(ConanFile):
             self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

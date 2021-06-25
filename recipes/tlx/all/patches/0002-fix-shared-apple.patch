@@ -1,0 +1,16 @@
+patch version greater than 1023 in dylib is not allowed on Apple OS
+
+--- a/tlx/CMakeLists.txt
++++ b/tlx/CMakeLists.txt
+@@ -73,8 +73,10 @@ if(TLX_BUILD_SHARED_LIBS)
+   add_library(tlx SHARED ${LIBTLX_SOURCES})
+   set_target_properties(tlx PROPERTIES
+     OUTPUT_NAME "${TLX_LIBNAME}"
+-    VERSION "${TLX_VERSION}"
+     SOVERSION "${TLX_SOVERSION}")
++  if(NOT APPLE)
++    set_target_properties(tlx PROPERTIES VERSION "${TLX_VERSION}")
++  endif()
+ 
+   target_compile_definitions(tlx PUBLIC ${TLX_DEFINITIONS})
+   target_include_directories(tlx PUBLIC

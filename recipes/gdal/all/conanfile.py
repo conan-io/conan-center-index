@@ -227,7 +227,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_libiconv", True):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.0")
         if self.options.with_pg:
             self.requires("libpq/13.2")
         # if self.options.with_libgrass:
@@ -279,15 +279,15 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.3.0")
+            self.requires("expat/2.4.1")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.77.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.10")
         # if self.options.with_spatialite:
@@ -309,8 +309,8 @@ class GdalConan(ConanFile):
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
         if self.options.with_opencl:
-            self.requires("opencl-headers/2020.06.16")
-            self.requires("opencl-icd-loader/2020.06.16")
+            self.requires("opencl-headers/2021.04.29")
+            self.requires("opencl-icd-loader/2021.04.29")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_poppler:
@@ -403,6 +403,9 @@ class GdalConan(ConanFile):
                 tools.replace_in_file(configure_ac,
                                       "-lz ",
                                       "-l{} ".format(zlib_name))
+            # Workaround for autoconf 2.71
+            with open(os.path.join(self._source_subfolder, "config.rpath"), "w"):
+                pass
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))

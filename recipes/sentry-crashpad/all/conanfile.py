@@ -24,12 +24,26 @@ class SentryCrashpadConan(ConanFile):
     }
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
+    short_paths = True
 
     _cmake = None
 
     @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,19 +58,16 @@ class SentryCrashpadConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            # Set as required in crashpad CMake file.
+            # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
+            tools.check_min_cppstd(self, 14)
 
-        if tools.is_apple_os(self.settings.os):
-            # FIXME: add Apple support
-            raise ConanInvalidConfiguration("This recipe does not support Apple.")
-
-        if self.settings.os == "Linux":
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-                # FIXME: need to test for availability of SYS_memfd_create syscall (Linux kernel >= 3.17)
-                raise ConanInvalidConfiguration("sentry-crashpad needs SYS_memfd_create syscall support.")
-
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
-            raise ConanInvalidConfiguration("Require at least Visual Studio 2017 (15)")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
+                .format(str(self.settings.compiler), minimum_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
@@ -68,7 +79,7 @@ class SentryCrashpadConan(ConanFile):
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL"] = True
         self._cmake.definitions["CRASHPAD_ENABLE_INSTALL_DEV"] = True
         self._cmake.definitions["CRASHPAD_ZLIB_SYSTEM"] = True
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -99,9 +110,16 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["mini_chromium"].system_libs.append("pthread")
+        if tools.is_apple_os(self.settings.os):
+            if self.settings.os == "Macos":
+                self.cpp_info.components["mini_chromium"].frameworks = ["ApplicationServices", "CoreFoundation", "Foundation", "IOKit", "Security"]
+            else:  # iOS
+                self.cpp_info.components["mini_chromium"].frameworks = ["CoreFoundation", "CoreGraphics", "CoreText", "Foundation", "Security"]
 
         self.cpp_info.components["compat"].includedirs.append(os.path.join("include", "crashpad"))
-        self.cpp_info.components["compat"].libs = ["crashpad_compat"]
+        # On Apple crashpad_compat is an interface library
+        if not tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["compat"].libs = ["crashpad_compat"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["compat"].system_libs.append("dl")
 
@@ -111,6 +129,10 @@ class SentryCrashpadConan(ConanFile):
             self.cpp_info.components["util"].system_libs.extend(["pthread", "rt"])
         if self.options.get_safe("with_tls") == "openssl":
             self.cpp_info.components["util"].requires.append("openssl::openssl")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.components["util"].frameworks.extend(["CoreFoundation", "Foundation", "IOKit"])
+            self.cpp_info.components["util"].system_libs.append("bsm")
 
         self.cpp_info.components["client"].libs = ["crashpad_client"]
         self.cpp_info.components["client"].requires = ["util", "mini_chromium"]
