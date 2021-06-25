@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-
+from conans.tools import Version
 
 class h5ppConan(ConanFile):
     name = "h5pp"
@@ -11,8 +11,8 @@ class h5ppConan(ConanFile):
     topics = ("conan","h5pp","hdf5", "binary", "storage")
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
-    requires = "eigen/3.3.9", "spdlog/1.8.2", "hdf5/1.12.0"
+    generators = "cmake", "cmake_find_package","cmake_find_package_multi"
+    requires = "eigen/3.3.9", "spdlog/1.8.5", "hdf5/1.12.0"
 
     _cmake = None
 
@@ -40,7 +40,8 @@ class h5ppConan(ConanFile):
             self._cmake.definitions["H5PP_ENABLE_TESTS"]         = False
             self._cmake.definitions["H5PP_BUILD_EXAMPLES"]       = False
             self._cmake.definitions["H5PP_PRINT_INFO"]           = False
-            self._cmake.definitions["H5PP_DOWNLOAD_METHOD"]      = "conan"
+            if Version(self.version) >= "1.9.0":
+                self._cmake.definitions["H5PP_PACKAGE_MANAGER"]  = "none"
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
@@ -62,7 +63,10 @@ class h5ppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        if Version(self.version) <= "1.8.6":
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+        else:
+            tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "h5pp"

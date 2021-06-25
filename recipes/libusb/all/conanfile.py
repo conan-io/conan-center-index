@@ -35,9 +35,11 @@ class LibUSBConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Android":
+            self.options.enable_udev = False
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in  ["Linux", "Android"]:
             del self.options.enable_udev
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -90,7 +92,7 @@ class LibUSBConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "Android"]:
                 configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
             elif self._is_mingw:
                 if self.settings.arch == "x86_64":
@@ -144,6 +146,7 @@ class LibUSBConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.os in ["Linux", "Android"]:
             if self.options.enable_udev:
                 self.cpp_info.system_libs.append("udev")
         elif self.settings.os == "Macos":
