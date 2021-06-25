@@ -1,0 +1,8 @@
+sources:
+  cci.20210329:
+    url: https://github.com/xxsds/sdsl-lite/archive/163d59bb1f3b1b21b028099547f556953d1c626f.zip
+    sha256: 3ec5e85ee6caf5afe73c4077992aaaaffd5dfed711033e944937c6245adbfeca
+patches:
+  cci.20210329:
+    - patch_file: patches/bits.hpp.patch
+      base_path: source_subfolder
