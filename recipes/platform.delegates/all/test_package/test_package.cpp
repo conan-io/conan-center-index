@@ -53,4 +53,5 @@ int main()
         std::cout << item << " ";
     }
     std::cout << std::endl;
+    return 0;
 }
