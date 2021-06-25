@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -14,12 +14,29 @@ class VectorclassConan(ConanFile):
     topics = ("conan", "vectorclass", "vector", "simd")
     homepage = "https://github.com/vectorclass/version2"
     url = "https://github.com/conan-io/conan-center-index"
-    no_copy_source = True
-    settings = "os", "arch", "compiler"
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
+    settings = ("os", "arch", "compiler", "build_type")
+    options = {
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "fPIC": True
+    }
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
 
     @property
     def _compilers_minimum_version(self):
@@ -49,13 +66,25 @@ class VectorclassConan(ConanFile):
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
-    def package_id(self):
-        self.info.header_only()
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["vectorclass"]

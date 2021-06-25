@@ -1,7 +1,7 @@
 sources:
   "cci.latest":
     url: [
-            "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20210419.tar.xz",
-            "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210419.tar.xz",
+            "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20210604.tar.xz",
+            "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210604.tar.xz",
     ]
-    sha256: "3d014d6f5ae519ea5de5b586bff505309c1f42fd8148996d63ba132b24146c85"
+    sha256: "ebbdb74d54f8ea1eeb1a744d50e47cc649785e9b4328435f290aca5a0a58bd4f"

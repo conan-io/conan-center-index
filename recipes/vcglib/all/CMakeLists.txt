@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.8)
+project(vcglib)
+
+include(conanbuildinfo.cmake)
+conan_basic_setup()
+
+set(VCGLIB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+
+find_package(Eigen3 REQUIRED CONFIG)
+
+add_library(${PROJECT_NAME} ${VCGLIB_SRC_DIR}/wrap/ply/plylib.cpp)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+target_include_directories(${PROJECT_NAME} PUBLIC ${VCGLIB_SRC_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(DIRECTORY "${VCGLIB_SRC_DIR}/vcg" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${VCGLIB_SRC_DIR}/wrap" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${VCGLIB_SRC_DIR}/img" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h")

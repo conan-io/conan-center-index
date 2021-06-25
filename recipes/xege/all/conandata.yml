@@ -1,0 +1,4 @@
+sources:
+  "20.08":
+    url: "https://github.com/wysaid/xege/archive/refs/tags/20.08.tar.gz"
+    sha256: "33bc63366d093902b5bc68d3d613ebd90e449bc22800b40f2dd98e2b5c44b88a"

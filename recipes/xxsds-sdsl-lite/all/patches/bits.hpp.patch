@@ -1,0 +1,11 @@
+--- a/include/sdsl/bits.hpp	2021-03-29 20:24:00.000000000 +0200
++++ b/include/sdsl/bits.hpp	2021-06-18 14:17:13.556993940 +0200
+@@ -593,7 +593,7 @@
+ template <typename T>
+ SDSL_CONSTEXPR inline uint32_t bits_impl<T>::sel(uint64_t x, uint32_t i)
+ {
+-#ifdef __BMI2__
++#if defined(__BMI__) && defined(__BMI2__)
+     // taken from folly
+     return _tzcnt_u64(_pdep_u64(1ULL << (i - 1), x));
+ #endif

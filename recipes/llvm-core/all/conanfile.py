@@ -66,6 +66,12 @@ class LLVMCoreConan(ConanFile):
         'with_xml2': True
     }
 
+    # Older cmake versions may have issues generating the graphviz output used
+    # to model the components
+    build_requires = [
+        'cmake/3.20.3'
+    ]
+
     exports_sources = ['CMakeLists.txt', 'patches/*']
     generators = ['cmake', 'cmake_find_package']
     no_copy_source = True
@@ -116,6 +122,11 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_PIC'] = \
             self.options.get_safe('fPIC', default=False)
 
+        if self.settings.compiler == 'Visual Studio':
+            build_type = str(self.settings.build_type).upper()
+            cmake.definitions['LLVM_USE_CRT_{}'.format(build_type)] = \
+                self.settings.compiler.runtime
+
         cmake.definitions['LLVM_ABI_BREAKING_CHECKS'] = 'WITH_ASSERTS'
         cmake.definitions['LLVM_ENABLE_WARNINGS'] = True
         cmake.definitions['LLVM_ENABLE_PEDANTIC'] = True
@@ -136,6 +147,7 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_APPEND_VC_REV'] = False
         cmake.definitions['LLVM_BUILD_DOCS'] = False
         cmake.definitions['LLVM_ENABLE_IDE'] = False
+        cmake.definitions['LLVM_ENABLE_TERMINFO'] = False
 
         cmake.definitions['LLVM_ENABLE_EH'] = self.options.exceptions
         cmake.definitions['LLVM_ENABLE_RTTI'] = self.options.rtti
@@ -183,7 +195,7 @@ class LLVMCoreConan(ConanFile):
         if self.options.get_safe('with_xml2', False):
             self.requires('libxml2/2.9.10')
 
-    def configure(self):
+    def validate(self):
         if self.options.shared:  # Shared builds disabled just due to the CI
             message = 'Shared builds not currently supported'
             raise ConanInvalidConfiguration(message)
@@ -195,6 +207,8 @@ class LLVMCoreConan(ConanFile):
             message = 'Cannot enable exceptions without rtti support'
             raise ConanInvalidConfiguration(message)
         self._supports_compiler()
+        if tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
@@ -216,6 +230,8 @@ class LLVMCoreConan(ConanFile):
 
         if not self.options.shared:
             for ext in ['.a', '.lib']:
+                lib = '**/lib/*LLVMTableGenGlobalISel{}'.format(ext)
+                self.copy(lib, dst='lib', keep_path=False)
                 lib = '*LLVMTableGenGlobalISel{}'.format(ext)
                 self.copy(lib, dst='lib', src='lib')
 
@@ -268,6 +284,9 @@ class LLVMCoreConan(ConanFile):
                 os.remove(os.path.join(lib_path, name))
 
         if not self.options.shared:
+            if self.options.get_safe('with_zlib', False):
+                if not 'z' in components['LLVMSupport']:
+                    components['LLVMSupport'].append('z')
             components_path = \
                 os.path.join(self.package_folder, 'lib', 'components.json')
             with open(components_path, 'w') as components_file:
@@ -282,10 +301,9 @@ class LLVMCoreConan(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = tools.collect_libs(self)
             if self.settings.os == 'Linux':
-                self.cpp_info.system_libs = ['tinfo', 'pthread']
-                self.cpp_info.system_libs.extend(['rt', 'dl', 'm'])
+                self.cpp_info.system_libs = ['pthread', 'rt', 'dl', 'm']
             elif self.settings.os == 'Macos':
-                self.cpp_info.system_libs = ['curses', 'm']
+                self.cpp_info.system_libs = ['m']
             return
 
         components_path = \
