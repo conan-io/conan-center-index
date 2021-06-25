@@ -32,7 +32,7 @@ class Libde265Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch in ["x86", "x86_64"]:
+        if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.sse
 
     def configure(self):
