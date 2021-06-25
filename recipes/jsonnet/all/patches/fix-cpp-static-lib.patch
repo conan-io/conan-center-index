@@ -1,0 +1,56 @@
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -8,24 +8,24 @@
+     libjsonnet++.cpp
+ )
+ 
+-add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
+-add_dependencies(libjsonnet++ jsonnet)
+-# target_link_libraries(libjsonnet libjsonnet)
++if (NOT BUILD_STATIC_LIBS)
++    add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
++    add_dependencies(libjsonnet++ jsonnet)
++    # target_link_libraries(libjsonnet libjsonnet)
+ 
+-# CMake prepends CMAKE_SHARED_LIBRARY_PREFIX to shared libraries, so without
+-# this step the output would be |liblibjsonnet|.
+-set_target_properties(libjsonnet++ PROPERTIES OUTPUT_NAME jsonnet++
+-	VERSION     "0.17.0"
+-	SOVERSION   "0"
+-	PUBLIC_HEADER "${LIB_HEADER}")
+-install(TARGETS libjsonnet++
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+-target_include_directories(libjsonnet++ INTERFACE
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
+-if (BUILD_STATIC_LIBS)
++    # CMake prepends CMAKE_SHARED_LIBRARY_PREFIX to shared libraries, so without
++    # this step the output would be |liblibjsonnet|.
++    set_target_properties(libjsonnet++ PROPERTIES OUTPUT_NAME jsonnet++
++    	VERSION     "0.17.0"
++    	SOVERSION   "0"
++    	PUBLIC_HEADER "${LIB_HEADER}")
++    install(TARGETS libjsonnet++
++    	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++    target_include_directories(libjsonnet++ INTERFACE
++      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
++else()
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet++_static STATIC ${LIBJSONNETPP_SOURCE})
+     add_dependencies(libjsonnet++_static jsonnet)
+@@ -34,6 +34,8 @@
+     install(TARGETS libjsonnet++_static DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+     target_include_directories(libjsonnet++_static INTERFACE
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
++    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../include/libjsonnet++.h
++            DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+ endif()
+ 
+ if (BUILD_SHARED_BINARIES OR NOT BUILD_STATIC_LIBS)
+
+
+
