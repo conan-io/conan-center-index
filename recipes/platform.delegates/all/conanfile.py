@@ -13,7 +13,7 @@ class PlatformInterfacesConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = """platform.delegates is one of the libraries of the LinksPlatform modular framework, which uses 
     innovations from the C++17 standard, for easier use delegates/events in csharp style."""
-    topics = ("linksplatform", "delegates", "events", "header-only")
+    topics = ("linksplatform", "cpp17", "delegates", "events", "header-only")
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
