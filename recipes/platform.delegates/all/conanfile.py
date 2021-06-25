@@ -11,10 +11,9 @@ class PlatformInterfacesConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/linksplatform/Delegates"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """platform.interfaces is one of the libraries of the LinksPlatform modular framework, which uses 
-    innovations from the C++20 standard, for easier use of static polymorphism. It also includes some auxiliary 
-    structures for more convenient work with containers."""
-    topics = ("platform", "concepts", "header-only")
+    description = """platform.delegates is one of the libraries of the LinksPlatform modular framework, which uses 
+    innovations from the C++17 standard, for easier use delegates/events in csharp style."""
+    topics = ("linksplatform", "delegates", "events", "header-only")
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
