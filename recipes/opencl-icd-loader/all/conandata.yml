@@ -5,3 +5,10 @@ sources:
   "2020.06.16":
     url: "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/v2020.06.16.tar.gz"
     sha256: "e7a0c161376bfb46b869e292d4593a64f4ff7b358837494a5f2d765d9a2af683"
+patches:
+  "2020.06.16":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2020.06.16/0001-xcode-missing-includes.patch"
+      # patch_type: portability 
+      # source: https://github.com/KhronosGroup/OpenCL-ICD-Loader/pull/131
+      # description: Add missing includes (needed for new Xcode versions)
