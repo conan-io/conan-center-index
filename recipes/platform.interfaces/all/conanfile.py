@@ -11,8 +11,8 @@ class PlatformInterfacesConan(ConanFile):
     license = "Unlicense"
     homepage = "https://github.com/linksplatform/Interfaces"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """platform.interfaces is one of the libraries of the LinksPlatform modular framework, which uses 
-    innovations from the C++20 standard, for easier use of static polymorphism. It also includes some auxiliary 
+    description = """platform.interfaces is one of the libraries of the LinksPlatform modular framework, which uses
+    innovations from the C++20 standard, for easier use of static polymorphism. It also includes some auxiliary
     structures for more convenient work with containers."""
     topics = ("platform", "concepts", "header-only")
     settings = "os", "compiler", "build_type", "arch"
