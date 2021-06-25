@@ -18,7 +18,7 @@ struct EventfulSet : public std::set<T>
     {
         InsertEvent(std::forward<decltype(item)>(item));
 
-        if (this->contains(item)) {
+        if (this->find(std::forward<decltype(item)>(item)) != this->end()) {
             InsertDuplicateEvent(std::forward<decltype(item)>(item));
         }
 
