@@ -1,6 +1,7 @@
 #include <tcb/span.hpp>
 
 #include <array>
+#include <cstddef>
 #include <cstdio>
 #include <vector>
 
