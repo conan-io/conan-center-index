@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 import os
 
 class LibStudXmlConan(ConanFile):
@@ -52,17 +52,58 @@ class LibStudXmlConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    def _build_vs(self):
+        if tools.Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
+        
+        vc_ver = self.settings.compiler.version
+        max_vc_ver = self.conan_data["max_vc_version"][self.version]
+        if tools.Version(vc_ver) > max_vc_ver:
+            vc_ver = max_vc_ver
+
+        sln_path = os.path.join(self._source_subfolder, "libstudxml-vc{}.sln".format(vc_ver))
+        proj_path = os.path.join(self._source_subfolder, "xml", "libstudxml-vc{}.vcxproj".format(vc_ver))
+
+        if not self.options.shared:
+            tools.replace_in_file(proj_path, "DynamicLibrary", "StaticLibrary")
+
+        msbuild = MSBuild(self)
+        msbuild.build(sln_path, platforms={"x86": "Win32"})
+    
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            pass
+            self._build_vs()
         else:
             autotools = self._configure_autotools()
             autotools.make()
 
+    @property
+    def _excluded_outputs(self):
+        return ("*.vcxproj", "*.vcproj", "*.filters", "Makefile.*", "config.h.in", "*.cxx")
+
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            pass
+            self.copy("xml/value-traits", dst="include", src=self._source_subfolder)
+            self.copy("xml/serializer", dst="include", src=self._source_subfolder)
+            self.copy("xml/qname", dst="include", src=self._source_subfolder)
+            self.copy("xml/parser", dst="include", src=self._source_subfolder)
+            self.copy("xml/forward", dst="include", src=self._source_subfolder)
+            self.copy("xml/exception", dst="include", src=self._source_subfolder)
+            self.copy("xml/content", dst="include", src=self._source_subfolder)
+            self.copy("xml/*.ixx", dst="include", src=self._source_subfolder)
+            self.copy("xml/*.txx", dst="include", src=self._source_subfolder)
+            self.copy("xml/*.hxx", dst="include", src=self._source_subfolder)
+            self.copy("xml/*.h", dst="include", src=self._source_subfolder)
+
+            suffix = ""
+            if self.settings.arch == "x86_64":
+                suffix = "64"
+            if self.options.shared:
+                self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "lib" + suffix))
+                self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "bin" + suffix))
+            else:
+                self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "bin" + suffix))
         else:
             autotools = self._configure_autotools()
             autotools.install()
