@@ -61,6 +61,8 @@ class FlintConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_DOCS"] = False
         self._cmake.definitions["WITH_NTL"] = False
+        # IPO/LTO breaks clang builds
+        self._cmake.definitions["IPO_SUPPORTED"] = False
         # No BLAS yet
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CBLAS"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
