@@ -794,6 +794,8 @@ Examples = bin/datadir/examples""")
             core_reqs.append("icu::icu")
         if self.options.with_zstd:
             core_reqs.append("zstd::zstd")
+        if self.options.with_glib:
+            core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
         if self.options.gui:
@@ -968,7 +970,12 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
 
         if self.options.qtmultimedia:
-            _create_module("Multimedia", ["Network", "Gui", "openal::openal"])
+            multimedia_reqs = ["Network", "Gui"]
+            if self.options.with_libalsa:
+                multimedia_reqs.append("libalsa::libalsa")
+            if self.options.with_openal:
+                multimedia_reqs.append("openal::openal")
+            _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and self.options.gui:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
