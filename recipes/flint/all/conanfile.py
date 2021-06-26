@@ -38,6 +38,8 @@ class FlintConan(ConanFile):
     def requirements(self):
         self.requires("gmp/6.2.1")
         self.requires("mpfr/4.1.0")
+        if self.settings.compiler == "Visual Studio":
+            self.requires("pthreads4w/3.0.0")
 
     def configure(self):
         if self.options.shared:
