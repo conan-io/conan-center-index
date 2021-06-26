@@ -55,13 +55,17 @@ class LibStudXmlConan(ConanFile):
     def _build_vs(self):
         if tools.Version(self.settings.compiler.version) < "9":
             raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
-        
-        vc_ver = self.settings.compiler.version
-        max_vc_ver = self.conan_data["max_vc_version"][self.version]
-        if tools.Version(vc_ver) > max_vc_ver:
-            vc_ver = max_vc_ver
 
-        sln_path = os.path.join(self._source_subfolder, "libstudxml-vc{}.sln".format(vc_ver))
+        vc_ver = int(tools.Version(self.settings.compiler.version).major)
+        sln_path = None
+        def get_sln_path():
+            return os.path.join(self._source_subfolder, "libstudxml-vc{}.sln".format(vc_ver))
+
+        sln_path = get_sln_path()
+        while not os.path.exists(sln_path):
+            vc_ver -= 1
+            sln_path = get_sln_path()
+
         proj_path = os.path.join(self._source_subfolder, "xml", "libstudxml-vc{}.vcxproj".format(vc_ver))
 
         if not self.options.shared:
@@ -69,7 +73,7 @@ class LibStudXmlConan(ConanFile):
 
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
-    
+
     def build(self):
         if self.settings.compiler == "Visual Studio":
             self._build_vs()
