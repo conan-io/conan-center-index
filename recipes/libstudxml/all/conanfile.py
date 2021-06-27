@@ -70,6 +70,7 @@ class LibStudXmlConan(ConanFile):
 
         if not self.options.shared:
             tools.replace_in_file(proj_path, "DynamicLibrary", "StaticLibrary")
+            tools.replace_in_file(proj_path, "LIBSTUDXML_DYNAMIC_LIB", "LIBSTUDXML_STATIC_LIB")
 
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
@@ -117,3 +118,7 @@ class LibStudXmlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+
+        # If built with makefile, static library mechanism is provided by their buildsystem already
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            self.cpp_info.defines = ["LIBSTUDXML_STATIC_LIB=1"]
