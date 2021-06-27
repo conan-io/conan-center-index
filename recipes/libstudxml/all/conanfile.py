@@ -1,5 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 class LibStudXmlConan(ConanFile):
     name = "libstudxml"
@@ -44,9 +47,9 @@ class LibStudXmlConan(ConanFile):
         if not self._autotools:
             args = ["--with-extern-expat", "CXXFLAGS=\"-UNDEBUG\""]
             if self.options.shared:
-                args.append("--disable-static")
+                args.extend(["--enable-shared", "--disable-static"])
             else:
-                args.append("--disable-shared")
+                args.extend(["--disable-shared", "--enable-static"])
 
             self._autotools = AutoToolsBuildEnvironment(self)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
@@ -82,10 +85,6 @@ class LibStudXmlConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make()
 
-    @property
-    def _excluded_outputs(self):
-        return ("*.vcxproj", "*.vcproj", "*.filters", "Makefile.*", "config.h.in", "*.cxx")
-
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
@@ -112,12 +111,13 @@ class LibStudXmlConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            os.remove(os.path.join(self.package_folder, "lib", "libstudxml.la"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libstudxml.la")
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libstudxml"
 
         # If built with makefile, static library mechanism is provided by their buildsystem already
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
