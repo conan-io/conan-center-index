@@ -38,7 +38,7 @@ class LibnetConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("libnet is not supported by Visual Studio")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("libnet can't be built as shared on Windows")
