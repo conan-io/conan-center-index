@@ -60,6 +60,19 @@ class FastDDSConan(ConanFile):
             self._module_subfolder,
             "conan-target-properties.cmake"
         )
+    
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "5",
+            "clang": "5.0",
+            "apple-clang": "5.0",
+        }
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -112,26 +125,21 @@ class FastDDSConan(ConanFile):
                   destination=self._source_subfolder)
 
     def validate(self):
-        os = self.settings.os
-        compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
-        if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if os == "Linux" and compiler == "gcc" and version < "5":
-            raise ConanInvalidConfiguration(
-                "Using Fast-DDS with gcc on Linux requires gcc 5 or higher.")
-        if os == "Linux" and compiler == "clang" and version < "5.0":
-            raise ConanInvalidConfiguration(
-                "Using Fast-DDS with clang on Linux requires clang 5 or higher.")
-        if os == "Windows" and compiler == "Visual Studio" and version < "16":
-            raise ConanInvalidConfiguration(
-                "Fast-DDS was tested on Windows with VS Compiler 16")
-        
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
+                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
         if self.settings.os == "Windows":
             if ("MT" in self.settings.compiler.runtime and self.options.shared):
                 # This combination leads to an fast-dds error when linking
                 # linking dynamic '*.dll' and static MT runtime
-                raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
+                raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
 
 
     def build(self):
@@ -174,20 +182,11 @@ class FastDDSConan(ConanFile):
             "foonathan-memory::foonathan-memory"
         ]
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:
-            self.cpp_info.components["fastrtps"].system_libs = [
-                    "pthread"
-                ]
+            self.cpp_info.components["fastrtps"].system_libs.append("pthread")
         if self.settings.os == "Linux":
-            self.cpp_info.components["fastrtps"].system_libs = [
-                    "rt",
-                    "dl",
-                    "atomic"
-                ]
+            self.cpp_info.components["fastrtps"].system_libs.extend(["rt", "dl", "atomic"])
         elif self.settings.os == "Windows":
-            self.cpp_info.components["fastrtps"].system_libs = [
-                "iphlpapi",
-                "shlwapi"
-            ]
+            self.cpp_info.components["fastrtps"].system_libs.extend(["iphlpapi","shlwapi"])
             if self.options.shared:
                 self.cpp_info.components["fastrtps"].defines.append("FASTRTPS_DYN_LINK")
         if self.options.with_ssl:
