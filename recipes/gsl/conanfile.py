@@ -4,15 +4,12 @@ from conans import ConanFile, CMake, tools
 class GslConan(ConanFile):
     name = "gsl"
     version = "0.1"
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of Gsl here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    license = "GNU GPL"
+    url = "http://www.gnu.org/software/gsl/"
+    description = "GNU Scientific Library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
 
     def config_options(self):
         if self.settings.os == "Windows":
