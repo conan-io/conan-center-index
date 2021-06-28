@@ -32,11 +32,11 @@ class AtkConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires('meson/0.58.0')
+        self.build_requires('meson/0.58.1')
         self.build_requires('pkgconf/1.7.4')
 
     def requirements(self):
-        self.requires('glib/2.66.2')
+        self.requires('glib/2.68.3')
 
     def configure(self):
         if self.options.shared:
