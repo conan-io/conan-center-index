@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
-
 class GslConan(ConanFile):
     name = "gsl"
     version = "2.7"
@@ -23,9 +22,10 @@ class GslConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self)
         autotools.configure()
         autotools.make()
+        autotools.install()
 
     def package(self):
-        self.copy("*.h", dst="include", src="hello")
+        self.copy("*.h", dst="include/gsl", src="gsl")
         self.copy("*hello.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
@@ -33,5 +33,5 @@ class GslConan(ConanFile):
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["hello"]
+        self.cpp_info.libs = ["gsl"]
 
