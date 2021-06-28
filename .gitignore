@@ -8,6 +8,9 @@
 .devcontainer/
 ## emacs
 *~
+## vim
+*.swp
+*.swo
 
 
 # Byte-compiled / optimized / DLL files / Cache

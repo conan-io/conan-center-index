@@ -1,39 +1,28 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 
 class GslConan(ConanFile):
     name = "gsl"
-    version = "0.1"
+    version = "2.7"
     license = "GNU GPL"
     url = "http://www.gnu.org/software/gsl/"
     description = "GNU Scientific Library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    _autotools = None
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
-        self.run("git clone https://github.com/conan-io/hello.git")
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
-        tools.replace_in_file("hello/CMakeLists.txt", "PROJECT(HelloWorld)",
-                              '''PROJECT(HelloWorld)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder))
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder="hello")
-        cmake.build()
-
-        # Explicit way:
-        # self.run('cmake %s/hello %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         self.copy("*.h", dst="include", src="hello")

@@ -1,0 +1,3 @@
+sources:
+  "2.6":
+    url: "https://mirror.csclub.uwaterloo.ca/gnu/gsl/gsl-2.6.tar.gz"
