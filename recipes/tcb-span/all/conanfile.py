@@ -5,7 +5,7 @@ import glob
 
 class TcbSpanConan(ConanFile):
     name = "tcb-span"
-    description = "Implementation of C++20's std::span for older compilers"
+    description = "Implementation of C++20's std::span for older C++ standards"
     topics = ("conan", "span", "header-only", "tcb-span")
     homepage = "https://github.com/tcbrindle/span"
     url = "https://github.com/conan-io/conan-center-index"
