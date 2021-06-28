@@ -58,6 +58,7 @@ class LibnetConan(ConanFile):
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--disable-shared", "--enable-static"])
+            args.append("--disable-doxygen-doc")
 
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
 
