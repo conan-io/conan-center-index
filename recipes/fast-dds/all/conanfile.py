@@ -68,10 +68,10 @@ class FastDDSConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
+            "Visual Studio": "14",
             "gcc": "5",
-            "clang": "5.0",
-            "apple-clang": "5.0",
+            "clang": "3.9",
+            "apple-clang": "8",
         }
 
     @staticmethod
@@ -117,6 +117,7 @@ class FastDDSConan(ConanFile):
         self.requires("asio/1.18.2")
         self.requires("fast-cdr/1.0.21")
         self.requires("foonathan-memory/0.7.0")
+        self.requires("boost/1.73.0")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1k")
 
@@ -179,7 +180,8 @@ class FastDDSConan(ConanFile):
             "fast-cdr::fast-cdr",
             "asio::asio",
             "tinyxml2::tinyxml2",
-            "foonathan-memory::foonathan-memory"
+            "foonathan-memory::foonathan-memory",
+            "boost::boost"
         ]
         if self.settings.os in ["Linux", "Macos", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")

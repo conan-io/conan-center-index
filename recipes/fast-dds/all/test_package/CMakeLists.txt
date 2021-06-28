@@ -12,6 +12,8 @@ add_executable(test_package
     msg/HelloWorldPubSubTypes.cxx
 )
 
+set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
+
 target_link_libraries(test_package
     fastrtps
 )
