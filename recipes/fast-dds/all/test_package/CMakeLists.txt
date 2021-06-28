@@ -4,7 +4,14 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(fastdds REQUIRED)
 
-add_subdirectory(HelloWorldExample)
+add_executable(test_package
+    test_package.cpp
+    msg/HelloWorld.cxx
+    msg/HelloWorldPubSubTypes.cxx
+)
+
+target_link_libraries(test_package
+    fastrtps
+)
