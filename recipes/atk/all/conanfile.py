@@ -5,7 +5,7 @@ import glob
 
 required_conan_version = ">=1.29"
 
-class LibnameConan(ConanFile):
+class AtkConan(ConanFile):
     name = "atk"
     description = "set of accessibility interfaces that are implemented by other toolkits and applications"
     topics = ("conan", "atk", "accessibility")
