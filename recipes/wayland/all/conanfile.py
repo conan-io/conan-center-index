@@ -47,15 +47,14 @@ class WaylandConan(ConanFile):
             self.requires("libffi/3.3")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.9.10")
-        self.requires("expat/2.2.10")
+        self.requires("expat/2.4.1")
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
+        self.build_requires("meson/0.58.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "wayland-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
