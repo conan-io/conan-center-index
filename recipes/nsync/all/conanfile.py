@@ -1,9 +1,12 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class NsyncConan(ConanFile):
     name = "nsync"
+    homepage = "https://github.com/google/nsync"
     description = "Library that exports various synchronization primitive"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -25,8 +28,9 @@ class NsyncConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True,
+                  destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -48,5 +52,22 @@ class NsyncConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.nsync_cpp.libs = ["nsync_cpp"]
-        self.cpp_info.nsync.libs = ["nsync"]
+        self.cpp_info.filenames["cmake_find_package"] = "nsync"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "nsync"
+        self.cpp_info.names["cmake_find_package"] = "nsync"
+        self.cpp_info.names["cmake_find_package_multi"] = "nsync"
+
+        nsync_c = self.cpp_info.components["nsync_c"]
+        nsync_c.name = "nsync_c"
+        nsync_c.libs = ["nsync"]
+        nsync_c.names["cmake_find_package"] = "nsync_c"
+        nsync_c.names["cmake_find_package_multi"] = "nsync_c"
+        nsync_c.names["pkg_config"] = "nsync"
+
+        nsync_cpp = self.cpp_info.components["nsync_cpp"]
+        nsync_cpp.name = "nsync_cpp"
+        nsync_cpp.libs = ["nsync_cpp"]
+        nsync_cpp.names["cmake_find_package"] = "nsync_cpp"
+        nsync_cpp.names["cmake_find_package_multi"] = "nsync_cpp"
+        nsync_cpp.names["pkg_config"] = "nsync_cpp"
+
