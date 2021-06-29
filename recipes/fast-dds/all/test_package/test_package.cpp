@@ -5,7 +5,6 @@
 #include <fastrtps/publisher/Publisher.h>
 #include <fastrtps/Domain.h>
 
-
 #include "msg/HelloWorld.h"
 #include "msg/HelloWorldPubSubTypes.h"
 
