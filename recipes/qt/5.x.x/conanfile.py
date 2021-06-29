@@ -206,9 +206,11 @@ class QtConan(ConanFile):
             del self.options.with_libalsa
             del self.options.with_openal
 
-        if tools.os_info.is_linux:
+        if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+        else:
+            del self.options.qtx11extras
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -567,6 +569,8 @@ class QtConan(ConanFile):
         for package in self.deps_cpp_info.deps:
             args += ["-I \"%s\"" % s for s in self.deps_cpp_info[package].include_paths]
             args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
+        lib_arg = "/LIBPATH:" if self.settings.compiler == "Visual Studio" else "-L"
+        args.append("QMAKE_LFLAGS+=\"%s\"" % " ".join("%s%s" % (lib_arg, l) for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths))
 
         if "libmysqlclient" in self.deps_cpp_info.deps:
             args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info["libmysqlclient"].rootpath, "bin", "mysql_config"))
@@ -641,8 +645,6 @@ class QtConan(ConanFile):
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
 
-                build_env["LIB" if self.settings.compiler == "Visual Studio" else "LIBRARY_PATH"] = \
-                    [l for package in self.deps_cpp_info.deps for l in self.deps_cpp_info[package].lib_paths]
                 with tools.environment_append(build_env):
 
                     if tools.os_info.is_macos:
@@ -794,6 +796,8 @@ Examples = bin/datadir/examples""")
             core_reqs.append("icu::icu")
         if self.options.with_zstd:
             core_reqs.append("zstd::zstd")
+        if self.options.with_glib:
+            core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
         if self.options.gui:
@@ -968,7 +972,12 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QXInputGamepadBackendPlugin", "xinputgamepad", "gamepads", [])
 
         if self.options.qtmultimedia:
-            _create_module("Multimedia", ["Network", "Gui", "openal::openal"])
+            multimedia_reqs = ["Network", "Gui"]
+            if self.options.with_libalsa:
+                multimedia_reqs.append("libalsa::libalsa")
+            if self.options.with_openal:
+                multimedia_reqs.append("openal::openal")
+            _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and self.options.gui:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
@@ -1002,6 +1011,9 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
+
+        if self.options.get_safe("qtx11extras"):
+            _create_module("X11Extras")
 
         if not self.options.shared:
             if self.settings.os == "Windows":

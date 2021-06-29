@@ -49,6 +49,8 @@ class CorradeConan(ConanFile):
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self):
             self.output.warn("This Corrade recipe could not be prepared for cross building")
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -79,6 +81,11 @@ class CorradeConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
+
+
+    def build_requirements(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self.settings, skip_x64_x86=True):
+            self.build_requires("corrade/{}".format(self.version))
 
     def build(self):
         cmake = self._configure_cmake()

@@ -10,7 +10,7 @@ find_package(args-parser REQUIRED)
 
 add_executable(${PROJECT_NAME} example.cpp)
 
-target_link_libraries(${PROJECT_NAME} args-parser)
+target_link_libraries(${PROJECT_NAME} args-parser::args-parser)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 14

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
+find_package(apriltag REQUIRED MODULE)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} apriltag::apriltag)
