@@ -45,8 +45,16 @@ class GslConan(ConanFile):
         autotools.make()
         autotools.install()
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def package(self):
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        tools.remove_files_by_mask(self.package_folder, "*.la")
+
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include/gsl", src="gsl")
         self.copy("*.dll", dst="bin", keep_path=False)
