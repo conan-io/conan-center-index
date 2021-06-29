@@ -43,6 +43,7 @@ class NsyncConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE", dst='licenses', src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
