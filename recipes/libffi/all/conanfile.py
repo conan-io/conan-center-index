@@ -47,9 +47,7 @@ class LibffiConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -129,9 +127,9 @@ class LibffiConan(ConanFile):
         self._autotools.configure(args=config_args, configure_dir=self._source_subfolder, build=build, host=host)
         return self._autotools
 
-    @property 
-    def _user_info_build(self): 
-        return getattr(self, "user_info_build", None) or self.deps_user_info 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def build(self):
         self._patch_sources()
