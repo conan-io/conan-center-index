@@ -55,7 +55,6 @@ class MinizConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy(pattern="*.dll", dst="bin", src=os.path.join(self._build_subfolder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
