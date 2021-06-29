@@ -45,6 +45,7 @@ class GslConan(ConanFile):
         autotools.install()
 
     def package(self):
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include/gsl", src="gsl")
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
