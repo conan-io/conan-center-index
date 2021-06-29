@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import os
 
 
 class GslConan(ConanFile):
@@ -45,6 +46,7 @@ class GslConan(ConanFile):
         autotools.install()
 
     def package(self):
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include/gsl", src="gsl")
         self.copy("*.dll", dst="bin", keep_path=False)
