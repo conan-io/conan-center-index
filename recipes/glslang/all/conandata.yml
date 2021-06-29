@@ -2,7 +2,14 @@ sources:
   "8.13.3559":
     url: "https://github.com/KhronosGroup/glslang/archive/8.13.3559.tar.gz"
     sha256: "c58fdcf7e00943ba10f9ae565b2725ec9d5be7dab7c8e82cac72fcaa83c652ca"
+  "11.5.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/11.5.0.zip"
+    sha256: "5ba7c7d8cbe33a8c6e9bd2a6127a80b22506e968b45f5c2da1cd2fc54d91b27b"
 patches:
   "8.13.3559":
     - patch_file: "patches/conanize-cmake-8.13.3559.patch"
       base_path: "source_subfolder"
+  "11.5.0":
+    - patch_file: "patches/remove_pos_independend_code.patch"
+      base_path: "source_subfolder"
+

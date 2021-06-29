@@ -82,11 +82,17 @@ class GlslangConan(ConanFile):
                 {"target": "OGLCompiler", "relpath": os.path.join("OGLCompilersDLL", "CMakeLists.txt")},
                 {"target": "SPIRV"      , "relpath": os.path.join("SPIRV", "CMakeLists.txt")},
                 {"target": "SPVRemapper", "relpath": os.path.join("SPIRV", "CMakeLists.txt")},
-                {"target": "glslang"    , "relpath": os.path.join("glslang", "CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Unix","CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
                 {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
+            if tools.Version(self.version) <= "8.13.3743":
+                cmake_files_to_fix.append({"target": "glslang"                            , "relpath": os.path.join("glslang", "CMakeLists.txt")})
+            if tools.Version(self.version) > "8.13.3743":
+                cmake_files_to_fix.append({"target": "glslang-default-resource-limits"    , "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
+                cmake_files_to_fix.append({"target": "GenericCodeGen"                     , "relpath": os.path.join("glslang"    , "CMakeLists.txt")})
+                cmake_files_to_fix.append({"target": "MachineIndependent"                 , "relpath": os.path.join("glslang"    , "CMakeLists.txt")})
+
             for cmake_file in cmake_files_to_fix:
                 tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file["relpath"]),
                                       "set_property(TARGET {} PROPERTY POSITION_INDEPENDENT_CODE ON)".format(cmake_file["target"]),
@@ -100,6 +106,7 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
         self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
+
         if tools.Version(self.version) >= "8.13.3743":
             self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
             self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
@@ -150,6 +157,7 @@ class GlslangConan(ConanFile):
         self.cpp_info.components["spirv"].names["cmake_find_package_multi"] = "SPIRV"
         self.cpp_info.components["spirv"].libs = ["SPIRV" + lib_suffix]
         self.cpp_info.components["spirv"].requires = ["glslang-core"]
+
         if self.options.enable_optimizer:
             self.cpp_info.components["spirv"].requires.append("spirv-tools::spirv-tools-opt")
             self.cpp_info.components["spirv"].defines.append("ENABLE_OPT")
