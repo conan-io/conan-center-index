@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
+
 class GslConan(ConanFile):
     name = "gsl"
     version = "2.7"
@@ -21,21 +22,25 @@ class GslConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        tools.replace_in_file(self._source_subfolder+"/configure", r"-install_name \$rpath/", "-install_name @rpath/")
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
+        tools.replace_in_file(self._source_subfolder + "/configure",
+                              r"-install_name \$rpath/",
+                              "-install_name @rpath/")
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
 
         configure_args = []
 
-        if(self.options.shared):
+        if self.options.shared:
             configure_args.append("--enable-shared")
-        if(not self.options.shared):
+
+        if not self.options.shared:
             configure_args.append("--enable-static")
 
-
-        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        autotools.configure(args=configure_args,
+                            configure_dir=self._source_subfolder)
         autotools.make()
         autotools.install()
 
@@ -49,4 +54,3 @@ class GslConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["gsl", "gslcblas"]
-
