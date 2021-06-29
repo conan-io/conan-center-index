@@ -9,7 +9,8 @@ class GslConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _autotools = None
+
+    generators = "cmake"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -21,10 +22,20 @@ class GslConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.replace_in_file(self._source_subfolder+"/configure", r"-install_name \$rpath/", "-install_name @rpath/")
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
-        autotools.configure(configure_dir=self._source_subfolder)
+
+        configure_args = []
+
+        if(self.options.shared):
+            configure_args.append("--enable-shared")
+        if(not self.options.shared):
+            configure_args.append("--enable-static")
+
+
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         autotools.make()
         autotools.install()
 
