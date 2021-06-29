@@ -1,4 +1,7 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/richgel999/miniz/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "bd1136d0a1554520dcb527a239655777148d90fd2d51cf02c36540afc552e6ec"
   "2.1.0":
     url: "https://github.com/richgel999/miniz/archive/2.1.0.tar.gz"
     sha256: "95f9b23c92219ad2670389a23a4ed5723b7329c82c3d933b7047673ecdfc1fea"
