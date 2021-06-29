@@ -15,12 +15,16 @@ class GslConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder))
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
-        autotools.configure()
+        autotools.configure(configure_dir=self._source_subfolder)
         autotools.make()
         autotools.install()
 
