@@ -11,3 +11,7 @@ sources:
   "cci.20210414":
     url: https://github.com/KhronosGroup/SPIRV-Headers/archive/dafead1765f6c1a5f9f8a76387dcb2abe4e54acd.tar.gz
     sha256: e1c8530c95fc8c70fa6a7cbc269ebd1b10da3872efa0e3c6eb82452c3e180cda
+  "cci.20210526":
+    url: https://github.com/DiligentGraphics/SPIRV-Headers/archive/2e1bc6dcd4ff49ed996dc0174d1aec37c2e9ab59.zip
+    sha256: 3f4fd313af7514bb7b3fe4f6049b689d1253ad4a102490ff5538c2e7db61a0ff
+
