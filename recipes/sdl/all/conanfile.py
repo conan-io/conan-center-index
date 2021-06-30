@@ -314,6 +314,8 @@ class SDLConan(ConanFile):
             self.cpp_info.components["libsdl2"].system_libs.extend(["android", "log"])
             self.cpp_info.components["hidapi"].libs = ["hidapi"]
             self.cpp_info.components["libsdl2"].requires.append("hidapi")
+            if self.options.opengles:
+                self.cpp_info.components["libsdl2"].system_libs.extend(["GLESv1_CM", "GLESv2"])
         # SDL2main
         if self.options.sdl2main:
             self.cpp_info.components["sdl2main"].names["cmake_find_package"] = "SDL2main"
