@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-cpp-static-lib.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-include.patch"
+      base_path: "source_subfolder"

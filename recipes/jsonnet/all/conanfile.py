@@ -13,7 +13,7 @@ class JsonnetConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
@@ -32,6 +32,11 @@ class JsonnetConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("nlohmann_json/3.9.1")
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
@@ -47,6 +52,7 @@ class JsonnetConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         self._cmake.definitions["BUILD_JSONNET"] = False
         self._cmake.definitions["BUILD_JSONNETFMT"] = False
+        self._cmake.definitions["USE_SYSTEM_JSON"] = True
         self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._cmake
 
