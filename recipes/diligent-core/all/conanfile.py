@@ -46,10 +46,9 @@ class DiligentCoreConan(ConanFile):
         self.requires("zlib/1.2.11")
         self.requires("libpng/1.6.37")
 
-        #self.requires("spirv-headers/cci.20210526")
-
-        #self.requires("spirv-tools/2019.2")
-        #self.requires("spirv-cross/20200403")
+        self.requires("spirv-headers/cci.20210526")
+        self.requires("spirv-tools/cci.20210601")
+        self.requires("spirv-cross/cci.20210601")
         #self.requires("glslang/8.13.3559")
         
         self.requires("vulkan-memory-allocator/2.3.0")
