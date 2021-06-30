@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
-
+import glob
 
 class VolkConan(ConanFile):
     name = "volk"
@@ -45,7 +45,11 @@ class VolkConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("volk-{}".format(self.version), self._source_subfolder)
+        extracted_dir = glob.glob('volk-*/')[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
+        #tools.get(**self.conan_data["sources"][self.version])
+        #os.rename("volk-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

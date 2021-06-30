@@ -1,4 +1,7 @@
 sources:
+  "cci.dirigent.2.5":
+    url: "https://github.com/DiligentGraphics/volk/archive/38d33ced560c2c06595b4dddc3a0d91e8483b38b.zip"
+    sha256: "a463552a8ce3f726fe5b7fcba94b10881542560732c43803272edc6e8ddbfd76"
   "1.2.170":
     url: "https://github.com/zeux/volk/archive/1.2.170.tar.gz"
     sha256: "01f37fc0c904afd2eb8060cada73f903ab1cdae87c7c24e77585ca7fb9bafae4"
