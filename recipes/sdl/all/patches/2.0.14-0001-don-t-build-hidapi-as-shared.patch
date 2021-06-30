@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -2253,7 +2253,7 @@
+ 
+ if(ANDROID)
+   if(HAVE_HIDAPI)
+-    add_library(hidapi SHARED ${SDL2_SOURCE_DIR}/src/hidapi/android/hid.cpp)
++    add_library(hidapi ${SDL2_SOURCE_DIR}/src/hidapi/android/hid.cpp)
+   endif()
+ 
+   if(MSVC AND NOT LIBC)
