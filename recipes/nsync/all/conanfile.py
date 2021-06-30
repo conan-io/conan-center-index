@@ -63,6 +63,7 @@ class NsyncConan(ConanFile):
         nsync_c.names["cmake_find_package"] = "nsync_c"
         nsync_c.names["cmake_find_package_multi"] = "nsync_c"
         nsync_c.names["pkg_config"] = "nsync"
+        self._add_pthread_dep(nsync_c)
 
         nsync_cpp = self.cpp_info.components["nsync_cpp"]
         nsync_cpp.name = "nsync_cpp"
@@ -70,4 +71,11 @@ class NsyncConan(ConanFile):
         nsync_cpp.names["cmake_find_package"] = "nsync_cpp"
         nsync_cpp.names["cmake_find_package_multi"] = "nsync_cpp"
         nsync_cpp.names["pkg_config"] = "nsync_cpp"
+        self._add_pthread_dep(nsync_cpp)
 
+    def _add_pthread_dep(self, component):
+        if self.settings.os == "Linux":
+            component.system_libs = ["pthread"]
+            component.cxxflags.append("-pthread")
+            component.exelinkflags.append("-pthread")
+            component.sharedlinkflags.append("-pthread")
