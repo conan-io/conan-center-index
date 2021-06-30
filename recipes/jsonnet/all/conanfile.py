@@ -44,14 +44,14 @@ class JsonnetConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options["shared"]
+        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         self._cmake.definitions["BUILD_JSONNET"] = False
         self._cmake.definitions["BUILD_JSONNETFMT"] = False
         self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
-        if not self.options["shared"]:
+        if not self.options.shared:
             for patch in self.conan_data.get("patches", {}).get(self.version, []):
                 tools.patch(**patch)
         cmake = self._configure_cmake()
