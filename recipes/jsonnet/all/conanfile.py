@@ -10,7 +10,7 @@ class JsonnetConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/jsonnet"
     description = "Jsonnet - The data templating language"
-    topics = ("conan", "jsonnet")
+    topics = ("config", "json", "functional", "configuration")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
