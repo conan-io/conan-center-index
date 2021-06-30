@@ -42,9 +42,8 @@ class DiligentCoreConan(ConanFile):
             del self.options.fPIC
 
     def _patch_sources(self):
-        pass
-        #for patch in self.conan_data["patches"][self.version]:
-        #    tools.patch(**patch)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def requirements(self):
         self.requires("libjpeg/9d")

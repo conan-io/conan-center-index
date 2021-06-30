@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f2eaef7..1928f5ab 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -349,7 +349,6 @@ endif()
+ 
+ include(BuildUtils.cmake)
+ 
+-add_subdirectory(ThirdParty)
+ add_subdirectory(BuildTools)
+ add_subdirectory(Primitives)
+ add_subdirectory(Platforms)
+diff --git a/Graphics/ShaderTools/CMakeLists.txt b/Graphics/ShaderTools/CMakeLists.txt
+index 82528587..7673f862 100644
+--- a/Graphics/ShaderTools/CMakeLists.txt
++++ b/Graphics/ShaderTools/CMakeLists.txt
+@@ -133,27 +133,24 @@ endif()
+ if(ENABLE_SPIRV)
+     target_link_libraries(Diligent-ShaderTools 
+     PRIVATE
+-        spirv-cross-core
++        "CONAN_PKG::spirv-cross"
+     )
+ 
+     if (${USE_SPIRV_TOOLS})
+         target_link_libraries(Diligent-ShaderTools 
+         PRIVATE
+-            SPIRV-Tools-opt
++            "CONAN_PKG::spirv-tools"
+         )
+     endif()
+ 
+     if (${USE_GLSLANG})
+         target_link_libraries(Diligent-ShaderTools 
+         PRIVATE
+-            SPIRV
+-            glslang
++            "CONAN_PKG::spirv-tools"
++            "CONAN_PKG::glslang"
+         )
+ 
+-        target_include_directories(Diligent-ShaderTools 
+-        PRIVATE
+-            ../../ThirdParty/glslang
+-        )
++        target_include_directories(Diligent-ShaderTools)
+     endif()
+ endif()
+
