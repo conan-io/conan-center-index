@@ -35,7 +35,7 @@ class Crc_CppConan(ConanFile):
             self.output.warn("{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
         return False
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         if not self._supported_compiler:
@@ -50,4 +50,3 @@ class Crc_CppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
