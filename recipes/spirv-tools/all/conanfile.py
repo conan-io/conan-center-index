@@ -60,6 +60,7 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _get_compatible_spirv_headers_version(self):
         return {
+            "cci.20210601":"cci.20210526",
             "2020.5": "1.5.4",
             "2020.3": "1.5.3",
             "2019.2": "1.5.1",
@@ -71,9 +72,8 @@ class SpirvtoolsConan(ConanFile):
                                             .format(self._version, self._get_compatible_spirv_headers_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SPIRV-Tools-" + self._version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+              destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -84,7 +84,7 @@ class SpirvtoolsConan(ConanFile):
         # - Before v2020.5, the shared lib is always built, but static libs might be built as shared
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
         # - From v2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
-        if tools.Version(self._version) < "2020.5":
+        if not "cci" in self._version and tools.Version(self._version) < "2020.5":
             cmake.definitions["BUILD_SHARED_LIBS"] = False
 
         # Required by the project's CMakeLists.txt

@@ -1,4 +1,7 @@
 sources:
+  "cci.20210601":
+    url: "https://github.com/DiligentGraphics/SPIRV-Tools/archive/96a331142da2cad662f03eedda47771dc45f4aef.zip"
+    sha256: "5fe549cce6dcdd867e61cfb214c4da1584b501ee7beff2b7d2228bbf2a010d27"
   "2020.5":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2020.5.tar.gz"
     sha256: "947ee994ba416380bd7ccc1c6377ac28a4802a55ca81ccc06796c28e84c00b71"
@@ -24,3 +27,4 @@ patches:
   "v2020.5":
     - patch_file: "patches/support-SPV_KHR_fragment_shading_rate.patch"
       base_path: "source_subfolder"
+
