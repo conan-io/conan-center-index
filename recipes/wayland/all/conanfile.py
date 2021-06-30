@@ -41,6 +41,8 @@ class WaylandConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Wayland can be built on Linux only")
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.enable_libraries:
