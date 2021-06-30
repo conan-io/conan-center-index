@@ -9,6 +9,7 @@ b2/4.2.0
 boost/1.69.0
 c-ares/1.15.0
 caffe/1.0.windows
+dlib/19.4
 libcurl/7.64.1
 bzip2/1.0.8
 ffmpeg/3.3.1
@@ -49,6 +50,7 @@ caffe:with_opencv=True
 caffe:with_leveldb=True
 caffe:with_lmdb=True
 curl:shared=True
+dlib:shared=header_only
 facesdk:shared=True
 ffmpeg:shared=True
 freetype:shared=True
