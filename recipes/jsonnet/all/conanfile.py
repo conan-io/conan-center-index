@@ -1,5 +1,4 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
 
 
@@ -27,9 +26,8 @@ class JsonnetConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-" + self.version)[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
         if self.options.shared:
