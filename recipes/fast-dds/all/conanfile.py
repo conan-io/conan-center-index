@@ -68,7 +68,7 @@ class FastDDSConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "14",
+            "Visual Studio": "16",
             "gcc": "5",
             "clang": "3.9",
             "apple-clang": "8",
