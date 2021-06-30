@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 class MongoCDriverConan(ConanFile):
@@ -88,8 +88,8 @@ class MongoCDriverConan(ConanFile):
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
