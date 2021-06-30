@@ -26,6 +26,7 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": [True, False],
         "enable_initial_exec_tls": [True, False],
         "enable_libdl": [True, False],
+        "enable_prof": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,7 +41,9 @@ class JemallocConan(ConanFile):
         "enable_debug_logging": False,
         "enable_initial_exec_tls": True,
         "enable_libdl": True,
+        "enable_prof": False,
     }
+    exports_sources = ["patches/**"]
 
     _autotools = None
 
@@ -72,6 +75,8 @@ class JemallocConan(ConanFile):
             raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
         if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
             raise ConanInvalidConfiguration("Unsupported arch")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
+            raise ConanInvalidConfiguration("Unsupported compiler version")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -93,9 +98,11 @@ class JemallocConan(ConanFile):
             "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
             "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
             "--enable-log" if self.options.enable_debug_logging else "--disable-log",
-            "--enable-initial-exec-tld" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
+            "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
             "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
         ]
+        if self.options.enable_prof:
+            conf_args.append("--enable-prof")
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
@@ -129,6 +136,9 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()

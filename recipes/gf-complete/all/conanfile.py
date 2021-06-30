@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
+
 
 class GfCompleteConan(ConanFile):
     name = "gf-complete"
@@ -31,10 +33,11 @@ class GfCompleteConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -46,7 +49,14 @@ class GfCompleteConan(ConanFile):
             del self.options.neon
 
     def configure(self):
-        if tools.os_info.is_windows and not self.settings.compiler == "gcc":
+        if self.options.shared:
+            del self.options.fPIC
+
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os == "Windows" and not self.settings.compiler == "gcc":
             # Building on Windows is currently only supported using the MSYS2
             # subsystem. In theory, the gf-complete library can be build using
             # MSVC. However, some adjustments to the build-system are needed
@@ -54,22 +64,18 @@ class GfCompleteConan(ConanFile):
             #
             # A suitable profile for MSYS2 can be found in the documentation:
             # https://github.com/conan-io/docs/blob/b712aa7c0dc99607c46c57585787ced2ae66ac33/systems_cross_building/windows_subsystems.rst
-            raise ConanInvalidConfiguration(
-                "Windows is only supported using the MSYS2 subsystem")
-
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            raise ConanInvalidConfiguration("Windows is only supported using the MSYS2 subsystem")
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows)
+            self, win_bash=bool(self.settings.os == "Windows"))
 
         with tools.environment_append(self._autotools.vars):
             with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
+                self.run("./autogen.sh", win_bash=bool(self.settings.os == "Windows"))
 
         if "x86" in self.settings.arch:
             self._autotools.flags.append('-mstackrealign')

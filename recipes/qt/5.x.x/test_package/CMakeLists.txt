@@ -9,7 +9,7 @@ conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
 
-find_package(qt REQUIRED CONFIG)
+find_package(Qt5 COMPONENTS Core REQUIRED CONFIG)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -20,4 +20,4 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
-target_link_libraries(${PROJECT_NAME} qt::qt)
+target_link_libraries(${PROJECT_NAME} Qt5::Core)
