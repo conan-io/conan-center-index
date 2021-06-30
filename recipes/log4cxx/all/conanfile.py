@@ -139,6 +139,9 @@ class Log4cxxConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "liblog4cxx"
+        self.cpp_info.names["cmake_find_package"] = "log4cxx"
+        self.cpp_info.names["cmake_find_package_multi"] = "log4cxx"
         if not self.options.shared:
             self.cpp_info.defines = ["LOG4CXX_STATIC"]
         self.cpp_info.libs = ["log4cxx"]
