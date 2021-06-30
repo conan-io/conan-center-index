@@ -74,6 +74,7 @@ libxslt/1.1.33 # GHA: noexport
 libxxf86vm/1.1.4 # GHA: noexport
 mesa/19.3.1
 odbc/2.3.7
+onnxruntime/1.7.2
 openh264/1.7.0
 protobuf/3.9.1
 protoc/3.9.1.dssl1
