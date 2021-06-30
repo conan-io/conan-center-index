@@ -1,0 +1,19 @@
+--- a/onnxruntime/core/providers/cpu/nn/batch_norm.h
++++ b/onnxruntime/core/providers/cpu/nn/batch_norm.h
+@@ -24,7 +24,7 @@
+ #include "core/framework/tensor.h"
+ #include "core/util/math_cpuonly.h"
+ #include "core/providers/cpu/nn/batch_norm_helper.h"
+-#include <safeint/SafeInt.hpp>
++#include <SafeInt.hpp>
+ 
+ namespace onnxruntime {
+ 
+--- a/onnxruntime/core/common/safeint.h
++++ b/onnxruntime/core/common/safeint.h
+@@ -24,4 +24,4 @@
+ 
+ #define SAFEINT_EXCEPTION_HANDLER_CPP 1
+ #define SafeIntDefaultExceptionHandler SafeIntExceptionHandler<onnxruntime::OnnxRuntimeException>
+-#include "safeint/SafeInt.hpp"
++#include "SafeInt.hpp"

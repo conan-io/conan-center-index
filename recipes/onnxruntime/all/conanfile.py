@@ -18,11 +18,10 @@ class OnnxRuntimeConan(ConanFile):
     homepage = "https://www.onnxruntime.ai/"
     url = "https://github.com/conan-io/conan-center-index"
 
-    settings = "os", "compiler", "build_type", "arch", "os_build"
+    settings = "os", "compiler", "build_type", "arch"
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
         "force_min_size_rel": [True, False],
         "with_static_rt": [True, False],
         "with_tvm": [True, False],
@@ -48,7 +47,9 @@ class OnnxRuntimeConan(ConanFile):
 
     generators = "cmake", "cmake_find_package"
 
-    default_options = {k: k == "fPIC" for k, _ in options.items()}
+    default_options = {k: False for k, _ in options.items()}
+
+    exports_sources = ['patches/*']
 
     _cmake = None
 
@@ -61,15 +62,20 @@ class OnnxRuntimeConan(ConanFile):
         return "build_subfolder"
 
     def build_requirements(self):
-        self.requires("protobuf/3.15.5")
+        self.build_requires("protobuf/3.15.5")
 
     def requirements(self):
         self.requires("protobuf/3.15.5")
         self.requires("date/3.0.0")
         self.requires("re2/20210401")
-        self.requires("onnx/1.8.1")
+        self.requires("onnx/1.9.0")
         self.requires("flatbuffers/1.12.0")
         self.requires("boost/1.76.0")       # for mp11
+        self.requires("nsync/1.23.0")
+        self.requires("optional-lite/3.4.0")
+        self.requires("safeint/3.0.26")
+        self.requires("nlohmann_json/3.9.1")
+        self.requires("eigen/3.4-rc1")
 
     def configure(self):
         if self.settings.os == "Android" or self.settings.os == "iOS":
@@ -81,9 +87,18 @@ class OnnxRuntimeConan(ConanFile):
         self.options["boost"].without_system = False
         self.options["boost"].without_timer = False
 
+    def validate(self):
+        if self.options.with_dnnl:
+            raise ConanInvalidConfiguration(
+                "Option 'with_dnnl' not supported yet! "
+                "Add receipt for https://github.com/oneapi-src/onednn")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(f"onnxruntime-{self.version}", self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True,
+                  destination=self._source_subfolder)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     @property
     def _cmake_rt_def(self):
@@ -102,59 +117,69 @@ class OnnxRuntimeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        #The onnxruntime_PREFER_SYSTEM_LIB is mainly designed for package managers like apt/yum/vcpkg.
-        #Please note, by default Protobuf_USE_STATIC_LIBS is OFF but it's recommended to turn it ON on Windows. You should set it properly when onnxruntime_PREFER_SYSTEM_LIB is ON otherwise you'll hit linkage errors.
-        #If you have already installed protobuf(or the others) in your system at the default system paths(like /usr/include), then it's better to set onnxruntime_PREFER_SYSTEM_LIB ON. Otherwise onnxruntime may see two different protobuf versions and we won't know which one will be used, the worst case could be onnxruntime picked up header files from one of them but the binaries from the other one.
-        #It's default OFF because it's experimental now.
         self._add_definition("PREFER_SYSTEM_LIB", True)
-        self._cmake.definitions["re2_FOUND"] = "ON"
-        self._cmake.definitions["re2_INCLUDE_DIRS"] = self.deps_cpp_info["re2"].include_paths
-        self._cmake.definitions["re2_LIBRARIES"] = self.deps_cpp_info["re2"].lib_paths
 
-        # Options
-        self._add_definition("RUN_ONNX_TESTS", self.options.with_tests)
+        with_tests = self.options.with_tests
+        if not tools.cross_building(self):
+            self._add_definition("RUN_ONNX_TESTS", with_tests)
+            self._add_definition("RUN_MODELTEST_IN_DEBUG_MODE", with_tests)
+            self._add_definition("FUZZ_TEST", with_tests)
+
+        self._add_definition("USE_VALGRIND", False)
+
+        self._add_definition("BUILD_SHARED_LIB", self.options.shared)
+        self._add_definition("BUILD_UNIT_TESTS", self.options.with_tests)
+        self._add_definition("BUILD_BENCHMARKS", self.options.with_benchmarks)
+        self._add_definition("BUILD_FOR_NATIVE_MACHINE", False)  # ??
+        self._add_definition("BUILD_WEBASSEMBLY", False)
+
         self._add_definition("GENERATE_TEST_REPORTS", self.options.with_tests)
-        self._add_definition("ENABLE_STATIC_ANALYSIS", False)
-        self._add_definition("ENABLE_PYTHON", self.options.with_python)
 
-        # Enable it may cause LNK1169 error
+        self._add_definition("ENABLE_STATIC_ANALYSIS", False)
         self._add_definition("ENABLE_MEMLEAK_CHECKER", False)
+        self._add_definition("ENABLE_CUDA_LINE_NUMBER_INFO", False)  # True may cause LNK1169 error
+        self._add_definition("ENABLE_LTO", False)
+        self._add_definition("ENABLE_INSTRUMENT", False)
+        self._add_definition("ENABLE_WEBASSEMBLY_EXCEPTION_CATCHING", False)
+
+        self._add_definition("ENABLE_PYTHON", self.options.with_python)
+        self._add_definition("BUILD_CSHARP", self.options.with_csharp)
         self._add_definition("USE_CUDA", self.options.with_cuda)
-        self._add_definition("ENABLE_CUDA_LINE_NUMBER_INFO", False)
+
         self._add_definition("USE_OPENVINO", self.options.with_openvino)
+
         if self.settings.os == "iOS" or self.settings.os == "Macos":
             self._add_definition("USE_COREML", self.options.with_coreml)
         if self.settings.os == "Android":
             self._add_definition("USE_NNAPI_BUILTIN", self.options.with_nnapi)
-        # self._add_definition("USE_RKNPU", self.options.with_rknpu)
+
+        self._add_definition("USE_RKNPU", False)
         self._add_definition("USE_DNNL", self.options.with_dnnl)
-        # self._add_definition("USE_FEATURIZERS", self.options.with_featurizers)
+        self._add_definition("USE_FEATURIZERS", False)
         self._add_definition("DEV_MODE", False)
         self._add_definition(self._cmake_rt_def, self.options.with_static_rt)
-        self._add_definition("BUILD_UNIT_TESTS", self.options.with_tests)
-        self._add_definition("BUILD_CSHARP", self.options.with_csharp)
-        self._add_definition("USE_PREINSTALLED_EIGEN", False)
-        self._add_definition("BUILD_BENCHMARKS", self.options.with_benchmarks)
+
+        self._add_definition("USE_PREINSTALLED_EIGEN", True)
+        eigen_includedir = os.path.join(self.deps_cpp_info["eigen"].include_paths[0], "eigen3")
+        self._cmake.definitions["eigen_SOURCE_PATH"] = eigen_includedir
 
         self._add_definition("USE_TVM", self.options.with_tvm)
         self._add_definition("USE_LLVM", self.options.with_tvm_llvm)
 
-        self._add_definition("BUILD_FOR_NATIVE_MACHINE", False)
         self._add_definition("USE_AVX", False)
         self._add_definition("USE_AVX2", False)
         self._add_definition("USE_AVX512", False)
 
         self._add_definition("USE_OPENMP", False)
-        self._add_definition("BUILD_SHARED_LIB", self.options.shared)
         self._add_definition("ENABLE_MICROSOFT_INTERNAL", False)
         self._add_definition("USE_NUPHAR", False)
         self._add_definition("USE_VITISAI", False)
         self._add_definition("USE_TENSORRT", False)
-        self._add_definition("ENABLE_LTO", False)
         self._add_definition("CROSS_COMPILING", False)
         self._add_definition("GCOV_COVERAGE", False)
 
-        #It's preferred to turn it OFF when onnxruntime is dynamically linked to PROTOBUF
+        # It's preferred to turn it OFF when onnxruntime
+        # is dynamically linked to PROTOBUF
         self._add_definition("USE_FULL_PROTOBUF", False)
         self._cmake.definitions["tensorflow_C_PACKAGE_PATH"] = None
         self._add_definition("ENABLE_LANGUAGE_INTEROP_OPS", False)
@@ -170,7 +195,6 @@ class OnnxRuntimeConan(ConanFile):
         self._add_definition("USE_ARMNN", False)
         self._add_definition("ARMNN_RELU_USE_CPU", True)
         self._add_definition("ARMNN_BN_USE_CPU", True)
-        self._add_definition("ENABLE_INSTRUMENT", False)
         self._add_definition("USE_TELEMETRY", False)
 
         self._add_definition("USE_ROCM", False)
@@ -179,24 +203,16 @@ class OnnxRuntimeConan(ConanFile):
         self._add_definition("DISABLE_CONTRIB_OPS", False)
         self._add_definition("DISABLE_ML_OPS", False)
         self._add_definition("DISABLE_RTTI", False)
-        # For now onnxruntime_DISABLE_EXCEPTIONS will only work with onnxruntime_MINIMAL_BUILD, more changes (ONNX, non-CPU EP, ...) are required to run this standalone
+
+        # For now onnxruntime_DISABLE_EXCEPTIONS will only work with
+        #   onnxruntime_MINIMAL_BUILD, more changes (ONNX, non-CPU EP, ...)
+        #   are required to run this standalone
         self._add_definition("DISABLE_EXCEPTIONS", False)
         self._add_definition("MINIMAL_BUILD", False)
         self._add_definition("EXTENDED_MINIMAL_BUILD", False)
         self._add_definition("MINIMAL_BUILD_CUSTOM_OPS", False)
         self._add_definition("REDUCED_OPS_BUILD", False)
         self._add_definition("DISABLE_ORT_FORMAT_LOAD", False)
-
-        #A special option just for debugging and sanitize check. Please do not enable in option in retail builds.
-        #The option has no effect on Windows.
-        self._add_definition("USE_VALGRIND", False)
-
-        # A special build option only used for gathering code coverage info
-        self._add_definition("RUN_MODELTEST_IN_DEBUG_MODE", False)
-
-        # options for security fuzzing
-        # build configuration for fuzz testing is in onnxruntime_fuzz_test.cmake
-        self._add_definition("FUZZ_TEST", False)
 
         # training options
         self._add_definition("ENABLE_NVTX_PROFILE", False)
@@ -208,10 +224,6 @@ class OnnxRuntimeConan(ConanFile):
         self._add_definition("USE_NCCL", False)
         self._add_definition("USE_MPI", False)
 
-        # build WebAssembly
-        self._add_definition("BUILD_WEBASSEMBLY", False)
-        self._add_definition("ENABLE_WEBASSEMBLY_EXCEPTION_CATCHING", False)
-
         # Enable bitcode for iOS
         if self.settings.os == "iOS" or self.settings.os == "Macos":
             self._add_definition("ENABLE_BITCODE", self.options.with_bitcode)
@@ -221,10 +233,8 @@ class OnnxRuntimeConan(ConanFile):
         if self.options.force_min_size_rel:
             self._cmake.definitions["CMAKE_BUILD_TYPE"] = "MinSizeRel"
         elif self.settings.build_type is not None:
-            self._cmake.definitions["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
-
-        # TODO full list of options in
-        # https://github.com/microsoft/onnxruntime/blob/master/BUILD.md
+            build_type = str(self.settings.build_type)
+            self._cmake.definitions["CMAKE_BUILD_TYPE"] = build_type
 
         if self.settings.os == "Android":
             android_ndk_root = None
@@ -251,8 +261,6 @@ class OnnxRuntimeConan(ConanFile):
             if android_sdk_root is None:
                 raise Exception("ANDROID_SDK_ROOT env not defined")
 
-            # TODO ENV["ANDROID_SDK_ROOT"]
-
             self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = os.path.join(
                 android_ndk_path, 'build', 'cmake', 'android.toolchain.cmake')
             self._cmake.definitions["ANDROID_PLATFORM"] = "android-" + str(self.settings.os.api_level)
@@ -261,7 +269,8 @@ class OnnxRuntimeConan(ConanFile):
 
         self._cmake.definitions["ONNX_CUSTOM_PROTOC_EXECUTABLE"] = tools.which('protoc')
 
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, 'cmake'), build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder,
+                              source_folder=os.path.join(self._source_subfolder, 'cmake'))
         return self._cmake
 
     def build(self):
@@ -269,20 +278,23 @@ class OnnxRuntimeConan(ConanFile):
         cmake.build()
 
     def package(self):
-        build_dir = self._onnxruntime_build_dir
-
         cmake = self._configure_cmake()
         cmake.install()
 
-        if not self.options.shared:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-        self.copy(
-            "onnxruntime_perf_test",
-            dst="bin",
-            src=build_dir,
-            keep_path=False
-        )
+        if self.options.shared:
+            self.copy(pattern="*.so", dst="lib", src=self._build_subfolder)
+            self.copy(pattern="*.dll", dst="lib", src=self._build_subfolder)
+        else:
+            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder)
+
+        if self.options.with_tests:
+            self.copy(
+                "onnxruntime_perf_test",
+                dst="bin",
+                keep_path=False
+            )
 
         providers_inc = "include/onnxruntime/core/providers"
         for provider in ["nnapi", "dnnl"]:
@@ -295,6 +307,11 @@ class OnnxRuntimeConan(ConanFile):
                 )
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "OnnxRuntime"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OnnxRuntime"
+        self.cpp_info.names["cmake_find_package"] = "OnnxRuntime"
+        self.cpp_info.names["cmake_find_package_multi"] = "OnnxRuntime"
+
         if self.options.shared:
             self.cpp_info.libs = ["onnxruntime"]
         else:
@@ -320,28 +337,4 @@ class OnnxRuntimeConan(ConanFile):
             self.cpp_info.libs = \
                 [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
-            self.cpp_info.libs.extend([
-                "onnx",
-                "onnx_proto",
-                "flatbuffers",
-                "re2",
-                "nsync_cpp",
-                "protobuf-lite" + debug_suffix,
-            ])
-
-            if self.options.with_dnnl:
-                self.cpp_info.libs.append("dnnl")
-
         self.cpp_info.includedirs.append("include/onnxruntime/core/session")
-
-    @property
-    def _onnxruntime_build_dir(self):
-        msr = self.options.force_min_size_rel
-        build_type = "MinSizeRel" if msr else str(self.settings.build_type)
-        return os.path.join(
-            self.build_folder,
-            self._source_subfolder,
-            "build",
-            str(self.settings.os),
-            build_type
-        )

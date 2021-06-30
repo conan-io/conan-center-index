@@ -3,4 +3,12 @@ sources:
     sha256: e24ff9a2a21dab74e6dfa821e9a267baa10e9423ffae5f5e404e3a2949eb41e2
     url: https://github.com/microsoft/onnxruntime/archive/v1.7.1.tar.gz
 patches:
-  "1.7.1": []
+  "1.7.1":
+    - patch_file: "patches/0000-more-PREFER_SYSTEM_LIB.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0001-external-nlohmann_json.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-safeint-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-fix-nlohmann-json-include.patch"
+      base_path: "source_subfolder"

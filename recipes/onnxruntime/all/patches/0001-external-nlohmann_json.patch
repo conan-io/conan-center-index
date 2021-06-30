@@ -1,0 +1,17 @@
+--- a/cmake/onnxruntime_session.cmake
++++ b/cmake/onnxruntime_session.cmake
+@@ -15,7 +15,13 @@
+ if(onnxruntime_ENABLE_INSTRUMENT)
+   target_compile_definitions(onnxruntime_session PUBLIC ONNXRUNTIME_ENABLE_INSTRUMENT)
+ endif()
+-target_include_directories(onnxruntime_session PRIVATE ${ONNXRUNTIME_ROOT} ${PROJECT_SOURCE_DIR}/external/json ${eigen_INCLUDE_DIRS})
++find_package(nlohmann_json)
++if(nlohmann_json_FOUND)
++  set(json_INCLUDE_DIRS ${nlohmann_json_INCLUDE_DIRS})
++else()
++  set(json_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/external/json)
++endif()
++target_include_directories(onnxruntime_session PRIVATE ${ONNXRUNTIME_ROOT} ${json_INCLUDE_DIRS} ${eigen_INCLUDE_DIRS})
+ add_dependencies(onnxruntime_session ${onnxruntime_EXTERNAL_DEPENDENCIES})
+ set_target_properties(onnxruntime_session PROPERTIES FOLDER "ONNXRuntime")
+ if (onnxruntime_USE_CUDA)
