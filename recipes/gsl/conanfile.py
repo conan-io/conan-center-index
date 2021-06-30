@@ -4,7 +4,6 @@ import os
 
 class GslConan(ConanFile):
     name = "gsl"
-    version = "2.7"
     license = "GNU GPL"
     url = "http://www.gnu.org/software/gsl/"
     description = "GNU Scientific Library"
