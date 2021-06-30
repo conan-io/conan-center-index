@@ -1,0 +1,55 @@
+diff --git a/Graphics/GraphicsEngineOpenGL/CMakeLists.txt b/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
+index 2d365772..446aa6c9 100644
+--- a/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
++++ b/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
+@@ -179,20 +179,13 @@ set(PUBLIC_DEPENDENCIES
+     Diligent-GraphicsEngineOpenGLInterface
+ )
+ 
+-if(PLATFORM_WIN32)
+-    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} glew-static opengl32.lib)
+-elseif(PLATFORM_ANDROID)
+-    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} GLESv3 EGL)
+-elseif(PLATFORM_LINUX)
+-    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} glew-static GL X11)
+-elseif(PLATFORM_MACOS)
+-    find_package(OpenGL REQUIRED)
+-    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} glew-static ${OPENGL_LIBRARY})
+-elseif(PLATFORM_IOS)
+-    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} ${OPENGLES})
+-else()
+-    message(FATAL_ERROR "Unknown platform")
++find_package(GLEW REQUIRED)
++find_package(OpenGL REQUIRED)
++
++if(PLATFORM_LINUX)
++    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} X11)
+ endif()
++set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} ${GLEW_LIBRARIES} ${OpenGL_LIBRARIES})
+ 
+ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+     # WARNING: set_source_files_properties() does not append
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index a140adb9..d6bd4e92 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -6,18 +6,6 @@ cmake_minimum_required (VERSION 3.6)
+ # instead:
+ set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+ 
+-if(PLATFORM_WIN32 OR PLATFORM_LINUX OR PLATFORM_MACOS)
+-       add_subdirectory(glew)
+-    if(DILIGENT_INSTALL_CORE)
+-        install(TARGETS glew-static
+-                ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-        )
+-    endif()
+-    install(FILES glew/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME GLEW-License.txt)
+-endif()
+-
+ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+     # We only need to have SPIRV-Headers folder, but we
+     # do not really need any target from the project.
+
