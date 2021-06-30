@@ -7,7 +7,8 @@ required_conan_version = ">=1.33.0"
 class Crc_CppConan(ConanFile):
     name = "crc_cpp"
     description = "A header only, constexpr / compile time small-table based CRC library for C++17 or newer"
-    topics = ("conan", "crc_cpp", "crc", "constexpr" "C++17", "C++20")
+    topics = ("conan", "crc_cpp", "crc", "constexpr" "cpp17", "cpp20", "header-only")
+    settings = "compiler", "os"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AshleyRoll/crc_cpp"
     license = "MIT"
@@ -26,4 +27,8 @@ class Crc_CppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
 

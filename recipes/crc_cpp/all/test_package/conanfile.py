@@ -3,6 +3,7 @@ import os
 
 
 class TestPackageConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
     def build(self):
