@@ -310,6 +310,8 @@ class SDLConan(ConanFile):
             self.cpp_info.components["libsdl2"].system_libs = ["user32", "gdi32", "winmm", "imm32", "ole32", "oleaut32", "version", "uuid", "advapi32", "setupapi", "shell32"]
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["libsdl2"].system_libs.append("mingw32")
+        elif self.settings.os == "Android":
+            self.cpp_info.components["libsdl2"].system_libs.append("log")
         # SDL2main
         if self.options.sdl2main:
             self.cpp_info.components["sdl2main"].names["cmake_find_package"] = "SDL2main"
