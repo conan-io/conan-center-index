@@ -10,8 +10,14 @@ class DiligentCoreConan(ConanFile):
     license = ("Apache 2.0")
     topics = ("graphics")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], 
+    "fPIC":         [True, False],
+    "with_glslang": [True, False],
+    }
+    default_options = {"shared": False, 
+    "fPIC": True,
+    "with_glslang" : False
+    }
     generators = "cmake_find_package", "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
@@ -66,6 +72,8 @@ class DiligentCoreConan(ConanFile):
         self._cmake.definitions["DILIGENT_BUILD_SAMPLES"] = False
         self._cmake.definitions["DILIGENT_BUILD_TESTS"] = False
         self._cmake.definitions["DILIGENT_NO_FORMAT_VALIDATION"] = True
+        self._cmake.definitions["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
+
         return self._cmake
 
     def build(self):
