@@ -21,6 +21,7 @@ jsoncpp/1.8.3
 leveldb/1.22
 libjpeg/9d.dssl1
 libpng/1.6.37
+libpq/11.5
 lmdb/0.9.28.dssl1
 miniupnpc/2.1
 nasm/2.14
