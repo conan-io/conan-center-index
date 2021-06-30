@@ -1,12 +1,14 @@
 [generators]
 cmake
 virtualrunenv
+virtualenv
 
 [requires]
 b2/4.2.0
 boost/1.69.0
 c-ares/1.15.0
 caffe/1.0.windows
+libcurl/7.64.1
 bzip2/1.0.8
 ffmpeg/3.3.1
 freetype/2.10.1
@@ -67,7 +69,7 @@ opencv:shared=True
 opencv:jasper=False
 opencv:openexr=False
 opencv:tiff=False
-OpenSSL:shared=True
+openssl:shared=True
 pjsip:shared=False
 protobuf:shared=False
 sdl:shared=True
