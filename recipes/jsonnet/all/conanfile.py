@@ -1,4 +1,3 @@
-import os
 from conans import ConanFile, CMake, tools
 
 
@@ -53,13 +52,13 @@ class JsonnetConan(ConanFile):
         self._cmake.definitions["BUILD_JSONNET"] = False
         self._cmake.definitions["BUILD_JSONNETFMT"] = False
         self._cmake.definitions["USE_SYSTEM_JSON"] = True
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder,
+                              source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
-        if not self.options.shared:
-            for patch in self.conan_data.get("patches", {}).get(self.version, []):
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
