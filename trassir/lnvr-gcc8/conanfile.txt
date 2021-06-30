@@ -4,7 +4,7 @@ virtualrunenv
 
 [requires]
 openssl/1.1.1d
-axtls/1.5.3
+axtls/1.5.3.dssl1
 boost/1.69.0
 
 # global bzip2 dependency
