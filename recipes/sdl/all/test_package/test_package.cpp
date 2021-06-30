@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <stdexcept>
 #include <string>
@@ -47,6 +48,7 @@ static void check_video_driver(const char * name)
 
 int main(int argc, char *argv[]) try
 {
+    SDL_SetMainReady();
     SDL_version v;
     SDL_GetVersion(&v);
     std::cout << "SDL version " << int(v.major) << "." << int(v.minor) << "." << int(v.patch) << std::endl;
