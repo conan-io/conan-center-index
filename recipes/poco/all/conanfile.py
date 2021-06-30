@@ -100,6 +100,7 @@ class PocoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.enable_netssl
+            del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
