@@ -1,0 +1,5 @@
+sources:
+  "2.5":
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.zip"
+    sha256: "a6e9b96c51c02e9fd8e04fb0311f6d82fb2eede4452d45b7497f6626ee9fb55e"
+
