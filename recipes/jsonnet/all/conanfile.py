@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class JsonnetConan(ConanFile):
@@ -29,6 +30,9 @@ class JsonnetConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def configure(self):
+        if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
+            raise ConanInvalidConfiguration("{} compiler not supported"
+                                            .format(self.settings.compiler))
         if self.options.shared:
             del self.options.fPIC
 
