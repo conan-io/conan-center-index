@@ -62,6 +62,8 @@ class Embree(ConanFile):
             del self.options.fPIC
     
     def configure(self):
+        if self.version == "3.12.0" and self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("only x86/x86_64 architectures are supported")
         version = tools.Version(self.settings.compiler.version)
         if self.settings.compiler == "clang" and version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
