@@ -1,0 +1,4 @@
+sources:
+  "8.1.0":
+    url: https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v8.1.0.tar.gz
+    sha256: 3e09d47331429be7409a3a3c27fdd3c297f96d31d2153febe194e664a99d6183
