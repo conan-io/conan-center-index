@@ -1,8 +1,8 @@
 diff --git a/Graphics/GraphicsEngineOpenGL/CMakeLists.txt b/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
-index 2d365772..446aa6c9 100644
+index 2d365772..b0fdb42e 100644
 --- a/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
 +++ b/Graphics/GraphicsEngineOpenGL/CMakeLists.txt
-@@ -179,20 +179,13 @@ set(PUBLIC_DEPENDENCIES
+@@ -179,20 +179,10 @@ set(PUBLIC_DEPENDENCIES
      Diligent-GraphicsEngineOpenGLInterface
  )
  
@@ -19,13 +19,10 @@ index 2d365772..446aa6c9 100644
 -    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} ${OPENGLES})
 -else()
 -    message(FATAL_ERROR "Unknown platform")
-+find_package(GLEW REQUIRED)
-+find_package(OpenGL REQUIRED)
-+
 +if(PLATFORM_LINUX)
 +    set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} X11)
  endif()
-+set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} ${GLEW_LIBRARIES} ${OpenGL_LIBRARIES})
++set(PRIVATE_DEPENDENCIES ${PRIVATE_DEPENDENCIES} CONAN_PKG::glew CONAN_PKG::opengl)
  
  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
      # WARNING: set_source_files_properties() does not append
@@ -52,4 +49,3 @@ index a140adb9..d6bd4e92 100644
  if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
      # We only need to have SPIRV-Headers folder, but we
      # do not really need any target from the project.
-
