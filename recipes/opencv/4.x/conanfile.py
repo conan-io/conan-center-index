@@ -34,7 +34,8 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_v4l": [True, False],
-        "dnn": [True, False]
+        "dnn": [True, False],
+        "detect_cpu_baseline": [True, False]
     }
     default_options = {
         "shared": False,
@@ -56,7 +57,8 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
-        "dnn": True
+        "dnn": True,
+        "detect_cpu_baseline": False
     }
 
     short_paths = True
@@ -289,6 +291,9 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        
+        if self.options.detect_cpu_baseline:
+            self._cmake.definitions["CPU_BASELINE"] = "DETECT"
 
         self._cmake.definitions["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
