@@ -1,0 +1,4 @@
+sources:
+  "1.9.0amzn1.1":
+    url: https://github.com/aws/libfabric/releases/download/v1.9.0amzn1.1/libfabric-1.9.0amzn1.1.tar.gz
+    sha256: 4e3912c379ca351f5039b01cfd168750030d919f1ce3f46531b5396b6a4266e5
