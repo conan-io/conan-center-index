@@ -54,6 +54,7 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-headers/cci.20210526")
         self.requires("spirv-tools/cci.20210601")
         self.requires("spirv-cross/cci.20210601")
+        self.options["spirv-cross"].namespace = "diligent_spirv_cross"
         #self.requires("glslang/8.13.3559")
         
         self.requires("vulkan-memory-allocator/2.3.0")
