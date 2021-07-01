@@ -4,7 +4,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class JsonnetConan(ConanFile):
     name = "jsonnet"
-    version = "0.17.0"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/jsonnet"
