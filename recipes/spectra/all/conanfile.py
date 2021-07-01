@@ -19,7 +19,7 @@ class SpectraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("eigen/3.3.7")
+        self.requires("eigen/3.3.9")
 
     def validate(self):
         if tools.Version(self.version) >= "1.0.0":
