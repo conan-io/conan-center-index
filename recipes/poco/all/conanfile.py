@@ -205,6 +205,8 @@ class PocoConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
+        # Disable parallel builds because c3i (=conan-center's test/build infrastructure) seems to choke here
+        cmake.parallel = False 
         cmake.build()
 
     def package(self):
