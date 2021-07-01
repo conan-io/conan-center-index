@@ -1009,6 +1009,9 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
+            
+        if self.settings.os != "Windows":
+            self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
