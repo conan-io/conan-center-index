@@ -27,7 +27,7 @@ class XercesCConan(ConanFile):
         return "build_subfolder"
     
     def validate(self):
-        if self.options.char_type == "wchar_t" and self.settings.os != Windows:
+        if self.options.char_type == "wchar_t" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Option 'char_type=wchar_t' is only supported in Windows")
 
 
