@@ -26,6 +26,10 @@ class LibmadConan(ConanFile):
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
 
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
+            
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
