@@ -8,7 +8,7 @@ class EffceeConan(ConanFile):
     homepage = "https://github.com/google/effcee/"
     description = "Zstandard - Fast real-time compression algorithm"
     topics = ("conan", "effcee", "strings", "algorithm", "matcher")
-    license = "Apache 2.0"
+    license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
@@ -65,4 +65,3 @@ class EffceeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
