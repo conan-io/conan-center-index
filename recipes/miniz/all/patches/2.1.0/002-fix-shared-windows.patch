@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4d8d385..7db30dc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ PROJECT(miniz C)
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.4)
+ if(CMAKE_BUILD_TYPE STREQUAL "")
+   # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
+   # differentiation between debug and release builds.
+@@ -14,12 +14,14 @@ set(miniz_SOURCE miniz.c miniz_zip.c miniz_tinfl.c miniz_tdef.c)
+ 
+ add_library(miniz ${miniz_SOURCE})
+ target_include_directories(miniz PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
++set_property(TARGET miniz PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ 
+ # add_executable(miniz_tester ${MINIZ_TESTER_SRC_LIST})
+ # target_link_libraries(miniz_tester miniz)
+ 
+ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
++    RUNTIME DESTINATION bin
+     ARCHIVE  DESTINATION lib
+     LIBRARY DESTINATION lib
+     )
