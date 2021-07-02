@@ -340,7 +340,7 @@ Libraries which are listed on [Components](https://docs.conan.io/en/latest/creat
 
 #### **<a name="KB-H055">#KB-H055</a>: "SINGLE REQUIRES"**
 
-Both `requirements()` and `self.requires` should not be used together at same recipe.
+Do not use `requirements()` and `self.requires` together in the same recipe.
 The duality creates a heterogeneous way of solving dependencies, making it difficult to review and susceptible to prone errors.
 
 #### **<a name="KB-H056">#KB-H056</a>: "LICENSE PUBLIC DOMAIN"**
