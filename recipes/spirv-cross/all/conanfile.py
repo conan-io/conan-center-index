@@ -96,8 +96,8 @@ class SpirvCrossConan(ConanFile):
         self._cmake.definitions["SPIRV_CROSS_ENABLE_UTIL"] = self.options.get_safe("util", False)
         self._cmake.definitions["SPIRV_CROSS_SKIP_INSTALL"] = False
         self._cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure(build_folder=self._build_subfolder)
         self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options.namespace
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     @property
