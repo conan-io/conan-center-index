@@ -102,6 +102,9 @@ class PCREConan(ConanFile):
         # can break conan generators
         tools.replace_in_file(
             cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(
+            cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
