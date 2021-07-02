@@ -8,7 +8,6 @@ class libalx_base_conan(ConanFile):
     homepage = "https://github.com/alejandro-colomar/libalx"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.0-only"
-    author = "Alejandro Colomar <alx.manpages@gmail.com>"
     topics = ("conan", "libc")
     settings = "os", "compiler", "arch"
     requires = [
