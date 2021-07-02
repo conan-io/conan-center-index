@@ -3,6 +3,10 @@ cmake
 virtualrunenv
 virtualenv
 
+[build_requires]
+jom/1.1.3
+strawberryperl/5.30.0.1
+
 [requires]
 axtls/1.5.3.dssl1
 b2/4.2.0
@@ -36,9 +40,9 @@ openh264/1.7.0
 openssl/1.1.1d
 protobuf/3.9.1
 protoc/3.9.1.dssl1
+qt/5.14.1.dssl1
 sip/4.19.3.dssl1
 snappy/1.1.8
-strawberryperl/5.30.0.1
 xz_utils/5.2.4
 zlib/1.2.11
 
@@ -82,3 +86,25 @@ protobuf:shared=False
 sdl:shared=True
 signalr-qt:shared=True
 zlib:shared=True
+
+qt:openssl=True
+qt:qtimageformats=True
+qt:qtmultimedia=True
+qt:qtscript=True
+qt:qtsvg=True
+qt:qttools=True
+qt:qtx11extras=True
+
+qt:with_glib=False
+qt:with_harfbuzz=not_used
+qt:with_doubleconversion=qt
+qt:with_icu=False
+qt:with_sqlite3=not_used
+qt:with_mysql=False
+qt:with_pcre2=False
+qt:with_sdl2=False
+qt:with_zstd=False
+qt:with_pq=True
+qt:with_odbc=False
+qt:with_openal=False
+qt:with_libalsa=False
