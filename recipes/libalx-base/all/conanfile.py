@@ -20,7 +20,7 @@ class libalx_base_conan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libalx-base is only available for GNU operating systems (e.g. Linux)")
         self._srcdir   = self.source_folder
-        self._builddir = self.build_subfolder
+        self._builddir = self.build_folder
         self._DESTDIR  = self.package_folder
         self._prefix   = ""
 
