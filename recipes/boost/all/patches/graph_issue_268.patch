@@ -1,0 +1,26 @@
+diff --git a/boost/graph/detail/adjacency_list.hpp b/boost/graph/detail/adjacency_list.hpp
+index c1a2ada2..806b3f0e 100644
+--- a/boost/graph/detail/adjacency_list.hpp
++++ b/boost/graph/detail/adjacency_list.hpp
+@@ -2069,15 +2069,20 @@ namespace detail
+     inline void reindex_edge_list(
+         EdgeList& el, vertex_descriptor u, boost::disallow_parallel_edge_tag)
+     {
+-        for (typename EdgeList::iterator ei = el.begin(); ei != el.end(); ++ei)
++        typename EdgeList::iterator ei = el.begin(), e_end = el.end();
++        while (ei != e_end) {
+         {
+             if (ei->get_target() > u)
+             {
+                 typename EdgeList::value_type ce = *ei;
++                ++ei;
+                 el.erase(ce);
+                 --ce.get_target();
+                 el.insert(ce);
+             }
++            else {
++                ++ei;
++            }
+         }
+     }
+ } // namespace detail

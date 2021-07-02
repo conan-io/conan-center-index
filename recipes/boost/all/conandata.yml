@@ -117,6 +117,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/graph_issue_268.patch"
+      base_path: "source_subfolder"
   1.75.0:
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter_since_1_74.patch"
       base_path: "source_subfolder"
@@ -124,6 +126,10 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/graph_issue_268.patch"
+      base_path: "source_subfolder"
   1.76.0:
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/graph_issue_268.patch"
       base_path: "source_subfolder"
