@@ -25,7 +25,8 @@ class SpirvCrossConan(ConanFile):
         "cpp": [True, False],
         "reflect": [True, False],
         "c_api": [True, False],
-        "util": [True, False]
+        "util": [True, False],
+        "namespace": "ANY",
     }
     default_options = {
         "shared": False,
@@ -37,7 +38,8 @@ class SpirvCrossConan(ConanFile):
         "cpp": True,
         "reflect": True,
         "c_api": True,
-        "util": True
+        "util": True,
+        "namespace": "spirv_cross",
     }
 
     _cmake = None
@@ -95,6 +97,7 @@ class SpirvCrossConan(ConanFile):
         self._cmake.definitions["SPIRV_CROSS_SKIP_INSTALL"] = False
         self._cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.definitions["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options.namespace
         return self._cmake
 
     @property
@@ -148,6 +151,7 @@ class SpirvCrossConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options.namespace))
 
     def _get_ordered_libs(self):
         libs = []
