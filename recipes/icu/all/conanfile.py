@@ -17,6 +17,7 @@ class ICUBase(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _env_build = None
+    exports_sources = ["patches/*"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -28,7 +29,6 @@ class ICUBase(ConanFile):
                        "data_packaging": "library",
                        "with_unit_tests": False,
                        "silent": True}
-
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
@@ -38,9 +38,8 @@ class ICUBase(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,7 +57,7 @@ class ICUBase(ConanFile):
     def build(self):
         for filename in glob.glob("patches/*.patch"):
             self.output.info('applying patch "%s"' % filename)
-            tools.patch(base_path=self._source_subfolder, patch_file=filename)
+            tools.patch(base_path= os.path.join(self.source_folder, self._source_subfolder), patch_file=filename, strip=1)
 
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
@@ -222,8 +221,6 @@ class ICUBase(ConanFile):
             if self.settings.os == "Windows":
                 if not self.options.shared:
                     name = 's' + name
-                if self.settings.build_type == "Debug":
-                    name += 'd'
             return name
 
         libs = ['icuin' if self.settings.os == "Windows" else 'icui18n',
@@ -233,8 +230,6 @@ class ICUBase(ConanFile):
         self.cpp_info.bindirs.append('lib')
 
         data_dir_name = self.name
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            data_dir_name += 'd'
         data_dir = os.path.join(self.package_folder, 'lib', data_dir_name, self.version)
         vtag = self.version.split('.')[0]
         data_file = "icudt{v}l.dat".format(v=vtag)

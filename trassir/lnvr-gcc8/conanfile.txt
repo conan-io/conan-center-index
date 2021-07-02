@@ -2,56 +2,42 @@
 cmake
 virtualrunenv
 
+[build_requires]
+b2/4.2.0
+bison/3.5.3
+flex/2.6.4
+gperf/3.1
+ninja/1.10.2
+meson/0.58.1
+m4/1.4.18
+nasm/2.14
+pkgconf/1.7.4
+ruby/2.3.7
+
 [requires]
-openssl/1.1.1d
 axtls/1.5.3.dssl1
 boost/1.69.0
-
-# global bzip2 dependency
 bzip2/1.0.8
-
 c-ares/1.15.0
 etcd-grpc/4.0.0
-ffmpeg/3.3.1
-#glew/2.1.0
-jansson/2.12
-jsoncpp/1.8.3
-libcurl/7.64.1
-
-#global libjpeg dependency
-#libjpeg/9c
-
-# global libpng dependency
-libpng/1.6.37
-
-libpq/11.5
-miniupnpc/2.1
-openal/1.20.1
-opencv/2.4.13.5
-# pjsip/2.8@dssl/stable
-qt/5.14.1
-qtwebkit/5.212.0-alpha4
-#sip/4.19.3
-signalr-qt/0.1
-
-# global zlib dependency (override for openssl and curl)
-zlib/1.2.11
-
-
-# version lock for indirect dependencies
-b2/4.2.0
 expat/2.2.9
-fontconfig/2.13.91
+ffmpeg/3.3.1
+fontconfig/2.13.91.dssl1
 freetype/2.10.1
 grpc/1.26.0
-icu/63.2
+icu/64.2
+jansson/2.12
+jsoncpp/1.8.3
 libalsa/1.1.9
+libcurl/7.64.1
 libdrm/2.4.100
 libelf/0.8.13
 libiconv/1.15
-libjpeg/9d.dssl1
 libjpeg-turbo/2.0.4
+libjpeg/9d.dssl1
 libpciaccess/0.16 # GHA: noexport
+libpng/1.6.37
+libpq/11.5
 libpthread-stubs/0.1 # GHA: noexport
 libunwind/1.3.1
 libuuid/1.0.3
@@ -73,34 +59,41 @@ libxshmfence/1.3 # GHA: noexport
 libxslt/1.1.33 # GHA: noexport
 libxxf86vm/1.1.4 # GHA: noexport
 mesa/19.3.1
+miniupnpc/2.1
 odbc/2.3.7
 onnxruntime/1.7.2
+openal/1.20.1
+opencv/2.4.13.5
 openh264/1.7.0
+openssl/1.1.1d
+#pjsip/2.8@dssl/stable
 protobuf/3.9.1
 protoc/3.9.1.dssl1
+qt/5.14.1.dssl1
+qtwebkit/5.212.0-alpha4.dssl1
+signalr-qt/0.1
+#sip/4.19.3
 sqlite3/3.31.0
 util-macros/1.19.2 # GHA: noexport
 xcb-proto/1.13 # GHA: noexport
-xcb-util/0.4.0 # GHA: noexport
 xcb-util-image/0.4.0 # GHA: noexport
 xcb-util-keysyms/0.4.0 # GHA: noexport
 xcb-util-renderutil/0.3.9 # GHA: noexport
 xcb-util-wm/0.4.0 # GHA: noexport
+xcb-util/0.4.0 # GHA: noexport
 xkbcommon/0.10.0
 xkeyboard-config/2.28 # GHA: noexport
 xorgproto/2019.1 # GHA: noexport
 xproto/7.0.31 # GHA: noexport
 xtrans/1.4.0 # GHA: noexport
 xz_utils/5.2.4
+zlib/1.2.11
 
 
 [options]
 ffmpeg:pulse=False
 ffmpeg:vdpau=False
 ffmpeg:xcb=False
-opencv:jasper=False
-opencv:openexr=False
-opencv:tiff=False
 
 qt:openssl=True
 qt:qtimageformats=True
@@ -113,10 +106,91 @@ qt:qtx11extras=True
 qt:with_glib=False
 qt:with_harfbuzz=not_used
 qt:with_doubleconversion=qt
+qt:with_fontconfig=True
+qt:with_freetype=system
+qt:with_libalsa=False
 qt:with_icu=False
 qt:with_mysql=False
+qt:with_mesa=True
+qt:with_pq=True
 qt:with_pcre2=False
 qt:with_sdl2=False
 qt:with_zstd=False
+qt:with_sqlite3=system
+qt:with_libjpeg=system
+qt:with_libpng=system
 
-*:shared=True
+axtls:shared=True
+boost:shared=True
+bzip2:shared=True
+c-ares:shared=False
+etcd-grpc:shared=False
+expat:shared=False
+fontconfig:shared=True
+grpc:shared=False
+libalsa:shared=True
+libcurl:shared=True
+dlib:shared=header_only
+facesdk:shared=True
+ffmpeg:shared=True
+freetype:fPIC=True
+freetype:shared=True
+freetype:with_bzip2=True
+freetype:with_png=True
+freetype:with_zlib=True
+gflags:shared=True
+glog:shared=True
+hdf5:shared=True
+icu:shared=True
+jansson:shared=True
+jsoncpp:shared=False
+libpng:shared=True
+libpq:shared=True
+miniupnpc:shared=False
+openal:shared=True
+opencv:shared=True
+opencv:jasper=False
+opencv:openexr=False
+opencv:tiff=False
+openssl:shared=True
+pjsip:shared=False
+protobuf:shared=False
+signalr-qt:shared=True
+zlib:shared=True
+
+libdrm:shared=True
+libelf:shared=True
+libiconv:shared=True
+libjpeg:shared=True
+libjpeg-turbo:shared=True
+libpciaccess:shared=True
+libunwind:shared=True
+libuuid:shared=True
+libva:shared=True
+libwebp:shared=True
+libx11:shared=True
+libxau:shared=True
+libxcb:shared=True
+libxcomposite:shared=True
+libxcursor:shared=True
+libxdamage:shared=True
+libxdmcp:shared=True
+libxext:shared=True
+libxfixes:shared=True
+libxml2:shared=True
+libxrandr:shared=True
+libxrender:shared=True
+libxshmfence:shared=True
+libxslt:shared=True
+libxxf86vm:shared=True
+odbc:shared=True
+openh264:shared=True
+protobuf:shared=True
+sqlite3:shared=True
+xcb-util:shared=True
+xcb-util-image:shared=True
+xcb-util-keysyms:shared=True
+xcb-util-renderutil:shared=True
+xcb-util-wm:shared=True
+xkbcommon:shared=True
+xz_utils:shared=True

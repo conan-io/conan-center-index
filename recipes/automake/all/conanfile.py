@@ -11,7 +11,7 @@ class AutomakeConan(ConanFile):
     exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
-    settings = "os_build", "arch_build"
+    settings = "os", "arch", "compiler"
     _autotools = None
 
     @property
@@ -23,18 +23,25 @@ class AutomakeConan(ConanFile):
         [major, minor, _] = self.version.split(".", 2)
         return '{}.{}'.format(major, minor)
 
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+
+    def requirements(self):
+        self.requires("autoconf/2.71")
+        # automake requires perl-Thread-Queue package
+
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.compiler
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-
-    def requirements(self):
-        self.requires("autoconf/2.69")
-        # automake requires perl-Thread-Queue package
-
-    def build_requirements(self):
-        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
 
     @property
     def _datarootdir(self):
@@ -48,21 +55,24 @@ class AutomakeConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        datarootdir = self._datarootdir
-        prefix = self.package_folder
-        if tools.os_info.is_windows:
-            datarootdir = tools.unix_path(datarootdir)
-            prefix = tools.unix_path(prefix)
         conf_args = [
-            "--datarootdir={}".format(datarootdir),
-            "--prefix={}".format(prefix),
+            "--datarootdir={}".format(tools.unix_path(self._datarootdir)),
+            "--prefix={}".format(tools.unix_path(self.package_folder)),
         ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        host, build = False, False
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
         return self._autotools
 
     def _patch_files(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        if self.settings.os == "Windows":
+            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
+            tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
+                                               "          $map_traced_defs{$arg1} = $file;",
+                                               "          $file = `cygpath -u $file`;\n"
+                                               "          $file =~ s/^\s+|\s+$//g;\n"
+                                               "          $map_traced_defs{$arg1} = $file;")
 
     def build(self):
         self._patch_files()
@@ -77,7 +87,7 @@ class AutomakeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "doc"))
 
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
             for filename in os.listdir(binpath):
                 fullpath = os.path.join(binpath, filename)
@@ -90,37 +100,29 @@ class AutomakeConan(ConanFile):
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
-        aclocal = os.path.join(self.package_folder, "bin", "aclocal" + bin_ext)
-        if self.settings.os_build == "Windows":
-            aclocal = tools.unix_path(aclocal)
+        aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal" + bin_ext))
         self.output.info("Setting ACLOCAL to {}".format(aclocal))
         self.env_info.ACLOCAL = aclocal
 
-        automake_datadir = self._datarootdir
-        if self.settings.os_build == "Windows":
-            automake_datadir = tools.unix_path(automake_datadir)
+        automake_datadir = tools.unix_path(self._datarootdir)
         self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
         self.env_info.AUTOMAKE_DATADIR = automake_datadir
 
-        automake_libdir = self._automake_libdir
-        if self.settings.os_build == "Windows":
-            automake_libdir = tools.unix_path(automake_libdir)
+        automake_libdir = tools.unix_path(self._automake_libdir)
         self.output.info("Setting AUTOMAKE_LIBDIR to {}".format(automake_libdir))
         self.env_info.AUTOMAKE_LIBDIR = automake_libdir
 
-        automake_perllibdir = self._automake_libdir
-        if self.settings.os_build == "Windows":
-            automake_perllibdir = tools.unix_path(automake_perllibdir)
+        automake_perllibdir = tools.unix_path(self._automake_libdir)
         self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
         self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
 
-        automake = os.path.join(self.package_folder, "bin", "automake" + bin_ext)
-        if self.settings.os_build == "Windows":
-            automake = tools.unix_path(automake)
+        automake = tools.unix_path(os.path.join(self.package_folder, "bin", "automake" + bin_ext))
         self.output.info("Setting AUTOMAKE to {}".format(automake))
         self.env_info.AUTOMAKE = automake
+
+        self.output.info("Append M4 include directories to AUTOMAKE_CONAN_INCLUDES environment variable")
 
         self.user_info.compile = os.path.join(self._automake_libdir, "compile")
         self.user_info.ar_lib = os.path.join(self._automake_libdir, "ar-lib")

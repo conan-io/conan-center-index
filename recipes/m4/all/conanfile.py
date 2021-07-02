@@ -11,7 +11,7 @@ class M4Conan(ConanFile):
     homepage = "https://www.gnu.org/software/m4/"
     license = "GPL-3.0-only"
     exports_sources = ["patches/*.patch"]
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -26,9 +26,8 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -39,7 +38,22 @@ class M4Conan(ConanFile):
             return self._autotools
         conf_args = []
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        build_canonical_name = None
+        host_canonical_name = None
+        if self.settings.compiler == "Visual Studio":
+            # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
+            build_canonical_name = False
+            host_canonical_name = False
+            self._autotools.flags.append("-FS")
+            # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
+            # Visual Studio does not support the %n format flag:
+            # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
+            # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
+            # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
+            conf_args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
+            if self.settings.build_type in ("Debug", "RelWithDebInfo"):
+                self._autotools.link_flags.append("-PDB")
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
     @contextmanager
@@ -87,12 +101,17 @@ class M4Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        del self.info.settings.compiler
         self.info.include_build_settings()
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment var: {}".format(bin_path))
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-        m4 = "m4.exe" if self.settings.os_build == "Windows" else "m4"
-        self.env_info.M4 = os.path.join(self.package_folder, "bin", m4).replace("\\", "/")
+
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
+        m4_bin = os.path.join(self.package_folder, "bin", "m4{}".format(bin_ext)).replace("\\", "/")
+
+        # M4 environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
+        self.output.info("Setting M4 environment variable: {}".format(m4_bin))
+        self.env_info.M4 = m4_bin

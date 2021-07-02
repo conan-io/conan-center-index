@@ -1,0 +1,52 @@
+diff -ur a/source/config/mh-mingw64 b/source/config/mh-mingw64
+--- a/source/config/mh-mingw64
++++ b/source/config/mh-mingw64
+@@ -42,11 +42,6 @@
+ THREADSCXXFLAGS = -mthreads
+ LIBCPPFLAGS =
+ 
+-## Add 'd' suffix to the names of binary files with Debug configuration
+-ifeq ($(ENABLE_DEBUG),1)
+-ICULIBSUFFIX:=$(ICULIBSUFFIX)d#M#
+-endif
+-
+ # Commands to link. Link with C++ in case static libraries are used.
+ LINK.c=       $(CXX) $(CXXFLAGS) $(LDFLAGS)
+ #LINK.cc=      $(CXX) $(CXXFLAGS) $(LDFLAGS)
+diff -ur a/source/config/mh-msys-msvc  b/source/config/mh-msys-msvc
+--- a/source/config/mh-msys-msvc
++++ b/source/config/mh-msys-msvc
+@@ -45,7 +45,6 @@
+ ifeq ($(ENABLE_DEBUG),1)
+ # Pass debugging flag through
+ CPPFLAGS+=-D_DEBUG=1#M#
+-ICULIBSUFFIX:=$(ICULIBSUFFIX)d#M#
+ endif
+ 
+ # -GF pools strings and places them into read-only memory
+diff -ur a/source/config/mh-cygwin-msvc b/source/config/mh-cygwin-msvc
+--- a/source/config/mh-cygwin-msvc
++++ b/source/config/mh-cygwin-msvc
+@@ -44,7 +44,6 @@
+ ifeq ($(ENABLE_DEBUG),1)
+ # Pass debugging flag through
+ CPPFLAGS+=-D_DEBUG=1#M#
+-ICULIBSUFFIX:=$(ICULIBSUFFIX)d#M#
+ endif
+ 
+ # /GF pools strings and places them into read-only memory
+diff -ur a/source/config/mh-mingw  b/source/config/mh-mingw
+--- a/source/config/mh-mingw
++++ b/source/config/mh-mingw
+@@ -42,11 +42,6 @@
+ THREADSCXXFLAGS = -mthreads
+ LIBCPPFLAGS =
+ 
+-## Add 'd' suffix to the names of binary files with Debug configuration
+-ifeq ($(ENABLE_DEBUG),1)
+-ICULIBSUFFIX:=$(ICULIBSUFFIX)d#M#
+-endif
+-
+ # Commands to link. Link with C++ in case static libraries are used.
+ LINK.c=       $(CXX) $(CXXFLAGS) $(LDFLAGS)
+ #LINK.cc=      $(CXX) $(CXXFLAGS) $(LDFLAGS)

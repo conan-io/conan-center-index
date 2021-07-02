@@ -1,0 +1,81 @@
+diff -ur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ project(WebKit)
+ 
+ # This should be removed once we require CMake 3.3.
+diff -ur a/Source/cmake/OptionsQt.cmake b/Source/cmake/OptionsQt.cmake
+--- a/Source/cmake/OptionsQt.cmake	2020-06-03 17:09:30.712875498 +0300
++++ b/Source/cmake/OptionsQt.cmake	2020-06-03 17:13:15.443423594 +0300
+@@ -61,18 +61,13 @@
+     endif ()
+ endmacro()
+ 
++include(CheckIncludeFileCXX)
++
+ macro(CHECK_QT5_PRIVATE_INCLUDE_DIRS _qt_component _header)
+-    set(INCLUDE_TEST_SOURCE
+-    "
+-        #include <${_header}>
+-        int main() { return 0; }
+-    "
+-    )
+     set(CMAKE_REQUIRED_INCLUDES ${Qt5${_qt_component}_PRIVATE_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES Qt5::${_qt_component})
+-
+-    # Avoid check_include_file_cxx() because it performs linking but doesn't support CMAKE_REQUIRED_LIBRARIES (doh!)
+-    check_cxx_source_compiles("${INCLUDE_TEST_SOURCE}" Qt5${_qt_component}_PRIVATE_HEADER_FOUND)
++    
++    check_include_file_cxx("${_header}" Qt5${_qt_component}_PRIVATE_HEADER_FOUND)
+ 
+     unset(INCLUDE_TEST_SOURCE)
+     unset(CMAKE_REQUIRED_INCLUDES)
+diff -ur a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
+--- a/Source/JavaScriptCore/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/JavaScriptCore/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(JavaScriptCore_INCLUDE_DIRECTORIES
+diff -ur a/Source/WebCore/CMakeLists.txt b/Source/WebCore/CMakeLists.txt
+--- a/Source/WebCore/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WebCore/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(WebCore_INCLUDE_DIRECTORIES
+diff -ur a/Source/WebKit/CMakeLists.txt b/Source/WebKit/CMakeLists.txt
+--- a/Source/WebKit/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WebKit/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(WebKit_SOURCES
+diff -ur a/Source/WTF/CMakeLists.txt b/Source/WTF/CMakeLists.txt
+--- a/Source/WTF/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WTF/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ add_subdirectory(wtf)
+diff -ur a/tests/webkitwidgets/cmake/CMakeLists.txt b/tests/webkitwidgets/cmake/CMakeLists.txt
+--- a/tests/webkitwidgets/cmake/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/tests/webkitwidgets/cmake/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,5 +1,5 @@
+ 
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.12)
+ 
+ project(qmake_cmake_files)
+ 

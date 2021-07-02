@@ -1,1 +1,0 @@
-https://github.com/conan-community/conan-fontconfig/commit/338ade478765534e8f91609fb2eb0c98d7455857
