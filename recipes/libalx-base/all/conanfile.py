@@ -31,7 +31,7 @@ class libalx_base_conan(ConanFile):
     def build(self):
         srcdir   = self._srcdir
         builddir = self._builddir
-	args = "builddir={}".format(builddir)
+        args = "builddir={}".format(builddir)
         self.run("make -C {} build-base {}".format(srcdir, args))
 
     def package(self):
@@ -39,7 +39,7 @@ class libalx_base_conan(ConanFile):
         builddir = self._builddir
         DESTDIR  = self._DESTDIR
         prefix   = self._prefix
-	args = "builddir={} DESTDIR={} prefix={}".format(builddir, DESTDIR, prefix)
+        args = "builddir={} DESTDIR={} prefix={}".format(builddir, DESTDIR, prefix)
         self.run("make -C {} install-base {}".format(srcdir, args))
 
     def package_info(self):
