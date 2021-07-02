@@ -1,0 +1,10 @@
+sources:
+  "2.42.0":
+    url: "http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.0.tar.xz"
+    sha256: "73441338d1a901dc7a3940113cb0aac22776b2832f7eab8f8ec7ec5755adaec7"
+  "2.42.2":
+    url: "http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.2.tar.xz"
+    sha256: "83c66a1cfd591d7680c144d2922c5955d38b4db336d7cd3ee109f7bcf9afef15"
+  "2.42.4":
+    url: "https://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.4.tar.xz"
+    sha256: "fe9c5dd88f486194ea2bc09b8814c1ed895bb6c530f37cbbf259757c4e482e4d"

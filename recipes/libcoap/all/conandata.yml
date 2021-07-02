@@ -1,0 +1,4 @@
+sources:
+  "cci.20200424":
+    sha256: 8402bf2dd9979d6d5f823a050cd3533619fe9b21e76be8c69a9b7d8b8ea175ab
+    url: https://github.com/obgm/libcoap/archive/17957e1e687c2218b7752a8a959eac36dbf5cb62.zip

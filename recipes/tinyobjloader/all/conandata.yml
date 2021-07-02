@@ -1,4 +1,4 @@
 sources:
-  1.0.6:
+  "1.0.6":
     url: https://github.com/syoyo/tinyobjloader/archive/v1.0.6.zip
     sha256: ba549b59eafcdcd3d6a0ce367c9655affbc8e6f85053ea793a7333fe276879a2

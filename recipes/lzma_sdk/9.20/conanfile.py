@@ -22,10 +22,10 @@ class PackageLzmaSdk(ConanFile):
     license = ("LZMA-exception",)
     homepage = "https://www.7-zip.org/sdk.html"
     topics = ("conan", "lzma", "zip", "compression", "decompression")
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler"
 
     def build_requirements(self):
-        if tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
             self.build_requires("msys2/20190524")
 
     def source(self):
@@ -48,23 +48,21 @@ class PackageLzmaSdk(ConanFile):
         return {
             'x86_64': 'AMD64',
             'x86': 'x86',
-        }[str(self.settings.arch_build)]
+        }[str(self.settings.arch)]
 
     @property
     def _autotools_build_dirs(self):
-        es = ".exe" if self.settings.os_build == "Windows" else ""
+        es = ".exe" if self.settings.os == "Windows" else ""
         return (
             [os.path.join("C","Util","7z"), [["7zDec{}".format(es)], []]],
             [os.path.join("CPP","7zip","Bundles","LzmaCon"), [["lzma{}".format(es)],[]]]
         )
 
     def _build_msvc(self):
-        env_build = VisualStudioBuildEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            vcvars = tools.vcvars_command(self.settings)
-            for make_dir, _ in self._msvc_build_dirs:
+        for make_dir, _ in self._msvc_build_dirs:
+            with tools.vcvars(self.settings):
                 with tools.chdir(make_dir):
-                    self.run("%s && nmake /f makefile NEW_COMPILER=1 CPU=%s" % (vcvars, self._msvc_cpu))
+                    self.run("nmake /f makefile NEW_COMPILER=1 CPU=%s" % self._msvc_cpu)
 
     def _build_autotools(self):
         env_build = AutoToolsBuildEnvironment(self)
@@ -72,7 +70,7 @@ class PackageLzmaSdk(ConanFile):
             for make_dir, _ in self._autotools_build_dirs:
                 with tools.chdir(make_dir):
                     extra_args = ""
-                    if self.settings.os_build == "Windows":
+                    if self.settings.os == "Windows":
                         extra_args += " IS_MINGW=1"
                     self.run("make -f makefile.gcc all%s" % extra_args)
 

@@ -1,0 +1,28 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -43,9 +43,6 @@ endif()
+ # TODO export Targets for HinnantDate and Sqlite3 as well
+ target_include_directories(sqlpp11-connector-sqlite3
+                            PUBLIC
+-                           ${SQLPP11_INCLUDE_DIR}
+-                           ${HinnantDate_INCLUDE_DIR}
+-													 ${SQLITE3_INCLUDE_DIRS}
+                            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+ 
+@@ -58,14 +55,13 @@ endif()
+ 
+ if (SQLCIPHER)
+     target_compile_definitions(sqlpp11-connector-sqlite3 PUBLIC SQLPP_USE_SQLCIPHER)
+-    target_link_libraries(sqlpp11-connector-sqlite3 SQLCipher::SQLCipher)
+     if (SQLPP_DYNAMIC_LOADING)
+         target_compile_definitions(sqlpp11-connector-sqlite3-dynamic PUBLIC SQLPP_USE_SQLCIPHER)
+         target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${SQLCIPHER_INCLUDE_DIRS})
+     endif()
+ else()
+-    target_link_libraries(sqlpp11-connector-sqlite3 ${SQLITE3_LIBRARIES})
+ endif()
++target_link_libraries(sqlpp11-connector-sqlite3 ${CONAN_LIBS})
+ 
+ install(TARGETS sqlpp11-connector-sqlite3
+         ARCHIVE DESTINATION lib

@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
-PROJECT(TbbExample CXX)
+cmake_minimum_required(VERSION 3.1)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-ADD_EXECUTABLE(example main.cpp)
-TARGET_LINK_LIBRARIES(example ${CONAN_LIBS})
-SET_PROPERTY(TARGET example PROPERTY CXX_STANDARD 11)
+find_package(TBB REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} TBB::tbb)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

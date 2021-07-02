@@ -1,0 +1,73 @@
+--- libmpdec++/Makefile.vc
++++ libmpdec++/Makefile.vc
+@@ -16,15 +16,15 @@
+ 
+ !if "$(DEBUG)" == "1"
+-OPT = /MTd /Od /Zi /EHsc
+-OPT_SHARED = /MDd /Od /Zi /EHsc
++OPT = /Od /Zi /EHsc
++OPT_SHARED = /Od /Zi /EHsc
+ !else
+-OPT = /MT /Ox /GS /EHsc
+-OPT_SHARED = /MD /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
++OPT_SHARED = /Ox /GS /EHsc
+ !endif
+ 
+ 
+-MPD_CXXFLAGS = /W4 /nologo $(OPT)
+-MPD_CXXFLAGS_SHARED = /DBUILD_LIBMPDECXX /W4 /nologo $(OPT_SHARED) $(PGOFLAGS)
+-MPD_BIN_CXXFLAGS_SHARED = /W4 /nologo $(OPT_SHARED) $(PGOFLAGS)
++MPD_CXXFLAGS = /W4 /nologo $(OPT) $(CONAN_CXXFLAGS) $(CONAN_CFLAGS)
++MPD_CXXFLAGS_SHARED = /DBUILD_LIBMPDECXX /W4 /nologo $(OPT_SHARED) $(PGOFLAGS) $(CONAN_LDFLAGS)
++MPD_BIN_CXXFLAGS_SHARED = /W4 /nologo $(OPT_SHARED) $(PGOFLAGS) $(CONAN_LDFLAGS)
+ 
+ MPD_LDXXFLAGS= /DLL /MANIFEST $(LDXXFLAGS)
+@@ -38,11 +38,11 @@
+ SHARED_OBJS = .objs\decimal.obj
+ 
+ 
+-$(LIBSTATIC_CXX): Makefile $(OBJS)
++$(LIBSTATIC_CXX): Makefile.vc $(OBJS)
+ 	-@if exist $@ del $(LIBSTATIC_CXX)
+ 	lib /out:$(LIBSTATIC_CXX) $(OBJS)
+ 
+-$(LIBSHARED_CXX): Makefile $(SHARED_OBJS)
++$(LIBSHARED_CXX): Makefile.vc $(SHARED_OBJS)
+ 	-@if exist $@ del $(LIBSHARED_CXX)
+ 	link $(MPD_LDXXFLAGS) /out:$(LIBSHARED_CXX) /implib:$(LIBIMPORT_CXX) /LIBPATH:$(SRCDIR) $(SHARED_OBJS) $(LIBIMPORT)
+ 	mt -manifest $(LIBSHARED_CXX).manifest -outputresource:$(LIBSHARED_CXX);2
+@@ -51,2 +51,2 @@
+ decimal.obj:\
+-Makefile decimal.cc decimal.hh
++Makefile.vc decimal.cc decimal.hh
+@@ -55,2 +55,2 @@
+ .objs\decimal.obj:\
+-Makefile decimal.cc decimal.hh
++Makefile.vc decimal.cc decimal.hh
+--- libmpdec/Makefile.vc
++++ libmpdec/Makefile.vc
+@@ -36,12 +36,12 @@
+ !endif
+ 
+ !if "$(DEBUG)" == "1"
+-OPT = /MTd /Od /Zi /EHsc
+-OPT_SHARED = /MDd /Od /Zi /EHsc
++OPT = /Od /Zi /EHsc
++OPT_SHARED = /Od /Zi /EHsc
+ !else
+-OPT = /MT /Ox /GS /EHsc
+-OPT_SHARED = /MD /Ox /GS /EHsc
++OPT = /Ox /GS /EHsc
++OPT_SHARED = /Ox /GS /EHsc
+ !endif
+ 
+-MPD_CFLAGS = /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT)
+-MPD_CFLAGS_SHARED = /DBUILD_LIBMPDEC /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT_SHARED) $(PGOFLAGS)
++MPD_CFLAGS = /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT) $(CONAN_CFLAGS)
++MPD_CFLAGS_SHARED = /DBUILD_LIBMPDEC /W4 /wd4200 /wd4204 /wd4221 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT_SHARED) $(PGOFLAGS) $(CONAN_CFLAGS)
+@@ -52,1 +52,1 @@
+-MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS)
++MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS) $(CONAN_LDFLAGS)
+ 
+ 

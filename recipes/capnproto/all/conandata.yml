@@ -1,0 +1,28 @@
+sources:
+  "0.8.0":
+    url: "https://github.com/capnproto/capnproto/archive/v0.8.0.tar.gz"
+    sha256: "6d8b43a7ec2a764b4dfe4139a7cdd070ad9057f106898050d9f4db3754b98820"
+  "0.7.0":
+    url: "https://github.com/capnproto/capnproto/archive/v0.7.0.tar.gz"
+    sha256: 76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28
+patches:
+  "0.8.0":
+    - patch_file: patches/0001-disable-tests.patch
+      base_path: source_subfolder
+    - patch_file: patches/0002-cmake-compat-header-install.patch
+      base_path: source_subfolder
+    - patch_file: patches/0003-kj-tls-windows.patch
+      base_path: source_subfolder
+    - patch_file: patches/0004-cmake-module-path.patch
+      base_path: source_subfolder
+    - patch_file: patches/0005-msvc-16.7-ice-workaround.patch
+      base_path: source_subfolder
+    - patch_file: patches/0009-windows-symlink-fix-0.8.0.patch
+      base_path: source_subfolder
+  "0.7.0":
+    - patch_file: patches/0006-symlink.patch
+      base_path: source_subfolder
+    - patch_file: patches/0007-cmake-module-path.patch
+      base_path: source_subfolder
+    - patch_file: patches/0008-disable-tests.patch
+      base_path: source_subfolder

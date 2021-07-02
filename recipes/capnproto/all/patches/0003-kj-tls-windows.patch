@@ -1,0 +1,75 @@
+--- a/c++/CMakeLists.txt
++++ b/c++/CMakeLists.txt
+@@ -41,6 +41,29 @@ else()
+   set(CAPNP_LITE_FLAG)
+ endif()
+ 
++set(WITH_OPENSSL "AUTO" CACHE STRING
++  "Whether or not to build libkj-tls by linking against openssl")
++# define list of values GUI will offer for the variable
++set_property(CACHE WITH_OPENSSL PROPERTY STRINGS AUTO ON OFF)
++
++# shadow cache variable original value with ON/OFF,
++# so from now on OpenSSL-specific code just has to check:
++#     if (WITH_OPENSSL)
++#         ...
++#     endif()
++if (CAPNP_LITE)
++  set(WITH_OPENSSL OFF)
++elseif (WITH_OPENSSL STREQUAL "AUTO")
++  find_package(OpenSSL COMPONENTS Crypto SSL)
++  if (OPENSSL_FOUND)
++    set(WITH_OPENSSL ON)
++  else()
++    set(WITH_OPENSSL OFF)
++  endif()
++elseif (WITH_OPENSSL)
++  find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
++endif()
++
+ if(MSVC)
+   # TODO(cleanup): Enable higher warning level in MSVC, but make sure to test
+   #   build with that warning level and clean out false positives.
+--- a/c++/src/kj/CMakeLists.txt
++++ b/c++/src/kj/CMakeLists.txt
+@@ -163,6 +163,29 @@ if(NOT CAPNP_LITE)
+   install(FILES ${kj-http_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/kj/compat")
+ endif()
+ 
++# kj-tls ======================================================================
++set(kj-tls_sources
++  compat/readiness-io.c++
++  compat/tls.c++
++)
++set(kj-tls_headers
++  compat/readiness-io.h
++  compat/tls.h
++)
++if(NOT CAPNP_LITE)
++  add_library(kj-tls ${kj-tls_sources})
++  add_library(CapnProto::kj-tls ALIAS kj-tls)
++  target_link_libraries(kj-tls PUBLIC kj-async)
++  if (WITH_OPENSSL)
++    target_compile_definitions(kj-tls PRIVATE KJ_HAS_OPENSSL)
++    target_link_libraries(kj-tls PRIVATE OpenSSL::SSL OpenSSL::Crypto)
++  endif()
++  # Ensure the library has a version set to match autotools build
++  set_target_properties(kj-tls PROPERTIES VERSION ${VERSION})
++  install(TARGETS kj-tls ${INSTALL_TARGETS_DEFAULT_ARGS})
++  install(FILES ${kj-tls_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/kj/compat")
++endif()
++
+ # kj-gzip ======================================================================
+ 
+ set(kj-gzip_sources
+--- a/c++/src/kj/compat/tls.c++
++++ b/c++/src/kj/compat/tls.c++
+@@ -266,7 +266,7 @@ private:
+   kj::Promise<size_t> sslCall(Func&& func) {
+     if (disconnected) return size_t(0);
+ 
+-    ssize_t result = func();
++    auto result = func();
+ 
+     if (result > 0) {
+       return result;

@@ -1,0 +1,4 @@
+sources:
+  "3.7.0":
+    sha256: ea768aa0187ba349391c6c157445ecc2b42e7d671fc1ce8c53ff5ef513f1e2ab
+    url: https://github.com/pciutils/pciutils/archive/v3.7.0.tar.gz

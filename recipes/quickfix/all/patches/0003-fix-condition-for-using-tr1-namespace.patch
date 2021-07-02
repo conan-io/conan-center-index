@@ -1,0 +1,25 @@
+From 0dc1082e71b21a84124d56181c1ab7daa6b52352 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Tue, 9 Jun 2020 08:39:03 -0300
+Subject: [PATCH 3/8] fix condition for using tr1 namespace
+
+---
+ src/C++/Utility.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/C++/Utility.h b/src/C++/Utility.h
+index 61ffaa77..63917ce2 100644
+--- a/src/C++/Utility.h
++++ b/src/C++/Utility.h
+@@ -112,7 +112,7 @@ typedef int ssize_t;
+ 
+ #if defined(HAVE_STD_SHARED_PTR)
+   namespace ptr = std;
+-#elif defined(HAVE_STD_TR1_SHARED_PTR)
++#elif defined(HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER)
+   #include <tr1/memory>
+   namespace ptr = std::tr1;
+ #elif defined(HAVE_BOOST_SHARED_PTR)
+-- 
+2.25.0
+

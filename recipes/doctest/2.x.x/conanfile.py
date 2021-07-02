@@ -7,6 +7,7 @@ class DoctestConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/onqtam/doctest"
     description = "C++11/14/17/20 single header testing framework"
+    topics = ("doctest", "header-only", "unit-test", "tdd")
     settings = "os", "compiler"
     license = "MIT"
     _source_subfolder = "source_subfolder"
@@ -19,6 +20,9 @@ class DoctestConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+    def build(self):
+        pass
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)

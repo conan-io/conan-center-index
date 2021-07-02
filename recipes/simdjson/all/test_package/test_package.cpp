@@ -1,14 +1,19 @@
+#include "simdjson.h"
 #include <iostream>
 #include <string>
-#include "simdjson/jsonparser.h"
 
 int main() {
   std::string mystring = "{ \"hello\": \"simdjson\" }";
-  simdjson::ParsedJson pj = simdjson::build_parsed_json(mystring);
-  if (!pj.is_valid()) {
-    // something went wrong
-    std::cout << pj.get_error_message() << std::endl;
-    return 1;
+  simdjson::dom::parser parser;
+  std::string_view string_value;
+  auto error = parser.parse(mystring)["hello"].get(string_value);
+  if (error) {
+    std::cerr << error << std::endl;
+    return EXIT_FAILURE;
   }
-  return 0;
+  if (string_value != "simdjson") {
+    std::cerr << string_value << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

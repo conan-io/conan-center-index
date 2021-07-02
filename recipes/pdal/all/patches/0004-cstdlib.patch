@@ -1,0 +1,14 @@
+Forwared to upstream and fixed in pdal>2.2.0
+---
+diff --git a/filters/private/expr/Lexer.cpp b/filters/private/expr/Lexer.cpp
+index 0c3dbe6b3..854d4c693 100644
+--- a/filters/private/expr/Lexer.cpp
++++ b/filters/private/expr/Lexer.cpp
+@@ -1,6 +1,7 @@
+ 
+ #include <cassert>
+ #include <cctype>
++#include <cstdlib>
+ 
+ #include "Lexer.hpp"
+ 

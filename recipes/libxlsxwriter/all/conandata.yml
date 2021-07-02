@@ -1,0 +1,8 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/jmcnamara/libxlsxwriter/archive/RELEASE_1.0.0.tar.gz"
+    sha256: "8b353379333c323d14a9d265cd2491d3a6c0032c8d6ec2141f10b82ab66a087c"
+patches:
+  "1.0.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/001-patch-cmake-conan-targets.patch"

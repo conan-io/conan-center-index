@@ -1,0 +1,7 @@
+sources:
+  "1.0.9":
+    url: "https://github.com/adamstark/AudioFile/archive/1.0.9.tar.gz"
+    sha256: "1d609b80496fc5c688d8e83086cdcad5b60ddb20f02d160f80be271fab97c4c0"
+  "1.0.8":
+    url: "https://github.com/adamstark/AudioFile/archive/1.0.8.tar.gz"
+    sha256: "f9ecc578425cb90a4a846b32c8ac162c9a61952713bd07525337245a8dee8ad2"

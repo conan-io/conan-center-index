@@ -2,4 +2,12 @@ versions:
   "2.3.0":
     folder: "2.3.0"
   "2.4.0":
-    folder: "2.4.0"
+    folder: "2.x"
+  "2.5.2":
+    folder: "2.x"
+  "2.5.3":
+    folder: "2.x"
+  "2.5.4":
+    folder: "2.x"
+  "2.5.5":
+    folder: "2.x"

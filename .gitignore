@@ -5,6 +5,7 @@
 .pydevproject
 .settings/
 .ropeproject/
+.devcontainer/
 ## emacs
 *~
 
@@ -116,3 +117,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# scons build files
+*.dblite

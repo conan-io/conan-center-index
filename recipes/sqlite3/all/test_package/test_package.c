@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
+#ifdef USE_EMPTY_VFS
+#define DB_NAME ":memory:"
+#else
+#define DB_NAME "bincrafters.db"
+#endif
+
 int main() {
     sqlite3* db_instance = NULL;
     char* errmsg = NULL;
@@ -10,7 +16,7 @@ int main() {
     printf("SQLite Version: %s\n", sqlite3_libversion());
 
     printf("Creating new data base ...\n");
-    result = sqlite3_open("bincrafters.db", &db_instance);
+    result = sqlite3_open(DB_NAME, &db_instance);
     if (result != SQLITE_OK) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db_instance));
         sqlite3_close(db_instance);
@@ -38,4 +44,3 @@ int main() {
 
     return EXIT_SUCCESS;
 }
-

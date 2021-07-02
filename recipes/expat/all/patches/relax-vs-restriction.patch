@@ -1,0 +1,13 @@
+diff --git a/expat/CMakeLists.txt b/expat/CMakeLists.txt
+index e3564691..0dc5cf80 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -133,7 +133,7 @@ if(MSVC)
+     # Minimum supported MSVC version is 1910 = Visual Studio 15.0/2017
+     # See also https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html
+     if(MSVC_VERSION VERSION_LESS 1910)
+-        message(SEND_ERROR "MSVC_VERSION ${MSVC_VERSION} is not a supported Visual Studio compiler version. Please use Visual Studio 15.0/2017 or any later version.")
++        message(WARNING "MSVC_VERSION ${MSVC_VERSION} is not a supported Visual Studio compiler version. Please use Visual Studio 15.0/2017 or any later version.")
+     endif()
+ endif()
+ 

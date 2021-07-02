@@ -1,0 +1,8 @@
+sources:
+  "6.4.2":
+    url: "https://github.com/skyrpex/clipper/archive/6.4.2.tar.gz"
+    sha256: 8F55019C0CB73E22F4FD15AF721B6B8D3BD20B0EB5621271834C796671E0B634
+patches:
+  "6.4.2":
+    - patch_file: "patches/0001-include-install-directory.patch"
+      base_path: "source_subfolder"

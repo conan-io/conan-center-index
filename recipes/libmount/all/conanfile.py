@@ -17,6 +17,8 @@ class LibmountConan(ConanFile):
     _autotools = None
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux":

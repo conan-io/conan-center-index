@@ -9,17 +9,19 @@ class H3Conan(ConanFile):
     topics = ("conan", "h3", "hierarchical", "geospatial", "indexing")
     homepage = "https://github.com/uber/h3"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_filters": [True, False],
         "h3_prefix": "ANY"
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_filters": True,
         "h3_prefix": ""
     }
 
@@ -38,6 +40,8 @@ class H3Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -46,6 +50,8 @@ class H3Conan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -56,7 +62,7 @@ class H3Conan(ConanFile):
         self._cmake.definitions["H3_PREFIX"] = self.options.h3_prefix
         self._cmake.definitions["ENABLE_COVERAGE"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["BUILD_FILTERS"] = False
+        self._cmake.definitions["BUILD_FILTERS"] = self.options.build_filters
         self._cmake.definitions["BUILD_GENERATORS"] = False
         self._cmake.definitions["WARNINGS_AS_ERRORS"] = False
         self._cmake.definitions["ENABLE_LINTING"] = False
@@ -76,3 +82,8 @@ class H3Conan(ConanFile):
         self.cpp_info.defines.append("H3_PREFIX={}".format(self.options.h3_prefix))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+
+        if self.options.build_filters:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

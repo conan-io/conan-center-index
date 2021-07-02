@@ -31,19 +31,23 @@ class LibUSBConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Android":
+            self.options.enable_udev = False
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in  ["Linux", "Android"]:
             del self.options.enable_udev
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def system_requirements(self):
         if self.settings.os == "Linux":
@@ -66,14 +70,19 @@ class LibUSBConan(ConanFile):
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
-            solution_file = "libusb_2017.sln"
-            if self.settings.compiler.version == "14":
-                solution_file = "libusb_2015.sln"
-            if self.settings.compiler.version == "12":
-                solution_file = "libusb_2013.sln"
-            elif self.settings.compiler.version == "11":
-                solution_file = "libusb_2012.sln"
-            solution_file = os.path.join("msvc", solution_file)
+            # Assume we're using the latest Visual Studio and default to libusb_2019.sln
+            # (or libusb_2017.sln for libusb < 1.0.24).
+            # If we're not using the latest Visual Studio, select an appropriate solution file.
+            solution_msvc_year = 2019 if tools.Version(self.version) >= "1.0.24" else 2017
+
+            solution_msvc_year = {
+                "11": 2012,
+                "12": 2013,
+                "14": 2015,
+                "15": 2017
+            }.get(str(self.settings.compiler.version), solution_msvc_year)
+
+            solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
             platforms = {"x86":"Win32"}
             msbuild = MSBuild(self)
             msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
@@ -83,7 +92,7 @@ class LibUSBConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
             configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "Android"]:
                 configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
             elif self._is_mingw:
                 if self.settings.arch == "x86_64":
@@ -96,10 +105,11 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         if self._is_msvc:
-            for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
-                            "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
-                vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
-                tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+            if tools.Version(self.version) < "1.0.24":
+                for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
+                                "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
+                    vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
+                    tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
             self._build_visual_studio()
         else:
             autotools = self._configure_autotools()
@@ -136,6 +146,7 @@ class LibUSBConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.os in ["Linux", "Android"]:
             if self.options.enable_udev:
                 self.cpp_info.system_libs.append("udev")
         elif self.settings.os == "Macos":

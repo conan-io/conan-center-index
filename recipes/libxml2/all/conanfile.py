@@ -2,63 +2,105 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuil
 from contextlib import contextmanager
 import glob
 import os
+import textwrap
+
+required_conan_version = ">=1.29.1"
 
 
 class Libxml2Conan(ConanFile):
     name = "libxml2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxml2 is a software library for parsing XML documents"
-    topics = "XML", "parser", "validation"
+    topics = ("XML", "parser", "validation")
     homepage = "https://xmlsoft.org"
     license = "MIT"
+
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
+    # from ./configure and ./win32/configure.js
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "include_utils": True,
+        "c14n": True,
+        "catalog": True,
+        "docbook": True,
+        "ftp": True,
+        "http": True,
+        "html": True,
+        "iconv": True,
+        "icu": False,
+        "iso8859x": True,
+        "legacy": True,
+        "mem-debug": False,
+        "output": True,
+        "pattern": True,
+        "push": True,
+        "python": False,
+        "reader": True,
+        "regexps": True,
+        "run-debug": False,
+        "sax1": True,
+        "schemas": True,
+        "schematron": True,
+        "threads": True,
+        "tree": True,
+        "valid": True,
+        "writer": True,
+        "xinclude": True,
+        "xpath": True,
+        "xptr": True,
+        "zlib": True,
+        "lzma": False,
+    }
+
+    options = {name: [True, False] for name in default_options.keys()}
+    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC", "include_utils"]]
+
     generators = "pkg_config"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "zlib": [True, False],
-               "lzma": [True, False],
-               "iconv": [True, False],
-               "icu": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       "iconv": True,
-                       "zlib": True,
-                       "lzma": False,
-                       "icu": False}
-
     _autotools = None
-    _source_subfolder = "source_subfolder"
 
-    def requirements(self):
-        if self.options.zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.lzma:
-            self.requires("xz_utils/5.2.4")
-        if self.options.iconv:
-            self.requires("libiconv/1.15")
-        if self.options.icu:
-            self.requires("icu/64.2")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
-    
+        return self.settings.compiler == "Visual Studio"
+
     @property
     def _is_mingw(self):
-        return self.settings.compiler == 'gcc' and self.settings.os == 'Windows'
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.lzma:
+            self.requires("xz_utils/5.2.5")
+        if self.options.iconv:
+            self.requires("libiconv/1.16")
+        if self.options.icu:
+            self.requires("icu/68.2")
+
+    def build_requirements(self):
+        if not self._is_msvc:
+            if self.options.zlib or self.options.lzma or self.options.icu:
+                self.build_requires("pkgconf/1.7.3")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/20200517")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
 
     @contextmanager
     def _msvc_build_environment(self):
@@ -74,10 +116,6 @@ class Libxml2Conan(ConanFile):
 
             args = ["cscript",
                     "configure.js",
-                    "zlib=%d" % (1 if self.options.zlib else 0),
-                    "lzma=%d" % (1 if self.options.lzma else 0),
-                    "iconv=%d" % (1 if self.options.iconv else 0),
-                    "icu=%d" % (1 if self.options.icu else 0),
                     "compiler=msvc",
                     "prefix=%s" % self.package_folder,
                     "cruntime=/%s" % self.settings.compiler.runtime,
@@ -85,6 +123,15 @@ class Libxml2Conan(ConanFile):
                     "static=%s" % static,
                     'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
                     'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+
+            for name in self._option_names:
+                cname = {"mem-debug": "mem_debug",
+                         "run-debug": "run_debug",
+                         "docbook": "docb"}.get(name, name)
+                value = getattr(self.options, name)
+                value = "yes" if value else "no"
+                args.append("%s=%s" % (cname, value))
+
             configure_command = ' '.join(args)
             self.output.info(configure_command)
             self.run(configure_command)
@@ -108,131 +155,125 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
 
-            self.run("nmake /f Makefile.msvc")
+            self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
+
+            if self.options.include_utils:
+                self.run("nmake /f Makefile.msvc utils")
+
 
     def _package_msvc(self):
         with self._msvc_build_environment():
-            self.run("nmake /f Makefile.msvc install")
+            self.run("nmake /f Makefile.msvc install-libs")
 
-    def _build_mingw(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
-            debug = "yes" if self.settings.build_type == "Debug" else "no"
-            static = "no" if self.options.shared else "yes"
-
-            args = ["cscript",
-                    "configure.js",
-                    "zlib=%d" % (1 if self.options.zlib else 0),
-                    "lzma=%d" % (1 if self.options.lzma else 0),
-                    "iconv=%d" % (1 if self.options.iconv else 0),
-                    "icu=%d" % (1 if self.options.icu else 0),
-                    "compiler=mingw",
-                    "prefix=%s" % self.package_folder,
-                    "debug=%s" % debug,
-                    "static=%s" % static,
-                    'include="%s"' % " -I".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % " -L".join(self.deps_cpp_info.lib_paths)]
-            configure_command = ' '.join(args)
-            self.output.info(configure_command)
-            self.run(configure_command)
-
-            self.run("mingw32-make -f Makefile.mingw")
-
-    def _package_mingw(self):
-        tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
-            self.run("mingw32-make -f Makefile.mingw install")
+            if self.options.include_utils:
+                self.run("nmake /f Makefile.msvc install-dist")
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if not tools.os_info.is_windows:
-            self._autotools.fpic = self.options.fPIC
+        self._autotools.libs = []
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
-        # fix rpath
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
-        if self._autotools.fpic:
-            configure_args.extend(['--with-pic'])
+        configure_args = ['--prefix=%s' % full_install_subfolder]
+        configure_args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
-        configure_args.extend(['--with-zlib' if self.options.zlib else '--without-zlib'])
-        configure_args.extend(['--with-lzma' if self.options.lzma else '--without-lzma'])
-        configure_args.extend(['--with-iconv' if self.options.iconv else '--without-iconv'])
-        configure_args.extend(['--with-icu' if self.options.icu else '--without-icu'])
 
-        # Disable --build when building for iPhoneSimulator. The configure script halts on
-        # not knowing if it should cross-compile.
-        build = None
-        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-            build = False
+        for name in self._option_names:
+            value = getattr(self.options, name)
+            value = ("--with-%s" % name) if value else ("--without-%s" % name)
+            configure_args.append(value)
 
-        self._autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
                                                "install-libs : all",
                                                "install-libs :")
+        # fix rpath
+        if self.settings.os == "Macos":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
 
     def build(self):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
-        elif self._is_mingw:
-            self._build_mingw()
         else:
             autotools = self._configure_autotools()
-            autotools.make()
+            autotools.make(["libxml2.la"])
+
+            if self.options.include_utils:
+                autotools.make(["xmllint", "xmlcatalog", "xml2-config"])
 
     def package(self):
         # copy package license
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         if self._is_msvc:
             self._package_msvc()
-        elif self._is_mingw:
-            self._package_mingw()
+            # remove redundant libraries to avoid confusion
+            if not self.options.shared:
+                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         else:
             autotools = self._configure_autotools()
-            autotools.install()
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
+            autotools.make(["install-libLTLIBRARIES", "install-data"])
 
-        for prefix in ["run", "test"]:
-            for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
-                os.remove(test)
+            if self.options.include_utils:
+                autotools.make(["install", "xmllint", "xmlcatalog", "xml2-config"])
+
+            os.remove(os.path.join(self.package_folder, "lib", "libxml2.la"))
+            for prefix in ["run", "test"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), prefix + "*")
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
         for header in ["win32config.h", "wsockcompat.h"]:
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
                       dst=os.path.join("include", "libxml2"), keep_path=False)
-        if self._is_msvc:
-            # remove redundant libraries to avoid confusion
-            if not self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
 
-            pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
-            for pdb in pdb_files:
-                os.unlink(pdb)
-        elif self._is_mingw:
-            if self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.a"))
-                os.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
-                          os.path.join(self.package_folder, "lib", "libxml2.a"))
-            else:
-                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.lib"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+        )
 
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
+        content = textwrap.dedent("""\
+            if(DEFINED LibXml2_FOUND)
+                set(LIBXML2_FOUND ${LibXml2_FOUND})
+            endif()
+            if(DEFINED LibXml2_INCLUDE_DIR)
+                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
+                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIR})
+            endif()
+            if(DEFINED LibXml2_LIBRARIES)
+                set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
+                set(LIBXML2_LIBRARY ${LibXml2_LIBRARIES})
+            endif()
+            if(DEFINED LibXml2_DEFINITIONS)
+                set(LIBXML2_DEFINITIONS ${LibXml2_DEFINITIONS})
+            endif()
+            if(DEFINED LibXml2_VERSION)
+                set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
+            endif()
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-variables.cmake".format(self.name)
 
     def package_info(self):
         if self._is_msvc:
@@ -242,10 +283,20 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.libs.append('m')
-        if self.settings.os == "Windows":
-            self.cpp_info.libs.append('ws2_32')
+        if self.options.include_utils:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.system_libs.append("m")
+            if self.options.threads and self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            if self.options.ftp or self.options.http:
+                self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
+        # FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]

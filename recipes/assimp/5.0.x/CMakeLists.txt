@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.1.0)
-
+cmake_minimum_required(VERSION 2.8.11)
 project(cmake_wrapper)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
+include(conanbuildinfo.cmake)
 conan_basic_setup()
+
+if(WIN32)
+  add_definitions(-DNOMINMAX)
+endif()
 
 add_subdirectory("source_subfolder")

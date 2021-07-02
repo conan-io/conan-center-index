@@ -1,0 +1,114 @@
+From ea4342aa1cd7ddf68857d1923ac1dceab90586a5 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Tue, 9 Jun 2020 02:14:57 -0300
+Subject: [PATCH 5/8] inc. required CMake version, add conan basic setup and
+ check compiler features
+
+opt for unique_ptr vs auto_ptr through CMake option
+---
+ CMakeLists.txt | 27 +++++++++++----------------
+ config.h.in    | 15 +++++++++++++++
+ 2 files changed, 26 insertions(+), 16 deletions(-)
+ create mode 100644 config.h.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 48908ead..8789432c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+ 
+ option(HAVE_EMX "Build with EMX")
+ 
+@@ -11,6 +11,8 @@ set (quickfix_PROJECT_NAME quickfix)
+ endif()
+ 
+ project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)
++include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
++conan_basic_setup()
+ message("-- Project name ${CMAKE_PROJECT_NAME}")
+ 
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+@@ -31,13 +33,6 @@ option(HAVE_PYTHON3 "Build with default Python3 version")
+ if(HAVE_SSL)
+ # Can set location explicitly, example, cmake -DOPENSSL_ROOT_DIR=/usr/local/ssl -DOPENSSL_LIBRARIES=/usr/local/ssl/lib
+ 
+-find_package(OpenSSL REQUIRED)
+-include_directories(${OPENSSL_INCLUDE_DIR})
+-
+-message("-- OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+-message("-- OPENSSL_LIBRARIES: ${OPENSSL_LIBRARIES}")
+-message("-- OPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}")
+-
+ message("-- Building with SSL")
+ add_definitions("-DHAVE_SSL=1")
+ endif()
+@@ -63,12 +58,15 @@ FIND_SHARED_PTR()
+ if (HAVE_SHARED_PTR_IN_STD_NAMESPACE)
+ message("-- set HAVE_STD_SHARED_PTR")
+ add_definitions("-DHAVE_STD_SHARED_PTR=1")
++set(HAVE_STD_SHARED_PTR 1)
+ elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE)
+ message("-- set HAVE_STD_TR1_SHARED_PTR")
+ add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
++set(HAVE_STD_TR1_SHARED_PTR 1)
+ elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE_FROM_TR1_MEMORY_HEADER)
+ message("-- set HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER")
+ add_definitions("-DHAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")
++set(HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER 1)
+ else()
+ message("-- shared_ptr not found.")
+ endif()
+@@ -78,6 +76,7 @@ FIND_UNIQUE_PTR()
+ if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
+ message("-- set HAVE_STD_UNIQUE_PTR")
+ add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
++set(HAVE_STD_UNIQUE_PTR 1)
+ endif()
+ 
+ if (HAVE_PYTHON)
+@@ -91,15 +90,11 @@ find_package(PythonLibs 3 REQUIRED)
+ include_directories(${PYTHON_INCLUDE_DIRS})
+ endif ()
+ 
+-if( WIN32 OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+-add_subdirectory(UnitTest++)
+-endif()
+-
+ add_subdirectory(src)
+-add_subdirectory(examples)
+-if( WIN32)
+-add_subdirectory(test)
+-endif()
++target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
++target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_BINARY_DIR})
++
++configure_file(config.h.in config.h)
+ 
+ install(DIRECTORY ${CMAKE_SOURCE_DIR}/spec/ DESTINATION share/quickfix
+   FILES_MATCHING PATTERN "FIX*.xml")
+diff --git a/config.h.in b/config.h.in
+new file mode 100644
+index 00000000..ffaffb5f
+--- /dev/null
++++ b/config.h.in
+@@ -0,0 +1,15 @@
++#ifndef HAVE_STD_SHARED_PTR
++#cmakedefine HAVE_STD_SHARED_PTR
++#endif
++
++#ifndef HAVE_STD_TR1_SHARED_PTR
++#cmakedefine HAVE_STD_TR1_SHARED_PTR
++#endif
++
++#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
++#cmakedefine HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
++#endif
++
++#ifndef HAVE_STD_UNIQUE_PTR
++#cmakedefine HAVE_STD_UNIQUE_PTR
++#endif
+-- 
+2.25.0
+

@@ -1,0 +1,22 @@
+--- crnlib/crn_miniz.cpp
++++ crnlib/crn_miniz.cpp
+@@ -1892,7 +1892,7 @@
+   *pLen_out = out_buf.m_size-41;
+   {
+     mz_uint8 pnghdr[41]={0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a,0x00,0x00,0x00,0x0d,0x49,0x48,0x44,0x52,
+-      0,0,(mz_uint8)(w>>8),(mz_uint8)w,0,0,(mz_uint8)(h>>8),(mz_uint8)h,8,"\0\0\04\02\06"[num_chans],0,0,0,0,0,0,0,
++      0,0,(mz_uint8)(w>>8),(mz_uint8)w,0,0,(mz_uint8)(h>>8),(mz_uint8)h,8,(mz_uint8)"\0\0\04\02\06"[num_chans],0,0,0,0,0,0,0,
+       (mz_uint8)(*pLen_out>>24),(mz_uint8)(*pLen_out>>16),(mz_uint8)(*pLen_out>>8),(mz_uint8)*pLen_out,0x49,0x44,0x41,0x54};
+     c=(mz_uint32)mz_crc32(MZ_CRC32_INIT,pnghdr+12,17); for (i=0; i<4; ++i, c<<=8) ((mz_uint8*)(pnghdr+29))[i]=(mz_uint8)(c>>24);
+     memcpy(out_buf.m_pBuf, pnghdr, 41);
+--- crnlib/crn_stb_image.cpp
++++ crnlib/crn_stb_image.cpp
+@@ -3776,7 +3776,7 @@
+          if (c1 != 2 || c2 != 2 || (len & 0x80)) {
+             // not run-length encoded, so we have to actually use THIS data as a decoded
+             // pixel (note this can't be a valid pixel--one of RGB must be >= 128)
+-            stbi_uc rgbe[4] = { c1,c2,len, get8(s) };
++            stbi_uc rgbe[4] = { (stbi_uc)c1, (stbi_uc)c2, (stbi_uc)len, (stbi_uc)get8(s) };
+             hdr_convert(hdr_data, rgbe, req_comp);
+             i = 1;
+             j = 0;

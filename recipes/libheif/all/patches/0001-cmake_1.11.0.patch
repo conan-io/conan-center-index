@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fabf381..6379d09 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -38,8 +38,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-
+ # Create the compile command database for clang by default
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+@@ -165,4 +163,3 @@ if(WITH_EXAMPLES)
+     add_subdirectory (examples)
+ endif()
+ add_subdirectory (libheif)
+-add_subdirectory (gdk-pixbuf)

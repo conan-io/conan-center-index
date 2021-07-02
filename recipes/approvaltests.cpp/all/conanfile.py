@@ -1,5 +1,7 @@
 import os
+
 from conans import ConanFile, tools
+from conans.tools import Version, ConanInvalidConfiguration
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -12,28 +14,44 @@ class ApprovalTestsCppConan(ConanFile):
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
     options = {
+        "with_boosttest": [True, False],
         "with_catch2": [True, False],
         "with_gtest": [True, False],
-        "with_doctest": [True, False]
+        "with_doctest": [True, False],
+        "with_cpputest": [True, False],
     }
     default_options = {
+        "with_boosttest": False,
         "with_catch2": False,
         "with_gtest": False,
-        "with_doctest": False
+        "with_doctest": False,
+        "with_cpputest": False,
     }
     no_copy_source = True
+    settings = "compiler"
+
+    def configure(self):
+        if not self._boost_test_supported():
+            del self.options.with_boosttest
+        if not self._cpputest_supported():
+            del self.options.with_cpputest
+        self._validate_compiler_settings()
 
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
 
     def requirements(self):
+        if self.options.get_safe("with_boosttest"):
+            self.requires("boost/1.72.0")
         if self.options.with_catch2:
             self.requires("catch2/2.11.0")
         if self.options.with_gtest:
             self.requires("gtest/1.10.0")
         if self.options.with_doctest:
             self.requires("doctest/2.3.6")
+        if self.options.get_safe("with_cpputest"):
+            self.requires("cpputest/4.0")
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
@@ -54,3 +72,22 @@ class ApprovalTestsCppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def _boost_test_supported(self):
+        return Version(self.version) >= "8.6.0"
+
+    def _cpputest_supported(self):
+        return Version(self.version) >= "10.4.0"
+
+    def _std_puttime_required(self):
+        return Version(self.version) >= "10.2.0"
+
+    def _validate_compiler_settings(self):
+        if self._std_puttime_required():
+            self._require_at_least_compiler_version("gcc", 5)
+
+    def _require_at_least_compiler_version(self, compiler, compiler_version):
+        if self.settings.compiler == compiler and tools.Version(self.settings.compiler.version) < compiler_version:
+            raise ConanInvalidConfiguration(
+                "{}/{} with compiler {} requires at least compiler version {}".
+                    format(self.name, self.version, compiler, compiler_version))

@@ -6,12 +6,13 @@ from conans import ConanFile, CMake, tools
 
 class FlatcConan(ConanFile):
     name = "flatc"
+    deprecated = "flatbuffers"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers/"
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser", "installer")
     description = "Memory Efficient Serialization Library"
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
     exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake"
 
@@ -22,11 +23,11 @@ class FlatcConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-            
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "flatbuffers-" + self.version
@@ -49,7 +50,7 @@ class FlatcConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        extension = ".exe" if self.settings.os_build == "Windows" else ""
+        extension = ".exe" if self.settings.os == "Windows" else ""
         bin_dir = os.path.join(self._build_subfolder, "bin")
         self.copy(pattern="flatc" + extension, dst="bin", src=bin_dir)
         self.copy(pattern="flathash" + extension, dst="bin", src=bin_dir)

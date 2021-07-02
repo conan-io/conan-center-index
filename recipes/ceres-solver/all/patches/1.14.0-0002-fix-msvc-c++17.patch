@@ -1,0 +1,36 @@
+Based on upstream commit 1e8e9452d0a7dfaf5697b544810798a58e35443e.
+Fixes conan-io/conan-center-index#2678
+
+From 1e8e9452d0a7dfaf5697b544810798a58e35443e Mon Sep 17 00:00:00 2001
+From: Norbert Wenzel <norbert.wenzel@gmail.com>
+Date: Tue, 22 May 2018 16:45:46 +0200
+Subject: [PATCH] Remove chunk shuffle in multithreaded SchurEliminator
+
+std::random_shuffle() is deprecated since C++14 and was removed in
+C++17. At least MSVC with C++17 fails to compile this code, I assume
+other compilers fail as well.
+
+In a Github discussion (#373) Sameer Agarwal states this line can
+likely be dropped and asks for a PR/CL.
+
+https://github.com/ceres-solver/ceres-solver/issues/373
+
+Change-Id: I78e04f36cba398769b8f90916edbdaf33884e7e1
+---
+ internal/ceres/schur_eliminator_impl.h | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/internal/ceres/schur_eliminator_impl.h b/internal/ceres/schur_eliminator_impl.h
+index 203dcc9ef..06d0983b9 100644
+--- a/internal/ceres/schur_eliminator_impl.h
++++ b/internal/ceres/schur_eliminator_impl.h
+@@ -154,9 +154,6 @@ void SchurEliminator<kRowBlockSize, kEBlockSize, kFBlockSize>::Init(
+   const Chunk& chunk = chunks_.back();
+ 
+   uneliminated_row_begins_ = chunk.start + chunk.size;
+-  if (num_threads_ > 1) {
+-    random_shuffle(chunks_.begin(), chunks_.end());
+-  }
+ 
+   buffer_.reset(new double[buffer_size_ * num_threads_]);
+ 

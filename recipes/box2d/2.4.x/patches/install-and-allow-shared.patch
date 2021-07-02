@@ -1,0 +1,37 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,3 +39,8 @@ if (BOX2D_BUILD_TESTBED)
+ 		set_property(TARGET testbed PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/testbed")
+ 	endif()
+ endif()
++
++install(
++  DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/box2d"
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -95,14 +95,22 @@ set(BOX2D_HEADER_FILES
+ 	../include/box2d/b2_world_callbacks.h
+ 	../include/box2d/box2d.h)
+ 
+-add_library(box2d STATIC ${BOX2D_SOURCE_FILES} ${BOX2D_HEADER_FILES})
++add_library(box2d ${BOX2D_SOURCE_FILES} ${BOX2D_HEADER_FILES})
+ target_include_directories(box2d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+ target_include_directories(box2d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+ set_target_properties(box2d PROPERTIES
++  WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+ 	CXX_STANDARD 11
+     CXX_STANDARD_REQUIRED YES
+     CXX_EXTENSIONS NO
+ )
+ 
++install(
++  TARGETS box2d
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++
+ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "src" FILES ${BOX2D_SOURCE_FILES})
+ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/../include" PREFIX "include" FILES ${BOX2D_HEADER_FILES})

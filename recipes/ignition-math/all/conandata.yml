@@ -1,0 +1,10 @@
+sources:
+  "6.7.0":
+    url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.7.0.zip"
+    sha256: "5427a17de6ef9f60ee497b9a170a4e92517de9496781dac91f50cdbeb3364b22"
+patches:
+  "6.7.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-Define-time_regex-locally.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-cmake-fixes.patch"

@@ -1,0 +1,27 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -26,8 +26,8 @@
+   MESSAGE("** for a debug build: cmake -DCMAKE_BUILD_TYPE=Debug ..")
+ ENDIF (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+ 
+-SET(CMAKE_C_FLAGS "-Wall")
+-IF (WIN32) 
++#SET(CMAKE_C_FLAGS "-Wall")
++IF (0)
+   SET(linkFlags "/PDB:NONE /INCREMENTAL:NO /OPT:NOREF /OPT:NOICF")
+   SET(CMAKE_EXE_LINKER_FLAGS    "${linkFlags}"
+       CACHE STRING "LZMA linker flags" FORCE)
+@@ -43,11 +43,11 @@
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4668 /wd4820 /wd4996 /wd4255 /wd4130 /wd4100 /wd4711")
+   SET(CMAKE_C_FLAGS_DEBUG "/D DEBUG /Od /Z7")
+   SET(CMAKE_C_FLAGS_RELEASE "/D NDEBUG /O2")
+-ELSE (WIN32)
++ELSEIF(0)
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ansi")
+   SET(CMAKE_C_FLAGS_DEBUG "-DDEBUG -g")
+   SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O2")
+-ENDIF (WIN32) 
++ENDIF ()
+ 
+ ADD_SUBDIRECTORY(src)
+ ADD_SUBDIRECTORY(elzma)

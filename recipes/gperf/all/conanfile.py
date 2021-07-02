@@ -8,9 +8,10 @@ class GperfConan(ConanFile):
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
     topics = ("conan", "gperf", "hash-generator", "hash")
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler"
     _source_subfolder = "source_subfolder"
     _autotools = None
+    exports_sources = "patches/**"
 
     @property
     def _is_msvc(self):
@@ -18,10 +19,10 @@ class GperfConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os_build == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
+        return self.settings.os == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
 
     def build_requirements(self):
-        if self.settings.os_build == "Windows" and tools.os_info.is_windows:
+        if self.settings.os == "Windows" and tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
@@ -47,8 +48,9 @@ class GperfConan(ConanFile):
                             "STRIP=:",
                             "AR={}/build-aux/ar-lib lib".format(cwd),
                             "RANLIB=:"])
-            elif self.settings.compiler == "gcc" and self.settings.os_build == "Windows":
-                args.append("LDFLAGS=-static -static-libgcc")
+            elif self.settings.compiler == "gcc" and self.settings.os == "Windows":
+                self._autotools.link_flags.extend(["-static", "-static-libgcc"])
+
             self._autotools.configure(args=args)
         return self._autotools
 

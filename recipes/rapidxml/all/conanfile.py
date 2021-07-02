@@ -21,7 +21,10 @@ class RapiXMLConan(ConanFile):
 
     def package(self):
         self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", dst="include", src=self._source_subfolder)
+        self.copy(pattern="*.hpp", dst=os.path.join("include", "rapidxml"), src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.includedirs.append(os.path.join("include", "rapidxml"))

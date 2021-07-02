@@ -1,0 +1,7 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -6,1 +6,3 @@
+-set(datadir ${CMAKE_INSTALL_PREFIX}/share)
++if(NOT datadir)
++  set(datadir ${CMAKE_INSTALL_PREFIX}/share)
++endif()

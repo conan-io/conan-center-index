@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from fnmatch import fnmatch
 import os
 
+required_conan_version = ">=1.28.0"
+
 
 class TlExpectedConan(ConanFile):
     name = "tl-expected"
@@ -11,11 +13,10 @@ class TlExpectedConan(ConanFile):
     topics = ("cpp11", "cpp14", "cpp17", "expected")
     license = "CC0-1.0"
     no_copy_source = True
-    _source_subfolder = "tl-expected"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self._archive_dir, self._source_subfolder)
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _archive_dir(self):
@@ -27,6 +28,10 @@ class TlExpectedConan(ConanFile):
         ]
         return expected_dirs[0].name
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self._archive_dir, self._source_subfolder)
+
     def package(self):
         self.copy("*",
                   src=os.path.join(self._source_subfolder, "include"),
@@ -35,3 +40,10 @@ class TlExpectedConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "tl-expected"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "tl-expected"
+        self.cpp_info.names["cmake_find_package"] = "tl"
+        self.cpp_info.names["cmake_find_package_multi"] = "tl"
+        self.cpp_info.components["expected"].name = "expected"

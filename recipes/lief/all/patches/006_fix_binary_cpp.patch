@@ -1,0 +1,10 @@
+--- src/ELF/Binary.cpp
++++ src/ELF/Binary.cpp
+@@ -18,6 +18,7 @@
+ #include <numeric>
+ #include <sstream>
+ #include <map>
++#include <cctype>
+
+ #include "LIEF/DWARF/enums.hpp"
+

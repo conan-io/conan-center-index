@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ed51adc..b9427b8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -60,8 +63,6 @@ if(BUILD_PACKAGES)
+ 
+ endif(BUILD_PACKAGES)
+ 
+-find_package(Boost 1.56.0 REQUIRED)
+-include_directories(${Boost_INCLUDE_DIR})
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2)
+ include_directories ("${PROJECT_SOURCE_DIR}/src")
+ 

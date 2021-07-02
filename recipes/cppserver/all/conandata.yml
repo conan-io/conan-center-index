@@ -1,0 +1,12 @@
+sources:
+  "1.0.0.0":
+    url: "https://github.com/chronoxor/CppServer/archive/1.0.0.0.tar.gz"
+    sha256: "dc70fb24231ac4c06e813a0489ff911dd5c48f844b75856b1e753ac8dbd64772"
+patches:
+  "1.0.0.0":
+    - patch_file: "patches/00001-cmake-clean-up.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00002-define-win32-winnt.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00003-remove-asio-defines.patch"
+      base_path: "source_subfolder"

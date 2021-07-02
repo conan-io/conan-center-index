@@ -1,0 +1,11 @@
+versions:
+  "2.38.0":
+    folder: all
+  "2.39.1":
+    folder: all
+  "2.40.0":
+    folder: all
+  "2.40.1":
+    folder: all
+  "2.40.2":
+    folder: all

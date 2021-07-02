@@ -2,3 +2,24 @@ sources:
   "20200130":
     sha256: 5f327b56d932ed5c1a28b7b1b1f528ddfbf69cb45bc4a8d38301ab85116e4b0e
     url: https://github.com/mjansson/mdns/archive/0f75def961433102dc4848564c1a865f473dfaed.zip
+  "20200331":
+    sha256: 98861150179942cd6975b207048939a491ab4bb6c7291a3a34dedc80082b3ba9
+    url: https://github.com/mjansson/mdns/archive/4f7f7942bd10eb3d67af48b5233cb84283d9639c.zip
+  "20200424":
+    sha256: 505aac658feb45bea65b2ab00a6abf1b14c2aaaa971456d6e3ba58b75a543d47
+    url: https://github.com/mjansson/mdns/archive/0b9a4de6c5132679364e47c0f9a7a37af9d2ce47.zip
+  "1.0":
+    sha256: e06ed954b4705f0e48f3e6bd44b75c115ee03f745c62394ee615f466e44e9373
+    url: https://github.com/mjansson/mdns/archive/1.0.tar.gz
+  "1.1":
+    sha256: a0d170bc88151235b9f2dea10a9ffd1d538e4ce3b098426893fd45890efcbffb
+    url: https://github.com/mjansson/mdns/archive/1.1.tar.gz
+  "1.2":
+    sha256: 1919f8fd01b2b7e1128e51d51e4bd9e48fd4f2ef4ade88c152970a35d2084bae
+    url: https://github.com/mjansson/mdns/archive/1.2.tar.gz
+  "1.3":
+    url: "https://github.com/mjansson/mdns/archive/1.3.tar.gz"
+    sha256: "d3bfd684ef07beadca71c426586be88a10a92026fe6fe5355609d9e805ff5f85"
+  "1.4":
+    url: "https://github.com/mjansson/mdns/archive/1.4.tar.gz"
+    sha256: "413af72a6ce655dc96d35584dd0134f4ba87534ff78471b5b578e175b9f58dd5"

@@ -1,0 +1,15 @@
+diff --git a/folly/Benchmark.cpp b/folly/Benchmark.cpp
+index 389ee46a1..390b7674b 100644
+--- a/folly/Benchmark.cpp
++++ b/folly/Benchmark.cpp
+@@ -16,6 +16,10 @@
+ 
+ // @author Andrei Alexandrescu (andrei.alexandrescu@fb.com)
+ 
++#ifndef __STDC_FORMAT_MACROS
++#define __STDC_FORMAT_MACROS 1
++#endif
++
+ #include <folly/Benchmark.h>
+ 
+ #include <algorithm>

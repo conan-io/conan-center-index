@@ -1,0 +1,10 @@
+--- src/PE/ResourcesManager.cpp
++++ src/PE/ResourcesManager.cpp
+@@ -1174,7 +1174,6 @@
+
+ std::string ResourcesManager::print(uint32_t depth) const {
+   std::ostringstream oss;
+-  oss << rang::control::forceColor;
+   uint32_t current_depth = 0;
+   this->print_tree(*this->resources_, oss, current_depth, depth);
+   return oss.str();

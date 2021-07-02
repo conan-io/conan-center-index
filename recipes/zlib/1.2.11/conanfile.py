@@ -1,6 +1,5 @@
 import os
-import stat
-from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, CMake
 from conans.errors import ConanException
 
 
@@ -13,11 +12,19 @@ class ZlibConan(ConanFile):
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "minizip": False}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]
+    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False, "deprecated"]}
+    default_options = {"shared": False, "fPIC": True, "minizip": "deprecated"}
+    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
+    topics = ("conan", "zlib", "compression")
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -27,90 +34,46 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def source(self):
-
-        try:
-            tools.get(**self.conan_data["sources"][self.version])
-        except ConanException:
-            tools.get(**self.conan_data["sources"]["{}_mirror".format(self.version)])
-
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-        if not tools.os_info.is_windows:
-            configure_file = os.path.join(self._source_subfolder, "configure")
-            st = os.stat(configure_file)
-            os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
-        tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
-
-    def build(self):
-        self._build_zlib()
-        if self.options.minizip:
-            self._build_minizip()
-
-    @property
-    def _use_autotools(self):
-        return self.settings.os == "Linux" or tools.is_apple_os(self.settings.os)
-
-    def _build_zlib_autotools(self):
-        env_build = AutoToolsBuildEnvironment(self)
-
-        # configure passes CFLAGS to linker, should be LDFLAGS
-        tools.replace_in_file("../configure", "$LDSHARED $SFLAGS", "$LDSHARED $LDFLAGS")
-        # same thing in Makefile.in, when building tests/example executables
-        tools.replace_in_file("../Makefile.in", "$(CC) $(CFLAGS) -o", "$(CC) $(LDFLAGS) -o")
-
-        # we need to build only libraries without test example and minigzip
         if self.options.shared:
-            make_target = "libz.%s.dylib" % self.version \
-                if tools.is_apple_os(self.settings.os) else "libz.so.%s" % self.version
-        else:
-            make_target = "libz.a"
+            del self.options.fPIC
 
-        env = {"CC": "clang", "CXX": "clang++"} if "clang" in str(self.settings.compiler) else {}
-        with tools.environment_append(env):
-            env_build.configure("../", build=False, host=False, target=False)
-            env_build.make(target=make_target)
+        if self.options.minizip != "deprecated":
+            self.output.warn("minizip option is deprecated. Please use the new minizip/1.2.11 package")
 
-    def _build_zlib_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_dir=".")
-        # we need to build only libraries without test example/example64 and minigzip/minigzip64
-        make_target = "zlib" if self.options.shared else "zlibstatic"
+    def package_id(self):
+        del self.info.options.minizip
 
-        cmake.build(build_dir=".", target=make_target)
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    def _build_zlib(self):
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268 
+            # https://github.com/madler/zlib/issues/268
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
-            if self.settings.os == "iOS":
-                tools.replace_in_file("gzguts.h", '#ifdef _LARGEFILE64_SOURCE',
-                                      '#include <unistd.h>\n\n#ifdef _LARGEFILE64_SOURCE')
-            for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_UNISTD_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_STDARG_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
-            tools.mkdir("_build")
-            with tools.chdir("_build"):
-                if self._use_autotools:
-                    self._build_zlib_autotools()
-                else:
-                    self._build_zlib_cmake()
 
-    def _build_minizip(self):
-        minizip_dir = os.path.join(self._source_subfolder, 'contrib', 'minizip')
-        os.rename("CMakeLists_minizip.txt", os.path.join(minizip_dir, 'CMakeLists.txt'))
-        with tools.chdir(minizip_dir):
-            cmake = CMake(self)
-            cmake.configure(source_folder=minizip_dir)
-            cmake.build()
-            cmake.install()
+            is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
+            if not is_apple_clang12:
+                for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_UNISTD_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_STDARG_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
+
+    def build(self):
+        self._patch_sources()
+        make_target = "zlib" if self.options.shared else "zlibstatic"
+        cmake = CMake(self)
+        cmake.configure(build_folder=self._build_subfolder)
+        cmake.build(target=make_target)
 
     def _rename_libraries(self):
         if self.settings.os == "Windows":
@@ -118,50 +81,49 @@ class ZlibConan(ConanFile):
             suffix = "d" if self.settings.build_type == "Debug" else ""
 
             if self.options.shared:
-                if self.settings.compiler == "Visual Studio":
+                if self.settings.compiler == "Visual Studio" and suffix:
                     current_lib = os.path.join(lib_path, "zlib%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
                 if self.settings.compiler == "Visual Studio":
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
-                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler == "gcc":
-                    current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                    os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                    if self.settings.os != "Windows" or not self.settings.os.subsystem:
+                        current_lib = os.path.join(lib_path, "libzlibstatic.a")
+                        tools.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                elif self.settings.compiler == "clang":
+                    current_lib = os.path.join(lib_path, "zlibstatic.lib")
+                    tools.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
 
-    def package(self):
-        # Extract the License/s from the header to a file
+    def _extract_license(self):
         with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
             tmp = tools.load("zlib.h")
             license_contents = tmp[2:tmp.find("*/", 1)]
             tools.save("LICENSE", license_contents)
 
-        # Copy the license files
+    def package(self):
+        self._extract_license()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
         # Copy headers
         for header in ["*zlib.h", "*zconf.h"]:
             self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src="_build", keep_path=False)
+            self.copy(pattern=header, dst="include", src=self._build_subfolder, keep_path=False)
 
         # Copying static and dynamic libs
-        build_dir = os.path.join(self._source_subfolder, "_build")
         if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.dylib*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=self._build_subfolder, keep_path=False, symlinks=True)
+            self.copy(pattern="*.dll", dst="bin", src=self._build_subfolder, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=self._build_subfolder, keep_path=False)
         else:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=self._build_subfolder, keep_path=False)
 
         self._rename_libraries()
 
     def package_info(self):
-        if self.options.minizip:
-            self.cpp_info.libs.append('minizip')
-            if self.options.shared:
-                self.cpp_info.defines.append('MINIZIP_DLL')
-        self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
+        self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"

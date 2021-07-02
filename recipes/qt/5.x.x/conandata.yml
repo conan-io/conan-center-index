@@ -1,0 +1,18 @@
+sources:
+  "5.15.2":
+    url:
+      - "https://download.qt.io/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
+    sha256: "3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240"
+patches:
+  "5.15.2":
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qt5/qtwebengine"
+    - patch_file: "patches/fix-macdeployqt.diff"
+      base_path: "qt5/qttools"
+    - patch_file: "patches/QTBUG-88625.diff"
+      base_path: "qt5/qtwebengine"

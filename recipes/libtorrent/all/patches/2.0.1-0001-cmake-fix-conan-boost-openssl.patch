@@ -1,0 +1,30 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -510,7 +510,7 @@
+ if(static_runtime)
+ 	include(ucm_flags)
+ 	ucm_set_runtime(STATIC)
+-	set(Boost_USE_MULTITHREADED ON)
+-	set(Boost_USE_STATIC_RUNTIME ON)
++	# set(Boost_USE_MULTITHREADED ON)
++	# set(Boost_USE_STATIC_RUNTIME ON)
+ 	set(OPENSSL_MSVC_STATIC_RT ON)
+ endif()
+@@ -660,7 +660,7 @@
+ 		if(WIN32 AND OPENSSL_USE_STATIC_LIBS)
+ 			target_link_libraries(torrent-rasterbar PRIVATE crypt32)
+ 		endif()
+-		target_link_libraries(torrent-rasterbar PUBLIC OpenSSL::SSL)
++		target_link_libraries(torrent-rasterbar PUBLIC OpenSSL::SSL ${CONAN_SYSTEM_LIBS_OPENSSL})
+ 		target_compile_definitions(torrent-rasterbar
+ 			PUBLIC
+ 				TORRENT_USE_OPENSSL
+@@ -696,7 +696,7 @@
+ 
+ if (NOT GNUTLS_FOUND AND NOT TARGET OpenSSL::SSL)
+ 	if(TARGET OpenSSL::Crypto)
+-		target_link_libraries(torrent-rasterbar PUBLIC OpenSSL::Crypto)
++		target_link_libraries(torrent-rasterbar PUBLIC OpenSSL::Crypto ${CONAN_SYSTEM_LIBS_OPENSSL})
+ 		target_compile_definitions(torrent-rasterbar PUBLIC TORRENT_USE_LIBCRYPTO)
+ 	else()
+ 		find_public_dependency(LibGcrypt)

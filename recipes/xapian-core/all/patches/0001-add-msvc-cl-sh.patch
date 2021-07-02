@@ -1,0 +1,99 @@
+new file mode 100755
+--- /dev/null
++++ msvc_cl.sh
+@@ -0,0 +1,95 @@
++#!/bin/sh
++clopts=()
++ldopts=()
++sources=0
++link=0
++while test $# -gt 0; do
++    case "$1" in
++        -lm | -pthread | -lpthread | -std=c++98)
++            # ignore
++            ;;
++        -Xlinker)
++            shift
++            ;;
++        -W* | -w* | -pedantic)
++            # ignore warnings
++            ;;
++        -D*)
++            clopts+=("$1")
++            ;;
++        -I*)
++            clopts+=("$1")
++            ;;
++        -l*)
++            ldopts+=("`echo "$1.lib" | sed "s/^-l//"`")
++            ;;
++        -LIBPATH*)
++            ldopts+=("$1")
++            ;;
++        -L*)
++            ldopts+=("`echo "$1" | sed "s/^-L/-LIBPATH:/"`")
++            ;;
++        *.obj | *.o)
++            link=1
++            ldopts+=("$1")
++            ;;
++        -Wl,*)
++            for linkarg in `echo '$1' | sed -e 's/-Wl,//' -e 's/,/ /'`; do
++                ldopts+=("${linkarg}")
++            done
++            ;;
++        *.lib)
++            ldopts+=("$1")
++            ;;
++        -o)
++            shift
++            case "$1" in
++               *.dll)
++                   link=1
++                   oname=$(echo "$1" | sed s/^lib//g)
++                   ldopts+=("-out:$oname")
++                   ;;
++               *.dll | *.exe)
++                   link=1
++                   ldopts+=("-out:$1")
++                   ;;
++               *.o | *.obj)
++                   link=0
++                   clopts+=("-Fo$1")
++                   ;;
++            esac
++            ;;
++        -implib* | -IMPLIB*)
++            ldopts+=("$1")
++            ;;
++        -c | *.c | *.C | *.cxx | *.cpp | *.cc | *.CC)
++            sources=1
++            clopts+=("$1")
++            ;;
++        *)
++            clopts+=("$1")
++            ;;
++    esac
++    shift
++done
++
++args="${clopts[@]}"
++if test $link = 1; then
++  if test $sources = 0; then
++    args="${ldopts[@]}"
++cat <<-EOF
++    Creating program/library
++    ** ld options:   "$args"
++EOF
++    LINK= exec link -nologo $args
++  else
++    args="$args -link ${ldopts[@]}"
++  fi
++fi
++
++cat <<-EOF
++    Compiling source
++    ** cl options:   "$args"
++EOF
++
++LINK= exec cl -nologo $args

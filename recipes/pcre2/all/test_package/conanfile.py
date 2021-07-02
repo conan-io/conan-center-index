@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -8,12 +8,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if self.settings.os == "Windows" and not self.options['pcre2'].shared:
-            cmake.definitions['PCRE2_STATIC'] = True
         cmake.configure()
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_package")
-        arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
-        self.run("%s %s" % (bin_path, arguments), run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
+            self.run("%s %s" % (bin_path, arguments), run_environment=True)

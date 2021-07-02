@@ -1,0 +1,9 @@
+sources:
+  "6.10":
+    url: "http://www.colm.net/files/ragel/ragel-6.10.tar.gz"
+    sha256: "5f156edb65d20b856d638dd9ee2dfb43285914d9aa2b6ec779dac0270cd56c3f"
+  
+patches:
+  "6.10":
+    - patch_file: "patches/0001-unistd.patch"
+      base_path: "source_subfolder"

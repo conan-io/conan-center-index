@@ -1,0 +1,96 @@
+--- a/octomap/src/CMakeLists.txt
++++ b/octomap/src/CMakeLists.txt
+@@ -11,26 +11,34 @@ SET (octomap_SRCS
+   )
+ 
+ # dynamic and static libs, see CMake FAQ:
++if(BUILD_SHARED_LIBS)
++set(OCTOMAP_TARGET "octomap")
+ ADD_LIBRARY( octomap SHARED ${octomap_SRCS})
+ set_target_properties( octomap PROPERTIES
+   VERSION ${OCTOMAP_VERSION}
+   SOVERSION ${OCTOMAP_SOVERSION}
+ )
++else()
++set(OCTOMAP_TARGET "octomap-static")
+ ADD_LIBRARY( octomap-static STATIC ${octomap_SRCS})
+ SET_TARGET_PROPERTIES(octomap-static PROPERTIES OUTPUT_NAME "octomap") 
+ add_dependencies(octomap-static octomath-static)
++endif()
+ 
++if(BUILD_SHARED_LIBS)
+ TARGET_LINK_LIBRARIES(octomap octomath)
++endif()
+ 
+ if(NOT EXISTS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
+   file(MAKE_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
+ endif()
+ 
+-export(TARGETS octomap octomap-static
++export(TARGETS ${OCTOMAP_TARGET}
+   APPEND FILE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap/octomap-targets.cmake")
+ 
+ ADD_SUBDIRECTORY( testing )
+ 
++if(FALSE)
+ ADD_EXECUTABLE(graph2tree graph2tree.cpp)
+ TARGET_LINK_LIBRARIES(graph2tree octomap)
+ 
+@@ -66,14 +74,16 @@ TARGET_LINK_LIBRARIES(intersection_example octomap)
+ 
+ ADD_EXECUTABLE(octree2pointcloud octree2pointcloud.cpp)
+ TARGET_LINK_LIBRARIES(octree2pointcloud octomap)
++endif()
+ 
+-install(TARGETS octomap octomap-static
++install(TARGETS ${OCTOMAP_TARGET}
+   EXPORT octomap-targets
+   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+   ${INSTALL_TARGETS_DEFAULT_ARGS}
+ )
+ install(EXPORT octomap-targets DESTINATION "${CMAKE_INSTALL_DATADIR}/octomap")
+ 
++if(FALSE)
+ install(TARGETS
+ 	graph2tree
+ 	log2graph
+@@ -85,4 +95,5 @@ install(TARGETS
+ 	compare_octrees
+ 	${INSTALL_TARGETS_DEFAULT_ARGS}
+ )
++endif()
+ 
+--- a/octomap/src/math/CMakeLists.txt
++++ b/octomap/src/math/CMakeLists.txt
+@@ -5,12 +5,16 @@ SET (octomath_SRCS
+  )
+ 
+ 
++if(BUILD_SHARED_LIBS)
++set(OCTOMATH_TARGET "octomath")
+ ADD_LIBRARY( octomath SHARED ${octomath_SRCS})
+ 
+ SET_TARGET_PROPERTIES( octomath PROPERTIES
+   VERSION ${OCTOMAP_VERSION}
+   SOVERSION ${OCTOMAP_SOVERSION}
+ )
++else()
++set(OCTOMATH_TARGET "octomath-static")
+ 
+ ADD_LIBRARY( octomath-static STATIC ${octomath_SRCS})
+ SET_TARGET_PROPERTIES(octomath-static PROPERTIES OUTPUT_NAME "octomath")
+@@ -18,11 +22,12 @@ SET_TARGET_PROPERTIES(octomath-static PROPERTIES OUTPUT_NAME "octomath")
+ if(NOT EXISTS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
+   file(MAKE_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap")
+ endif()
++endif()
+ 
+-export(TARGETS octomath octomath-static
++export(TARGETS ${OCTOMATH_TARGET}
+   APPEND FILE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cmake/octomap/octomap-targets.cmake")
+ 
+-install(TARGETS octomath octomath-static
++install(TARGETS ${OCTOMATH_TARGET}
+   EXPORT octomap-targets
+   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+   ${INSTALL_TARGETS_DEFAULT_ARGS}

@@ -1,0 +1,21 @@
+The change present here is handled upstream by this CMake module:
+
+https://github.com/chronoxor/CppCMakeScripts/blob/1.0.0.0/SetPlatformFeatures.cmake
+
+Even if it sets _WIN32_WINNT to _WIN32_WINNT_WIN10, here a less strict definiton is chosen (_WIN32_WINNT_VISTA).
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 94135f07..40dcab45 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,6 +75,10 @@ target_compile_features(cppserver PUBLIC cxx_std_17)
+ list(APPEND INSTALL_TARGETS cppserver)
+ list(APPEND LINKLIBS cppserver)
+ 
++if(WIN32 AND NOT MSVC)
++    target_compile_definitions(cppserver PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_VISTA)
++endif()
++
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPSERVER_MODULE)
+ 

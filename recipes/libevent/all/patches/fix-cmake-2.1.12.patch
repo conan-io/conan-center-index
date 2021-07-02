@@ -1,0 +1,41 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -970,16 +970,15 @@ endif()
+ # library exists for historical reasons; it contains the contents of
+ # both libevent_core and libevent_extra. You shouldn’t use it; it may
+ # go away in a future version of Libevent.
+-add_event_library(event SOURCES ${SRC_CORE} ${SRC_EXTRA})
+ 
+ set(WIN32_GETOPT)
+ if (WIN32)
+     set(_TMPLIBS)
+     if (${EVENT_LIBRARY_STATIC})
+-        list(APPEND _TMPLIBS event_core_static event_static)
++        list(APPEND _TMPLIBS event_core_static)
+     endif()
+     if (${EVENT_LIBRARY_SHARED})
+-        list(APPEND _TMPLIBS event_core_shared event_shared)
++        list(APPEND _TMPLIBS event_core_shared)
+     endif()
+     foreach(lib ${_TMPLIBS})
+         target_link_libraries(${lib} iphlpapi)
+--- a/cmake/AddEventLibrary.cmake
++++ b/cmake/AddEventLibrary.cmake
+@@ -42,7 +42,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+         install(TARGETS "${LIB_NAME}_${TYPE}"
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT lib
+             COMPONENT dev
+         )
+     else()
+@@ -69,7 +69,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+             EXPORT LibeventTargets-${TYPE}
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT lib
+             COMPONENT dev
+         )
+     endif()

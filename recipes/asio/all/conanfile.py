@@ -10,9 +10,11 @@ class Asio(ConanFile):
     topics = ("conan", "asio", "network", "io", "low-level")
     settings = "os"
     license = "BSL-1.0"
-
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -29,8 +31,8 @@ class Asio(ConanFile):
 
     def package_info(self):
         self.cpp_info.defines.append('ASIO_STANDALONE')
-        if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.libs.append('pthread')
+        if str(self.settings.os) in ["Linux"]:
+            self.cpp_info.system_libs.append('pthread')
 
     def package_id(self):
         self.info.header_only()

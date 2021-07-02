@@ -1,4 +1,7 @@
 sources:
+  "1.2.5":
+    url: "https://github.com/likle/cwalk/archive/v1.2.5.tar.gz"
+    sha256: "55a24deb602a7bee822e48bda50e454d102649a8cb064300a6dabc8f0405646f"
   "1.2.2":
     url: "https://github.com/likle/cwalk/archive/v1.2.2.zip"
     sha256: "62094c2bb8882fd57fe7ea00fb196e6065b363e8ca57f9c693c19f4912747d88"

@@ -1,0 +1,10 @@
+versions:
+  "5.7.2.2":
+    folder: all
+  "5.7.2.3":
+    folder: all
+  "5.7.2.4":
+    folder: all
+  "5.7.2.5":
+    folder: all
+

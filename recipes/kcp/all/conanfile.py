@@ -1,12 +1,11 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
 class KcpConan(ConanFile):
     name = "kcp"
     description = "A Fast and Reliable ARQ Protocol"
-    topic = ("conan", "kcp", "ARQ", "TCP", "protocol")
+    topics = ("conan", "kcp", "ARQ", "TCP", "protocol")
     homepage = "https://github.com/skywind3000/kcp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"

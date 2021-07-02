@@ -1,0 +1,40 @@
+diff --git a/src/mfast/coder/encoder/encoder_presence_map.h b/src/mfast/coder/encoder/encoder_presence_map.h
+index aca12a2..2a63516 100644
+--- a/src/mfast/coder/encoder/encoder_presence_map.h
++++ b/src/mfast/coder/encoder/encoder_presence_map.h
+@@ -19,7 +19,7 @@
+ #ifndef ENCODER_PRESENCE_MAP_H_MQSBLA37
+ #define ENCODER_PRESENCE_MAP_H_MQSBLA37
+ 
+-#include <boost/detail/endian.hpp>
++#include <boost/predef/other/endian.h>
+ #include "fast_ostream.h"
+ 
+ 
+@@ -70,7 +70,7 @@ namespace mfast
+     nbytes_ = 0;
+     value_ = 0;
+ 
+-#ifdef BOOST_BIG_ENDIAN
++#if BOOST_ENDIAN_BIG_BYTE
+     mask_ =  0x80ULL << 56;
+ #else
+     mask_ =  0x80ULL;
+@@ -80,7 +80,7 @@ namespace mfast
+   inline void
+   encoder_presence_map::commit()
+   {
+-#ifdef BOOST_BIG_ENDIAN
++#if BOOST_ENDIAN_BIG_BYTE
+     const uint64_t stop_bit_mask = (0x8000000000000000ULL >> (nbytes_ * 8));
+ #else
+     const uint64_t stop_bit_mask = (0x80ULL << (nbytes_ * 8));
+@@ -94,7 +94,7 @@ namespace mfast
+   encoder_presence_map::set_next_bit(bool v)
+   {
+     if ( (mask_ & 0x0101010101010101ULL) != 0) {
+-#ifdef BOOST_BIG_ENDIAN
++#if BOOST_ENDIAN_BIG_BYTE
+       mask_ >>= 2;
+ #else
+       mask_ <<= 14;

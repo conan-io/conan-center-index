@@ -1,0 +1,9 @@
+*.cmake text eol=lf
+*.conf text eol=lf
+*.diff text eol=lf
+*.md text eol=lf
+*.patch text eol=lf
+*.py text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.am text eol=lf

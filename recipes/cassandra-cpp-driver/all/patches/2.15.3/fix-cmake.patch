@@ -1,0 +1,159 @@
+ CMakeLists.txt     |  4 ---
+ src/CMakeLists.txt | 84 ++++++++++++++++++++++++++++++++++++------------------
+ 2 files changed, 57 insertions(+), 31 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c6150948b..669eb086e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,3 @@
+-cmake_minimum_required(VERSION 2.8.12)
+-project(cassandra C CXX)
+-
+ set(CASS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ set(CASS_SRC_DIR "${CASS_ROOT_DIR}/src")
+ set(CASS_INCLUDE_DIR "${CASS_ROOT_DIR}/include")
+@@ -81,7 +78,6 @@ endif()
+ # Dependencies
+ #------------------------
+ 
+-include(Dependencies)
+ include(ClangFormat)
+ 
+ #------------------------
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 06b84b759..7e81b2a06 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,50 @@
+ include(CheckSymbolExists)
+ include(CheckCXXSourceCompiles)
+ 
++#------------------------
++# Windows libraries
++#------------------------
++
++if(WIN32)
++  # Assign additional library requirements for Windows
++  set(CASS_LIBS iphlpapi psapi wsock32 crypt32 ws2_32 userenv version)
++endif()
++
++#------------------------
++# Libuv
++#------------------------
++
++if(NOT WIN32)
++  set(CMAKE_THREAD_PREFER_PTHREAD 1)
++  set(THREADS_PREFER_PTHREAD_FLAG 1)
++endif()
++
++find_package(Threads REQUIRED)
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_THREAD_LIBS_INIT}")
++set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_THREAD_LIBS_INIT}")
++if(NOT WIN32 AND ${CMAKE_VERSION} VERSION_LESS "3.1.0")
++  # FindThreads in CMake versions < v3.1.0 do not have the THREADS_PREFER_PTHREAD_FLAG to prefer -pthread
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
++  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
++endif()
++
++#------------------------
++# Boost
++#------------------------
++
++if(CASS_USE_BOOST_ATOMIC)
++  # Ensure Boost auto linking is disabled (defaults to auto linking on Windows)
++  if(WIN32)
++    add_definitions(-DBOOST_ALL_NO_LIB)
++  endif()
++
++  # Determine if additional Boost definitions are required for driver/executables
++  if(NOT WIN32)
++    # Handle explicit initialization warning in atomic/details/casts
++    add_definitions(-Wno-missing-field-initializers)
++  endif()
++endif()
++
+ file(GLOB SOURCES *.cpp *.hpp)
+ 
+ if(APPLE)
+@@ -38,18 +82,14 @@ endif()
+ 
+ add_subdirectory(third_party/curl)
+ add_subdirectory(third_party/hdr_histogram)
+-add_subdirectory(third_party/http-parser)
+-add_subdirectory(third_party/minizip)
+ add_subdirectory(third_party/sparsehash)
+ 
+ list(APPEND INCLUDE_DIRS 
+-  third_party/curl
+-  third_party/hdr_histogram
+-  third_party/http-parser
+-  third_party/minizip
+-  third_party/mt19937_64
++  third_party/curl # FIXME: Use conan package
++  third_party/hdr_histogram # FIXME: Use conan package
++  third_party/mt19937_64 # FIXME: Use conan package
++  third_party/sparsehash/src) # FIXME: Use conan package
+   third_party/rapidjson/rapidjson
+-  third_party/sparsehash/src)
+ 
+ list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+@@ -69,12 +109,6 @@ if(WIN32)
+   endif()
+ endif()
+ 
+-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-undefined-var-template -Werror")
+-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # To many superfluous warnings generated with GCC when using -Wconversion (see: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=40752)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+-endif()
+-
+ #------------------------------
+ # Build configured header
+ #------------------------------
+@@ -130,11 +164,11 @@ if(CASS_BUILD_SHARED)
+   add_library(cassandra SHARED 
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck>
+-    $<TARGET_OBJECTS:hdr_histogram>
+-    $<TARGET_OBJECTS:http-parser>
+-    $<TARGET_OBJECTS:minizip>)
++    $<TARGET_OBJECTS:hdr_histogram>)
+   target_link_libraries(cassandra ${CASS_LIBS})
+-  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
++  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS})
++  
++  conan_target_link_libraries(cassandra)
+ 
+   set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
+   set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
+@@ -167,11 +201,12 @@ if(CASS_BUILD_STATIC)
+   add_library(cassandra_static STATIC
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck_static>
+-    $<TARGET_OBJECTS:hdr_histogram_static>
+-    $<TARGET_OBJECTS:http-parser_static>
+-    $<TARGET_OBJECTS:minizip_static>)
++    $<TARGET_OBJECTS:hdr_histogram_static>)
++
+   target_link_libraries(cassandra_static ${CASS_LIBS})
+-  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
++  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS})
++  
++  conan_target_link_libraries(cassandra_static)
+ 
+   set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
+   set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
+@@ -274,11 +309,6 @@ if(CASS_BUILD_SHARED)
+       endif()
+     endif()
+   endif()
+-  if(WIN32)
+-    install(FILES $<TARGET_PDB_FILE:cassandra>
+-      DESTINATION "${INSTALL_DLL_EXE_DIR}"
+-      OPTIONAL)
+-  endif()
+ endif()
+ 
+ if(CASS_BUILD_STATIC)

@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(PackageTest CXX)
-
-set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-set (CMAKE_CXX_EXTENSIONS OFF)
+cmake_minimum_required(VERSION 3.1)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(tests SimpleTests.cpp)
+find_package(ixwebsocket REQUIRED CONFIG)
 
-target_link_libraries(tests ${CONAN_LIBS})
-
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} ixwebsocket::ixwebsocket)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED ON)

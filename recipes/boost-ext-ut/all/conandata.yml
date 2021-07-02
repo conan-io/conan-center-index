@@ -1,0 +1,4 @@
+sources:
+  "1.1.8":
+    url: "https://github.com/boost-ext/ut/archive/v1.1.8.tar.gz"
+    sha256: "3cc426dcf38397637e889efd9567b06d55dd23fb4e65cc0381eb8103a411d104"

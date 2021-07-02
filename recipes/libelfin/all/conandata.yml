@@ -1,0 +1,11 @@
+sources:
+  "0.3":
+    url: "https://github.com/aclements/libelfin/archive/v0.3.tar.gz"
+    sha256: "c338942b967582922b3514b54b93175ca9051a9668db92dd8ef619824d443ac7"
+patches:
+  "0.3":
+    - patch_file: "patches/commit-9d0db16d0a0b3c4f8aaa60a3e4dab295df34b6b2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/const-fix.patch"
+      base_path: "source_subfolder"
+      # patch_source: https://github.com/aclements/libelfin/pull/54

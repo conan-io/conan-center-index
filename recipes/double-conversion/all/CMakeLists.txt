@@ -1,8 +1,11 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.4)
 project(cmake_wrapper)
 
-message(STATUS "Conan CMake Wrapper")
 include(conanbuildinfo.cmake)
 conan_basic_setup()
+
+if(BUILD_SHARED_LIBS AND MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 
 add_subdirectory("source_subfolder")

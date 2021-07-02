@@ -1,0 +1,4 @@
+sources:
+  "cci.3.2-20200130":
+    url: "https://github.com/godotengine/godot-cpp/archive/aba8766618c6aa40c6f7b40b513e8e47cfa807f4.zip"
+    sha256: "a6dba9cda3c36c669ffca2bb9dd4e372bcd1fbf23c74076505467247c15f0e77"

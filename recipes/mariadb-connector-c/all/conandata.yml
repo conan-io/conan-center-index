@@ -1,0 +1,30 @@
+sources:
+  "3.1.12":
+    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.12/mariadb-connector-c-3.1.12-src.tar.gz"
+    sha256: "2f5ae14708b4813e4ff6857d152c22e6fc0e551c9fa743c1ef81a68e3254fe63"
+  "3.1.11":
+    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.11/mariadb-connector-c-3.1.11-src.tar.gz"
+    sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
+patches:
+  "3.1.12":
+    - patch_file: "patches/0001-fix-install-and-static-or-shared.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-msvc-no-override-md-zi.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-include-order-windows-winsock2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-include-mysqld_error-header.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-cmake-connectorname.patch"
+      base_path: "source_subfolder"
+  "3.1.11":
+    - patch_file: "patches/0001-fix-install-and-static-or-shared.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-msvc-no-override-md-zi.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-include-order-windows-winsock2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-include-mysqld_error-header.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-cmake-connectorname.patch"
+      base_path: "source_subfolder"

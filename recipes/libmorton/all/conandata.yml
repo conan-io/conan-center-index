@@ -1,0 +1,14 @@
+sources:
+  "0.2.7":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.7.tar.gz"
+    sha256: "02bf640732750a5db638991b9f63049252f9656ef52a00d30d2a90df542b9ecf"
+  "0.2.6":
+    url: "https://github.com/Forceflow/libmorton/archive/v0.2.6.tar.gz"
+    sha256: "466e31af19b49399426a860107f7fe9336ee784e46e49070959b3ac300f0d90d"
+  "0.2.5":
+    url: "https://github.com/Forceflow/libmorton/archive/v0.2.5.tar.gz"
+    sha256: "744c64e598a753928b7b643347ab36d89ddc36e786453028238aa8f3515399f6"
+patches:
+  "0.2.5":
+    - patch_file: "patches/missing-includes.patch"
+      base_path: "source_subfolder"

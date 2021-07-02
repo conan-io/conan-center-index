@@ -10,7 +10,7 @@ class CppJwtConan(ConanFile):
     topics = ("jwt", "auth", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["patches/*"]
     license = "MIT"
     _cmake = None
@@ -64,7 +64,8 @@ class CppJwtConan(ConanFile):
 
     def package(self):
         tools.patch(**self.conan_data["patches"][self.version])
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE*", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))

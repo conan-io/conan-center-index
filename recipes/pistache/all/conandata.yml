@@ -1,0 +1,8 @@
+sources:
+  "cci.20201127":
+    url: https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz
+    sha256: f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae
+patches:
+  "cci.20201127":
+    - patch_file: "patches/0001-remove-fpic.patch"
+      base_path: "source_subfolder"

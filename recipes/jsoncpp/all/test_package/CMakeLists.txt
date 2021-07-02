@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-SET(CMAKE_CXX_STANDARD 11)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_CXX_EXTENSIONS OFF)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+
+find_package(jsoncpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if(JSONCPP_SHARED)
+    target_link_libraries(${PROJECT_NAME} jsoncpp_lib)
+else()
+    target_link_libraries(${PROJECT_NAME} jsoncpp_static)
+endif()
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

@@ -1,62 +1,5 @@
 from conans import ConanFile, tools
 import os
-from distutils.dir_util import copy_tree
-
-
-license = """================================================================================
-OpenGL Mathematics (GLM)
---------------------------------------------------------------------------------
-GLM is licensed under The Happy Bunny License and MIT License
-
-================================================================================
-The Happy Bunny License (Modified MIT License)
---------------------------------------------------------------------------------
-Copyright (c) 2005 - 2014 G-Truc Creation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-Restrictions:
- By making use of the Software for military purposes, you choose to make a
- Bunny unhappy.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-================================================================================
-The MIT License
---------------------------------------------------------------------------------
-Copyright (c) 2005 - 2014 G-Truc Creation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE."""
 
 
 class GlmConan(ConanFile):
@@ -68,27 +11,36 @@ class GlmConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
-    exports_sources = [
-        "CMakeLists.txt",
-        "patches/*.patch"
-    ]
-
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "glm-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-        if "patches" in self.conan_data:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
-    def package(self):
-        os.makedirs(os.path.join(self.package_folder, "licenses"))
-        tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license)
-        copy_tree(os.path.join(self.source_folder, self._source_subfolder, "glm"),
-                  os.path.join(self.package_folder, "include", "glm"))
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def package_id(self):
         self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def package(self):
+        if tools.Version(self._get_semver()) < "0.9.9" or \
+           (tools.Version(self._get_semver()) == "0.9.9" and self._get_tweak_number() < 6):
+            tools.save(os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
+        else:
+            self.copy("copying.txt", dst="licenses", src=self._source_subfolder)
+        headers_src_dir = os.path.join(self.source_folder, self._source_subfolder, "glm")
+        self.copy("*.hpp", dst=os.path.join("include", "glm"), src=headers_src_dir)
+        self.copy("*.inl", dst=os.path.join("include", "glm"), src=headers_src_dir)
+        self.copy("*.h", dst=os.path.join("include", "glm"), src=headers_src_dir)
+
+    def _get_semver(self):
+        return self.version.rsplit(".", 1)[0]
+
+    def _get_tweak_number(self):
+        return int(self.version.rsplit(".", 1)[-1])
+
+    def _get_license(self):
+        manual = tools.load(os.path.join(self.source_folder, self._source_subfolder, "manual.md"))
+        begin = manual.find("### The Happy Bunny License (Modified MIT License)")
+        end = manual.find("\n![](./doc/manual/frontpage2.png)", begin)
+        return manual[begin:end]

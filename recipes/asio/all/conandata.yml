@@ -1,4 +1,25 @@
 sources:
+  "1.18.2":
+    url: "https://github.com/chriskohlhoff/asio/archive/asio-1-18-2.tar.gz"
+    sha256: "8d67133b89e0f8b212e9f82fdcf1c7b21a978d453811e2cd941c680e72c2ca32"
+  "1.18.1":
+    url: "https://github.com/chriskohlhoff/asio/archive/asio-1-18-1.tar.gz"
+    sha256: "39c721b987b7a0d2fe2aee64310bd128cd8cc10f43481604d18cb2d8b342fd40"
+  "1.18.0":
+    sha256: 820688d1e0387ff55194ae20036cbae0fb3c7d11b7c3f46492369723c01df96f
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-18-0.tar.gz
+  "1.17.0":
+    sha256: 46406a830f8334b3789e7352ed7309a39c7c30b685b0499d289eda4fd4ae2067
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-17-0.tar.gz
+  "1.16.1":
+    sha256: e40bbd531530f08318b7c7d7e84e457176d8eae6f5ad2e3714dc27b9131ecd35
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-16-1.tar.gz
+  "1.16.0":
+    sha256: c87410ea62de6245aa239b9ed2057edf01d7f66acc3f5e50add9a29343c87512
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-16-0.tar.gz
+  "1.14.1":
+    sha256: 5b12ce2cdb658025e67785f954f74b052709cfc9b5941b8fb889c049b0955e1d
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-14-1.tar.gz
   "1.14.0":
     sha256: bdb01a649c24d73ca4a836662e7af442d935313ed6deef6b07f17f3bc5f78d7a
     url: https://github.com/chriskohlhoff/asio/archive/asio-1-14-0.tar.gz

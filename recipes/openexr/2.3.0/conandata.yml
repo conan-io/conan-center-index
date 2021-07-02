@@ -5,4 +5,4 @@ sources:
 patches:
   "2.3.0":
     - patch_file: "patches/IlmImf__ImfSystemSpecific.cpp.patch"
-      base_path: "source_subfolder/OpenEXR"
+      base_path: "source_subfolder"

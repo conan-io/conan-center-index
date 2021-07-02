@@ -1,0 +1,50 @@
+d61c3c6a ("ncurses 6.2 - patch 20200711", 2020-07-12)
+
+--- test/picsmap.c
++++ test/picsmap.c
+@@ -955,6 +955,20 @@ parse_rgb(char **data)
+     return result;
+ }
+
++#define LOWERCASE(c) ((isalpha(UChar(c)) && isupper(UChar(c))) ? tolower(UChar(c)) : (c))
++
++static int
++CaselessCmp(const char *a, const char *b)
++{				/* strcasecmp isn't portable */
++    while (*a && *b) {
++	int cmp = LOWERCASE(*a) - LOWERCASE(*b);
++	if (cmp != 0)
++	    break;
++	a++, b++;
++    }
++    return LOWERCASE(*a) - LOWERCASE(*b);
++}
++
+ static RGB_NAME *
+ lookup_rgb(const char *name)
+ {
+@@ -962,7 +976,7 @@ lookup_rgb(const char *name)
+     if (rgb_table != 0) {
+ 	int n;
+ 	for (n = 0; rgb_table[n].name != 0; ++n) {
+-	    if (!strcasecmp(name, rgb_table[n].name)) {
++	    if (!CaselessCmp(name, rgb_table[n].name)) {
+ 		result = &rgb_table[n];
+ 		break;
+ 	    }
+--- test/test.priv.h
++++ test/test.priv.h
+@@ -437,6 +437,13 @@ extern int optind;
+ #include <assert.h>
+ #include <ctype.h>
+
++#if defined(_MSC_VER)
++#undef popen
++#define popen(s,n) _popen(s,n)
++#undef pclose
++#define pclose(s) _pclose(s)
++#endif
++
+ #ifndef GCC_NORETURN
+ #define GCC_NORETURN		/* nothing */
+ #endif

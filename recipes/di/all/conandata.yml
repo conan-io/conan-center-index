@@ -1,0 +1,7 @@
+sources:
+  "1.1.0":
+    url: https://github.com/boost-ext/di/archive/v1.1.0.tar.gz
+    sha256: 2bb52ed621c36e4e301ed7fbe4197980e9110bd4afc4208841637ce112c0d443
+  "1.2.0":
+    url: https://github.com/boost-ext/di/archive/v1.2.0.tar.gz
+    sha256: 47ed660a1198f61394d30890cbb9a68b0fd6d17f41283e1de0036d10c1d24a55

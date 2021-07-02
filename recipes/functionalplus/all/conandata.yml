@@ -1,0 +1,7 @@
+sources:
+  "0.2.14-p0":
+    url: "https://github.com/Dobiasd/FunctionalPlus/archive/refs/tags/v0.2.14-p0.tar.gz"
+    sha256: "68a0e715aa18d2fe558fede06d65ec125959895efe4d0ef21b102037c9864ba1"
+  "0.2.13-p0":
+    url: "https://github.com/Dobiasd/FunctionalPlus/archive/v0.2.13-p0.tar.gz"
+    sha256: "62f61ce6500859f0d77306b1644b5c6992287688de38e170b17b8a66b2448b54"

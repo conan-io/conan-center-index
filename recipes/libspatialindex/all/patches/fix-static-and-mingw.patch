@@ -1,0 +1,92 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,6 @@ SET(SIDX_VERSION_MINOR "9")
+ SET(SIDX_VERSION_PATCH "3")
+ SET(SIDX_LIB_VERSION "6.1.1")
+ SET(SIDX_LIB_SOVERSION "6")
+-SET(BUILD_SHARED_LIBS ON)
+ 
+ 
+ set(SIDX_VERSION_STRING "${SIDX_VERSION_MAJOR}.${SIDX_VERSION_MINOR}.${SIDX_VERSION_PATCH}")
+@@ -52,6 +51,7 @@ set(SIDX_VERSION_STRING "${SIDX_VERSION_MAJOR}.${SIDX_VERSION_MINOR}.${SIDX_VERS
+ # libspatialindex general cmake options
+ #------------------------------------------------------------------------------
+ 
++option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+ option(SIDX_BUILD_TESTS "Enables integrated test suites" OFF)
+ 
+ 
+--- a/include/spatialindex/capi/sidx_export.h
++++ b/include/spatialindex/capi/sidx_export.h
+@@ -29,16 +29,21 @@
+ #pragma once
+ 
+ #ifndef SIDX_C_DLL
+-#if defined(_MSC_VER)
+-#  define SIDX_C_DLL     __declspec(dllexport)
+-#  define SIDX_DLL     __declspec(dllexport)
++#if (defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64) && !defined __GNUC__
++  #ifndef SIDX_STATIC
++    #ifdef SIDX_DLL_EXPORT
++      #define SIDX_C_DLL __declspec(dllexport)
++      #define SIDX_DLL __declspec(dllexport)
++    #else
++      #define SIDX_C_DLL __declspec(dllimport)
++      #define SIDX_DLL __declspec(dllimport)
++    #endif
++  #else
++    #define SIDX_C_DLL
++    #define SIDX_DLL
++  #endif
+ #else
+-#  if defined(USE_GCC_VISIBILITY_FLAG)
+-#    define SIDX_C_DLL     __attribute__ ((visibility("default")))
+-#    define SIDX_DLL     __attribute__ ((visibility("default")))
+-#  else
+-#    define SIDX_C_DLL
+-#    define SIDX_DLL
+-#  endif
++  #define SIDX_C_DLL
++  #define SIDX_DLL
+ #endif
+ #endif
+--- a/include/spatialindex/tools/Tools.h
++++ b/include/spatialindex/tools/Tools.h
+@@ -43,10 +43,14 @@
+ #endif
+ 
+ #if (defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64) && !defined __GNUC__
+-  #ifdef SIDX_DLL_EXPORT
+-    #define SIDX_DLL __declspec(dllexport)
++  #ifndef SIDX_STATIC
++    #ifdef SIDX_DLL_EXPORT
++      #define SIDX_DLL __declspec(dllexport)
++    #else
++      #define SIDX_DLL __declspec(dllimport)
++    #endif
+   #else
+-    #define SIDX_DLL __declspec(dllimport)
++    #define SIDX_DLL
+   #endif
+ 
+   // Nuke this annoying warning.  See http://www.unknownroad.com/rtfm/VisualStudio/warningC4251.html
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -204,12 +204,16 @@ set_target_properties(${SIDX_C_LIB_NAME}
+     PROPERTIES VERSION "${SIDX_LIB_VERSION}"
+                SOVERSION "${SIDX_LIB_SOVERSION}" )
+ 
+-if(WIN32)
++if(MSVC)
+     target_compile_options(${SIDX_LIB_NAME} PRIVATE "/wd4068")
+     target_compile_options(${SIDX_C_LIB_NAME} PRIVATE "/wd4068")
+ 
+     target_compile_definitions(${SIDX_C_LIB_NAME} PRIVATE "-DSIDX_DLL_EXPORT=1")
+     target_compile_definitions(${SIDX_LIB_NAME} PRIVATE "-DSIDX_DLL_EXPORT=1")
++    if(NOT BUILD_SHARED_LIBS)
++        target_compile_definitions(${SIDX_C_LIB_NAME} PUBLIC "-DSIDX_STATIC")
++        target_compile_definitions(${SIDX_LIB_NAME} PUBLIC "-DSIDX_STATIC")
++    endif()
+     if (NOT WITH_STATIC_SIDX)
+         target_compile_definitions(${SIDX_LIB_NAME} PRIVATE "-DSIDX_DLL_IMPORT=1")
+         target_compile_definitions(${SIDX_C_LIB_NAME} PRIVATE "-DSIDX_DLL_IMPORT=1")

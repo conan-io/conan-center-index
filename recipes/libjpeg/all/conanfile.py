@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
@@ -26,13 +27,15 @@ class LibjpegConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -56,7 +59,7 @@ class LibjpegConan(ConanFile):
             else:
                 tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsmt)")
                 tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsmt)")
-            target = "libjpeg.dll.lib" if self.options.shared else "libjpeg.lib"
+            target = "{}/libjpeg.lib".format( "shared" if self.options.shared else "static" )
             with tools.vcvars(self.settings):
                 self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
 
@@ -105,8 +108,10 @@ class LibjpegConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
+
             self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
+            if self.options.shared:
+                self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -120,12 +125,22 @@ class LibjpegConan(ConanFile):
                 if file.endswith(".exe"):
                     os.unlink(os.path.join(bindir, file))
 
+        for fn in ("jpegint.h", "transupp.h",):
+            self.copy(fn, src=self._source_subfolder, dst="include")
+
+        for fn in ("jinclude.h", "transupp.c",):
+            self.copy(fn, src=self._source_subfolder, dst="res")
+
+        # Remove export decorations of transupp symbols
+        for relpath in os.path.join("include", "transupp.h"), os.path.join("res", "transupp.c"):
+            path = os.path.join(self.package_folder, relpath)
+            tools.save(path, re.subn(r"(?:EXTERN|GLOBAL)\(([^)]+)\)", r"\1", tools.load(path))[0])
+
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "JPEG"
+        self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
         if self.settings.compiler == "Visual Studio":
-            lib = "libjpeg"
-            if self.options.shared:
-                lib += ".dll.lib"
-            self.cpp_info.libs = [lib]
+            self.cpp_info.libs = ["libjpeg"]
         else:
             self.cpp_info.libs = ["jpeg"]
         if not self.options.shared:

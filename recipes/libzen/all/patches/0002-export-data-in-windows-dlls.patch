@@ -1,0 +1,42 @@
+--- Source/ZenLib/Conf.cpp
++++ Source/ZenLib/Conf.cpp
+@@ -24,8 +24,8 @@
+ 
+ //End of line
+ #ifdef WINDOWS
+-    const Char* EOL=__T("\r\n");
+-    const Char  PathSeparator=__T('\\');
++    ZEN_IMPEXP const Char* EOL=__T("\r\n");
++    ZEN_IMPEXP const Char  PathSeparator=__T('\\');
+ #endif
+ #ifdef UNIX
+     const Char* EOL=__T("\n");
+diff --git a/source_subfolder/Source/ZenLib/Conf.h b/source_subfolder/Source/ZenLib/Conf.h
+index 18264cf..d989fdb 100644
+--- Source/ZenLib/Conf.h
++++ Source/ZenLib/Conf.h
+@@ -234,9 +234,22 @@
+ // Platform differences
+ //***************************************************************************
+ 
++#ifdef WINDOWS
++# ifdef zen_EXPORTS
++#  define ZEN_IMPEXP __declspec(dllexport)
++# else
++#  ifdef LIBZEN_SHARED
++#   define ZEN_IMPEXP __declspec(dllimport)
++#  endif
++# endif
++#endif
++#ifndef ZEN_IMPEXP
++# define ZEN_IMPEXP
++#endif
++
+ //End of line
+-extern const Char* EOL;
+-extern const Char  PathSeparator;
++ZEN_IMPEXP extern const Char* EOL;
++ZEN_IMPEXP extern const Char  PathSeparator;
+ 
+ //***************************************************************************
+ // Types

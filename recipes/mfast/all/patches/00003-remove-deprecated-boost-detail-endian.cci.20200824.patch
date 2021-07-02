@@ -1,0 +1,22 @@
+diff --git a/src/mfast/coder/encoder/encoder_presence_map.h b/src/mfast/coder/encoder/encoder_presence_map.h
+index ab8be89..a66fd8d 100644
+--- a/src/mfast/coder/encoder/encoder_presence_map.h
++++ b/src/mfast/coder/encoder/encoder_presence_map.h
+@@ -56,7 +56,7 @@ inline void encoder_presence_map::reset() {
+ }
+ 
+ inline void encoder_presence_map::commit() {
+-#ifdef BOOST_BIG_ENDIAN
++#if BOOST_ENDIAN_BIG_BYTE
+   const std::size_t stop_bit_mask = (init_mask >> (nbytes_ * 8));
+ #else
+   const std::size_t stop_bit_mask = (init_mask << (nbytes_ * 8));
+@@ -74,7 +74,7 @@ inline void encoder_presence_map::set_next_bit(bool v) {
+   const std::size_t next_bit_mask = get_next_bit_mask(sizeof(std::size_t));
+ 
+   if ((mask_ & next_bit_mask) != 0) {
+-#ifdef BOOST_BIG_ENDIAN
++#if BOOST_ENDIAN_BIG_BYTE
+     mask_ >>= 2;
+ #else
+     mask_ <<= 14;

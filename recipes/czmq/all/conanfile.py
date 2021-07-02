@@ -42,15 +42,14 @@ class CzmqConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1d")  # zdigest depends on openssl
-        self.requires.add("zeromq/4.3.2")
+        self.requires("openssl/1.1.1g")  # zdigest depends on openssl
+        self.requires("zeromq/4.3.2")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.67.0")
+            self.requires("libcurl/7.71.1")
         if self.options.with_lz4:
-            self.requires.add("lz4/1.9.2")
-        if self.settings.os != "Windows":
-            if self.options.with_libuuid:
-                self.requires.add("libuuid/1.0.3")
+            self.requires("lz4/1.9.2")
+        if self.options.get_safe("with_libuuid"):
+                self.requires("libuuid/1.0.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -84,14 +83,26 @@ class CzmqConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        # TODO: CMake imported target shouldn't be namespaced
+        self.cpp_info.names["pkg_config"] = "libczmq"
+        czmq_target = "czmq" if self.options.shared else "czmq-static"
+        self.cpp_info.components["libczmq"].names["cmake_find_package"] = czmq_target
+        self.cpp_info.components["libczmq"].names["cmake_find_package_multi"] = czmq_target
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["czmq" if self.options.shared else "libczmq"]
-            self.cpp_info.system_libs.append("rpcrt4")
+            self.cpp_info.components["libczmq"].libs = ["czmq" if self.options.shared else "libczmq"]
+            self.cpp_info.components["libczmq"].system_libs.append("rpcrt4")
         else:
-            self.cpp_info.libs = ["czmq"]
+            self.cpp_info.components["libczmq"].libs = ["czmq"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["pthread", "m"])
+                self.cpp_info.components["libczmq"].system_libs.extend(["pthread", "m"])
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("rpcrt4")
+            self.cpp_info.components["libczmq"].system_libs.append("rpcrt4")
         if not self.options.shared:
-            self.cpp_info.defines.append("CZMQ_STATIC")
+            self.cpp_info.components["libczmq"].defines.append("CZMQ_STATIC")
+        self.cpp_info.components["libczmq"].requires = ["openssl::openssl", "zeromq::zeromq"]
+        if self.options.with_libcurl:
+            self.cpp_info.components["libczmq"].requires.append("libcurl::libcurl")
+        if self.options.with_lz4:
+            self.cpp_info.components["libczmq"].requires.append("lz4::lz4")
+        if self.options.get_safe("with_libuuid"):
+            self.cpp_info.components["libczmq"].requires.append("libuuid::libuuid")

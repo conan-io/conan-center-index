@@ -1,0 +1,14 @@
+sources:
+  "1.2.154.0":
+    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/sdk-1.2.154.0.tar.gz"
+    sha256: "8898ab05d0d8dec04fbba03d0ed2e79a1eb5c0382e5c89d4c737b45a6648f7f9"
+patches:
+  "1.2.154.0":
+    - patch_file: "patches/duplicated-declaration.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/disable-nortti-and-warnings-as-errors.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-installation.patch"
+      base_path: "source_subfolder"

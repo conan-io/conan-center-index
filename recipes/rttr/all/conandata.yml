@@ -2,3 +2,9 @@ sources:
   "0.9.6":
     url: "https://github.com/rttrorg/rttr/archive/v0.9.6.tar.gz"
     sha256: "058554f8644450185fd881a6598f9dee7ef85785cbc2bb5a5526a43225aa313f"
+patches:
+  "0.9.6":
+    - patch_file: "patches/001_fix_build_without_RTTI.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002_fix_license_installer.patch"
+      base_path: "source_subfolder"

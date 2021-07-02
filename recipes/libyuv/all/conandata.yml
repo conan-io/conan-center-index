@@ -1,0 +1,8 @@
+sources:
+  "cci.20201106":
+    url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/2664f649bc0a32e05f5bc3ff4d12134e41aa08c4.tar.gz"
+
+patches:
+  "cci.20201106":
+    - patch_file: "patches/001-cmake.patch"
+      base_path: "source_subfolder"

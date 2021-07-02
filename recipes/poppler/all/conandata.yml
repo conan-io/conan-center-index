@@ -1,0 +1,20 @@
+sources:
+  "20.09.0":
+    url: "https://poppler.freedesktop.org/poppler-20.09.0.tar.xz"
+    sha256: "4ed6eb5ddc4c37f2435c9d78ff9c7c4036455aea3507d1ce8400070aab745363"
+patches:
+  "20.09.0":
+    - patch_file: "patches/0001-cmake-use-PROJECT_SOURCE_DIR-fix-CMAKE_MODULE_PATH.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-use_CONAN_PKG-targets.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-cmake-disable-tests.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-add-POPPLER_DATADIR-environment-variable.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-fix-visual-studio-basetsd.h-libjpeg-INT32.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0006-missing-symbol-dll-windows.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-cmake-use_conan_qt.patch"
+      base_path: "source_subfolder"

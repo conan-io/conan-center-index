@@ -1,0 +1,58 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 491ae46..c0a4f3d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ cmake_minimum_required(VERSION 3.12)
+-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmakeUtils;")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmakeUtils;")
+ include(setup)
+ 
+ project(nativeipc)
+diff --git a/cmakeUtils/conanutils.cmake b/cmakeUtils/conanutils.cmake
+index cc6c07c..cbf0cd6 100644
+--- a/cmakeUtils/conanutils.cmake
++++ b/cmakeUtils/conanutils.cmake
+@@ -59,7 +59,8 @@ macro(run_conan)
+       set(_keeprpath "KEEP_RPATHS")
+     endif()
+ 
+-    conan_cmake_run(CONANFILE conan/conanfile.py
++    if(NOT CONAN_EXPORTED)
++      conan_cmake_run(CONANFILE conan/conanfile.py
+         BASIC_SETUP
+         CMAKE_TARGETS
+         NO_OUTPUT_DIRS
+@@ -71,4 +72,5 @@ macro(run_conan)
+         RELWITHDEBINFO_PROFILE ${_profile}
+         ENV "CONAN_CMAKE_BINARY_DIR_PATH=${CMAKE_BINARY_DIR}"
+         )
++    endif()
+ endmacro()
+diff --git a/cmakeUtils/unix.cmake b/cmakeUtils/unix.cmake
+index 5f4bb4c..9b2856a 100644
+--- a/cmakeUtils/unix.cmake
++++ b/cmakeUtils/unix.cmake
+@@ -1,7 +1,7 @@
+ 
+ macro(setup_default_cxx_compile_options)
+     message("Setting up Unix-Like default settings")
+-    set(unix_flags "-Wall -Wextra -Werror -Wformat=2 -Wold-style-cast -Wnull-dereference -Wno-missing-field-initializers")
++    set(unix_flags " -Wall -Wextra -Werror -Wformat=2 -Wold-style-cast -Wnull-dereference -Wno-missing-field-initializers")
+     string(APPEND CMAKE_CXX_FLAGS ${unix_flags})
+     string(APPEND CMAKE_C_FLAGS ${unix_flags})
+ endmacro()
+diff --git a/libnativeipc/CMakeLists.txt b/libnativeipc/CMakeLists.txt
+index fe5cc30..173a156 100644
+--- a/libnativeipc/CMakeLists.txt
++++ b/libnativeipc/CMakeLists.txt
+@@ -81,7 +81,9 @@ if(MSVC)
+ endif()
+ 
+ install(TARGETS nativeipc
++  LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
+   )
+ 
+ install(DIRECTORY include

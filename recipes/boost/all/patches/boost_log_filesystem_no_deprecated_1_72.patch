@@ -1,0 +1,13 @@
+diff --git a/libs/log/src/text_file_backend.cpp b/libs/log/src/text_file_backend.cpp
+index 50cef3b..d5fd02e 100644
+--- a/libs/log/src/text_file_backend.cpp
++++ b/libs/log/src/text_file_backend.cpp
+@@ -39,6 +39,8 @@
+ #include <boost/type_traits/is_same.hpp>
+ #include <boost/system/error_code.hpp>
+ #include <boost/system/system_error.hpp>
++#include <boost/filesystem/directory.hpp>
++#include <boost/filesystem/exception.hpp>
+ #include <boost/filesystem/path.hpp>
+ #include <boost/filesystem/fstream.hpp>
+ #include <boost/filesystem/operations.hpp>

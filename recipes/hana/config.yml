@@ -1,0 +1,7 @@
+versions:
+  "boost-1.74.0":
+    folder: all
+  "1.6.0":
+    folder: all
+  "1.7.0":
+    folder: all

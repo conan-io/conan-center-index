@@ -1,0 +1,14 @@
+sources:
+  "3.2.0":
+    url: "https://github.com/argtable/argtable3/archive/refs/tags/v3.2.0.7402e6e.tar.gz"
+    sha256: "e692ce51fb51dc750b47ef0ef2941573c8c49195aa2ddc48cb369239c400efa7"
+  "3.1.5":
+    url: "https://github.com/argtable/argtable3/archive/v3.1.5.1c1bb23.tar.gz"
+    sha256: "e2435562ece10bbf52c21811fe6ec25a3574054886cb56d483e5c17451329bb4"
+patches:
+  "3.2.0":
+    - patch_file: "patches/3.2.0-0001-cmake-fixes.patch"
+      base_path: "source_subfolder"
+  "3.1.5":
+    - patch_file: "patches/3.1.5-0001-cmake-fixes.patch"
+      base_path: "source_subfolder"

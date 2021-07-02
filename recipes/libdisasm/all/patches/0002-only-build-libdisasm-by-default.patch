@@ -1,0 +1,8 @@
+--- Makefile.am
++++ Makefile.am
+@@ -1,4 +1,4 @@
+-SUBDIRS = libdisasm x86dis test doc man perl
++SUBDIRS = libdisasm #x86dis test doc man perl
+
+ EXTRA_DIST = \
+ 	LICENSE autogen.sh

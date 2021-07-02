@@ -1,0 +1,24 @@
+diff --git a/CMake/FollyCompilerUnix.cmake b/CMake/FollyCompilerUnix.cmake
+index 8dcaf141a3a..200fe8d3798 100644
+--- a/CMake/FollyCompilerUnix.cmake
++++ b/CMake/FollyCompilerUnix.cmake
+@@ -28,9 +28,9 @@ set(
+ )
+ mark_as_advanced(CXX_STD)
+ 
+-set(CMAKE_CXX_FLAGS_COMMON "-g -Wall -Wextra")
++set(CMAKE_CXX_FLAGS_COMMON "-Wall -Wextra")
+ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_COMMON}")
+-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_COMMON} -O3")
++set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_COMMON}")
+ 
+ # Note that CMAKE_REQUIRED_FLAGS must be a string, not a list
+ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=${CXX_STD}")
+@@ -43,7 +43,6 @@ function(apply_folly_compile_options_to_target THETARGET)
+   )
+   target_compile_options(${THETARGET}
+     PRIVATE
+-      -g
+       -std=${CXX_STD}
+       -finput-charset=UTF-8
+       -fsigned-char

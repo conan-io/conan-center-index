@@ -2,3 +2,7 @@ sources:
   "1.0.3":
     url: "https://downloads.sourceforge.net/project/libuuid/libuuid-1.0.3.tar.gz"
     sha256: "46af3275291091009ad7f1b899de3d0cea0252737550e7919d17237997db5644"
+patches:
+  "1.0.3":
+    - patch_file: "patches/0001-check-sys-syscall-h+wrap-includes.patch"
+      base_path: "source_subfolder"

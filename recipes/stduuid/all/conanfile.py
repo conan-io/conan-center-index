@@ -12,7 +12,6 @@ class StduuidConan(ConanFile):
     homepage = "https://github.com/mariusbancila/stduuid"
     license = "MIT"
     settings = "os", "compiler"
-    requires = "ms-gsl/2.0.0"
 
     no_copy_source = True
     _source_subfolder = "source_subfolder"
@@ -23,6 +22,7 @@ class StduuidConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
+        self.requires("ms-gsl/2.0.0")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
@@ -32,15 +32,13 @@ class StduuidConan(ConanFile):
         if self.settings.compiler.cppstd and \
            not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
             raise ConanInvalidConfiguration("stduuid requires at least c++17")
-        elif compiler == "Visual Studio":
-            if version < "16":
-                raise ConanInvalidConfiguration("stduuid requires at least Visual Studio version 16")
+        elif compiler == "Visual Studio"and version < "15":
+            raise ConanInvalidConfiguration("stduuid requires at least Visual Studio version 15")
         else:
             if ( compiler == "gcc" and version < "7" ) or ( compiler == "clang" and version < "5" ):
                 raise ConanInvalidConfiguration("stduuid requires a compiler that supports at least C++17")
-            elif compiler == "apple-clang":
-                if version < "10":
-                    raise ConanInvalidConfiguration("stduuid requires a compiler that supports at least C++17")
+            elif compiler == "apple-clang"and version < "10":
+                raise ConanInvalidConfiguration("stduuid requires a compiler that supports at least C++17")
 
     def package(self):
         root_dir = self._source_subfolder

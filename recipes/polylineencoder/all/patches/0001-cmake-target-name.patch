@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 04a1541..2963045 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
+ project(polylineencoder)
+ set (CMAKE_CXX_STANDARD 11)
+ 
+-add_library(encoder
++add_library(polylineencoder
+   src/polylineencoder.h
+   src/polylineencoder.cpp
+ )
+@@ -13,7 +13,7 @@ add_executable(poly_test
+ )
+ 
+ target_link_libraries(poly_test
+-  PRIVATE encoder
++  PRIVATE polylineencoder
+ )
+ 
+ enable_testing()

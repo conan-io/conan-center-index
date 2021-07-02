@@ -3,6 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
+required_conan_version = ">=1.33.0"
+
+
 class LibibertyConan(ConanFile):
     name = "libiberty"
     version = "9.1.0"
@@ -12,8 +15,13 @@ class LibibertyConan(ConanFile):
     homepage = "https://gcc.gnu.org/onlinedocs/libiberty"
     license = "LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
+
     _autotools = None
 
     @property
@@ -25,7 +33,7 @@ class LibibertyConan(ConanFile):
         return os.path.join(self._source_subfolder, self.name)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -35,17 +43,19 @@ class LibibertyConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "gcc-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.rmdir(os.path.join(self._source_subfolder, 'gcc'))
-        tools.rmdir(os.path.join(self._source_subfolder, 'libstdc++-v3'))
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+        tools.rmdir(os.path.join(self._source_subfolder, "gcc"))
+        tools.rmdir(os.path.join(self._source_subfolder, "libstdc++-v3"))
 
     def _configure_autotools(self):
-        if not self._autotools:
-            args = ["--enable-install-libiberty"]
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self._autotools.configure(args=args, configure_dir=self._libiberty_folder)
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        conf_args = [
+            "--enable-install-libiberty",
+        ]
+        self._autotools.configure(args=conf_args, configure_dir=self._libiberty_folder)
         return self._autotools
 
     def build(self):
@@ -56,14 +66,15 @@ class LibibertyConan(ConanFile):
         self.copy(pattern="COPYING.LIB", src=self._libiberty_folder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        self._package_x86()
+        self._package_xx(32)
+        self._package_xx(64)
 
-    def _package_x86(self):
-        lib32dir = os.path.join(self.package_folder, "lib32")
-        if os.path.exists(lib32dir):
+    def _package_xx(self, arch):
+        lib_arch_dir = os.path.join(self.package_folder, "lib{}".format(arch))
+        if os.path.exists(lib_arch_dir):
             libdir = os.path.join(self.package_folder, "lib")
             tools.rmdir(libdir)
-            os.rename(lib32dir, libdir)
+            tools.rename(lib_arch_dir, libdir)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["iberty"]

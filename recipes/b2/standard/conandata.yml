@@ -1,0 +1,13 @@
+sources:
+  "4.0.0":
+    sha256: f59bd90bd4d68b44005a83a60d3d933d3768fc5a5b51e45a0462e6f4b81caa8a
+    url: https://github.com/bfgroup/b2/archive/4.0.0.tar.gz
+  "4.0.1":
+    sha256: ebdfb38b3938dba4c2548b2b7f4ca48e209beef9a376a78742bcd75769a9d68f
+    url: https://github.com/bfgroup/b2/archive/4.0.1.tar.gz
+  "4.1.0":
+    sha256: eb562b14677e3ad3619bb67e6be6ea97d5dbe34780bbc47bed4cdda3177835c8
+    url: https://github.com/bfgroup/b2/archive/4.1.0.tar.gz
+  "4.2.0":
+    sha256: 00e3425e0419688ea61ecbbcd106ce168e334f0acdcc2f4a4ead084f03cd4b60
+    url: https://github.com/bfgroup/b2/archive/4.2.0.tar.gz

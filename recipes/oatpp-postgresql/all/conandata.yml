@@ -1,0 +1,14 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp-postgresql/archive/1.2.0.tar.gz"
+    sha256: "bece5e298c1e6a312939fd77ad7230792bd9993c6c5ca75def696a3ed0c4f07f"
+  "1.2.5":
+    url: "https://github.com/oatpp/oatpp-postgresql/archive/1.2.5.tar.gz"
+    sha256: "861d9948dea42199832e4133996d3af9caa4e30e6d8093c0729c8fec1f5c7aea"
+patches:
+  "1.2.5":
+    - patch_file: "patches/1.2.5/01-fix-windows-build.patch"
+      base_path: "source_subfolder"
+      # patch_type: portability
+      # patch_source: https://github.com/oatpp/oatpp-postgresql/pull/8
+      # patch_description: Fix build error in Windows.

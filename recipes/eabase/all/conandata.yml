@@ -2,7 +2,6 @@ sources:
   "2.09.05":
     url: "https://github.com/electronicarts/EABase/archive/2.09.05.tar.gz"
     sha256: "f85b98c96f1976aa013c8d6016c5e37a409633ac3fce843cd4ec0b89c67e6b7a"
-patches:
-  "2.09.05":
-    - patch_file: "patches/0001-cmake-add-install-target.patch"
-      base_path: "source_subfolder"
+  "2.09.06":
+    url: "https://github.com/electronicarts/EABase/archive/2.09.06.tar.gz"
+    sha256: "981f922441617152b841585c0fc0bd205bd898c758016fa4985599a63c5a6e16"

@@ -1,13 +1,11 @@
+cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
-cmake_minimum_required(VERSION 2.8.12)
-
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-file(GLOB SOURCE_FILES *.cpp)
+find_package(Microsoft.GSL REQUIRED CONFIG)
 
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} Microsoft.GSL::GSL)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)

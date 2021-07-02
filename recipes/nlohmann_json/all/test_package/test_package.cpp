@@ -20,6 +20,11 @@ int main() {
         }}
     };
 
+#if JSON_USE_IMPLICIT_CONVERSIONS
+    float f = data["pi"];
+#else
+    auto f = data["pi"].get<float>();
+#endif
     std::cout << data.dump(4) << std::endl;
     return 0;
 }

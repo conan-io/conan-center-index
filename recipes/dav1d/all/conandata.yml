@@ -1,0 +1,4 @@
+sources:
+  "0.8.1":
+    url: "https://code.videolan.org/videolan/dav1d/-/archive/0.8.1/dav1d-0.8.1.tar.gz"
+    sha256: "39f52cccc31180c7180ebe8f223de6d12351c0407de0dfac087e8a9cc3feb8da"
