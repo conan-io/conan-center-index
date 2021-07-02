@@ -5,6 +5,9 @@
 #include "greeter.h"
 #include <QFile>
 
+// Qt Network test
+#include <QNetworkAccessManager>
+
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Application Example");
@@ -24,6 +27,8 @@ int main(int argc, char *argv[]){
         qFatal("Could not open resource file");
     qDebug() << "Resource content:" << f.readAll();
     f.close();
+
+    QNetworkAccessManager networkTester;
 
     return app.exec();
 }
