@@ -120,7 +120,7 @@ class CoinUtilsConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1",])
 
         os.unlink(os.path.join(self.package_folder, "lib", "libCoinUtils.la"))
 
