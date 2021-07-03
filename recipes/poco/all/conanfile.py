@@ -21,10 +21,12 @@ class PocoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_fork": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_fork": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "is_lib"))
@@ -98,6 +100,7 @@ class PocoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.enable_netssl
+            del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
@@ -200,6 +203,9 @@ class PocoConan(ConanFile):
         # On Windows, Poco needs a message (MC) compiler.
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             self._cmake.configure(build_dir=self._build_subfolder)
+        # Disable fork
+        if not self.options.get_safe("enable_fork", True):
+            self._cmake.definitions["POCO_NO_FORK_EXEC"] = True
         return self._cmake
 
     def build(self):
