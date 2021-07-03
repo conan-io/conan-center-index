@@ -2,13 +2,12 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 modules_list = ['bullet', 'gel', 'ode']
 
-
 class Chai3dConan(ConanFile):
     name = "chai3d"
+    version = "3.2.0"
     license = "BSD 3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.chai3d.org"
@@ -18,19 +17,31 @@ class Chai3dConan(ConanFile):
               "interactive real-time simulation")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-    options = {"shared": [True, False], "fPIC": [True, False]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_utils": [True, False]}
     options.update(
         {"with_{}".format(module): [True, False]
          for module in modules_list})
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_utils": False}
     default_options.update(
-        {"with_{}".format(module): False
+        {"with_{}".format(module): True
          for module in modules_list})
     exports_sources = ["CMakeLists.txt", os.path.join("patches", "*.patch")]
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _platform_path(self):
@@ -48,90 +59,93 @@ class Chai3dConan(ConanFile):
     def requirements(self):
         # the following conan dependencies are missing:
         # * core:
-        #  - giflib: available version (5.1.7) crashes during compilation
-        #  - lib3ds: not available in conan center
+        #  - eigen (requires version 3.2.X, so use bundled)
+        #  - giflib (requires a version lower than 5.0, so use bundled)
+        #  - lib3ds (n/a)
+        #  - theoraplayer (n/a)
         # * ode module:
-        #  - ode: not available in conan center
-        self.requires("eigen/3.3.7")
-        self.requires("glew/2.1.0")
+        #  - ode (n/a)
+        # * bullet module:
+        #  - bullet (requires a specific compiling flag, so use bundled)
+        self.requires("opengl/system")
+        self.requires("glew/2.2.0")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("openal/1.19.1")
-        self.requires("pugixml/1.10")
-        self.requires("theora/1.1.1@bincrafters/stable")
-        if self.options.with_bullet:
-            self.requires("bullet3/2.89")
+        self.requires("pugixml/1.11")
+        self.requires("theora/1.1.1")
 
-    def configure(self):
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def validate(self):
         if self.settings.os not in ["Windows", "Linux", "Macos"]:
             raise ConanInvalidConfiguration(
                 "Unsupported System. "
                 "This package only supports Windows/Linux/Macos")
-        elif (self.settings.os == "Windows"
-              and self.settings.compiler == "Visual Studio"
-              and tools.Version(self.settings.compiler.version) <= "8"):
-            raise ConanInvalidConfiguration(
-                "Unsupported Visual Studio version. "
-                "This package requires Visual Studio editions "
-                "2010 or later")
-        elif (self.settings.os == "Macos"
-              and self.settings.get_safe("os.version") and tools.Version(self.settings.os.version) <= "10.8"):
-            raise ConanInvalidConfiguration(
-                "Unsupported Macos version. "
-                "This package requires Macos version "
-                "10.9 or later")
-        # chai3d builds with the std c++0x so we warn the user for a
-        # potential ABI incompatibility
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
-        if (self.settings.compiler == "gcc"
-                and Version(self.settings.compiler.version) >= "5"
-                and self.settings.compiler.libcxx == "libstdc++"):
-            raise ConanInvalidConfiguration(
-                "Unsupported compiler configuration. "
-                "This package uses the c++0x standard and thus requires "
-                "compiler.libcxx=libstdc++11")
+        if (self.settings.compiler == "gcc" and
+            tools.Version(self.settings.compiler.version) < "5"):
+            raise ConanInvalidConfiguration("This package requires gcc 5+")
 
-    def config_options(self):
-        if self.options.shared or self.settings.os == "Windows":
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
-        # glew doesn't have an fPIC option, so its type must match with chai3d
-        self.options["glew"].shared = self.options.shared
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "{0}-{1}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
         if self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
 
-    def build(self):
-        cmake = CMake(self)
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            # modules need to know where to find the chai3d core target
+            self._cmake.definitions["CHAI3D_DIR"] = os.path.join(
+                self.build_folder,
+                self._build_subfolder,
+                self._source_subfolder)
+        self._cmake.definitions["CHAI3D_BUILD_UTILS"] = self.options.build_utils
         # build modules on demand
         for module in modules_list:
             opt_name = "with_{}".format(module)
             opt_value = getattr(self.options, opt_name)
             if opt_value:
-                cmake.definitions["CHAI3D_{}".format(
-                    opt_name.upper())] = opt_value
-        # modules need to know where to find the chai3d core targets
-        cmake.definitions["CHAI3D_DIR"] = os.path.join(self.build_folder,
-                                                       self._source_subfolder)
-        cmake.configure()
+                self._cmake.definitions["CHAI3D_{}".format(
+                   opt_name.upper())] = opt_value
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy("copyright.txt", dst="licenses", src=self._source_subfolder)
         # libs
-        self.copy("libchai3d*",
+        self.copy("*chai3d*",
                   dst="lib",
-                  src=os.path.join(self.build_folder, "lib"),
+                  src=os.path.join(self._build_subfolder, "lib"),
+                  keep_path=False)
+        # modules libs (windows only)
+        if self.settings.os == "Windows":
+            self.copy("*chai3d*.dll",
+                  dst="bin",
+                  src=os.path.join(self._build_subfolder, "bin"),
                   keep_path=False)
         # headers
         self.copy("*.h",
                   dst="include",
                   src=os.path.join(self._source_subfolder, "src"))
+        # Eigen headers
+        self.copy("Eigen/*",
+                  dst="include",
+                  src=os.path.join(self._source_subfolder, "external", "Eigen"))
         # modules headers
         for module in modules_list:
             if getattr(self.options, "with_{}".format(module)):
@@ -145,6 +159,11 @@ class Chai3dConan(ConanFile):
                               dst="include",
                               src=os.path.join(mod_path, "external", "ODE",
                                                "include"))
+                if module == "bullet":
+                    self.copy("*.h",
+                              dst="include",
+                              src=os.path.join(mod_path, "external", "bullet",
+                                               "src"))
         # DHD dependency
         if self.settings.os != "Windows":
             self.copy("libdrd.a",
@@ -157,6 +176,11 @@ class Chai3dConan(ConanFile):
                       dst="bin",
                       src=os.path.join(self._source_subfolder, "bin",
                                        self._platform_path))
+        # cli utils
+        if self.options.build_utils:
+            self.copy("*",
+                      dst="bin",
+                      src=os.path.join(self._build_subfolder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
@@ -170,14 +194,23 @@ class Chai3dConan(ConanFile):
                 self.cpp_info.defines.append(arch_def)
             elif self.settings.compiler == "mingw":
                 self.cpp_info.defines.append("WIN32")
-            self.cpp_info.cxxflags.extend(
-                ["-march=native", "-Wno-deprecated", "-std=c++0x"])
+                self.cpp_info.cxxflags.extend(
+                    ["-march=native", "-Wno-deprecated", "-std=c++0x"])
+            # set PATH for dlls
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.env_info.path.append(bin_path)
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(
                 ["GL", "GLU", "usb-1.0", "rt", "pthread", "dl"])
             self.cpp_info.defines.append("LINUX")
             self.cpp_info.cxxflags.extend(
                 ["-march=native", "-Wno-deprecated", "-std=c++0x"])
+            # set ABI compatibility for gcc 5+
+            if self.settings.compiler == "gcc":
+                if str(self.settings.compiler.libcxx) == "libstdc++":
+                    self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=0")
+                elif str(self.settings.compiler.libcxx) == "libstdc++11":
+                    self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=1")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = [
                 "OpenGL", "CoreFoundation", "IOKit", "CoreServices",
@@ -186,5 +219,5 @@ class Chai3dConan(ConanFile):
             self.cpp_info.defines.append("MACOSX")
             self.cpp_info.cxxflags.extend([
                 "-Qunused-arguments", "-Wno-deprecated", "-std=c++0x",
-                "-stdlib=libc++"
+                "-stdlib=libc++11"
             ])

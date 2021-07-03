@@ -1,6 +1,20 @@
---- a/modules/GEL/CMakeLists.txt	2020-01-21 23:47:31.000000000 +0100
-+++ b/modules/GEL/CMakeLists.txt	2020-04-07 12:08:43.000000000 +0200
-@@ -120,8 +120,8 @@
+--- a/modules/GEL/CMakeLists.txt	2021-06-08 16:55:54.939874984 +0000
++++ b/modules/GEL/CMakeLists.txt	2021-06-21 11:26:33.069936488 +0000
+@@ -77,13 +77,6 @@
+   set (CMAKE_BUILD_TYPE Release CACHE STRING "Setting build mode to Release" FORCE)
+ endif()
+ 
+-# output location
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY                ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-
+ # find dependencies
+ find_package (CHAI3D 3.2 REQUIRED)
+ include_directories (${CHAI3D_INCLUDE_DIRS})
+@@ -120,8 +113,8 @@
  # Linux global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
    add_definitions (-DLINUX)
@@ -11,47 +25,23 @@
  
  # Mac OS X global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-@@ -132,16 +132,16 @@
- 
- 
- #
--# static library
-+# library
- #
- 
- # header search path
- include_directories (${PROJECT_SOURCE_DIR}/src)
- 
--# static library source files
-+# library source files
- file (GLOB_RECURSE source RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.h)
- 
--# static library external dependencies source files
-+# library external dependencies source files
- # -
- 
- # platform-specific source files adjustments
-@@ -153,8 +153,17 @@
+@@ -153,8 +146,13 @@
  # build flags
  add_definitions (${PROJECT_DEFINITIONS})
  
 -# static library
 -add_library (chai3d-GEL STATIC ${source})
 +# library
-+add_library (chai3d-GEL ${source} $<TARGET_OBJECTS:chai3d-obj>)
-+target_include_directories (chai3d-GEL
-+  PUBLIC
-+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-+    $<INSTALL_INTERFACE:include>
-+)
-+if (BUILD_SHARED_LIBS)
-+  set_target_properties (chai3d-GEL PROPERTIES VERSION ${PROJECT_VERSION})
-+endif ()
-+target_link_libraries (chai3d-GEL PUBLIC chai3d-lib)
++add_library (chai3d-GEL SHARED ${source})
++set_target_properties (chai3d-GEL PROPERTIES VERSION ${PROJECT_VERSION})
++if (MSVC)
++  set_target_properties (chai3d-GEL PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++endif (MSVC)
++target_link_libraries (chai3d-GEL PUBLIC chai3d)
  
  # library exports
  set (CHAI3D-GEL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
-@@ -162,16 +171,6 @@
+@@ -162,16 +160,6 @@
  
  
  #

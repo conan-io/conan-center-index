@@ -1,6 +1,8 @@
 #include <CBullet.h>
+#include <cassert>
 
-int main() {
+int main()
+{
   chai3d::cBulletWorld *world = new chai3d::cBulletWorld();
   world->m_name = "BulletWorldConanTest";
   chai3d::cVector3d gravity(0.0, 0.0, -9.8);

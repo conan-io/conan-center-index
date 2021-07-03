@@ -1,6 +1,25 @@
---- a/CMakeLists.txt	2020-04-08 00:26:26.000000000 +0200
-+++ b/CMakeLists.txt	2020-04-07 23:36:41.000000000 +0200
-@@ -122,8 +122,8 @@
+--- a/CMakeLists.txt	2021-06-08 16:43:28.856000000 +0000
++++ b/CMakeLists.txt	2021-06-21 11:26:19.603693033 +0000
+@@ -71,18 +71,6 @@
+   set (ARCH "x86_64")
+ endif ()
+ 
+-# enforce build type
+-if (NOT CMAKE_BUILD_TYPE)
+-  set (CMAKE_BUILD_TYPE Release CACHE STRING "Setting build mode to Release" FORCE)
+-endif()
+-
+-# output location
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY                ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-
+ # OpenGL dependency
+ find_package (OpenGL REQUIRED)
+ include_directories (OPENGL_INCLUDE_DIR)
+@@ -122,8 +110,8 @@
  # Linux global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
    add_definitions (-DLINUX)
@@ -11,7 +30,7 @@
  
  # Mac OS X global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-@@ -134,52 +134,30 @@
+@@ -134,52 +122,32 @@
  
  
  #
@@ -21,7 +40,7 @@
  
  # header search path
  include_directories (${PROJECT_SOURCE_DIR}/src)
--include_directories (${PROJECT_SOURCE_DIR}/external/Eigen)
+ include_directories (${PROJECT_SOURCE_DIR}/external/Eigen)
 -include_directories (${PROJECT_SOURCE_DIR}/external/glew/include)
  include_directories (${PROJECT_SOURCE_DIR}/external/giflib/include)
  include_directories (${PROJECT_SOURCE_DIR}/external/lib3ds/include)
@@ -43,8 +62,8 @@
  file (GLOB_RECURSE source RELATIVE ${CHAI3D_SOURCE_DIR} ${CHAI3D_SOURCE_DIR}/src/*.cpp ${CHAI3D_SOURCE_DIR}/src/*.h)
  
 -# static library external dependencies source files
--file (GLOB_RECURSE source_eigen     RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/Eigen/Eigen/*)
 +# library external dependencies source files
+ file (GLOB_RECURSE source_eigen     RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/Eigen/Eigen/*)
  file (GLOB_RECURSE source_gif       RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/giflib/*.c       ${PROJECT_SOURCE_DIR}/external/giflib/*.h)
 -file (GLOB_RECURSE source_glew      RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/glew/*.c         ${PROJECT_SOURCE_DIR}/external/glew/*.h)
  file (GLOB_RECURSE source_3ds       RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/lib3ds/*.c       ${PROJECT_SOURCE_DIR}/external/lib3ds/*.h)
@@ -54,68 +73,48 @@
 -file (GLOB_RECURSE source_openal    RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/openal/*.c       ${PROJECT_SOURCE_DIR}/external/openal/*.h)
  file (GLOB_RECURSE source_theora    RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/theoraplayer/*.c ${PROJECT_SOURCE_DIR}/external/theoraplayer/*.cpp ${PROJECT_SOURCE_DIR}/external/theoraplayer/*.h)
  
--# platform-specific source files adjustments
+ # platform-specific source files adjustments
 -if (${CMAKE_SYSTEM_NAME} MATCHES Windows)
 -  file (GLOB_RECURSE source_theora_exclude RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/theoraplayer/external/theora/lib/x86/*.c)
 -else ()
 -  file (GLOB_RECURSE source_theora_exclude RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/theoraplayer/external/theora/lib/x86_vc/*.c)
 -endif ()
-+# source files adjustments
-+file (GLOB_RECURSE source_theora_exclude RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/theoraplayer/external/*)
++file (GLOB_RECURSE source_theora_exclude RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/theoraplayer/external/*.c)
  list (REMOVE_ITEM source_theora ${source_theora_exclude})
  
  # group source files (MSVC likes this)
 -foreach (FILE ${source} ${source_eigen} ${source_gif} ${source_glew} ${source_3ds} ${source_jpeg} ${source_png} ${source_pugixml} ${source_openal} ${source_theora})
-+foreach (FILE ${source} ${source_gif} ${source_3ds} ${source_theora})
++foreach (FILE ${source} ${source_eigen} ${source_gif} ${source_3ds} ${source_theora})
    get_filename_component (PARENT_DIR "${FILE}" PATH)
    string (REGEX REPLACE "(\\./)?(src|include)/?" "" GROUP "${PARENT_DIR}")
    string (REPLACE "/" "\\" GROUP "${GROUP}")
-@@ -187,13 +165,40 @@
- endforeach ()
- 
+@@ -189,11 +157,22 @@
  # build flags
--add_definitions (${PROJECT_DEFINITIONS} -DGLEW_STATIC -DAL_ALEXT_PROTOTYPES -DAL_BUILD_LIBRARY -DAL_LIBTYPE_STATIC -D__THEORA -D_LIB)
-+add_definitions (${PROJECT_DEFINITIONS} -D_LIB)
+ add_definitions (${PROJECT_DEFINITIONS} -DGLEW_STATIC -DAL_ALEXT_PROTOTYPES -DAL_BUILD_LIBRARY -DAL_LIBTYPE_STATIC -D__THEORA -D_LIB)
  
 -# static library
 -add_library (chai3d STATIC ${source} ${source_eigen} ${source_gif} ${source_glew} ${source_3ds} ${source_jpeg} ${source_png} ${source_pugixml} ${source_openal} ${source_theora})
-+# interface library
-+add_library (chai3d-lib INTERFACE)
-+target_include_directories (chai3d-lib
-+  INTERFACE
-+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src
-+    $<INSTALL_INTERFACE:include>
-+)
-+target_link_libraries (chai3d-lib
-+  INTERFACE
-+    CONAN_PKG::eigen CONAN_PKG::glew
-+    CONAN_PKG::libjpeg CONAN_PKG::libpng CONAN_PKG::openal CONAN_PKG::pugixml
-+    CONAN_PKG::theora
-+)
-+
-+# object library
-+add_library (chai3d-obj OBJECT ${source} ${source_gif} ${source_3ds} ${source_theora})
-+if (BUILD_SHARED_LIBS)
-+  set_target_properties (chai3d-obj
-+    PROPERTIES
-+      POSITION_INDEPENDENT_CODE TRUE
-+  )
-+endif()
-+target_link_libraries (chai3d-obj PUBLIC chai3d-lib)
-+
-+# final library
-+add_library (chai3d $<TARGET_OBJECTS:chai3d-obj>)
++# library
++add_library (chai3d ${source} ${source_eigen} ${source_gif} ${source_3ds} ${source_theora})
 +if (BUILD_SHARED_LIBS)
 +  set_target_properties (chai3d PROPERTIES VERSION ${PROJECT_VERSION})
-+endif ()
++  if (MSVC)
++    set_target_properties (chai3d PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++  endif (MSVC)
++endif (BUILD_SHARED_LIBS)
++target_link_libraries (chai3d
++  PUBLIC
++    CONAN_PKG::opengl CONAN_PKG::glew
++  PRIVATE
++    CONAN_PKG::libjpeg CONAN_PKG::libpng CONAN_PKG::pugixml CONAN_PKG::openal CONAN_PKG::theora)
  
  # library exports
 -set (CHAI3D_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/external/Eigen" "${PROJECT_SOURCE_DIR}/external/glew/include" "${OPENGL_INCLUDE_DIR}")
-+set (CHAI3D_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${OPENGL_INCLUDE_DIR}")
++set (CHAI3D_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/external/Eigen" "${OPENGL_INCLUDE_DIR}")
  set (CHAI3D_LIBRARIES chai3d ${OPENGL_LIBRARIES})
  set (CHAI3D_DEFINITIONS ${PROJECT_DEFINITIONS})
  if (NOT ${CMAKE_SYSTEM_NAME} MATCHES Windows)
-@@ -211,36 +216,11 @@
+@@ -211,26 +190,11 @@
  
  
  #
@@ -129,27 +128,17 @@
 -
 -
 -#
--# executables
--#
--
+ # executables
+ #
+ 
 -# examples
 -if (EXISTS ${PROJECT_SOURCE_DIR}/examples)
 -  add_subdirectory (${PROJECT_SOURCE_DIR}/examples)
 -endif ()
 -
--# utilities
+ # utilities
 -if (EXISTS ${PROJECT_SOURCE_DIR}/utils)
--  add_subdirectory (${PROJECT_SOURCE_DIR}/utils)
--endif ()
--
--
--#
- # export package
- #
++if (EXISTS ${PROJECT_SOURCE_DIR}/utils AND CHAI3D_BUILD_UTILS)
+   add_subdirectory (${PROJECT_SOURCE_DIR}/utils)
+ endif ()
  
- # export package for use from the build tree
--export (TARGETS chai3d FILE ${PROJECT_BINARY_DIR}/CHAI3DTargets.cmake)
-+export (TARGETS chai3d chai3d-lib FILE ${PROJECT_BINARY_DIR}/CHAI3DTargets.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
- export (PACKAGE CHAI3D)
- 
- # package definitions

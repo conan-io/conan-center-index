@@ -1,6 +1,20 @@
---- a/modules/ODE/CMakeLists.txt	2020-04-07 23:02:17.000000000 +0200
-+++ b/modules/ODE/CMakeLists.txt	2020-04-07 12:08:04.000000000 +0200
-@@ -120,8 +120,8 @@
+--- a/modules/ODE/CMakeLists.txt	2021-06-08 16:56:46.011491299 +0000
++++ b/modules/ODE/CMakeLists.txt	2021-06-21 11:26:28.252499865 +0000
+@@ -77,13 +77,6 @@
+   set (CMAKE_BUILD_TYPE Release CACHE STRING "Setting build mode to Release" FORCE)
+ endif()
+ 
+-# output location
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY                ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-
+ # find dependencies
+ find_package (CHAI3D 3.2 REQUIRED)
+ include_directories (${CHAI3D_INCLUDE_DIRS})
+@@ -120,8 +113,8 @@
  # Linux global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
    add_definitions (-DLINUX)
@@ -11,7 +25,7 @@
  
  # Mac OS X global build options
  elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-@@ -132,7 +132,7 @@
+@@ -132,7 +125,7 @@
  
  
  #
@@ -20,7 +34,7 @@
  #
  
  # header search path
-@@ -143,10 +143,10 @@
+@@ -143,10 +136,10 @@
  include_directories (${PROJECT_SOURCE_DIR}/external/ODE/OPCODE)
  include_directories (${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/Ice)
  
@@ -33,27 +47,29 @@
  file (GLOB_RECURSE source_ode    RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.c ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.cpp ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.h ${PROJECT_SOURCE_DIR}/external/ODE/include/*.h)
  file (GLOB_RECURSE source_opcode RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/*.cpp ${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/*.h)
  
-@@ -173,8 +173,17 @@
+@@ -168,13 +161,18 @@
+ else ()
+   set (PROJECT_DEFINITIONS "${PROJECT_DEFINITIONS} -DdNODEBUG")
+ endif ()
+-if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++if (${CMAKE_SIZEOF_VOID_P} EQUAL 8 AND MSVC)
+   set (PROJECT_DEFINITIONS "${PROJECT_DEFINITIONS} -DX86_64_SYSTEM")
  endif ()
  add_definitions (${PROJECT_DEFINITIONS})
  
 -# static library
 -add_library (chai3d-ODE STATIC ${source} ${source_ode} ${source_opcode})
 +# library
-+add_library (chai3d-ODE ${source} ${source_ode} ${source_opcode} $<TARGET_OBJECTS:chai3d-obj>)
-+target_include_directories (chai3d-ODE
-+  PUBLIC
-+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-+    $<INSTALL_INTERFACE:include>
-+)
-+if (BUILD_SHARED_LIBS)
-+  set_target_properties (chai3d-ODE PROPERTIES VERSION ${PROJECT_VERSION})
-+endif ()
-+target_link_libraries (chai3d-ODE PUBLIC chai3d-lib)
++add_library (chai3d-ODE SHARED ${source} ${source_ode} ${source_opcode})
++set_target_properties (chai3d-ODE PROPERTIES VERSION ${PROJECT_VERSION})
++if (MSVC)
++  set_target_properties (chai3d-ODE PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++endif (MSVC)
++target_link_libraries(chai3d-ODE chai3d)
  
  # library exports
  set (CHAI3D-ODE_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
-@@ -183,16 +192,6 @@
+@@ -183,16 +181,6 @@
  
  
  #

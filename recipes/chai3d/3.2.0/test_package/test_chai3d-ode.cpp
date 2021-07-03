@@ -1,6 +1,8 @@
 #include <CODE.h>
+#include <cassert>
 
-int main() {
+int main()
+{
   chai3d::cWorld *world = new chai3d::cWorld();
   world->m_name = "WorldConanTest";
 

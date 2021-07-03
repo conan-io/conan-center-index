@@ -1,17 +1,25 @@
---- a/modules/BULLET/CMakeLists.txt	2020-04-07 23:07:17.000000000 +0200
-+++ b/modules/BULLET/CMakeLists.txt	2020-04-07 14:16:04.000000000 +0200
-@@ -120,8 +120,8 @@
- # Linux global build options
- elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
-   add_definitions (-DLINUX)
--  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -march=native -Wno-deprecated -std=c++0x")
--  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -march=native -Wno-deprecated")
-+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wno-deprecated -std=c++0x")
-+  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -march=native -Wno-deprecated")
+--- a/modules/BULLET/CMakeLists.txt	2021-06-08 16:52:09.638000000 +0000
++++ b/modules/BULLET/CMakeLists.txt	2021-06-21 11:26:37.291798115 +0000
+@@ -72,18 +72,6 @@
+   set (ARCH "x86_64")
+ endif ()
  
- # Mac OS X global build options
- elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-@@ -132,34 +132,19 @@
+-# enforce build type
+-if (NOT CMAKE_BUILD_TYPE)
+-  set (CMAKE_BUILD_TYPE Release CACHE STRING "Setting build mode to Release" FORCE)
+-endif()
+-
+-# output location
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY                ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin/${OS}-${ARCH})
+-
+ # find dependencies
+ find_package (CHAI3D 3.2 REQUIRED)
+ include_directories (${CHAI3D_INCLUDE_DIRS})
+@@ -132,17 +120,17 @@
  
  
  #
@@ -21,56 +29,39 @@
  
  # header search path
  include_directories (${PROJECT_SOURCE_DIR}/src)
--include_directories (${PROJECT_SOURCE_DIR}/external/bullet/src)
+ include_directories (${PROJECT_SOURCE_DIR}/external/bullet/src)
  
 -# static library source files
 +# library source files
  file (GLOB_RECURSE source RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.h)
  
 -# static library external dependencies source files
--file (GLOB_RECURSE source_collision  RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletCollision/*.cpp ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletCollision/*.h)
--file (GLOB_RECURSE source_dynamics   RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletDynamics/*.cpp  ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletDynamics/*.h)
--file (GLOB_RECURSE source_softbody   RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletSoftBody/*.cpp  ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletSoftBody/*.h)
--file (GLOB_RECURSE source_linearmath RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/LinearMath/*.cpp      ${PROJECT_SOURCE_DIR}/external/bullet/src/LinearMath/*.h)
--
- # build flags
- set (PROJECT_DEFINITIONS "${PROJECT_DEFINITIONS} -DBT_USE_DOUBLE_PRECISION")
- add_definitions (${PROJECT_DEFINITIONS})
- 
--# group source files (MSVC likes this)
--foreach (FILE ${source_collision} ${source_dynamics} ${source_softbody} ${source_linearmath})
--  get_filename_component (PARENT_DIR "${FILE}" PATH)
--  string (REGEX REPLACE "(\\./)?(src|include)/?" "" GROUP "${PARENT_DIR}")
--  string (REPLACE "/" "\\" GROUP "${GROUP}")
--  source_group ("${GROUP}" FILES "${FILE}")
--endforeach ()
--
- # platform-specific source files adjustments
- # -
- 
-@@ -171,26 +156,25 @@
++# library external dependencies source files
+ file (GLOB_RECURSE source_collision  RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletCollision/*.cpp ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletCollision/*.h)
+ file (GLOB_RECURSE source_dynamics   RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletDynamics/*.cpp  ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletDynamics/*.h)
+ file (GLOB_RECURSE source_softbody   RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletSoftBody/*.cpp  ${PROJECT_SOURCE_DIR}/external/bullet/src/BulletSoftBody/*.h)
+@@ -167,12 +155,17 @@
+ if (${CMAKE_BUILD_TYPE} MATCHES Debug)
+   add_definitions ("-DDEBUG")
+ endif ()
+-if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++if (${CMAKE_SIZEOF_VOID_P} EQUAL 8 AND NOT MSVC)
    add_definitions ("-DUSE_X86_64_ASM")
  endif ()
  
 -# static library
 -add_library (chai3d-BULLET STATIC ${source} ${source_collision} ${source_dynamics} ${source_softbody} ${source_linearmath} )
 +# library
-+add_library (chai3d-BULLET ${source} $<TARGET_OBJECTS:chai3d-obj>)
-+target_include_directories (chai3d-BULLET
-+  PUBLIC
-+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-+    $<INSTALL_INTERFACE:include>
-+)
-+if (BUILD_SHARED_LIBS)
-+  set_target_properties (chai3d-BULLET PROPERTIES VERSION ${PROJECT_VERSION})
-+endif ()
-+target_link_libraries (chai3d-BULLET PUBLIC chai3d-lib PRIVATE CONAN_PKG::bullet3)
++add_library (chai3d-BULLET SHARED ${source} ${source_collision} ${source_dynamics} ${source_softbody} ${source_linearmath})
++set_target_properties (chai3d-BULLET PROPERTIES VERSION ${PROJECT_VERSION})
++if (MSVC)
++  set_target_properties (chai3d-BULLET PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++endif (MSVC)
++target_link_libraries(chai3d-BULLET PUBLIC chai3d)
  
  # library exports
--set (CHAI3D-BULLET_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/external/bullet/src")
-+set (CHAI3D-BULLET_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
- set (CHAI3D-BULLET_LIBRARIES chai3d-BULLET)
- set (CHAI3D-BULLET_DEFINITIONS ${PROJECT_DEFINITIONS})
+ set (CHAI3D-BULLET_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/external/bullet/src")
+@@ -181,16 +174,6 @@
  
  
  #
