@@ -10,10 +10,8 @@ endif()
 
 add_library(${PROJECT_NAME} source_subfolder/libjbig/jbig.c
                             source_subfolder/libjbig/jbig_tab.c)
-if (WIN32)
-    if (BUILD_SHARED_LIBS)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE _JBIGDLL_=1)
-    endif()
+if(MSVC AND BUILD_SHARED_LIBS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC _JBIGDLL_)
 endif()
 
 set(OTHER_TARGETS)
