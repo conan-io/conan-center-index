@@ -10,7 +10,7 @@ class WasmtimeConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch"
     options = {
         "shared": [True, False],
         'fPIC': [True],
@@ -19,8 +19,7 @@ class WasmtimeConan(ConanFile):
         'shared': False,
         'fPIC': True,
     }
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -34,18 +33,14 @@ class WasmtimeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def build(self):
-        try:
-            if self.settings.arch == "armv8" and self.settings.os == "Android":
-                os_name = "Linux"
-            else:
-                os_name = str(self.settings.os)
+    def validate(self):
+        if (not (self.version in self.conan_data["sources"]) or
+            not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
+            not (str(self.settings.arch) in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
+            raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
-            archive_ext = "zip" if os_name == "Windows" else "tar.xz"
-            url = f"https://github.com/bytecodealliance/wasmtime/releases/download/v{self.version}/wasmtime-v{self.version}-{self.settings.arch}-{os_name.lower()}-c-api.{archive_ext}"
-            tools.get(url, strip_root=True, destination=self._source_subfolder)
-        except:
-            raise Exception("Binary does not exist for these settings")
+    def build(self):
+        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         include_path = os.path.join(self._source_subfolder, 'include')
@@ -62,8 +57,6 @@ class WasmtimeConan(ConanFile):
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wasmtime"
-        self.cpp_info.names["cmake_find_multi_package"] = "wasmtime"
         if self.options.shared:
             self.cpp_info.libs = ["wasmtime.dll"]
         else:
