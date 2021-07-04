@@ -49,13 +49,12 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("nlohmann_json/3.9.1")
         self.requires("sqlite3/3.36.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.77.0")
-        if tools.Version(self.version) >= "8.1.0":
-            self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -71,6 +70,9 @@ class ProjConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
+        # unvendor nlohmann_json
+        if tools.Version(self.version) < "8.1.0":
+            tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -132,13 +134,11 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].system_libs.append("Ole32")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["projlib"].system_libs.append(tools.stdcpp_library(self))
-        self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
+        self.cpp_info.components["projlib"].requires.extend(["nlohmann_json::nlohmann_json", "sqlite3::sqlite3"])
         if self.options.get_safe("with_tiff"):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
-        if tools.Version(self.version) >= "8.1.0":
-            self.cpp_info.components["projlib"].requires.append("nlohmann_json::nlohmann_json")
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
 
