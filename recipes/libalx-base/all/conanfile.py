@@ -9,7 +9,10 @@ class libalx_base_conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.0-only"
     topics = ("conan", "libc")
-    settings = "os", "compiler", "arch"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+    }
     requires = [
         ("libbsd/0.10.0"),
     ];
@@ -32,7 +35,11 @@ class libalx_base_conan(ConanFile):
         srcdir   = self._srcdir
         builddir = self._builddir
         args = "builddir={}".format(builddir)
-        self.run("make -C {} build-base {}".format(srcdir, args))
+        self.run("make -C {} build-base-pc {}".format(srcdir, args))
+        if self.options.shared:
+            self.run("make -C {} build-base-a  {}".format(srcdir, args))
+        else:
+            self.run("make -C {} build-base-so {}".format(srcdir, args))
 
     def package(self):
         srcdir   = self._srcdir
@@ -40,7 +47,13 @@ class libalx_base_conan(ConanFile):
         DESTDIR  = self._DESTDIR
         prefix   = self._prefix
         args = "builddir={} DESTDIR={} prefix={}".format(builddir, DESTDIR, prefix)
-        self.run("make -C {} install-base {}".format(srcdir, args))
+        self.run("make -C {} install-base-etc {}".format(srcdir, args))
+        self.run("make -C {} install-base-inc {}".format(srcdir, args))
+        self.run("make -C {} install-base-pc  {}".format(srcdir, args))
+        if self.options.shared:
+            self.run("make -C {} install-base-a  {}".format(srcdir, args))
+        else:
+            self.run("make -C {} install-base-so {}".format(srcdir, args))
 
     def package_info(self):
         pass

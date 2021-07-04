@@ -1,4 +1,4 @@
 sources:
-  "1.0.0-b33":
-    url: "https://github.com/alejandro-colomar/libalx/archive/v1.0.0-b33.tar.gz"
-    sha256: "1e1ff88058837e8aeec24c5ee09c78e680b2b51a60ff48b8fdb6211aa2412897"
+  "1.0.0-b34":
+    url: "https://github.com/alejandro-colomar/libalx/archive/v1.0.0-b34.tar.gz"
+    sha256: "39ea43af3dbd57430064e32fe96fea32c7c1f60a2863b95733dabfba27243868"
