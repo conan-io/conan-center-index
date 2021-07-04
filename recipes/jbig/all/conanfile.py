@@ -11,8 +11,8 @@ class ConanJBig(ConanFile):
     description = "jbig for the Windows build of ImageMagick"
     topics = ("conan", "jbig", "imagemagick", "window", "graphic")
     license = "GPL-2.0"
-    exports_sources = ['CMakeLists.txt', "*.patch"]
-    generators = 'cmake'
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
