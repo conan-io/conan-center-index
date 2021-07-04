@@ -67,7 +67,7 @@ class ICUBase(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
 
         if tools.cross_building(self.settings, skip_x64_x86=True) and hasattr(self, 'settings_build'):
             self.build_requires("icu/{}".format(self.version))
