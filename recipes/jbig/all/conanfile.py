@@ -1,6 +1,7 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class ConanJBig(ConanFile):
@@ -34,11 +35,6 @@ class ConanJBig(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        for extracted_dir in glob.glob("jbig-*"):
-            os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,6 +42,10 @@ class ConanJBig(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
