@@ -11,7 +11,7 @@ class FlacConan(ConanFile):
     license = ("BSD-3-Clause", "GPL-2.0-or-later", "LPGL-2.1-or-later", "GFDL-1.2")
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
-    generators = "cmake",
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
