@@ -47,7 +47,6 @@ class libalx_base_conan(ConanFile):
         DESTDIR  = self._DESTDIR
         prefix   = self._prefix
         args = "builddir={} DESTDIR={} prefix={}".format(builddir, DESTDIR, prefix)
-        self.run("make -C {} install-base-etc {}".format(srcdir, args))
         self.run("make -C {} install-base-inc {}".format(srcdir, args))
         self.run("make -C {} install-base-pc  {}".format(srcdir, args))
         if self.options.shared:
