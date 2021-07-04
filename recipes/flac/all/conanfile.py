@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class FlacConan(ConanFile):
     name = "flac"
@@ -43,9 +45,8 @@ class FlacConan(ConanFile):
         self.build_requires("nasm/2.14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
