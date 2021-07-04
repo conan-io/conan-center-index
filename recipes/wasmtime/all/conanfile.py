@@ -58,13 +58,14 @@ class WasmtimeConan(ConanFile):
 
     def package_info(self):
         if self.options.shared:
-            self.cpp_info.libs = ["wasmtime.dll"]
+            if self.settings.os == "Windows":
+                self.cpp_info.libs = ["wasmtime.dll"]
+            else:
+                self.cpp_info.libs = ["wasmtime"]
         else:
             if self.settings.os == "Windows":
                 self.cpp_info.defines= ["/DWASM_API_EXTERN=", "/DWASI_API_EXTERN="]
-                self.cpp_info.libs = ["wasmtime"]
-            else:
-                self.cpp_info.libs = ["wasmtime"]
+            self.cpp_info.libs = ["wasmtime"]
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'bcrypt', 'advapi32', 'userenv', 'ntdll', 'shell32', 'ole32']
