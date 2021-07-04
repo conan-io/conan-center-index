@@ -11,7 +11,7 @@ class EffceeConan(ConanFile):
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package_multi"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "cppstd", "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
@@ -24,6 +24,10 @@ class EffceeConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,6 +47,8 @@ class EffceeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
         self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
+        self._cmake.definitions["RE2_BUILD_TESTING"] = False
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
