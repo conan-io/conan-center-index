@@ -39,7 +39,7 @@ class WasmtimeConan(ConanFile):
             not (str(self.settings.arch) in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
-    def build(self):
+    def source(self):
         tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)], destination=self._source_subfolder, strip_root=True)
 
     def package(self):
