@@ -14,7 +14,12 @@ if(MSVC AND BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _JBIGDLL_)
 endif()
 
-set(OTHER_TARGETS)
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(FILES source_subfolder/libjbig/jbig.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 if (BUILD_EXECUTABLES)
     add_executable(pbmtojbg source_subfolder/pbmtools/pbmtojbg.c)
@@ -25,13 +30,5 @@ if (BUILD_EXECUTABLES)
     target_link_libraries(jbgtopbm ${PROJECT_NAME})
     target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
 
-    set(OTHER_TARGETS jbgtopbm pbmtojbg)
+    install(TARGETS pbmtojbg jbgtopbm DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
-
-install(TARGETS ${PROJECT_NAME} ${OTHER_TARGETS}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-install(FILES source_subfolder/libjbig/jbig.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
