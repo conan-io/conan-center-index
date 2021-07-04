@@ -54,6 +54,8 @@ class ProjConan(ConanFile):
             self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.77.0")
+        if tools.Version(self.version) >= "8.1.0":
+            self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -93,6 +95,8 @@ class ProjConan(ConanFile):
             self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.definitions["ENABLE_IPO"] = False
             self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
+        if tools.Version(self.version) >= "8.1.0":
+            self._cmake.definitions["NLOHMANN_JSON_ORIGIN"] = "external"
         self._cmake.configure()
         return self._cmake
 
@@ -133,6 +137,8 @@ class ProjConan(ConanFile):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
+        if tools.Version(self.version) >= "8.1.0":
+            self.cpp_info.components["projlib"].requires.append("nlohmann_json::nlohmann_json")
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
 
