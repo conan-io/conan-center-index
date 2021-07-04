@@ -37,9 +37,9 @@ class libalx_base_conan(ConanFile):
         args = "builddir={}".format(builddir)
         self.run("make -C {} build-base-pc {}".format(srcdir, args))
         if self.options.shared:
-            self.run("make -C {} build-base-a  {}".format(srcdir, args))
-        else:
             self.run("make -C {} build-base-so {}".format(srcdir, args))
+        else:
+            self.run("make -C {} build-base-a  {}".format(srcdir, args))
 
     def package(self):
         srcdir   = self._srcdir
@@ -51,9 +51,9 @@ class libalx_base_conan(ConanFile):
         self.run("make -C {} install-base-inc {}".format(srcdir, args))
         self.run("make -C {} install-base-pc  {}".format(srcdir, args))
         if self.options.shared:
-            self.run("make -C {} install-base-a  {}".format(srcdir, args))
-        else:
             self.run("make -C {} install-base-so {}".format(srcdir, args))
+        else:
+            self.run("make -C {} install-base-a  {}".format(srcdir, args))
 
     def package_info(self):
         pass
