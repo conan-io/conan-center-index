@@ -56,6 +56,10 @@ class ProjConan(ConanFile):
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/7.77.0")
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.36.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -69,7 +73,13 @@ class ProjConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "/W4", "")
+        # Trick to find sqlite3 executable for build machine
+        sqlite3_exe_build_context_paths = " ".join("\"{}\"".format(path.replace("\\", "/")) for path in self.deps_env_info["sqlite3"].PATH)
+        tools.replace_in_file(cmakelists,
+                              "find_program(EXE_SQLITE3 sqlite3)",
+                              "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe_build_context_paths))
         # unvendor nlohmann_json
         if tools.Version(self.version) < "8.1.0":
             tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
