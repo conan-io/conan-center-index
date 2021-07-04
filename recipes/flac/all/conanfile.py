@@ -94,3 +94,7 @@ class FlacConan(ConanFile):
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libflac"].system_libs += ["m"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
