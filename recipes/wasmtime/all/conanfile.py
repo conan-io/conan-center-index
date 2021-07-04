@@ -6,7 +6,7 @@ import os
 class WasmtimeConan(ConanFile):
     name = 'wasmtime'
     homepage = 'https://github.com/bytecodealliance/wasmtime'
-    license = 'Apache License 2.0'
+    license = 'Apache-2.0'
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi")
