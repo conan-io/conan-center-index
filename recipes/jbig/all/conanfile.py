@@ -70,7 +70,7 @@ class ConanJBig(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = [self.name]
+        self.cpp_info.libs = ["jbig"]
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.defines = ["_JBIGDLL_"]
 
