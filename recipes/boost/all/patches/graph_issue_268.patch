@@ -8,7 +8,7 @@ index c1a2ada2..806b3f0e 100644
      {
 -        for (typename EdgeList::iterator ei = el.begin(); ei != el.end(); ++ei)
 +        typename EdgeList::iterator ei = el.begin(), e_end = el.end();
-+        while (ei != e_end) {
++        while (ei != e_end)
          {
              if (ei->get_target() > u)
              {
