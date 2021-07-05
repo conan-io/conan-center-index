@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
