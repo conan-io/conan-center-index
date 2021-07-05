@@ -31,6 +31,8 @@ class Ezc3dConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
