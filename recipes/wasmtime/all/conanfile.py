@@ -10,7 +10,7 @@ class WasmtimeConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi")
-    settings = "os", "arch"
+    settings = "os", "compiler", "arch"
     options = {
         "shared": [True, False],
         'fPIC': [True],
@@ -25,6 +25,19 @@ class WasmtimeConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "apple-clang": "9.4",
+            "clang": "3.3",
+            "gcc": "4.9.4"
+        }
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -34,6 +47,14 @@ class WasmtimeConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        compiler = self.settings.compiler
+        min_version = self._minimum_compilers_version[str(compiler)]
+        if tools.Version(compiler.version) < min_version:
+            msg = (
+                "{} requires C{} features which are not supported by compiler {} {} !!"
+            ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+            raise ConanInvalidConfiguration(msg)
+
         if (not (self.version in self.conan_data["sources"]) or
             not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
             not (str(self.settings.arch) in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
