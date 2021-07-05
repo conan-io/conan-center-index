@@ -51,6 +51,10 @@ class OnnxConan(ConanFile):
     def requirements(self):
         self.requires("protobuf/3.15.5")
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires("protobuf/3.15.5")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
