@@ -8,6 +8,9 @@
 // Qt Network test
 #include <QNetworkAccessManager>
 
+// Qt Concurrent test
+#include <QtConcurrent>
+
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Application Example");
@@ -29,6 +32,8 @@ int main(int argc, char *argv[]){
     f.close();
 
     QNetworkAccessManager networkTester;
+
+    QFuture<void> future = QtConcurrent::run([](){});
 
     return app.exec();
 }
