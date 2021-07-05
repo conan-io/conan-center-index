@@ -18,7 +18,8 @@ class TcbSpanConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
