@@ -12,7 +12,7 @@ class LibfabricConan(ConanFile):
     homepage = "https://github.com/aws/libfabric"
     license = "BSD-2-Clause", "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    _providers = ['gni', 'psm', 'psm2', 'psm3', 'rxm', 'sockets', 'tcp', 'udp', 'usnic', 'verbs', 'bgq']
+    _providers = ['gni', 'psm', 'psm2', 'sockets', 'rxm', 'tcp', 'udp', 'usnic', 'verbs', 'bgq', 'shm', 'efa', 'rxd', 'mrail', 'rstream', 'perf', 'hook_debug']
     options = {
         **{ p: "ANY" for p in _providers },
         **{
@@ -24,11 +24,14 @@ class LibfabricConan(ConanFile):
         }
     }
     default_options = {
-        **{ p: "auto" for p in _providers },
+        **{ p: "auto" for p in _providers if p not in ('efa', 'verbs', 'rxd') },
         **{
             "shared": False,
             "fPIC": True,
-            "with_libnl": None,
+            "efa": "yes",
+            "verbs": "no",
+            "rxd": "no",
+            "with_libnl": False,
             "with_bgq_progress": None,
             "with_bgq_mr": None
         }
@@ -67,6 +70,8 @@ class LibfabricConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        with tools.chdir(self._source_subfolder):
+            self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
         args = []
         for p in self._providers:
             args.append('--enable-{}={}'.format(p, self.options.get_safe(p)))
