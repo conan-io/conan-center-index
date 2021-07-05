@@ -66,7 +66,7 @@ class LibaecConan(ConanFile):
         self.copy(pattern="Copyright.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         if self.settings.os == "Windows" and self.options.shared:
