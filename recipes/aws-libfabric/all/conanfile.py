@@ -98,9 +98,16 @@ class LibfabricConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        if self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+        else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libfabric"
         self.cpp_info.libs = self.collect_libs()
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
+            if not self.options.shared:
+                self.cpp_info.system_libs.extend(["dl", "rt"])
