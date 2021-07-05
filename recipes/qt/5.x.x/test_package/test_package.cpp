@@ -5,11 +5,11 @@
 #include "greeter.h"
 #include <QFile>
 
-// Qt Network test
 #include <QNetworkAccessManager>
-
-// Qt Concurrent test
 #include <QtConcurrent>
+#include <QDomText>
+#include <QDBusMessage>
+#include <QSqlDatabase>
 
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
@@ -33,7 +33,13 @@ int main(int argc, char *argv[]){
 
     QNetworkAccessManager networkTester;
 
+    QSqlDatabase sqlTester;
+
     QFuture<void> future = QtConcurrent::run([](){});
+
+    QDomText xmlTester;
+
+    QDBusMessage dbusTester;
 
     return app.exec();
 }
