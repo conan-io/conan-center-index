@@ -9,7 +9,7 @@ class TcbSpanConan(ConanFile):
     homepage = "https://github.com/tcbrindle/span"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
 
     no_copy_source = True
 
