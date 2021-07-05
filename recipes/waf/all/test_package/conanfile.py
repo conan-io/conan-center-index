@@ -9,11 +9,16 @@ class TestPackageConan(ConanFile):
     exports_sources = "a.cpp", "b.cpp", "main.c", "main.cpp", "wscript"
 
     def build(self):
+        if tools.cross_building(self.settings):
+            return
+
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
 
-        waf_path = tools.which("waf").replace("\\", "/")
-        assert waf_path.startswith(str(self.deps_cpp_info["waf"].rootpath))
+        waf_path = tools.which("waf")
+        if waf_path:
+            waf_path = waf_path.replace("\\", "/")
+            assert waf_path.startswith(str(self.deps_cpp_info["waf"].rootpath))
 
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             self.run("waf -h")
