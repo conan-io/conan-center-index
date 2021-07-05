@@ -21,8 +21,9 @@ class LibaecConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -53,9 +54,11 @@ class LibaecConan(ConanFile):
                               "add_subdirectory(tests)", "")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch_sources()
