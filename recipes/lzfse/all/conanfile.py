@@ -59,6 +59,9 @@ class LzfseConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lzfse"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("LZFSE_DLL")
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
