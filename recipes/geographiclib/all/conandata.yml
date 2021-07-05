@@ -1,7 +1,10 @@
 sources:
-  "1.50.1":
-    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.50.1.tar.gz"
-    sha256: "d1765009e068b8cc5e76957e5d6be45ce6cff08c4aad8e5995e84a28354385f1"
+  "1.52":
+    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.52.tar.gz"
+    sha256: "5d4145cd16ebf51a2ff97c9244330a340787d131165cfd150e4b2840c0e8ac2b"
   "1.51":
     url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.51.tar.gz"
     sha256: "34370949617df5105bd6961e0b91581aef758dc455fe8629eb5858516022d310"
+  "1.50.1":
+    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.50.1.tar.gz"
+    sha256: "d1765009e068b8cc5e76957e5d6be45ce6cff08c4aad8e5995e84a28354385f1"
