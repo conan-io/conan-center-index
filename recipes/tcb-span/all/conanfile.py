@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 import os
-import glob
 
 
 class TcbSpanConan(ConanFile):
