@@ -1,4 +1,4 @@
 sources:
-  "0.9":
-    url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/refs/tags/0.9.tar.gz"
-    sha256: "6a8b435da649882a6942f04be5a0fde40ca4173dae7acc6f1f75e51a385dee9e"
+  "cb09b3a84c7e905c6a3fecfe9617cf864d9af781":
+    url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/cb09b3a84c7e905c6a3fecfe9617cf864d9af781.zip"
+sha256: "058c01828692bf193cb862372651c572fcc43babbf2d664674409511b9f54e5b"
