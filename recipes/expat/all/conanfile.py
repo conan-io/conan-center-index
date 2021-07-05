@@ -11,7 +11,7 @@ class ExpatConan(ConanFile):
     homepage = "https://github.com/libexpat/libexpat"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "char_type": ["char", "wchar_t"]}
+    options = {"shared": [True, False], "fPIC": [True, False], "char_type": ["char", "wchar_t", "ushort"]}
     default_options = {"shared": False, "fPIC": True, "char_type": "char"}
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -79,5 +79,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
+        if self.options.get_safe("char_type") in ["wchar_t", "ushort"]:
+            self.cpp_info.defines.append("XML_UNICODE")
         if self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
