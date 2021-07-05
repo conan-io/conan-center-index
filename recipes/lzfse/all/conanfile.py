@@ -11,12 +11,19 @@ class LzfseConan(ConanFile):
     topics = ("conan", "lzfse", "compression", "decompression")
     homepage = "https://github.com/lzfse/lzfse"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -42,10 +49,15 @@ class LzfseConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "POSITION_INDEPENDENT_CODE TRUE", "")
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "POSITION_INDEPENDENT_CODE TRUE", "")
 
     def _configure_cmake(self):
         if self._cmake:
