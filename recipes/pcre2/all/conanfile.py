@@ -76,13 +76,17 @@ class PCRE2Conan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
         # FindPackageHandleStandardArgs.cmake which can break conan generators
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if tools.Version(self.version) < "10.34":
             tools.replace_in_file(cmakelists, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
         else:
             tools.replace_in_file(cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(cmakelists,
+                              "RUNTIME DESTINATION bin",
+                              "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
