@@ -39,8 +39,14 @@ class JsonnetConan(ConanFile):
         if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration("{} compiler not supported"
                                             .format(self.settings.compiler))
+
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("jsonnet gcc package requires libstdc++11")
+
+        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.libcxx != "libstdc++":
+            raise ConanInvalidConfiguration("jsonnet {} package requires libstdc++".
+                                            format(self.settings.compiler))
+
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
