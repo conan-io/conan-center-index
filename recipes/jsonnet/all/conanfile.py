@@ -36,11 +36,11 @@ class JsonnetConan(ConanFile):
         self.requires("nlohmann_json/3.9.1")
 
     def validate(self):
-        if self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("jsonnet requires libstdc++11")
         if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration("{} compiler not supported"
                                             .format(self.settings.compiler))
+        if self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("jsonnet requires libstdc++11")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
