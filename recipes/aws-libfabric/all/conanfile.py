@@ -18,7 +18,7 @@ class LibfabricConan(ConanFile):
         **{
             "shared": [True, False],
             "fPIC": [True, False],
-            "with_libnl": "ANY",
+            "with_libnl": [True, False],
             "with_bgq_progress": [None, "auto", "manual"],
             "with_bgq_mr": [None, "basic", "scalable"]
         }
@@ -53,14 +53,16 @@ class LibfabricConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.options.get_safe('with_libnl'):
+            self.requires('libnl/3.2.25')
+
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("The libfabric package cannot be built on Visual Studio.")
         for p in self._providers:
             if self.options.get_safe(p) not in ["auto", "yes", "no", "dl"] and not os.path.isdir(str(self.options.get_safe(p))):
                 raise ConanInvalidConfiguration("Option {} can only be one of 'auto', 'yes', 'no', 'dl' or a directory path")
-        if self.options.get_safe('with_libnl') and not os.path.isdir(str(self.options.with_libnl)):
-            raise ConanInvalidConfiguration("Value of with_libnl must be an existing directory")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -76,7 +78,7 @@ class LibfabricConan(ConanFile):
         for p in self._providers:
             args.append('--enable-{}={}'.format(p, self.options.get_safe(p)))
         if self.options.with_libnl:
-            args.append('--with-libnl={}'.format(self.options.with_libnl))
+            args.append('--with-libnl={}'.format(self.deps_cpp_info["libnl"].rootpath))
         if self.options.with_bgq_progress:
             args.append('--with-bgq-progress={}'.format(self.options.with_bgq_progress))
         if self.options.with_bgq_mr:
@@ -100,5 +102,5 @@ class LibfabricConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libfabric"
         self.cpp_info.libs = self.collect_libs()
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
