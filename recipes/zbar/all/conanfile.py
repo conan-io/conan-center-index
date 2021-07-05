@@ -2,6 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 import glob
+import shutil
 
 class zbarConan(ConanFile):
     name = "zbar"
@@ -41,6 +42,10 @@ class zbarConan(ConanFile):
     _env_build = None
 
     @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -61,6 +66,9 @@ class zbarConan(ConanFile):
                 "--enable-shared" if self.options.shared else "--disable-shared",
                 "--enable-static" if not self.options.shared else "--disable-static",
             ]
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+               # ./libtool: eval: line 961: syntax error near unexpected token `|'
+                env_args.append("NM=nm")
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
@@ -68,7 +76,12 @@ class zbarConan(ConanFile):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
 
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
         if tools.is_apple_os(self.settings.os) and not self.options.shared:
@@ -82,13 +95,17 @@ class zbarConan(ConanFile):
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config", "config.guess"))
+
         env_build = self._configure_autotools()
         env_build.make()
 
