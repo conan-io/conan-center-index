@@ -130,5 +130,5 @@ class GetTextConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["gnuintl"]
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(['CoreFoundation'])
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.frameworks.append("CoreFoundation")
