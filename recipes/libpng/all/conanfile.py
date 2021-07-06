@@ -70,6 +70,8 @@ class LibpngConan(ConanFile):
                 cmake.definitions["PNG_ARM_NEON"] = "on"
         if self.options.api_prefix:
             cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         cmake.configure()
         return cmake
 
