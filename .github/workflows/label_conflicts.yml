@@ -13,11 +13,10 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: prince-chrismc/label-merge-conflicts-action@comment-on-pr
+      - uses: prince-chrismc/label-merge-conflicts-action@v1
         with:
           conflict_label_name: "has conflicts"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          max_retries: 5
-          wait_ms: 10000
+          wait_ms: 12000
           detect_merge_changes: true
           conflict_comment: ":wave: Hi, @${author},\n\nI detected conflicts against the base branch. You'll want sync :arrows_counterclockwise: your branch with upstream!"
