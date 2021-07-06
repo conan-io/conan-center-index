@@ -27,6 +27,10 @@ class DCMTKConan(ConanFile):
         "with_libsndfile": [True, False, "deprecated"],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
+        "builtin_dictionary": [None, True, False],
+        "builtin_private_tags": [True, False],
+        "external_dictionary": [None, True, False],
+        "wide_io": [True, False],
     }
     default_options = {
         "shared": False,
@@ -42,6 +46,10 @@ class DCMTKConan(ConanFile):
         "with_libsndfile": "deprecated",
         "with_libtiff": True,
         "with_tcpwrappers": False,
+        "builtin_dictionary": None,
+        "builtin_private_tags": False,
+        "external_dictionary": None,
+        "wide_io": False,
     }
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
@@ -65,6 +73,7 @@ class DCMTKConan(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.with_tcpwrappers
+        
         # Looking into source code, it appears that OpenJPEG and libsndfile are not used
         if self.options.with_openjpeg != "deprecated":
             self.output.warn("with_openjpeg option is deprecated, do not use anymore")
@@ -130,6 +139,7 @@ class DCMTKConan(ConanFile):
         self._cmake.definitions["DCMTK_WITH_XML"] = self.options.with_libxml2
         if self.options.with_libxml2:
             self._cmake.definitions["WITH_LIBXMLINC"] = self.deps_cpp_info["libxml2"].rootpath
+            self._cmake.definitions["WITH_LIBXML_SHARED"] = self.options["libxml2"].shared
         self._cmake.definitions["DCMTK_WITH_ZLIB"] = self.options.with_zlib
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIBINC"] = self.deps_cpp_info["zlib"].rootpath
@@ -139,6 +149,15 @@ class DCMTKConan(ConanFile):
 
         self._cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False
         self._cmake.definitions["DCMTK_WITH_DOXYGEN"] = False
+
+        self._cmake.definitions["DCMTK_ENABLE_PRIVATE_TAGS"] = self.options.builtin_private_tags
+        if self.options.external_dictionary is not None:
+            self._cmake.definitions["DCMTK_ENABLE_EXTERNAL_DICTIONARY"] = self.options.external_dictionary
+        if self.options.builtin_dictionary is not None:
+            self._cmake.definitions["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
+        self._cmake.definitions["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
+        self._cmake.definitions["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
+
 
         if self.settings.os == "Windows":
             self._cmake.definitions["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
@@ -221,6 +240,8 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
+        charls = "dcmtkcharls" if tools.Version("3.6.6") <= self.version else "charls"
+
         return {
             "ofstd"   : charset_conversion(),
             "oflog"   : ["ofstd"],
@@ -232,8 +253,8 @@ class DCMTKConan(ConanFile):
             "ijg8"    : [],
             "ijg12"   : [],
             "ijg16"   : [],
-            "dcmjpls" : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage", "charls"],
-            "charls"  : ["ofstd", "oflog"],
+            "dcmjpls" : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage", charls],
+            charls    : ["ofstd", "oflog"],
             "dcmtls"  : ["ofstd", "dcmdata", "dcmnet"] + openssl(),
             "dcmnet"  : ["ofstd", "oflog", "dcmdata"] + tcpwrappers(),
             "dcmsr"   : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage"] + xml2(),

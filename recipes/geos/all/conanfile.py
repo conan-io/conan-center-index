@@ -51,6 +51,12 @@ class GeosConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, {}):
             tools.patch(**patch)
+
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) <= "3.9.0":
+            # Issue reported https://trac.osgeo.org/geos/ticket/1090, and 
+            # fixed upstream for following versions https://trac.osgeo.org/geos/changeset/6318f224552c27a4b87ecf8817173cb7e6a2f4f1/git
+            os.unlink(os.path.join(self.build_folder, self._source_subfolder, 'src', 'inlines.cpp'))
+
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -5,6 +5,7 @@ import shutil
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
+required_conan_version = ">=1.33.0"
 
 class ICUBase(ConanFile):
     name = "icu"
@@ -46,7 +47,7 @@ class ICUBase(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-    
+
     @property
     def _make_tool(self):
         return "make" if self.settings.os != "FreeBSD" else "gmake"
@@ -54,6 +55,7 @@ class ICUBase(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.data_packaging
 
     def configure(self):
         if self.options.shared:
@@ -65,11 +67,13 @@ class ICUBase(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
+
+        if tools.cross_building(self.settings, skip_x64_x86=True) and hasattr(self, 'settings_build'):
+            self.build_requires("icu/{}".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("icu", self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -93,6 +97,8 @@ class ICUBase(ConanFile):
                 with tools.chdir(build_dir):
                     # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
                     os.makedirs(os.path.join("data", "out", "tmp"))
+                    # workaround for "No rule to make target 'out/tmp/dirs.timestamp'"
+                    tools.save(os.path.join("data", "out", "tmp", "dirs.timestamp"), "")
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
                     command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
@@ -145,7 +151,6 @@ class ICUBase(ConanFile):
         bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
                 "--prefix={0}".format(prefix),
-                "--with-library-bits={0}".format(bits),
                 "--disable-samples",
                 "--disable-layout",
                 "--disable-layoutex",
@@ -156,14 +161,19 @@ class ICUBase(ConanFile):
 
         env_build = self._configure_autotools()
         if tools.cross_building(self.settings, skip_x64_x86=True):
-            if env_build.build:
-                args.append("--build=%s" % env_build.build)
             if env_build.host:
                 args.append("--host=%s" % env_build.host)
-            if env_build.target:
-                args.append("--target=%s" % env_build.target)
+            bin_path = self.deps_env_info["icu"].PATH[0]
+            base_path, _ = bin_path.rsplit('/', 1)
+            args.append("--with-cross-build={}".format(base_path))
+        else:
+            args.append("--with-library-bits={0}".format(bits),)
 
-        args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+        if self.settings.os != "Windows":
+            # http://userguide.icu-project.org/icudata
+            # This is the only directly supported behavior on Windows builds.
+            args.append("--with-data-packaging={0}".format(self.options.data_packaging))
+
         datadir = os.path.join(self.package_folder, "lib")
         datadir = datadir.replace("\\", "/") if tools.os_info.is_windows else datadir
         args.append("--datarootdir=%s" % datadir)  # do not use share
@@ -209,9 +219,13 @@ class ICUBase(ConanFile):
         for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             shutil.move(dll, os.path.join(self.package_folder, "bin"))
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             tools.mkdir(os.path.join(self.package_folder, "res"))
             shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
+
+        # Copy some files required for cross-compiling
+        self.copy("icucross.mk", src=os.path.join(build_dir, "config"), dst="config")
+        self.copy("icucross.inc", src=os.path.join(build_dir, "config"), dst="config")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "icu"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
@@ -307,7 +321,7 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
         self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
-        if self.options.data_packaging in ["files", "archive"]:
+        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)

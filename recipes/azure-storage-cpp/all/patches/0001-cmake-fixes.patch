@@ -1,0 +1,72 @@
+diff --git a/Microsoft.WindowsAzure.Storage/CMakeLists.txt b/Microsoft.WindowsAzure.Storage/CMakeLists.txt
+index ac9e65d..f5988f6 100644
+--- a/Microsoft.WindowsAzure.Storage/CMakeLists.txt
++++ b/Microsoft.WindowsAzure.Storage/CMakeLists.txt
+@@ -46,9 +46,9 @@ if(UNIX)
+   find_package(OpenSSL 1.0.0 REQUIRED)
+ 
+ 
+-  find_package(UUID REQUIRED)
+-  find_package(Casablanca REQUIRED)
+-  find_package(LibXML2 REQUIRED)
++  find_package(libuuid REQUIRED)
++  find_package(cpprestsdk REQUIRED)
++  find_package(LibXml2 REQUIRED)
+ 
+   if(BUILD_TESTS)
+     find_package(UnitTest++ REQUIRED)
+@@ -57,7 +57,7 @@ if(UNIX)
+ 
+ elseif(WIN32)
+   message("-- Setting WIN32 options")
+-  find_package(Casablanca REQUIRED)
++  find_package(cpprestsdk REQUIRED)
+   add_definitions(-DUNICODE -D_UNICODE -D_WIN32)
+ else()
+   message("-- Unsupported Build Platform.")
+@@ -85,13 +85,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+ 
+   set(LD_FLAGS "${LD_FLAGS} -Wl,-z,defs")
+ 
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-strict-aliasing")
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+ 
+   set(STRICT_CXX_FLAGS ${WARNINGS} "-Werror -pedantic")
+ 
+-  if (BUILD_SHARED_LIBS)
+-    add_definitions(-DBOOST_LOG_DYN_LINK)
+-  endif()
+   add_definitions(-D_TURN_OFF_PLATFORM_STRING)
+ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   message("-- Setting clang options")
+@@ -100,14 +97,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   set(OSX_SUPPRESSIONS "-Wno-overloaded-virtual -Wno-sign-conversion -Wno-deprecated -Wno-unknown-pragmas -Wno-reorder -Wno-char-subscripts -Wno-switch -Wno-unused-parameter -Wno-unused-variable -Wno-deprecated -Wno-unused-value -Wno-unknown-warning-option -Wno-return-type-c-linkage -Wno-unused-function -Wno-sign-compare -Wno-shorten-64-to-32 -Wno-reorder -Wno-unused-local-typedefs")
+   set(WARNINGS "${WARNINGS} ${OSX_SUPPRESSIONS}")
+ 
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type-c-linkage -Wno-unneeded-internal-declaration")
+   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+ 
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-strict-aliasing")
+-  if (BUILD_SHARED_LIBS)
+-    add_definitions(-DBOOST_LOG_DYN_LINK)
+-  endif()
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+   add_definitions(-D_TURN_OFF_PLATFORM_STRING)
+ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+   message("-- Setting MSVC options")
+@@ -142,11 +136,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Binaries)
+ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Binaries)
+ 
+ set(AZURESTORAGE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/includes)
+-set(AZURESTORAGE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/includes ${CASABLANCA_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${LibXML2_INCLUDE_DIR})
++set(AZURESTORAGE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/includes ${cpprestsdk_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${OpenSSL_INCLUDE_DIRS} ${libuuid_INCLUDE_DIRS} ${LibXml2_INCLUDE_DIR})
+ 
+ 
+ set(AZURESTORAGE_LIBRARY azurestorage)
+-set(AZURESTORAGE_LIBRARIES ${AZURESTORAGE_LIBRARY} ${CASABLANCA_LIBRARY} ${Boost_LIBRARIES} ${Boost_FRAMEWORK} ${OPENSSL_LIBRARIES} ${UUID_LIBRARIES} ${LibXML2_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
++set(AZURESTORAGE_LIBRARIES ${AZURESTORAGE_LIBRARY} ${cpprestsdk_LIBRARIES} ${Boost_LIBRARIES} ${OpenSSL_LIBRARIES} ${libuuid_LIBRARIES} ${LibXml2_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+ 
+ # Set version numbers centralized
+ set (AZURESTORAGE_VERSION_MAJOR 7)

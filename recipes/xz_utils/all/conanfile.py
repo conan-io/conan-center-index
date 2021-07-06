@@ -14,7 +14,7 @@ class XZUtils(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
     topics = ("conan", "lzma", "xz", "compression")
-    license = "Public Domain, GNU LGPLv2.1, GNU GPLv2, or GNU GPLv3"
+    license = "Unlicense", "LGPL-2.1-or-later",  "GPL-2.0-or-later", "GPL-3.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -42,7 +42,7 @@ class XZUtils(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+           not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
     def source(self):

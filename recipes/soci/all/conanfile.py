@@ -151,6 +151,7 @@ class SociConan(ConanFile):
                 tools.rename(os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
 
         os.remove(os.path.join(self.package_folder, "include", "soci", "soci-config.h.in"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["soci_core"]

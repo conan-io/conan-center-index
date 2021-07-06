@@ -5,6 +5,7 @@
 .pydevproject
 .settings/
 .ropeproject/
+.devcontainer/
 ## emacs
 *~
 

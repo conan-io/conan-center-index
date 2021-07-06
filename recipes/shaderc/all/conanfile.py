@@ -45,9 +45,9 @@ class ShadercConan(ConanFile):
 
     def requirements(self):
         self.requires("glslang/8.13.3559")
-        self.requires("spirv-tools/v2020.3")
+        self.requires("spirv-tools/2020.5")
         if self.options.spvc:
-           self.requires("spirv-cross/20200629")
+           self.requires("spirv-cross/20210115")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

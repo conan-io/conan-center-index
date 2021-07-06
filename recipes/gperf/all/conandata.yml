@@ -2,3 +2,7 @@ sources:
   "3.1":
     url: "https://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz"
     sha256: "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2"
+patches:
+  "3.1":
+    - patch_file: "all/0001-assert-exception-upstream-issue-2011.patch"
+      base_path: "source_subfolder"

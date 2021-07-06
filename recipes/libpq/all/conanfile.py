@@ -11,6 +11,7 @@ class LibpqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
+    exports_sources = ["patches/*"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,6 +54,10 @@ class LibpqConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.shared:
+            del self.options.fPIC
+
         if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
             if self.options.shared:
                 raise ConanInvalidConfiguration("static mingw build is not possible")
@@ -76,6 +81,8 @@ class LibpqConan(ConanFile):
             args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
             if tools.cross_building(self.settings) and not self.options.with_openssl:
                 args.append("--disable-strong-random")
+            if tools.cross_building(self.settings, skip_x64_x86=True):
+                args.append("USE_DEV_URANDOM=1")
             if self.settings.os != "Windows" and self.options.disable_rpath:
                 args.append('--disable-rpath')
             if self._is_clang8_x86:
@@ -92,6 +99,9 @@ class LibpqConan(ConanFile):
         return args
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
             # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README

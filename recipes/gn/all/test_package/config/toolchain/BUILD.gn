@@ -1,0 +1,174 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+toolchain("gcc") {
+  tool("cc") {
+    depfile = "{{output}}.d"
+    _compiler = getenv("CC")
+    if (_compiler == "") {
+      _compiler = "gcc"
+    }
+    command = _compiler + " -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    depsformat = "gcc"
+    description = "CC {{output}}"
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
+  }
+  tool("cxx") {
+    depfile = "{{output}}.d"
+    _compiler = getenv("CXX")
+    if (_compiler == "") {
+      _compiler = "g++"
+    }
+    command = _compiler + " -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    depsformat = "gcc"
+    description = "CXX {{output}}"
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
+  }
+  tool("alink") {
+    _archiver = getenv("AR")
+    if (_archiver == "") {
+      _archiver = "ar"
+    }
+    command = "rm -f {{output}} && " + _archiver + " rcs {{output}} {{inputs}}"
+    description = "AR {{target_output_name}}{{output_extension}}"
+    outputs =
+        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+    default_output_extension = ".a"
+    output_prefix = "lib"
+  }
+  tool("solink") {
+    _linker = getenv("LD")
+    if (_linker == "") {
+      _linker = getenv("CXX")
+      if (_linker == "") {
+        _linker = "g++"
+      }
+    }
+    soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
+    sofile = "{{output_dir}}/$soname"
+    rspfile = soname + ".rsp"
+    if (is_mac) {
+      os_specific_option = "-install_name @executable_path/$sofile"
+      rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
+      default_output_extension = ".dylib"
+    } else {
+      os_specific_option = "-Wl,-soname=$soname"
+      rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}}"
+      default_output_extension = ".so"
+    }
+    command = _linker + " -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
+    description = "SOLINK $soname"
+    default_output_dir = "{{root_out_dir}}"
+    outputs = [ sofile ]
+    link_output = sofile
+    depend_output = sofile
+    output_prefix = "lib"
+  }
+  tool("link") {
+    _linker = getenv("LD")
+    if (_linker == "") {
+      _linker = getenv("CXX")
+      if (_linker == "") {
+        _linker = "g++"
+      }
+    }
+    outfile = "{{target_output_name}}{{output_extension}}"
+    rspfile = "$outfile.rsp"
+    if (is_mac) {
+      command = _linker + " {{ldflags}} -o $outfile @$rspfile {{solibs}} {{libs}}"
+    } else {
+      command = _linker + " {{ldflags}} -o $outfile -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}}"
+    }
+    description = "LINK $outfile"
+    default_output_dir = "{{root_out_dir}}"
+    rspfile_content = "{{inputs}}"
+    outputs = [ outfile ]
+  }
+  tool("stamp") {
+    command = "touch {{output}}"
+    description = "STAMP {{output}}"
+  }
+  tool("copy") {
+    command = "cp -af {{source}} {{output}}"
+    description = "COPY {{source}} {{output}}"
+  }
+}
+
+toolchain("msvc") {
+  tool("cc") {
+    _compiler = getenv("CC")
+    if (_compiler == "") {
+      _compiler = "cl -nologo"
+    }
+    command = _compiler + " {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -Fo{{output}}"
+    description = "CC {{output}}"
+    outputs =
+      [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj" ]
+  }
+  tool("cxx") {
+    _compiler = getenv("CXX")
+    if (_compiler == "") {
+      _compiler = "cl -nologo"
+    }
+    command = _compiler + " {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -Fo{{output}}"
+    description = "CXX {{output}}"
+    default_output_extension = ".obj"
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
+  }
+  tool("alink") {
+    _archiver = getenv("AR")
+    if (_archiver == "") {
+      _archiver = "lib -nologo"
+    }
+    command = _archiver + " -OUT:{{output}} {{inputs}}"
+    description = "LIB {{target_output_name}}{{output_extension}}"
+    outputs =
+      [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+    default_output_extension = ".lib"
+    output_prefix = ""
+  }
+  tool("solink") {
+    _linker = getenv("LD")
+    if (_linker == "") {
+      _linker = "link -nologo"
+    }
+    soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
+    sofile = "{{output_dir}}/$soname"
+    implib = "$sofile.lib"
+    rspfile = soname + ".rsp"
+    rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
+    command = _linker + " -dll {{ldflags}} -OUT:$sofile -IMPLIB:$implib @$rspfile"
+    description = "SOLINK $soname"
+    default_output_extension = ".dll"
+    default_output_dir = "{{root_out_dir}}"
+    outputs = [ sofile, implib ]
+    link_output = implib
+    depend_output = implib
+    output_prefix = ""
+  }
+  tool("link") {
+    _linker = getenv("LD")
+    if (_linker == "") {
+      _linker = "link -nologo"
+    }
+    outfile = "{{target_output_name}}{{output_extension}}"
+    rspfile = "$outfile.rsp"
+    command = _linker + " {{ldflags}} -OUT:$outfile @$rspfile {{solibs}} {{libs}}"
+    description = "LINK $outfile"
+    default_output_extension = ".exe"
+    default_output_dir = "{{root_out_dir}}"
+    rspfile_content = "{{inputs}}"
+    outputs = [ outfile ]
+  }
+  tool("stamp") {
+    command = "touch {{output}}"
+    description = "STAMP {{output}}"
+  }
+  tool("copy") {
+    command = "cp -af {{source}} {{output}}"
+    description = "COPY {{source}} {{output}}"
+  }
+}

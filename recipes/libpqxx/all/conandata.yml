@@ -44,6 +44,15 @@ sources:
   "7.4.1":
     url: "https://github.com/jtv/libpqxx/archive/7.4.1.tar.gz"
     sha256: "73b2f0a0af786d6039291b60250bee577bc7ea7c10b7550ec37da448940848b7"
+  "7.5.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.5.0.tar.gz"
+    sha256: "62744ddba939880675f1e76275c98c1653f60b0e725f013299f4a437351bf2b0"
+  "7.5.1":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.5.1.tar.gz"
+    sha256: "16a3a4097a6772a9824ba584dbe5a1feee163ab954b94497358fe591eb236e3d"
+  "7.5.2":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.5.2.tar.gz"
+    sha256: "62e140667fb1bc9b61fa01cbf46f8ff73236eba6f3f7fbcf98108ce6bbc18dcd"
 patches:
   "7.0.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
@@ -100,5 +109,14 @@ patches:
     - patch_file: "patches/fix-apple-clang-compilation-7.4.0.patch"
       base_path: "source_subfolder"
   "7.4.1":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.5.0":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.5.1":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.5.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"

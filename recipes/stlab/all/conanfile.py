@@ -130,6 +130,10 @@ class Stlab(ConanFile):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
             raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
+        # Actually, we want *at least* 15.8 (MSVC 19.15), but we cannot check this for now with Conan.
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "19.15":
+            raise ConanInvalidConfiguration("Need msvc >= 19.15")
+
         self._validate_task_system()
         self._validate_boost_components()
 

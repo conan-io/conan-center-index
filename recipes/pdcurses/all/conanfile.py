@@ -10,7 +10,7 @@ class PDCursesConan(ConanFile):
     topics = ("conan", "pdcurses", "curses", "ncurses")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdcurses.org/"
-    license = "Public Domain", "MITX"
+    license = "Unlicense", "MITX", "CC-BY-4.0", "GPL", "FSFUL"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {

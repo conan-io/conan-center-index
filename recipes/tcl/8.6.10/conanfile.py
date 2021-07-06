@@ -206,7 +206,7 @@ class TclConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "TCL"
 
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["Cocoa"]
+            self.cpp_info.frameworks = ["CoreFoundation"]
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
         tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))

@@ -8,3 +8,6 @@ sources:
   "2.48":
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.48.tar.xz"
     sha256: "4de9590ee09a87c282d558737ffb5b6175ccbfd26d580add10df44d0f047f6c2"
+  "2.50":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.50.tar.xz"
+    sha256: "47a57b8bd238b84c93c921a9b4ff82337551dbcb0cca071316aadf3e23b19261"

@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 class LupleConan(ConanFile):
     name = "luple"
@@ -12,6 +12,7 @@ class LupleConan(ConanFile):
     description = "Home to luple, nuple, C++ String Interning, Struct Reader and C++ Type Loophole"
     topics = ("conan", "loophole", "luple", "nuple", "struct", "intern")
     settings = "compiler"
+    no_copy_source = True
 
     def validate(self):
         minimal_cpp_standard = "14"
@@ -34,18 +35,13 @@ class LupleConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version][0], strip_root=True)
+        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "COPYING"), "Public Domain")
-        self.copy("*.h", dst="include", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses")
+        self.copy("*.h", dst="include")
 
     def package_id(self):
         self.info.header_only()

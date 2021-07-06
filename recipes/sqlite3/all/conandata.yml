@@ -41,3 +41,9 @@ sources:
   "3.35.4":
     sha256: "f3bf0df69f5de0675196f4644e05d07dbc698d674dc563a12eff17d5b215cdf5"
     url: "https://sqlite.org/2021/sqlite-amalgamation-3350400.zip"
+  "3.35.5":
+    sha256: "b49409ef123e193e719e2536f9b795482a69e61a9cc728933739b9024f035061"
+    url: "https://sqlite.org/2021/sqlite-amalgamation-3350500.zip"
+  "3.36.0":
+    sha256: "999826fe4c871f18919fdb8ed7ec9dd8217180854dd1fe21eea96aed36186729"
+    url: "https://sqlite.org/2021/sqlite-amalgamation-3360000.zip"

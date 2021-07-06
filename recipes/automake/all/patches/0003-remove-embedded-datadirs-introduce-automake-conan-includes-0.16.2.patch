@@ -8,7 +8,7 @@
 -my @system_includes = ('@datadir@/aclocal');
 +my @automake_includes = ($ENV{"AUTOMAKE_DATADIR"} . '/aclocal-' . $APIVERSION);
 +my @system_includes = ($ENV{"AUTOMAKE_DATADIR"} . '/aclocal');
-+my @conan_includes = uniq(split(/:/, $ENV{'AUTOMAKE_CONAN_INCLUDES'} || ""));
++my @conan_includes = uniq(split(/[:;]/, $ENV{'AUTOMAKE_CONAN_INCLUDES'} || ""));
 -
  # Whether we should copy M4 file in $user_includes[0].
  my $install = 0;

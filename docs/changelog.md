@@ -1,6 +1,34 @@
 # Changelog
 
-### 08-April-2021 - 17:01 CET
+### 01-June-2021 - 08:59 CEST
+
+ - [request_reviews] Add column to enable/disable review requests (any user)
+ - [testing] Use declared Conan version to run tests
+ - [internal] Pay some technical debt
+ - [internal] Simplify workflow, all packages already have properties
+
+### 24-May-2021 - 15:59 CEST
+
+- [feature] Start to crossbuild Apple M1 using two profiles approach (extra build).
+- [feature] Detect and report when a PR has missing dependencies.
+- [feature] Upgrade Conan version to 1.35.2.
+- [feature] Use only one Artifactory repository per pull request.
+
+### 13-May-2021 - 17:20 CEST
+
+- [fix] Add `--dry-build` to `conan info` commands, it will expand also the build-requires that would have
+  failed during the build stage.
+- [fix] Escape character comma when assigning properties to Artifactory.
+- [fix] Add `--force` when adding remotes.
+
+### 30-April-2021 - 13:52 CEST
+
+- [feature] Add mark in logs to indicate output has been trimmed.
+- [feature] Stop uploading packages to Bintray.
+- [job] RequestReviews: Automatically request team reviews for PRs ready for review.
+- [job] Add checks to validate infrastructure: MacOS version and AVX2 in CPU features.
+
+### 08-April-2021 - 17:01 CEST
 
 - [feature] Hide previous comments by the bot.
 - [feature] Use Artifactory API to promote packages from one repository to another.

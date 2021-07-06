@@ -2,6 +2,7 @@ import os
 from conans import tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
+required_conan_version = ">=1.33.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -60,12 +61,10 @@ class CMakeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -77,6 +76,9 @@ class CMakeConan(ConanFile):
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
                 if self.options.with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
+            if tools.cross_building(self):
+                self._cmake.definitions["HAVE_POLL_FINE_EXITCODE"] = ''
+                self._cmake.definitions["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
