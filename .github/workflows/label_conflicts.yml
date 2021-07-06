@@ -20,3 +20,4 @@ jobs:
           max_retries: 5
           wait_ms: 10000
           detect_merge_changes: true
+          conflict_comment: "# There are merge conflicts!"
