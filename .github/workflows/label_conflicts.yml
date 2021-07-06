@@ -20,4 +20,4 @@ jobs:
           max_retries: 5
           wait_ms: 10000
           detect_merge_changes: true
-          conflict_comment: "# There are merge conflicts!"
+          conflict_comment: ":wave: Hi, @${author},\n\nI detected conflicts against the base branch. You'll want sync :arrows_counterclockwise: your branch with upstream!"
