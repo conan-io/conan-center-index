@@ -91,18 +91,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "cppcoro"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "cppcoro"
         self.cpp_info.names["cmake_find_package"] = "cppcoro"
         self.cpp_info.names["cmake_find_package_multi"] = "cppcoro"
-
-        comp = self.cpp_info.components["cppcoro"]
-        comp.names["cmake_find_package"] = "cppcoro"
-        comp.names["cmake_find_package_multi"] = "cppcoro"
-
+        self.cpp_info.libs = ["cppcoro"]
         if self.settings.compiler == "Visual Studio":
-            comp.cxxflags.append("/await")
+            self.cpp_info.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
-            comp.cxxflags.append("-fcoroutines")
+            self.cpp_info.cxxflags.append("-fcoroutines")
         elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
-            comp.cxxflags.append("-fcoroutines-ts")
+            self.cpp_info.cxxflags.append("-fcoroutines-ts")
