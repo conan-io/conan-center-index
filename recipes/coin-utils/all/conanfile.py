@@ -2,6 +2,9 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class CoinUtilsConan(ConanFile):
@@ -39,22 +42,34 @@ class CoinUtilsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
+
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not supported (tested M1)")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("bzip2/1.0.8")
 
     def build_requirements(self):
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
+
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
+
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("CoinUtils-releases-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    @property 
+    def _user_info_build(self): 
+        return getattr(self, "user_info_build", None) or self.deps_user_info 
 
     @contextmanager
     def _build_context(self):
@@ -74,6 +89,13 @@ class CoinUtilsConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        
+        if self.settings.compiler != "Visual Studio":
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
@@ -92,6 +114,7 @@ class CoinUtilsConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
