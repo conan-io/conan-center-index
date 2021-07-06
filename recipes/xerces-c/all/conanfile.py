@@ -5,7 +5,9 @@ import os
 
 class XercesCConan(ConanFile):
     name = "xerces-c"
-    description = "Xerces-C++ is a validating XML parser written in a portable subset of C++"
+    description = (
+        "Xerces-C++ is a validating XML parser written in a portable subset of C++"
+    )
     topics = ("conan", "xerces", "XML", "validation", "DOM", "SAX", "SAX2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
@@ -13,7 +15,11 @@ class XercesCConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "char_type": ["uint16_t", "wchar_t"]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "char_type": ["uint16_t", "char16_t", "wchar_t"],
+    }
     default_options = {"shared": False, "fPIC": True, "char_type": "uint16_t"}
 
     _cmake = None
@@ -25,11 +31,12 @@ class XercesCConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def validate(self):
         if self.options.char_type == "wchar_t" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Option 'char_type=wchar_t' is only supported in Windows")
-
+            raise ConanInvalidConfiguration(
+                "Option 'char_type=wchar_t' is only supported in Windows"
+            )
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,19 +58,25 @@ class XercesCConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         # https://xerces.apache.org/xerces-c/build-3.html
-        self._cmake.definitions["network-accessor"] = {"Windows": "winsock",
-                                                       "Macos": "cfurl",
-                                                       "Linux": "socket"}.get(str(self.settings.os))
-        self._cmake.definitions["transcoder"] = {"Windows": "windows",
-                                                 "Macos": "macosunicodeconverter",
-                                                 "Linux": "gnuiconv"}.get(str(self.settings.os))
+        self._cmake.definitions["network-accessor"] = {
+            "Windows": "winsock",
+            "Macos": "cfurl",
+            "Linux": "socket",
+        }.get(str(self.settings.os))
+        self._cmake.definitions["transcoder"] = {
+            "Windows": "windows",
+            "Macos": "macosunicodeconverter",
+            "Linux": "gnuiconv",
+        }.get(str(self.settings.os))
         self._cmake.definitions["message-loader"] = "inmemory"
 
         self._cmake.definitions["xmlch-type"] = self.options.char_type
 
-        self._cmake.definitions["mutex-manager"] = {"Windows": "windows",
-                                                    "Macos": "posix",
-                                                    "Linux": "posix"}.get(str(self.settings.os))
+        self._cmake.definitions["mutex-manager"] = {
+            "Windows": "windows",
+            "Macos": "posix",
+            "Linux": "posix",
+        }.get(str(self.settings.os))
         # avoid picking up system dependency
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
