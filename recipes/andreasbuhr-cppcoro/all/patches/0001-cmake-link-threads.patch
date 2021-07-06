@@ -1,0 +1,11 @@
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -171,6 +171,8 @@ target_compile_options(cppcoro PUBLIC ${compile_options})
+ 
+ find_package(Coroutines COMPONENTS Experimental Final REQUIRED)
+ target_link_libraries(cppcoro PUBLIC std::coroutines ${libraries})
++find_package(Threads REQUIRED)
++target_link_libraries(cppcoro PRIVATE Threads::Threads)
+ 
+ install(TARGETS cppcoro EXPORT cppcoroTargets
+ 	LIBRARY DESTINATION lib

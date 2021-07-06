@@ -14,7 +14,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     provides = "cppcoro"
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     options = {
@@ -81,6 +81,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -94,6 +96,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "cppcoro"
         self.cpp_info.names["cmake_find_package_multi"] = "cppcoro"
         self.cpp_info.libs = ["cppcoro"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
