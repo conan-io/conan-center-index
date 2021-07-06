@@ -50,10 +50,8 @@ class GetTextConan(ConanFile):
         self.requires("libiconv/1.16")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and \
-               tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20200517")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self._is_msvc:
             self.build_requires("automake/1.16.2")
 
