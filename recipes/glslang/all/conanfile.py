@@ -140,6 +140,16 @@ class GlslangConan(ConanFile):
     def package_info(self):
         # TODO: glslang exports non-namespaced targets but without config file...
         lib_suffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        # glslang
+        self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"
+        self.cpp_info.components["glslang-core"].names["cmake_find_package_multi"] = "glslang"
+        self.cpp_info.components["glslang-core"].libs = ["glslang" + lib_suffix]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
+        self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
+        if tools.Version(self.version) >= "11.5.0":
+            self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
+
         # OSDependent
         self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
         self.cpp_info.components["osdependent"].names["cmake_find_package_multi"] = "OSDependent"
@@ -162,15 +172,6 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
             self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
 
-        # glslang
-        self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"
-        self.cpp_info.components["glslang-core"].names["cmake_find_package_multi"] = "glslang"
-        self.cpp_info.components["glslang-core"].libs = ["glslang" + lib_suffix]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
-        self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
-        if tools.Version(self.version) >= "11.5.0":
-            self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
         # SPIRV
         self.cpp_info.components["spirv"].names["cmake_find_package"] = "SPIRV"
         self.cpp_info.components["spirv"].names["cmake_find_package_multi"] = "SPIRV"
