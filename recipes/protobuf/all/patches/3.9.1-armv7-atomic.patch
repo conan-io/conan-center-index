@@ -1,0 +1,12 @@
+diff -Naur a/cmake/protoc.cmake b/cmake/protoc.cmake
+--- a/cmake/protoc.cmake	2021-07-06 07:39:04.059407875 +0000
++++ b/cmake/protoc.cmake	2021-07-06 08:19:22.622130530 +0000
+@@ -9,7 +9,7 @@
+ endif()
+ 
+ add_executable(protoc ${protoc_files} ${protoc_rc_files})
+-target_link_libraries(protoc libprotoc libprotobuf)
++target_link_libraries(protoc libprotoc libprotobuf atomic)
+ add_executable(protobuf::protoc ALIAS protoc)
+ 
+ set_target_properties(protoc PROPERTIES

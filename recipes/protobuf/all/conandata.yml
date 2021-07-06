@@ -40,3 +40,6 @@ patches:
   "3.15.5":
     - patch_file: "patches/upstream-pr-8301-bundle-destination.patch"
       base_path: "source_subfolder"
+  "3.9.1":
+    - patch_file: "patches/3.9.1-armv7-atomic.patch"
+      base_path: "source_subfolder"
