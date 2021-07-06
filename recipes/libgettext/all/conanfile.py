@@ -1,7 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class GetTextConan(ConanFile):
     name = "libgettext"
@@ -57,9 +58,8 @@ class GetTextConan(ConanFile):
             self.build_requires("automake/1.16.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "gettext-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -120,11 +120,11 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*.so*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*.dylib*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
-        os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
-                  os.path.join(self.package_folder, "include", "libintl.h"))
+        tools.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
+                     os.path.join(self.package_folder, "include", "libintl.h"))
         if self._is_msvc and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "gnuintl.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["gnuintl"]
