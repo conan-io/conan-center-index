@@ -1,7 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
-import shutil
-import glob
 
 required_conan_version = ">=1.28.0"
 
