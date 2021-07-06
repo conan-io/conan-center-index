@@ -23,12 +23,12 @@ class LibmadConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
- 
-    def validate(self):
         if self.options.shared:
             del self.options.fPIC
-            if self._is_msvc:
-               raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
+ 
+    def validate(self):
+        if self.options.shared and self._is_msvc:
+            raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
         if (self.settings.os == "Macos" and self.settings.arch == "armv8"
                 and hasattr(self, 'settings_build') 
                 and tools.cross_building(self, skip_x64_x86=True)):
