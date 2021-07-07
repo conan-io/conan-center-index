@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from glob import glob
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class AstroInformaticsSO3(ConanFile):
     name = "astro-informatics-so3"
@@ -37,9 +39,8 @@ class AstroInformaticsSO3(ConanFile):
             )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob("so3-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def cmake(self):
