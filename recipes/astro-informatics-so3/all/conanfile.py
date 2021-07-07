@@ -12,9 +12,10 @@ class AstroInformaticsSO3(ConanFile):
     description = "Fast and accurate Wigner transforms"
     settings = "os", "arch", "compiler", "build_type"
     topics = ("physics", "astrophysics", "radio interferometry")
+
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-    requires = "fftw/3.3.9", "ssht/1.3.7"
+
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
 
@@ -33,6 +34,10 @@ class AstroInformaticsSO3(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def requirements(self):
+        self.requires("fftw/3.3.9")
+        self.requires("ssht/1.3.7")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
