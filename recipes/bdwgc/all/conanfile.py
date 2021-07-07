@@ -94,6 +94,7 @@ class BdwGcConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             cmake_osx_arch = {
                 "x86": "i386",
+                "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
             self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = cmake_osx_arch
         self._cmake.verbose = True
