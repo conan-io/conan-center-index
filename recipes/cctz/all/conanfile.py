@@ -12,8 +12,7 @@ class CCTZConan(ConanFile):
     description = "C++ library for translating between absolute and civil times"
     topics = ("conan", "cctz", "time", "timezones")
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -26,8 +25,17 @@ class CCTZConan(ConanFile):
         "build_tools": True
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,12 +55,14 @@ class CCTZConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TOOLS"] = self.options.build_tools
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.build_tools
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
