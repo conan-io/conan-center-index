@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import glob
 import os
 
 class GperfConan(ConanFile):
@@ -27,9 +28,8 @@ class GperfConan(ConanFile):
                 self.build_requires("msys2/20190524")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], filename=self.name + "-" + self.version + ".tar.gz")
+        os.rename(glob.glob("gperf-*")[0], self._source_subfolder)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -56,6 +56,10 @@ class GperfConan(ConanFile):
 
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
+            try:
+                self.run("./autogen.sh")
+            except:
+                pass
             autotools = self._configure_autotools()
             autotools.make()
 

@@ -2,6 +2,9 @@ sources:
   "3.1":
     url: "https://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz"
     sha256: "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2"
+  "cci.20210606":
+    url: "https://git.savannah.gnu.org/gitweb/?p=gperf.git;a=snapshot;h=96ebd0b95dda2817923ef6de25cdaca1e7ee2956;sf=tgz"
+    sha256: "e9b40d8d573e67db145a726a762f2a031cd64a300f8aa5cc3d576ee8f1ea93f5"   
 patches:
   "3.1":
     - patch_file: "patches/0001-remove-register-keyword.patch"
