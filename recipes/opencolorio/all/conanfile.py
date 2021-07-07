@@ -1,5 +1,9 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os, shutil
+
+required_conan_version = ">=1.33.0"
+
 
 class OpenColorIOConan(ConanFile):
     name = "opencolorio"
@@ -33,9 +37,12 @@ class OpenColorIOConan(ConanFile):
         self.requires("lcms/2.11")
         self.requires("yaml-cpp/0.6.3")
 
+    def validate(self):
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("Only x86/x86_64 supported")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("OpenColorIO-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
