@@ -1,6 +1,9 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import contextlib
+
+required_conan_version = ">=1.33.0"
 
 
 class NettleTLS(ConanFile):
@@ -45,25 +48,28 @@ class NettleTLS(ConanFile):
 
     def requirements(self):
         if self.options.public_key:
-            self.requires("gmp/6.1.2")
+            self.requires("gmp/6.2.1")
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not supported (yet)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("nettle-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/cci.latest")
 
     def _configure_autotools(self):
         if self._autotools:
