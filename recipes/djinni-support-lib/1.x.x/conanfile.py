@@ -104,7 +104,7 @@ class DjinniSuppotLib(ConanFile):
                     "C++/CLI is not yet supported with other languages enabled as well. Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration.")
         if self._python_support:
             if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Python on Windowns is not fully yet supported, please see https://github.com/cross-language-cpp/djinni-support-lib/issues.")
+                raise ConanInvalidConfiguration("Python on Windows is not fully yet supported, please see https://github.com/cross-language-cpp/djinni-support-lib/issues.")
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
