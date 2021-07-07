@@ -21,7 +21,7 @@ class CCTZConan(ConanFile):
     default_options = {
         "fPIC": True,
         "shared": False,
-        "build_tools": False
+        "build_tools": True
     }
 
     _source_subfolder = "source_subfolder"
