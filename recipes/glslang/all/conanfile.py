@@ -151,15 +151,16 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
 
         if tools.Version(self.version) >= "11.5.0":
+            # MachineIndependent
+            self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
+            self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
+            self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
+
             # GenericCodeGen
             self.cpp_info.components["genericcodegen"].names["cmake_find_package"] = "GenericCodeGen"
             self.cpp_info.components["genericcodegen"].names["cmake_find_package_multi"] = "GenericCodeGen"
             self.cpp_info.components["genericcodegen"].libs = ["GenericCodeGen" + lib_suffix]
 
-            # MachineIndependent
-            self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
-            self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
-            self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
 
         # OSDependent
         self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
