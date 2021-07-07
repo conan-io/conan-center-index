@@ -93,12 +93,6 @@ class BdwGcConan(ConanFile):
         self._cmake.definitions["disable_handle_fork"] = not self.options.handle_fork
         self._cmake.definitions["install_headers"] = True
         self._cmake.definitions["build_tests"] = False
-        if tools.is_apple_os(self.settings.os):
-            cmake_osx_arch = {
-                "x86": "i386",
-                "armv8": "arm64",
-            }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = cmake_osx_arch
         self._cmake.verbose = True
         self._cmake.parallel = False
         self._cmake.configure()
