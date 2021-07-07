@@ -31,11 +31,10 @@ class CCTZConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.os == "Windows" and \
-           self.settings.compiler == "Visual Studio" and \
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) < 14:
-           raise ConanInvalidConfiguration("CCTZ requires MSVC >= 14")
+            raise ConanInvalidConfiguration("CCTZ requires MSVC >= 14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
