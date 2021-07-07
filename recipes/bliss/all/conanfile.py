@@ -84,6 +84,8 @@ class BlissConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "bliss"))
         if self.options.with_exact_int != False:
             self.cpp_info.defines = ["BLISS_USE_GMP"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags.append("/permissive-")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
