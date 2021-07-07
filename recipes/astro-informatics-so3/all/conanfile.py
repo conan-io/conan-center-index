@@ -42,7 +42,7 @@ class AstroInformaticsSO3(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                "SO3 requires C99 support for complex numbers."
+                "Visual Studio not supported, since SO3 requires C99 support for complex numbers"
             )
 
     def source(self):
