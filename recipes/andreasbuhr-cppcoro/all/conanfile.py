@@ -99,7 +99,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.cxxflags.append("/await")
+            self.cpp_info.cxxflags.append("/await:strict")
         elif self.settings.compiler == "gcc":
             self.cpp_info.cxxflags.append("-fcoroutines")
         elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
