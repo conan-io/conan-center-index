@@ -23,9 +23,17 @@ class LibmadConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self._is_msvc and self.options.shared:
+        if self.options.shared:
+            del self.options.fPIC
+ 
+    def validate(self):
+        if self.options.shared and self._is_msvc:
             raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
-
+        if (self.settings.os == "Macos" and self.settings.arch == "armv8"
+                and hasattr(self, 'settings_build') 
+                and tools.cross_building(self, skip_x64_x86=True)):
+            raise ConanInvalidConfiguration("Cross-building for Macos to armv8 not implemented")
+            
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
