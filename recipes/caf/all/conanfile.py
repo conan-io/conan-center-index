@@ -3,6 +3,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
+required_conan_version = ">=1.33.0"
+
 
 class CAFConan(ConanFile):
     name = "caf"
@@ -32,10 +34,6 @@ class CAFConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("actor-framework-" + self.version, self._source_subfolder)
 
     def requirements(self):
         if self.options.with_openssl:
@@ -80,6 +78,10 @@ class CAFConan(ConanFile):
             raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         if self.options.with_openssl and self.settings.os == "Windows" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("OpenSSL is not supported for Windows x86")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _cmake_configure(self):
         if not self._cmake:
