@@ -4,6 +4,9 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
+
 class Hdf5Conan(ConanFile):
     name = "hdf5"
     description = "HDF5 is a data model, library, and file format for storing and managing data."
@@ -50,6 +53,9 @@ class Hdf5Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+            
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -62,6 +68,11 @@ class Hdf5Conan(ConanFile):
              not self.options["szip"].enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
 
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Cross building is not supported (yet)")
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -71,9 +82,7 @@ class Hdf5Conan(ConanFile):
             self.requires("szip/2.1.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{0}-{0}-{1}".format(self.name, self.version.replace('.', '_'))
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
