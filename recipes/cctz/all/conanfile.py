@@ -31,6 +31,10 @@ class CCTZConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) < 14:
