@@ -45,6 +45,7 @@ class AstroInformaticsSO3(ConanFile):
     def cmake(self):
         if not hasattr(self, "_cmake"):
             self._cmake = CMake(self)
+            self._cmake.definitions["conan_deps"] = False
             self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
