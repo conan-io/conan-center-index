@@ -150,17 +150,6 @@ class GlslangConan(ConanFile):
         if tools.Version(self.version) >= "11.5.0":
             self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
 
-        # OSDependent
-        self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
-        self.cpp_info.components["osdependent"].names["cmake_find_package_multi"] = "OSDependent"
-        self.cpp_info.components["osdependent"].libs = ["OSDependent" + lib_suffix]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["osdependent"].system_libs.append("pthread")
-        # OGLCompiler
-        self.cpp_info.components["oglcompiler"].names["cmake_find_package"] = "OGLCompiler"
-        self.cpp_info.components["oglcompiler"].names["cmake_find_package_multi"] = "OGLCompiler"
-        self.cpp_info.components["oglcompiler"].libs = ["OGLCompiler" + lib_suffix]
-
         if tools.Version(self.version) >= "11.5.0":
             # GenericCodeGen
             self.cpp_info.components["genericcodegen"].names["cmake_find_package"] = "GenericCodeGen"
@@ -171,6 +160,17 @@ class GlslangConan(ConanFile):
             self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
             self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
             self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
+
+        # OSDependent
+        self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
+        self.cpp_info.components["osdependent"].names["cmake_find_package_multi"] = "OSDependent"
+        self.cpp_info.components["osdependent"].libs = ["OSDependent" + lib_suffix]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["osdependent"].system_libs.append("pthread")
+        # OGLCompiler
+        self.cpp_info.components["oglcompiler"].names["cmake_find_package"] = "OGLCompiler"
+        self.cpp_info.components["oglcompiler"].names["cmake_find_package_multi"] = "OGLCompiler"
+        self.cpp_info.components["oglcompiler"].libs = ["OGLCompiler" + lib_suffix]
 
         # SPIRV
         self.cpp_info.components["spirv"].names["cmake_find_package"] = "SPIRV"
