@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanException
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class BdwGcConan(ConanFile):
     name = "bdwgc"
@@ -78,8 +80,8 @@ class BdwGcConan(ConanFile):
             self.requires("libatomic_ops/7.6.10")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("gc-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
