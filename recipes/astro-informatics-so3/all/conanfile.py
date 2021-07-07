@@ -28,6 +28,10 @@ class AstroInformaticsSO3(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
