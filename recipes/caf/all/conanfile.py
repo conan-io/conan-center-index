@@ -20,12 +20,24 @@ class CAFConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "log_level": ["error", "warning", "info", "debug", "trace", "quiet"],
-        "with_openssl": [True, False]
+        "with_openssl": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "log_level": "quiet", "with_openssl": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "log_level": "quiet",
+        "with_openssl": True,
+    }
+
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
