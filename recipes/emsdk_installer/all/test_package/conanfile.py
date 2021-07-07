@@ -7,7 +7,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self, generator='MinGW Makefiles' if os.name == 'nt' else 'Unix Makefiles', parallel=False)
+        cmake = CMake(self, generator='MinGW Makefiles' if os.name ==
+                      'nt' else 'Unix Makefiles', parallel=False)
         cmake.definitions["CONAN_DISABLE_CHECK_COMPILER"] = True
         cmake.configure()
         cmake.build()

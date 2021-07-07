@@ -57,9 +57,10 @@ class EmSDKInstallerConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder)
-        self.copy(pattern='*', dst='.', src=self._source_subfolder)
+        self.copy(pattern='*', dst='bin',
+                  src=self._source_subfolder, excludes=('*.pc', '*Find*.cmake'))
         emsdk = self.package_folder
-        emscripten = os.path.join(emsdk, 'upstream', 'emscripten')
+        emscripten = os.path.join(emsdk, 'bin', 'upstream', 'emscripten')
         toolchain = os.path.join(
             emscripten, 'cmake', 'Modules', 'Platform', 'Emscripten.cmake')
         # allow to find conan libraries
@@ -75,7 +76,7 @@ class EmSDKInstallerConan(ConanFile):
 
     def _define_tool_var(self, name, value):
         suffix = '.bat' if os.name == 'nt' else ''
-        path = os.path.join(self.package_folder, 'upstream',
+        path = os.path.join(self.package_folder, 'bin', 'upstream',
                             'emscripten', '%s%s' % (value, suffix))
         self._chmod_plus_x(path)
         self.output.info('Creating %s environment variable: %s' % (name, path))
@@ -83,9 +84,9 @@ class EmSDKInstallerConan(ConanFile):
 
     def package_info(self):
         emsdk = self.package_folder
-        em_config = os.path.join(emsdk, '.emscripten')
-        emscripten = os.path.join(emsdk, 'upstream', 'emscripten')
-        em_cache = os.path.join(emsdk, '.emscripten_cache')
+        em_config = os.path.join(emsdk, 'bin', '.emscripten')
+        emscripten = os.path.join(emsdk, 'bin', 'upstream', 'emscripten')
+        em_cache = os.path.join(emsdk,  'bin', '.emscripten_cache')
         toolchain = os.path.join(
             emscripten, 'cmake', 'Modules', 'Platform', 'Emscripten.cmake')
 
@@ -119,3 +120,5 @@ class EmSDKInstallerConan(ConanFile):
         self.env_info.CXX = self._define_tool_var('CXX', 'em++')
         self.env_info.RANLIB = self._define_tool_var('RANLIB', 'emranlib')
         self.env_info.AR = self._define_tool_var('AR', 'emar')
+        self.cpp_info.builddirs = ['bin/releases/src/', 'bin/upstream/emscripten/cmake/Modules/', 'bin/upstream/emscripten/cmake/Modules/Platform/', 'bin/upstream/emscripten/system/lib/libunwind/cmake/Modules/',
+                                   'bin/upstream/emscripten/system/lib/libunwind/cmake/', 'bin/upstream/emscripten/tests/cmake/target_library/', 'bin/upstream/lib/cmake/llvm/']
