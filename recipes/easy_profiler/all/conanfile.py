@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
@@ -72,11 +71,9 @@ class EasyProfilerConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "LICENSE.MIT"))
         os.remove(os.path.join(self.package_folder, "LICENSE.APACHE"))
         if self.settings.os == "Windows":
-            for dll_file in \
-              glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
-                if os.path.basename(dll_file).startswith(("concrt", "msvcp",
-                   "vcruntime")):
-                    os.remove(dll_file)
+            for dll_prefix in ["concrt", "msvcp", "vcruntime"]:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"),
+                                           "{}*.dll".format(dll_prefix))
 
     def package_info(self):
         self.cpp_info.libs = ["easy_profiler"]
