@@ -2,6 +2,8 @@ from conans import ConanFile, tools, CMake
 import os
 import glob
 
+required_conan_version = ">=1.33.0"
+
 
 class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
@@ -42,10 +44,8 @@ class EasyProfilerConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
