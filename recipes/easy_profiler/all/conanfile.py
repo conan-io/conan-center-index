@@ -86,3 +86,7 @@ class EasyProfilerConan(ConanFile):
             self.cpp_info.system_libs = ["psapi", "ws2_32"]
             if not self.options.shared:
                 self.cpp_info.defines.append("EASY_PROFILER_STATIC")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
