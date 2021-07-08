@@ -19,10 +19,6 @@ class LibuuidConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -59,7 +55,8 @@ class LibuuidConan(ConanFile):
         return self._autotools
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
             self.run("autoreconf -fiv", run_environment=True)
         autotools = self._configure_autotools()
