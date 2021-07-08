@@ -11,7 +11,7 @@ class EffceeConan(ConanFile):
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package_multi"
-    settings = "cppstd", "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
