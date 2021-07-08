@@ -1,0 +1,5 @@
+sources:
+    "0.4.1":
+        url: "https://github.com/ess-dmsc/h5cpp/archive/refs/tags/v0.4.1.tar.gz"
+        sha256: "dd0833619fc9ef615829cfcbfaeca0694f27b3c1ca573633ee103e4c7aa92ebb"
+
