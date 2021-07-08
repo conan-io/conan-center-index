@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibuuidConan(ConanFile):
     name = "libuuid"
@@ -16,10 +18,6 @@ class LibuuidConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _autotools = None
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -41,6 +39,10 @@ class LibuuidConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
