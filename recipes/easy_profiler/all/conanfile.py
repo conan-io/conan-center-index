@@ -59,6 +59,7 @@ class EasyProfilerConan(ConanFile):
         self._cmake = CMake(self)
         # Don't build the GUI because it is dependent on Qt
         self._cmake.definitions["EASY_PROFILER_NO_GUI"] = True
+        self._cmake.definitions["EASY_PROFILER_NO_SAMPLES"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
