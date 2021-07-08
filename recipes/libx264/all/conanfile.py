@@ -38,6 +38,8 @@ class LibX264Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -60,11 +62,15 @@ class LibX264Conan(ConanFile):
                 args.append('--enable-shared')
             else:
                 args.append('--enable-static')
-            if self.settings.os != 'Windows' and self.options.fPIC:
+            if self.settings.os != 'Windows' and self.options.get_safe("fPIC"):
                 args.append('--enable-pic')
             if self.settings.build_type == 'Debug':
                 args.append('--enable-debug')
             args.append('--bit-depth=%s' % str(self.options.bit_depth))
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                # bitstream-a.S:29:18: error: unknown token in expression
+                args.append('--extra-asflags=-arch arm64')
+                args.append('--extra-ldflags=-arch arm64')
 
             if tools.cross_building(self.settings):
                 if self.settings.os == "Android":
