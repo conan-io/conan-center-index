@@ -30,10 +30,12 @@ class LibuuidConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libuuid is not supported on Windows")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libuuid is not supported on Windows")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
