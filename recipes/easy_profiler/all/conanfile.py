@@ -108,7 +108,7 @@ class EasyProfilerConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.libs = ["easy_profiler"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["psapi", "ws2_32"]
