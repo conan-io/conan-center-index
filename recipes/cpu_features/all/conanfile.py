@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -32,10 +31,6 @@ class CpuFeaturesConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,6 +40,9 @@ class CpuFeaturesConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        # TODO: should be handled by CMake helper
+        if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         self._cmake.configure() # Does not support out of source builds
         return self._cmake
 
