@@ -1022,6 +1022,9 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtremoteobjects:
             _create_module("RemoteObjects")
+        
+        if self.options.qtwinextras:
+            _create_module("WinExtras")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
