@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["DOCOPTCPP_SHARED"] = self.options["docopt.cpp"].shared
         cmake.configure()
         cmake.build()
 
