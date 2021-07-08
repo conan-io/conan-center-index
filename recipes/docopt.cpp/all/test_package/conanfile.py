@@ -13,15 +13,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
-            if self.settings.os == "Emscripten":
-                exe_name = "test_package.js"
-            elif tools.os_info.is_windows:
-                exe_name = "test_package.exe"
-            else:
-                exe_name = "test_package"
-
-            assert(os.path.exists(os.path.join("bin", exe_name)))
-        else:
+        if not tools.cross_building(self.settings):
             exec_path = os.path.join("bin", "test_package")
             self.run("{} --help".format(exec_path), run_environment=True)
