@@ -64,7 +64,7 @@ class Libx265Conan(ConanFile):
 
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Only x86/x86_64 supported")
+            raise ConanInvalidConfiguration("Current recipe supports only x86/x86_64 builds")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
