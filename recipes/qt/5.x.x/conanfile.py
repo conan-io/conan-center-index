@@ -1020,6 +1020,9 @@ Examples = bin/datadir/examples""")
         if self.options.get_safe("qtx11extras"):
             _create_module("X11Extras")
 
+        if self.options.qtremoteobjects:
+            _create_module("RemoteObjects")
+
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
