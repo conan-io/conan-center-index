@@ -58,7 +58,7 @@ class LibuuidConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
 
