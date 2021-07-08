@@ -76,13 +76,13 @@ class CyrusSaslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.with_postgresql:
-            self.requires("libpq/13.1")
+            self.requires("libpq/13.3")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.36.0")
         if self.options.with_gssapi:
             raise ConanInvalidConfiguration("with_gssapi requires krb5 recipe, not yet available in CCI")
             self.requires("krb5/1.18.3")
