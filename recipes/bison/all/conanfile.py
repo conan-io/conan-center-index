@@ -40,6 +40,7 @@ class BisonConan(ConanFile):
             self.build_requires("msys2/20190524")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
+        self.build_requires("readline/8.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,6 +77,7 @@ class BisonConan(ConanFile):
             "--enable-relocatable",
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
+            "--with-libreadline-prefix={}".format(tools.unix_path(self.deps_cpp_info["readline"].rootpath)),
         ]
         host, build = None, None
         if self.settings.os == "Windows":
