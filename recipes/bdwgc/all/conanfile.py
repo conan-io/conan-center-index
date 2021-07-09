@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanException
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class BdwGcConan(ConanFile):
     name = "bdwgc"
@@ -78,24 +80,19 @@ class BdwGcConan(ConanFile):
             self.requires("libatomic_ops/7.6.10")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("gc-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         for option, _ in self._autotools_options_defaults:
-                self._cmake.definitions["enable_{}".format(option)] = self.options.get_safe(option)
+            self._cmake.definitions["enable_{}".format(option)] = self.options.get_safe(option)
         self._cmake.definitions["disable_gc_debug"] = not self.options.gc_debug
         self._cmake.definitions["disable_handle_fork"] = not self.options.handle_fork
         self._cmake.definitions["install_headers"] = True
         self._cmake.definitions["build_tests"] = False
-        if tools.is_apple_os(self.settings.os):
-            cmake_osx_arch = {
-                "x86": "i386",
-            }.get(str(self.settings.arch), str(self.settings.arch))
-            self._cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = cmake_osx_arch
         self._cmake.verbose = True
         self._cmake.parallel = False
         self._cmake.configure()

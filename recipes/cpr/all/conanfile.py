@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class CprConan(ConanFile):
     _AUTO_SSL = "auto"
@@ -106,8 +108,7 @@ class CprConan(ConanFile):
 
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("cpr-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         self.requires("libcurl/{}".format("7.67.0" if not self._supports_openssl else "7.69.1"))
@@ -156,6 +157,14 @@ class CprConan(ConanFile):
             # If we are on a version where disabling SSL requires a cmake option, disable it
             if not self._uses_old_cmake_options and self._get_ssl_library() == CprConan._NO_SSL:
                 self._cmake.definitions["CPR_ENABLE_SSL"] = False
+
+            if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+                self._cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE"] = 1
+                self._cmake.definitions["THREAD_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
+                self._cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE"] = 1
+                self._cmake.definitions["ADDRESS_SANITIZER_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
+                self._cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE"] = 1
+                self._cmake.definitions["ALL_SANITIZERS_AVAILABLE_EXITCODE__TRYRUN_OUTPUT"] = 1
 
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -215,7 +224,7 @@ class CprConan(ConanFile):
             )
 
         if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL) and ssl_library != self.options["libcurl"].with_ssl:
-            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('ssl')))
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('with_ssl')))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")

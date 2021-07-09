@@ -21,6 +21,14 @@ class TheoraConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
+    def build_requirements(self):
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -59,6 +67,10 @@ class TheoraConan(ConanFile):
         if self.settings.compiler == 'Visual Studio':
             self._build_msvc()
         else:
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.make()
