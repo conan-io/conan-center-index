@@ -14,8 +14,5 @@ class AngelScriptTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            if self.settings.compiler == "Visual Studio":
-                bin_path = self.settings.build_type.value
-            else:
-                bin_path = "."
-            self.run(os.path.join(bin_path, "example"), run_environment=True)
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)
