@@ -48,6 +48,7 @@ class EffceeConan(ConanFile):
         self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
         self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
         self._cmake.definitions["RE2_BUILD_TESTING"] = False
+        self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
