@@ -71,5 +71,5 @@ class AngelScriptConan(ConanFile):
     def package_info(self):
         # FIXME: Missing CMake components 
         self.cpp_info.libs.extend(tools.collect_libs(self))
-        if self.settings.os in ("Linux", "Macos", "FreeBSD", "SunOS"):
+        if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
             self.cpp_info.components["_angelscript"].system_libs.append("pthread")
