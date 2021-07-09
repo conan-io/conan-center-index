@@ -6,7 +6,9 @@ import os
 class GslConan(ConanFile):
     name = "gsl"
     license = "GPL-3.0-or-later"
-    url = "http://www.gnu.org/software/gsl/"
+    topics = ("numerical", "math", "random", "scientific")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.gnu.org/software/gsl"
     description = "GNU Scientific Library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -32,6 +34,7 @@ class GslConan(ConanFile):
                   destination=self._source_subfolder)
 
     def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -40,17 +43,15 @@ class GslConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env = {
-                    "CC": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXX": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "LD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXXLD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "AR": "lib",
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
+                    "LD": "link -nologo",
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
         else:
             yield
-
 
     def _patch_source(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
