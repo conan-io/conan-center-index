@@ -802,6 +802,9 @@ Examples = bin/datadir/examples""")
             core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
+
         if self.options.gui:
             gui_reqs = ["DBus"]
             if self.options.with_freetype:
