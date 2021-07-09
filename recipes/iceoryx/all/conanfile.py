@@ -6,7 +6,6 @@ import textwrap
 class IceoryxConan(ConanFile):
 
     name = "iceoryx"
-    version = "1.0.0"
     license = "Apache-2.0"
     homepage = "https://iceoryx.io/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -64,12 +63,12 @@ class IceoryxConan(ConanFile):
             self.package_folder,
             "etc"
         )
-
+    
     @property
-    def _pkg_bin(self):
+    def _pkg_res(self):
         return os.path.join(
             self.package_folder,
-            "bin"
+            "res"
         )
 
     @property
@@ -145,10 +144,11 @@ class IceoryxConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(self._pkg_share)
         tools.rmdir(self._pkg_cmake)
+        tools.mkdir(self._pkg_res)
         if self.options.toml_config:
             tools.rename(
                 os.path.join(self._pkg_etc, "roudi_config_example.toml"),
-                os.path.join(self._pkg_bin, "roudi_config_example.toml")
+                os.path.join(self._pkg_res, "roudi_config.toml")
             )
         tools.rmdir(self._pkg_etc)
         for alias, aliased in self._target_aliases.items():
