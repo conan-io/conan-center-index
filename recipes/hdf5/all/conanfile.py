@@ -139,7 +139,7 @@ class Hdf5Conan(ConanFile):
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
 
         # apple-clang 12 changed defaults (now enforces C99) and it adds 'implicit-function-declaration' as error
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) == "12" and tools.Version(self.version) < "1.11":
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12" and tools.Version(self.version) < "1.11":
             self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wno-error=implicit-function-declaration"
 
         self._cmake.configure(build_folder=self._build_subfolder)
