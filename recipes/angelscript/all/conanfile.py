@@ -78,7 +78,7 @@ class AngelScriptConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Angelscript"
         self.cpp_info.components["_angelscript"].names["cmake_find_package"] = "angelscript"
         self.cpp_info.components["_angelscript"].names["cmake_find_package_multi"] = "angelscript"
-        postfix = "d" if self.settings.compiler == "Visual Studio" else ""
+        postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
         self.cpp_info.components["_angelscript"].libs = ["angelscript" + postfix]
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
             self.cpp_info.components["_angelscript"].system_libs.append("pthread")
