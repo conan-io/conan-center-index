@@ -42,23 +42,5 @@ int main(int argc, char* argv[]) {
   auto result = effcee::Match(input_stream.str(), checks_stream.str(),
                               effcee::Options().SetChecksName("checks"));
 
-  // Successful match result converts to true.
-  if (result) {
-    std::cout << "The input matched your check list!" << std::endl;
-  } else {
-    // Otherwise, you can get a status code and a detailed message.
-    switch (result.status()) {
-      case effcee::Result::Status::NoRules:
-        std::cout << "error: Expected check rules as command line arguments\n";
-        break;
-      case effcee::Result::Status::Fail:
-        std::cout << "The input failed to match your check rules:\n";
-        break;
-      default:
-        break;
-    }
-    std::cout << result.message() << std::endl;
-    return 1;
-  }
   return 0;
 }
