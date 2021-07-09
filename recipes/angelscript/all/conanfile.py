@@ -51,10 +51,6 @@ class AngelScriptConan(ConanFile):
             strip_root=True,
         )
 
-    def configure(self):
-        if self.settings.os == "Windows" or self.options.shared:
-            del self.options.fPIC
-
     def build(self):
         self._configure_cmake().build()
 
