@@ -61,7 +61,7 @@ class AngelScriptConan(ConanFile):
 
     def package(self):
         self._configure_cmake().install()
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         header = tools.load(os.path.join(self.package_folder, "include", "angelscript.h"))
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), header[header.find("/*", 1) + 3 : header.find("*/", 1)])
 
