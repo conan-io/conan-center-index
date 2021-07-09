@@ -11,6 +11,8 @@ class AngelScriptConan(ConanFile):
     description = "An extremely flexible cross-platform scripting library designed to allow applications to extend their functionality through external scripts."
     topics = "angelcode", "embedded", "scripting", "language", "compiler", "interpreter"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     options = {
         "shared": [False, True],
         "fPIC": [False, True],
@@ -21,6 +23,7 @@ class AngelScriptConan(ConanFile):
         "fPIC": True,
         "no_exceptions": False,
     }
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -39,16 +42,12 @@ class AngelScriptConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(
-            args=[
-                "-DCMAKE_CXX_STANDARD=11",
-                "-DAS_NO_EXCEPTIONS={}".format(self.options.no_exceptions.value),
-            ],
-            source_folder=os.path.join(self._source_subfolder, "angelscript", "projects", "cmake"),
-            build_folder=self._build_subfolder,
-        )
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["AS_NO_EXCEPTIONS"] = self.options.no_exceptions
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def source(self):
         # Website blocks default user agent string.
@@ -60,16 +59,21 @@ class AngelScriptConan(ConanFile):
         )
 
     def build(self):
-        self._configure_cmake().build()
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def _extract_license(self):
+        header = tools.load(os.path.join(self._source_subfolder, "angelscript", "include", "angelscript.h"))
+        tools.save("LICENSE", header[header.find("/*", 1) + 3 : header.find("*/", 1)])
 
     def package(self):
-        self._configure_cmake().install()
+        self._extract_license()
+        self.copy("LICENSE", dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        header = tools.load(os.path.join(self.package_folder, "include", "angelscript.h"))
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), header[header.find("/*", 1) + 3 : header.find("*/", 1)])
 
     def package_info(self):
-        # FIXME: Missing CMake components 
         self.cpp_info.names["cmake_find_package"] = "Angelscript"
         self.cpp_info.names["cmake_find_package_multi"] = "Angelscript"
         self.cpp_info.components["_angelscript"].names["cmake_find_package"] = "angelscript"
