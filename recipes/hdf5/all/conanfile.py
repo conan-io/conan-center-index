@@ -71,7 +71,7 @@ class Hdf5Conan(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Cross building is not supported (yet)")
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -137,6 +137,11 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if tools.Version(self.version) >= "1.10.0":
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
+
+        # apple-clang 12 changed defaults (now enforces C99) and it adds 'implicit-function-declaration' as error
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) == "12" and tools.Version(self.version) < "1.11":
+            self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wno-error=implicit-function-declaration"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
