@@ -10,5 +10,5 @@ add_executable(example
 
 target_link_libraries(example
     PRIVATE
-    angelscript::angelscript
+    Angelscript::angelscript
 )
