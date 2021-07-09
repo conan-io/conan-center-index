@@ -5,7 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 
-find_package(angelscript REQUIRED)
+find_package(Angelscript REQUIRED CONFIG)
 
 add_executable(example
     example.cpp
