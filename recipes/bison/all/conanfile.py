@@ -26,6 +26,10 @@ class BisonConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "bison-" + self.version
@@ -55,13 +59,13 @@ class BisonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 build_env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
                     "CFLAGS": "-{}".format(self.settings.compiler.runtime),
                     "LD": "link",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                     "RANLIB": ":",
                 }
                 with tools.environment_append(build_env):
