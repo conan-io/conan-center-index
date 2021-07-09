@@ -1,7 +1,6 @@
 from conans import CMake, ConanFile, tools
 
 import os
-import shutil
 
 
 class AngelScriptConan(ConanFile):
