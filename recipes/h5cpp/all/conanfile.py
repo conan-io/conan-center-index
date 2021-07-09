@@ -1,11 +1,11 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
 
 
 class H5cppConan(ConanFile):
     name = "h5cpp"
-    version = "0.4.1"
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ess-dmsc/h5cpp"
@@ -15,7 +15,7 @@ class H5cppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -37,7 +37,7 @@ class H5cppConan(ConanFile):
             "gcc": "8",
             "clang": "7",
             "apple-clang": "11",
-            "Visual Studio": "19.14"
+            "msvc": "19.14"
         }
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
@@ -72,10 +72,6 @@ class H5cppConan(ConanFile):
         })
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
