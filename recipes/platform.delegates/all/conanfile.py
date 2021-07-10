@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.33.0"
 
 
-class PlatformInterfacesConan(ConanFile):
+class PlatformDelegatesConan(ConanFile):
     name = "platform.delegates"
     license = "MIT"
     homepage = "https://github.com/linksplatform/Delegates"
@@ -14,7 +14,7 @@ class PlatformInterfacesConan(ConanFile):
     description = """platform.delegates is one of the libraries of the LinksPlatform modular framework, which uses 
     innovations from the C++17 standard, for easier use delegates/events in csharp style."""
     topics = ("linksplatform", "cpp17", "delegates", "events", "header-only")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
 
     @property
@@ -65,7 +65,3 @@ class PlatformInterfacesConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Platform.Delegates"
-        self.cpp_info.names["cmake_find_package_multi"] = "Platform.Delegates"
