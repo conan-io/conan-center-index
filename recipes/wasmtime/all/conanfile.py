@@ -43,6 +43,8 @@ class WasmtimeConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
 
