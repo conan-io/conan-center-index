@@ -28,8 +28,9 @@ class GperfConan(ConanFile):
                 self.build_requires("msys2/20190524")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], filename=self.name + "-" + self.version + ".tar.gz")
-        os.rename(glob.glob("gperf-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  filename="gperf.tar.gz",
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
