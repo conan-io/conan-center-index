@@ -1,6 +1,7 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import glob
 import os
+
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanException
 
 class GperfConan(ConanFile):
     name = "gperf"
@@ -24,7 +25,7 @@ class GperfConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows" and tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
                 self.build_requires("msys2/20190524")
 
     def source(self):
