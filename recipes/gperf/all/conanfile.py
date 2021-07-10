@@ -11,7 +11,7 @@ class GperfConan(ConanFile):
     settings = "os", "arch", "compiler"
     _source_subfolder = "source_subfolder"
     _autotools = None
-    exports_sources = "patches/**"
+    exports_sources = "patches/*"
 
     @property
     def _is_msvc(self):
@@ -60,6 +60,8 @@ class GperfConan(ConanFile):
             autotools.make()
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 self._build_configure()
