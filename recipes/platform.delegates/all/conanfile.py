@@ -14,7 +14,7 @@ class PlatformDelegatesConan(ConanFile):
     description = """platform.delegates is one of the libraries of the LinksPlatform modular framework, which uses 
     innovations from the C++17 standard, for easier use delegates/events in csharp style."""
     topics = ("linksplatform", "cpp17", "delegates", "events", "header-only")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
 
     @property
