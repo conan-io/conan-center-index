@@ -51,11 +51,18 @@ class WasmtimeConan(ConanFile):
     def validate(self):
         compiler = self.settings.compiler
         min_version = self._minimum_compilers_version[str(compiler)]
-        if tools.Version(compiler.version) < min_version:
+        try:
+            if tools.Version(compiler.version) < min_version:
+                msg = (
+                    "{} requires C{} features which are not supported by compiler {} {} !!"
+                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                raise ConanInvalidConfiguration(msg)
+        except KeyError:
             msg = (
-                "{} requires C{} features which are not supported by compiler {} {} !!"
-            ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
-            raise ConanInvalidConfiguration(msg)
+                "{} recipe lacks information about the {} compiler, "
+                "support for the required C++{} features is assumed"
+            ).format(self.name, compiler, self._minimum_cpp_standard)
+            self.output.warn(msg)
 
         if (not (self.version in self.conan_data["sources"]) or
             not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
