@@ -30,8 +30,6 @@ class GperfConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -62,6 +60,8 @@ class GperfConan(ConanFile):
             autotools.make()
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 self._build_configure()
