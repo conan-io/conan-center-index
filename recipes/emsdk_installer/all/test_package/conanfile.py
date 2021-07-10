@@ -1,10 +1,13 @@
 from conans import ConanFile, CMake, tools, RunEnvironment
 import os
 
+required_conan_version = ">=1.36.0"
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "build_type", "arch", "compiler"
     generators = "cmake"
+    test_type = "build_requires"
 
     def build(self):
         cmake = CMake(self, generator='MinGW Makefiles' if os.name ==
