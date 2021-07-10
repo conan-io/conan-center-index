@@ -153,8 +153,8 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
-                "if cc.has_function('ngettext')",
-                "if false #cc.has_function('ngettext')",
+                "if cc.has_function('ngettext'",
+                "if false #cc.has_function('ngettext'",
             )
 
     def build(self):
