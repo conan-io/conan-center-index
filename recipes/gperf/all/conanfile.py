@@ -58,7 +58,7 @@ class GperfConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             try:
                 self.run("autogen.sh", run_environment=True)
-            except:
+            except ConanException:
                 pass
             autotools = self._configure_autotools()
             autotools.make()
