@@ -57,7 +57,7 @@ class Hdf5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            
+
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -72,7 +72,7 @@ class Hdf5Conan(ConanFile):
         if self.options.parallel:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
-            if self.options.threadsafe:
+            if self.options.get_safe("threadsafe", False):
                 raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
 
     def validate(self):
@@ -146,10 +146,6 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if tools.Version(self.version) >= "1.10.0":
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
-
-        # apple-clang 12 changed defaults (now enforces C99) and it adds 'implicit-function-declaration' as error
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12" and tools.Version(self.version) < "1.11":
-            self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wno-error=implicit-function-declaration"
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
