@@ -30,15 +30,6 @@ class EditlineConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        if self.options.terminal_db == "termcap":
-            self.requires("termcap/1.3.1")
-        elif self.options.terminal_db == "ncurses":
-            self.requires("ncurses/6.2")
-        elif self.options.terminal_db == "tinfo":
-            # TODO - Add tinfo when available
-            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,6 +39,15 @@ class EditlineConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.terminal_db == "termcap":
+            self.requires("termcap/1.3.1")
+        elif self.options.terminal_db == "ncurses":
+            self.requires("ncurses/6.2")
+        elif self.options.terminal_db == "tinfo":
+            # TODO - Add tinfo when available
+            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
 
     def validate(self):
         if self.settings.os == "Windows":
