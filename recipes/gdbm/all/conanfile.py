@@ -44,6 +44,8 @@ class GdbmConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -90,7 +92,7 @@ class GdbmConan(ConanFile):
         else:
             conf_args.extend([
                 "--disable-shared", "--enable-static",
-                "--with-pic" if self.options.fPIC else "--without-pic"]
+                "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic"]
             )
 
         if not self.options.with_nls:
