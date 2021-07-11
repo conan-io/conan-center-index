@@ -37,6 +37,7 @@ class GdbmConan(ConanFile):
         "with_nls": True,
     }
 
+    exports_sources = "patches/**"
     _autotools = None
 
     @property
@@ -69,6 +70,18 @@ class GdbmConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
 
     def _configure_autotools(self):
         if self._autotools:
@@ -106,15 +119,8 @@ class GdbmConan(ConanFile):
         self._autotools.configure(args=conf_args)
         return self._autotools
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
     def build(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             with tools.chdir("src"):
