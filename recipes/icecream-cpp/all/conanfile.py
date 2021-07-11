@@ -13,7 +13,10 @@ class IcecreamcppConan(ConanFile):
     topics = ("debug", "single-header-lib", "print")
     settings = "compiler"
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
