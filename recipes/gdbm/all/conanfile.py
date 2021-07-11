@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class GdbmConan(ConanFile):
@@ -65,6 +66,7 @@ class GdbmConan(ConanFile):
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
         self.build_requires("flex/2.6.4")
+        self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -106,7 +108,15 @@ class GdbmConan(ConanFile):
         self._autotools.configure(args=conf_args)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             with tools.chdir("src"):
