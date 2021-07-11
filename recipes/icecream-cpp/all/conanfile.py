@@ -35,5 +35,5 @@ class IcecreamcppConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy('LICENSE.txt', dst='licenses', src=self._source_subfolder)
-        self.copy('icecream.hpp', dst='include', src=self._source_subfolder)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        self.copy("icecream.hpp", dst="include", src=self._source_subfolder)
