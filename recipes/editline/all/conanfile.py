@@ -45,13 +45,13 @@ class EditlineConan(ConanFile):
             self.requires("termcap/1.3.1")
         elif self.options.terminal_db == "ncurses":
             self.requires("ncurses/6.2")
-        elif self.options.terminal_db == "tinfo":
-            # TODO - Add tinfo when available
-            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
 
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported by libedit (missing termios.h)")
+        if self.options.terminal_db == "tinfo":
+            # TODO - Add tinfo when available
+            raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
