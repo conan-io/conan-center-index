@@ -71,7 +71,7 @@ class YamlCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
-        self.cpp_info.libs = ["yaml-cpp"]
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append('m')
         if self.settings.compiler == 'Visual Studio':
