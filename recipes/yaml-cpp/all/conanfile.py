@@ -36,7 +36,7 @@ class YamlCppConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def _configure_cmake(self):
