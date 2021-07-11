@@ -70,8 +70,6 @@ class GfCompleteConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(
             self, win_bash=tools.os_info.is_windows)
 
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         if "x86" in self.settings.arch:
             self._autotools.flags.append('-mstackrealign')
@@ -101,6 +99,8 @@ class GfCompleteConan(ConanFile):
         return self._autotools
 
     def build(self):
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
