@@ -115,4 +115,4 @@ class GfCompleteConan(ConanFile):
             os.unlink(la_file)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["gf_complete"]
