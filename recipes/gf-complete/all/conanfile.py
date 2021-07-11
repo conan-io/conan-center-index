@@ -35,7 +35,7 @@ class GfCompleteConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -73,9 +73,8 @@ class GfCompleteConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(
             self, win_bash=bool(self.settings.os == "Windows"))
 
-        with tools.environment_append(self._autotools.vars):
-            with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=bool(self.settings.os == "Windows"))
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=bool(self.settings.os == "Windows"))
 
         if "x86" in self.settings.arch:
             self._autotools.flags.append('-mstackrealign')
