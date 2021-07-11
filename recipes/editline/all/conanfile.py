@@ -62,7 +62,7 @@ class EditlineConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
 
-        configure_args = []
+        configure_args = ["--disable-examples"]
         if self.options.shared:
             configure_args.extend(["--disable-static", "--enable-shared"])
         else:
