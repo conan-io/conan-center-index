@@ -43,19 +43,7 @@ class GdbmConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("gdbm is not supported on Windows")
-
     def configure(self):
-        # Disabling NLS will render the dependency on libiconv and gettext moot
-        # as the configure script will no longer look for that
-        if not self.options.with_nls:
-            if self.options.with_libiconv:
-                raise ConanInvalidConfiguration(
-                    "with_libiconv=True when with_nls=False is not possible "
-                    "as it's NLS that requires libiconv")
-
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -64,6 +52,17 @@ class GdbmConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.with_readline:
             self.requires("readline/8.0")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("gdbm is not supported on Windows")
+
+        # Disabling NLS will render the dependency on libiconv and gettext moot
+        # as the configure script will no longer look for that
+        if not self.options.with_nls and self.options.with_libiconv:
+            raise ConanInvalidConfiguration(
+                "with_libiconv=True when with_nls=False is not possible "
+                "as it's NLS that requires libiconv")
 
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
