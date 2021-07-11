@@ -64,6 +64,8 @@ class SpirvCrossConan(ConanFile):
             # these options don't contribute to shared binary
             del self.options.c_api
             del self.options.util
+
+    def validate(self):
         if not self.options.glsl and \
            (self.options.hlsl or self.options.msl or self.options.cpp or self.options.reflect):
             raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
