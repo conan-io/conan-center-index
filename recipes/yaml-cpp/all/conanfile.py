@@ -10,7 +10,7 @@ class YamlCppConan(ConanFile):
     topics = ("conan", "yaml", "yaml-parser", "serialization", "data-serialization")
     description = "A YAML parser and emitter in C++"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -35,6 +35,10 @@ class YamlCppConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -43,12 +47,14 @@ class YamlCppConan(ConanFile):
         self._cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
         self._cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
         self._cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
+        self._cmake.definitions["YAML_CPP_INSTALL"] = True
         self._cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
 
         self._cmake.configure()
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -60,6 +66,7 @@ class YamlCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
         tools.rmdir(os.path.join(self.package_folder, 'CMake'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
