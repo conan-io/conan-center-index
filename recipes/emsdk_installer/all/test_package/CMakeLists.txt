@@ -10,11 +10,3 @@ file(GLOB SOURCE_FILES *.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
-
-#print all variables used in cmake
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-   message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
