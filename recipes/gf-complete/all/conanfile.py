@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
@@ -30,14 +29,11 @@ class GfCompleteConan(ConanFile):
         "avx": "auto"
     }
 
-    _source_subfolder = "source_subfolder"
     _autotools = None
 
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -65,6 +61,12 @@ class GfCompleteConan(ConanFile):
             # A suitable profile for MSYS2 can be found in the documentation:
             # https://github.com/conan-io/docs/blob/b712aa7c0dc99607c46c57585787ced2ae66ac33/systems_cross_building/windows_subsystems.rst
             raise ConanInvalidConfiguration("Windows is only supported using the MSYS2 subsystem")
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
