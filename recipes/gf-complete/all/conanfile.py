@@ -63,6 +63,11 @@ class GfCompleteConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+                              "SUBDIRS = src tools test examples",
+                              "SUBDIRS = src tools")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -99,6 +104,7 @@ class GfCompleteConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
