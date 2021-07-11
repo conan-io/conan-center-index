@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
 required_conan_version = ">=1.33.0"
@@ -137,11 +136,8 @@ class SpirvCrossConan(ConanFile):
             self.copy(pattern="spirv-cross*", dst="bin", src=os.path.join("build_subfolder_exe", "bin"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" and self.options.shared:
-            for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-                os.remove(pdb_file)
-            for ilk_file in glob.glob(os.path.join(self.package_folder, "bin", "*.ilk")):
-                os.remove(ilk_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.ilk")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         # TODO: set targets names when components available in conan
