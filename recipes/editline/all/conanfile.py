@@ -48,6 +48,8 @@ class EditlineConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported by libedit (missing termios.h)")
 
