@@ -887,8 +887,6 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
-            if self.options.widgets:
-                _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
