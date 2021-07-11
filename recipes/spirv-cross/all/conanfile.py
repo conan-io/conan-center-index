@@ -1,8 +1,10 @@
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+required_conan_version = ">=1.33.0"
+
 
 class SpirvCrossConan(ConanFile):
     name = "spirv-cross"
@@ -67,10 +69,8 @@ class SpirvCrossConan(ConanFile):
             raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = "SPIRV-Cross-" + os.path.basename(url).replace(".tar.gz", "").replace(".zip", "")
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
