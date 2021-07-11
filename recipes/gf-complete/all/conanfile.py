@@ -108,11 +108,7 @@ class GfCompleteConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-
-        # don't package la file
-        la_file = os.path.join(self.package_folder, "lib", "libgf_complete.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["gf_complete"]
