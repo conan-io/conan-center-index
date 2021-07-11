@@ -48,9 +48,11 @@ class GdbmConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if not self.options.with_nls:
+            del self.options.with_libiconv
 
     def requirements(self):
-        if self.options.with_libiconv:
+        if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.with_readline:
             self.requires("readline/8.0")
@@ -58,13 +60,6 @@ class GdbmConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("gdbm is not supported on Windows")
-
-        # Disabling NLS will render the dependency on libiconv and gettext moot
-        # as the configure script will no longer look for that
-        if not self.options.with_nls and self.options.with_libiconv:
-            raise ConanInvalidConfiguration(
-                "with_libiconv=True when with_nls=False is not possible "
-                "as it's NLS that requires libiconv")
 
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
@@ -98,7 +93,7 @@ class GdbmConan(ConanFile):
         if not self.options.with_nls:
             conf_args.extend(["--disable-nls"])
 
-        if self.options.with_libiconv:
+        if self.options.get_safe("with_libiconv"):
             conf_args.extend([
                 "--with-libiconv-prefix={}"
                 .format(self.deps_cpp_info["libiconv"].rootpath),
