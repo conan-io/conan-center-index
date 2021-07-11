@@ -15,6 +15,9 @@ class IcecreamcppConan(ConanFile):
     no_copy_source = True
     _source_subfolder = "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('icecream-cpp-{}'.format(self.version), self._source_subfolder)
