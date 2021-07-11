@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class YamlCppConan(ConanFile):
@@ -23,9 +24,8 @@ class YamlCppConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -69,8 +69,10 @@ class YamlCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["yaml-cpp"]
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append('m')
         if self.settings.compiler == 'Visual Studio':
             self.cpp_info.defines.append('_NOEXCEPT=noexcept')
+        self.cpp_info.names["cmake_find_package"] = "yaml-cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "yaml-cpp"
