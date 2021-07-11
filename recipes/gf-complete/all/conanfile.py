@@ -64,9 +64,15 @@ class GfCompleteConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        # Don't build tests and examples
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
                               "SUBDIRS = src tools test examples",
                               "SUBDIRS = src tools")
+        # Honor build type settings and fPIC option
+        for subdir in ["src", "tools"]:
+            for flag in ["-O3", "-fPIC"]:
+                tools.replace_in_file(os.path.join(self._source_subfolder, subdir, "Makefile.am"),
+                                      flag, "")
 
     def _configure_autotools(self):
         if self._autotools:
