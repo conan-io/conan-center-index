@@ -52,18 +52,13 @@ class GfCompleteConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.os == "Windows" and not self.settings.compiler == "gcc":
-            # Building on Windows is currently only supported using the MSYS2
-            # subsystem. In theory, the gf-complete library can be build using
-            # MSVC. However, some adjustments to the build-system are needed
-            # and the CLI tools cannot be build.
-            #
-            # A suitable profile for MSYS2 can be found in the documentation:
-            # https://github.com/conan-io/docs/blob/b712aa7c0dc99607c46c57585787ced2ae66ac33/systems_cross_building/windows_subsystems.rst
-            raise ConanInvalidConfiguration("Windows is only supported using the MSYS2 subsystem")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio not yet supported by this recipe")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -73,10 +68,10 @@ class GfCompleteConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=bool(self.settings.os == "Windows"))
+            self, win_bash=tools.os_info.is_windows)
 
         with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=bool(self.settings.os == "Windows"))
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         if "x86" in self.settings.arch:
             self._autotools.flags.append('-mstackrealign')
