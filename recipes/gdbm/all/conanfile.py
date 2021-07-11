@@ -131,11 +131,7 @@ class GdbmConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        os.unlink(os.path.join(self.package_folder, "lib", "libgdbm.la"))
-        compat_la = os.path.join(self.package_folder, "lib",
-                                 "libgdbm_compat.la")
-        if (os.path.exists(compat_la)):
-            os.unlink(compat_la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
