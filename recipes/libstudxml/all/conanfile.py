@@ -13,6 +13,8 @@ class LibStudXmlConan(ConanFile):
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
 
+    exports_sources = "patches/*"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,6 +38,9 @@ class LibStudXmlConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def build_requirements(self):
+        self.build_requires("autoconf/2.71")
+
     def requirements(self):
         self.requires("expat/2.4.1")
 
@@ -52,7 +57,6 @@ class LibStudXmlConan(ConanFile):
                 args.extend(["--disable-shared", "--enable-static"])
 
             self._autotools = AutoToolsBuildEnvironment(self)
-            self._autotools.cxx_flags.append("-UNDEBUG")
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
@@ -80,9 +84,15 @@ class LibStudXmlConan(ConanFile):
         msbuild.build(sln_path, platforms={"x86": "Win32"})
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             self._build_vs()
         else:
+            with tools.chdir(self._source_subfolder):
+                #self.run("autoreconf --install")
+                self.run("./bootstrap")
             autotools = self._configure_autotools()
             autotools.make()
 
