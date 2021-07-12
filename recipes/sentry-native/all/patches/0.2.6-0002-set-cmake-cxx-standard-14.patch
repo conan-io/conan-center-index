@@ -7,7 +7,7 @@ index c41d902..4793e9b 100644
  endif()
  
 +if(NOT CMAKE_CXX_STANDARD)
-+  set(CMAKE_CXX_STANDARD 11)
++  set(CMAKE_CXX_STANDARD 14)
 +endif()
 +
  include(GNUInstallDirs)

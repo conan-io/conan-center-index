@@ -67,7 +67,7 @@ class SentryNativeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, 14)
         if self.options.backend == "inproc" and self.settings.os == "Windows" and tools.Version(self.version) < "0.4":
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.backend != "crashpad":
