@@ -28,11 +28,6 @@ class LibX264Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build_requirements(self):
-        self.build_requires("nasm/2.15.05")
-        if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
-            self.build_requires("msys2/20200517")
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -42,6 +37,11 @@ class LibX264Conan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        self.build_requires("nasm/2.15.05")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
