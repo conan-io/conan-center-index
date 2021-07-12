@@ -21,7 +21,7 @@ class LibpngConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "api_prefix": None,
+        "api_prefix": "",
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -84,8 +84,7 @@ class LibpngConan(ConanFile):
                 self._cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
             if self.settings.arch == "armv8":
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
-        if self.options.api_prefix:
-            self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
+        self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
         self._cmake.configure()
         return self._cmake
 
