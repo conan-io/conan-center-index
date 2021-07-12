@@ -975,7 +975,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtmultimedia:
             multimedia_reqs = ["Network", "Gui"]
-            if self.options.with_libalsa:
+            if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
                 multimedia_reqs.append("openal::openal")
@@ -1013,7 +1013,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
-            
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
