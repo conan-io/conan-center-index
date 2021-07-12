@@ -98,9 +98,9 @@ class LibpngConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'libpng'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PNG"
@@ -111,7 +111,7 @@ class LibpngConan(ConanFile):
             if self.settings.compiler == "gcc":
                 self.cpp_info.libs = ["png"]
             else:
-                self.cpp_info.libs = ['libpng16']
+                self.cpp_info.libs = ["libpng16"]
         else:
             self.cpp_info.libs = ["png16"]
             if str(self.settings.os) in ["Linux", "Android", "FreeBSD"]:
