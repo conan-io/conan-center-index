@@ -67,13 +67,13 @@ class LibpngConan(ConanFile):
             cmake.definitions["M_LIBRARY"] = ""
             cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
             cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
-        if self.settings.os == "Macos":
-            if 'arm' in self.settings.arch:
-                cmake.definitions["PNG_ARM_NEON"] = "on"
+        if tools.is_apple_os(self.settings.os):
+            if "arm" in self.settings.arch:
+                cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
+            if self.settings.arch == "armv8":
+                cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         if self.options.api_prefix:
             cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         cmake.configure()
         return cmake
 
