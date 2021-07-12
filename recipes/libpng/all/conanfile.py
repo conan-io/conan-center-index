@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanException
 
 
 class LibpngConan(ConanFile):
