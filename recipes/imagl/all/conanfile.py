@@ -1,8 +1,7 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
-import os
+from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class ImaglConan(ConanFile):
@@ -57,10 +56,6 @@ class ImaglConan(ConanFile):
     def _supports_jpeg(self):
         return tools.Version(self.version) >= "0.2.0"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-v" + self.version, self._source_subfolder)
-
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 20)
@@ -106,6 +101,10 @@ class ImaglConan(ConanFile):
             self.requires("libpng/1.6.37")
         if self._supports_jpeg and self.options.with_jpeg:
             self.requires("libjpeg/9d")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
