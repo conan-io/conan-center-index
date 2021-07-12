@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -78,8 +77,6 @@ class LibtiffConan(ConanFile):
         if not self.options.cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
-        if self.options.get_safe("libdeflate") and not self.options.zlib:
-            raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def requirements(self):
         if self.options.zlib:
@@ -99,8 +96,13 @@ class LibtiffConan(ConanFile):
         if self.options.get_safe("webp"):
             self.requires("libwebp/1.2.0")
 
+    def validate(self):
+        if self.options.get_safe("libdeflate") and not self.options.zlib:
+            raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -166,4 +168,4 @@ class LibtiffConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         self.cpp_info.names["cmake_find_package"] = "TIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
-        self.cpp_info.names["pkg_config"] = "libtiff-4"
+        self.cpp_info.names["pkg_config"] = "libtiff-{}".format(tools.Version(self.version).major)
