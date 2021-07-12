@@ -5,10 +5,10 @@
 -EndProject
 --- PCbuild/python.vcxproj
 +++ PCbuild/python.vcxproj
-@@ -118,1 +118,1 @@
+@@ -120,1 +120,1 @@
 -  <Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'">
 +  <!--<Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'">
-@@ -126,1 +126,1 @@
+@@ -128,1 +128,1 @@
 -  </Target>
 +  </Target>-->
 --- PCbuild/_freeze_importlib.vcxproj

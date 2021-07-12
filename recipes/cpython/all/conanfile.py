@@ -176,7 +176,7 @@ class CPythonConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self._supports_modules:
             self.requires("openssl/1.1.1k")
-            self.requires("expat/2.3.0")
+            self.requires("expat/2.4.1")
             if self._with_libffi:
                 self.requires("libffi/3.2.1")
             if tools.Version(self._version_number_only) < "3.8":
@@ -187,7 +187,7 @@ class CPythonConan(ConanFile):
                 self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
-            self.requires("libxcrypt/4.4.18")
+            self.requires("libxcrypt/4.4.23")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -196,7 +196,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -680,10 +680,14 @@ class CPythonConan(ConanFile):
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
 
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
         python = self._cpython_interpreter_path
-        self.output.info("Setting PYTHON environment variable: {}".format(python))
         self.user_info.python = python
         if self.options.env_vars:
+            self.output.info("Setting PYTHON environment variable: {}".format(python))
             self.env_info.PYTHON = python
 
         if self.settings.compiler == "Visual Studio":
@@ -691,16 +695,15 @@ class CPythonConan(ConanFile):
         else:
             pythonhome = self.package_folder
         self.user_info.pythonhome = pythonhome
+        if self.options.env_vars:
+            self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
+            self.env_info.PYTHONHOME = pythonhome
 
         if self._is_py2:
             python_root = ""
         else:
             python_root = self.package_folder
-            self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
             if self.options.env_vars:
+                self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
                 self.env_info.PYTHON_ROOT = python_root
         self.user_info.python_root = python_root
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)

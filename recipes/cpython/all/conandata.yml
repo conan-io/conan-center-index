@@ -1,21 +1,21 @@
 sources:
-  "3.10.0b1":
-    url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0b1.tgz"
-    sha256: "a44c4726948689fe22f3edf30f11bf361d4536b38738ca955747eb5860c2dc93"
-  "3.9.5":
-    url: "https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz"
-    sha256: "e0fbd5b6e1ee242524430dee3c91baf4cbbaba4a72dd1674b90fda87b713c7ab"
-  "3.8.10":
-    url: "https://www.python.org/ftp/python/3.8.10/Python-3.8.10.tgz"
-    sha256: "b37ac74d2cbad2590e7cd0dd2b3826c29afe89a734090a87bf8c03c45066cb65"
-  "3.7.10":
-    url: "https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz"
-    sha256: "c9649ad84dc3a434c8637df6963100b2e5608697f9ba56d82e3809e4148e0975"
+  "3.10.0b4":
+    url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0b4.tgz"
+    sha256: "f7ab6d8c05102bcdfcfa54ab0478fc9b945d699c896307b0ae177504cabc435c"
+  "3.9.6":
+    url: "https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tgz"
+    sha256: "d0a35182e19e416fc8eae25a3dcd4d02d4997333e4ad1f2eee6010aadc3fe866"
+  "3.8.11":
+    url: "https://www.python.org/ftp/python/3.8.11/Python-3.8.11.tgz"
+    sha256: "b77464ea80cec14581b86aeb7fb2ff02830e0abc7bcdc752b7b4bdfcd8f3e393"
+  "3.7.11":
+    url: "https://www.python.org/ftp/python/3.7.11/Python-3.7.11.tgz"
+    sha256: "b4fba32182e16485d0a6022ba83c9251e6a1c14676ec243a9a07d3722cd4661a"
   "2.7.18":
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
 patches:
-  "3.10.0b1":
+  "3.10.0b4":
     - patch_file: "patches/3.10.0-0001-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.9.5-0002-_msi-vcxproj.patch"
@@ -28,7 +28,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.9.5":
+  "3.9.6":
     - patch_file: "patches/3.9.5-0001-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.9.5-0002-_msi-vcxproj.patch"
@@ -41,7 +41,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.8.10":
+  "3.8.11":
     - patch_file: "patches/3.8.10-0001-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.8.10-0002-_ctypes-ffi.patch"
@@ -52,7 +52,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.7.10":
+  "3.7.11":
     - patch_file: "patches/3.7.9-0001-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.7.9-0002-setup.py-pass-CFLAGS-CPPFLAGS.patch"
