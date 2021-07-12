@@ -19,9 +19,6 @@ class LibpngConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -31,6 +28,9 @@ class LibpngConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
