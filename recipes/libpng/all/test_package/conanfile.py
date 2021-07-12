@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-import platform
 
 from conans import ConanFile, CMake, tools
 
