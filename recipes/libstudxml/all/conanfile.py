@@ -45,13 +45,14 @@ class LibStudXmlConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            args = ["--with-external-expat", "CXXFLAGS=\"-UNDEBUG\""]
+            args = ["--with-external-expat"]
             if self.options.shared:
                 args.extend(["--enable-shared", "--disable-static"])
             else:
                 args.extend(["--disable-shared", "--enable-static"])
 
             self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.cxx_flags.append("-UNDEBUG")
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
