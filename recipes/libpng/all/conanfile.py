@@ -50,7 +50,8 @@ class LibpngConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
-        tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patches", "CMakeLists-zlib.patch"))
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "find_library(M_LIBRARY m)",
                               "set(M_LIBRARY m)")
