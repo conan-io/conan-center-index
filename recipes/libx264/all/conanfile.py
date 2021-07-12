@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibX264Conan(ConanFile):
     name = "libx264"
@@ -44,9 +46,8 @@ class LibX264Conan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = 'x264-snapshot-%s-2245' % self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def env(self):
