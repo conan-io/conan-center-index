@@ -10,14 +10,24 @@ class LibpngConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
+    topics = ("conan", "png", "libpng")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake", "cmake_find_package"]
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "api_prefix": "ANY"}
-    default_options = {'shared': False, 'fPIC': True, "api_prefix": None}
-    topics = ("conan", "png", "libpng")
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "api_prefix": "ANY",
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "api_prefix": None,
+    }
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
