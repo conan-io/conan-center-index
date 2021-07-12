@@ -19,23 +19,15 @@ sources:
     sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
 patches:
   "0.4.10":
-    - patch_file: "patches/0.4.10-0001-find-conan-qt.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.4.10-0002-CXX-14.patch"
       base_path: "source_subfolder"
   "0.4.9":
-    - patch_file: "patches/0.4.9-0001-find-conan-qt.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.4.9-0002-CXX-14.patch"
       base_path: "source_subfolder"
   "0.4.8":
-    - patch_file: "patches/0.4.8-0001-find-conan-qt.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.4.8-0002-CXX-14.patch"
       base_path: "source_subfolder"
   "0.4.7":
-    - patch_file: "patches/0.4.7-0001-find-conan-qt.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0.4.7-0002-CXX-14.patch"
       base_path: "source_subfolder"
   "0.2.6":
