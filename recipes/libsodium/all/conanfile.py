@@ -71,10 +71,9 @@ class LibsodiumConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        # There are several unix tools used (bash scripts for Emscripten, autoreconf on MinGW, etc...)
-        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and \
-                not "CONAN_BASH_PATH" in os.environ and tools.os_info.detect_windows_subsystem() != "Windows":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
