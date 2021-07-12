@@ -90,9 +90,15 @@ class LibStudXmlConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._build_vs()
         else:
+            if self.settings.compiler.get_safe("libcxx") == "libc++":
+                # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
+                # include dir, libc++ ends up including their 'version' file instead, causing a compile error
+                tools.remove_files_by_mask(self._source_subfolder, "version")
+
             with tools.chdir(self._source_subfolder):
                 #self.run("autoreconf --install")
                 self.run("./bootstrap")
+
             autotools = self._configure_autotools()
             autotools.make()
 
