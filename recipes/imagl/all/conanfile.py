@@ -27,7 +27,7 @@ class ImaglConan(ConanFile):
         "allow_clang_11": None
     }
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     _cmake = None
 
     @property
@@ -120,6 +120,8 @@ class ImaglConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
