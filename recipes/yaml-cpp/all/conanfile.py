@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class YamlCppConan(ConanFile):
     name = "yaml-cpp"
@@ -21,11 +23,6 @@ class YamlCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -33,6 +30,10 @@ class YamlCppConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
