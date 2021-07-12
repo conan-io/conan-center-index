@@ -11,8 +11,7 @@ class LibpngConan(ConanFile):
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
     topics = ("conan", "png", "libpng")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = ["cmake", "cmake_find_package"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,6 +23,10 @@ class LibpngConan(ConanFile):
         "fPIC": True,
         "api_prefix": None,
     }
+
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = ["cmake", "cmake_find_package"]
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -68,25 +71,27 @@ class LibpngConan(ConanFile):
                                   '-lpng@PNGLIB_MAJOR@@PNGLIB_MINOR@d')
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PNG_TESTS"] = "OFF"
-        cmake.definitions["PNG_SHARED"] = self.options.shared
-        cmake.definitions["PNG_STATIC"] = not self.options.shared
-        cmake.definitions["PNG_DEBUG"] = "OFF" if self.settings.build_type == "Release" else "ON"
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["PNG_TESTS"] = "OFF"
+        self._cmake.definitions["PNG_SHARED"] = self.options.shared
+        self._cmake.definitions["PNG_STATIC"] = not self.options.shared
+        self._cmake.definitions["PNG_DEBUG"] = "OFF" if self.settings.build_type == "Release" else "ON"
         if self.settings.os == "Emscripten":
-            cmake.definitions["PNG_BUILD_ZLIB"] = "ON"
-            cmake.definitions["M_LIBRARY"] = ""
-            cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
-            cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
+            self._cmake.definitions["PNG_BUILD_ZLIB"] = "ON"
+            self._cmake.definitions["M_LIBRARY"] = ""
+            self._cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
+            self._cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
         if tools.is_apple_os(self.settings.os):
             if "arm" in self.settings.arch:
-                cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
+                self._cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
             if self.settings.arch == "armv8":
-                cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         if self.options.api_prefix:
-            cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
-        cmake.configure()
-        return cmake
+            self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._patch()
