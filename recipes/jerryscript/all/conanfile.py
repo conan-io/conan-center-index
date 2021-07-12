@@ -35,6 +35,8 @@ class JerryScriptStackConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.options.shared:
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
