@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 import os
 import json
 
-
 class VtkConan(ConanFile):
     name = "vtk"
     license = "BSD-3-Clause"
@@ -41,7 +40,7 @@ class VtkConan(ConanFile):
                        "vtk_group_enable_web": "DEFAULT",
                        "fPIC": True}
     generators = "cmake"
-    version = "9.0.1"
+    short_paths = True
 
     _cmake = None
 
@@ -58,8 +57,6 @@ class VtkConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        if self.version is None:
-            self.version = "9.0.1"
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
@@ -87,10 +84,8 @@ class VtkConan(ConanFile):
         cmake.build()
 
     def requirements(self):
-        if self.options.vtk_group_enable_rendering in ["YES", "WANT", "DEFAULT"]:
-            self.requires("opengl/system")
 
-        if self.options.vtk_group_enable_qt in ["YES", "WANT", "DEFAULT"]:
+        if self.options.vtk_group_enable_qt in ["YES", "WANT"]:
             self.requires("qt/5.15.2")
 
         if self.options.vtk_smp_implementation == "TBB":
@@ -108,31 +103,40 @@ class VtkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "vtk"))
         self.copy("modules.json", dst="bin", src=self.build_folder)
+    
+    def filter_dep(self, dependencies):
+        ls_dep = []
+        for dep in dependencies:
+            name = dep.split('::')[1]
+            ls_dep.append(name)
+        return ls_dep
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "VTK"
         self.cpp_info.names["cmake_find_package_multi"] = "VTK"
 
-        libs = tools.collect_libs(self)
+        pkg_ver = [int(i) for i in self.version.split('.')]
+        base_include_dir = os.path.join('include','vtk-%d.%d' % (pkg_ver[0], pkg_ver[1]))
+
         with open(os.path.join(self.package_folder, "bin", "modules.json")) as reader:
             vtk_modules = json.load(reader)
+        
+        for full_name, content in vtk_modules["modules"].items():
+            lib_name = content["library_name"]
+            name = full_name.split('::')[1]
+            if content["enabled"] and not name in ['TestingCore', 'TestingRendering']:
+                self.cpp_info.components[name].names["cmake_find_package"]  = name
+                self.cpp_info.components[name].names["cmake_find_package_multi"] = name
+                self.cpp_info.components[name].libs = ['%s-%d.%d' % ( lib_name, pkg_ver[0], pkg_ver[1])]
 
-        for name, content in vtk_modules["modules"].items():
-            if content["enabled"]:
-                lib_name = content["library_name"]
-                self.cpp_info.components[name].libs = [lib_name]
+                self.cpp_info.components[name].requires.extend(self.filter_dep(content['depends']))
+                self.cpp_info.components[name].requires.extend(self.filter_dep(content['private_depends']))
 
-                for dep in content['depends']:
-                    self.cpp_info.components[name].requires.append(dep)
-
-                for dep in content['private_depends']:
-                    self.cpp_info.components[name].requires.append(dep)
-
-                incl_dir = set()
+                incl_dir = {base_include_dir}
                 for incl_f in content['headers']:
-                    p = incl_f.split('/')
+                    p = os.path.dirname(incl_f)
                     if len(p) > 1:
-                        incl_dir.add(os.path.join(*p[0:-1]))
+                        incl_dir.add(os.path.join(base_include_dir, p))
 
                 if len(incl_dir) != 0:
                     for d in incl_dir:

@@ -3,10 +3,10 @@ project(PackageTest CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
-find_package(VTK REQUIRED)
+find_package(VTK REQUIRED CONFIG)
 
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS} ${VTK_LIBRARIES})
+target_link_libraries(example ${CONAN_LIBS})
 
 # CTest is a testing tool that can be used to test your project.
 # enable_testing()
