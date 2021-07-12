@@ -81,6 +81,7 @@ class LibpngConan(ConanFile):
             self._cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
         if tools.is_apple_os(self.settings.os):
             if "arm" in self.settings.arch:
+                # FIXME: Neon should work on iOS (but currently if leads to undefined symbols), see if autotools build is better
                 self._cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
             if self.settings.arch == "armv8":
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
