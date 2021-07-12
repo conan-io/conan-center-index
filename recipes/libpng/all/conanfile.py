@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, tools, CMake
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibpngConan(ConanFile):
@@ -31,8 +33,8 @@ class LibpngConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libpng-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
         tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patches", "CMakeLists-zlib.patch"))
