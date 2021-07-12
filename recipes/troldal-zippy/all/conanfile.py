@@ -1,13 +1,14 @@
 from conans import ConanFile, tools
 import os
 
-class NoWideConan(ConanFile):
-    name = "zippy"
+class TroldalZippyConan(ConanFile):
+    name = "troldal-zippy"
     description = "A simple C++ wrapper around the \"miniz\" zip library "
     topics = ("wrapper", "compression", "zip")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/troldal/Zippy"
     license = "MIT"
+    settings = "compiler"
     exports_sources = "patches/*"
 
     @property
@@ -16,6 +17,10 @@ class NoWideConan(ConanFile):
 
     def requirements(self):
         self.requires("miniz/2.2.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
