@@ -40,3 +40,54 @@
  target_include_directories(NetSSLWin
  	PUBLIC
  		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+
+--- ActiveRecord/Compiler/CMakeLists.txt
++++ ActiveRecord/Compiler/CMakeLists.txt
+@@ -21,5 +21,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+
+--- Encodings/Compiler/CMakeLists.txt
++++ Encodings/Compiler/CMakeLists.txt
+@@ -15,5 +15,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+
+--- PageCompiler/CMakeLists.txt
++++ PageCompiler/CMakeLists.txt
+@@ -23,5 +23,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+
+--- PocoDoc/CMakeLists.txt
++++ PocoDoc/CMakeLists.txt
+@@ -11,5 +11,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+
+--- cmake/PocoMacros.cmake
++++ cmake/PocoMacros.cmake
+@@ -274,6 +274,7 @@ install(
+     LIBRARY DESTINATION lib${LIB_SUFFIX}
+     ARCHIVE DESTINATION lib${LIB_SUFFIX}
+     RUNTIME DESTINATION bin
++    BUNDLE DESTINATION bin
+     INCLUDES DESTINATION include
+ )
+ 
