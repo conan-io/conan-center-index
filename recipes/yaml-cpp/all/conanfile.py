@@ -51,6 +51,7 @@ class YamlCppConan(ConanFile):
         self._cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
         self._cmake.definitions["YAML_CPP_INSTALL"] = True
         self._cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["YAML_MSVC_SHARED_RT"] = self.settings.compiler == "Visual Studio" and "MD" in str(self.settings.compiler.runtime)
 
         self._cmake.configure()
         return self._cmake
