@@ -113,16 +113,15 @@ class LibX264Conan(ConanFile):
             autotools.install()
         self.copy(pattern="COPYING", src=self._source_subfolder, dst='licenses')
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        if self._is_msvc:
+            ext = ".dll.lib" if self.options.shared else ".lib"
+            tools.rename(os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
+                         os.path.join(self.package_folder, "lib", "x264.lib"))
 
     def package_info(self):
-        if self._is_msvc:
-            self.cpp_info.libs = ['libx264.dll.lib' if self.options.shared else 'libx264']
-            if self.options.shared:
-                self.cpp_info.defines.append("X264_API_IMPORTS")
-        elif self._is_mingw:
-            self.cpp_info.libs = ['x264.dll' if self.options.shared else 'x264']
-        else:
-            self.cpp_info.libs = ['x264']
+        self.cpp_info.libs = ["x264"]
+        if self._is_msvc and self.options.shared:
+            self.cpp_info.defines.append("X264_API_IMPORTS")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['dl', 'pthread', 'm'])
         elif self.settings.os == "Android":
