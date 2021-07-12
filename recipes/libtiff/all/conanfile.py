@@ -105,6 +105,11 @@ class LibtiffConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
+        tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
+                     os.path.join(self.build_folder, "ConanFindjbig.cmake"))
+        tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
+                     os.path.join(self.build_folder, "ConanFindzstd.cmake"))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if self.options.shared and self.settings.compiler == "Visual Studio":

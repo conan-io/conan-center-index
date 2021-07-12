@@ -1,7 +1,7 @@
 --- cmake/FindZSTD.cmake
 +++ cmake/FindZSTD.cmake
 @@ -1,0 +1,9 @@
-+include("${cmake_wrapper_SOURCE_DIR}/Findzstd.cmake")
++include("${cmake_wrapper_SOURCE_DIR}/ConanFindzstd.cmake")
 +if(NOT TARGET ZSTD::ZSTD)
 +  add_library(ZSTD::ZSTD INTERFACE IMPORTED)
 +  if(TARGET zstd::libzstd_shared)
@@ -13,7 +13,7 @@
 --- cmake/FindJBIG.cmake
 +++ cmake/FindJBIG.cmake
 @@ -1,0 +1,5 @@
-+include("${cmake_wrapper_SOURCE_DIR}/Findjbig.cmake")
++include("${cmake_wrapper_SOURCE_DIR}/ConanFindjbig.cmake")
 +if(NOT TARGET JBIG::JBIG)
 +  add_library(JBIG::JBIG INTERFACE IMPORTED)
 +  target_link_libraries(JBIG::JBIG INTERFACE jbig::jbig)
