@@ -102,5 +102,5 @@ class YamlCppConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "yaml-cpp"
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
