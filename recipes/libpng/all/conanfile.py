@@ -74,11 +74,6 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_SHARED"] = self.options.shared
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
-        if self.settings.os == "Emscripten":
-            self._cmake.definitions["PNG_BUILD_ZLIB"] = True
-            self._cmake.definitions["M_LIBRARY"] = ""
-            self._cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
-            self._cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
         if tools.is_apple_os(self.settings.os):
             if "arm" in self.settings.arch:
                 # FIXME: Neon should work on iOS (but currently if leads to undefined symbols), see if autotools build is better
