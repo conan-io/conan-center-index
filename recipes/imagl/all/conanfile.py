@@ -56,6 +56,26 @@ class ImaglConan(ConanFile):
     def _supports_jpeg(self):
         return tools.Version(self.version) >= "0.2.0"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if not self._supports_jpeg:
+            del self.options.with_jpeg
+        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
+            del self.options.allow_clang_11
+        else:
+            self.output.warn("allow_clang_11 option will be removed in the future when conan center index will support clang 11.")
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self._supports_jpeg and self.options.with_jpeg:
+            self.requires("libjpeg/9d")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 20)
@@ -81,26 +101,6 @@ class ImaglConan(ConanFile):
             raise ConanInvalidConfiguration("Clang 11 is not currently supported by conan center index. To build imaGL, append '-o imagl:allow_clang_11=True --build missing' to your 'conan install' command line.")
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if not self._supports_jpeg:
-            del self.options.with_jpeg
-        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
-            del self.options.allow_clang_11
-        else:
-            self.output.warn("allow_clang_11 option will be removed in the future when conan center index will support clang 11.")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        if self.options.with_png:
-            self.requires("libpng/1.6.37")
-        if self._supports_jpeg and self.options.with_jpeg:
-            self.requires("libjpeg/9d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
