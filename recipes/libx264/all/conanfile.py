@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibX264Conan(ConanFile):
     name = "libx264"
@@ -28,11 +30,6 @@ class LibX264Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build_requirements(self):
-        self.build_requires("nasm/2.15.05")
-        if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
-            self.build_requires("msys2/20200517")
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -43,10 +40,14 @@ class LibX264Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        self.build_requires("nasm/2.15.05")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = 'x264-snapshot-%s-2245' % self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def env(self):
@@ -113,16 +114,15 @@ class LibX264Conan(ConanFile):
             autotools.install()
         self.copy(pattern="COPYING", src=self._source_subfolder, dst='licenses')
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        if self._is_msvc:
+            ext = ".dll.lib" if self.options.shared else ".lib"
+            tools.rename(os.path.join(self.package_folder, "lib", "libx264{}".format(ext)),
+                         os.path.join(self.package_folder, "lib", "x264.lib"))
 
     def package_info(self):
-        if self._is_msvc:
-            self.cpp_info.libs = ['libx264.dll.lib' if self.options.shared else 'libx264']
-            if self.options.shared:
-                self.cpp_info.defines.append("X264_API_IMPORTS")
-        elif self._is_mingw:
-            self.cpp_info.libs = ['x264.dll' if self.options.shared else 'x264']
-        else:
-            self.cpp_info.libs = ['x264']
+        self.cpp_info.libs = ["x264"]
+        if self._is_msvc and self.options.shared:
+            self.cpp_info.defines.append("X264_API_IMPORTS")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['dl', 'pthread', 'm'])
         elif self.settings.os == "Android":
