@@ -14,17 +14,17 @@ class ImaglConan(ConanFile):
     topics = ("opengl", "texture", "image")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False], 
-        "fPIC": [True, False], 
-        "with_png": [True, False], 
-        "with_jpeg": [True, False], 
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_png": [True, False],
+        "with_jpeg": [True, False],
         "allow_clang_11": [None, True, False]
     }
     default_options = {
-        "shared": False, 
-        "fPIC": True, 
-        "with_png": True, 
-        "with_jpeg": True, 
+        "shared": False,
+        "fPIC": True,
+        "with_png": True,
+        "with_jpeg": True,
         "allow_clang_11": None
     }
     generators = "cmake"
