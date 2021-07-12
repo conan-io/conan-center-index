@@ -44,6 +44,15 @@ class SentryNativeConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -72,6 +81,14 @@ class SentryNativeConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
+                .format(str(self.settings.compiler), minimum_version))
+
         if self.options.backend == "inproc" and self.settings.os == "Windows" and tools.Version(self.version) < "0.4":
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.backend != "crashpad":
