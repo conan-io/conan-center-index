@@ -66,11 +66,6 @@ class LibpngConan(ConanFile):
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
-        if self.settings.build_type == 'Debug':
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'libpng.pc.in'),
-                                  '-lpng@PNGLIB_MAJOR@@PNGLIB_MINOR@',
-                                  '-lpng@PNGLIB_MAJOR@@PNGLIB_MINOR@d')
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
