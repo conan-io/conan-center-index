@@ -11,7 +11,7 @@ class YamlCppConan(ConanFile):
     topics = ("conan", "yaml", "yaml-parser", "serialization", "data-serialization")
     description = "A YAML parser and emitter in C++"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -54,6 +54,8 @@ class YamlCppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
