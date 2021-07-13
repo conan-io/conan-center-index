@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class KangaruConan(ConanFile):
     name = "kangaru"
@@ -36,8 +38,8 @@ class KangaruConan(ConanFile):
         self.info.settings.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
