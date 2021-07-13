@@ -89,14 +89,14 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
 
     def build_requirements(self):
         if not self._is_msvc:
             if self.options.zlib or self.options.lzma or self.options.icu:
-                self.build_requires("pkgconf/1.7.3")
+                self.build_requires("pkgconf/1.7.4")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
