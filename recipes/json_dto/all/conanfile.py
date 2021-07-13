@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class JsondtoConan(ConanFile):
     name = "json_dto"
     license = "BSD-3-Clause"
@@ -48,6 +51,9 @@ class JsondtoConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -58,11 +64,6 @@ class JsondtoConan(ConanFile):
         self._cmake.definitions["JSON_DTO_FIND_DEPS"] = False
         self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
         return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-v." + self.version
-        os.rename(extracted_dir, self._source_subfolder )
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
