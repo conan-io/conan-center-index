@@ -33,7 +33,10 @@ class JsonSchemaValidatorConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def requirements(self):
+        self.requires("nlohmann_json/3.9.1")
+
+    def validate(self):
         version = tools.Version(self.version)
         min_vs_version = "16" if version < "2.1.0" else "14"
         min_cppstd = "17" if self.settings.compiler == "Visual Studio" and version < "2.1.0" else "11"
@@ -54,9 +57,6 @@ class JsonSchemaValidatorConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires c++{} support. The current compiler {} {} does not support it.".format(
                     self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
-
-    def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
