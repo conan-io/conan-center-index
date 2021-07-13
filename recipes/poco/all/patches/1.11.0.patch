@@ -69,7 +69,7 @@ index 92f37a9..49ad7b4 100644
  	INCLUDES DESTINATION include
  )
 diff --git a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
-index 038779e..93f014e 100644
+index 038779e..879dd56 100644
 --- a/cmake/PocoMacros.cmake
 +++ b/cmake/PocoMacros.cmake
 @@ -40,7 +40,7 @@ if(WIN32)
@@ -81,7 +81,7 @@ index 038779e..93f014e 100644
  		DOC "path to message compiler")
  	if(NOT CMAKE_MC_COMPILER)
  		message(FATAL_ERROR "message compiler not found: required to build")
-@@ -274,12 +274,13 @@ install(
+@@ -274,6 +274,7 @@ install(
      LIBRARY DESTINATION lib${LIB_SUFFIX}
      ARCHIVE DESTINATION lib${LIB_SUFFIX}
      RUNTIME DESTINATION bin
@@ -89,10 +89,3 @@ index 038779e..93f014e 100644
      INCLUDES DESTINATION include
  )
  
- if(MSVC)
- # install the targets pdb
--	POCO_INSTALL_PDB(${target_name})
-+	# POCO_INSTALL_PDB(${target_name})
- endif()
- 
- endmacro()
