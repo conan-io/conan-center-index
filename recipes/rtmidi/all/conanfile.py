@@ -12,7 +12,8 @@ class RtMidiConan(ConanFile):
     topics = ("midi")
     license = "Copyright (c) 2003-2019 Gary P. Scavone"
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["patches/*"]
+    generators = "cmake", "pkg_config"
+    exports_sources = "patches/*"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -49,7 +50,7 @@ class RtMidiConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["RTMIDI_BUILD_TESTING"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
