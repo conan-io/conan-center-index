@@ -157,6 +157,18 @@ class MimallocConan(ConanFile):
                 self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
                           dst="bin")
 
+        # Starting version 2.0 mimalloc installs libs in a mimalloc-2.0 subfolder.
+        # Move them out to preserve package layout
+        if tools.Version(self.version) >= "2.0":
+            file_names = os.listdir(
+                            os.path.join(self.package_folder, "lib", "mimalloc-2.0")
+                            )
+            for file_name in file_names:
+                shutil.move(os.path.join(self.package_folder, "lib", "mimalloc-2.0", file_name),
+                            os.path.join(self.package_folder, "lib")
+                )
+            tools.rmdir(os.path.join(self.package_folder, "lib", "mimalloc-2.0"))
+
     @property
     def _obj_name(self):
         name = "mimalloc"
@@ -203,3 +215,8 @@ class MimallocConan(ConanFile):
                 self.cpp_info.system_libs.extend(["psapi", "shell32", "user32", "bcrypt"])
             elif self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("rt")
+
+        # Starting version 2.0 mimalloc installs the headers in a mimalloc-2.0 subfolder.
+        # Expose both paths to preserve compatibility with the test_package
+        if tools.Version(self.version) >= "2.0":
+            self.cpp_info.includedirs = ["include", os.path.join("include", "mimalloc-2.0")]
