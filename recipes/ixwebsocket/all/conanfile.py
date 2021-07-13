@@ -40,6 +40,15 @@ class IXWebSocketConan(ConanFile):
             # zlib is always required before 10.1.5
             del self.options.with_zlib
 
+    def requirements(self):
+        if self.options.get_safe("with_zlib", True):
+            self.requires("zlib/1.2.11")
+        if self.options.tls == "openssl":
+            self.requires("openssl/1.1.1k")
+        elif self.options.tls == "mbedtls":
+            self.requires("mbedtls/2.25.0")
+
+    @property
     def _can_use_openssl(self):
         if self.settings.os == "Windows":
             # Future: support for OpenSSL on Windows was introduced in 7.9.3. Earlier versions force MbedTLS
@@ -49,22 +58,14 @@ class IXWebSocketConan(ConanFile):
         # Older versions doesn't support OpenSSL on Mac, but those are unlikely to be built now.
         return True
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             # After version 11.0.8, IXWebSocket is fully compatible with C++ 11. https://github.com/machinezone/IXWebSocket/commit/ee5a2eb46ee0e109415dc02b0db85a9c76256090
             tools.check_min_cppstd(self, 14 if tools.Version(self.version) < "11.0.8" else 11)
         if self.options.tls == "applessl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
-        elif not self._can_use_openssl() and self.options.tls == "openssl":
+        elif not self._can_use_openssl and self.options.tls == "openssl":
             raise ConanInvalidConfiguration("This version doesn't support OpenSSL with Windows; use v7.9.3 or newer for this to be valid")
-
-    def requirements(self):
-        if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.11")
-        if self.options.tls == "openssl":
-            self.requires("openssl/1.1.1k")
-        elif self.options.tls == "mbedtls":
-            self.requires("mbedtls/2.25.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
