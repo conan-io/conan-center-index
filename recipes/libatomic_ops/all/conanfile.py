@@ -1,6 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from contextlib import contextmanager
 import os
+import shutil
 
 
 class Libatomic_opsConan(ConanFile):
@@ -38,6 +39,7 @@ class Libatomic_opsConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -68,7 +70,15 @@ class Libatomic_opsConan(ConanFile):
         else:
             yield
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
