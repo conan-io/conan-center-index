@@ -4,6 +4,8 @@ import os
 import shutil
 import string
 
+required_conan_version = ">=1.33.0"
+
 
 class JemallocConan(ConanFile):
     name = "jemalloc"
@@ -79,8 +81,8 @@ class JemallocConan(ConanFile):
             raise ConanInvalidConfiguration("Unsupported compiler version")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
         if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH", None):
@@ -194,8 +196,8 @@ class JemallocConan(ConanFile):
             autotools.make(target="install_lib_shared" if self.options.shared else "install_lib_static")
             autotools.make(target="install_include")
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                os.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
-                          os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
+                tools.rename(os.path.join(self.package_folder, "lib", "{}.lib".format(self._library_name)),
+                             os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
 
