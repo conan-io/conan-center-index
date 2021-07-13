@@ -81,10 +81,12 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(os.path.join("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"),  # This is not installed in 2.0.0 correctly
-                  src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        if tools.Version(self.version) < "2.1.0":
+            self.copy("json-schema.hpp",
+                      dst=os.path.join("include", "nlohmann"),
+                      src=os.path.join(self._source_subfolder, "src"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
