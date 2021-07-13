@@ -82,6 +82,10 @@ class JemallocConan(ConanFile):
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "3.9":
             raise ConanInvalidConfiguration("Unsupported compiler version")
 
+    def package_id(self):
+        if not self.settings.build_type:
+            self.info.settings.build_type = "Release"
+
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -202,10 +206,6 @@ class JemallocConan(ConanFile):
                              os.path.join(self.package_folder, "lib", "lib{}.a".format(self._library_name)))
                 if not self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
-
-    def package_id(self):
-        if not self.settings.build_type:
-            self.info.settings.build_type = "Release"
 
     def package_info(self):
         self.cpp_info.libs = [self._library_name]
