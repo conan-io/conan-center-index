@@ -12,7 +12,6 @@ class JsondtoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A small header-only helper for converting data between json representation and c++ structs"
     topics = ("json", "dto", "serialization")
-    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
