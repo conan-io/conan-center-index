@@ -42,6 +42,11 @@ class RtMidiConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
 
+    def requirements(self):
+        if self.settings.os == "Linux":
+            if self.options.with_alsa:
+                self.requires("libalsa/1.2.4")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -93,3 +98,5 @@ class RtMidiConan(ConanFile):
             self.cpp_info.frameworks.extend(
                 ["CoreFoundation", "CoreAudio", "CoreMidi"]
             )
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("winmm")
