@@ -1,4 +1,7 @@
 sources:
+  "1.18.0":
+    sha256: 8cdb8b246263fbd8fcef07b6300f6aefb58b3a54cd67e5cbe5383bc948305844
+    url: https://github.com/hosseinmoein/DataFrame/archive/1.18.0.tar.gz
   "1.17.0":
     sha256: 669e9663de358330b15eacaa783ccf42fe16db27b9556fdcd18f1114c0335557
     url: https://github.com/hosseinmoein/DataFrame/archive/1.17.0.tar.gz
