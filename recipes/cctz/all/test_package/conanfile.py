@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -15,6 +15,3 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
-
-            if self.options["cctz"].build_tools:
-                self.run("time_tool --tz=Europe/Berlin")

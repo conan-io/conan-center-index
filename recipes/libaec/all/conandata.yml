@@ -2,8 +2,9 @@ sources:
   "1.0.4":
     url: https://gitlab.dkrz.de/k202009/libaec/uploads/ea0b7d197a950b0c110da8dfdecbb71f/libaec-1.0.4.tar.gz
     sha256: f2b1b232083bd8beaf8a54a024225de3dd72a673a9bcdf8c3ba96c39483f4309
-
 patches:
   "1.0.4":
-    patch_file: "patches/0001-Fix-static-library-builds.patch"
-    base_path: "source_subfolder"
+    - patch_file: "patches/0001-Fix-static-library-builds.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-install-ios.patch"
+      base_path: "source_subfolder"

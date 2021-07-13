@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class CivetwebConan(ConanFile):
@@ -12,7 +12,7 @@ class CivetwebConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Embedded C/C++ web server"
     topics = ("conan", "civetweb", "web-server", "embedded")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -66,8 +66,8 @@ class CivetwebConan(ConanFile):
             raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("civetweb-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -89,6 +89,8 @@ class CivetwebConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -2,6 +2,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class OatppsqliteConan(ConanFile):
     name = "oatpp-sqlite"
     license = "Apache-2.0"
@@ -43,11 +46,10 @@ class OatppsqliteConan(ConanFile):
 
     def requirements(self):
         self.requires("oatpp/" + self.version)
-        self.requires("sqlite3/3.33.0")
+        self.requires("sqlite3/3.36.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("oatpp-sqlite-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

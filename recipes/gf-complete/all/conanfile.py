@@ -1,7 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
 import os
-import glob
 
 required_conan_version = ">=1.33.0"
 
@@ -30,14 +30,12 @@ class GfCompleteConan(ConanFile):
         "avx": "auto"
     }
 
-    _source_subfolder = "source_subfolder"
+    exports_sources = "patches/**"
     _autotools = None
 
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -51,34 +49,72 @@ class GfCompleteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.settings.compiler == "Visual Studio":
+            self.requires("getopt-for-visual-studio/20200201")
+
     def validate(self):
-        if self.settings.os == "Windows" and not self.settings.compiler == "gcc":
-            # Building on Windows is currently only supported using the MSYS2
-            # subsystem. In theory, the gf-complete library can be build using
-            # MSVC. However, some adjustments to the build-system are needed
-            # and the CLI tools cannot be build.
-            #
-            # A suitable profile for MSYS2 can be found in the documentation:
-            # https://github.com/conan-io/docs/blob/b712aa7c0dc99607c46c57585787ced2ae66ac33/systems_cross_building/windows_subsystems.rst
-            raise ConanInvalidConfiguration("Windows is only supported using the MSYS2 subsystem")
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared:
+                raise ConanInvalidConfiguration("gf-complete doesn't support shared with Visual Studio")
+            if self.version == "1.03":
+                raise ConanInvalidConfiguration("gf-complete 1.03 doesn't support Visual Studio")
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Don't build tests and examples (and also tools if Visual Studio)
+        to_build = ["src"]
+        if self.settings.compiler != "Visual Studio":
+            to_build.append("tools")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+                              "SUBDIRS = src tools test examples",
+                              "SUBDIRS = {}".format(" ".join(to_build)))
+        # Honor build type settings and fPIC option
+        for subdir in ["src", "tools"]:
+            for flag in ["-O3", "-fPIC"]:
+                tools.replace_in_file(os.path.join(self._source_subfolder, subdir, "Makefile.am"),
+                                      flag, "")
+
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=bool(self.settings.os == "Windows"))
+            self, win_bash=tools.os_info.is_windows)
 
-        with tools.environment_append(self._autotools.vars):
-            with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=bool(self.settings.os == "Windows"))
+        self._autotools.libs = []
 
-        if "x86" in self.settings.arch:
-            self._autotools.flags.append('-mstackrealign')
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
+        elif "x86" in self.settings.arch:
+            self._autotools.flags.append("-mstackrealign")
 
         configure_args = [
             "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
@@ -105,18 +141,24 @@ class GfCompleteConan(ConanFile):
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        self._patch_sources()
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
-
-        # don't package la file
-        la_file = os.path.join(self.package_folder, "lib", "libgf_complete.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["gf_complete"]
+
+        if self.settings.compiler != "Visual Studio":
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

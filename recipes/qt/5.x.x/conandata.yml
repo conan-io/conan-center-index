@@ -16,3 +16,5 @@ patches:
       base_path: "qt5/qttools"
     - patch_file: "patches/QTBUG-88625.diff"
       base_path: "qt5/qtwebengine"
+    - patch_file: "patches/7371d3a.diff"
+      base_path: "qt5/qtbase"

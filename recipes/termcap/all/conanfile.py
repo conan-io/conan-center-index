@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
 import re
-import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -61,9 +60,9 @@ class TermcapConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version].get(str(self.settings.os), []):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        
+
         if self.settings.os == "Windows":
             for src in self._extract_sources()[0]:
                 txt = open(src).read()
