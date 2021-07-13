@@ -92,6 +92,14 @@ class IXWebSocketConan(ConanFile):
         # Allow shared
         if tools.Version(self.version) < "11.1.4":
             tools.replace_in_file(cmakelists, "add_library( ixwebsocket STATIC", "add_library( ixwebsocket")
+        if tools.Version(self.version) < "9.8.5":
+            tools.replace_in_file(cmakelists,
+                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib",
+                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
+        else:
+            tools.replace_in_file(cmakelists,
+                                  "ARCHIVE DESTINATION lib",
+                                  "ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
