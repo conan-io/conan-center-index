@@ -28,7 +28,7 @@ class JsondtoConan(ConanFile):
     def requirements(self):
         self.requires("rapidjson/1.1.0")
 
-    def configure(self):
+    def validate(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
