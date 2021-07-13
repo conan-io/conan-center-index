@@ -100,6 +100,10 @@ class SentryNativeConan(ConanFile):
         if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
 
+    def build_requirements(self):
+        if self.options.backend == "breakpad":
+            self.build_requires("pkgconf/1.7.4")
+
     def requirements(self):
         if self.options.transport == "curl":
             self.requires("libcurl/7.75.0")
