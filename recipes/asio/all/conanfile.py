@@ -33,6 +33,6 @@ class Asio(ConanFile):
         self.copy(pattern="*.ipp", dst="include", src=include_dir)
 
     def package_info(self):
-        self.cpp_info.defines.append('ASIO_STANDALONE')
-        if str(self.settings.os) in ["Linux"]:
-            self.cpp_info.system_libs.append('pthread')
+        self.cpp_info.defines.append("ASIO_STANDALONE")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
