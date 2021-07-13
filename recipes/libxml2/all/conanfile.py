@@ -239,7 +239,7 @@ class Libxml2Conan(ConanFile):
                       dst=os.path.join("include", "libxml2"), keep_path=False)
 
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+            os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
     @staticmethod
@@ -271,8 +271,9 @@ class Libxml2Conan(ConanFile):
         return os.path.join("lib", "cmake")
 
     @property
-    def _module_file(self):
-        return "conan-official-{}-variables.cmake".format(self.name)
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         if self._is_msvc:
@@ -298,4 +299,4 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
