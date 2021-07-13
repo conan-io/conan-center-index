@@ -6,6 +6,11 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def requirements(self):
+        self.requires("gtest/cci.20210126")
+        self.requires("platform.setters/0.0.1")
+        self.requires("platform.interfaces/0.1.3")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
