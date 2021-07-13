@@ -50,6 +50,9 @@ class JsondtoConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -70,6 +73,3 @@ class JsondtoConan(ConanFile):
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib"))
-
-    def package_id(self):
-        self.info.header_only()
