@@ -12,7 +12,6 @@ class VtkConan(ConanFile):
     topics = ("conan", "vtk", "geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "build_testing": ["ON", "OFF", "WANT"],
                "vtk_smp_implementation": ["Sequential", "OpenMP", "TBB", "STDThread"],
                "vtk_wrap_python": [True, False],
                "vtk_use_cuda": [True, False],
@@ -26,7 +25,6 @@ class VtkConan(ConanFile):
                "vtk_group_enable_imaging": ["YES", "WANT", "DONT_WANT", "NO", "DEFAULT"],
                "fPIC": [True, False]}
     default_options = {"shared": False,
-                       "build_testing": "OFF",
                        "vtk_smp_implementation": "Sequential",
                        "vtk_wrap_python": False,
                        "vtk_use_cuda": False,
@@ -64,7 +62,7 @@ class VtkConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-            self._cmake.definitions["BUILD_TESTING"] = self.options.build_testing
+            self._cmake.definitions["BUILD_TESTING"] = "OFF"
             self._cmake.definitions["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.vtk_smp_implementation
             self._cmake.definitions["VTK_WRAP_PYTHON"] = self.options.vtk_wrap_python
             self._cmake.definitions["VTK_USE_CUDA"] = self.options.vtk_use_cuda
@@ -89,10 +87,10 @@ class VtkConan(ConanFile):
             self.requires("qt/5.15.2")
 
         if self.options.vtk_smp_implementation == "TBB":
-            self.requires("TBB/[>2020]")
+            self.requires("TBB")
 
         if self.options.vtk_use_mpi:
-            self.requires("openmpi/[>4]")
+            self.requires("openmpi")
 
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
@@ -104,16 +102,17 @@ class VtkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "vtk"))
         self.copy("modules.json", dst="bin", src=self.build_folder)
     
-    def filter_dep(self, dependencies):
+    def filter_dep(self, dependencies, enabled_pkg):
         ls_dep = []
         for dep in dependencies:
-            name = dep.split('::')[1]
-            ls_dep.append(name)
+            if dep in enabled_pkg.keys():
+                ls_dep.append(enabled_pkg[dep]['alias'])
         return ls_dep
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "VTK"
         self.cpp_info.names["cmake_find_package_multi"] = "VTK"
+        lib = [i.split('-')[0] for i in tools.collect_libs(self)]
 
         pkg_ver = [int(i) for i in self.version.split('.')]
         base_include_dir = os.path.join('include','vtk-%d.%d' % (pkg_ver[0], pkg_ver[1]))
@@ -121,23 +120,32 @@ class VtkConan(ConanFile):
         with open(os.path.join(self.package_folder, "bin", "modules.json")) as reader:
             vtk_modules = json.load(reader)
         
-        for full_name, content in vtk_modules["modules"].items():
+        enabled_pkg = {}
+        for name, content in vtk_modules["modules"].items():
             lib_name = content["library_name"]
-            name = full_name.split('::')[1]
-            if content["enabled"] and not name in ['TestingCore', 'TestingRendering']:
-                self.cpp_info.components[name].names["cmake_find_package"]  = name
-                self.cpp_info.components[name].names["cmake_find_package_multi"] = name
-                self.cpp_info.components[name].libs = ['%s-%d.%d' % ( lib_name, pkg_ver[0], pkg_ver[1])]
+            if content["enabled"] and lib_name in lib:
+                alias = name.split("::")[1]
+                enabled_pkg[name] = {"libname": lib_name, 'alias' : alias}
+        
+        for name, info in enabled_pkg.items():
+            content = vtk_modules["modules"][name]
+            alias = info['alias']
+            lib_name = info['libname']
 
-                self.cpp_info.components[name].requires.extend(self.filter_dep(content['depends']))
-                self.cpp_info.components[name].requires.extend(self.filter_dep(content['private_depends']))
+            self.cpp_info.components[alias].names["cmake_find_package"]  = alias
+            self.cpp_info.components[alias].names["cmake_find_package_multi"] = alias
+            self.cpp_info.components[alias].libs = ['%s-%d.%d' % ( lib_name, pkg_ver[0], pkg_ver[1])]
+            dep = self.filter_dep(content['depends'], enabled_pkg)
+            opt_dep = self.filter_dep(content['private_depends'], enabled_pkg)
+            self.cpp_info.components[alias].requires.extend(dep)
+            self.cpp_info.components[alias].requires.extend(opt_dep)
 
-                incl_dir = {base_include_dir}
-                for incl_f in content['headers']:
-                    p = os.path.dirname(incl_f)
-                    if len(p) > 1:
-                        incl_dir.add(os.path.join(base_include_dir, p))
+            incl_dir = {base_include_dir}
+            for incl_f in content['headers']:
+                p = os.path.dirname(incl_f)
+                if len(p) > 1:
+                    incl_dir.add(os.path.join(base_include_dir, p))
 
-                if len(incl_dir) != 0:
-                    for d in incl_dir:
-                        self.cpp_info.components[name].includedirs.append(d)
+            if len(incl_dir) != 0:
+                for d in incl_dir:
+                    self.cpp_info.components[alias].includedirs.append(d)
