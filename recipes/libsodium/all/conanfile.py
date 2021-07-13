@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibsodiumConan(ConanFile):
     name        = "libsodium"
@@ -69,15 +71,13 @@ class LibsodiumConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        # There are several unix tools used (bash scripts for Emscripten, autoreconf on MinGW, etc...)
-        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and \
-                not "CONAN_BASH_PATH" in os.environ and tools.os_info.detect_windows_subsystem() != "Windows":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_visual(self):
         sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._vs_sln_folder, "libsodium.sln")
@@ -150,7 +150,7 @@ class LibsodiumConan(ConanFile):
             self._build_autotools_neutrino(configure_args)
         else:
             raise ConanInvalidConfiguration("Unsupported os for libsodium: {}".format(self.settings.os))
-            
+
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             if self.options.shared and "MT" in str(self.settings.compiler.runtime):
