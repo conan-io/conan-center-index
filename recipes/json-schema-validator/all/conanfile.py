@@ -12,7 +12,7 @@ class JsonSchemaValidatorConan(ConanFile):
     topics = ("json-schema-validator", "modern-json",
               "schema-validation", "json")
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
