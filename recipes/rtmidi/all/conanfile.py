@@ -35,8 +35,7 @@ class RtMidiConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            if self.options.with_alsa:
-                self.requires("libalsa/1.2.4")
+            self.requires("libalsa/1.2.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
