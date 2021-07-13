@@ -59,3 +59,7 @@ class JsondtoConan(ConanFile):
         cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "json-dto"
+        self.cpp_info.names["cmake_find_package_multi"] = "json-dto"
