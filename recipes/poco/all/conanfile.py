@@ -27,6 +27,7 @@ class PocoConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
+        "force_openssl": False,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "is_lib"))
@@ -100,7 +101,6 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.enable_netssl
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
@@ -141,6 +141,8 @@ class PocoConan(ConanFile):
         if self.options.enable_data_sqlite:
             if self.options["sqlite3"].threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
         self.requires("pcre/8.44")
@@ -154,7 +156,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.get_safe("enable_netssl", False) or \
+        if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1k")
