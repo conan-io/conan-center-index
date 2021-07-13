@@ -17,11 +17,13 @@ class IXWebSocketConan(ConanFile):
     short_paths = True
     generators = "cmake", "cmake_find_package"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
         "tls": ["mbedtls", "openssl", "applessl", False],
         "with_zlib": [True, False]
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "tls": "mbedtls",
         "with_zlib": True
@@ -39,6 +41,10 @@ class IXWebSocketConan(ConanFile):
         if tools.Version(self.version) < "10.1.5":
             # zlib is always required before 10.1.5
             del self.options.with_zlib
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.get_safe("with_zlib", True):
@@ -82,8 +88,10 @@ class IXWebSocketConan(ConanFile):
         tools.replace_in_file(cmakelists, "MBEDTLS_LIBRARIES", "MbedTLS_LIBRARIES")
         # Do not force PIC
         if tools.Version(self.version) >= "9.5.7":
-            tools.replace_in_file(cmakelists,
-                                  "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+            tools.replace_in_file(cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        # Allow shared
+        if tools.Version(self.version) < "11.1.4":
+            tools.replace_in_file(cmakelists, "add_library( ixwebsocket STATIC", "add_library( ixwebsocket")
 
     def _configure_cmake(self):
         if self._cmake:
