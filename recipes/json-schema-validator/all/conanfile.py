@@ -123,4 +123,4 @@ class JsonSchemaValidatorConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.libs = ["json-schema-validator"]
+        self.cpp_info.libs = ["json-schema-validator" if tools.Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]
