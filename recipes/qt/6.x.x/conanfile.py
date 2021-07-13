@@ -903,10 +903,11 @@ class QtConan(ConanFile):
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
-            component_name = m.replace("Qt6", "qt")
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
-            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+            if os.path.isfile(module):
+                component_name = m.replace("Qt6", "qt")
+                self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+                self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
