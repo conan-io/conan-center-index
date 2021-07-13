@@ -49,7 +49,9 @@ class JemallocConan(ConanFile):
 
     _autotools = None
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
