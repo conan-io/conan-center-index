@@ -169,6 +169,8 @@ class MimallocConan(ConanFile):
                 )
             tools.rmdir(os.path.join(self.package_folder, "lib", "mimalloc-2.0"))
 
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+
     @property
     def _obj_name(self):
         name = "mimalloc"
