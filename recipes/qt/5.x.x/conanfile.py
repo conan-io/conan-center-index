@@ -802,6 +802,9 @@ Examples = bin/datadir/examples""")
             core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
+
         if self.options.gui:
             gui_reqs = ["DBus"]
             if self.options.with_freetype:
@@ -884,8 +887,6 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
-            if self.options.widgets:
-                _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
@@ -975,7 +976,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtmultimedia:
             multimedia_reqs = ["Network", "Gui"]
-            if self.options.with_libalsa:
+            if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
                 multimedia_reqs.append("openal::openal")
@@ -1019,6 +1020,12 @@ Examples = bin/datadir/examples""")
 
         if self.options.get_safe("qtx11extras"):
             _create_module("X11Extras")
+
+        if self.options.qtremoteobjects:
+            _create_module("RemoteObjects")
+        
+        if self.options.qtwinextras:
+            _create_module("WinExtras")
 
         if not self.options.shared:
             if self.settings.os == "Windows":

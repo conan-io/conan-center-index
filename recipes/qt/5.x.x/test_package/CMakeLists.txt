@@ -16,6 +16,6 @@ set(CMAKE_AUTORCC ON)
 
 set(SOURCES test_package.cpp greeter.h example.qrc)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network Qt5::Sql Qt5::Concurrent Qt5::Xml Qt5::DBus)
