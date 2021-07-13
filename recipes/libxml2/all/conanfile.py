@@ -4,7 +4,7 @@ import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class Libxml2Conan(ConanFile):
@@ -99,8 +99,8 @@ class Libxml2Conan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _msvc_build_environment(self):
