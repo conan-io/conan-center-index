@@ -1,5 +1,5 @@
 diff --git a/src/H5Fsuper.c b/src/H5Fsuper.c
-index 4999565137..00a3dc552e 100644
+index 9339b3df6c..052c296ac1 100644
 --- a/src/H5Fsuper.c
 +++ b/src/H5Fsuper.c
 @@ -54,6 +54,7 @@
@@ -11,38 +11,24 @@ index 4999565137..00a3dc552e 100644
  
  /*********************/
 diff --git a/src/H5Odeprec.c b/src/H5Odeprec.c
-index 33ed787440..0e1290476c 100644
+index 33ed787440..b8e1af55ce 100644
 --- a/src/H5Odeprec.c
 +++ b/src/H5Odeprec.c
-@@ -32,6 +32,7 @@
- /* Headers */
- /***********/
- #include "H5private.h"      /* Generic Functions    */
-+#include "H5CXprivate.h"    /* API Contexts         */
- #include "H5Eprivate.h"     /* Error handling       */
- #include "H5Opkg.h"         /* Object headers       */
+@@ -54,6 +54,17 @@
+ /********************/
+ /* Local Prototypes */
+ /********************/
++herr_t
++H5CX_set_apl(hid_t *, const H5P_libclass_t *,
++             hid_t
++#ifndef H5_HAVE_PARALLEL
++H5_ATTR_UNUSED
++#endif /* H5_HAVE_PARALLEL */
++, hbool_t
++#ifndef H5_HAVE_PARALLEL
++             H5_ATTR_UNUSED
++#endif /* H5_HAVE_PARALLEL */
++);
  
-diff --git a/src/H5Oint.c b/src/H5Oint.c
-index 543637c127..92809e4d5a 100644
---- a/src/H5Oint.c
-+++ b/src/H5Oint.c
-@@ -31,6 +31,7 @@
- /* Headers */
- /***********/
- #include "H5private.h"          /* Generic Functions                        */
-+#include "H5CXprivate.h"        /* API Contexts                             */
- #include "H5Eprivate.h"         /* Error handling                           */
- #include "H5Fprivate.h"         /* File access                              */
- #include "H5FLprivate.h"        /* Free lists                               */
-diff --git a/src/H5Rint.c b/src/H5Rint.c
-index 159bccac34..6f8efb33a2 100644
---- a/src/H5Rint.c
-+++ b/src/H5Rint.c
-@@ -23,6 +23,7 @@
- /***********/
- #include "H5private.h"          /* Generic Functions                        */
- #include "H5ACprivate.h"        /* Metadata cache                           */
-+#include "H5CXprivate.h"        /* API Contexts                             */
- #include "H5Dprivate.h"         /* Datasets                                 */
- #include "H5Eprivate.h"         /* Error handling                           */
- #include "H5Gprivate.h"         /* Groups                                   */
+ 
+ /*********************/
