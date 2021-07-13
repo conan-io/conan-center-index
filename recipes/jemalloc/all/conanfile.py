@@ -56,6 +56,13 @@ class JemallocConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if not self.options.enable_cxx:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.options.enable_cxx and \
                 self.settings.compiler.get_safe("libcxx") == "libc++" and \
                 self.settings.compiler == "clang" and \
@@ -68,11 +75,6 @@ class JemallocConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version != "15":
             # https://github.com/jemalloc/jemalloc/issues/1703
             raise ConanInvalidConfiguration("Only Visual Studio 15 2017 is supported.  Please fix this if other versions are supported")
-        if self.options.shared:
-            del self.options.fPIC
-        if not self.options.enable_cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
         if self.settings.build_type not in ("Release", "Debug", None):
             raise ConanInvalidConfiguration("Only Release and Debug build_types are supported")
         if self.settings.compiler == "Visual Studio" and self.settings.arch not in ("x86_64", "x86"):
