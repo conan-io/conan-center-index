@@ -39,7 +39,9 @@ class LibStudXmlConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("autoconf/2.71")
+        if self.settings.os != "Windows":
+            # Transitively requires autoconf and automake
+            self.build_requires("libtool/2.4.6")
 
     def requirements(self):
         self.requires("expat/2.4.1")
@@ -96,7 +98,6 @@ class LibStudXmlConan(ConanFile):
                 tools.remove_files_by_mask(self._source_subfolder, "version")
 
             with tools.chdir(self._source_subfolder):
-                #self.run("autoreconf --install")
                 self.run("./bootstrap")
 
             autotools = self._configure_autotools()
