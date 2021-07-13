@@ -91,6 +91,8 @@ class RtMidiConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        os.unlink(os.path.join(self.package_folder, "lib", "librtmidi.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["rtmidi"]
