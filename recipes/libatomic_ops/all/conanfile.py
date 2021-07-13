@@ -92,11 +92,11 @@ class Libatomic_opsConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            for lib in ["atomic_ops_gpl", "atomic_ops"]:
+                tools.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(lib)),
+                             os.path.join(self.package_folder, "lib", "{}.lib".format(lib)))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "atomic_ops"
-        libs = ["atomic_ops_gpl", "atomic_ops"]
-        if self.settings.os == "Windows" and self.options.shared:
-            ext = "lib" if self.settings.compiler == "Visual Studio" else "a"
-            libs = list("{}.dll.{}".format(lib, ext) for lib in libs)
-        self.cpp_info.libs = libs
+        self.cpp_info.libs = ["atomic_ops_gpl", "atomic_ops"]
