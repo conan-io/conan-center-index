@@ -1,0 +1,4 @@
+sources:
+  "21.05":
+    url: "https://github.com/seladb/PcapPlusPlus/archive/v21.05.tar.gz"
+    sha256: "f7bc2caea72544f42e3547c8acf65fca07ddd4cd45f7be2f5132dd1826ea27bb"
