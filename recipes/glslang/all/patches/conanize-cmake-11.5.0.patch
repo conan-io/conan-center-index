@@ -31,7 +31,7 @@
  endif(ENABLE_OPT)
 --- a/glslang/CMakeLists.txt
 +++ b/glslang/CMakeLists.txt
-@@ -167,7 +167,6 @@ set(GLSLANG_HEADERS
+@@ -167,7 +167,6 @@
  add_library(glslang ${LIB_TYPE} ${BISON_GLSLParser_OUTPUT_SOURCE} ${GLSLANG_SOURCES} ${GLSLANG_HEADERS})
  set_target_properties(glslang PROPERTIES
      FOLDER glslang
@@ -39,3 +39,13 @@
      VERSION   "${GLSLANG_VERSION}"
      SOVERSION "${GLSLANG_VERSION_MAJOR}")
  target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent)
+@@ -206,6 +205,9 @@
+                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++        install(TARGETS MachineIndependent GenericCodeGen
++                EXPORT  glslangTargets
++                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+     else()
+         install(TARGETS glslang MachineIndependent GenericCodeGen
+                 EXPORT  glslangTargets
