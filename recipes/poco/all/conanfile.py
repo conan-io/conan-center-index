@@ -27,7 +27,6 @@ class PocoConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
-        "force_openssl": False,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "is_lib"))
