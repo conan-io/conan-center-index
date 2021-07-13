@@ -1,4 +1,4 @@
-#include <rtmidi/RtMidi.h>
+#include <RtMidi.h>
 
 int main (void) {
     try {
