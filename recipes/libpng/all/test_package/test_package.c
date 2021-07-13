@@ -3,7 +3,7 @@
 #include "png.h"
 #include "zlib.h"
 
-int main()
+int main(void)
 {
   fprintf(stderr, "   Compiled with libpng %s; using libpng %s.\n",
     PNG_LIBPNG_VER_STRING, png_libpng_ver);
