@@ -25,7 +25,8 @@ class DataFrameConan(ConanFile):
         "machine-learning",
         "trading-algorithms",
         "financial-engineering",
-        "large-data",     )
+        "large-data",
+    )
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
