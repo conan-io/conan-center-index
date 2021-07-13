@@ -1,6 +1,7 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
+
 
 class JxrlibConan(ConanFile):
     name = "jxrlib"
@@ -38,9 +39,8 @@ class JxrlibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('jxrlib-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
