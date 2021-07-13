@@ -210,6 +210,7 @@ class JemallocConan(ConanFile):
                     os.unlink(os.path.join(self.package_folder, "lib", "jemalloc.lib"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "jemalloc"
         self.cpp_info.libs = [self._library_name]
         self.cpp_info.includedirs = [os.path.join(self.package_folder, "include"),
                                      os.path.join(self.package_folder, "include", "jemalloc")]
