@@ -15,15 +15,9 @@ class JsondtoConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def requirements(self):
         self.requires("rapidjson/1.1.0")
@@ -57,19 +51,11 @@ class JsondtoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["JSON_DTO_INSTALL"] = True
-        self._cmake.definitions["JSON_DTO_FIND_DEPS"] = False
-        self._cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
-        return self._cmake
-
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.definitions["JSON_DTO_INSTALL"] = True
+        cmake.definitions["JSON_DTO_FIND_DEPS"] = False
+        cmake.configure(source_folder=os.path.join(self._source_subfolder, "dev", "json_dto"))
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib"))
