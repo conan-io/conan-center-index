@@ -12,6 +12,7 @@ class RtMidiConan(ConanFile):
     topics = ("midi")
     license = "Copyright (c) 2003-2019 Gary P. Scavone"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["patches/*"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -52,6 +53,8 @@ class RtMidiConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
