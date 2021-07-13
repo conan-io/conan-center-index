@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class IXWebSocketConan(ConanFile):
     name = "ixwebsocket"
@@ -65,8 +67,8 @@ class IXWebSocketConan(ConanFile):
             self.requires("mbedtls/2.16.3-apache")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("IXWebSocket-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
