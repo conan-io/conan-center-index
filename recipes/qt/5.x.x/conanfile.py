@@ -73,6 +73,7 @@ class QtConan(ConanFile):
         "with_libalsa": [True, False],
         "with_openal": [True, False],
         "with_zstd": [True, False],
+        "with_gstreamer": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -109,6 +110,7 @@ class QtConan(ConanFile):
         "with_libalsa": False,
         "with_openal": True,
         "with_zstd": True,
+        "with_gstreamer": True,
 
         "gui": True,
         "widgets": True,
@@ -190,7 +192,8 @@ class QtConan(ConanFile):
             self.options.opengl = "dynamic"
 
     def configure(self):
-        #if self.settings.os != "Linux":
+        if self.settings.os != "Linux":
+            self.options.with_gstreamer = False
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.gui:
@@ -205,6 +208,7 @@ class QtConan(ConanFile):
         if not self.options.qtmultimedia:
             del self.options.with_libalsa
             del self.options.with_openal
+            del self.options.with_gstreamer
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
@@ -343,6 +347,8 @@ class QtConan(ConanFile):
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
+        if self.options.get_safe("with_gstreamer", False):
+            self.requires("gstreamer/1.19.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -523,6 +529,7 @@ class QtConan(ConanFile):
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
+            args.append("--gstreamer " + self.deps_cpp_info["gstreamer"].version if self.options.with_gstreamer else "-no-gstreamer")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -702,7 +709,6 @@ Examples = bin/datadir/examples""")
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             if not os.path.isfile(module):
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
-
 
         extension = ""
         if self.settings.os == "Windows":
@@ -986,12 +992,13 @@ Examples = bin/datadir/examples""")
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.settings.os == "Linux":
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui"])
+                if self.options.with_gstreamer:
+                    _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                    _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
+                    _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
+                    _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
                 _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
                 _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
-                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
-                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
-                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
@@ -1014,7 +1021,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
-            
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
@@ -1023,7 +1030,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtremoteobjects:
             _create_module("RemoteObjects")
-        
+
         if self.options.qtwinextras:
             _create_module("WinExtras")
 
@@ -1065,7 +1072,6 @@ Examples = bin/datadir/examples""")
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
-
 
     @staticmethod
     def _remove_duplicate(l):
