@@ -31,8 +31,7 @@ class EmSDKInstallerConan(ConanFile):
     @staticmethod
     def _touch(filename):
         if not os.path.isfile(filename):
-            with open(filename, "w") as f:
-                f.write("\n")
+            tools.save(filename, "\n")
 
     @staticmethod
     def _chmod_plus_x(filename):
