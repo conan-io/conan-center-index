@@ -92,10 +92,10 @@ class LibConfuse(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libconfuse.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "confuse.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "confuse.lib"))
 
     def package_info(self):
-        lib = "confuse"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll.{}".format("lib" if self.settings.compiler == "Visual Studio" else "a")
-        self.cpp_info.libs = [lib]
         self.cpp_info.names["pkg_config"] = "libconfuse"
+        self.cpp_info.libs = ["confuse"]
