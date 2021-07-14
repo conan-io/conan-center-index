@@ -7,7 +7,12 @@ sources:
     sha256: "c81a5f443f72373e3105172d6a935e29b0dabd13ba387c080bc444586cbe3021"
 patches:
   "1.6.7":
-    - patch_file: "patches/0001-change-install-paths-avoid-symlink.patch"
+    - patch_file: "patches/1.6.7-0001-change-install-paths-avoid-symlink.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-include-cstddef-to-get-std-size-t.patch"
+    - patch_file: "patches/1.6.7-0002-include-cstddef-to-get-std-size-t.patch"
+      base_path: "source_subfolder"
+  "2.0.2":
+    - patch_file: "patches/2.0.2-0001-change-install-paths-avoid-symlink.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.2-0002-include-cstddef-to-get-std-size-t.patch"
       base_path: "source_subfolder"
