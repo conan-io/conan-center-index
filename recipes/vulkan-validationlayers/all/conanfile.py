@@ -49,9 +49,20 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
+    @property
+    def _get_compatible_spirv_tools_version(self):
+        return {
+            "1.2.182": "2021.2",
+            "1.2.176.0": "2021.1",
+            "1.2.176": "2021.1",
+            "1.2.154.0": "2020.5",
+        }.get(str(self.version), False)
+
     def requirements(self):
-        self.requires("spirv-tools/2020.5", private=True)
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=True)
         self.requires("vulkan-headers/{}".format(self.version))
+        if tools.Version(self.version) > "1.2.154.0":
+            self.requires("robin-hood-hashing/3.11.1")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
@@ -77,6 +88,7 @@ class VulkanValidationLayersConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+
 
     def _configure_cmake(self):
         if self._cmake:
