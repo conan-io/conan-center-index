@@ -239,31 +239,22 @@ class Libxml2Conan(ConanFile):
                       dst=os.path.join("include", "libxml2"), keep_path=False)
 
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_file_rel_path)
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            tools.Version(self.version)
         )
 
     @staticmethod
-    def _create_cmake_module_variables(module_file):
+    def _create_cmake_module_variables(module_file, version):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
         content = textwrap.dedent("""\
-            if(DEFINED LibXml2_FOUND)
-                set(LIBXML2_FOUND ${LibXml2_FOUND})
-            endif()
-            if(DEFINED LibXml2_INCLUDE_DIR)
-                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
-                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIR})
-            endif()
-            if(DEFINED LibXml2_LIBRARIES)
-                set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
-                set(LIBXML2_LIBRARY ${LibXml2_LIBRARIES})
-            endif()
-            if(DEFINED LibXml2_DEFINITIONS)
-                set(LIBXML2_DEFINITIONS ${LibXml2_DEFINITIONS})
-            endif()
-            if(DEFINED LibXml2_VERSION)
-                set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
-            endif()
-        """)
+            set(LIBXML2_FOUND TRUE)
+            set(LIBXML2_INCLUDE_DIR $<TARGET_PROPERTY:LibXml2::LibXml2,INTERFACE_INCLUDE_DIRECTORIES>)
+            set(LIBXML2_INCLUDE_DIRS ${{LIBXML2_INCLUDE_DIR}})
+            set(LIBXML2_LIBRARIES $<LINK_ONLY:LibXml2::LibXml2>)
+            set(LIBXML2_LIBRARY ${{LIBXML2_LIBRARIES}})
+            set(LIBXML2_DEFINITIONS $<TARGET_PROPERTY:LibXml2::LibXml2,INTERFACE_COMPILE_DEFINITIONS>)
+            set(LIBXML2_VERSION_STRING "{major}.{minor}.{patch}")
+        """.format(major=version.major, minor=version.minor, patch=version.patch))
         tools.save(module_file, content)
 
     @property
@@ -300,3 +291,4 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
