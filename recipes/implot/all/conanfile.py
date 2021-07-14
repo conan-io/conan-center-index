@@ -60,3 +60,4 @@ class ImGuizmoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["implot"]
+        self.cpp_info.requires = ["imgui::imgui"]
