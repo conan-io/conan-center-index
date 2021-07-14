@@ -1,6 +1,6 @@
 from conans import ConanFile, tools
 import os
-
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -16,7 +16,7 @@ class EmSDKConan(ConanFile):
 
     short_paths = True
 
-    @property
+    @ property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -27,20 +27,16 @@ class EmSDKConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _run(self, command):
-        self.output.info(command)
-        self.run(command)
-
-    @staticmethod
+    @ staticmethod
     def _create_dummy_file(directory):
         tools.save(os.path.join(directory, "dummy"), "\n")
 
-    @staticmethod
+    @ staticmethod
     def _touch(filename):
         if not os.path.isfile(filename):
             tools.save(filename, "\n")
 
-    @staticmethod
+    @ staticmethod
     def _chmod_plus_x(filename):
         if os.name == 'posix':
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
@@ -51,13 +47,13 @@ class EmSDKConan(ConanFile):
             if os.path.isfile("python_selector"):
                 self._chmod_plus_x("python_selector")
             self._chmod_plus_x('emsdk')
-            self._run('%s update' % emsdk)
+            self.run('%s update' % emsdk)
             if os.path.isfile("python_selector"):
                 self._chmod_plus_x("python_selector")
             self._chmod_plus_x('emsdk')
 
-            self._run('%s install %s' % (emsdk, self.version))
-            self._run('%s activate %s --embedded' % (emsdk, self.version))
+            self.run('%s install %s' % (emsdk, self.version))
+            self.run('%s activate %s --embedded' % (emsdk, self.version))
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses",
