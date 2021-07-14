@@ -1,6 +1,7 @@
 import os
 
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -32,7 +33,7 @@ class BloatyConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("bloaty package requires Linux"
+            raise ConanInvalidConfiguration("bloaty package requires Linux")
 
     def package_id(self):
         del self.info.settings.compiler
