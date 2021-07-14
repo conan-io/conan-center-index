@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class LibdbConan(ConanFile):
     name = "libdb"
@@ -66,8 +68,8 @@ class LibdbConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("db-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _user_info_build(self):
@@ -187,8 +189,8 @@ class LibdbConan(ConanFile):
 
             msvc_libs = [_lib_to_msvc_lib(lib) for lib in self._libs]
             for lib, msvc_lib in zip(self._libs, msvc_libs):
-                os.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
-                          os.path.join(libdir, "{}.lib".format(lib)))
+                tools.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
+                             os.path.join(libdir, "{}.lib".format(lib)))
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -196,7 +198,7 @@ class LibdbConan(ConanFile):
             if self.settings.os == "Windows":
                 for fn in os.listdir(libdir):
                     if fn.endswith(".dll"):
-                        os.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
+                        tools.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
                 for fn in os.listdir(bindir):
                     if not fn.endswith(".dll"):
                         binpath = os.path.join(bindir, fn)
