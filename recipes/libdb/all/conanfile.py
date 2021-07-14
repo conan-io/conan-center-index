@@ -61,6 +61,7 @@ class LibdbConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
             if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ and \
                     tools.os_info.detect_windows_subsystem() != "msys2":
                 self.build_requires("msys2/20190524")
@@ -69,9 +70,25 @@ class LibdbConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("db-{}".format(self.version), self._source_subfolder)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def _patch_sources(self):
         for patch_data in self.conan_data["patches"][self.version]:
             tools.patch(**patch_data)
+
+        if self.settings.compiler != "Visual Studio":
+            for subdir in [
+                "dist",
+                os.path.join("lang", "sql", "jdbc"),
+                os.path.join("lang", "sql", "odbc"),
+                os.path.join("lang", "sql", "sqlite"),
+            ]:
+                shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                            os.path.join(self._source_subfolder, subdir, "config.sub"))
+                shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                            os.path.join(self._source_subfolder, subdir, "config.guess"))
 
         import glob
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
