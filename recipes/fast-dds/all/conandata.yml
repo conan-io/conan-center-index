@@ -1,0 +1,8 @@
+sources:
+  "2.3.2":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.2.tar.gz"
+    sha256: "4D8183CF4D37C3DE9E6FD28D2850DD08023A9079001C4880B23C95F0D8C0B5CE"
+patches:
+  "2.3.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.3.2-0001-fix-find-asio-and-tinyxml2.patch"

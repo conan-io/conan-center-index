@@ -38,6 +38,10 @@ class GLibConan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -149,8 +153,8 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
-                "if cc.has_function('ngettext')",
-                "if false #cc.has_function('ngettext')",
+                "if cc.has_function('ngettext'",
+                "if false #cc.has_function('ngettext'",
             )
 
     def build(self):

@@ -6,11 +6,14 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
+    def build_requirements(self):
+        if tools.cross_building(self.settings):
+            self.build_requires(str(self.requires["capnproto"]))
+
     def build(self):
-        with tools.run_environment(self):
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):

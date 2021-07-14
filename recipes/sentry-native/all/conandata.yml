@@ -1,4 +1,7 @@
 sources:
+  "0.4.10":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.4.10/sentry-native.zip"
+    sha256: "8926735b5c27ad2ae0e40098c53f45a031cdc584cb4519ffc93d04de28df6a7a"
   "0.4.9":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.9/sentry-native.zip"
     sha256: "559344bad846b7868c182b22df0cd9869c31ebf46a222ac7a6588aab0211af7d"
@@ -15,12 +18,20 @@ sources:
     url: "https://github.com/getsentry/sentry-native/releases/download/0.2.6/sentry-native-0.2.6.zip"
     sha256: "0d93bd77f70a64f3681d4928dfca6b327374218a84d33ee31489114d8e4716c0"
 patches:
+  "0.4.10":
+    - patch_file: "patches/0.4.10-0001-find-conan-qt.patch"
+      base_path: "source_subfolder"
   "0.4.9":
-    - patch_file: "patches/find-conan-qt-0.4.9.patch"
+    - patch_file: "patches/0.4.9-0001-find-conan-qt.patch"
       base_path: "source_subfolder"
   "0.4.8":
-    - patch_file: "patches/find-conan-qt-0.4.8.patch"
+    - patch_file: "patches/0.4.8-0001-find-conan-qt.patch"
       base_path: "source_subfolder"
   "0.4.7":
-    - patch_file: "patches/find-conan-qt-0.4.7.patch"
+    - patch_file: "patches/0.4.7-0001-find-conan-qt.patch"
+      base_path: "source_subfolder"
+  "0.2.6":
+    - patch_file: "patches/0.2.6-0001-remove-sentry-handler-dependency.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0.2.6-0002-set-cmake-cxx-standard-11.patch"
       base_path: "source_subfolder"

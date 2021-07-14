@@ -1,0 +1,4 @@
+sources:
+  "5.993":
+    url: "https://github.com/herumi/xbyak/archive/refs/tags/v5.993.tar.gz"
+    sha256: "97d596e7ca05208a0f64b225bff482ee5bcd44ebae07f1e3a50009d5e54b940b"

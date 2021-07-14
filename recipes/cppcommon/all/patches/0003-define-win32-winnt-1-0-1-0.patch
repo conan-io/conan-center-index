@@ -1,0 +1,33 @@
+From 80370771e98dc4558811a3846cb567d13ad7d636 Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alx.manpages@gmail.com>
+Date: Mon, 7 Jun 2021 10:40:58 +0200
+Subject: [PATCH] define win32 winnt
+
+The change present here is handled upstream by this CMake module:
+
+https://github.com/chronoxor/CppCMakeScripts/blob/1.0.0.0/SetPlatformFeatures.cmake
+
+Even if it sets _WIN32_WINNT to _WIN32_WINNT_WIN10, here a less strict
+definiton is chosen (_WIN32_WINNT_VISTA).
+---
+ CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 10a0065b..2ed1668c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,6 +61,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
+ list(APPEND INSTALL_TARGETS cppcommon)
+ list(APPEND LINKLIBS cppcommon)
+ 
++if(WIN32 AND NOT MSVC)
++  target_compile_definitions(cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_VISTA)
++endif()
++
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPCOMMON_MODULE)
+ 
+-- 
+2.31.1.498.g6c1eba8ee3d
+

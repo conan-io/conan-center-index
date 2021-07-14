@@ -78,7 +78,9 @@ class ThriftConan(ConanFile):
             self.requires("libevent/2.1.12")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        build_os = self.settings_build.os if hasattr(self, "settings_build") else self.settings.os
+            
+        if build_os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")

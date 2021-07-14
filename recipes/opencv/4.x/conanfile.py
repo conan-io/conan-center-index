@@ -34,7 +34,8 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_v4l": [True, False],
-        "dnn": [True, False]
+        "dnn": [True, False],
+        "detect_cpu_baseline": [True, False]
     }
     default_options = {
         "shared": False,
@@ -56,7 +57,8 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
-        "dnn": True
+        "dnn": True,
+        "detect_cpu_baseline": False
     }
 
     short_paths = True
@@ -166,6 +168,7 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         if self.options.dnn:
@@ -288,6 +291,9 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        
+        if self.options.detect_cpu_baseline:
+            self._cmake.definitions["CPU_BASELINE"] = "DETECT"
 
         self._cmake.definitions["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:

@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class CpuFeaturesConan(ConanFile):
     name = "cpu_features"
@@ -10,11 +12,9 @@ class CpuFeaturesConan(ConanFile):
     description = "A cross platform C99 library to get cpu features at runtime."
     topics = ("conan", "cpu", "features", "cpuid")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake",
     _cmake = None
 
@@ -22,12 +22,9 @@ class CpuFeaturesConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -35,20 +32,24 @@ class CpuFeaturesConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        cmake = CMake(self)
-        cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
-        cmake.configure()
-        self._cmake = cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_PIC"] = self.options.get_safe("fPIC", True)
+        # TODO: should be handled by CMake helper
+        if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+        self._cmake.configure() # Does not support out of source builds
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

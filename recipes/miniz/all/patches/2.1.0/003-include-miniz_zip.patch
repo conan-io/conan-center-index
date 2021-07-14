@@ -1,0 +1,8 @@
+--- a/miniz.h
++++ b/miniz.h
+@@ -475,3 +475,5 @@ typedef void *const voidpc;
+ #ifdef __cplusplus
+ }
+ #endif
++
++#include "miniz_zip.h"

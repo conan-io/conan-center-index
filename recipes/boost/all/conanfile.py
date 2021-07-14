@@ -528,10 +528,11 @@ class BoostConan(ConanFile):
         except ConanException:
             self.output.info("(failed)")
             return None
-        output = output.getvalue().strip()
+        output = output.getvalue()
         # Conan is broken when run_to_output = True
         if "\n-----------------\n" in output:
             output = output.split("\n-----------------\n", 1)[1]
+        output = output.strip()
         return output if output != "None" else None
 
     def _get_python_path(self, name):
@@ -1141,6 +1142,10 @@ class BoostConan(ConanFile):
                         executable=self._python_executable,
                         includes=self._python_includes,
                         libraries=self._python_libraries)
+
+        if not self.options.without_mpi:
+            # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
+            contents += '\nusing mpi ;'
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)

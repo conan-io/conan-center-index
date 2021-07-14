@@ -1,0 +1,7 @@
+sources:
+  "4.4.1":
+    url: "https://github.com/DuffsDevice/tiny-utf8/archive/refs/tags/v4.4.1.tar.gz"
+    sha256: "c083ce288b5a4f7f153e55332b097fa952d985f0bb0b8302bdaec739d3045768"
+  "4.3.2":
+    url: "https://github.com/DuffsDevice/tiny-utf8/archive/refs/tags/v4.3.2.tar.gz"
+    sha256: "3c4545e2f06052ee05c614e4ad365adaa28ae2edf5902ffc9c1eb2ecce0d3338"

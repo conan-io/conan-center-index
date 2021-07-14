@@ -1,7 +1,9 @@
-import os
-
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
+import os
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class LcmsConan(ConanFile):
@@ -32,16 +34,14 @@ class LcmsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        if os.path.isdir("Little-CMS-lcms%s" % self.version):
-            os.rename("Little-CMS-lcms%s" % self.version, self._source_subfolder)
-        else:
-            os.rename("Little-CMS-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "14":
@@ -76,11 +76,23 @@ class LcmsConan(ConanFile):
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         else:
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
             autotools = self._configure_autotools()
             autotools.make()
 

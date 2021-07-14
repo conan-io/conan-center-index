@@ -310,6 +310,13 @@ class QtConan(ConanFile):
             if os.path.isfile(file):
                 os.remove(file)
 
+        # workaround QTBUG-94356
+        if tools.Version(self.version) >= "6.1.1":
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "FindWrapZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
+            tools.replace_in_file(os.path.join("qt6", "qtbase", "configure.cmake"),
+                "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
+                "")
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
@@ -683,7 +690,8 @@ class QtConan(ConanFile):
             assert componentname not in self.cpp_info.components, "Plugin %s already present in self.cpp_info.components" % pluginname
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            if not self.options.shared:
+                self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", type)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
@@ -878,6 +886,8 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
                 self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
+                if self.options.gui and self.options.widgets:
+                    self.cpp_info.components["qtPrintSupport"].system_libs.append("cups")
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)

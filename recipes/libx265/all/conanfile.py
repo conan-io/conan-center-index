@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class Libx265Conan(ConanFile):
     name = "libx265"
@@ -54,15 +56,18 @@ class Libx265Conan(ConanFile):
 
     def build_requirements(self):
         if self.options.assembly:
-            self.build_requires("nasm/2.14")
+            self.build_requires("nasm/2.15.05")
 
     def requirements(self):
         if self.options.get_safe("with_numa", False):
             self.requires("libnuma/2.0.14")
 
+    def validate(self):
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("Current recipe supports only x86/x86_64 builds")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("x265-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

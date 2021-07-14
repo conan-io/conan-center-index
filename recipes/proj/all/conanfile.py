@@ -49,11 +49,16 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("sqlite3/3.35.5")
+        self.requires("nlohmann_json/3.9.1")
+        self.requires("sqlite3/3.36.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.2.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.77.0")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires("sqlite3/3.36.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -68,7 +73,25 @@ class ProjConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "/W4", "")
+        # Trick to find sqlite3 executable for build machine
+        sqlite3_exe_build_context_paths = " ".join("\"{}\"".format(path.replace("\\", "/")) for path in self.deps_env_info["sqlite3"].PATH)
+        tools.replace_in_file(cmakelists,
+                              "find_program(EXE_SQLITE3 sqlite3)",
+                              "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe_build_context_paths))
+        # Fix executables installation on iOS
+        # might be fixed upstream by https://github.com/OSGeo/PROJ/pull/2764
+        execs = ["cct", "cs2cs", "geod", "gie", "proj", "projinfo"]
+        if tools.Version(self.version) >= "7.0.0":
+            execs.append("projsync")
+        for exec in execs:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "bin_{}.cmake".format(exec)),
+                                  "RUNTIME DESTINATION ${BINDIR}",
+                                  "DESTINATION ${BINDIR}")
+        # unvendor nlohmann_json
+        if tools.Version(self.version) < "8.1.0":
+            tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -93,6 +116,8 @@ class ProjConan(ConanFile):
             self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.definitions["ENABLE_IPO"] = False
             self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
+        if tools.Version(self.version) >= "8.1.0":
+            self._cmake.definitions["NLOHMANN_JSON_ORIGIN"] = "external"
         self._cmake.configure()
         return self._cmake
 
@@ -128,7 +153,7 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].system_libs.append("Ole32")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["projlib"].system_libs.append(tools.stdcpp_library(self))
-        self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
+        self.cpp_info.components["projlib"].requires.extend(["nlohmann_json::nlohmann_json", "sqlite3::sqlite3"])
         if self.options.get_safe("with_tiff"):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_curl"):

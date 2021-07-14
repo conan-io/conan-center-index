@@ -8,6 +8,8 @@ HEADERS += greeter.h
 
 RESOURCES = example.qrc
 
+QT += network sql concurrent xml dbus
+
 QT -= gui
 
 CONFIG += console
