@@ -39,7 +39,7 @@ class Libdc1394Conan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not supported")
+            raise ConanInvalidConfiguration("Windows is not supported yet in this recipe")
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration("Clang doesn't support VLA")
 
