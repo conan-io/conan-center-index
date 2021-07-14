@@ -23,6 +23,7 @@ class LibaecConan(ConanFile):
 
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -54,9 +55,11 @@ class LibaecConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "-fsanitize=address", "")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch_sources()
