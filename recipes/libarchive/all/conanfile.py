@@ -104,6 +104,8 @@ class LibarchiveConan(ConanFile):
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
             self.requires("zstd/1.4.9")
+        if self.options.with_acl:
+            self.requires("acl/2.3.1")
 
     def validate(self):
         if self.options.with_expat and self.options.with_libxml2:
