@@ -3,7 +3,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
-class ImGuizmoConan(ConanFile):
+class ImplotConan(ConanFile):
     name = "implot"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/epezent/implot"
@@ -60,4 +60,3 @@ class ImGuizmoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["implot"]
-        self.cpp_info.requires = ["imgui::imgui"]
