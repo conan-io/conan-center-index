@@ -9,6 +9,7 @@ class EmSDKInstallerConan(ConanFile):
     homepage = "https://github.com/kripken/emscripten"
     topics = ("conan", "emsdk", "emscripten", "installer", "sdk")
     license = "MIT"
+    settings = "os"
 
     short_paths = True
     @property
