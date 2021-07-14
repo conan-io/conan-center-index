@@ -2,6 +2,8 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 class ShadercConan(ConanFile):
     name = "shaderc"
     description = "A collection of tools, libraries and tests for shader compilation."
@@ -43,15 +45,28 @@ class ShadercConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
+    @property
+    def _get_compatible_spirv_tools_version(self):
+        return {
+            "2021.1": "2021.2",
+            "2019.0": "2020.5"
+        }.get(str(self.version), False)
+
+    @property
+    def _get_compatible_glslang_version(self):
+        return {
+            "2021.1": "11.5.0",
+            "2019.0": "8.13.3559"
+        }.get(str(self.version), False)
+
     def requirements(self):
-        self.requires("glslang/8.13.3559")
-        self.requires("spirv-tools/2020.5")
+        self.requires("glslang/{}".format(self._get_compatible_glslang_version))
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
         if self.options.spvc:
            self.requires("spirv-cross/20210115")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
