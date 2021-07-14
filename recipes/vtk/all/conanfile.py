@@ -176,19 +176,19 @@ class VtkConan(ConanFile):
             
             # Adding system libs without 'lib' prefix and '.so' or '.so.X' suffix.
             if self.settings.os == 'Linux':
-                self.cpp_info.components[alias].requires.append('pthread')
+                self.cpp_info.components[alias].system_libs.append('pthread')
                 if name == "VTK::vtksys":
-                    self.cpp_info.components[alias].requires.append('dl') # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
+                    self.cpp_info.components[alias].system_libs.append('dl') # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
 
             if not self.options.shared and name == "VTK::GUISupportQt":
                 if self.settings.os == 'Windows':
-                    self.cpp_info.components[alias].requires.append('Ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
-                    self.cpp_info.components[alias].requires.append('Psapi')     # 'vtksys-9.0d.lib' require 'GetProcessMemoryInfo' which is in 'Psapi.lib' library
-                    self.cpp_info.components[alias].requires.append('dbghelp')   # 'vtksys-9.0d.lib' require '__imp_SymGetLineFromAddr64', '__imp_SymInitialize' and '__imp_SymFromAddr' which are in 'dbghelp.lib' library
+                    self.cpp_info.components[alias].system_libs.append('ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
+                    self.cpp_info.components[alias].system_libs.append('psapi')     # 'vtksys-9.0d.lib' require 'GetProcessMemoryInfo' which is in 'Psapi.lib' library
+                    self.cpp_info.components[alias].system_libs.append('dbghelp')   # 'vtksys-9.0d.lib' require '__imp_SymGetLineFromAddr64', '__imp_SymInitialize' and '__imp_SymFromAddr' which are in 'dbghelp.lib' library
 
                 if self.settings.os == 'Macos':
-                    self.cpp_info.components[alias].frameworks.extend(["CoreFoundation"]) # 'libvtkRenderingOpenGL2-9.0.a' require '_CFRelease', '_CFRetain', '_objc_msgSend' and much more which are in 'CoreFoundation' library
-                    self.cpp_info.components[alias].frameworks.extend(["Cocoa"])          # 'libvtkRenderingOpenGL2-9.0.a' require '_CGWarpMouseCursorPosition' and more, 'libvtkRenderingUI-9.0.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' library
+                    self.cpp_info.components[alias].frameworks.extend(["corefoundation"]) # 'libvtkRenderingOpenGL2-9.0.a' require '_CFRelease', '_CFRetain', '_objc_msgSend' and much more which are in 'CoreFoundation' library
+                    self.cpp_info.components[alias].frameworks.extend(["cocoa"])          # 'libvtkRenderingOpenGL2-9.0.a' require '_CGWarpMouseCursorPosition' and more, 'libvtkRenderingUI-9.0.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' library
 
 
             incl_dir = {base_include_dir}
