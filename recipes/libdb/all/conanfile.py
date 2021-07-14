@@ -50,6 +50,9 @@ class LibdbConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.get_safe("with_cxx", False):
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_tcl:
