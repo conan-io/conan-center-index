@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class Libdc1394Conan(ConanFile):
     name = "libdc1394"
@@ -46,8 +48,8 @@ class Libdc1394Conan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libdc1394-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _user_info_build(self):
