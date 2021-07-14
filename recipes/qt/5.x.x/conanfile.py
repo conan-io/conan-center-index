@@ -529,7 +529,7 @@ class QtConan(ConanFile):
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
-            args.append("--gstreamer " + self.deps_cpp_info["gstreamer"].version if self.options.with_gstreamer else "-no-gstreamer")
+            args.append("--gstreamer" if self.options.with_gstreamer else "-no-gstreamer")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
