@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 class AwsCCommon(ConanFile):
     name = "aws-c-common"
