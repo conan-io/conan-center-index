@@ -1,0 +1,4 @@
+sources:
+  "0.5.11":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.11.tar.gz"
+    sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
