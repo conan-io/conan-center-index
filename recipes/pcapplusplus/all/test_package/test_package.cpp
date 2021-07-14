@@ -1,19 +1,25 @@
+#include <iostream>
 #include <IPv4Layer.h>
 #include <Packet.h>
 #include <PcapFileDevice.h>
 
-int main() {
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        std::cerr << "ERROR: Need at least one argument" << std::endl;
+        return 1;
+    }
+
     // open a pcap file for reading
-    pcpp::PcapFileReaderDevice reader("1_packet.pcap");
+    pcpp::PcapFileReaderDevice reader(argv[1]);
     if (!reader.open()) {
-        printf("Error opening the pcap file\n");
+        std::cerr << "ERROR: Error opening the pcap file" << std::endl;
         return 1;
     }
 
     // read the first (and only) packet from the file
     pcpp::RawPacket rawPacket;
     if (!reader.getNextPacket(rawPacket)) {
-        printf("Couldn't read the first packet in the file\n");
+        std::cerr << "ERROR: Couldn't read the first packet in the file" << std::endl;
         return 1;
     }
 
@@ -27,7 +33,7 @@ int main() {
         pcpp::IPv4Address destIP = parsedPacket.getLayerOfType<pcpp::IPv4Layer>()->getDstIPv4Address();
 
         // print source and dest IPs
-        printf("Source IP is '%s'; Dest IP is '%s'\n", srcIP.toString().c_str(), destIP.toString().c_str());
+        std::cout << "Source IP is '" << srcIP.toString() << "'; Dest IP is '" << destIP.toString() << "'" << std::endl;
     }
 
     // close the file
