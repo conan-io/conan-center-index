@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 import os
 
 
+required_conan_version = ">=1.33.0"
+
 class EmSDKInstallerConan(ConanFile):
     name = "emsdk"
     description = "Emscripten is an Open Source LLVM to JavaScript compiler"
