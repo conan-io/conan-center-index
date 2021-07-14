@@ -22,16 +22,9 @@ class Libdc1394Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _configure_autotools(self):
-        if not self._env_build:
-            self._env_build = AutoToolsBuildEnvironment(self)
-            if self.options.shared:
-                args = ["--disable-static", "--enable-shared"]
-            else:
-                args = ["--disable-shared", "--enable-static"]
-            args.extend(["--disable-examples"])
-            self._env_build.configure(args=args)
-        return self._env_build
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -42,10 +35,6 @@ class Libdc1394Conan(ConanFile):
             raise ConanInvalidConfiguration("Clang doesn't support VLA")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def requirements(self):
         self.requires("libusb/1.0.24")
@@ -61,6 +50,17 @@ class Libdc1394Conan(ConanFile):
     @property
     def _user_info_build(self):
         return getattr(self, "user_info_build", None) or self.deps_user_info
+
+    def _configure_autotools(self):
+        if not self._env_build:
+            self._env_build = AutoToolsBuildEnvironment(self)
+            if self.options.shared:
+                args = ["--disable-static", "--enable-shared"]
+            else:
+                args = ["--disable-shared", "--enable-static"]
+            args.extend(["--disable-examples"])
+            self._env_build.configure(args=args)
+        return self._env_build
 
     def build(self):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
