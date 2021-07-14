@@ -16,7 +16,6 @@ class TestPackageConan(ConanFile):
             cmake.definitions["CONAN_DISABLE_CHECK_COMPILER"] = True
             cmake.configure()
             cmake.build()
-        #self.run("cmake --build %s --config Release" % self.build_folder)
 
     def test(self):
         if self.settings.os == "Emscripten":
