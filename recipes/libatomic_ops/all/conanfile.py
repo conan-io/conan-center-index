@@ -53,6 +53,8 @@ class Libatomic_opsConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
