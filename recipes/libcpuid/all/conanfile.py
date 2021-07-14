@@ -63,14 +63,13 @@ class LibCpuidConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        autotools = self._configure_cmake()
-        autotools.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_cmake()
-        autotools.install()
-
+        cmake = self._configure_cmake()
+        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
