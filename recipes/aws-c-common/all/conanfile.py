@@ -1,14 +1,14 @@
 import os
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.28.0"
 
 class AwsCCommon(ConanFile):
     name = "aws-c-common"
     description = "Core c99 package for AWS SDK for C. Includes cross-platform primitives, configuration, data structures, and error handling."
     topics = ("conan", "aws", "amazon", "cloud", )
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/awslabs/aws-sdk-cpp"
+    homepage = "https://github.com/awslabs/aws-c-common"
     license = "Apache-2.0",
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
@@ -39,9 +39,8 @@ class AwsCCommon(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "aws-c-common-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -61,7 +60,6 @@ class AwsCCommon(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-common"))
 
     def package_info(self):
