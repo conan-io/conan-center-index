@@ -218,7 +218,8 @@ class MimallocConan(ConanFile):
             elif self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("rt")
 
-        # Starting version 2.0 mimalloc installs the headers in a mimalloc-2.0 subfolder.
-        # Expose both paths to preserve compatibility with the test_package
+        # Starting version 2.0 mimalloc installs its public headers in a mimalloc-2.0 subfolder.
+        # Regardless, they include each other with no mimaloc-2.o prefix, so we need to expose
+        # the inner folder as the includedir.
         if tools.Version(self.version) >= "2.0":
-            self.cpp_info.includedirs = ["include", os.path.join("include", "mimalloc-2.0")]
+            self.cpp_info.includedirs = [os.path.join("include", "mimalloc-2.0")]
