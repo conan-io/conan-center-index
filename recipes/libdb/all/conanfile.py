@@ -114,6 +114,8 @@ class LibdbConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
