@@ -32,6 +32,9 @@ class BloatyConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
