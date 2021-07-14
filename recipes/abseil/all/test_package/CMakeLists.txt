@@ -8,9 +8,7 @@ conan_basic_setup(TARGETS)
 find_package(absl REQUIRED)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} absl::strings absl::flat_hash_map absl::flat_hash_set absl::int128 absl::time)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 # Test also global target
 add_executable(${PROJECT_NAME}_global test_package.cpp)
 target_link_libraries(${PROJECT_NAME}_global CONAN_PKG::abseil)
-set_property(TARGET ${PROJECT_NAME}_global PROPERTY CXX_STANDARD 11)
