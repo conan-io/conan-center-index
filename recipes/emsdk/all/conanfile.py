@@ -5,12 +5,12 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class EmSDKInstallerConan(ConanFile):
+class EmSDKConan(ConanFile):
     name = "emsdk"
     description = "Emscripten is an Open Source LLVM to JavaScript compiler"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
-    topics = ("conan", "emsdk", "emscripten", "installer", "sdk")
+    topics = ("conan", "emsdk", "emscripten", "sdk")
     license = "MIT"
     settings = "os"
 
