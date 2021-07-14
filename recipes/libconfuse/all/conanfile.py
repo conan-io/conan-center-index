@@ -36,14 +36,13 @@ class LibConfuse(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("confuse-{}".format(self.version), self._source_subfolder)
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
         if self._autotools:
