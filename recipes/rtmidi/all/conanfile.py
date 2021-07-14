@@ -13,7 +13,7 @@ class RtMidiConan(ConanFile):
     license = "Copyright (c) 2003-2019 Gary P. Scavone"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "pkg_config"
-    exports_sources = "patches/*"
+    exports_sources = "CMakeLists.txt", "patches/*"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
