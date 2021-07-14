@@ -11,7 +11,12 @@ class EmSDKInstallerConan(ConanFile):
     license = "MIT"
 
     short_paths = True
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def package_id(self):
+        del self.info.settings.os
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
