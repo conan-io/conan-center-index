@@ -64,6 +64,7 @@ class BloatyConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
