@@ -111,10 +111,10 @@ class VtkConan(ConanFile):
             self.requires("qt/5.15.2")
 
         if self.options.vtk_smp_implementation == "tbb":
-            self.requires("TBB")
+            self.requires("TBB/2020.3")
 
         if self.options.vtk_use_mpi:
-            self.requires("openmpi")
+            self.requires("openmpi/4.1.0")
 
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
@@ -169,7 +169,7 @@ class VtkConan(ConanFile):
             self.cpp_info.components[alias].requires.extend(opt_dep)
             
             if name == "VTK::GUISupportQt" :
-                self.cpp_info.components[alias].requires.extend(["qt::qtWidgets"])
+                self.cpp_info.components[alias].requires.append("widgets")
             
             if name == "VTK::RenderingOpenGL2":
                 self.cpp_info.components[alias].requires.append("opengl::opengl")
