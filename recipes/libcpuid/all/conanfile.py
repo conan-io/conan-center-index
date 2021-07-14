@@ -41,10 +41,12 @@ class LibCpuidConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("libcpuid is only available for x86 and x86_64 architecture")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("libcpuid is only available for x86 and x86_64 architecture")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
