@@ -31,10 +31,7 @@ class EmSDKInstallerConan(ConanFile):
 
     @staticmethod
     def _create_dummy_file(directory):
-        if not os.path.isdir(directory):
-            os.makedirs(directory)
-        with open(os.path.join(directory, "dummy"), "w") as f:
-            f.write("\n")
+        tools.save(os.path.join(directory, "dummy"), "\n")
 
     @staticmethod
     def _touch(filename):
