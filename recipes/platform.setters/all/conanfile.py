@@ -8,14 +8,14 @@ required_conan_version = ">=1.33.0"
 
 class PlatformInterfacesConan(ConanFile):
     name = "platform.setters"
-    license = "Unlicense"
+    license = "MIT"
     homepage = "https://github.com/linksplatform/Setters"
     url = "https://github.com/conan-io/conan-center-index"
     description = """LinksPlatform's Platform.Setters is a library that contains set of C++ class 
     templates. Each setter provides a set of callback methods to set the result value. Use Platform.Setters.h file 
     to include the library."""
     topics = ("platform", "concepts", "header-only")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
 
     @property
@@ -23,7 +23,7 @@ class PlatformInterfacesConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _subfolder_sources(self):
+    def _internal_cpp_subfolder(self):
         return os.path.join(self._source_subfolder, "cpp", "Platform.Setters")
 
     @property
@@ -34,22 +34,28 @@ class PlatformInterfacesConan(ConanFile):
             "clang": "11",
             "apple-clang": "11"
         }
+    def requirements(self):
+        self.requires("platform.interfaces/0.1.3")
 
     def validate(self):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
         if tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("platform.setters/{} "
                                             "requires C++20 with {}, "
                                             "which is not supported "
                                             "by {} {}.".format(self.version, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 20)
+    @property
+    def _min_cppstd(self):
+        return 20
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
-        self.copy("*.h", dst="include", src=self._subfolder_sources)
+        self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
@@ -57,4 +63,3 @@ class PlatformInterfacesConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Platform.Setters"
-        self.cpp_info.names["cmake_find_package_multi"] = "Platform.Setters"
