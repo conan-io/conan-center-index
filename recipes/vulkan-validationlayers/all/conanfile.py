@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -53,8 +53,6 @@ class VulkanValidationLayersConan(ConanFile):
     def _get_compatible_spirv_tools_version(self):
         return {
             "1.2.182": "2021.2",
-            "1.2.176.0": "2021.1",
-            "1.2.176": "2021.1",
             "1.2.154.0": "2020.5",
         }.get(str(self.version), False)
 
@@ -73,9 +71,7 @@ class VulkanValidationLayersConan(ConanFile):
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("Vulkan-ValidationLayers-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()
