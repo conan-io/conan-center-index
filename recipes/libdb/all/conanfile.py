@@ -251,9 +251,9 @@ class LibdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = self._libs
-        if self.settings.compiler == "Visual Studio"and self.options.shared:
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines = ["DB_USE_DLL"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         elif self.settings.os == "Windows" :
             self.cpp_info.system_libs.append("ws2_32")
