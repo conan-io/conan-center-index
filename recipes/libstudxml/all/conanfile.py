@@ -38,8 +38,13 @@ class LibStudXmlConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            if tools.Version(self.settings.compiler.version) < "9":
+                raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
+
     def build_requirements(self):
-        if self.settings.os != "Windows":
+        if self.settings.compiler != "Visual Studio":
             # Transitively requires autoconf and automake
             self.build_requires("libtool/2.4.6")
 
@@ -63,9 +68,6 @@ class LibStudXmlConan(ConanFile):
         return self._autotools
 
     def _build_vs(self):
-        if tools.Version(self.settings.compiler.version) < "9":
-            raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
-
         vc_ver = int(tools.Version(self.settings.compiler.version).major)
         sln_path = None
         def get_sln_path():
@@ -85,6 +87,18 @@ class LibStudXmlConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
 
+    def _build_autotools(self):
+        if self.settings.compiler.get_safe("libcxx") == "libc++":
+            # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
+            # include dir, libc++ ends up including their 'version' file instead, causing a compile error
+            tools.remove_files_by_mask(self._source_subfolder, "version")
+
+        with tools.chdir(self._source_subfolder):
+            self.run("./bootstrap")
+
+        autotools = self._configure_autotools()
+        autotools.make()
+
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
@@ -92,16 +106,7 @@ class LibStudXmlConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._build_vs()
         else:
-            if self.settings.compiler.get_safe("libcxx") == "libc++":
-                # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
-                # include dir, libc++ ends up including their 'version' file instead, causing a compile error
-                tools.remove_files_by_mask(self._source_subfolder, "version")
-
-            with tools.chdir(self._source_subfolder):
-                self.run("./bootstrap")
-
-            autotools = self._configure_autotools()
-            autotools.make()
+            self._build_autotools()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
