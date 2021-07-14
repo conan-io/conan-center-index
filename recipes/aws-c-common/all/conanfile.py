@@ -1,7 +1,7 @@
-from conans import CMake, ConanFile, tools
 import os
+from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 class AwsCCommon(ConanFile):
     name = "aws-c-common"
@@ -51,12 +51,9 @@ class AwsCCommon(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
