@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 import shutil
 
@@ -93,7 +94,6 @@ class LibdbConan(ConanFile):
                 shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                             os.path.join(self._source_subfolder, subdir, "config.guess"))
 
-        import glob
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             tools.replace_in_file(file,
                                   "<PropertyGroup Label=\"Globals\">",
