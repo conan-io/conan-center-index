@@ -30,7 +30,7 @@ class BloatyConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, "11")
 
     def package_id(self):
         del self.info.settings.compiler
