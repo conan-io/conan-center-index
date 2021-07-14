@@ -49,6 +49,12 @@ class LibdbConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        if self.options.with_tcl:
+            self.requires("tcl/8.6.10")
+
+    def validate(self):
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang":
                 if self.settings.compiler.version <= tools.Version("5"):
@@ -56,10 +62,6 @@ class LibdbConan(ConanFile):
             if self.settings.compiler == "apple-clang":
                 if self.settings.compiler.version < tools.Version("10"):
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
-
-    def requirements(self):
-        if self.options.with_tcl:
-            self.requires("tcl/8.6.10")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
