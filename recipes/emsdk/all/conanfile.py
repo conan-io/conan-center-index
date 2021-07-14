@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class EmSDKInstallerConan(ConanFile):
     name = "emsdk"
     description = "Emscripten is an Open Source LLVM to JavaScript compiler"
@@ -14,6 +15,7 @@ class EmSDKInstallerConan(ConanFile):
     settings = "os"
 
     short_paths = True
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -78,7 +80,7 @@ class EmSDKInstallerConan(ConanFile):
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
 
     def _define_tool_var(self, name, value):
-        suffix = '.bat' if self.settings.os == "Windows"
+        suffix = '.bat' if self.settings.os == "Windows" else ''
         path = os.path.join(self.package_folder, 'bin', 'upstream',
                             'emscripten', '%s%s' % (value, suffix))
         self._chmod_plus_x(path)
