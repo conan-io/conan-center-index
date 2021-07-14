@@ -131,7 +131,8 @@ class VtkConan(ConanFile):
         for dep in dependencies:
             if dep in enabled_pkg.keys() and dep != name:
                 ls_dep.append(enabled_pkg[dep]['alias'])
-            elif dep == "VTK::RenderingCore" and not "VTK::RenderingOpenGL2" in dependencies:
+            elif dep == "VTK::RenderingCore" and not "VTK::RenderingOpenGL2" in dependencies: 
+                # VTK::RenderingCore is a virtual library implemented by VTK::RenderingOpenGL2
                 ls_dep.append("RenderingOpenGL2")
 
         return ls_dep
@@ -168,10 +169,10 @@ class VtkConan(ConanFile):
             self.cpp_info.components[alias].requires.extend(opt_dep)
             
             if name == "VTK::GUISupportQt" :
-                self.cpp_info.components[alias].requires.append("qt")
+                self.cpp_info.components[alias].requires.extend(["qt::qtWidgets"])
             
             if name == "VTK::RenderingOpenGL2":
-                self.cpp_info.components[alias].requires.append("opengl/system")
+                self.cpp_info.components[alias].requires.append("opengl::opengl")
             
             # Adding system libs without 'lib' prefix and '.so' or '.so.X' suffix.
             if self.settings.os == 'Linux':
