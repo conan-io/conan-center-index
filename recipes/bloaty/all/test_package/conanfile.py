@@ -9,5 +9,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if tools.cross_building(self.settings):
             return
-        bloaty_path = os.path.join(self.deps_cpp_info["bloaty"].bin_paths[0], "bloaty")
-        self.run("bloaty {}".format(bloaty_path), run_environment=True)
+        self.run("bloaty --version", run_environment=True)
