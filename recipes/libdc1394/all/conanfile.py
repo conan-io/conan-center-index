@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class Libdc1394Conan(ConanFile):
@@ -13,6 +14,8 @@ class Libdc1394Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    generators = "pkg_config"
     _env_build = None
 
     @property
@@ -44,11 +47,26 @@ class Libdc1394Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("libusb/1.0.24")
+
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+        self.build_requires("pkgconf/1.7.4")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libdc1394-%s" % self.version, self._source_subfolder)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with tools.chdir(self._source_subfolder):
             env_build = self._configure_autotools()
             env_build.make()
