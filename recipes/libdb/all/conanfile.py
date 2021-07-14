@@ -78,8 +78,8 @@ class LibdbConan(ConanFile):
         return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def _patch_sources(self):
-        for patch_data in self.conan_data["patches"][self.version]:
-            tools.patch(**patch_data)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
         if self.settings.compiler != "Visual Studio":
             for subdir in [
