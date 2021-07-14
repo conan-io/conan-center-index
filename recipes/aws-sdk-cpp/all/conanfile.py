@@ -318,15 +318,18 @@ class AwsSdkCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if (self.settings.compiler == "gcc"
-                    and tools.Version(self.settings.compiler.version) < "6.0"):
-                raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
+
+    def validate(self):
+        if (self.options.shared
+            and self.settings.compiler == "gcc"
+            and tools.Version(self.settings.compiler.version) < "6.0"):
+            raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
 
     def requirements(self):
-        self.requires("aws-c-event-stream/0.1.5")
+        self.requires("aws-crt-cpp/0.14.3")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.74.0")
+            self.requires("libcurl/7.77.0")
         if self.settings.os == "Linux":
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
@@ -355,10 +358,10 @@ class AwsSdkCppConan(ConanFile):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
 
-        self._cmake.definitions["BUILD_DEPS"] = False
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
+        self._cmake.definitions["BUILD_DEPS"] = False
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
         if self.settings.compiler == "Visual Studio":
@@ -390,7 +393,7 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
+        self.cpp_info.components["core"].requires = ["aws-crt-cpp::aws-crt-cpp-lib"]
 
         enabled_sdks = [sdk for sdk in self._sdks if getattr(self.options, sdk)]
         for hl_comp in self._internal_requirements.keys():

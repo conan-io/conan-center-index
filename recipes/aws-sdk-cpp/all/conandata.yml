@@ -1,4 +1,7 @@
 sources:
+  "1.9.58":
+    url: "https://github.com/aws/aws-sdk-cpp/archive/1.9.58.tar.gz"
+    sha256: "cd691f015324d93858b68a0706276dd895da2b4f69eee2ad339132d051669045"
   "1.8.130":
     url: "https://github.com/aws/aws-sdk-cpp/archive/1.8.130.tar.gz"
     sha256: "5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda"
