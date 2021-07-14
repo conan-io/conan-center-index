@@ -40,8 +40,8 @@ class YamlCppConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.shared and self.settings.compiler.runtime == "MTd":
-            raise ConanInvalidConfiguration("{} is not supported with MTd runtime".format(self.name))
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in str(self.settings.compiler.runtime):
+            raise ConanInvalidConfiguration("Visual Studio build for {} shared library with MT runtime is not supported".format(self.name))
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
