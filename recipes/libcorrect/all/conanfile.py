@@ -72,6 +72,6 @@ class LibaecConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["correct"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
