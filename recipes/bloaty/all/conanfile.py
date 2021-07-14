@@ -31,6 +31,8 @@ class BloatyConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("bloaty package requires Linux"
 
     def package_id(self):
         del self.info.settings.compiler
