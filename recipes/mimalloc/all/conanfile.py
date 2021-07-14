@@ -120,6 +120,8 @@ class MimallocConan(ConanFile):
         self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        if tools.Version(self.version) >= "1.7.0":
+            self._cmake.definitions["MI_INSTALL_TOPLEVEL"] = "ON"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -156,18 +158,6 @@ class MimallocConan(ConanFile):
             elif self.settings.arch == "x86":
                 self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
                           dst="bin")
-
-        # Starting version 2.0 mimalloc installs libs in a mimalloc-2.0 subfolder.
-        # Move them out to preserve package layout
-        if tools.Version(self.version) >= "2.0":
-            file_names = os.listdir(
-                            os.path.join(self.package_folder, "lib", "mimalloc-2.0")
-                            )
-            for file_name in file_names:
-                shutil.move(os.path.join(self.package_folder, "lib", "mimalloc-2.0", file_name),
-                            os.path.join(self.package_folder, "lib")
-                )
-            tools.rmdir(os.path.join(self.package_folder, "lib", "mimalloc-2.0"))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -217,9 +207,3 @@ class MimallocConan(ConanFile):
                 self.cpp_info.system_libs.extend(["psapi", "shell32", "user32", "bcrypt"])
             elif self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("rt")
-
-        # Starting version 2.0 mimalloc installs its public headers in a mimalloc-2.0 subfolder.
-        # Regardless, they include each other with no mimaloc-2.o prefix, so we need to expose
-        # the inner folder as the includedir.
-        if tools.Version(self.version) >= "2.0":
-            self.cpp_info.includedirs = [os.path.join("include", "mimalloc-2.0")]
