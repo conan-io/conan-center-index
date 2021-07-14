@@ -29,15 +29,17 @@ class Libdc1394Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not supported")
-        if self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration("Clang doesn't support VLA")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("libusb/1.0.24")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported")
+        if self.settings.compiler == "clang":
+            raise ConanInvalidConfiguration("Clang doesn't support VLA")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
