@@ -73,7 +73,7 @@ class LibGit2Conan(ConanFile):
             self.requires("openssl/1.1.1k")
         if self._need_mbedtls:
             self.requires("mbedtls/2.25.0")
-        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
+        if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.16")
         if self.options.with_regex == "pcre":
             self.requires("pcre/8.45")
@@ -135,10 +135,7 @@ class LibGit2Conan(ConanFile):
         self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
         self._cmake.definitions["USE_SSH"] = self.options.with_libssh2
 
-        if tools.is_apple_os(self.settings.os):
-            self._cmake.definitions["USE_ICONV"] = self.options.with_iconv
-        else:
-            self._cmake.definitions["USE_ICONV"] = False
+        self._cmake.definitions["USE_ICONV"] = self.options.get_safe("with_iconv", False)
 
         self._cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         self._cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
