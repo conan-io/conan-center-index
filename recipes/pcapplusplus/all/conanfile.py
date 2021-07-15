@@ -27,7 +27,11 @@ class PcapplusplusConan(ConanFile):
             raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
 
     def requirements(self):
-        self.requires("libpcap/1.9.1")
+        if self.settings.os == "Windows":
+            # FIXME: missing winpcap recipe (https://github.com/bincrafters/community/pull/1395)
+            raise ConanInvalidConfiguration("winpcap is not available on cci (yet)")
+        else:
+            self.requires("libpcap/1.9.1")
 
     def source(self):
         tools.get(
