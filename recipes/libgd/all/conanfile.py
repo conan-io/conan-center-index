@@ -1,6 +1,7 @@
-import glob
-import os
 from conans import ConanFile, tools, CMake
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibgdConan(ConanFile):
@@ -36,8 +37,8 @@ class LibgdConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("libgd-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
