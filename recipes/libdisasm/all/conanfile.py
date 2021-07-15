@@ -75,6 +75,8 @@ class LibdisasmConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
 
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
