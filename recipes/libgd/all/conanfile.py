@@ -35,15 +35,18 @@ class LibgdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _patch(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("libgd-*")[0], self._source_subfolder)
+
+    def _patch(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "RUNTIME DESTINATION bin",
+                              "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
