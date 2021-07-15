@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
 from contextlib import contextmanager
 
+required_conan_version = ">=1.33.0"
+
 
 class LibdisasmConan(ConanFile):
     name = "libdisasm"
@@ -44,9 +46,8 @@ class LibdisasmConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
