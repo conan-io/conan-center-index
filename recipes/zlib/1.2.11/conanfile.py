@@ -41,7 +41,7 @@ class ZlibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _patch_sources(self):
-        with tools.chdir(".."):
+        with tools.chdir(".."):  # FIXME: This need to go to parent folder is not very nice.
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch, base_path=self.source_folder)
 
