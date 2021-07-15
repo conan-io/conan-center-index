@@ -11,14 +11,29 @@ class LibgdConan(ConanFile):
     description = ("GD is an open source code library for the dynamic "
                    "creation of images by programmers.")
     topics = ("images", "graphics")
-    settings = "os", "compiler", "build_type", "arch"
     homepage = "https://libgd.github.io"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
-    requires = "zlib/1.2.11"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,13 +43,8 @@ class LibgdConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def requirements(self):
+        self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -45,6 +55,9 @@ class LibgdConan(ConanFile):
             tools.patch(**patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
+        tools.replace_in_file(cmakelists,
+                              "SET(CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")",
+                              "LIST(APPEND CMAKE_MODULE_PATH \"${GD_SOURCE_DIR}/cmake/modules\")")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "RUNTIME DESTINATION bin",
                               "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
@@ -53,10 +66,9 @@ class LibgdConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
-        zlib_info = self.deps_cpp_info["zlib"]
-        self._cmake.definitions["ZLIB_LIBRARY"] = zlib_info.libs[0]
-        self._cmake.definitions["ZLIB_INCLUDE_DIR"] = zlib_info.include_paths[0]
+        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        if tools.Version(self.version) >= "2.3.0":
+            self._cmake.definitions["ENABLE_GD_FORMATS"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
