@@ -17,10 +17,18 @@ class LibgdConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_png": [True, False],
+        "with_jpeg": [True, False],
+        "with_tiff": [True, False],
+        "with_freetype": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_png": False,
+        "with_jpeg": False,
+        "with_tiff": False,
+        "with_freetype": False,
     }
 
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -45,6 +53,14 @@ class LibgdConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/1.2.11")
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self.options.with_jpeg:
+            self.requires("libjpeg/9d")
+        if self.options.with_tiff:
+            self.requires("libtiff/4.2.0")
+        if self.options.with_freetype:
+            self.requires("freetype/2.10.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -69,6 +85,20 @@ class LibgdConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         if tools.Version(self.version) >= "2.3.0":
             self._cmake.definitions["ENABLE_GD_FORMATS"] = True
+        self._cmake.definitions["ENABLE_PNG"] = self.options.with_png
+        self._cmake.definitions["ENABLE_LIQ"] = False
+        self._cmake.definitions["ENABLE_JPEG"] = self.options.with_jpeg
+        self._cmake.definitions["ENABLE_TIFF"] = self.options.with_tiff
+        self._cmake.definitions["ENABLE_ICONV"] = False
+        self._cmake.definitions["ENABLE_XPM"] = False
+        self._cmake.definitions["ENABLE_FREETYPE"] = self.options.with_freetype
+        self._cmake.definitions["ENABLE_FONTCONFIG"] = False
+        self._cmake.definitions["ENABLE_WEBP"] = False
+        if tools.Version(self.version) >= "2.3.2":
+            self._cmake.definitions["ENABLE_HEIF"] = False
+            self._cmake.definitions["ENABLE_AVIF"] = False
+        if tools.Version(self.version) >= "2.3.0":
+            self._cmake.definitions["ENABLE_RAQM"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
