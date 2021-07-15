@@ -40,14 +40,14 @@ class LibevConan(ConanFile):
             # libtool:   error: can't build i686-pc-mingw32 shared library unless -no-undefined is specified
             raise ConanInvalidConfiguration("libev can't be built as shared on Windows")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "libev-{0}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
         if self._autotools:
