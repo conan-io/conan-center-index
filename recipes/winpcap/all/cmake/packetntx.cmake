@@ -42,7 +42,7 @@ if(PACKET_TME)
             source_subfolder/packetNtx/driver/normal_lookup.c
             source_subfolder/packetNtx/driver/win_bpf_filter_init.c
     )
-    target_compile_definitions(driver PRIVATE HAVE_BUGGY_TME_SUPPORT)
+    target_compile_definitions(packet PRIVATE HAVE_BUGGY_TME_SUPPORT)
 endif()
 
 install(TARGETS packet
