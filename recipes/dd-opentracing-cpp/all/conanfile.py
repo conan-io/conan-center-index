@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class DatadogOpenTracingConan(ConanFile):
     name = "dd-opentracing-cpp"
     description = "Monitoring service for cloud-scale applications based on OpenTracing "
-    license = "Apache 2.0 License"
+    license = "Apache-2.0"
     topics = ("instrumentration", "monitoring", "security", "tracing")
     homepage = "https://github.com/DataDog/dd-opentracing-cpp"
     url = "https://github.com/conan-io/conan-center-index"
