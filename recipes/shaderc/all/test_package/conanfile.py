@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        print(self.options["shaderc"])
         cmake.definitions["SHADERC_WITH_SPVC"] = self.options["shaderc"].spvc if "spvc" in self.options["shaderc"] else False
         cmake.configure()
         cmake.build()
