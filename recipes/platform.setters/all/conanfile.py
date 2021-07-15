@@ -19,6 +19,10 @@ class PlatformSettersConan(ConanFile):
     no_copy_source = True
 
     @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -34,6 +38,7 @@ class PlatformSettersConan(ConanFile):
             "clang": "11",
             "apple-clang": "11"
         }
+
     def requirements(self):
         self.requires("platform.interfaces/0.1.3")
 
@@ -47,9 +52,6 @@ class PlatformSettersConan(ConanFile):
                                             "requires C++20 with {}, "
                                             "which is not supported "
                                             "by {} {}.".format(self.version, self.settings.compiler, self.settings.compiler, self.settings.compiler.version))
-    @property
-    def _min_cppstd(self):
-        return 20
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
