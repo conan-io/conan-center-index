@@ -110,7 +110,7 @@ class QtConan(ConanFile):
         "with_libalsa": False,
         "with_openal": True,
         "with_zstd": True,
-        "with_gstreamer": True,
+        "with_gstreamer": False,
 
         "gui": True,
         "widgets": True,
