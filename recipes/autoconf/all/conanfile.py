@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
@@ -9,7 +10,7 @@ class AutoconfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/autoconf/"
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
-    topics = ("conan", "autoconf", "configure", "build")
+    topics = ("autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler"
 
@@ -72,15 +73,22 @@ class AutoconfConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        with tools.environment_append(tools.RunEnvironment(self).vars):
+            yield
+
     def build(self):
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
