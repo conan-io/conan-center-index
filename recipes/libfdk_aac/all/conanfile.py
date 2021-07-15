@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake, VisualStudioBuildEnvironment, tools
 from contextlib import contextmanager
 import os
 
@@ -23,11 +23,18 @@ class FDKAACConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+    _cmake = None
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _use_cmake(self):
+        return tools.Version(self.version) >= "2.0.2"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,7 +45,7 @@ class FDKAACConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
+        if not self._use_cmake and self.settings.compiler != "Visual Studio":
             self.build_requires("libtool/2.4.6")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
@@ -46,6 +53,16 @@ class FDKAACConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_PROGRAMS"] = False
+        self._cmake.definitions["FDK_AAC_INSTALL_CMAKE_CONFIG_MODULE"] = False
+        self._cmake.definitions["FDK_AAC_INSTALL_PKGCONFIG_MODULE"] = False
+        self._cmake.configure()
+        return self._cmake
 
     @contextmanager
     def _msvc_build_environment(self):
@@ -102,14 +119,20 @@ class FDKAACConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._use_cmake:
+            cmake = self._configure_cmake()
+            cmake.build()
+        elif self.settings.compiler == "Visual Studio":
             self._build_vs()
         else:
             self._build_autotools()
 
     def package(self):
         self.copy(pattern="NOTICE", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
+        if self._use_cmake:
+            cmake = self._configure_cmake()
+            cmake.install()
+        elif self.settings.compiler == "Visual Studio":
             with self._msvc_build_environment():
                 self.run("nmake -f Makefile.vc prefix=\"{}\" install".format(self.package_folder))
             if self.options.shared:
@@ -122,7 +145,13 @@ class FDKAACConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs = ["fdk-aac"]
-        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.system_libs.append("m")
+        self.cpp_info.filenames["cmake_find_package"] = "fdk-aac"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "fdk-aac"
+        self.cpp_info.names["cmake_find_package"] = "FDK-AAC"
+        self.cpp_info.names["cmake_find_package_multi"] = "FDK-AAC"
         self.cpp_info.names["pkg_config"] = "fdk-aac"
+        self.cpp_info.components["fdk-aac"].names["cmake_find_package"] = "fdk-aac"
+        self.cpp_info.components["fdk-aac"].names["cmake_find_package_multi"] = "fdk-aac"
+        self.cpp_info.components["fdk-aac"].libs = ["fdk-aac"]
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.components["fdk-aac"].system_libs.append("m")
