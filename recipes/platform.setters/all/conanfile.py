@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.33.0"
 
 
-class PlatformInterfacesConan(ConanFile):
+class PlatformSettersConan(ConanFile):
     name = "platform.setters"
     license = "MIT License"
     homepage = "https://github.com/linksplatform/Setters"
