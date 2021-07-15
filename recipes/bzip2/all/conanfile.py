@@ -103,3 +103,5 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = ["bz2"]
+        self.cpp_info.set_property("cmake_file_name", "BZip2")
+        self.cpp_info.set_property("cmake_target_name", "BZip2")
