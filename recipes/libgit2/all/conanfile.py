@@ -12,8 +12,7 @@ class LibGit2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libgit2.org/"
     license = ("GPL-2.0-linking-exception",)
-    exports_sources = "CMakeLists.txt",
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -37,6 +36,10 @@ class LibGit2Conan(ConanFile):
         "with_ntlmclient": True,
         "with_regex": "builtin",
     }
+
+    exports_sources = "CMakeLists.txt",
+    generators = "cmake", "cmake_find_package"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -126,30 +129,32 @@ class LibGit2Conan(ConanFile):
     }
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        cmake.definitions["USE_SSH"] = self.options.with_libssh2
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
+        self._cmake.definitions["USE_SSH"] = self.options.with_libssh2
 
         if tools.is_apple_os(self.settings.os):
-            cmake.definitions["USE_ICONV"] = self.options.with_iconv
+            self._cmake.definitions["USE_ICONV"] = self.options.with_iconv
         else:
-            cmake.definitions["USE_ICONV"] = False
+            self._cmake.definitions["USE_ICONV"] = False
 
-        cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
-        cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
+        self._cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
+        self._cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        cmake.definitions["BUILD_CLAR"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["USE_HTTP_PARSER"] = "system"
+        self._cmake.definitions["BUILD_CLAR"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["USE_HTTP_PARSER"] = "system"
 
-        cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
+        self._cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
 
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+            self._cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
-        cmake.configure()
+        self._cmake.configure()
 
-        return cmake
+        return self._cmake
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
