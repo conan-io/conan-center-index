@@ -16,13 +16,11 @@ class FDKAACConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,32 +53,33 @@ class FDKAACConan(ConanFile):
                     self.run("nmake -f Makefile.vc")
                     self.run("nmake -f Makefile.vc prefix=\"%s\" install" % os.path.abspath(self.package_folder))
 
-    def _build_configure(self):
+    def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
-            win_bash = self._use_winbash
-            prefix = os.path.abspath(self.package_folder)
-            if self._use_winbash:
-                prefix = tools.unix_path(prefix, tools.MSYS2)
-            args = ["--prefix=%s" % prefix]
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--disable-shared", "--enable-static"])
-            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             if self.settings.os == "Android" and tools.os_info.is_windows:
                 # remove escape for quotation marks, to make ndk on windows happy
                 tools.replace_in_file("configure",
                     "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.install()
+        autotools = self._configure_autotools()
+        autotools.make()
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        args = []
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--disable-shared", "--enable-static"])
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
             self._build_vs()
         else:
-            self._build_configure()
+            self._build_autotools()
 
     def package(self):
         self.copy(pattern="NOTICE", src=self._source_subfolder, dst="licenses")
@@ -93,9 +92,11 @@ class FDKAACConan(ConanFile):
                 for ext in exts:
                     for filename in fnmatch.filter(filenames, ext):
                         os.unlink(os.path.join(root, filename))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if os.path.isfile(os.path.join(self.package_folder, "lib", "libfdk-aac.la")):
-            os.remove(os.path.join(self.package_folder, "lib", "libfdk-aac.la"))
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
