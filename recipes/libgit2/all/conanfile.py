@@ -58,6 +58,31 @@ class LibGit2Conan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("http_parser/2.9.4")
+        if self.options.with_libssh2:
+            self.requires("libssh2/1.9.0")
+        if self._need_openssl:
+            self.requires("openssl/1.1.1k")
+        if self._need_mbedtls:
+            self.requires("mbedtls/2.25.0")
+        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
+            self.requires("libiconv/1.16")
+        if self.options.with_regex == "pcre":
+            self.requires("pcre/8.45")
+        elif self.options.with_regex == "pcre2":
+            self.requires("pcre2/10.37")
+
+    @property
+    def _need_openssl(self):
+        return "openssl" in (self.options.with_https, self.options.with_sha1)
+
+    @property
+    def _need_mbedtls(self):
+        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
+
+    def validate(self):
         if self.options.with_https == "security":
             if not tools.is_apple_os(self.settings.os):
                 raise ConanInvalidConfiguration("security is only valid for Apple products")
@@ -75,14 +100,6 @@ class LibGit2Conan(ConanFile):
                 raise ConanInvalidConfiguration("{} isn't supported by Visual Studio".format(self.options.with_regex))
 
     @property
-    def _need_openssl(self):
-        return "openssl" in (self.options.with_https, self.options.with_sha1)
-
-    @property
-    def _need_mbedtls(self):
-        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
-
-    @property
     def _with_regex(self):
         if self.options.with_regex == "auto":
             if self.settings.os == "Macos":
@@ -90,22 +107,6 @@ class LibGit2Conan(ConanFile):
             else:
                 return "builtin"
         return self.options.with_regex
-
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-        self.requires("http_parser/2.9.4")
-        if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
-        if self._need_openssl:
-            self.requires("openssl/1.1.1k")
-        if self._need_mbedtls:
-            self.requires("mbedtls/2.25.0")
-        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
-            self.requires("libiconv/1.16")
-        if self.options.with_regex == "pcre":
-            self.requires("pcre/8.45")
-        elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.37")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
