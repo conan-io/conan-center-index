@@ -42,7 +42,7 @@ index 3e2b5ff..2ab7590 100644
  )
  
 -target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
-+target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib ws2_32)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util crypt32 ws2_32)
  target_include_directories(NetSSLWin
  	PUBLIC
  		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
