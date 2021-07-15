@@ -83,7 +83,7 @@ class LibGit2Conan(ConanFile):
     @property
     def _with_regex(self):
         if self.options.with_regex == "auto":
-            if tools.is_apple_os(self.settings.os):
+            if self.settings.os == "Macos":
                 return "regcomp_l"
             else:
                 return "builtin"
