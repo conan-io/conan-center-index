@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class PlatformInterfacesConan(ConanFile):
     name = "platform.setters"
-    license = "MIT"
+    license = "MIT License"
     homepage = "https://github.com/linksplatform/Setters"
     url = "https://github.com/conan-io/conan-center-index"
     description = """LinksPlatform's Platform.Setters is a library that contains set of C++ class 
