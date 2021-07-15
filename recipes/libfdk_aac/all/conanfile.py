@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import fnmatch
 
+required_conan_version = ">=1.33.0"
+
 
 class FDKAACConan(ConanFile):
     name = "libfdk_aac"
@@ -33,9 +35,8 @@ class FDKAACConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "fdk-aac-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_vs(self):
         with tools.chdir(self._source_subfolder):
