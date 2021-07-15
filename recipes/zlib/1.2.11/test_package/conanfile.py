@@ -28,4 +28,4 @@ class TestZlibConan(ConanFile):
             # FIXME: Very ugly interface to get the current test executable path
             cmd = os.path.join(self.build_folder, self.cpp.build.libdirs[0], "test")
             self.output.info("Running {}".format(cmd))
-            self.run(cmd)
+            self.run(cmd, env="conanrunenv")

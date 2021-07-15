@@ -45,23 +45,23 @@ class ZlibConan(ConanFile):
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch, base_path=self.source_folder)
 
-            with tools.chdir(self.source_folder):
-                # https://github.com/madler/zlib/issues/268
-                tools.replace_in_file('gzguts.h',
-                                    '#if defined(_WIN32) || defined(__CYGWIN__)',
-                                    '#if defined(_WIN32) || defined(__MINGW32__)')
+        with tools.chdir(self.source_folder):
+            # https://github.com/madler/zlib/issues/268
+            tools.replace_in_file('gzguts.h',
+                                '#if defined(_WIN32) || defined(__CYGWIN__)',
+                                '#if defined(_WIN32) || defined(__MINGW32__)')
 
-                is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
-                if not is_apple_clang12:
-                    for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                        tools.replace_in_file(filename,
-                                            '#ifdef HAVE_UNISTD_H    '
-                                            '/* may be set to #if 1 by ./configure */',
-                                            '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                        tools.replace_in_file(filename,
-                                            '#ifdef HAVE_STDARG_H    '
-                                            '/* may be set to #if 1 by ./configure */',
-                                            '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
+            is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
+            if not is_apple_clang12:
+                for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
+                    tools.replace_in_file(filename,
+                                        '#ifdef HAVE_UNISTD_H    '
+                                        '/* may be set to #if 1 by ./configure */',
+                                        '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
+                    tools.replace_in_file(filename,
+                                        '#ifdef HAVE_STDARG_H    '
+                                        '/* may be set to #if 1 by ./configure */',
+                                        '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
 
     def layout(self):
         cmake_layout(self)
@@ -126,3 +126,4 @@ class ZlibConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         self.cpp_info.set_property("cmake_file_name", "ZLIB")
+        self.cpp_info.set_property("cmake_target_name", "ZLIB")
