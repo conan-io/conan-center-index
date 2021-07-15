@@ -85,7 +85,6 @@ class VulkanValidationLayersConan(ConanFile):
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
 
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
