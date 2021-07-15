@@ -192,8 +192,7 @@ class QtConan(ConanFile):
             self.options.opengl = "dynamic"
 
     def configure(self):
-        if self.settings.os != "Linux":
-            self.options.with_gstreamer = False
+        # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.gui:
@@ -992,12 +991,12 @@ Examples = bin/datadir/examples""")
             if self.options.qtdeclarative and self.options.gui:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
+            if self.options.with_gstreamer:
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
+                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
+                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
-                if self.options.with_gstreamer:
-                    _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
-                    _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
-                    _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
-                    _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
                 _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
                 _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
