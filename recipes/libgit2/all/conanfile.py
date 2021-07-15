@@ -95,15 +95,15 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
         if self._need_mbedtls:
-            self.requires("mbedtls/2.24.0")
+            self.requires("mbedtls/2.25.0")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
         if self.options.with_regex == "pcre":
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.36")
+            self.requires("pcre2/10.37")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
