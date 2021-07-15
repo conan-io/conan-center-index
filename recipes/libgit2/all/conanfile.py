@@ -24,7 +24,7 @@ class LibGit2Conan(ConanFile):
         "with_https": [False, "openssl", "mbedtls", "winhttp", "security"],
         "with_sha1": ["collisiondetection", "commoncrypto", "openssl", "mbedtls", "generic", "win32"],
         "with_ntlmclient": [True, False],
-        "with_regex": ["auto", "builtin", "pcre", "pcre2", "regcomp_l", "regcomp"],
+        "with_regex": ["builtin", "pcre", "pcre2", "regcomp_l", "regcomp"],
     }
     default_options = {
         "shared": False,
@@ -35,7 +35,7 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
         "with_ntlmclient": True,
-        "with_regex": "auto",
+        "with_regex": "builtin",
     }
 
     @property
@@ -51,6 +51,9 @@ class LibGit2Conan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.with_ntlmclient
+
+        if self.settings.os == "Macos":
+            self.options.with_regex = "regcomp_l"
 
     def configure(self):
         if self.options.shared:
@@ -94,19 +97,12 @@ class LibGit2Conan(ConanFile):
             if self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("win32 is only valid on Windows")
 
-        self.options.with_regex = self._with_regex
         if self.options.with_regex == "regcomp" or self.options.with_regex == "regcomp_l":
             if self.settings.compiler == "Visual Studio":
                 raise ConanInvalidConfiguration("{} isn't supported by Visual Studio".format(self.options.with_regex))
 
-    @property
-    def _with_regex(self):
-        if self.options.with_regex == "auto":
-            if self.settings.os == "Macos":
-                return "regcomp_l"
-            else:
-                return "builtin"
-        return self.options.with_regex
+        if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.options.with_regex == "regcomp_l":
+            raise ConanInvalidConfiguration("regcomp_l isn't supported on {}".format(self.settings.os))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
