@@ -103,12 +103,13 @@ class LibdisasmConan(ConanFile):
                 autotools.install(args=["-C", "x86dis"])
 
         os.unlink(os.path.join(self.package_folder, "lib", "libdisasm.la"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            dlllib = os.path.join(self.package_folder, "lib", "disasm.dll.lib")
+            if os.path.exists(dlllib):
+                tools.rename(dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
 
     def package_info(self):
-        libname = "disasm"
-        if self.settings.os == "Windows" and self.options.shared:
-            libname += ".dll.lib" if self.settings.compiler == "Visual Studio" else ".dll.a"
-        self.cpp_info.libs = [libname]
+        self.cpp_info.libs = ["disasm"]
 
         if self.settings.os != "Windows":
             bin_path = os.path.join(self.package_folder, "bin")
