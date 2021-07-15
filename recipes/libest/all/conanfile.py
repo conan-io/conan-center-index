@@ -54,7 +54,7 @@ class LibEstConan(ConanFile):
             # TODO:
             # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
             # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
-            args = []
+            args = ["--with-ssl-dir={}".format(self.deps_cpp_info["openssl"].rootpath)]
             if self.options.shared:
                  args.extend(["--enable-shared", "--disable-static"])
             else:
