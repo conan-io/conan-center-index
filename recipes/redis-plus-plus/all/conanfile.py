@@ -65,6 +65,8 @@ class RedisPlusPlusConan(ConanFile):
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_TEST"] = False
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
+            if tools.valid_min_cppstd(self, 17):
+                self._cmake.definitions["REDIS_PLUS_PLUS_CXX_STANDARD"] = "17"
             if tools.Version(self.version) >= "1.2.3":
                 self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
             self._cmake.configure(build_folder=self._build_subfolder)
