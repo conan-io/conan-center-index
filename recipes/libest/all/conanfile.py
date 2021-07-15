@@ -38,7 +38,7 @@ class LibEstConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1k")
 
     def validate(self):
         if self.settings.os == "Windows":
