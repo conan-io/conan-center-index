@@ -69,6 +69,7 @@ class GslConan(ConanFile):
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--enable-static" if not self.options.shared else "--disable-static",
         ]
+        self._autotools.flags.append("-lm")
         self._autotools.configure(args=args,configure_dir=self._source_subfolder)
         return self._autotools
 
