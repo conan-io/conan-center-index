@@ -90,5 +90,5 @@ class LibEstConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["est"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
