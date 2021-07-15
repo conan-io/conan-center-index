@@ -185,6 +185,7 @@ class LibGit2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libgit2"
         self.cpp_info.libs = ["git2"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
