@@ -1,6 +1,7 @@
-import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -44,6 +45,9 @@ class LibEstConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Platform is currently not supported by this recipe")
 
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -62,9 +66,17 @@ class LibEstConan(ConanFile):
             self._autotools.configure(args=args)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config", "config.guess"))
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
