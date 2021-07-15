@@ -58,3 +58,11 @@ class TroldalZippyConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        # To match the target created here
+        # https://github.com/troldal/Zippy/blob/a838de8522f9051df0d1b202473bb6befe648702/library/CMakeLists.txt#L10
+        self.cpp_info.filenames["cmake_find_package"] = "Zippy"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Zippy"
+        self.cpp_info.names["cmake_find_package"] = "Zippy"
+        self.cpp_info.names["cmake_find_package_multi"] = "Zippy"
