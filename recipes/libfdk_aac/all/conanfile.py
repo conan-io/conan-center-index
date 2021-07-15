@@ -25,6 +25,7 @@ class FDKAACConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
+            self.build_requires("libtool/2.4.6")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
@@ -57,8 +58,8 @@ class FDKAACConan(ConanFile):
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
-            env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
-            self.run('autoreconf -fiv', win_bash=win_bash)
+            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             if self.settings.os == "Android" and tools.os_info.is_windows:
                 # remove escape for quotation marks, to make ndk on windows happy
                 tools.replace_in_file('configure',
