@@ -43,7 +43,7 @@ class LibGit2Conan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
         if not tools.is_apple_os(self.settings.os):
