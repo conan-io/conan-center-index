@@ -80,7 +80,7 @@ class LibevConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ev"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
