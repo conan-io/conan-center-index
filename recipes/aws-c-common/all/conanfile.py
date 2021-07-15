@@ -63,6 +63,8 @@ class AwsCCommon(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-c-common"))
 
     def package_info(self):
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl"]
         self.cpp_info.filenames["cmake_find_package"] = "aws-c-common"
         self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-common"
         self.cpp_info.names["cmake_find_package"] = "AWS"
