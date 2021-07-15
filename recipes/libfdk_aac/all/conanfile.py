@@ -13,7 +13,10 @@ class FDKAACConan(ConanFile):
     topics = ("conan", "libfdk_aac", "multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
-    _source_subfolder = 'sources'
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _use_winbash(self):
@@ -75,7 +78,7 @@ class FDKAACConan(ConanFile):
             self._build_configure()
 
     def package(self):
-        self.copy(pattern="NOTICE", src='sources', dst="licenses")
+        self.copy(pattern="NOTICE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == 'Visual Studio':
             if self.options.shared:
                 exts = ['fdk-aac.lib']
