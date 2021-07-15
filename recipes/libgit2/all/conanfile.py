@@ -2,6 +2,8 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibGit2Conan(ConanFile):
     name = "libgit2"
@@ -106,9 +108,8 @@ class LibGit2Conan(ConanFile):
             self.requires("pcre2/10.37")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     _cmake_https = {
         "openssl": "OpenSSL",
