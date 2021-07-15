@@ -45,6 +45,13 @@ class WinPcapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_os(self):
+        if hasattr(self, "settings_build"):
+            return self.settings_build.os
+        else:
+            return self.settings.os
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -73,7 +80,7 @@ class WinPcapConan(ConanFile):
             raise ConanInvalidConfiguration("missing turbocap cci recipe")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._build_os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.1")
