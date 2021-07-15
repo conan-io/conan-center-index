@@ -1,5 +1,7 @@
 #include <est/est.h>
+
 #include <stdio.h>
+#include <string.h>
 
 unsigned char *BIO_copy_data(BIO *out, int *data_lenp) {
     unsigned char *data, *tdata;

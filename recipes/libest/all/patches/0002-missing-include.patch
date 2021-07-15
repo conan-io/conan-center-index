@@ -1,0 +1,30 @@
+--- a/src/est/est.h
++++ b/src/est/est.h
+@@ -25,6 +25,7 @@
+ #include <openssl/engine.h>
+ #include <openssl/conf.h>
+ #include <openssl/srp.h>
++#include <openssl/err.h>
+ 
+ #ifdef  __cplusplus
+ extern "C" {
+--- a/src/est/est_client_http.c
++++ b/src/est/est_client_http.c
+@@ -39,6 +39,7 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <ctype.h>
++#include <errno.h>
+ #ifdef WIN32
+ #include <Ws2tcpip.h>
+ #else
+--- a/src/est/est_server_http.c
++++ b/src/est/est_server_http.c
+@@ -43,6 +43,7 @@
+ #include <WS2tcpip.h>
+ #endif 
+ #include <openssl/err.h>
++#include <openssl/rand.h>
+ #include <openssl/ssl.h>
+ #include <openssl/x509v3.h>
+ #if defined(_WIN32)

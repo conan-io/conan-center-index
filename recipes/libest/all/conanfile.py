@@ -32,9 +32,6 @@ class LibEstConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration(
-                "Platform is currently not supported by this recipe")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -42,6 +39,10 @@ class LibEstConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1g")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Platform is currently not supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
