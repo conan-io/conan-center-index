@@ -28,11 +28,6 @@ class LibdisasmConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20190524")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,6 +37,11 @@ class LibdisasmConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
