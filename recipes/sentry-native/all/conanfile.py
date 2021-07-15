@@ -16,7 +16,7 @@ class SentryNativeConan(ConanFile):
     topics = ("conan", "breakpad", "crashpad",
               "error-reporting", "crash-reporting")
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,6 +25,7 @@ class SentryNativeConan(ConanFile):
         "transport": ["none", "curl", "winhttp"],
         "qt": [True, False],
         "with_crashpad": ["google", "sentry"],
+        "with_breakpad": ["google", "sentry"],
     }
     default_options = {
         "shared": False,
@@ -33,6 +34,8 @@ class SentryNativeConan(ConanFile):
         "transport": "curl",  # overwritten in config_options
         "qt": False,
         "with_crashpad": "sentry",
+        "with_breakpad": "sentry",
+
     }
 
     _cmake = None
@@ -40,6 +43,15 @@ class SentryNativeConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,8 +70,9 @@ class SentryNativeConan(ConanFile):
             # FIXME: for self.version < 0.4: default backend is "breakpad" when building with MSVC for Windows xp; else: backend=none
             self.options.backend = "crashpad"
         elif self.settings.os in ("FreeBSD", "Linux"):
-            # FIXME: default backend on Linux is "breakpad"
-            self.options.backend = "inproc"  # Should be "breakpad"
+            self.options.backend = "breakpad"
+        elif self.settings.os == "Android":
+            self.options.backend = "inproc"
         else:
             self.options.backend = "inproc"
 
@@ -67,15 +80,29 @@ class SentryNativeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            tools.check_min_cppstd(self, 14)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("Compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
+                .format(str(self.settings.compiler), minimum_version))
+
         if self.options.backend == "inproc" and self.settings.os == "Windows" and tools.Version(self.version) < "0.4":
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
         if self.options.backend != "crashpad":
             del self.options.with_crashpad
+        if self.options.backend != "breakpad":
+            del self.options.with_breakpad
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
         if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
+
+    def build_requirements(self):
+        if self.options.backend == "breakpad":
+            self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         if self.options.transport == "curl":
@@ -86,7 +113,10 @@ class SentryNativeConan(ConanFile):
             if self.options.with_crashpad == "google":
                 self.requires("crashpad/cci.20210507")
         elif self.options.backend == "breakpad":
-            raise ConanInvalidConfiguration("breakpad not available yet in CCI")
+            if self.options.with_breakpad == "sentry":
+                self.requires("sentry-breakpad/{}".format(self.version))
+            if self.options.with_breakpad == "google":
+                self.requires("breakpad/cci.20210521")
         if self.options.qt:
             self.requires("qt/5.15.2")
             self.requires("openssl/1.1.1k")
@@ -102,6 +132,7 @@ class SentryNativeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend
         self._cmake.definitions["SENTRY_CRASHPAD_SYSTEM"] = True
+        self._cmake.definitions["SENTRY_BREAKPAD_SYSTEM"] = True
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
         self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
