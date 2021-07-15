@@ -30,7 +30,7 @@ class YamlCppConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -72,10 +72,10 @@ class YamlCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # drop pc and cmake files
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'CMake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"yaml-cpp": "yaml-cpp::yaml-cpp"}
@@ -105,9 +105,9 @@ class YamlCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.append('m')
-        if self.settings.compiler == 'Visual Studio':
-            self.cpp_info.defines.append('_NOEXCEPT=noexcept')
+            self.cpp_info.system_libs.append("m")
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines.append("_NOEXCEPT=noexcept")
         self.cpp_info.names["cmake_find_package"] = "yaml-cpp"
         self.cpp_info.names["cmake_find_package_multi"] = "yaml-cpp"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
