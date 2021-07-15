@@ -10,7 +10,7 @@ class RtMidiConan(ConanFile):
     homepage = "http://www.music.mcgill.ca/~gary/rtmidi/"
     description = "Realtime MIDI input/output"
     topics = ("midi")
-    license = "Copyright (c) 2003-2019 Gary P. Scavone"
+    license = "MIT+send-patches-upstream"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "pkg_config"
     exports_sources = "CMakeLists.txt", "patches/*"
