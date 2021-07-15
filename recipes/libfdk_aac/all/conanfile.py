@@ -1,6 +1,6 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from contextlib import contextmanager
 import os
-import fnmatch
 
 required_conan_version = ">=1.33.0"
 
@@ -40,18 +40,37 @@ class FDKAACConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _build_vs(self):
+    @contextmanager
+    def _msvc_build_environment(self):
         with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings, force=True):
-                with tools.remove_from_path("mkdir"):
-                    tools.replace_in_file("Makefile.vc",
-                                          "CFLAGS   = /nologo /W3 /Ox /MT",
-                                          "CFLAGS   = /nologo /W3 /Ox /%s" % str(self.settings.compiler.runtime))
-                    tools.replace_in_file("Makefile.vc",
-                                          "MKDIR_FLAGS = -p",
-                                          "MKDIR_FLAGS =")
-                    self.run("nmake -f Makefile.vc")
-                    self.run("nmake -f Makefile.vc prefix=\"%s\" install" % os.path.abspath(self.package_folder))
+            with tools.vcvars(self.settings):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    yield
+
+    def _build_vs(self):
+        with self._msvc_build_environment():
+            # Rely on flags injected by conan
+            tools.replace_in_file("Makefile.vc",
+                                  "CFLAGS   = /nologo /W3 /Ox /MT",
+                                  "CFLAGS   = /nologo")
+            tools.replace_in_file("Makefile.vc",
+                                  "MKDIR_FLAGS = -p",
+                                  "MKDIR_FLAGS =")
+            # Build either shared or static, and don't build utility (it always depends on static lib)
+            tools.replace_in_file("Makefile.vc", "copy $(PROGS) $(bindir)", "")
+            tools.replace_in_file("Makefile.vc", "copy $(LIB_DEF) $(libdir)", "")
+            if self.options.shared:
+                tools.replace_in_file("Makefile.vc",
+                                      "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
+                                      "all: $(LIB_DEF) $(SHARED_LIB) $(IMP_LIB)")
+                tools.replace_in_file("Makefile.vc", "copy $(STATIC_LIB) $(libdir)", "")
+            else:
+                tools.replace_in_file("Makefile.vc",
+                                      "all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)",
+                                      "all: $(STATIC_LIB)")
+                tools.replace_in_file("Makefile.vc", "copy $(IMP_LIB) $(libdir)", "")
+                tools.replace_in_file("Makefile.vc", "copy $(SHARED_LIB) $(bindir)", "")
+            self.run("nmake -f Makefile.vc")
 
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
@@ -84,14 +103,11 @@ class FDKAACConan(ConanFile):
     def package(self):
         self.copy(pattern="NOTICE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
+            with self._msvc_build_environment():
+                self.run("nmake -f Makefile.vc prefix=\"{}\" install".format(self.package_folder))
             if self.options.shared:
-                exts = ["fdk-aac.lib"]
-            else:
-                exts = ["fdk-aac.dll.lib", "fdk-aac-1.dll"]
-            for root, _, filenames in os.walk(self.package_folder):
-                for ext in exts:
-                    for filename in fnmatch.filter(filenames, ext):
-                        os.unlink(os.path.join(root, filename))
+                tools.rename(os.path.join(self.package_folder, "lib", "fdk-aac.dll.lib"),
+                             os.path.join(self.package_folder, "lib", "fdk-aac.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -99,10 +115,7 @@ class FDKAACConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.libs = ["fdk-aac.dll.lib"]
-        else:
-            self.cpp_info.libs = ["fdk-aac"]
+        self.cpp_info.libs = ["fdk-aac"]
         if self.settings.os == "Linux" or self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
         self.cpp_info.names["pkg_config"] = "fdk-aac"
