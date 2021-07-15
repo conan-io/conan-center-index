@@ -82,12 +82,12 @@ class LibgdConan(ConanFile):
         cmake.install()
         self.copy("COPYING", src=self._source_subfolder, dst="licenses",
                   ignore_case=True, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"]= "gdlib"
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == 'Windows' and not self.options.shared:
-            self.cpp_info.defines.append('BGD_NONDLL')
-            self.cpp_info.defines.append('BGDWIN32')
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("BGD_NONDLL")
+            self.cpp_info.defines.append("BGDWIN32")
