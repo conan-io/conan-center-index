@@ -107,8 +107,8 @@ class LibMP3LameConan(ConanFile):
             if self.options.shared:
                 self.copy(pattern="*.dll", src=os.path.join(self._source_subfolder, "output"), dst="bin")
             name = "libmp3lame.lib" if self.options.shared else "libmp3lame-static.lib"
-            shutil.move(os.path.join(self.package_folder, "lib", name),
-                        os.path.join(self.package_folder, "lib", "mp3lame.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", name),
+                         os.path.join(self.package_folder, "lib", "mp3lame.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
