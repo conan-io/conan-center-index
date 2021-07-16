@@ -62,7 +62,7 @@ class OpusFileConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], srip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _build_vs(self):
         includedir = os.path.abspath(os.path.join(self._source_subfolder, "include"))
