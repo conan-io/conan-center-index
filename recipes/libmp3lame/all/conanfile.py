@@ -35,6 +35,8 @@ class LibMP3LameConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if not self._is_msvc:
