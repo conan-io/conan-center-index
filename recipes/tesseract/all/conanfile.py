@@ -71,7 +71,7 @@ class TesseractConan(ConanFile):
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def requirements(self):
-        self.requires("leptonica/1.80.0")
+        self.requires("leptonica/1.81.0")
         self.requires("libarchive/3.5.1")
 
     def source(self):
