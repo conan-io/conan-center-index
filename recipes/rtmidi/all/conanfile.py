@@ -23,11 +23,15 @@ class RtMidiConan(ConanFile):
         "fPIC": True,
         }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _cmake = None
+    @property
+    def _with_alsa(self):
+        return self.settings.os == "Linux"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -38,11 +42,12 @@ class RtMidiConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.settings.os == "Linux":
+        if self._with_alsa:
             self.requires("libalsa/1.2.4")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+        if self._with_alsa:
+            self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
