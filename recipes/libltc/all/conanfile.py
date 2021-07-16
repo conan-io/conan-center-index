@@ -99,5 +99,5 @@ class LibltcConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "ltc"
         self.cpp_info.libs = ["ltc"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
