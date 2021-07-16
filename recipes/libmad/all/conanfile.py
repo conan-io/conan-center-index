@@ -44,6 +44,8 @@ class LibmadConan(ConanFile):
     def build_requirements(self):
         if not self._is_msvc:
             self.build_requires("gnu-config/cci.20201022")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -88,7 +90,7 @@ class LibmadConan(ConanFile):
             args = ["--disable-static", "--enable-shared"]
         else:
             args = ["--disable-shared", "--enable-static"]
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
