@@ -1,5 +1,5 @@
---- a/trunk/lame/configure.in
-+++ b/trunk/lame/configure.in
+--- a/configure.in
++++ b/configure.in
 @@ -421,6 +421,7 @@
  AC_CHECK_LIB(termcap, initscr, HAVE_TERMCAP="termcap")
  AC_CHECK_LIB(curses, initscr, HAVE_TERMCAP="curses")
@@ -8,8 +8,8 @@
  
  AM_ICONV
 
---- a/trunk/lame/frontend/parse.c
-+++ b/trunk/lame/frontend/parse.c
+--- a/frontend/parse.c
++++ b/frontend/parse.c
 @@ -70,7 +70,7 @@
  #ifdef HAVE_ICONV
  #include <iconv.h>

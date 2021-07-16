@@ -12,10 +12,12 @@ class LibMP3LameConan(ConanFile):
     homepage = "http://lame.sourceforge.net"
     topics = ("conan", "libmp3lame", "multimedia", "audio", "mp3", "decoder", "encoding", "decoding")
     license = "LGPL-2.0"
-    exports_sources = ["6410.patch", "6416.patch", "android.patch"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    exports_sources = ["patches/**"]
     _autotools = None
 
     @property
@@ -45,10 +47,9 @@ class LibMP3LameConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _apply_patch(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libmp3lame.sym"), "lame_init_old\n", "")
-        for patch in [6410, 6416]:
-            tools.patch(base_path=self._source_subfolder, patch_file="%s.patch" % patch, strip=3)
-        tools.patch(base_path=self._source_subfolder, patch_file="android.patch")
 
     def _build_vs(self):
         with tools.chdir(self._source_subfolder):
