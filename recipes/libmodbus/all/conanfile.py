@@ -107,13 +107,12 @@ class LibmodbusConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libmodbus.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "modbus.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "modbus.lib"))
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "modbus"))
-        lib = "modbus"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll" + (".lib" if self.settings.compiler == "Visual Studio" else ".a")
-        self.cpp_info.libs = [lib]
-        if not self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["wsock32"]
+        self.cpp_info.libs = ["modbus"]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.system_libs = ["wsock32"]
