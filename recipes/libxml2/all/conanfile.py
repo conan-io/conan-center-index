@@ -98,6 +98,8 @@ class Libxml2Conan(ConanFile):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
+        # can't use strip_root here because if fails since 2.9.10 with:
+        # KeyError: "linkname 'libxml2-2.9.1x/test/relaxng/ambig_name-class.xml' not found"
         tools.get(**self.conan_data["sources"][self.version])
         tools.rename("libxml2-{}".format(self.version), self._source_subfolder)
 
