@@ -37,13 +37,15 @@ class LibIdn(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("libiconv/1.16")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
