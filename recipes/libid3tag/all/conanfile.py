@@ -35,11 +35,13 @@ class LibId3TagConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self._is_msvc and self.options.shared:
-            raise ConanInvalidConfiguration("libid3tag does not support shared library for MSVC")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("libid3tag does not support shared library for MSVC")
 
     def build_requirements(self):
         if not self._is_msvc:
