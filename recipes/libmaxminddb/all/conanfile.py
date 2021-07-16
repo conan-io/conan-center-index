@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class libmaxminddbConan(ConanFile):
@@ -36,8 +38,8 @@ class libmaxminddbConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libmaxminddb-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
