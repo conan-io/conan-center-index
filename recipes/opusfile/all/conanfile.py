@@ -64,6 +64,7 @@ class OpusFileConan(ConanFile):
                 self.build_requires("msys2/cci.latest")
         if self.settings.os in ["Linux", "Macos", "FreeBSD"]:
             self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
