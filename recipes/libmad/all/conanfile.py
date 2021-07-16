@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class LibmadConan(ConanFile):
@@ -13,8 +14,14 @@ class LibmadConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _is_msvc(self):
+        return self.settings.compiler == "Visual Studio"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -25,23 +32,19 @@ class LibmadConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
- 
+
     def validate(self):
         if self.options.shared and self._is_msvc:
             raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
-        if (self.settings.os == "Macos" and self.settings.arch == "armv8"
-                and hasattr(self, 'settings_build') 
-                and tools.cross_building(self, skip_x64_x86=True)):
-            raise ConanInvalidConfiguration("Cross-building for Macos to armv8 not implemented")
-            
+
+    def build_requirements(self):
+        if not self._is_msvc:
+            self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
 
     def build(self):
         if self._is_msvc:
@@ -62,7 +65,15 @@ class LibmadConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build(project_file="libmad.vcxproj")
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def _build_configure(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with tools.chdir(self._source_subfolder):
             if self.options.shared:
                 args = ["--disable-static", "--enable-shared"]
