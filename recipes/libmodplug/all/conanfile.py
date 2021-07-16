@@ -17,7 +17,7 @@ class LibmodplugConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -49,6 +49,8 @@ class LibmodplugConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -56,13 +58,11 @@ class LibmodplugConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libmodplug"
         self.cpp_info.libs = ["modplug"]
-        self.cpp_info.bindirs = ["lib"]
         self.cpp_info.includedirs.append(os.path.join("include", "libmodplug"))
         if not self.options.shared:
             self.cpp_info.defines.append("MODPLUG_STATIC")
