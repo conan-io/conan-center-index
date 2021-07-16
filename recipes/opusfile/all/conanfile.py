@@ -2,6 +2,7 @@ from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class OpusFileConan(ConanFile):
     name = "opusfile"
@@ -41,6 +42,8 @@ class OpusFileConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+    
+    def validate(self):
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Opusfile doesn't support building as shared with Visual Studio")
 
@@ -56,7 +59,7 @@ class OpusFileConan(ConanFile):
             # Looks like this does not work with a MSVC-built m4.
             # self.build_requires("libtool/2.4.6")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], srip_root=True, destination=self._source_subfolder)
