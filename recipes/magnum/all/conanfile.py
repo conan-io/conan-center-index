@@ -148,13 +148,21 @@ class MagnumConan(ConanFile):
         # Math 
         # Platform
         if self.options.sdl2_application:
+            self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
+            self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
+            self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application"]
+            self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
+            if self.options.with_gl:
+                self.cpp_info.components["sdl2_application"].requires += ["gl"]
+
+            # If there is only one application, here it is an alias
             self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
             self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
-            self.cpp_info.components["application"].libs = ["MagnumSdl2Application"]
-            self.cpp_info.components["application"].requires = ["magnum_main", "sdl::sdl"]
+            self.cpp_info.components["application"].requires = ["sdl2_application"]
+
 
         # Audio
-        # TODO: Here there is a target
+        # TODO: Here there is a target (false by default)
         
         # DebugTools
         if self.options.with_debugtools:
@@ -211,7 +219,7 @@ class MagnumConan(ConanFile):
         if self.options.with_texturetools:
             self.cpp_info.components["texturetools"].names["cmake_find_package"] = "TextureTools"
             self.cpp_info.components["texturetools"].names["cmake_find_package_multi"] = "TextureTools"
-            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTool"]
+            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTools"]
             self.cpp_info.components["texturetools"].requires = ["magnum_main"]
             if self.options.with_gl:
                 self.cpp_info.components["texturetools"].requires += ["gl"]
