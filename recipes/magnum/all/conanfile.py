@@ -74,7 +74,8 @@ class MagnumConan(ConanFile):
     
     def requirements(self):
         self.requires("corrade/{}".format(self.version))
-        #self.requires("opengl/system")
+        if self.options.with_gl:
+            self.requires("opengl/system")
         if self.options.sdl2_application:
             self.requires("sdl/2.0.14")
 
