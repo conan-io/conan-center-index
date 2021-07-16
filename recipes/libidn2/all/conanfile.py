@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibIdn(ConanFile):
     name = "libidn2"
@@ -50,8 +52,8 @@ class LibIdn(ConanFile):
             self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libidn2-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
