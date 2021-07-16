@@ -121,7 +121,7 @@ class LibIdn(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["idn"]
         self.cpp_info.names["pkg_config"] = "libidn"
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
                 self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Windows":
