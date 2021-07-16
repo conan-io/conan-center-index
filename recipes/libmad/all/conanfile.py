@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class LibmadConan(ConanFile):
     name = "libmad"
-    description = "MAD is a high-quality MPEG audio decoder.format."
+    description = "MAD is a high-quality MPEG audio decoder."
     topics = ("conan", "mad", "MPEG", "audio", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.underbit.com/products/mad/"
