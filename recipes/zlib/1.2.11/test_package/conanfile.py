@@ -26,6 +26,6 @@ class TestZlibConan(ConanFile):
         assert os.path.exists(os.path.join(self.generators_folder, "zlib.pc"))
         if "x86" in self.settings.arch and not tools.cross_building(self.settings):
             # FIXME: Very ugly interface to get the current test executable path
-            cmd = os.path.join(self.build_folder, self.cpp.build.libdirs[0], "test")
+            cmd = os.path.join(self.build_folder, self.cpp.build.bindirs[0], "test")
             self.output.info("Running {}".format(cmd))
             self.run(cmd, env="conanrunenv")
