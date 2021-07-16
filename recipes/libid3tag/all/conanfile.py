@@ -24,10 +24,6 @@ class LibId3TagConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
