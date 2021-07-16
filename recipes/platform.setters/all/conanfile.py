@@ -14,7 +14,7 @@ class PlatformSettersConan(ConanFile):
     description = """LinksPlatform's Platform.Setters is a library that contains set of C++ class 
     templates. Each setter provides a set of callback methods to set the result value. Use Platform.Setters.h file 
     to include the library."""
-    topics = ("platform", "linksplatform", "concepts", "header-only", "setters")
+    topics = ("linksplatform", "platform", "setters", "concepts", "header-only")
     settings = "compiler"
     no_copy_source = True
 
