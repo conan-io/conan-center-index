@@ -98,7 +98,7 @@ class OpusFileConan(ConanFile):
             self._build_vs()
         else:
             with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
             autotools = self._configure_autotools()
             autotools.make()
 
