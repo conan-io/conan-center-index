@@ -49,7 +49,7 @@ openh264/1.7.0
 openssl/1.1.1d
 protobuf/3.9.1
 protoc/3.9.1.dssl1
-signalr-qt/0.1
+signalr-qt/0.1.dssl1
 qt/5.14.1.dssl1
 qtwebkit/5.212.0-alpha4.dssl1
 sqlite3/3.31.0
@@ -105,10 +105,14 @@ libxml2:shared=True
 libxslt:shared=True
 
 qt:openssl=True
+qt:qtdeclarative=True
 qt:qtimageformats=True
 qt:qtmultimedia=True
+qt:qtwebsockets=True
 qt:qtscript=True
 qt:qtsvg=True
+qt:qtquickcontrols=True
+qt:qtquickcontrols2=True
 qt:qttools=True
 qt:qtx11extras=True
 

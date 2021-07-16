@@ -11,6 +11,10 @@ class SignalrQtConan(ConanFile):
     license = "signalr-qt"
     description = "C++ implementation of Microsofts ASP.Net SignalR"
     settings = "os", "compiler", "build_type", "arch"
+    version = "0.1.dssl1"
+    exports_sources = [
+        "patches/*.patch"
+    ]
     options = {
         "shared": [True, False]
     }
@@ -26,15 +30,19 @@ class SignalrQtConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        url = self.conan_data["sources"][self.version]["url"]
-        signalr_hash = self.conan_data["sources"][self.version]["signalr_hash"]
-        qthttpserver_hash = self.conan_data["sources"][self.version]["qthttpserver_hash"]
-        qtwebsockets_hash = self.conan_data["sources"][self.version]["qtwebsockets_hash"]
+        original_version = ".".join(self.version.split(".")[:2])
+        url = self.conan_data["sources"][original_version]["url"]
+        signalr_hash = self.conan_data["sources"][original_version]["signalr_hash"]
+        qthttpserver_hash = self.conan_data["sources"][original_version]["qthttpserver_hash"]
+        qtwebsockets_hash = self.conan_data["sources"][original_version]["qtwebsockets_hash"]
 
         self.run("git clone --recursive %s %s" % (url, self._source_subfolder))
         self.run("cd %s && git checkout %s" % (self._source_subfolder, signalr_hash))
-        self.run("cd %s/ThirdParty/QtWebSockets && git checkout %s" % (self._source_subfolder, qtwebsockets_hash))
+        # self.run("cd %s/ThirdParty/QtWebSockets && git checkout %s" % (self._source_subfolder, qtwebsockets_hash))
         self.run("cd %s/ThirdParty/QHttpServer && git checkout %s" % (self._source_subfolder, qthttpserver_hash))
+
+        if tools.os_info.is_windows:
+            tools.patch(base_path=self._source_subfolder, patch_file="patches/fix_win.patch", strip=1)
 
     def requirements(self):
         self.requires.add("qt/5.14.1")
@@ -56,38 +64,41 @@ class SignalrQtConan(ConanFile):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 args = [os.path.join(self.build_folder, self._source_subfolder)]
 
-                def _getenvpath(var):
-                    val = os.getenv(var)
-                    if val and tools.os_info.is_windows:
-                        val = val.replace("\\", "/")
-                        os.environ[var] = val
-                    return val
+                if tools.os_info.is_windows:
+                    def _getenvpath(var):
+                        val = os.getenv(var)
+                        if val and tools.os_info.is_windows:
+                            val = val.replace("\\", "/")
+                            os.environ[var] = val
+                        return val
 
-                value = _getenvpath('CC')
-                if value:
-                    args += ['QMAKE_CC=' + value,
-                             'QMAKE_LINK_C=' + value,
-                             'QMAKE_LINK_C_SHLIB=' + value]
+                    value = _getenvpath('CC')
+                    if value:
+                        args += ['QMAKE_CC=' + value,
+                                 'QMAKE_LINK_C=' + value,
+                                 'QMAKE_LINK_C_SHLIB=' + value]
 
-                value = _getenvpath('CXX')
-                if value:
-                    args += ['QMAKE_CXX=' + value,
-                             'QMAKE_LINK=' + value,
-                             'QMAKE_LINK_SHLIB=' + value]
+                    value = _getenvpath('CXX')
+                    if value:
+                        args += ['QMAKE_CXX=' + value,
+                                 'QMAKE_LINK=' + value,
+                                 'QMAKE_LINK_SHLIB=' + value]
 
                 self.run("%s %s" % (qmake, " ".join(args)), run_environment=True)
 
     def _build_with_make(self):
         with tools.chdir(self.source_folder):
             self.output.info("Building with make")
-            if tools.os_info.is_windows:
-                if self.settings.compiler == "Visual Studio":
-                    make = "jom"
-                else:
-                    make = "mingw32-make"
-            else:
-                make = "make"
-            self.run(make, run_environment=True)
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                with tools.environment_append({"PATH": self.deps_cpp_info.bin_paths}) if tools.os_info.is_windows else tools.no_op():
+                    if tools.os_info.is_windows:
+                        if self.settings.compiler == "Visual Studio":
+                            make = "jom"
+                        else:
+                            make = "mingw32-make"
+                    else:
+                        make = "make"
+                    self.run(make, run_environment=True)
 
     def build(self):
         self._build_with_qmake()
