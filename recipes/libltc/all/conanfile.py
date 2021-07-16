@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibltcConan(ConanFile):
     name = "libltc"
@@ -38,9 +40,9 @@ class LibltcConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -72,7 +74,8 @@ class LibltcConan(ConanFile):
             args.extend(["--disable-shared", "--enable-static"])
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
-            self._autotools.flags.append("-FS")
+            if tools.Version(self.settings.compiler.version) >= "12":
+                self._autotools.flags.append("-FS")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -96,5 +99,5 @@ class LibltcConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "ltc"
         self.cpp_info.libs = ["ltc"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
