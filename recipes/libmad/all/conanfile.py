@@ -17,6 +17,8 @@ class LibmadConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -51,7 +53,7 @@ class LibmadConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            self._build_configure()
+            self._build_autotools()
 
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
@@ -70,23 +72,25 @@ class LibmadConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", None) or self.deps_user_info
 
-    def _build_configure(self):
+    def _build_autotools(self):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
-        with tools.chdir(self._source_subfolder):
-            if self.options.shared:
-                args = ["--disable-static", "--enable-shared"]
-            else:
-                args = ["--disable-shared", "--enable-static"]
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.install()
-            la = os.path.join(self.package_folder, "lib", "libmad.la")
-            if os.path.isfile(la):
-                os.unlink(la)
+        autotools = self._configure_autotools()
+        autotools.make()
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        args = []
+        if self.options.shared:
+            args = ["--disable-static", "--enable-shared"]
+        else:
+            args = ["--disable-shared", "--enable-static"]
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
@@ -95,6 +99,10 @@ class LibmadConan(ConanFile):
         if self._is_msvc:
             self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
             self.copy(pattern="mad.h", dst="include", src=os.path.join(self._source_subfolder, "msvc++"))
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["libmad" if self._is_msvc else "mad"]
