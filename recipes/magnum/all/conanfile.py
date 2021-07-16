@@ -18,10 +18,12 @@ class MagnumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "sdl2_application": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "sdl2_application": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -48,7 +50,9 @@ class MagnumConan(ConanFile):
     
     def requirements(self):
         self.requires("corrade/{}".format(self.version))
-        self.requires("opengl/system")
+        #self.requires("opengl/system")
+        if self.options.sdl2_application:
+            self.requires("sdl/2.0.14")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -67,6 +71,8 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
+
+        self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.sdl2_application
 
         self._cmake.configure()
         return self._cmake
@@ -94,4 +100,17 @@ class MagnumConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Magnum"
         self.cpp_info.names["cmake_find_package_multi"] = "Magnum"
-        self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.components["_core"].libs = ["Magnum", "MagnumDebugTools", "MagnumGL",
+                                                  "MagnumMeshTools", "MagnumPrimitives", 
+                                                  "MagnumSceneGraph", "MagnumShaders",
+                                                  "MagnumText", "MagnumTextureTool",
+                                                  "MagnumTrade"]
+
+        if self.options.sdl2_application:
+            self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
+            self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
+            self.cpp_info.components["application"].libs = ["MagnumSdl2Application"]
+            self.cpp_info.components["application"].requires = ["_core", "sdl::sdl"]
+
+        #self.cpp_info.libs = tools.collect_libs(self)
