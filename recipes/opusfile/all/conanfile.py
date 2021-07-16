@@ -42,6 +42,8 @@ class OpusFileConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
     
     def validate(self):
         if self._is_msvc and self.options.shared:
