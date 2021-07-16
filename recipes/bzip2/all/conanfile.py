@@ -42,7 +42,11 @@ class Bzip2Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
-        os.rename("CMakeLists.txt", "src/CMakeLists.txt")
+        # FIXME: this is failing after the export export to "src" in local folder
+        try:
+            os.rename("CMakeLists.txt", "src/CMakeLists.txt")
+        except:
+            pass
 
     def layout(self):
         cmake_layout(self)
@@ -98,8 +102,6 @@ class Bzip2Conan(ConanFile):
         return "conan-official-{}-variables.cmake".format(self.name)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "BZip2"
-        self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [os.path.join(self._module_subfolder, self._module_file)]
         self.cpp_info.libs = ["bz2"]
