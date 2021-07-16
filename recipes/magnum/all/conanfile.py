@@ -19,11 +19,35 @@ class MagnumConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "sdl2_application": [True, False],
+
+        "with_audio": [True, False],
+        "with_debugtools": [True, False],
+        "with_meshtools": [True, False],
+        "with_gl": [True, False],
+        "with_primitives": [True, False],
+        "with_scenegraph": [True, False],
+        "with_shaders": [True, False],
+        "with_text": [True, False],
+        "with_texturetools": [True, False],
+        "with_trade": [True, False],
+        "with_vk": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "sdl2_application": True,
+
+        "with_audio": False,
+        "with_debugtools": True,
+        "with_meshtools": True,
+        "with_gl": True,
+        "with_primitives": True,
+        "with_scenegraph": True,
+        "with_shaders": True,
+        "with_text": True,
+        "with_texturetools": True,
+        "with_trade": True,
+        "with_vk": False,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -74,6 +98,18 @@ class MagnumConan(ConanFile):
 
         self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.sdl2_application
 
+        self._cmake.definitions["WITH_AUDIO"] = self.options.with_audio
+        self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.with_debugtools
+        self._cmake.definitions["WITH_MESHTOOLS"] = self.options.with_meshtools
+        self._cmake.definitions["WITH_GL"] = self.options.with_gl
+        self._cmake.definitions["WITH_PRIMITIVES"] = self.options.with_primitives
+        self._cmake.definitions["WITH_SCENEGRAPH"] = self.options.with_scenegraph
+        self._cmake.definitions["WITH_SHADERS"] = self.options.with_shaders
+        self._cmake.definitions["WITH_TEXT"] = self.options.with_text
+        self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.with_texturetools
+        self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
+        self._cmake.definitions["WITH_VK"] = self.options.with_vk
+
         self._cmake.configure()
         return self._cmake
 
@@ -101,16 +137,90 @@ class MagnumConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Magnum"
         self.cpp_info.names["cmake_find_package_multi"] = "Magnum"
 
-        self.cpp_info.components["_core"].libs = ["Magnum", "MagnumDebugTools", "MagnumGL",
-                                                  "MagnumMeshTools", "MagnumPrimitives", 
-                                                  "MagnumSceneGraph", "MagnumShaders",
-                                                  "MagnumText", "MagnumTextureTool",
-                                                  "MagnumTrade"]
+        # Magnum contains just the main library
+        self.cpp_info.components["magnum_main"].names["cmake_find_package"] = "Magnum"
+        self.cpp_info.components["magnum_main"].names["cmake_find_package_multi"] = "Magnum"
+        self.cpp_info.components["magnum_main"].libs = ["Magnum"]
+        self.cpp_info.components["magnum_main"].requires = ["corrade::utility"]
 
+        # Animation
+        # Math 
+        # Platform
         if self.options.sdl2_application:
             self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
             self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
             self.cpp_info.components["application"].libs = ["MagnumSdl2Application"]
-            self.cpp_info.components["application"].requires = ["_core", "sdl::sdl"]
+            self.cpp_info.components["application"].requires = ["magnum_main", "sdl::sdl"]
 
-        #self.cpp_info.libs = tools.collect_libs(self)
+        # Audio
+        # TODO: Here there is a target
+        
+        # DebugTools
+        if self.options.with_debugtools:
+            self.cpp_info.components["debugtools"].names["cmake_find_package"] = "DebugTools"
+            self.cpp_info.components["debugtools"].names["cmake_find_package_multi"] = "DebugTools"
+            self.cpp_info.components["debugtools"].libs = ["MagnumDebugTools"]
+            self.cpp_info.components["debugtools"].requires = ["magnum_main"]
+            if self.options["corrade"].with_testsuite and self.options.with_trade:
+                self.cpp_info.components["debugtools"].requires += ["corrade::test_suite", "trade"]
+
+        # GL
+        if self.options.with_gl:
+            self.cpp_info.components["gl"].names["cmake_find_package"] = "GL"
+            self.cpp_info.components["gl"].names["cmake_find_package_multi"] = "GL"
+            self.cpp_info.components["gl"].libs = ["MagnumGL"]
+            self.cpp_info.components["gl"].requires = ["magnum_main", "opengl::opengl"]
+
+        # MeshTools
+        if self.options.with_meshtools:
+            self.cpp_info.components["meshtools"].names["cmake_find_package"] = "MeshTools"
+            self.cpp_info.components["meshtools"].names["cmake_find_package_multi"] = "MeshTools"
+            self.cpp_info.components["meshtools"].libs = ["MagnumMeshTools"]
+            self.cpp_info.components["meshtools"].requires = ["magnum_main", "trade", "gl"]
+
+        # Primitives
+        if self.options.with_primitives:
+            self.cpp_info.components["primitives"].names["cmake_find_package"] = "Primitives"
+            self.cpp_info.components["primitives"].names["cmake_find_package_multi"] = "Primitives"
+            self.cpp_info.components["primitives"].libs = ["MagnumPrimitives"]
+            self.cpp_info.components["primitives"].requires = ["magnum_main", "meshtools", "trade"]
+
+        # SceneGraph
+        if self.options.with_scenegraph:
+            self.cpp_info.components["scenegraph"].names["cmake_find_package"] = "SceneGraph"
+            self.cpp_info.components["scenegraph"].names["cmake_find_package_multi"] = "SceneGraph"
+            self.cpp_info.components["scenegraph"].libs = ["MagnumSceneGraph"]
+            self.cpp_info.components["scenegraph"].requires = ["magnum_main"]
+
+        # Shaders
+        if self.options.with_scenegraph:
+            self.cpp_info.components["shaders"].names["cmake_find_package"] = "Shaders"
+            self.cpp_info.components["shaders"].names["cmake_find_package_multi"] = "Shaders"
+            self.cpp_info.components["shaders"].libs = ["MagnumShaders"]
+            self.cpp_info.components["shaders"].requires = ["magnum_main", "gl"]
+
+        # Text
+        if self.options.with_text:
+            self.cpp_info.components["text"].names["cmake_find_package"] = "Text"
+            self.cpp_info.components["text"].names["cmake_find_package_multi"] = "Text"
+            self.cpp_info.components["text"].libs = ["MagnumText"]
+            self.cpp_info.components["text"].requires = ["magnum_main", "texturetools", "corrade::plugin_manager", "gl"]
+
+        # TextureTools
+        if self.options.with_texturetools:
+            self.cpp_info.components["texturetools"].names["cmake_find_package"] = "TextureTools"
+            self.cpp_info.components["texturetools"].names["cmake_find_package_multi"] = "TextureTools"
+            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTool"]
+            self.cpp_info.components["texturetools"].requires = ["magnum_main"]
+            if self.options.with_gl:
+                self.cpp_info.components["texturetools"].requires += ["gl"]
+
+        # Trade
+        if self.options.with_trade:
+            self.cpp_info.components["trade"].names["cmake_find_package"] = "Trade"
+            self.cpp_info.components["trade"].names["cmake_find_package_multi"] = "Trade"
+            self.cpp_info.components["trade"].libs = ["MagnumTrade"]
+            self.cpp_info.components["trade"].requires = ["magnum_main", "corrade::plugin_manager"]
+
+        # VK
+        # TODO: target here, disabled by default
