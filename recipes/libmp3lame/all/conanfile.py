@@ -19,10 +19,6 @@ class LibMP3LameConan(ConanFile):
     _autotools = None
 
     @property
-    def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
-
-    @property
     def _is_msvc(self):
         return self.settings.compiler == 'Visual Studio'
 
@@ -37,6 +33,8 @@ class LibMP3LameConan(ConanFile):
     def build_requirements(self):
         if not self._is_msvc:
             self.build_requires("gnu-config/cci.20201022")
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -72,7 +70,7 @@ class LibMP3LameConan(ConanFile):
             if self.settings.os != 'Windows' and self.options.fPIC:
                 args.append('--with-pic')
 
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._use_winbash)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             if self.settings.compiler == 'clang' and self.settings.arch in ['x86', 'x86_64']:
                 self._autotools.flags.extend(['-mmmx', '-msse'])
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
