@@ -48,7 +48,7 @@ class OpusFileConan(ConanFile):
         self.requires("ogg/1.3.4")
         self.requires("opus/1.3.1")
         if self.options.http:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
 
     def build_requirements(self):
         if not self._is_msvc:
@@ -59,9 +59,7 @@ class OpusFileConan(ConanFile):
                 self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], srip_root=True, destination=self._source_subfolder)
 
     def _build_vs(self):
         includedir = os.path.abspath(os.path.join(self._source_subfolder, "include"))
