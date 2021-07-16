@@ -60,6 +60,7 @@ class LibmodplugConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libmodplug"
         self.cpp_info.libs = ["modplug"]
         self.cpp_info.bindirs = ["lib"]
         self.cpp_info.includedirs.append(os.path.join("include", "libmodplug"))
