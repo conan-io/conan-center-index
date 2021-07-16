@@ -29,6 +29,10 @@ class LibMP3LameConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,7 +46,7 @@ class LibMP3LameConan(ConanFile):
     def build_requirements(self):
         if not self._is_msvc:
             self.build_requires("gnu-config/cci.20201022")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
