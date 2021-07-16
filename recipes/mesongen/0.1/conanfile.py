@@ -1,9 +1,9 @@
-# Copyright © 2021-2021
+# Copyright 2021-2021
 #         Alexis A. D. COLIN,
 #         Antoine VUGLIANO,
-#         Gaëtan CHAMPARNAUD,
+#         Gaetan CHAMPARNAUD,
 #         Geoffrey L. TOURON,
-#         Grégoire A. P. BADIN
+#         Gregoire A. P. BADIN
 
 # This file is part of mesongen.
 
@@ -95,5 +95,8 @@ class MesonGeneratorPackage(ConanFile):
     version = "0.1"
     license = "GPLv3"
     description = "Custom generator for Meson 0.58"
-    url = "https://framagit.org/perdumondrapeau/mesongen"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://framagit.org/perdumondrapeau/mesongen"
+    topics = ["build system"]
+    no_copy_source = True
 
