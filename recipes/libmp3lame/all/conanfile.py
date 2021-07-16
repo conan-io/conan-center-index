@@ -1,4 +1,5 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from contextlib import contextmanager
 import os
 import shutil
 
@@ -53,17 +54,23 @@ class LibMP3LameConan(ConanFile):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libmp3lame.sym"), "lame_init_old\n", "")
 
-    def _build_vs(self):
+    @contextmanager
+    def _msvc_build_environment(self):
         with tools.chdir(self._source_subfolder):
+            with tools.vcvars(self.settings):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    yield
+
+    def _build_vs(self):
+        with self._msvc_build_environment():
             shutil.copy("configMS.h", "config.h")
+            tools.replace_in_file("Makefile.MSVC", "CC_OPTS = $(CC_OPTS) /MT", "")
             command = "nmake -f Makefile.MSVC comp=msvc asm=yes"
             if self.settings.arch == "x86_64":
                 tools.replace_in_file("Makefile.MSVC", "MACHINE = /machine:I386", "MACHINE =/machine:X64")
                 command += " MSVCVER=Win64"
-            if self.options.shared:
-                command += " dll"
-            with tools.vcvars(self.settings, filter_known_paths=False, force=True):
-                self.run(command)
+            command += " libmp3lame.dll" if self.options.shared else " libmp3lame-static.lib"
+            self.run(command)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -104,11 +111,10 @@ class LibMP3LameConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         if self._is_msvc:
             self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "lame"))
-            self.copy(pattern="*.lib", src=os.path.join(self._source_subfolder, "output"), dst="lib")
-            self.copy(pattern="*.exe", src=os.path.join(self._source_subfolder, "output"), dst="bin")
+            name = "libmp3lame.lib" if self.options.shared else "libmp3lame-static.lib"
+            self.copy(name, src=os.path.join(self._source_subfolder, "output"), dst="lib")
             if self.options.shared:
                 self.copy(pattern="*.dll", src=os.path.join(self._source_subfolder, "output"), dst="bin")
-            name = "libmp3lame.lib" if self.options.shared else "libmp3lame-static.lib"
             tools.rename(os.path.join(self.package_folder, "lib", name),
                          os.path.join(self.package_folder, "lib", "mp3lame.lib"))
         else:
