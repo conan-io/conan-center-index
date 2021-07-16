@@ -62,8 +62,10 @@ class libmaxminddbConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "maxminddb"
+        self.cpp_info.names["cmake_find_package_multi"] = "maxminddb"
+        self.cpp_info.names["pkg_config"] = "libmaxminddb"
         self.cpp_info.libs = ["maxminddb"]
-
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
 
