@@ -5,4 +5,5 @@
 int main (void) {
     LTCDecoder *decoder = ltc_decoder_create(1920, 1920 * 2);
     ltc_decoder_free(decoder);
+    return 0;
 }
