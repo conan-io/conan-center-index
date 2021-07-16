@@ -106,9 +106,7 @@ class LibId3TagConan(ConanFile):
     def _install_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        la = os.path.join(self.package_folder, "lib", "libid3tag.la")
-        if os.path.isfile(la):
-            os.unlink(la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
