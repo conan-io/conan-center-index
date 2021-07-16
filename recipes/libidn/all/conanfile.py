@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibIdn(ConanFile):
     name = "libidn"
@@ -36,23 +38,25 @@ class LibIdn(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("libiconv/1.16")
 
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
+
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libidn-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
@@ -77,7 +81,8 @@ class LibIdn(ConanFile):
         if not self.options.shared:
             self._autotools.defines.append("LIBIDN_STATIC")
         if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
+            if tools.Version(self.settings.compiler.version) >= "12":
+                self._autotools.flags.append("-FS")
             self._autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
@@ -117,7 +122,7 @@ class LibIdn(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["idn"]
         self.cpp_info.names["pkg_config"] = "libidn"
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
                 self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Windows":
