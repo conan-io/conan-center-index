@@ -32,6 +32,10 @@ class LibMP3LameConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def build_requirements(self):
+        if not self._is_msvc:
+            self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "lame-" + self.version
@@ -57,7 +61,7 @@ class LibMP3LameConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            args = []
+            args = ["--disable-frontend"]
             if self.options.shared:
                 args.extend(['--disable-static', '-enable-shared'])
             else:
@@ -73,7 +77,15 @@ class LibMP3LameConan(ConanFile):
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def _build_configure(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         autotools = self._configure_autotools()
         autotools.make()
 
