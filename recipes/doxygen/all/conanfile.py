@@ -11,6 +11,14 @@ class DoxygenConan(ConanFile):
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "enable_parse": [True, False],
+        "enable_search": [True, False]
+    }
+    default_options = {
+        "enable_parse": True,
+        "enable_search": True
+    }
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     short_paths = True
@@ -42,8 +50,9 @@ class DoxygenConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("xapian-core/1.4.18")
-        self.requires("zlib/1.2.11")
+        if self.options.enable_search:
+            self.requires("xapian-core/1.4.18")
+            self.requires("zlib/1.2.11")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -60,8 +69,8 @@ class DoxygenConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["build_parse"] = True
-        self._cmake.definitions["build_search"] = True
+        self._cmake.definitions["build_parse"] = self.options.enable_parse
+        self._cmake.definitions["build_search"] = self.options.enable_search
         self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         self._cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -84,6 +93,13 @@ class DoxygenConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+
+        # Doxygen doesn't make code. Any package that will run is ok to use.
+        # It's ok in general to use a release version of the tool that matches the
+        # build os and architecture.
+        compatible_pkg = self.info.clone()
+        compatible_pkg.settings.build_type = "Release"
+        self.compatible_packages.append(compatible_pkg)
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
