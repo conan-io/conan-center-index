@@ -116,5 +116,5 @@ class LibMP3LameConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mp3lame"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
