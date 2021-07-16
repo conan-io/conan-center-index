@@ -157,3 +157,7 @@ class CorradeConan(ConanFile):
             bindir = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
+
+        # pkg_config: Add more explicit naming to generated files (avoid filesystem collision).
+        for key, cmp in self.cpp_info.components.items():
+            self.cpp_info.components[key].names["pkg_config"] = "{}_{}".format(self.name, key)
