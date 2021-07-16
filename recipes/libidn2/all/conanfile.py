@@ -112,10 +112,7 @@ class LibIdn(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        libname = "idn2"
-        if self.options.shared and self.settings.os == "Windows":
-            libname += ".dll" + (".lib" if self.settings.compiler == "Visual Studio" else ".a")
-        self.cpp_info.libs = [libname]
+        self.cpp_info.libs = ["idn2"]
         self.cpp_info.names["pkg_config"] = "libidn2"
         if self.settings.os == "Windows":
             if not self.options.shared:
