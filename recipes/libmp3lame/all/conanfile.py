@@ -111,11 +111,8 @@ class LibMP3LameConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        la_file = os.path.join(self.package_folder, "lib", "libmp3lame.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["mp3lame"]
