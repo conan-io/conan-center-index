@@ -32,8 +32,17 @@ class MagnumConan(ConanFile):
         "with_trade": [True, False],
         "with_vk": [True, False],
 
+        # WITH_ANYAUDIOIMPORTER
         "with_anyimageimporter": [True, False],
         "with_anyimageconverter": [True, False],
+        "with_anysceneconverter": [True, False],
+        "with_anysceneimporter": [True, False],
+        "with_magnumfont": [True, False],
+        "with_magnumfontconverter": [True, False],
+        "with_objimporter": [True, False],
+        "with_tgaimageconverter": [True, False],
+        "with_tgaimporter": [True, False],
+        #"with_wavaudioimporter": [True, False],
     }
     default_options = {
         "shared": False,
@@ -54,6 +63,13 @@ class MagnumConan(ConanFile):
 
         "with_anyimageimporter": True,
         "with_anyimageconverter": True,
+        "with_anysceneconverter": True,
+        "with_anysceneimporter": True,
+        "with_magnumfont": True,
+        "with_magnumfontconverter": True,
+        "with_objimporter": True,
+        "with_tgaimageconverter": True,
+        "with_tgaimporter": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -93,6 +109,9 @@ class MagnumConan(ConanFile):
             # To fix issue with resource management, see here: https://github.com/mosra/magnum/issues/304#issuecomment-451768389
             raise ConanInvalidConfiguration("If using 'shared=True', corrado should be shared as well")
 
+        if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
+            raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -121,7 +140,14 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared  # TODO: Different option
         self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.with_anyimageimporter
         self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.with_anyimageconverter
-
+        self._cmake.definitions["WITH_ANYSCENECONVERTER"] = self.options.with_anysceneconverter
+        self._cmake.definitions["WITH_ANYSCENEIMPORTER"] = self.options.with_anysceneconverter
+        self._cmake.definitions["WITH_MAGNUMFONT"] = self.options.with_anysceneconverter
+        self._cmake.definitions["WITH_MAGNUMFONTCONVERTER"] = self.options.with_anysceneconverter
+        self._cmake.definitions["WITH_OBJIMPORTER"] = self.options.with_objimporter
+        self._cmake.definitions["WITH_TGAIMAGECONVERTER"] = self.options.with_tgaimageconverter
+        self._cmake.definitions["WITH_TGAIMPORTER"] = self.options.with_tgaimporter
+        
         self._cmake.configure()
         return self._cmake
 
@@ -260,3 +286,55 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
             self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
             self.cpp_info.components["anyimageconverter"].requires = ["trade"]
+
+        if self.options.with_anysceneconverter:
+            self.cpp_info.components["anysceneconverter"].names["cmake_find_package"] = "AnySceneConverter"
+            self.cpp_info.components["anysceneconverter"].names["cmake_find_package_multi"] = "AnySceneConverter"
+            self.cpp_info.components["anysceneconverter"].libs = ["AnySceneConverter"]
+            self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'sceneconverters')]
+            self.cpp_info.components["anysceneconverter"].requires = ["trade"]
+
+        if self.options.with_anysceneimporter:
+            self.cpp_info.components["anysceneimporter"].names["cmake_find_package"] = "AnySceneImporter"
+            self.cpp_info.components["anysceneimporter"].names["cmake_find_package_multi"] = "AnySceneImporter"
+            self.cpp_info.components["anysceneimporter"].libs = ["AnySceneImporter"]
+            self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            self.cpp_info.components["anysceneimporter"].requires = ["trade"]
+
+        if self.options.with_magnumfont:
+            self.cpp_info.components["magnumfont"].names["cmake_find_package"] = "MagnumFont"
+            self.cpp_info.components["magnumfont"].names["cmake_find_package_multi"] = "MagnumFont"
+            self.cpp_info.components["magnumfont"].libs = ["MagnumFont"]
+            self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fonts')]
+            self.cpp_info.components["magnumfont"].requires = ["magnum_main", "trade", "text"]
+
+        if self.options.with_magnumfontconverter:
+            self.cpp_info.components["magnumfontconverter"].names["cmake_find_package"] = "MagnumFontConverter"
+            self.cpp_info.components["magnumfontconverter"].names["cmake_find_package_multi"] = "MagnumFontConverter"
+            self.cpp_info.components["magnumfontconverter"].libs = ["MagnumFontConverter"]
+            self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fontconverters')]
+            self.cpp_info.components["magnumfontconverter"].requires = ["magnum_main", "trade", "text"]
+            if not self.options.shared:
+                self.cpp_info.components["magnumfontconverter"].requires += ["tgaimageconverter"]
+
+        if self.options.with_objimporter:
+            self.cpp_info.components["objimporter"].names["cmake_find_package"] = "ObjImporter"
+            self.cpp_info.components["objimporter"].names["cmake_find_package_multi"] = "ObjImporter"
+            self.cpp_info.components["objimporter"].libs = ["ObjImporter"]
+            self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            self.cpp_info.components["objimporter"].requires = ["trade", "meshtools"]
+
+        if self.options.with_tgaimageconverter:
+            self.cpp_info.components["tgaimageconverter"].names["cmake_find_package"] = "TgaImageConverter"
+            self.cpp_info.components["tgaimageconverter"].names["cmake_find_package_multi"] = "TgaImageConverter"
+            self.cpp_info.components["tgaimageconverter"].libs = ["TgaImageConverter"]
+            self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+            self.cpp_info.components["tgaimageconverter"].requires = ["trade"]
+
+        if self.options.with_tgaimporter:
+            self.cpp_info.components["tgaimporter"].names["cmake_find_package"] = "TgaImporter"
+            self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
+            self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
+            self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            self.cpp_info.components["tgaimporter"].requires = ["trade"]
+
