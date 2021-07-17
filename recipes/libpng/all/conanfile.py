@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+import glob
 import os
 
 required_conan_version = ">=1.33.0"
@@ -109,6 +110,12 @@ class LibpngConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
+            if self.options.shared:
+                for binfile in glob.glob(os.path.join(self.package_folder, "bin", "*")):
+                    if not binfile.endswith(".dll"):
+                        os.remove(binfile)
+            else:
+                tools.rmdir(os.path.join(self.package_folder, "bin"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -122,15 +129,8 @@ class LibpngConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
         self.cpp_info.names["pkg_config"] = "libpng" # TODO: we should also create libpng16.pc file
 
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "gcc":
-                self.cpp_info.libs = ["png"]
-            else:
-                self.cpp_info.libs = ["libpng16"]
-        else:
-            self.cpp_info.libs = ["png16"]
-            if str(self.settings.os) in ["Linux", "Android", "FreeBSD"]:
-                self.cpp_info.system_libs.append("m")
-        # use 'd' suffix everywhere except mingw
-        if self.settings.build_type == "Debug" and not (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
-            self.cpp_info.libs[0] += "d"
+        prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        suffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["{}png16{}".format(prefix, suffix)]
+        if self.settings.os in ["Linux", "Android", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
