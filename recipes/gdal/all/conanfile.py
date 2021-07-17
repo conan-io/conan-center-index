@@ -794,6 +794,10 @@ class GdalConan(ConanFile):
         else:
             with self._autotools_build_environment():
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+                # Required for cross-build to iOS, see https://github.com/OSGeo/gdal/issues/4123
+                tools.replace_in_file(os.path.join("port", "cpl_config.h.in"),
+                                      "/* port/cpl_config.h.in",
+                                      "#pragma once\n/* port/cpl_config.h.in")
                 autotools = self._configure_autotools()
                 autotools.make()
 
