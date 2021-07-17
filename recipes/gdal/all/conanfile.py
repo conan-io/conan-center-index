@@ -206,22 +206,22 @@ class GdalConan(ConanFile):
 
     def requirements(self):
         self.requires("json-c/0.15")
-        self.requires("libgeotiff/1.6.0")
+        self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.2.0")
-        self.requires("proj/8.0.1")
+        self.requires("proj/8.1.0")
         if tools.Version(self.version) >= "3.1.0":
-            self.requires("flatbuffers/1.12.0")
+            self.requires("flatbuffers/2.0.0")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.7")
+            self.requires("libdeflate/1.8")
         if self.options.get_safe("with_libiconv", True):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
         if self.options.with_pg:
-            self.requires("libpq/13.2")
+            self.requires("libpq/13.3")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
@@ -265,7 +265,7 @@ class GdalConan(ConanFile):
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         elif self.options.with_mysql == "mariadb-connector-c":
             self.requires("mariadb-connector-c/3.1.12")
         if self.options.with_xerces:
@@ -281,15 +281,15 @@ class GdalConan(ConanFile):
         if self.options.with_curl:
             self.requires("libcurl/7.77.0")
         if self.options.with_xml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         # if self.options.with_epsilon:
         #     self.requires("epsilon/0.9.2")
         if self.options.with_webp:
