@@ -31,6 +31,9 @@ class MagnumConan(ConanFile):
         "with_texturetools": [True, False],
         "with_trade": [True, False],
         "with_vk": [True, False],
+
+        "with_anyimageimporter": [True, False],
+        "with_anyimageconverter": [True, False],
     }
     default_options = {
         "shared": False,
@@ -48,6 +51,9 @@ class MagnumConan(ConanFile):
         "with_texturetools": True,
         "with_trade": True,
         "with_vk": False,
+
+        "with_anyimageimporter": True,
+        "with_anyimageconverter": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -110,6 +116,11 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.with_texturetools
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
+
+        ##### Plugins related #####
+        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared  # TODO: Different option
+        self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.with_anyimageimporter
+        self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.with_anyimageconverter
 
         self._cmake.configure()
         return self._cmake
@@ -233,3 +244,19 @@ class MagnumConan(ConanFile):
 
         # VK
         # TODO: target here, disabled by default
+
+        ######## PLUGINS ########
+        # TODO: If shared, there are no libraries to link with
+        if self.options.with_anyimageimporter:
+            self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
+            self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
+            self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
+            self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            self.cpp_info.components["anyimageimporter"].requires = ["trade"]
+
+        if self.options.with_anyimageconverter:
+            self.cpp_info.components["anyimageconverter"].names["cmake_find_package"] = "AnyImageConverter"
+            self.cpp_info.components["anyimageconverter"].names["cmake_find_package_multi"] = "AnyImageConverter"
+            self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
+            self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+            self.cpp_info.components["anyimageconverter"].requires = ["trade"]

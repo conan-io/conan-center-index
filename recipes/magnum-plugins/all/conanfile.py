@@ -18,6 +18,8 @@ class MagnumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+
+        "with_assimpimporter": [True, False],
         
         "with_stbimageimporter": [True, False],
     }
@@ -25,6 +27,8 @@ class MagnumConan(ConanFile):
         "shared": True,
         "fPIC": True,
         
+        "with_assimpimporter": True,
+
         "with_stbimageimporter": True,
     }
     generators = "cmake", "cmake_find_package"
@@ -57,9 +61,8 @@ class MagnumConan(ConanFile):
     #    self.build_requires("corrade/{}".format(self.version))
 
     def validate(self):
-        if self.options.with_stbimageimporter:
-            if not self.options["magnum"].with_trade:
-                raise ConanInvalidConfiguration("Magnum Trade is required for plugin 'stbimageimporter'")
+        if not self.options["magnum"].with_trade:
+            raise ConanInvalidConfiguration("Magnum Trade is required")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,6 +74,8 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
+
+        self._cmake.definitions["WITH_ASSIMPIMPORTER"] = self.options.with_assimpimporter
 
         self._cmake.definitions["WITH_STBIMAGEIMPORTER"] = self.options.with_stbimageimporter
 
