@@ -49,6 +49,8 @@ class LibPcapConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
+        if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
 
     def build_requirements(self):
         if self.settings.os == "Linux":
