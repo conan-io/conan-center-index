@@ -86,10 +86,10 @@ class LibTasn1Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libtasn1.la"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libtasn1"
         self.cpp_info.libs = ["tasn1"]
         if not self.options.shared:
             self.cpp_info.defines = ["ASN1_STATIC"]
-
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
