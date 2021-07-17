@@ -23,6 +23,7 @@ class GdalConan(ConanFile):
         "fPIC": [True, False],
         "simd_intrinsics": [None, "sse", "ssse3", "avx"],
         "threadsafe": [True, False],
+        "tools": [True, False],
         "with_zlib": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
@@ -87,6 +88,7 @@ class GdalConan(ConanFile):
         "fPIC": True,
         "simd_intrinsics": "sse",
         "threadsafe": True,
+        "tools": False,
         "with_zlib": True,
         "with_libdeflate": True,
         "with_libiconv": True,
@@ -406,6 +408,28 @@ class GdalConan(ConanFile):
             # Workaround for autoconf 2.71
             with open(os.path.join(self._source_subfolder, "config.rpath"), "w"):
                 pass
+
+        # Disable tools
+        if not self.options.tools:
+            # autotools
+            gnumakefile_apps = os.path.join(self._source_subfolder, "apps", "GNUmakefile")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "default:	gdal-config-inst gdal-config $(BIN_LIST)",
+                                  "default:	gdal-config-inst gdal-config")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst",
+                                  "$(RM) *.o core gdal-config gdal-config-inst")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "for f in $(BIN_LIST) ; do $(INSTALL) $$f $(DESTDIR)$(INST_BIN) ; done",
+                                  "")
+            # msvc
+            vcmakefile_apps = os.path.join(self._source_subfolder, "apps", "makefile.vc")
+            tools.replace_in_file(vcmakefile_apps,
+                                  "default:	",
+                                  "default:	\n\nold-default:	")
+            tools.replace_in_file(vcmakefile_apps,
+                                  "copy *.exe $(BINDIR)",
+                                  "")
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
@@ -810,6 +834,8 @@ class GdalConan(ConanFile):
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
         self.output.info("Creating GDAL_DATA environment variable: {}".format(gdal_data_path))
         self.env_info.GDAL_DATA = gdal_data_path
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
