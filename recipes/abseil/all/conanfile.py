@@ -22,8 +22,14 @@ class ConanRecipe(ConanFile):
     short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _cmake = None
 
@@ -33,6 +39,10 @@ class ConanRecipe(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def configure(self):
