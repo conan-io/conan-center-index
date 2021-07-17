@@ -12,13 +12,21 @@ class NasRecipe(ConanFile):
     homepage = "https://www.radscan.com/nas.html"
     license = "Unlicense"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = {'shared': False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
