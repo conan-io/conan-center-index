@@ -126,6 +126,7 @@ class LibsndfileConan(ConanFile):
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.programs:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
