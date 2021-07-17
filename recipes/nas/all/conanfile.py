@@ -61,6 +61,8 @@ class NasRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]
+        self.cpp_info.system_libs = ["Xau"]
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: %s' % bin_path)
         self.env_info.path.append(bin_path)
