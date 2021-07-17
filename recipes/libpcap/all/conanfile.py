@@ -44,7 +44,7 @@ class LibPcapConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_libusb:
-            self.requires("libusb/1.0.23")
+            self.requires("libusb/1.0.24")
 
     def validate(self):
         if self.settings.os == "Macos" and self.options.shared:
