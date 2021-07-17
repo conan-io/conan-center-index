@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -26,6 +26,7 @@ class LibpngConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake", "cmake_find_package"]
+    _autotools = None
     _cmake = None
 
     @property
@@ -74,28 +75,47 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_SHARED"] = self.options.shared
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
-        if tools.is_apple_os(self.settings.os):
-            if "arm" in self.settings.arch:
-                # FIXME: Neon should work on iOS (but currently if leads to undefined symbols), see if autotools build is better
-                self._cmake.definitions["PNG_ARM_NEON"] = "on" if self.settings.os == "Macos" else "off"
-            if self.settings.arch == "armv8":
-                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
         self._cmake.configure()
         return self._cmake
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--without-binconfigs",
+            "--with-libpng-prefix={}".format(self.options.api_prefix),
+        ]
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
+
     def build(self):
         self._patch()
-        cmake = self._configure_cmake()
-        cmake.build()
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.build()
+        else:
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PNG"
