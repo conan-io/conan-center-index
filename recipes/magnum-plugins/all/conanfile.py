@@ -68,8 +68,8 @@ class MagnumConan(ConanFile):
         "with_icoimporter": True,
         "with_jpegimageconverter": True,
         "with_jpegimporter": True,
-        "with_meshoptimizersceneconverter": False,
-        "with_miniexrimageconverter": False,
+        "with_meshoptimizersceneconverter": True,
+        "with_miniexrimageconverter": True,
         "with_opengeximporter": False,
         "with_pngimageconverter": False,
         "with_pngimporter": False,
@@ -83,7 +83,7 @@ class MagnumConan(ConanFile):
         "with_stlimporter": False,
         "with_tinygltfimporter": False,
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
     _cmake = None
@@ -129,6 +129,8 @@ class MagnumConan(ConanFile):
             self.requires("harfbuzz/2.8.2")
         if self.options.with_jpegimporter or self.options.with_jpegimageconverter:
             self.requires("libjpeg/9d")
+        if self.options.with_meshoptimizersceneconverter:
+            self.requires("meshoptimizer/0.15")
 
     #def build_requirements(self):
     #    self.build_requires("corrade/{}".format(self.version))
@@ -245,6 +247,20 @@ class MagnumConan(ConanFile):
             if not self.options.shared_plugins:
                 self.cpp_info.components["jpegimporter"].libs = ["JpegImporter"]
             self.cpp_info.components["jpegimporter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
+
+        if self.options.with_meshoptimizersceneconverter:
+            self.cpp_info.components["meshoptimizersceneconverter"].names["cmake_find_package"] = "MeshOptimizerSceneConverter"
+            self.cpp_info.components["meshoptimizersceneconverter"].names["cmake_find_package_multi"] = "MeshOptimizerSceneConverter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["meshoptimizersceneconverter"].libs = ["MeshOptimizerSceneConverter"]
+            self.cpp_info.components["meshoptimizersceneconverter"].requires = ["magnum::trade", "magnum::meshtools", "meshoptimizer::meshoptimizer"]
+
+        if self.options.with_miniexrimageconverter:
+            self.cpp_info.components["miniexrimageconverter"].names["cmake_find_package"] = "MiniExrImageConverter"
+            self.cpp_info.components["miniexrimageconverter"].names["cmake_find_package_multi"] = "MiniExrImageConverter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["miniexrimageconverter"].libs = ["MiniExrImageConverter"]
+            self.cpp_info.components["miniexrimageconverter"].requires = ["magnum::trade"]
 
         # not yet
         if self.options.with_stbimageimporter:
