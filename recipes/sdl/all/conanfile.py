@@ -48,7 +48,7 @@ class SDLConan(ConanFile):
         "fPIC": True,
         "directx": True,
         "alsa": True,
-        "jack": True,
+        "jack": False,
         "pulse": True,
         "sndio": False,
         "nas": True,
