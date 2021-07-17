@@ -217,6 +217,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
+                self.cpp_info.components["assimpimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
 
         if self.options.with_ddsimporter:
@@ -224,6 +225,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["ddsimporter"].names["cmake_find_package_multi"] = "DdsImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["ddsimporter"].libs = ["DdsImporter"]
+                self.cpp_info.components["ddsimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["ddsimporter"].requires = ["magnum::trade"]
 
         if self.options.with_freetypefont:
@@ -231,6 +233,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["freetypefont"].names["cmake_find_package_multi"] = "FreeTypeFont"
             if not self.options.shared_plugins:
                 self.cpp_info.components["freetypefont"].libs = ["FreeTypeFont"]
+                self.cpp_info.components["freetypefont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
             self.cpp_info.components["freetypefont"].requires = ["magnum::text"]
 
         if self.options.with_harfbuzzfont:
@@ -238,6 +241,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["harfbuzzfont"].names["cmake_find_package_multi"] = "HarfBuzzFont"
             if not self.options.shared_plugins:
                 self.cpp_info.components["harfbuzzfont"].libs = ["HarfBuzzFont"]
+                self.cpp_info.components["harfbuzzfont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
             self.cpp_info.components["harfbuzzfont"].requires = ["magnum::text", "harfbuzz::harfbuzz"]
 
         if self.options.with_jpegimageconverter:
@@ -245,6 +249,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["jpegimageconverter"].names["cmake_find_package_multi"] = "JpegImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["jpegimageconverter"].libs = ["JpegImageConverter"]
+                self.cpp_info.components["jpegimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
             self.cpp_info.components["jpegimageconverter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
 
         if self.options.with_jpegimporter:
@@ -252,6 +257,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["jpegimporter"].names["cmake_find_package_multi"] = "JpegImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["jpegimporter"].libs = ["JpegImporter"]
+                self.cpp_info.components["jpegimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["jpegimporter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
 
         if self.options.with_meshoptimizersceneconverter:
@@ -259,6 +265,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["meshoptimizersceneconverter"].names["cmake_find_package_multi"] = "MeshOptimizerSceneConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["meshoptimizersceneconverter"].libs = ["MeshOptimizerSceneConverter"]
+                self.cpp_info.components["meshoptimizersceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
             self.cpp_info.components["meshoptimizersceneconverter"].requires = ["magnum::trade", "magnum::meshtools", "meshoptimizer::meshoptimizer"]
 
         if self.options.with_miniexrimageconverter:
@@ -266,6 +273,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["miniexrimageconverter"].names["cmake_find_package_multi"] = "MiniExrImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["miniexrimageconverter"].libs = ["MiniExrImageConverter"]
+                self.cpp_info.components["miniexrimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
             self.cpp_info.components["miniexrimageconverter"].requires = ["magnum::trade"]
 
         if self.options.with_opengeximporter:
@@ -273,6 +281,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["opengeximporter"].names["cmake_find_package_multi"] = "OpenGexImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["opengeximporter"].libs = ["OpenGexImporter"]
+                self.cpp_info.components["opengeximporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["opengeximporter"].requires = ["magnum::trade", "magnumopenddl"]
             if not self.options["magnum"].shared_plugins:
                 self.cpp_info.components["opengeximporter"].requires = ["magnum::anyimageimporter"]
@@ -282,6 +291,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["pngimporter"].names["cmake_find_package_multi"] = "PngImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["pngimporter"].libs = ["PngImporter"]
+                self.cpp_info.components["pngimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["pngimporter"].requires = ["magnum::trade"]
 
         if self.options.with_pngimageconverter:
@@ -289,6 +299,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["pngimageconverter"].names["cmake_find_package_multi"] = "PngImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["pngimageconverter"].libs = ["PngImageConverter"]
+                self.cpp_info.components["pngimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
             self.cpp_info.components["pngimageconverter"].requires = ["magnum::trade"]
 
         if self.options.with_primitiveimporter:
@@ -296,6 +307,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["primitiveimporter"].names["cmake_find_package_multi"] = "PrimitiveImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["primitiveimporter"].libs = ["PrimitiveImporter"]
+                self.cpp_info.components["primitiveimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["primitiveimporter"].requires = ["magnum::primitives", "magnum::trade"]
 
         if self.options.with_stanfordimporter:
@@ -303,6 +315,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stanfordimporter"].names["cmake_find_package_multi"] = "StandfordImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stanfordimporter"].libs = ["StandfordImporter"]
+                self.cpp_info.components["stanfordimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["stanfordimporter"].requires = ["magnum::meshtools", "magnum::trade"]
 
         if self.options.with_stanfordsceneconverter:
@@ -310,6 +323,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stanfordsceneconverter"].names["cmake_find_package_multi"] = "StandfordSceneConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stanfordsceneconverter"].libs = ["StandfordSceneConverter"]
+                self.cpp_info.components["stanfordsceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
             self.cpp_info.components["stanfordsceneconverter"].requires = ["magnum::meshtools", "magnum::trade"]
 
         if self.options.with_stbimageconverter:
@@ -317,6 +331,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stbimageconverter"].names["cmake_find_package_multi"] = "StbImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stbimageconverter"].libs = ["StbImageConverter"]
+                self.cpp_info.components["stbimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
             self.cpp_info.components["stbimageconverter"].requires = ["magnum::trade"]
 
         if self.options.with_stbimageimporter:
@@ -324,6 +339,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
+                self.cpp_info.components["stbimageimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["stbimageimporter"].requires = ["magnum::trade"]
 
         if self.options.with_stbtruetypefont:
@@ -331,6 +347,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stbtruetypefont"].names["cmake_find_package_multi"] = "StbTrueTypeFont"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stbtruetypefont"].libs = ["StbTrueTypeFont"]
+                self.cpp_info.components["stbtruetypefont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
             self.cpp_info.components["stbtruetypefont"].requires = ["magnum::text"]
 
         if self.options.with_stlimporter:
@@ -338,6 +355,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stlimporter"].names["cmake_find_package_multi"] = "StlImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["stlimporter"].libs = ["StlImporter"]
+                self.cpp_info.components["stlimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["stlimporter"].requires = ["magnum::meshtools", "magnum::trade"]
 
         if self.options.with_tinygltfimporter:
@@ -345,4 +363,5 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["tinygltfimporter"].names["cmake_find_package_multi"] = "TinyGltfImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["tinygltfimporter"].libs = ["TinyGltfImporter"]
+                self.cpp_info.components["tinygltfimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
             self.cpp_info.components["tinygltfimporter"].requires = ["magnum::trade", "magnum::anyimageimporter"]
