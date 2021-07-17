@@ -55,33 +55,33 @@ class MagnumConan(ConanFile):
         "shared_plugins": True,
         
         "with_assimpimporter": True,
-        "with_basisimageconverter": True,
-        "with_basisimporter": True,
+        "with_basisimageconverter": False,
+        "with_basisimporter": False,
         "with_ddsimporter": True,
-        "with_devilimageimporter": True,
-        "with_drflacaudioimporter": True,
-        "with_drmp3audioimporter": True,
-        "with_drwavaudioimporter": True,
-        "with_faad2audioimporter": True,
+        "with_devilimageimporter": False,
+        "with_drflacaudioimporter": False,
+        "with_drmp3audioimporter": False,
+        "with_drwavaudioimporter": False,
+        "with_faad2audioimporter": False,
         "with_freetypefont": True,
         "with_harfbuzzfont": True,
         "with_icoimporter": True,
         "with_jpegimageconverter": True,
         "with_jpegimporter": True,
-        "with_meshoptimizersceneconverter": True,
-        "with_miniexrimageconverter": True,
-        "with_opengeximporter": True,
-        "with_pngimageconverter": True,
-        "with_pngimporter": True,
-        "with_primitiveimporter": True,
-        "with_stanfordimporter": True,
-        "with_stanfordsceneconverter": True,
-        "with_stbimageconverter": True,
-        "with_stbimageimporter": True,
-        "with_stbtruetypefont": True,
-        "with_stbvorbisaudioimporter": True,
-        "with_stlimporter": True,
-        "with_tinygltfimporter": True,
+        "with_meshoptimizersceneconverter": False,
+        "with_miniexrimageconverter": False,
+        "with_opengeximporter": False,
+        "with_pngimageconverter": False,
+        "with_pngimporter": False,
+        "with_primitiveimporter": False,
+        "with_stanfordimporter": False,
+        "with_stanfordsceneconverter": False,
+        "with_stbimageconverter": False,
+        "with_stbimageimporter": False,
+        "with_stbtruetypefont": False,
+        "with_stbvorbisaudioimporter": False,
+        "with_stlimporter": False,
+        "with_tinygltfimporter": False,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -105,6 +105,14 @@ class MagnumConan(ConanFile):
                               "Assimp::Assimp",
                               "assimp::assimp")
 
+        harfbuzz_cmake_file = os.path.join(self._source_subfolder, "src", "MagnumPlugins", "HarfBuzzFont", "CMakeLists.txt")
+        tools.replace_in_file(harfbuzz_cmake_file,
+                              "find_package(HarfBuzz REQUIRED)",
+                              "find_package(harfbuzz REQUIRED)")
+        tools.replace_in_file(harfbuzz_cmake_file,
+                              "HarfBuzz::HarfBuzz",
+                              "harfbuzz::harfbuzz")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -117,6 +125,10 @@ class MagnumConan(ConanFile):
         self.requires("magnum/{}".format(self.version))
         if self.options.with_assimpimporter:
             self.requires("assimp/5.0.1")
+        if self.options.with_harfbuzzfont:
+            self.requires("harfbuzz/2.8.2")
+        if self.options.with_jpegimporter or self.options.with_jpegimageconverter:
+            self.requires("libjpeg/9d")
 
     #def build_requirements(self):
     #    self.build_requires("corrade/{}".format(self.version))
@@ -195,12 +207,50 @@ class MagnumConan(ConanFile):
         if self.options.with_assimpimporter:
             self.cpp_info.components["assimpimporter"].names["cmake_find_package"] = "AssimpImporter"
             self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
-            self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
             self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
 
+        if self.options.with_ddsimporter:
+            self.cpp_info.components["ddsimporter"].names["cmake_find_package"] = "DdsImporter"
+            self.cpp_info.components["ddsimporter"].names["cmake_find_package_multi"] = "DdsImporter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["ddsimporter"].libs = ["DdsImporter"]
+            self.cpp_info.components["ddsimporter"].requires = ["magnum::trade"]
+
+        if self.options.with_freetypefont:
+            self.cpp_info.components["freetypefont"].names["cmake_find_package"] = "FreeTypeFont"
+            self.cpp_info.components["freetypefont"].names["cmake_find_package_multi"] = "FreeTypeFont"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["freetypefont"].libs = ["FreeTypeFont"]
+            self.cpp_info.components["freetypefont"].requires = ["magnum::text"]
+
+        if self.options.with_harfbuzzfont:
+            self.cpp_info.components["harfbuzzfont"].names["cmake_find_package"] = "HarfBuzzFont"
+            self.cpp_info.components["harfbuzzfont"].names["cmake_find_package_multi"] = "HarfBuzzFont"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["harfbuzzfont"].libs = ["HarfBuzzFont"]
+            self.cpp_info.components["harfbuzzfont"].requires = ["magnum::text", "harfbuzz::harfbuzz"]
+
+        if self.options.with_jpegimageconverter:
+            self.cpp_info.components["jpegimageconverter"].names["cmake_find_package"] = "JpegImageConverter"
+            self.cpp_info.components["jpegimageconverter"].names["cmake_find_package_multi"] = "JpegImageConverter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["jpegimageconverter"].libs = ["JpegImageConverter"]
+            self.cpp_info.components["jpegimageconverter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
+
+        if self.options.with_jpegimporter:
+            self.cpp_info.components["jpegimporter"].names["cmake_find_package"] = "JpegImporter"
+            self.cpp_info.components["jpegimporter"].names["cmake_find_package_multi"] = "JpegImporter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["jpegimporter"].libs = ["JpegImporter"]
+            self.cpp_info.components["jpegimporter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
+
+        # not yet
         if self.options.with_stbimageimporter:
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package"] = "StbImageImporter"
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
-            self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
             self.cpp_info.components["stbimageimporter"].requires = ["magnum::trade"]
 
