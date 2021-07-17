@@ -36,9 +36,21 @@ class LibPcapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def requirements(self):
         if self.options.enable_libusb:
             self.requires("libusb/1.0.23")
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("libpcap can not be built as shared on OSX.")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
 
     def build_requirements(self):
         if self.settings.os == "Linux":
@@ -48,18 +60,6 @@ class LibPcapConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        
-    def validate(self):
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("libpcap can not be built as shared on OSX.")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
 
     def _configure_autotools(self):
         if not self._autotools:
