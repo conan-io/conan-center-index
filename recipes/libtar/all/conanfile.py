@@ -1,7 +1,8 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibTarConan(ConanFile):
@@ -51,8 +52,8 @@ class LibTarConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("libtar-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
