@@ -26,6 +26,9 @@ class NasRecipe(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Recipe supports Linux only")
 
+    def requirements(self):
+        self.requires("xorg/system")
+
     def build_requirements(self):
         self.build_requires("bison/3.7.1")
         self.build_requires("flex/2.6.4")
@@ -47,7 +50,7 @@ class NasRecipe(ConanFile):
         with tools.chdir(self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             env_build_vars = env_build.vars
-            env_build_vars['DESTDIR'] = tmp_install  #self.package_folder
+            env_build_vars['DESTDIR'] = tmp_install
             env_build.install(vars=env_build_vars)
 
         self.copy("*", src=os.path.join(tmp_install, "usr"), dst=self.package_folder)
@@ -61,7 +64,6 @@ class NasRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]
-        self.cpp_info.system_libs = ["Xau"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: %s' % bin_path)
