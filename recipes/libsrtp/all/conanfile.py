@@ -13,8 +13,6 @@ class ConanRecipe(ConanFile):
     homepage = "https://github.com/cisco/libsrtp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +26,8 @@ class ConanRecipe(ConanFile):
         "with_openssl": False,
     }
 
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
