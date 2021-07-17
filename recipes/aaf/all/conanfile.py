@@ -36,6 +36,8 @@ class AafConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
+            raise ConanInvalidConfiguration("Static runtime not supported")
         if self.settings.os == "Linux":
             raise ConanInvalidConfiguration("Linux not supported yet")
 
