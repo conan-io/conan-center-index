@@ -336,6 +336,11 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+        if tools.cross_building(self.settings):
+            if self.options.shared:
+                raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
+            if self.options.tools:
+                raise ConanInvalidConfiguration("GDAL build system can't cross-build tools")
         # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
         if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) < "16":
