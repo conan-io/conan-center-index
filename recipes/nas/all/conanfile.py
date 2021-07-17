@@ -63,7 +63,7 @@ class NasRecipe(ConanFile):
         with tools.chdir(self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             env_build_vars = env_build.vars
-            env_build_vars['DESTDIR'] = tmp_install
+            env_build_vars["DESTDIR"] = tmp_install
             env_build.install(vars=env_build_vars)
 
         self.copy("*", src=os.path.join(tmp_install, "usr"), dst=self.package_folder)
