@@ -122,6 +122,8 @@ class SDLConan(ConanFile):
                 self.requires("pulseaudio/13.0")
             if self.options.opengl:
                 self.requires("opengl/system")
+            if self.options.nas:
+                self.requires("nas/1.9.4")
 
     def package_id(self):
         del self.info.options.sdl2main
@@ -285,7 +287,7 @@ class SDLConan(ConanFile):
             if self.options.sndio:
                 self._add_libraries_from_pc("sndio")
             if self.options.nas:
-                self.cpp_info.components["libsdl2"].libs.append("audio")
+                self.cpp_info.components["libsdl2"].requires.append("nas::nas")
             if self.options.esd:
                 self._add_libraries_from_pc("esound")
             if self.options.directfb:
