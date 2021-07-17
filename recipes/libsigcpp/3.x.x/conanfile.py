@@ -47,19 +47,24 @@ class LibSigCppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def _has_support_for_cpp17(self):
-        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15.7",
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
 
     def validate(self):
         if self.settings.compiler.cppstd:
            tools.check_min_cppstd(self, 17)
-        if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
-                                            " {} {} is not supported."
-                                            .format(self.settings.compiler,
-                                                    self.settings.compiler.version))
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("libsigcpp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("libsigcpp requires C++17, which your compiler does not support.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
