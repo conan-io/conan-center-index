@@ -18,18 +18,70 @@ class MagnumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "shared_plugins": [True, False],
 
         "with_assimpimporter": [True, False],
-        
+        "with_basisimageconverter": [True, False],
+        "with_basisimporter": [True, False],
+        "with_ddsimporter": [True, False],
+        "with_devilimageimporter": [True, False],
+        "with_drflacaudioimporter": [True, False],
+        "with_drmp3audioimporter": [True, False],
+        "with_drwavaudioimporter": [True, False],
+        "with_faad2audioimporter": [True, False],
+        "with_freetypefont": [True, False],
+        "with_harfbuzzfont": [True, False],
+        "with_icoimporter": [True, False],
+        "with_jpegimageconverter": [True, False],
+        "with_jpegimporter": [True, False],
+        "with_meshoptimizersceneconverter": [True, False],
+        "with_miniexrimageconverter": [True, False],
+        "with_opengeximporter": [True, False],
+        "with_pngimageconverter": [True, False],
+        "with_pngimporter": [True, False],
+        "with_primitiveimporter": [True, False],
+        "with_stanfordimporter": [True, False],
+        "with_stanfordsceneconverter": [True, False],
+        "with_stbimageconverter": [True, False],
         "with_stbimageimporter": [True, False],
+        "with_stbtruetypefont": [True, False],
+        "with_stbvorbisaudioimporter": [True, False],
+        "with_stlimporter": [True, False],
+        "with_tinygltfimporter": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
+        "shared_plugins": True,
         
         "with_assimpimporter": True,
-
+        "with_basisimageconverter": True,
+        "with_basisimporter": True,
+        "with_ddsimporter": True,
+        "with_devilimageimporter": True,
+        "with_drflacaudioimporter": True,
+        "with_drmp3audioimporter": True,
+        "with_drwavaudioimporter": True,
+        "with_faad2audioimporter": True,
+        "with_freetypefont": True,
+        "with_harfbuzzfont": True,
+        "with_icoimporter": True,
+        "with_jpegimageconverter": True,
+        "with_jpegimporter": True,
+        "with_meshoptimizersceneconverter": True,
+        "with_miniexrimageconverter": True,
+        "with_opengeximporter": True,
+        "with_pngimageconverter": True,
+        "with_pngimporter": True,
+        "with_primitiveimporter": True,
+        "with_stanfordimporter": True,
+        "with_stanfordsceneconverter": True,
+        "with_stbimageconverter": True,
         "with_stbimageimporter": True,
+        "with_stbtruetypefont": True,
+        "with_stbvorbisaudioimporter": True,
+        "with_stlimporter": True,
+        "with_tinygltfimporter": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -80,13 +132,38 @@ class MagnumConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
-        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared
+        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
 
         self._cmake.definitions["WITH_ASSIMPIMPORTER"] = self.options.with_assimpimporter
-
+        self._cmake.definitions["WITH_BASISIMAGECONVERTER"] = self.options.with_basisimageconverter
+        self._cmake.definitions["WITH_BASISIMPORTER"] = self.options.with_basisimporter
+        self._cmake.definitions["WITH_DDSIMPORTER"] = self.options.with_ddsimporter
+        self._cmake.definitions["WITH_DEVILIMAGEIMPORTER"] = self.options.with_devilimageimporter
+        self._cmake.definitions["WITH_DRFLACAUDIOIMPORTER"] = self.options.with_drflacaudioimporter
+        self._cmake.definitions["WITH_DRMP3AUDIOIMPORTER"] = self.options.with_drmp3audioimporter
+        self._cmake.definitions["WITH_DRWAVAUDIOIMPORTER"] = self.options.with_drwavaudioimporter
+        self._cmake.definitions["WITH_FAAD2AUDIOIMPORTER"] = self.options.with_faad2audioimporter
+        self._cmake.definitions["WITH_FREETYPEFONT"] = self.options.with_freetypefont
+        self._cmake.definitions["WITH_HARFBUZZFONT"] = self.options.with_harfbuzzfont
+        self._cmake.definitions["WITH_ICOIMPORTER"] = self.options.with_icoimporter
+        self._cmake.definitions["WITH_JPEGIMAGECONVERTER"] = self.options.with_jpegimageconverter
+        self._cmake.definitions["WITH_JPEGIMPORTER"] = self.options.with_jpegimporter
+        self._cmake.definitions["WITH_MESHOPTIMIZERSCENECONVERTER"] = self.options.with_meshoptimizersceneconverter
+        self._cmake.definitions["WITH_MINIEXRIMAGECONVERTER"] = self.options.with_miniexrimageconverter
+        self._cmake.definitions["WITH_OPENGEXIMPORTER"] = self.options.with_opengeximporter
+        self._cmake.definitions["WITH_PNGIMAGECONVERTER"] = self.options.with_pngimageconverter
+        self._cmake.definitions["WITH_PNGIMPORTER"] = self.options.with_pngimporter
+        self._cmake.definitions["WITH_PRIMITIVEIMPORTER"] = self.options.with_primitiveimporter
+        self._cmake.definitions["WITH_STANFORDIMPORTER"] = self.options.with_stanfordimporter
+        self._cmake.definitions["WITH_STANFORDSCENECONVERTER"] = self.options.with_stanfordsceneconverter
+        self._cmake.definitions["WITH_STBIMAGECONVERTER"] = self.options.with_stbimageconverter
         self._cmake.definitions["WITH_STBIMAGEIMPORTER"] = self.options.with_stbimageimporter
+        self._cmake.definitions["WITH_STBTRUETYPEFONT"] = self.options.with_stbtruetypefont
+        self._cmake.definitions["WITH_STBVORBISAUDIOIMPORTER"] = self.options.with_stbvorbisaudioimporter
+        self._cmake.definitions["WITH_STLIMPORTER"] = self.options.with_stlimporter
+        self._cmake.definitions["WITH_TINYGLTFIMPORTER"] = self.options.with_tinygltfimporter
 
         self._cmake.configure()
         return self._cmake
@@ -115,14 +192,15 @@ class MagnumConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "MagnumPlugins"
         self.cpp_info.names["cmake_find_package_multi"] = "MagnumPlugins"
 
+        if self.options.with_assimpimporter:
+            self.cpp_info.components["assimpimporter"].names["cmake_find_package"] = "AssimpImporter"
+            self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
+            self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
+            self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
+
         if self.options.with_stbimageimporter:
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package"] = "StbImageImporter"
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
             self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
             self.cpp_info.components["stbimageimporter"].requires = ["magnum::trade"]
 
-        if self.options.with_assimpimporter:
-            self.cpp_info.components["assimpimporter"].names["cmake_find_package"] = "AssimpImporter"
-            self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
-            self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
-            self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
