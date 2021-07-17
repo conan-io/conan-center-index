@@ -353,11 +353,15 @@ class GdalConan(ConanFile):
             elif mongocxx_version < "3.4.0":
                 raise ConanInvalidConfiguration("gdal with mongo-cxx-driver v3 requires 3.4.0 at least.")
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
