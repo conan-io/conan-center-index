@@ -45,6 +45,13 @@ class MagnumConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
+        assimp_importer_cmake_file = os.path.join(self._source_subfolder, "src", "MagnumPlugins", "AssimpImporter", "CMakeLists.txt")
+        tools.replace_in_file(assimp_importer_cmake_file,
+                              "find_package(Assimp REQUIRED)",
+                              "find_package(assimp REQUIRED)")
+        tools.replace_in_file(assimp_importer_cmake_file,
+                              "Assimp::Assimp",
+                              "assimp::assimp")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,6 +63,8 @@ class MagnumConan(ConanFile):
     
     def requirements(self):
         self.requires("magnum/{}".format(self.version))
+        if self.options.with_assimpimporter:
+            self.requires("assimp/5.0.1")
 
     #def build_requirements(self):
     #    self.build_requires("corrade/{}".format(self.version))
@@ -111,3 +120,9 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stbimageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
             self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
             self.cpp_info.components["stbimageimporter"].requires = ["magnum::trade"]
+
+        if self.options.with_assimpimporter:
+            self.cpp_info.components["assimpimporter"].names["cmake_find_package"] = "AssimpImporter"
+            self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
+            self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
+            self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
