@@ -1,0 +1,51 @@
+commit a72ae1b4486769c76bb40683388ee52845c09bfe
+Author: Martin Delille <martin@delille.org>
+Date:   Sat Jul 17 18:22:17 2021 +0200
+
+    Link CoreFoundation and CoreServices with find_library
+
+diff --git a/build/cdefs.cmake b/build/cdefs.cmake
+index e1b924599..7096b3464 100644
+--- a/build/cdefs.cmake
++++ b/build/cdefs.cmake
+@@ -36,10 +36,6 @@ cmake_minimum_required(VERSION 3.0.2)
+ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+ if(APPLE)
+-    set(LINKER_FLAGS "-framework CoreFoundation -framework CoreServices")
+-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}")
+-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LINKER_FLAGS}")
+-    set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${LINKER_FLAGS}")
+ elseif(WIN32)
+     add_definitions(
+         -D_WIN32
+diff --git a/ref-impl/src/com-api/CMakeLists.txt b/ref-impl/src/com-api/CMakeLists.txt
+index d092d9ad2..f0afde40a 100644
+--- a/ref-impl/src/com-api/CMakeLists.txt
++++ b/ref-impl/src/com-api/CMakeLists.txt
+@@ -236,11 +236,25 @@ target_include_directories(comapi PRIVATE
+     ${AAFSDK_ROOT}/ref-impl/src/impl
+ )
+ 
++if(APPLE)
++    find_library(CORE_FOUNDATION CoreFoundation)
++    if (NOT CORE_FOUNDATION)
++      message(FATAL_ERROR "CoreFoundation not found")
++    endif()
++
++    find_library(CORE_SERVICES CoreServices)
++    if (NOT CORE_SERVICES)
++      message(FATAL_ERROR "CoreServices not found")
++    endif()
++endif()
++
+ target_link_libraries(comapi PRIVATE
+     Impl
+     OM
+     expat
+     ss
++    ${CORE_FOUNDATION}
++    ${CORE_SERVICES}
+ )
+ 
+ target_compile_definitions(comapi PUBLIC -DAAFCOAPI)
