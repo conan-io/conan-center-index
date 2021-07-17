@@ -7,7 +7,8 @@ class PcapplusplusTestConan(ConanFile):
     generators = "cmake"
 
     def configure(self):
-        del self.settings.compiler.libcxx
+        pass
+        # del self.settings.compiler.libcxx
 
     def build(self):
         cmake = CMake(self)
