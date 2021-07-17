@@ -5,7 +5,7 @@ include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_library(svm source_subfolder/svm.cpp)
-set_property(TARGET svm PROPERTY CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set_property(TARGET svm PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_target_properties(svm PROPERTIES PUBLIC_HEADER source_subfolder/svm.h)
 
 add_executable(svm-predict source_subfolder/svm-predict.c)
