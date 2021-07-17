@@ -183,9 +183,6 @@ class GdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            min_cppstd = 14 if self.options.with_charls else 11
-            tools.check_min_cppstd(self, min_cppstd)
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.simd_intrinsics
         if self.options.without_lerc:
@@ -201,14 +198,7 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
-        if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
-            raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         self._strict_options_requirements()
-
-        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
-        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
-           tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
 
     def _strict_options_requirements(self):
         if self.options.with_qhull:
@@ -339,8 +329,17 @@ class GdalConan(ConanFile):
             self.requires("libheif/1.12.0")
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            min_cppstd = 14 if self.options.with_charls else 11
+            tools.check_min_cppstd(self, min_cppstd)
+        if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
+            raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
+        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
+           tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
 
     def _validate_dependency_graph(self):
         if tools.Version(self.deps_cpp_info["libtiff"].version) < "4.0.0":
