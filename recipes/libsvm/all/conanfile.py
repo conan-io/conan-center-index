@@ -22,12 +22,6 @@ class libsvmConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.configure()
-        return self._cmake
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,6 +46,12 @@ class libsvmConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
