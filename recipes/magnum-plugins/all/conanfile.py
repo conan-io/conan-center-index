@@ -22,7 +22,7 @@ class MagnumConan(ConanFile):
         "with_stbimageimporter": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         
         "with_stbimageimporter": True,
