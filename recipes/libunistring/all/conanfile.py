@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibUnistringConan(ConanFile):
     name = "libunistring"
@@ -38,8 +40,8 @@ class LibUnistringConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libunistring-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
