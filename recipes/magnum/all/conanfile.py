@@ -32,6 +32,8 @@ class MagnumConan(ConanFile):
         "with_trade": [True, False],
         "with_vk": [True, False],
 
+        # Options related to plugins
+        "shared_plugins": [True, False],
         # WITH_ANYAUDIOIMPORTER
         "with_anyimageimporter": [True, False],
         "with_anyimageconverter": [True, False],
@@ -61,6 +63,7 @@ class MagnumConan(ConanFile):
         "with_trade": True,
         "with_vk": False,
 
+        "shared_plugins": True,
         "with_anyimageimporter": True,
         "with_anyimageconverter": True,
         "with_anysceneconverter": True,
@@ -137,7 +140,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
 
         ##### Plugins related #####
-        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared  # TODO: Different option
+        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
         self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.with_anyimageimporter
         self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.with_anyimageconverter
         self._cmake.definitions["WITH_ANYSCENECONVERTER"] = self.options.with_anysceneconverter
@@ -276,65 +279,73 @@ class MagnumConan(ConanFile):
         if self.options.with_anyimageimporter:
             self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
             self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
-            self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
-            self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
+                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
             self.cpp_info.components["anyimageimporter"].requires = ["trade"]
 
         if self.options.with_anyimageconverter:
             self.cpp_info.components["anyimageconverter"].names["cmake_find_package"] = "AnyImageConverter"
             self.cpp_info.components["anyimageconverter"].names["cmake_find_package_multi"] = "AnyImageConverter"
-            self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
-            self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
+                self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
             self.cpp_info.components["anyimageconverter"].requires = ["trade"]
 
         if self.options.with_anysceneconverter:
             self.cpp_info.components["anysceneconverter"].names["cmake_find_package"] = "AnySceneConverter"
             self.cpp_info.components["anysceneconverter"].names["cmake_find_package_multi"] = "AnySceneConverter"
-            self.cpp_info.components["anysceneconverter"].libs = ["AnySceneConverter"]
-            self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'sceneconverters')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["anysceneconverter"].libs = ["AnySceneConverter"]
+                self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'sceneconverters')]
             self.cpp_info.components["anysceneconverter"].requires = ["trade"]
 
         if self.options.with_anysceneimporter:
             self.cpp_info.components["anysceneimporter"].names["cmake_find_package"] = "AnySceneImporter"
             self.cpp_info.components["anysceneimporter"].names["cmake_find_package_multi"] = "AnySceneImporter"
-            self.cpp_info.components["anysceneimporter"].libs = ["AnySceneImporter"]
-            self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["anysceneimporter"].libs = ["AnySceneImporter"]
+                self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
             self.cpp_info.components["anysceneimporter"].requires = ["trade"]
 
         if self.options.with_magnumfont:
             self.cpp_info.components["magnumfont"].names["cmake_find_package"] = "MagnumFont"
             self.cpp_info.components["magnumfont"].names["cmake_find_package_multi"] = "MagnumFont"
-            self.cpp_info.components["magnumfont"].libs = ["MagnumFont"]
-            self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fonts')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["magnumfont"].libs = ["MagnumFont"]
+                self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fonts')]
             self.cpp_info.components["magnumfont"].requires = ["magnum_main", "trade", "text"]
 
         if self.options.with_magnumfontconverter:
             self.cpp_info.components["magnumfontconverter"].names["cmake_find_package"] = "MagnumFontConverter"
             self.cpp_info.components["magnumfontconverter"].names["cmake_find_package_multi"] = "MagnumFontConverter"
-            self.cpp_info.components["magnumfontconverter"].libs = ["MagnumFontConverter"]
-            self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fontconverters')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["magnumfontconverter"].libs = ["MagnumFontConverter"]
+                self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fontconverters')]
             self.cpp_info.components["magnumfontconverter"].requires = ["magnum_main", "trade", "text"]
-            if not self.options.shared:
+            if not self.options.shared_plugins:
                 self.cpp_info.components["magnumfontconverter"].requires += ["tgaimageconverter"]
 
         if self.options.with_objimporter:
             self.cpp_info.components["objimporter"].names["cmake_find_package"] = "ObjImporter"
             self.cpp_info.components["objimporter"].names["cmake_find_package_multi"] = "ObjImporter"
-            self.cpp_info.components["objimporter"].libs = ["ObjImporter"]
-            self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["objimporter"].libs = ["ObjImporter"]
+                self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
             self.cpp_info.components["objimporter"].requires = ["trade", "meshtools"]
 
         if self.options.with_tgaimageconverter:
             self.cpp_info.components["tgaimageconverter"].names["cmake_find_package"] = "TgaImageConverter"
             self.cpp_info.components["tgaimageconverter"].names["cmake_find_package_multi"] = "TgaImageConverter"
-            self.cpp_info.components["tgaimageconverter"].libs = ["TgaImageConverter"]
-            self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["tgaimageconverter"].libs = ["TgaImageConverter"]
+                self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
             self.cpp_info.components["tgaimageconverter"].requires = ["trade"]
 
         if self.options.with_tgaimporter:
             self.cpp_info.components["tgaimporter"].names["cmake_find_package"] = "TgaImporter"
             self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
-            self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
-            self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+            if not self.options.shared_plugins:
+                self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
+                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
             self.cpp_info.components["tgaimporter"].requires = ["trade"]
-
