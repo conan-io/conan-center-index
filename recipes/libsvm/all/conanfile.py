@@ -63,6 +63,6 @@ class libsvmConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["svm"]
         self.cpp_info.names["cmake_find_package"] = "LibSVM"
         self.cpp_info.names["cmake_find_package_multi"] = "LibSVM"
