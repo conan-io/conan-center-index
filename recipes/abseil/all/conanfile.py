@@ -110,7 +110,7 @@ class ConanRecipe(ConanFile):
                             if dependency.startswith("absl::"): # abseil targets
                                 components[potential_lib_name].setdefault("requires", []).append(dependency.replace("absl::", "absl_"))
                             else: # system libs or frameworks
-                                if self.settings.os == "Linux":
+                                if self.settings.os in ["Linux", "FreeBSD"]:
                                     if dependency == "Threads::Threads":
                                         components[potential_lib_name].setdefault("system_libs", []).append("pthread")
                                     elif "-lrt" in dependency:
@@ -119,7 +119,7 @@ class ConanRecipe(ConanFile):
                                     for system_lib in ["bcrypt", "advapi32", "dbghelp"]:
                                         if system_lib in dependency:
                                             components[potential_lib_name].setdefault("system_libs", []).append(system_lib)
-                                elif self.settings.os == "Macos":
+                                elif tools.is_apple_os(self.settings.os):
                                     for framework in ["CoreFoundation"]:
                                         if framework in dependency:
                                             components[potential_lib_name].setdefault("frameworks", []).append(framework)
