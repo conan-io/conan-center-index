@@ -9,7 +9,8 @@ class AafConan(ConanFile):
     description = "A  cross-platform SDK for AAF. AAF is a metadata management system and file format for use in professional multimedia creation and authoring."
     topics = ("aaf", "multimedia", "crossplatform")
     license = "AAF SDK PUBLIC SOURCE LICENSE"
-    exports_sources = ["patches/**"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
             "shared": [True, False],
@@ -23,6 +24,10 @@ class AafConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,7 +54,7 @@ class AafConan(ConanFile):
             cmake.definitions["PLATFORM"] = "vc"
 
         cmake.definitions["ARCH"] = "x86_64"
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
