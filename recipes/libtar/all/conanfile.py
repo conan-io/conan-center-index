@@ -30,10 +30,6 @@ class LibTarConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +39,10 @@ class LibTarConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
