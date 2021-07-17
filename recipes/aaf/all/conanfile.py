@@ -42,10 +42,8 @@ class AafConan(ConanFile):
             tools.patch(**patch)
 
         cmake = CMake(self)
-        cmake.verbose = True
 
         if tools.is_apple_os(self.settings.os):
-            cmake.generator = "Xcode"
             cmake.definitions["PLATFORM"] = "apple-clang"
         elif self.settings.compiler == "Visual Studio":
             cmake.definitions["PLATFORM"] = "vc"
