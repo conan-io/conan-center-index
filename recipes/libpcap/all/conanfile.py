@@ -47,8 +47,6 @@ class LibPcapConan(ConanFile):
             self.requires("libusb/1.0.24")
 
     def validate(self):
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("libpcap can not be built as shared on OSX.")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
 
