@@ -10,7 +10,7 @@ class LibZipConan(ConanFile):
     homepage = "https://github.com/nih-at/libzip"
     license = "BSD-3-Clause"
     topics = ("conan", "zip", "libzip", "zip-archives", "zip-editing")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -101,6 +101,8 @@ class LibZipConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
