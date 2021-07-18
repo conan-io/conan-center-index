@@ -6,6 +6,8 @@ import re
 import shlex
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class LibUSBCompatConan(ConanFile):
     name = "libusb-compat"
@@ -35,10 +37,6 @@ class LibUSBCompatConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libusb-compat-{}".format(self.version), self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -61,6 +59,10 @@ class LibUSBCompatConan(ConanFile):
         if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _iterate_lib_paths_win(self, lib):
         """Return all possible library paths for lib"""
