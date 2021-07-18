@@ -43,9 +43,15 @@ class LibZipConan(ConanFile):
             return "win32" if self.settings.os == "Windows" else "openssl"
         return self.options.crypto
 
+    @property
+    def _has_zstd_support(self):
+        return tools.Version(self.version) >= "1.8.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_zstd_support:
+            del self.options.zstd
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -62,7 +68,7 @@ class LibZipConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
 
-        if self.options.with_zstd:
+        if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
 
         if self._crypto == "openssl":
@@ -91,7 +97,8 @@ class LibZipConan(ConanFile):
 
         self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
         self._cmake.definitions["ENABLE_BZIP2"] = self.options.with_bzip2
-        self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
+        if self._has_zstd_support:
+            self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
 
         self._cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
         self._cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
@@ -133,7 +140,7 @@ class LibZipConan(ConanFile):
             self.cpp_info.components["_libzip"].requires.append("bzip2::bzip2")
         if self.options.with_lzma:
             self.cpp_info.components["_libzip"].requires.append("xz_utils::xz_utils")
-        if self.options.with_zstd:
+        if self.options.get_safe("with_zstd"):
             self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
         if self._crypto == "openssl":
             self.cpp_info.components["_libzip"].requires.append("openssl::openssl")
