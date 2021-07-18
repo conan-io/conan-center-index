@@ -12,7 +12,7 @@ class LibfabricConan(ConanFile):
     homepage = "https://github.com/aws/libfabric"
     license = "BSD-2-Clause", "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    _providers = ['gni', 'psm', 'psm2', 'sockets', 'rxm', 'tcp', 'udp', 'usnic', 'verbs', 'bgq', 'shm', 'efa', 'rxd', 'mrail', 'rstream', 'perf', 'hook_debug']
+    _providers = ["gni", "psm", "psm2", "sockets", "rxm", "tcp", "udp", "usnic", "verbs", "bgq", "shm", "efa", "rxd", "mrail", "rstream", "perf", "hook_debug"]
     options = {
         **{ p: [True, False, "shared"] for p in _providers },
         **{
@@ -24,12 +24,11 @@ class LibfabricConan(ConanFile):
         }
     }
     default_options = {
-        **{ p: False for p in _providers },
+        **{ p: False for p in _providers if p not in ["efa", ] },
         **{
             "shared": False,
             "fPIC": True,
             "tcp": True,
-            "efa": tools.os_info.is_linux,
             "with_libnl": False,
             "with_bgq_progress": "manual",
             "with_bgq_mr": "basic"
@@ -50,6 +49,8 @@ class LibfabricConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.efa == None:
+            self.options.efa = self.settings.os in ["Linux", ]
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
