@@ -60,7 +60,8 @@ class Libx265Conan(ConanFile):
 
     def build_requirements(self):
         if self.options.assembly:
-            self.build_requires("nasm/2.15.05")
+            if self.settings.arch in ["x86", "x86_64"]:
+                self.build_requires("nasm/2.15.05")
 
     def requirements(self):
         if self.options.get_safe("with_numa", False):
