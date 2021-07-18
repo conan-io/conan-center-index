@@ -57,8 +57,11 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.os == "Android" and self.options.enable_udev:
-            raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
+        if self.options.get_safe("enable_udev"):
+            if self.settings.os == "Android":
+                raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
+            if self.settings.os == "Linux" and self._settings_build.os != "Linux":
+                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling to Linux from a non-Linux machine")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
