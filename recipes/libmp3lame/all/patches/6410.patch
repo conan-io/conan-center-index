@@ -1,5 +1,5 @@
---- a/trunk/lame/frontend/parse.c
-+++ b/trunk/lame/frontend/parse.c
+--- a/frontend/parse.c
++++ b/frontend/parse.c
 @@ -70,8 +70,10 @@
  #ifdef HAVE_ICONV
  #include <iconv.h>
