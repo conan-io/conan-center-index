@@ -58,14 +58,14 @@ class Libx265Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if self.options.get_safe("with_numa", False):
+            self.requires("libnuma/2.0.14")
+
     def build_requirements(self):
         if self.options.assembly:
             if self.settings.arch in ["x86", "x86_64"]:
                 self.build_requires("nasm/2.15.05")
-
-    def requirements(self):
-        if self.options.get_safe("with_numa", False):
-            self.requires("libnuma/2.0.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
