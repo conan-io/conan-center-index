@@ -18,6 +18,11 @@ class FFNvEncHeaders(ConanFile):
     def package_id(self):
         self.info.header_only()
 
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            if "CONAN_MAKE_PROGRAM" not in os.environ and not tools.which("make"):
+                self.build_requires("make/4.2.1")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
@@ -32,6 +37,14 @@ class FFNvEncHeaders(ConanFile):
         autotools.make()
 
     def package(self):
+        # Extract the License/s from the header to a file
+        tmp = tools.load(os.path.join("include", "ffnvcodec", "nvEncodeAPI.h"))
+        license_contents = tmp[2:tmp.find("*/", 1)] # The license begins with a C comment /* and ends with */
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+
+        # Package it
+        self.copy("license*", dst="licenses",  ignore_case=True, keep_path=False)
+
         autotools = self._configure_autotools()
         vars = autotools.vars
         autotools.install(args=["PREFIX={}".format(self.package_folder)])
