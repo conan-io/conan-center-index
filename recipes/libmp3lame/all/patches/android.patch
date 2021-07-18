@@ -1,5 +1,5 @@
---- libmp3lame/util.c
-+++ libmp3lame/util.c
+--- a/libmp3lame/util.c
++++ b/libmp3lame/util.c
 @@ -911,7 +911,7 @@
          mask &= ~(_EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID);
          _FPU_SETCW(mask);
