@@ -40,6 +40,8 @@ class AwsCCal(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.6.7")
+        if self.settings.os == "Linux":
+            self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -72,3 +74,5 @@ class AwsCCal(ConanFile):
         self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::openssl")
