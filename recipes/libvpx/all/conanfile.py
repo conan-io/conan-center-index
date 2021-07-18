@@ -33,6 +33,10 @@ class LibVPXConan(ConanFile):
             for name in self._arch_options:
                 delattr(self.options, name)
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported")
@@ -62,8 +66,6 @@ class LibVPXConan(ConanFile):
             args.extend(['--disable-static', '--enable-shared'])
         else:
             args.extend(['--disable-shared', '--enable-static'])
-        if self.settings.os != 'Windows' and self.options.fPIC:
-            args.append('--enable-pic')
         if self.settings.build_type == "Debug":
             args.append('--enable-debug')
         if self.settings.compiler == 'Visual Studio':
