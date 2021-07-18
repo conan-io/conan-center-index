@@ -48,17 +48,20 @@ class LibUSBCompatConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libusb/1.0.23")
+        self.requires("libusb/1.0.24")
         if self.settings.compiler == "Visual Studio":
             self.requires("dirent/1.23.2")
+
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
         self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
