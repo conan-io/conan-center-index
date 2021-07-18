@@ -48,8 +48,6 @@ class LibZipConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self._crypto == "win32" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
@@ -71,6 +69,10 @@ class LibZipConan(ConanFile):
             self.requires("openssl/1.1.1k")
         elif self._crypto == "mbedtls":
             self.requires("mbedtls/2.25")
+
+    def validate(self):
+        if self._crypto == "win32" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
 
     def package_id(self):
         self.info.options.crypto = self._crypto
