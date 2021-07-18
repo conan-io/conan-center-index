@@ -21,7 +21,7 @@ class LibZipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
-        "crypto": [False, "win32", "openssl", "mbedtls", "auto"],
+        "crypto": [False, "win32", "openssl", "mbedtls"],
         "tools": [True, False],
     }
     default_options = {
@@ -30,7 +30,7 @@ class LibZipConan(ConanFile):
         "with_bzip2": True,
         "with_lzma": True,
         "with_zstd": True,
-        "crypto": "auto",
+        "crypto": "openssl",
         "tools": True,
     }
     _cmake = None
@@ -38,12 +38,6 @@ class LibZipConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _crypto(self):
-        if self.options.crypto == "auto":
-            return "win32" if self.settings.os == "Windows" else "openssl"
-        return self.options.crypto
 
     @property
     def _has_zstd_support(self):
@@ -54,6 +48,9 @@ class LibZipConan(ConanFile):
             del self.options.fPIC
         if not self._has_zstd_support:
             del self.options.zstd
+        # Default crypto backend on windows
+        if self.settings.os == "Windows":
+            self.options.crypto = "win32"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -73,17 +70,14 @@ class LibZipConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
 
-        if self._crypto == "openssl":
+        if self.options.crypto == "openssl":
             self.requires("openssl/1.1.1k")
-        elif self._crypto == "mbedtls":
+        elif self.options.crypto == "mbedtls":
             self.requires("mbedtls/2.25")
 
     def validate(self):
-        if self._crypto == "win32" and self.settings.os != "Windows":
+        if self.options.crypto == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
-
-    def package_id(self):
-        self.info.options.crypto = self._crypto
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -106,9 +100,9 @@ class LibZipConan(ConanFile):
         self._cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
         self._cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
 
-        self._cmake.definitions["ENABLE_MBEDTLS"] = self._crypto == "mbedtls"
-        self._cmake.definitions["ENABLE_OPENSSL"] = self._crypto == "openssl"
-        self._cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self._crypto == "win32"
+        self._cmake.definitions["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
+        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
+        self._cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
 
         self._cmake.configure()
         return self._cmake
@@ -136,7 +130,7 @@ class LibZipConan(ConanFile):
         self.cpp_info.components["_libzip"].libs = ["zip"]
         if self.settings.os == "Windows":
             self.cpp_info.components["_libzip"].system_libs = ["advapi32"]
-            if self._crypto == "win32":
+            if self.options.crypto == "win32":
                 self.cpp_info.components["_libzip"].system_libs.append("bcrypt")
         self.cpp_info.components["_libzip"].requires = ["zlib::zlib"]
         if self.options.with_bzip2:
@@ -145,9 +139,9 @@ class LibZipConan(ConanFile):
             self.cpp_info.components["_libzip"].requires.append("xz_utils::xz_utils")
         if self.options.get_safe("with_zstd"):
             self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
-        if self._crypto == "openssl":
+        if self.options.crypto == "openssl":
             self.cpp_info.components["_libzip"].requires.append("openssl::openssl")
-        elif self._crypto == "mbedtls":
+        elif self.options.crypto == "mbedtls":
             self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
 
         if self.options.tools:
