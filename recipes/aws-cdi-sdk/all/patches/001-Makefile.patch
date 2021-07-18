@@ -1,0 +1,277 @@
+commit 29604f862387faaf277a992edc9d742ccb056149
+Author: dvirtz <dvirtz@gmail.com>
+Date:   Tue Aug 3 16:48:41 2021 +0300
+
+    build with external sdk
+
+diff --git a/Makefile b/Makefile
+index 6929dee..c0f70f3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -7,11 +7,6 @@ top.sdk := $(abspath $(CURDIR)/)
+ # all SDK build artifacts go into a debug or release directory under top.build
+ top.build := $(top.sdk)/build
+ 
+-### The AWS SDK is a required dependency of the CDI SDK by default for the metrics gathering service and for publishing
+-### metrics to CloudWatch. If the #defines of both CLOUDWATCH_METRICS_ENABLED and METRICS_GATHERING_SERVICE_ENABLED are
+-### commented out in src/cdi/configuration.h, this requirement can be removed by commenting out the following line.
+-require_aws_sdk := yes
+-
+ #-----------------------------------------------------------------------------
+ # Get product name and version information from text file.
+ #-----------------------------------------------------------------------------
+@@ -70,10 +65,8 @@ endif
+ 
+ ifeq ($(DEBUG), y)
+     config := debug
+-    config_libfabric := debug
+ else
+     config := release
+-    config_libfabric := release
+ endif
+ 
+ ## outputs from compilation process
+@@ -89,23 +82,10 @@ build_dir.image := $(build_dir)/image
+ build_dir.packages := $(build_dir)/packages
+ build_dir.libaws := $(build_dir)/libaws
+ 
+-# Setup path to libfabric.
+-ifneq ($(wildcard $(top)/libfabric),)
+-    top.libfabric := $(top)/libfabric
+-endif
+-
+ # Users can add their own variables to this makefile by creating a makefile in this directory called
+ # makefile.[name].vars.mk.
+ -include makefile.*.vars.mk
+ 
+-ifeq ($(top.libfabric),)
+-    $(error libfabric source tree not found)
+-endif
+-# Build artifacts for libfabric go into a debug or release directory under top.libfabric
+-build_dir.libfabric := $(top.libfabric)/build/$(config_libfabric)
+-
+-libfabric_config_h := $(build_dir.libfabric)/config.h
+-
+ ## library build definitions
+ # "top level" subtrees
+ top.cdi := $(top.src)/cdi
+@@ -120,22 +100,18 @@ src_dir.test_unit := $(top.test_unit)
+ # directories with header files
+ include_dir.cdi := $(top.cdi)
+ include_dirs.cdi := $(foreach dir,sdk cdi common,$(include_dir.$(dir)))
+-include_dirs.libfabric := $(top.libfabric)/include $(build_dir.libfabric)
+ 
+ # generate various lists for building SDK library
+ srcs.cdi := $(foreach ext,c cpp,$(wildcard $(src_dir.cdi)/*.$(ext)))
+ srcs.cdi += queue.c fifo.c list.c logger.c os_linux.c pool.c
+ objs.cdi := $(addprefix $(build_dir.obj)/,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(notdir $(srcs.cdi)))))
+ headers.cdi := $(foreach dir,$(include_dirs.cdi),$(wildcard $(dir)/*.h))
+-include_opts.cdi := $(foreach proj,cdi libfabric,$(addprefix -I,$(include_dirs.$(proj))))
++include_opts.cdi := $(foreach proj,cdi,$(addprefix -I,$(include_dirs.$(proj))))
+ depends.cdi := $(patsubst %.o,%.d,$(objs.cdi))
+ 
+ # the end goal of building the SDK library
+ libsdk := $(build_dir.lib)/libcdisdk.so.2.0
+ 
+-# the end goal of building the libfabric shared library
+-libfabric := $(build_dir.lib)/libfabric.so.1
+-
+ ## test program definitions
+ # test specific source files are all in one directory
+ src_dir.test := $(top.src)/test
+@@ -186,10 +162,10 @@ headers.all := $(foreach dir,cdi test test_common test_min_tx test_min_rx test_u
+ # augment compiler flags
+ COMMON_COMPILER_FLAG_ADDITIONS := \
+ 	$(include_opts.cdi) $(include_opts.test) \
+-	$(EXTRA_COMPILER_FLAG_ADDITIONS) \
+-	-Wall -Wextra -Werror -pthread -fPIC \
++	-Wall -Wextra -pthread -fPIC \
+ 	-D_LINUX -D_POSIX_C_SOURCE=200112L \
+-	$(sanitize_opts)
++	$(sanitize_opts) \
++	$(EXTRA_COMPILER_FLAG_ADDITIONS)
+ ifeq ($(config), debug)
+     COMMON_COMPILER_FLAG_ADDITIONS += -O0 -g -DDEBUG
+ else
+@@ -203,7 +179,7 @@ CXXFLAGS += $(COMMON_COMPILER_FLAG_ADDITIONS) --std=c++11
+ # The only libraries needed here are those that present new dependencies beyond what libcdisdk.so already requires.
+ # An rpath is specified so cdi_test can find libcdisdk.so.2 in the same directory as cdi_test or in a sibling directory
+ # named lib.
+-CDI_LDFLAGS = $(LDFLAGS) -L$(build_dir.lib) -lcdisdk -lfabric $(EXTRA_LD_LIBS) -lncurses -lm $(aws_sdk_library_flags) \
++CDI_LDFLAGS = $(LDFLAGS) -L$(build_dir.lib) -lcdisdk -lfabric $(EXTRA_LD_LIBS) -lncurses -lm \
+ 	   -Wl,-rpath,\$$ORIGIN:\$$ORIGIN/../lib64:\$$ORIGIN/../lib
+ 
+ # docs go into the build directory but are not specific to release/debug
+@@ -222,37 +198,11 @@ endif
+ 
+ # default build target
+ .PHONY : all
+-all : libfabric libsdk test docs docs_api $(EXTRA_ALL_TARGETS)
++all : libsdk test docs docs_api $(EXTRA_ALL_TARGETS)
+ 
+ # Build only the libraries
+ .PHONY : lib
+-lib : libfabric libsdk
+-
+-# Ensure that the location of the AWS SDK source code tree was specified unless explicitly opted out. Define and augment
+-# some variables needed for building and linking to the AWS SDK.
+-ifeq ($(require_aws_sdk),yes)
+-    ifneq ($(real_build_goals),)
+-        ifeq ($(AWS_SDK),)
+-            $(error AWS_SDK must be specified.)
+-        else
+-            AWS_SDK_ABS := $(abspath $(AWS_SDK))
+-            ifeq (0,$(shell if [ -d $(AWS_SDK_ABS)/aws-cpp-sdk-core ]; then echo 1; else echo 0; fi))
+-                $(error AWS_SDK does not point to the root of the AWS SDK.)
+-            else
+-                libaws := $(foreach component,monitoring core cdi,$(build_dir.lib64)/libaws-cpp-sdk-$(component).so)
+-
+-                # add necessary flags for compiler and linker
+-                CXXFLAGS += -I$(build_dir)/include
+-                CDI_LDFLAGS += -laws-checksums -laws-c-event-stream
+-
+-                aws_sdk_library_flags = -L$(build_dir.lib) -L$(build_dir.lib)64 -laws-cpp-sdk-cdi -laws-cpp-sdk-core \
+-                                        -laws-cpp-sdk-monitoring -lstdc++
+-                aws_h := $(build_dir)/include/aws/core/Aws.h
+-                cdi_sdk_src := $(AWS_SDK_ABS)/aws-cpp-sdk-cdi
+-            endif
+-        endif
+-    endif
+-endif
++lib : libsdk
+ 
+ .PHONY : help
+ help ::
+@@ -266,9 +216,6 @@ help ::
+ 	@echo "    cleanall       - clean and removes libfabric artifacts."
+ 	@echo "    headers        - Test compiles header files for correctness."
+ 	@echo ""
+-	@echo "Required parameters:"
+-	@echo "    AWS_SDK=<path> - Path to AWS SDK; specifying this enables publishing CloudWatch metrics."
+-	@echo ""
+ 	@echo "Options:"
+ 	@echo "    DEBUG=y        - Builds debug instead of release."
+ 	@echo "    SANITIZE=y     - Builds debug with extra Sanitizer run-time checking (automatically DEBUG=y)."
+@@ -284,49 +231,16 @@ vpath %.c $(foreach proj,cdi common test test_common test_minimal test_unit,$(sr
+ vpath %.cpp $(src_dir.cdi)
+ 
+ # rule to create the various build output directories
+-$(foreach d,obj lib bin doc packages libfabric results image libaws,$(build_dir.$(d))) :
++$(foreach d,obj lib bin doc packages results image libaws,$(build_dir.$(d))) :
+ 	$(Q)mkdir -p $@
+ 
+-# Setup flags for libfabric depending on debug/release build target.
+-LIBFABRIC_OPTS := --prefix=$(build_dir.libfabric) \
+-	--enable-efa=yes \
+-	--srcdir=$(top.libfabric) \
+-	--disable-verbs \
+-	--disable-rxd
+-ifeq ($(config), debug)
+-    LIBFABRIC_OPTS += --enable-debug
+-endif
+-
+-$(libfabric_config_h) : | $(build_dir.libfabric)
+-	@echo "Configuring libfabric. Creating $(libfabric_config_h)"
+-	$(Q)cd $(top.libfabric)       && \
+-	    ./autogen.sh              && \
+-	    cd $(build_dir.libfabric) && \
+-	    $(top.libfabric)/configure $(LIBFABRIC_OPTS)
+-
+-# rule to create the libfabric library files. We currently only use the static library called libfabric.a
+-# NOTE: The build steps used here were created from the libfabric docs.
+-# Implementation note: Specifying both "all" and "install" in the same make command fails if -j is also specified. The
+-# libfabric Makefile has some kind of issue that requires these to be two distinct invocations.
+-.PHONY : libfabric
+-libfabric : $(libfabric)
+-$(libfabric) : $(libfabric_config_h) | $(build_dir.lib)
+-	@echo "Building libfabric. Creating output files in $(build_dir.libfabric)"
+-	$(Q)$(MAKE) -C $(build_dir.libfabric) -j$$(nproc) all
+-	$(Q)$(MAKE) -C $(build_dir.libfabric) install
+-	$(Q)cp $(build_dir.libfabric)/lib/$(notdir $(libfabric)) $(libfabric)
+-	$(Q)ln -fs $@ $(basename $@)
+-	$(Q)ln -fs $@ $(basename $(basename $@))
+-
+ # rule to create the SDK library file
+ .PHONY : libsdk
+ libsdk : $(libsdk)
+-$(libsdk) : $(libfabric_config_h) $(objs.cdi) $(libfabric) $(libaws) | $(build_dir.lib)
++$(libsdk) : $(objs.cdi) | $(build_dir.lib)
+ 	@echo "GCC version is" $(GCCVERSION)
+ 	$(Q)$(CC) -shared -o $@ -Wl,-z,defs,-soname=$(basename $(notdir $@)),--version-script,libcdisdk.vers \
+-		$(objs.cdi) -L$(build_dir.lib) $(aws_sdk_library_flags) \
+-		-lfabric -ldl -lrt $(EXTRA_CC_LIBS) -lnl-3 -lm $(EXTRA_LD_LIBS) -lpthread -lc \
+-		$(ASAN_LIBS) -Wl,-rpath,\$$ORIGIN:\$$ORIGIN/../lib
++		$(objs.cdi) $(LDFLAGS) $(LIBS)
+ 	$(Q)ln -fs $@ $(basename $@)
+ 	$(Q)ln -fs $@ $(basename $(basename $@))
+ 
+@@ -336,38 +250,24 @@ $(cdi_sdk_src) :
+ 	$(Q)ln -fs $(top.sdk)/$(notdir $@) $@
+ endif
+ 
+-# rule to build the AWS SDK
+-$(aws_h) $(libaws) : $(cdi_sdk_src) | $(build_dir.libaws)
+-	$(Q)cd $(build_dir.libaws) \
+-	    && cmake -j $$(nproc) -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_ONLY="monitoring;cdi" \
+-	           -DCMAKE_INSTALL_PREFIX=$(build_dir) $(AWS_SDK_ABS) \
+-               -DCMAKE_VERBOSE_MAKEFILE=TRUE \
+-	           -DAUTORUN_UNIT_TESTS=FALSE \
+-	           -DENABLE_TESTING=FALSE \
+-	    && $(MAKE) -j $$(nproc) V=$(V) \
+-	    && $(MAKE) install V=$(V)
+-ifneq ($(aws_h),)
+-		$(Q)touch $(aws_h)
+-endif
+-
+ # Define a dependency to cause the AWS SDK to get built prior to trying to compile cw_metrics.cpp.
+ $(build_dir.obj)/cloudwatch_sdk_metrics.o : $(aws_h)
+ 
+ # rule to build a .d file from a .c file; relies on vpath to find the source file
+ $(build_dir.obj)/%.d : %.c | $(build_dir.obj)
+-	$(Q)$(CC) $(CFLAGS) -MM -MF $@ -MT $(patsubst %.d,%.o,$@) $<
++	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) -MM -MF $@ -MT $(patsubst %.d,%.o,$@) $<
+ 
+ # rule to build a .o file from a .c file; relies on vpath to find the source file
+ $(build_dir.obj)/%.o : %.c | $(build_dir.obj)
+-	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
++	$(Q)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+ 
+ # rule to build a .d file from a .c file; relies on vpath to find the source file
+ $(build_dir.obj)/%.d : %.cpp | $(build_dir.obj)
+-	$(Q)$(CXX) $(CXXFLAGS) -MM -MF $@ -MT $(patsubst %.d,%.o,$@) $<
++	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MM -MF $@ -MT $(patsubst %.d,%.o,$@) $<
+ 
+ # rule to build a .o file from a .c file; relies on vpath to find the source file
+ $(build_dir.obj)/%.o : %.cpp | $(build_dir.obj)
+-	$(Q)$(CXX) $(CXXFLAGS) -c -o $@ $<
++	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CPPFLAGS) -c -o $@ $<
+ 
+ # rules for building the test programs
+ .PHONY : test
+@@ -421,8 +321,8 @@ docs_api : $(docs_top_index) | $(build_dir.packages)
+ headers : $(headers.cdi)
+ 	$(Q)for i in $^; do \
+ 	       echo "compiling $$(basename $$i)"; \
+-	       $(CC) $(CFLAGS) $$i; \
+-	       $(CXX) $(CXXFLAGS) $$i; \
++	       $(CC) $(CFLAGS) $(CPPFLAGS) $$i; \
++	       $(CXX) $(CXXFLAGS) $(CPPFLAGS) $$i; \
+ 	    done
+ 	$(Q)$(RM) $(addsuffix .gch,$+)
+ 
+@@ -432,13 +332,12 @@ clean ::
+ 	$(Q)$(RM) -r $(top.build)
+ 
+ cleanall :: clean
+-	$(Q)$(RM) -r $(top.libfabric)/build $(libfabric_config_h)
+ 
+-$(depends.cdi) : $(libfabric_config_h) $(aws_h)
++$(depends.cdi) : $(aws_h)
+ 
+ # include dependency rules from generated files; this is conditional so .d files are only created if needed.
+ ifneq ($(real_build_goals),)
+--include $(foreach proj,cdi test test_min_tx test_min_rx test_unit,$(depends.$(proj)))
++-include $(foreach proj,$(real_build_goals),$(depends.$(proj)))
+ endif
+ 
+ # Users can add their own rules to this makefile by creating a makefile in this directory called
