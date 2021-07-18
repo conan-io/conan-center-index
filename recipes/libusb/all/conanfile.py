@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class LibUSBConan(ConanFile):
@@ -34,18 +35,23 @@ class LibUSBConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
 
     def config_options(self):
-        if self.settings.os not in  ["Linux", "Android"]:
-            del self.options.enable_udev
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "Android"]:
+            del self.options.enable_udev
+        # FIXME: enable_udev should be True for Android, but libudev recipe is missing
+        if self.settings.os == "Android":
+            self.options.enable_udev = False
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Android":
-            self.options.enable_udev = False
+
+    def validate(self):
+        if self.settings.os == "Android" and self.options.enable_udev:
+            raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
