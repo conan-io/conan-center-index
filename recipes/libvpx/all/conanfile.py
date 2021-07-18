@@ -20,11 +20,14 @@ class LibVPXConan(ConanFile):
     default_options = {'shared': False,
                        'fPIC': True}
 
-    _source_subfolder = "source_subfolder"
     _arch_options = ['mmx', 'sse', 'sse2', 'sse3', 'ssse3', 'sse4_1', 'avx', 'avx2', 'avx512']
 
     options.update({name: [True, False] for name in _arch_options})
     default_options.update({name: 'avx' not in name for name in _arch_options})
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
