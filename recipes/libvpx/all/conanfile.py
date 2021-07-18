@@ -42,7 +42,7 @@ class LibVPXConan(ConanFile):
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires('msys2/20200517')
 
-    def source(self):                                                                                    
+    def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
@@ -88,8 +88,11 @@ class LibVPXConan(ConanFile):
         build_os = str(self.settings.os)
         if build_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif build_os in ['Macos', 'iOS', 'watchOS', 'tvOS']:
-            os_name = 'darwin11'
+        elif tools.is_apple_os(build_os):
+            if "arm" in self.settings.arch:
+                os_name = "darwin"
+            else:
+                os_name = "darwin17" # TODO: it would be better to map os version here if specified in profile
         elif build_os == 'Linux':
             os_name = 'linux'
         elif build_os == 'Solaris':
