@@ -45,6 +45,8 @@ class LibVPXConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported")
+        if self.settings.compiler not in ["Visual Studio", "gcc", "clang", "apple-clang"]:
+            raise ConanInvalidConfiguration("Unsupported compiler {}.".format(self.settings.compiler))
 
     @property
     def _settings_build(self):
@@ -94,8 +96,6 @@ class LibVPXConan(ConanFile):
             compiler = 'vs' + str(self.settings.compiler.version)
         elif host_compiler in ['gcc', 'clang', 'apple-clang']:
             compiler = 'gcc'
-        else:
-            raise ConanInvalidConfiguration("Unsupported compiler '{}'.".format(host_compiler))
 
         host_os = str(self.settings.os)
         if host_os == 'Windows':
