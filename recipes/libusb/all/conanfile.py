@@ -2,6 +2,9 @@ from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class LibUSBConan(ConanFile):
     name = "libusb"
     description = "A cross-platform library to access USB devices"
@@ -81,9 +84,8 @@ class LibUSBConan(ConanFile):
                 package_tool.install(packages=libudev_name, update=True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
