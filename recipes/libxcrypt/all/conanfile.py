@@ -90,4 +90,5 @@ class LibxcryptConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libxcrypt"
         self.cpp_info.libs = ["crypt"]
