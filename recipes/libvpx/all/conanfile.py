@@ -26,17 +26,16 @@ class LibVPXConan(ConanFile):
     options.update({name: [True, False] for name in _arch_options})
     default_options.update({name: 'avx' not in name for name in _arch_options})
 
-
-    def configure(self):
-        if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration('Windows shared builds are not supported')
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
         if str(self.settings.arch) not in ['x86', 'x86_64']:
             for name in self._arch_options:
                 delattr(self.options, name)
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Windows shared builds are not supported")
 
     def build_requirements(self):
         self.build_requires('yasm/1.3.0')
