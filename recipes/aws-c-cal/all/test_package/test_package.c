@@ -1,9 +1,9 @@
-#include <aws/cal/hash.h>
+#include <aws/cal/cal.h>
 
 int main() {
     struct aws_allocator *allocator = aws_default_allocator();
-    struct aws_hash *hash = aws_sha256_new(allocator);
-    aws_hash_destroy(hash);
+    aws_cal_library_init(allocator);
+    aws_cal_library_clean_up();
 
     return EXIT_SUCCESS;
 }
