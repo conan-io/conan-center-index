@@ -76,6 +76,9 @@ class RtMidiConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "rtmidi"
+        self.cpp_info.names["cmake_find_package"] = "RtMidi"
+        self.cpp_info.names["cmake_find_package_multi"] = "RtMidi"
+        # FIXME: Needs components to do https://github.com/thestk/rtmidi/blob/12b64c18912816d0cf9b11233c4bf978f2824b76/CMakeLists.txt#L259
         self.cpp_info.libs = ["rtmidi"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(
