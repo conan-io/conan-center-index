@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import os
 import re
 import shlex
+import shutil
 
 
 class LibUSBCompatConan(ConanFile):
@@ -54,6 +55,7 @@ class LibUSBCompatConan(ConanFile):
             self.requires("dirent/1.23.2")
 
     def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
@@ -145,6 +147,10 @@ class LibUSBCompatConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         if self.settings.os == "Windows":
             api = "__declspec(dllexport)" if self.options.shared else ""
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
@@ -154,6 +160,10 @@ class LibUSBCompatConan(ConanFile):
             # This will override this and add the dependency
             tools.replace_in_file(os.path.join(self._source_subfolder, "ltmain.sh"),
                                   "droppeddeps=yes", "droppeddeps=no && func_append newdeplibs \" $a_deplib\"")
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def build(self):
         self._patch_sources()
