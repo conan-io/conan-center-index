@@ -49,6 +49,10 @@ class Libx265Conan(ConanFile):
             del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_numa
+        # FIXME: Disable assembly by default if host is arm and compiler apple-clang for the moment.
+        # Indeed, apple-clang is not able to understand some asm instructions of libx265
+        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch:
+            self.options.assembly = False
 
     def configure(self):
         if self.options.shared:
@@ -61,10 +65,6 @@ class Libx265Conan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_numa", False):
             self.requires("libnuma/2.0.14")
-
-    def validate(self):
-        if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Current recipe supports only x86/x86_64 builds")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -87,6 +87,11 @@ class Libx265Conan(ConanFile):
             self._cmake.definitions["STATIC_LINK_CRT"] = "T" in str(self.settings.compiler.runtime)
         if self.settings.os == "Linux":
             self._cmake.definitions["PLATFORM_LIBS"] = "dl"
+        # FIXME: too specific, should be handled by CMake helper
+        if tools.is_apple_os(self.settings.os) and self.settings.arch == "armv8":
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+        if "arm" in self.settings.arch:
+            self._cmake.definitions["CROSS_COMPILE_ARM"] = tools.cross_building(self.settings)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
