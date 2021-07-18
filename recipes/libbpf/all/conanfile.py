@@ -1,15 +1,16 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import platform
 
 class LibbpfConan(ConanFile):
     name = "libbpf"
     description = "eBPF helper library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libbpf/libbpf"
-    license = "LGPL-2.1"
+    license = "LGPL-2.1", "BSD-2-Clause"
     topics = ("conan", "bpf", "ebpf", "libbpf", "berkeley-packet-filter")
-    generators = "cmake", "pkg_config"
+    generators = "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
@@ -49,10 +50,14 @@ class LibbpfConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self)
         return self._autotools, make_args
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This library is only available on Linux")
 
+        if tools.Version(platform.release()) < "5.7":
+            raise ConanInvalidConfiguration("This library needs at least kernel version 5.7")
+
+    def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
