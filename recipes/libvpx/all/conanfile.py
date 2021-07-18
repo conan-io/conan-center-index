@@ -77,27 +77,27 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
-        build_compiler = str(self.settings.compiler)
-        if build_compiler == 'Visual Studio':
+        host_compiler = str(self.settings.compiler)
+        if host_compiler == 'Visual Studio':
             compiler = 'vs' + str(self.settings.compiler.version)
-        elif build_compiler in ['gcc', 'clang', 'apple-clang']:
+        elif host_compiler in ['gcc', 'clang', 'apple-clang']:
             compiler = 'gcc'
         else:
-            raise ConanInvalidConfiguration("Unsupported compiler '{}'.".format(build_compiler))
+            raise ConanInvalidConfiguration("Unsupported compiler '{}'.".format(host_compiler))
 
-        build_os = str(self.settings.os)
-        if build_os == 'Windows':
+        host_os = str(self.settings.os)
+        if host_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif tools.is_apple_os(build_os):
+        elif tools.is_apple_os(host_os):
             if "arm" in self.settings.arch:
                 os_name = "darwin"
             else:
                 os_name = "darwin17" # TODO: it would be better to map os version here if specified in profile
-        elif build_os == 'Linux':
+        elif host_os == 'Linux':
             os_name = 'linux'
-        elif build_os == 'Solaris':
+        elif host_os == 'Solaris':
             os_name = 'solaris'
-        elif build_os == 'Android':
+        elif host_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
         if tools.cross_building(self) or self.settings.compiler == 'Visual Studio':
