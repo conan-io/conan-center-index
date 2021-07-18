@@ -61,9 +61,6 @@ class lmdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lmdb"]
-        self.cpp_info.names["cmake_find_package"] = "LMDB"
-        self.cpp_info.names["cmake_find_package_multi"] = "LMDB"
-        self.cpp_info.names["pkg_config"] = "lmdb"
 
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = ["pthread"]
