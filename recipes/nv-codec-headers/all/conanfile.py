@@ -48,3 +48,5 @@ class FFNvEncHeaders(ConanFile):
         autotools = self._configure_autotools()
         vars = autotools.vars
         autotools.install(args=["PREFIX={}".format(self.package_folder)])
+
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
