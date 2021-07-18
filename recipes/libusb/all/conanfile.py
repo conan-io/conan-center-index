@@ -9,8 +9,16 @@ class LibUSBConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "libusb", "usb", "device")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "enable_udev": True, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "enable_udev": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_udev": True,
+    }
     _autotools = None
 
     @property
@@ -25,10 +33,11 @@ class LibUSBConan(ConanFile):
     def _is_msvc(self):
         return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+    def config_options(self):
+        if self.settings.os not in  ["Linux", "Android"]:
+            del self.options.enable_udev
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -37,12 +46,6 @@ class LibUSBConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os == "Android":
             self.options.enable_udev = False
-
-    def config_options(self):
-        if self.settings.os not in  ["Linux", "Android"]:
-            del self.options.enable_udev
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
@@ -67,6 +70,11 @@ class LibUSBConan(ConanFile):
                     self.output.warn("Could not install libudev: Undefined package name for current platform.")
                     return
                 package_tool.install(packages=libudev_name, update=True)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = self.name + "-" + self.version
+        os.rename(extracted_folder, self._source_subfolder)
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
