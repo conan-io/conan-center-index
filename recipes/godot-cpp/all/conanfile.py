@@ -65,7 +65,12 @@ class GodotCppConan(ConanFile):
         tools.rename(glob.glob("godot-cpp-*")[0], self._source_subfolder)
 
     def requirements(self):
-        self.requires("godot_headers/{}".format(self.version))
+        headers_version = {
+            "cci.3.3-20210525": "3.3.2",
+        }
+
+        required_headers_version = headers_version[self.version] if self.version in headers_version else self.version
+        self.requires("godot_headers/{}".format(required_headers_version))
 
     def configure(self):
         minimal_cpp_standard = "14"
