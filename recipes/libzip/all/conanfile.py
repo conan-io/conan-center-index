@@ -21,7 +21,8 @@ class LibZipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
-        "crypto": [False, "win32", "openssl", "mbedtls", "auto"]
+        "crypto": [False, "win32", "openssl", "mbedtls", "auto"],
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
@@ -29,7 +30,8 @@ class LibZipConan(ConanFile):
         "with_bzip2": True,
         "with_lzma": True,
         "with_zstd": True,
-        "crypto": "auto"
+        "crypto": "auto",
+        "tools": True,
     }
     _cmake = None
 
@@ -91,6 +93,7 @@ class LibZipConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["BUILD_REGRESS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_DOC"] = False
@@ -147,6 +150,7 @@ class LibZipConan(ConanFile):
         elif self._crypto == "mbedtls":
             self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
