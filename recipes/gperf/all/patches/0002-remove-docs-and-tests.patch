@@ -1,0 +1,26 @@
+--- configure.ac
++++ configure.ac
+@@ -30,7 +30,7 @@
+ 
+ AC_CONFIG_FILES([Makefile])
+ 
+-AC_CONFIG_SUBDIRS([lib src tests doc])
++AC_CONFIG_SUBDIRS([lib src])
+ 
+ dnl This piece of sed script replaces every line containing '@subdir@'
+ dnl by several consecutive lines, each referencing one subdir.
+@@ -42,14 +42,6 @@
+ p
+ g
+ s/@subdir@/src/
+-p
+-g
+-s/@subdir@/tests/
+-p
+-g
+-s/@subdir@/doc/
+-p
+-d
+ }
+ '
+ 

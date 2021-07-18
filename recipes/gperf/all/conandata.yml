@@ -9,3 +9,6 @@ patches:
   "3.1":
     - patch_file: "patches/0001-remove-register-keyword.patch"
       base_path: "source_subfolder"
+  "cci.20210606":
+    - patch_file: "patches/0002-remove-docs-and-tests.patch"
+      base_path: "source_subfolder"
