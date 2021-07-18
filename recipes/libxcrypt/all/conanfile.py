@@ -1,6 +1,8 @@
-import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibxcryptConan(ConanFile):
@@ -38,12 +40,12 @@ class LibxcryptConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
