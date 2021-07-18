@@ -34,6 +34,10 @@ class LibUSBConan(ConanFile):
     def _is_msvc(self):
         return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,9 +58,8 @@ class LibUSBConan(ConanFile):
             raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def system_requirements(self):
         if self.settings.os == "Linux":
