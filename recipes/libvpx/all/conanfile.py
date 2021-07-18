@@ -142,4 +142,5 @@ class LibVPXConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "vpx"
         self.cpp_info.libs = tools.collect_libs(self)
