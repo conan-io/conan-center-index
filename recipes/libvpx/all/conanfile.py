@@ -25,6 +25,8 @@ class LibVPXConan(ConanFile):
     options.update({name: [True, False] for name in _arch_options})
     default_options.update({name: 'avx' not in name for name in _arch_options})
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -58,6 +60,8 @@ class LibVPXConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
         win_bash = tools.os_info.is_windows
         prefix = os.path.abspath(self.package_folder)
         if win_bash:
@@ -115,21 +119,21 @@ class LibVPXConan(ConanFile):
                 if not self.options.get_safe(name):
                     args.append('--disable-%s' % name)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
-            env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
-            env_build.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
-        return env_build
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
+            self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
+        return self._autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
-            env_build = self._configure_autotools()
-            env_build.make()
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        with tools.chdir(self.build_folder):
-            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            env_build.install()
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            autotools = self._configure_autotools()
+            autotools.install()
 
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst='licenses')
         if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
