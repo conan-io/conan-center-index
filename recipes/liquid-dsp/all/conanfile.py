@@ -150,6 +150,8 @@ class LiquidDspConan(ConanFile):
             configure_args.append("--enable-debug-messages")
         if self.options.simdoverride:
             configure_args.append("--enable-simdoverride")
+        if self.settings.compiler == "Visual Studio":
+            configure_args.append("CFLAGS='-static -static-libgcc'")
         configure_args_str = " ".join(configure_args)
         with self._build_context():
             with tools.chdir(self._source_subfolder):
@@ -174,6 +176,7 @@ class LiquidDspConan(ConanFile):
             src=os.path.join(self._source_subfolder, "include"),
         )
         self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
+        self.copy(pattern=self._lib_pattern, dst="bin", src=self._source_subfolder)
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
