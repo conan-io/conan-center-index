@@ -32,6 +32,8 @@ class MagnumConan(ConanFile):
         "with_trade": [True, False],
         "with_vk": [True, False],
 
+        "with_cglcontext": [True, False],
+
         # Options related to plugins
         "shared_plugins": [True, False],
         # WITH_ANYAUDIOIMPORTER
@@ -63,6 +65,8 @@ class MagnumConan(ConanFile):
         "with_trade": True,
         "with_vk": False,
 
+        "with_cglcontext": True,
+
         "shared_plugins": True,
         "with_anyimageimporter": True,
         "with_anyimageconverter": True,
@@ -92,6 +96,8 @@ class MagnumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Macos":
+            del self.options.with_cglcontext
 
     def configure(self):
         if self.options.shared:
@@ -114,6 +120,9 @@ class MagnumConan(ConanFile):
 
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
+
+        if self.options.get_safe("with_cglcontext", False) and not self.options.with_gl:
+            raise ConanInvalidConfiguration("Option 'with_cglcontext' requires option 'with_gl'")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -138,6 +147,8 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.with_texturetools
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
+
+        self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
 
         ##### Plugins related #####
         self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
@@ -274,8 +285,19 @@ class MagnumConan(ConanFile):
         # VK
         # TODO: target here, disabled by default
 
+        if self.options.with_cglcontext:
+            self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
+            self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
+            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext"]
+            self.cpp_info.components["cglcontext"].requires = ["magnum_main", "gl"]
+        
+            # FIXME: If only one *context is provided, then it also gets the GLContext alias
+            self.cpp_info.components["glcontext"].names["cmake_find_package"] = "GLContext"
+            self.cpp_info.components["glcontext"].names["cmake_find_package_multi"] = "GLContext"
+            self.cpp_info.components["glcontext"].requires = ["cglcontext"]
+
         ######## PLUGINS ########
-        # TODO: If shared, there are no libraries to link with
+        # If shared, there are no libraries to link with
         if self.options.with_anyimageimporter:
             self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
             self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
