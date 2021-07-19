@@ -1,0 +1,2 @@
+https://github.com/elizagamedev/conan-ruby
+458ffaec0349e6886f3032f13410300c7717ff30 (branch: stable/2.3.7)
