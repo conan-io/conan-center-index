@@ -6,6 +6,9 @@ virtualrunenv
 openssl/1.1.1d
 axtls/1.5.3.dssl1
 boost/1.69.0
+bison/3.5.3
+flex/2.6.4
+m4/1.4.18
 
 # global bzip2 dependency
 bzip2/1.0.8
