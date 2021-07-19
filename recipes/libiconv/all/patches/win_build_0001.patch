@@ -1,0 +1,867 @@
+--- a/config.h.in	2021-07-05 12:25:16.951976852 +0300
++++ b/config.h.in	2021-07-05 12:43:44.540276341 +0300
+@@ -1,478 +1,478 @@
+ /* config.h.in.  Generated from configure.ac by autoheader.  */
+ 
+ /* Define to the number of bits in type 'ptrdiff_t'. */
+-#undef BITSIZEOF_PTRDIFF_T
++#cmakedefine BITSIZEOF_PTRDIFF_T
+ 
+ /* Define to the number of bits in type 'sig_atomic_t'. */
+-#undef BITSIZEOF_SIG_ATOMIC_T
++#cmakedefine BITSIZEOF_SIG_ATOMIC_T
+ 
+ /* Define to the number of bits in type 'size_t'. */
+-#undef BITSIZEOF_SIZE_T
++#cmakedefine BITSIZEOF_SIZE_T
+ 
+ /* Define to the number of bits in type 'wchar_t'. */
+-#undef BITSIZEOF_WCHAR_T
++#cmakedefine BITSIZEOF_WCHAR_T
+ 
+ /* Define to the number of bits in type 'wint_t'. */
+-#undef BITSIZEOF_WINT_T
++#cmakedefine BITSIZEOF_WINT_T
+ 
+ /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+    systems. This function is required for `alloca.c' support on those systems.
+    */
+-#undef CRAY_STACKSEG_END
++#cmakedefine CRAY_STACKSEG_END
+ 
+ /* Define to 1 if using `alloca.c'. */
+-#undef C_ALLOCA
++#cmakedefine C_ALLOCA
+ 
+ /* Define to 1 if // is a file system root distinct from /. */
+-#undef DOUBLE_SLASH_IS_DISTINCT_ROOT
++#cmakedefine DOUBLE_SLASH_IS_DISTINCT_ROOT
+ 
+ /* Define as good substitute value for EILSEQ. */
+-#undef EILSEQ
++#cmakedefine EILSEQ
+ 
+ /* Define to 1 to enable a few rarely used encodings. */
+-#undef ENABLE_EXTRA
++#cmakedefine ENABLE_EXTRA
+ 
+ /* Define to 1 if translation of program messages to the user's native
+    language is requested. */
+-#undef ENABLE_NLS
++#cmakedefine ENABLE_NLS
+ 
+ /* Define to 1 if the package shall run at any location in the file system. */
+-#undef ENABLE_RELOCATABLE
++#cmakedefine ENABLE_RELOCATABLE
+ 
+ /* Define to 1 if realpath() can malloc memory, always gives an absolute path,
+    and handles trailing slash correctly. */
+-#undef FUNC_REALPATH_WORKS
++#cmakedefine FUNC_REALPATH_WORKS
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module canonicalize-lgpl shall be considered present. */
+-#undef GNULIB_CANONICALIZE_LGPL
++#cmakedefine GNULIB_CANONICALIZE_LGPL
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module fscanf shall be considered present. */
+-#undef GNULIB_FSCANF
++#cmakedefine GNULIB_FSCANF
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module msvc-nothrow shall be considered present. */
+-#undef GNULIB_MSVC_NOTHROW
++#cmakedefine GNULIB_MSVC_NOTHROW
+ 
+ /* Define to 1 if printf and friends should be labeled with attribute
+    "__gnu_printf__" instead of "__printf__" */
+-#undef GNULIB_PRINTF_ATTRIBUTE_FLAVOR_GNU
++#cmakedefine GNULIB_PRINTF_ATTRIBUTE_FLAVOR_GNU
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module scanf shall be considered present. */
+-#undef GNULIB_SCANF
++#cmakedefine GNULIB_SCANF
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module sigpipe shall be considered present. */
+-#undef GNULIB_SIGPIPE
++#cmakedefine GNULIB_SIGPIPE
+ 
+ /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+    whether the gnulib module strerror shall be considered present. */
+-#undef GNULIB_STRERROR
++#cmakedefine GNULIB_STRERROR
+ 
+ /* Define to 1 when the gnulib module canonicalize_file_name should be tested.
+    */
+-#undef GNULIB_TEST_CANONICALIZE_FILE_NAME
++#cmakedefine GNULIB_TEST_CANONICALIZE_FILE_NAME
+ 
+ /* Define to 1 when the gnulib module environ should be tested. */
+-#undef GNULIB_TEST_ENVIRON
++#cmakedefine GNULIB_TEST_ENVIRON
+ 
+ /* Define to 1 when the gnulib module lstat should be tested. */
+-#undef GNULIB_TEST_LSTAT
++#cmakedefine GNULIB_TEST_LSTAT
+ 
+ /* Define to 1 when the gnulib module malloc-posix should be tested. */
+-#undef GNULIB_TEST_MALLOC_POSIX
++#cmakedefine GNULIB_TEST_MALLOC_POSIX
+ 
+ /* Define to 1 when the gnulib module raise should be tested. */
+-#undef GNULIB_TEST_RAISE
++#cmakedefine GNULIB_TEST_RAISE
+ 
+ /* Define to 1 when the gnulib module read should be tested. */
+-#undef GNULIB_TEST_READ
++#cmakedefine GNULIB_TEST_READ
+ 
+ /* Define to 1 when the gnulib module readlink should be tested. */
+-#undef GNULIB_TEST_READLINK
++#cmakedefine GNULIB_TEST_READLINK
+ 
+ /* Define to 1 when the gnulib module realpath should be tested. */
+-#undef GNULIB_TEST_REALPATH
++#cmakedefine GNULIB_TEST_REALPATH
+ 
+ /* Define to 1 when the gnulib module sigprocmask should be tested. */
+-#undef GNULIB_TEST_SIGPROCMASK
++#cmakedefine GNULIB_TEST_SIGPROCMASK
+ 
+ /* Define to 1 when the gnulib module stat should be tested. */
+-#undef GNULIB_TEST_STAT
++#cmakedefine GNULIB_TEST_STAT
+ 
+ /* Define to 1 when the gnulib module strerror should be tested. */
+-#undef GNULIB_TEST_STRERROR
++#cmakedefine GNULIB_TEST_STRERROR
+ 
+ /* Define to 1 if you have `alloca', as a function or macro. */
+-#undef HAVE_ALLOCA
++#cmakedefine HAVE_ALLOCA
+ 
+ /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+    */
+-#undef HAVE_ALLOCA_H
++#cmakedefine HAVE_ALLOCA_H
+ 
+ /* Define to 1 if you have the `canonicalize_file_name' function. */
+-#undef HAVE_CANONICALIZE_FILE_NAME
++#cmakedefine HAVE_CANONICALIZE_FILE_NAME
+ 
+ /* Define to 1 if you have the Mac OS X function CFLocaleCopyCurrent in the
+    CoreFoundation framework. */
+-#undef HAVE_CFLOCALECOPYCURRENT
++#cmakedefine HAVE_CFLOCALECOPYCURRENT
+ 
+ /* Define to 1 if you have the Mac OS X function
+    CFLocaleCopyPreferredLanguages in the CoreFoundation framework. */
+-#undef HAVE_CFLOCALECOPYPREFERREDLANGUAGES
++#cmakedefine HAVE_CFLOCALECOPYPREFERREDLANGUAGES
+ 
+ /* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
+    the CoreFoundation framework. */
+-#undef HAVE_CFPREFERENCESCOPYAPPVALUE
++#cmakedefine HAVE_CFPREFERENCESCOPYAPPVALUE
+ 
+ /* Define to 1 if you have the `copy_file_range' function. */
+-#undef HAVE_COPY_FILE_RANGE
++#cmakedefine HAVE_COPY_FILE_RANGE
+ 
+ /* Define if the GNU dcgettext() function is already present or preinstalled.
+    */
+-#undef HAVE_DCGETTEXT
++#cmakedefine HAVE_DCGETTEXT
+ 
+ /* Define to 1 if you have the declaration of `clearerr_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_CLEARERR_UNLOCKED
++#cmakedefine HAVE_DECL_CLEARERR_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `feof_unlocked', and to 0 if you
+    don't. */
+-#undef HAVE_DECL_FEOF_UNLOCKED
++#cmakedefine HAVE_DECL_FEOF_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `ferror_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FERROR_UNLOCKED
++#cmakedefine HAVE_DECL_FERROR_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fflush_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FFLUSH_UNLOCKED
++#cmakedefine HAVE_DECL_FFLUSH_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fgets_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FGETS_UNLOCKED
++#cmakedefine HAVE_DECL_FGETS_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fputc_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FPUTC_UNLOCKED
++#cmakedefine HAVE_DECL_FPUTC_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fputs_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FPUTS_UNLOCKED
++#cmakedefine HAVE_DECL_FPUTS_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fread_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FREAD_UNLOCKED
++#cmakedefine HAVE_DECL_FREAD_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `fwrite_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_FWRITE_UNLOCKED
++#cmakedefine HAVE_DECL_FWRITE_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `getchar_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_GETCHAR_UNLOCKED
++#cmakedefine HAVE_DECL_GETCHAR_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
+    don't. */
+-#undef HAVE_DECL_GETC_UNLOCKED
++#cmakedefine HAVE_DECL_GETC_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `program_invocation_name', and
+    to 0 if you don't. */
+-#undef HAVE_DECL_PROGRAM_INVOCATION_NAME
++#cmakedefine HAVE_DECL_PROGRAM_INVOCATION_NAME
+ 
+ /* Define to 1 if you have the declaration of `program_invocation_short_name',
+    and to 0 if you don't. */
+-#undef HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME
++#cmakedefine HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME
+ 
+ /* Define to 1 if you have the declaration of `putchar_unlocked', and to 0 if
+    you don't. */
+-#undef HAVE_DECL_PUTCHAR_UNLOCKED
++#cmakedefine HAVE_DECL_PUTCHAR_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `putc_unlocked', and to 0 if you
+    don't. */
+-#undef HAVE_DECL_PUTC_UNLOCKED
++#cmakedefine HAVE_DECL_PUTC_UNLOCKED
+ 
+ /* Define to 1 if you have the declaration of `setenv', and to 0 if you don't.
+    */
+-#undef HAVE_DECL_SETENV
++#cmakedefine HAVE_DECL_SETENV
+ 
+ /* Define to 1 if you have the declaration of `strerror_r', and to 0 if you
+    don't. */
+-#undef HAVE_DECL_STRERROR_R
++#cmakedefine HAVE_DECL_STRERROR_R
+ 
+ /* Define to 1 if you have the declaration of `__argv', and to 0 if you don't.
+    */
+-#undef HAVE_DECL___ARGV
++#cmakedefine HAVE_DECL___ARGV
+ 
+ /* Define to 1 if you have the <dlfcn.h> header file. */
+-#undef HAVE_DLFCN_H
++#cmakedefine HAVE_DLFCN_H
+ 
+ /* Define if you have the declaration of environ. */
+-#undef HAVE_ENVIRON_DECL
++#cmakedefine HAVE_ENVIRON_DECL
+ 
+ /* Define to 1 if you have the `getcwd' function. */
+-#undef HAVE_GETCWD
++#cmakedefine HAVE_GETCWD
+ 
+ /* Define to 1 if you have the `getc_unlocked' function. */
+-#undef HAVE_GETC_UNLOCKED
++#cmakedefine HAVE_GETC_UNLOCKED
+ 
+ /* Define to 1 if you have the `getexecname' function. */
+-#undef HAVE_GETEXECNAME
++#cmakedefine HAVE_GETEXECNAME
+ 
+ /* Define to 1 if you have the `getprogname' function. */
+-#undef HAVE_GETPROGNAME
++#cmakedefine HAVE_GETPROGNAME
+ 
+ /* Define if the GNU gettext() function is already present or preinstalled. */
+-#undef HAVE_GETTEXT
++#cmakedefine HAVE_GETTEXT
+ 
+ /* Define if you have the iconv() function and it works. */
+-#undef HAVE_ICONV
++#cmakedefine HAVE_ICONV
+ 
+ /* Define to 1 if you have the <inttypes.h> header file. */
+-#undef HAVE_INTTYPES_H
++#cmakedefine HAVE_INTTYPES_H
+ 
+ /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+-#undef HAVE_LANGINFO_CODESET
++#cmakedefine HAVE_LANGINFO_CODESET
+ 
+ /* Define to 1 if you have the <limits.h> header file. */
+-#undef HAVE_LIMITS_H
++#cmakedefine HAVE_LIMITS_H
+ 
+ /* Define to 1 if the system has the type 'long long int'. */
+-#undef HAVE_LONG_LONG_INT
++#cmakedefine HAVE_LONG_LONG_INT
+ 
+ /* Define to 1 if you have the `lstat' function. */
+-#undef HAVE_LSTAT
++#cmakedefine HAVE_LSTAT
+ 
+ /* Define to 1 if you have the <mach-o/dyld.h> header file. */
+-#undef HAVE_MACH_O_DYLD_H
++#cmakedefine HAVE_MACH_O_DYLD_H
+ 
+ /* Define if the 'malloc' function is POSIX compliant. */
+-#undef HAVE_MALLOC_POSIX
++#cmakedefine HAVE_MALLOC_POSIX
+ 
+ /* Define to 1 if you have the `mbrtowc' function. */
+-#undef HAVE_MBRTOWC
++#cmakedefine HAVE_MBRTOWC
+ 
+ /* Define to 1 if you have the `mbsinit' function. */
+-#undef HAVE_MBSINIT
++#cmakedefine HAVE_MBSINIT
+ 
+ /* Define to 1 if <wchar.h> declares mbstate_t. */
+-#undef HAVE_MBSTATE_T
++#cmakedefine HAVE_MBSTATE_T
+ 
+ /* Define to 1 if you have the `memmove' function. */
+-#undef HAVE_MEMMOVE
++#cmakedefine HAVE_MEMMOVE
+ 
+ /* Define to 1 if you have the <memory.h> header file. */
+-#undef HAVE_MEMORY_H
++#cmakedefine HAVE_MEMORY_H
+ 
+ /* Define to 1 on MSVC platforms that have the "invalid parameter handler"
+    concept. */
+-#undef HAVE_MSVC_INVALID_PARAMETER_HANDLER
++#cmakedefine HAVE_MSVC_INVALID_PARAMETER_HANDLER
+ 
+ /* Define to 1 if you have the `raise' function. */
+-#undef HAVE_RAISE
++#cmakedefine HAVE_RAISE
+ 
+ /* Define to 1 if you have the `readlink' function. */
+-#undef HAVE_READLINK
++#cmakedefine HAVE_READLINK
+ 
+ /* Define to 1 if you have the `readlinkat' function. */
+-#undef HAVE_READLINKAT
++#cmakedefine HAVE_READLINKAT
+ 
+ /* Define to 1 if you have the `realpath' function. */
+-#undef HAVE_REALPATH
++#cmakedefine HAVE_REALPATH
+ 
+ /* Define to 1 if you have the <search.h> header file. */
+-#undef HAVE_SEARCH_H
++#cmakedefine HAVE_SEARCH_H
+ 
+ /* Define to 1 if you have the `setenv' function. */
+-#undef HAVE_SETENV
++#cmakedefine HAVE_SETENV
+ 
+ /* Define to 1 if you have the `setlocale' function. */
+-#undef HAVE_SETLOCALE
++#cmakedefine HAVE_SETLOCALE
+ 
+ /* Define to 1 if 'sig_atomic_t' is a signed integer type. */
+-#undef HAVE_SIGNED_SIG_ATOMIC_T
++#cmakedefine HAVE_SIGNED_SIG_ATOMIC_T
+ 
+ /* Define to 1 if 'wchar_t' is a signed integer type. */
+-#undef HAVE_SIGNED_WCHAR_T
++#cmakedefine HAVE_SIGNED_WCHAR_T
+ 
+ /* Define to 1 if 'wint_t' is a signed integer type. */
+-#undef HAVE_SIGNED_WINT_T
++#cmakedefine HAVE_SIGNED_WINT_T
+ 
+ /* Define to 1 if the system has the type `sigset_t'. */
+-#undef HAVE_SIGSET_T
++#cmakedefine HAVE_SIGSET_T
+ 
+ /* Define to 1 if you have the <stdint.h> header file. */
+-#undef HAVE_STDINT_H
++#cmakedefine HAVE_STDINT_H
+ 
+ /* Define to 1 if you have the <stdlib.h> header file. */
+-#undef HAVE_STDLIB_H
++#cmakedefine HAVE_STDLIB_H
+ 
+ /* Define to 1 if you have the `strerror_r' function. */
+-#undef HAVE_STRERROR_R
++#cmakedefine HAVE_STRERROR_R
+ 
+ /* Define to 1 if you have the <strings.h> header file. */
+-#undef HAVE_STRINGS_H
++#cmakedefine HAVE_STRINGS_H
+ 
+ /* Define to 1 if you have the <string.h> header file. */
+-#undef HAVE_STRING_H
++#cmakedefine HAVE_STRING_H
+ 
+ /* Define to 1 if `st_atimensec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_ATIMENSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_ATIMENSEC
+ 
+ /* Define to 1 if `st_atimespec.tv_nsec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
+ 
+ /* Define to 1 if `st_atim.st__tim.tv_nsec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_ATIM_ST__TIM_TV_NSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_ATIM_ST__TIM_TV_NSEC
+ 
+ /* Define to 1 if `st_atim.tv_nsec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC
+ 
+ /* Define to 1 if `st_birthtimensec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_BIRTHTIMENSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_BIRTHTIMENSEC
+ 
+ /* Define to 1 if `st_birthtimespec.tv_nsec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC
+ 
+ /* Define to 1 if `st_birthtim.tv_nsec' is a member of `struct stat'. */
+-#undef HAVE_STRUCT_STAT_ST_BIRTHTIM_TV_NSEC
++#cmakedefine HAVE_STRUCT_STAT_ST_BIRTHTIM_TV_NSEC
+ 
+ /* Define to 1 if you have the `symlink' function. */
+-#undef HAVE_SYMLINK
++#cmakedefine HAVE_SYMLINK
+ 
+ /* Define to 1 if you have the <sys/bitypes.h> header file. */
+-#undef HAVE_SYS_BITYPES_H
++#cmakedefine HAVE_SYS_BITYPES_H
+ 
+ /* Define to 1 if you have the <sys/inttypes.h> header file. */
+-#undef HAVE_SYS_INTTYPES_H
++#cmakedefine HAVE_SYS_INTTYPES_H
+ 
+ /* Define to 1 if you have the <sys/param.h> header file. */
+-#undef HAVE_SYS_PARAM_H
++#cmakedefine HAVE_SYS_PARAM_H
+ 
+ /* Define to 1 if you have the <sys/socket.h> header file. */
+-#undef HAVE_SYS_SOCKET_H
++#cmakedefine HAVE_SYS_SOCKET_H
+ 
+ /* Define to 1 if you have the <sys/stat.h> header file. */
+-#undef HAVE_SYS_STAT_H
++#cmakedefine HAVE_SYS_STAT_H
+ 
+ /* Define to 1 if you have the <sys/time.h> header file. */
+-#undef HAVE_SYS_TIME_H
++#cmakedefine HAVE_SYS_TIME_H
+ 
+ /* Define to 1 if you have the <sys/types.h> header file. */
+-#undef HAVE_SYS_TYPES_H
++#cmakedefine HAVE_SYS_TYPES_H
+ 
+ /* Define to 1 if you have the `tsearch' function. */
+-#undef HAVE_TSEARCH
++#cmakedefine HAVE_TSEARCH
+ 
+ /* Define to 1 if you have the <unistd.h> header file. */
+-#undef HAVE_UNISTD_H
++#cmakedefine HAVE_UNISTD_H
+ 
+ /* Define to 1 if the system has the type 'unsigned long long int'. */
+-#undef HAVE_UNSIGNED_LONG_LONG_INT
++#cmakedefine HAVE_UNSIGNED_LONG_LONG_INT
+ 
+ /* Define if you have a global __progname variable */
+-#undef HAVE_VAR___PROGNAME
++#cmakedefine HAVE_VAR___PROGNAME
+ 
+ /* Define to 1 or 0, depending whether the compiler supports simple visibility
+    declarations. */
+-#undef HAVE_VISIBILITY
++#cmakedefine HAVE_VISIBILITY
+ 
+ /* Define to 1 if you have the <wchar.h> header file. */
+-#undef HAVE_WCHAR_H
++#cmakedefine HAVE_WCHAR_H
+ 
+ /* Define if you have the 'wchar_t' type. */
+-#undef HAVE_WCHAR_T
++#cmakedefine HAVE_WCHAR_T
+ 
+ /* Define to 1 if you have the `wcrtomb' function. */
+-#undef HAVE_WCRTOMB
++#cmakedefine HAVE_WCRTOMB
+ 
+ /* Define to 1 if you have the <winsock2.h> header file. */
+-#undef HAVE_WINSOCK2_H
++#cmakedefine HAVE_WINSOCK2_H
+ 
+ /* Define if you have the 'wint_t' type. */
+-#undef HAVE_WINT_T
++#cmakedefine HAVE_WINT_T
+ 
+ /* Define to 1 if O_NOATIME works. */
+-#undef HAVE_WORKING_O_NOATIME
++#cmakedefine HAVE_WORKING_O_NOATIME
+ 
+ /* Define to 1 if O_NOFOLLOW works. */
+-#undef HAVE_WORKING_O_NOFOLLOW
++#cmakedefine HAVE_WORKING_O_NOFOLLOW
+ 
+ /* Define to 1 if the system has the type `_Bool'. */
+-#undef HAVE__BOOL
++#cmakedefine HAVE__BOOL
+ 
+ /* Define to 1 if you have the `_NSGetExecutablePath' function. */
+-#undef HAVE__NSGETEXECUTABLEPATH
++#cmakedefine HAVE__NSGETEXECUTABLEPATH
+ 
+ /* Define to 1 if you have the `_set_invalid_parameter_handler' function. */
+-#undef HAVE__SET_INVALID_PARAMETER_HANDLER
++#cmakedefine HAVE__SET_INVALID_PARAMETER_HANDLER
+ 
+ /* Define as const if the declaration of iconv() needs const. */
+-#undef ICONV_CONST
++#cmakedefine ICONV_CONST
+ 
+ /* Define to the value of ${prefix}, as a string. */
+-#undef INSTALLPREFIX
++#cmakedefine INSTALLPREFIX
+ 
+ /* Define to 1 if 'lstat' dereferences a symlink specified with a trailing
+    slash. */
+-#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
++#cmakedefine LSTAT_FOLLOWS_SLASHED_SYMLINK
+ 
+ /* Define to the sub-directory where libtool stores uninstalled libraries. */
+-#undef LT_OBJDIR
++#cmakedefine LT_OBJDIR
+ 
+ /* If malloc(0) is != NULL, define this to 1. Otherwise define this to 0. */
+-#undef MALLOC_0_IS_NONNULL
++#cmakedefine MALLOC_0_IS_NONNULL
+ 
+ /* Use GNU style printf and scanf.  */
+ #ifndef __USE_MINGW_ANSI_STDIO
+-# undef __USE_MINGW_ANSI_STDIO
++# cmakedefine __USE_MINGW_ANSI_STDIO
+ #endif
+ 
+ 
+ /* Name of package */
+-#undef PACKAGE
++#cmakedefine PACKAGE
+ 
+ /* Define to the address where bug reports for this package should be sent. */
+-#undef PACKAGE_BUGREPORT
++#cmakedefine PACKAGE_BUGREPORT
+ 
+ /* Define to the full name of this package. */
+-#undef PACKAGE_NAME
++#cmakedefine PACKAGE_NAME
+ 
+ /* Define to the full name and version of this package. */
+-#undef PACKAGE_STRING
++#cmakedefine PACKAGE_STRING
+ 
+ /* Define to the one symbol short name of this package. */
+-#undef PACKAGE_TARNAME
++#cmakedefine PACKAGE_TARNAME
+ 
+ /* Define to the home page for this package. */
+-#undef PACKAGE_URL
++#cmakedefine PACKAGE_URL
+ 
+ /* Define to the version of this package. */
+-#undef PACKAGE_VERSION
++#cmakedefine PACKAGE_VERSION
+ 
+ /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+    'ptrdiff_t'. */
+-#undef PTRDIFF_T_SUFFIX
++#cmakedefine PTRDIFF_T_SUFFIX
+ 
+ /* Define to 1 if readlink fails to recognize a trailing slash. */
+-#undef READLINK_TRAILING_SLASH_BUG
++#cmakedefine READLINK_TRAILING_SLASH_BUG
+ 
+ /* Define to 1 if stat needs help when passed a file name with a trailing
+    slash */
+-#undef REPLACE_FUNC_STAT_FILE
++#cmakedefine REPLACE_FUNC_STAT_FILE
+ 
+ /* Define to 1 if strerror(0) does not return a message implying success. */
+-#undef REPLACE_STRERROR_0
++#cmakedefine REPLACE_STRERROR_0
+ 
+ /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+    'sig_atomic_t'. */
+-#undef SIG_ATOMIC_T_SUFFIX
++#cmakedefine SIG_ATOMIC_T_SUFFIX
+ 
+ /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+    'size_t'. */
+-#undef SIZE_T_SUFFIX
++#cmakedefine SIZE_T_SUFFIX
+ 
+ /* If using the C implementation of alloca, define if you know the
+    direction of stack growth for your system; otherwise it will be
+@@ -480,131 +480,131 @@
+ 	STACK_DIRECTION > 0 => grows toward higher addresses
+ 	STACK_DIRECTION < 0 => grows toward lower addresses
+ 	STACK_DIRECTION = 0 => direction of growth unknown */
+-#undef STACK_DIRECTION
++#cmakedefine STACK_DIRECTION
+ 
+ /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
+-#undef STAT_MACROS_BROKEN
++#cmakedefine STAT_MACROS_BROKEN
+ 
+ /* Define to 1 if you have the ANSI C header files. */
+-#undef STDC_HEADERS
++#cmakedefine STDC_HEADERS
+ 
+ /* Define to 1 if strerror_r returns char *. */
+-#undef STRERROR_R_CHAR_P
++#cmakedefine STRERROR_R_CHAR_P
+ 
+ /* Define to 1 if the type of the st_atim member of a struct stat is struct
+    timespec. */
+-#undef TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
++#cmakedefine TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
+ 
+ /* Define to the prefix of C symbols at the assembler and linker level, either
+    an underscore or empty. */
+-#undef USER_LABEL_PREFIX
++#cmakedefine USER_LABEL_PREFIX
+ 
+ /* Enable extensions on AIX 3, Interix.  */
+ #ifndef _ALL_SOURCE
+-# undef _ALL_SOURCE
++# cmakedefine _ALL_SOURCE
+ #endif
+ /* Enable general extensions on macOS.  */
+ #ifndef _DARWIN_C_SOURCE
+-# undef _DARWIN_C_SOURCE
++# cmakedefine _DARWIN_C_SOURCE
+ #endif
+ /* Enable GNU extensions on systems that have them.  */
+ #ifndef _GNU_SOURCE
+-# undef _GNU_SOURCE
++# cmakedefine _GNU_SOURCE
+ #endif
+ /* Enable NetBSD extensions on NetBSD.  */
+ #ifndef _NETBSD_SOURCE
+-# undef _NETBSD_SOURCE
++# cmakedefine _NETBSD_SOURCE
+ #endif
+ /* Enable OpenBSD extensions on NetBSD.  */
+ #ifndef _OPENBSD_SOURCE
+-# undef _OPENBSD_SOURCE
++# cmakedefine _OPENBSD_SOURCE
+ #endif
+ /* Enable threading extensions on Solaris.  */
+ #ifndef _POSIX_PTHREAD_SEMANTICS
+-# undef _POSIX_PTHREAD_SEMANTICS
++# cmakedefine _POSIX_PTHREAD_SEMANTICS
+ #endif
+ /* Enable extensions specified by ISO/IEC TS 18661-5:2014.  */
+ #ifndef __STDC_WANT_IEC_60559_ATTRIBS_EXT__
+-# undef __STDC_WANT_IEC_60559_ATTRIBS_EXT__
++# cmakedefine __STDC_WANT_IEC_60559_ATTRIBS_EXT__
+ #endif
+ /* Enable extensions specified by ISO/IEC TS 18661-1:2014.  */
+ #ifndef __STDC_WANT_IEC_60559_BFP_EXT__
+-# undef __STDC_WANT_IEC_60559_BFP_EXT__
++# cmakedefine __STDC_WANT_IEC_60559_BFP_EXT__
+ #endif
+ /* Enable extensions specified by ISO/IEC TS 18661-2:2015.  */
+ #ifndef __STDC_WANT_IEC_60559_DFP_EXT__
+-# undef __STDC_WANT_IEC_60559_DFP_EXT__
++# cmakedefine __STDC_WANT_IEC_60559_DFP_EXT__
+ #endif
+ /* Enable extensions specified by ISO/IEC TS 18661-4:2015.  */
+ #ifndef __STDC_WANT_IEC_60559_FUNCS_EXT__
+-# undef __STDC_WANT_IEC_60559_FUNCS_EXT__
++# cmakedefine __STDC_WANT_IEC_60559_FUNCS_EXT__
+ #endif
+ /* Enable extensions specified by ISO/IEC TS 18661-3:2015.  */
+ #ifndef __STDC_WANT_IEC_60559_TYPES_EXT__
+-# undef __STDC_WANT_IEC_60559_TYPES_EXT__
++# cmakedefine __STDC_WANT_IEC_60559_TYPES_EXT__
+ #endif
+ /* Enable extensions specified by ISO/IEC TR 24731-2:2010.  */
+ #ifndef __STDC_WANT_LIB_EXT2__
+-# undef __STDC_WANT_LIB_EXT2__
++# cmakedefine __STDC_WANT_LIB_EXT2__
+ #endif
+ /* Enable extensions specified by ISO/IEC 24747:2009.  */
+ #ifndef __STDC_WANT_MATH_SPEC_FUNCS__
+-# undef __STDC_WANT_MATH_SPEC_FUNCS__
++# cmakedefine __STDC_WANT_MATH_SPEC_FUNCS__
+ #endif
+ /* Enable extensions on HP NonStop.  */
+ #ifndef _TANDEM_SOURCE
+-# undef _TANDEM_SOURCE
++# cmakedefine _TANDEM_SOURCE
+ #endif
+ /* Enable X/Open extensions if necessary.  HP-UX 11.11 defines
+    mbstate_t only if _XOPEN_SOURCE is defined to 500, regardless of
+    whether compiling with -Ae or -D_HPUX_SOURCE=1.  */
+ #ifndef _XOPEN_SOURCE
+-# undef _XOPEN_SOURCE
++# cmakedefine _XOPEN_SOURCE
+ #endif
+ /* Enable X/Open compliant socket functions that do not require linking
+    with -lxnet on HP-UX 11.11.  */
+ #ifndef _HPUX_ALT_XOPEN_SOCKET_API
+-# undef _HPUX_ALT_XOPEN_SOCKET_API
++# cmakedefine _HPUX_ALT_XOPEN_SOCKET_API
+ #endif
+ /* Enable general extensions on Solaris.  */
+ #ifndef __EXTENSIONS__
+-# undef __EXTENSIONS__
++# cmakedefine __EXTENSIONS__
+ #endif
+ 
+ 
+ /* Define to 1 if you want getc etc. to use unlocked I/O if available.
+    Unlocked I/O can improve performance in unithreaded apps, but it is not
+    safe for multithreaded apps. */
+-#undef USE_UNLOCKED_IO
++#cmakedefine USE_UNLOCKED_IO
+ 
+ /* Version number of package */
+-#undef VERSION
++#cmakedefine VERSION
+ 
+ /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+    'wchar_t'. */
+-#undef WCHAR_T_SUFFIX
++#cmakedefine WCHAR_T_SUFFIX
+ 
+ /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+    'wint_t'. */
+-#undef WINT_T_SUFFIX
++#cmakedefine WINT_T_SUFFIX
+ 
+ /* Define if the machine's byte ordering is little endian. */
+-#undef WORDS_LITTLEENDIAN
++#cmakedefine WORDS_LITTLEENDIAN
+ 
+ /* Enable large inode numbers on Mac OS X 10.5. */
+-#undef _DARWIN_USE_64_BIT_INODE
++#cmakedefine _DARWIN_USE_64_BIT_INODE
+ 
+ /* Number of bits in a file offset, on hosts where this is settable. */
+-#undef _FILE_OFFSET_BITS
++#cmakedefine _FILE_OFFSET_BITS
+ 
+ /* Define for large files, on AIX-style hosts. */
+-#undef _LARGE_FILES
++#cmakedefine _LARGE_FILES
+ 
+ /* Define to 1 if on MINIX. */
+-#undef _MINIX
++#cmakedefine _MINIX
+ 
+ /* Define to 1 to make NetBSD features available. MINIX 3 needs this. */
+-#undef _NETBSD_SOURCE
++#cmakedefine _NETBSD_SOURCE
+ 
+ /* The _Noreturn keyword of C11.  */
+ #ifndef _Noreturn
+@@ -628,19 +628,19 @@
+ 
+ /* Define to 2 if the system does not provide POSIX.1 features except with
+    this defined. */
+-#undef _POSIX_1_SOURCE
++#cmakedefine _POSIX_1_SOURCE
+ 
+ /* Define to 1 if you need to in order for 'stat' and other things to work. */
+-#undef _POSIX_SOURCE
++#cmakedefine _POSIX_SOURCE
+ 
+ /* For standard stat data types on VMS. */
+-#undef _USE_STD_STAT
++#cmakedefine _USE_STD_STAT
+ 
+ /* Define to 1 if the system <stdint.h> predates C++11. */
+-#undef __STDC_CONSTANT_MACROS
++#cmakedefine __STDC_CONSTANT_MACROS
+ 
+ /* Define to 1 if the system <stdint.h> predates C++11. */
+-#undef __STDC_LIMIT_MACROS
++#cmakedefine __STDC_LIMIT_MACROS
+ 
+ /* The _GL_ASYNC_SAFE marker should be attached to functions that are
+    signal handlers (for signals other than SIGABRT, SIGPIPE) or can be
+@@ -774,7 +774,7 @@
+ #endif
+ 
+ /* Define to `int' if <sys/types.h> doesn't define. */
+-#undef gid_t
++#cmakedefine gid_t
+ 
+ /* Work around a bug in Apple GCC 4.0.1 build 5465: In C99 mode, it supports
+    the ISO C 99 semantics of 'extern inline' (unlike the GNU C semantics of
+@@ -787,21 +787,21 @@
+ #endif
+ 
+ /* Define to a type if <wchar.h> does not define. */
+-#undef mbstate_t
++#cmakedefine mbstate_t
+ 
+ /* Define to `int' if <sys/types.h> does not define. */
+-#undef mode_t
++#cmakedefine mode_t
+ 
+ /* Define to the type of st_nlink in struct stat, or a supertype. */
+-#undef nlink_t
++#cmakedefine nlink_t
+ 
+ /* Define to `int' if <sys/types.h> does not define. */
+-#undef pid_t
++#cmakedefine pid_t
+ 
+ /* Define to the equivalent of the C99 'restrict' keyword, or to
+    nothing if this is not supported.  Do not define if restrict is
+    supported directly.  */
+-#undef restrict
++#cmakedefine restrict
+ /* Work around a bug in Sun C++: it does not support _Restrict or
+    __restrict__, even though the corresponding Sun C compiler ends up with
+    "#define restrict _Restrict" or "#define restrict __restrict__" in the
+@@ -813,13 +813,13 @@
+ #endif
+ 
+ /* Define to `unsigned int' if <sys/types.h> does not define. */
+-#undef size_t
++#cmakedefine size_t
+ 
+ /* Define as a signed type of the same size as size_t. */
+-#undef ssize_t
++#cmakedefine ssize_t
+ 
+ /* Define to `int' if <sys/types.h> doesn't define. */
+-#undef uid_t
++#cmakedefine uid_t
+ 
+ /* Define as a marker that can be attached to declarations that might not
+     be used.  This helps to reduce warnings, such as from

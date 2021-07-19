@@ -30,9 +30,9 @@ openal/1.20.1
 opencv/2.4.13.5
 # pjsip/2.8@dssl/stable
 qt/5.14.1
-qtwebkit/5.212.0-alpha4
+#qtwebkit/5.212.0-alpha4
 #sip/4.19.3
-signalr-qt/0.1
+#signalr-qt/0.1
 
 # global zlib dependency (override for openssl and curl)
 zlib/1.2.11
@@ -44,7 +44,7 @@ expat/2.2.9
 fontconfig/2.13.91
 freetype/2.10.1
 grpc/1.26.0
-icu/63.2
+icu/64.2
 libalsa/1.1.9
 libdrm/2.4.100
 libelf/0.8.13
