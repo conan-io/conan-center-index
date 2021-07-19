@@ -22,8 +22,12 @@ class GperfConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os_build == "Windows" and tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+            # (k.starkov): not correct setting detect_windows_subsystem
+            # e.g. M4 and gperf depends of msys2. M4 built first and used msys for building. After using msys2, conan set sybsystem globally
+            # when conan built gperf and checking condition, msys2 won't be used for building.
+            # if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ:
+                self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
