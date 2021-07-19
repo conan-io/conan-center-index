@@ -27,6 +27,9 @@ class TinyMidiConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Only Linux is supported")
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
         strip_root=True, destination=self._source_subfolder)
