@@ -1,7 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.tools import SystemPackageTool
 from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class TinyMidiConan(ConanFile):
@@ -12,8 +13,14 @@ class TinyMidiConan(ConanFile):
     homepage = "https://github.com/krgn/tinymidi"
     license = "LGPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _autotools = None
 
@@ -22,8 +29,12 @@ class TinyMidiConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Only Linux is supported")
 
@@ -32,35 +43,44 @@ class TinyMidiConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-        strip_root=True, destination=self._source_subfolder)
+                  strip_root=True, destination=self._source_subfolder)
 
     def _get_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
         return self._autotools
+
+    def _make_args(self, autotools):
+        args = [
+            "INSTALL_PREFIX={}".format(tools.unix_path(self.package_folder)),
+            "COMPILE_FLAGS={}".format(autotools.vars["CFLAGS"]),
+            "LINKING_FLAGS={} -o".format(autotools.vars["LDFLAGS"]),
+        ]
+        if tools.get_env("CC"):
+            args.append("CC={}".format(tools.get_env("CC")))
+        return args
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            tools.replace_in_file("Makefile",
-                                  "INSTALL_PREFIX=/usr",
-                                  "INSTALL_PREFIX=%s" % self.package_folder)
-            tools.replace_in_file("Makefile", "COMPILE_FLAGS = ", "COMPILE_FLAGS = $(CFLAGS) ")
-            tools.replace_in_file("Makefile", "LINKING_FLAGS = ", "LINKING_FLAGS = $(CFLAGS) ")
-            tools.mkdir(os.path.join(self.package_folder, 'include'))
-            tools.mkdir(os.path.join(self.package_folder, 'lib'))
-            self._get_autotools().make()
+            autotools = self._get_autotools()
+            make_args = self._make_args(autotools)
+            self.run("pwd")
+            autotools.make(args=make_args)
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
-            self._get_autotools().install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        tools.mkdir(os.path.join(self.package_folder, "include"))
+        tools.mkdir(os.path.join(self.package_folder, "lib"))
+        with tools.chdir(self._source_subfolder):
+            autotools = self._get_autotools()
+            make_args = self._make_args(autotools)
+            autotools.install(args=make_args)
         if self.options.shared:
-            os.unlink(os.path.join(self.package_folder, "lib", "libtinymidi.a"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
         else:
-            os.unlink(os.path.join(self.package_folder, "lib", "libtinymidi.so"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libtinymidi.so.1"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libtinymidi.so.1.0.0"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
 
     def package_info(self):
         self.cpp_info.libs = ["tinymidi"]
