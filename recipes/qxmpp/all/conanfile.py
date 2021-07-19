@@ -1,11 +1,14 @@
 from conans import ConanFile, CMake, tools
-from os import path
+from os import rename
+from os.path import join
+import glob
 
 
 class QxmppConan(ConanFile):
     name = "qxmpp"
     license = "LGPL-2.1"
-    url = "https://github.com/qxmpp-project/qxmpp"
+    homepage = "https://github.com/qxmpp-project/qxmpp"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform C++ XMPP client and server library. It is written in C++ and uses Qt framework."
     topics = ("qt", "qt6", "xmpp", "xmpp-library", "xmpp-server", "xmpp-client")
     settings = "os", "compiler", "build_type", "arch"
@@ -29,14 +32,17 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("qxmpp-*")[0]
+        rename(extracted_dir, self._source_subfolder)
+
         gitTag: str = self.conan_data["sources"][self.version]["gitTag"]
 
         self.run("git clone https://github.com/qxmpp-project/qxmpp.git")
         self.run(f"cd qxmpp && git checkout tags/{gitTag} -b {gitTag} && cd ..")
-        tools.patch("qxmpp", self.conan_data["patches"][self.version]["default"])
-
-        if self.options.withGstreamer:
-            tools.patch("qxmpp", self.conan_data["patches"][self.version]["gstreamer"])
+        patches = self.conan_data["patches"][self.version]
+        for patch in patches:
+            tools.patch(**patch)
 
     def __get_option_str(self, b: bool) -> str:
         if b:
@@ -54,9 +60,10 @@ class QxmppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("*.h", dst="include/base", src="qxmpp/base")
-        self.copy("*.h", dst="include/client", src="qxmpp/client")
-        self.copy("*.h", dst="include/server", src="qxmpp/server")
+        self.copy("LICENSE", dst="licenses", src=join(self._source_subfolder, "LICENSE.LGPL"))
+        self.copy("*.h", dst="include/base", src=join(self._source_subfolder, "base"))
+        self.copy("*.h", dst="include/client", src=join(self._source_subfolder, "client"))
+        self.copy("*.h", dst="include/server", src=join(self._source_subfolder, "server"))
         self.copy("*qxmpp.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
