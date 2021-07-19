@@ -61,6 +61,7 @@ class lmdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["lmdb"]
+        self.cpp_info.names["pkg_config"] = "lmdb"
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
