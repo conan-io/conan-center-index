@@ -78,7 +78,11 @@ class RtMidiConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "rtmidi"
         self.cpp_info.names["cmake_find_package"] = "RtMidi"
         self.cpp_info.names["cmake_find_package_multi"] = "RtMidi"
+        self.cpp_info.components["RtMidi"].names["cmake_find_package"] = "rtmidi"
+        self.cpp_info.components["RtMidi"].names["cmake_find_package_multi"] = "rtmidi"
         self.cpp_info.components["RtMidi"].libs = ["rtmidi"]
+        if self._with_alsa:
+            self.cpp_info.components["RtMidi"].requires.append("libalsa::libalsa")
         if self.settings.os == "Macos":
             self.cpp_info.components["RtMidi"].frameworks.extend(
                 ["CoreFoundation", "CoreAudio", "CoreMidi"]
