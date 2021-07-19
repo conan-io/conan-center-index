@@ -21,7 +21,10 @@ set_target_properties(lmdb PROPERTIES
 include(FindThreads)
 target_link_libraries(lmdb PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-install(TARGETS lmdb)
+install(TARGETS lmdb
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # LMDB utilities:
 
