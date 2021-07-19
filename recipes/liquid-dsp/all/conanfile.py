@@ -176,7 +176,6 @@ class LiquidDspConan(ConanFile):
             src=os.path.join(self._source_subfolder, "include"),
         )
         self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
-        self.copy(pattern=self._lib_pattern, dst="bin", src=self._source_subfolder)
         self.copy(pattern=self._lib_pattern, dst="lib", src=self._source_subfolder)
 
     def package_info(self):
