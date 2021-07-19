@@ -151,7 +151,7 @@ class LiquidDspConan(ConanFile):
         if self.options.simdoverride:
             configure_args.append("--enable-simdoverride")
         if self.settings.compiler == "Visual Studio":
-            configure_args.append("CFLAGS='-static -static-libgcc'")
+            configure_args.append("CFLAGS='-static-libgcc'")
         configure_args_str = " ".join(configure_args)
         with self._build_context():
             with tools.chdir(self._source_subfolder):
