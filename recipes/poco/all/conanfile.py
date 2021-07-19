@@ -203,12 +203,12 @@ class PocoConan(ConanFile):
             self._cmake.definitions["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].lib_paths)
 
         self.output.info(self._cmake.definitions)
+        # Disable fork
+        if not self.options.get_safe("enable_fork", True):
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-DPOCO_NO_FORK_EXEC=1"
         # On Windows, Poco needs a message (MC) compiler.
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             self._cmake.configure(build_dir=self._build_subfolder)
-        # Disable fork
-        if not self.options.get_safe("enable_fork", True):
-            self._cmake.definitions["POCO_NO_FORK_EXEC"] = True
         return self._cmake
 
     def build(self):
