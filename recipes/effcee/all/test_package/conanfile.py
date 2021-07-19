@@ -12,5 +12,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        pass
-
+        if and not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "effcee-example")
+            self.run(bin_path, run_environment=True)
