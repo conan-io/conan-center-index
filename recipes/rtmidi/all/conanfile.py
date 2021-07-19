@@ -78,13 +78,12 @@ class RtMidiConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "rtmidi"
         self.cpp_info.names["cmake_find_package"] = "RtMidi"
         self.cpp_info.names["cmake_find_package_multi"] = "RtMidi"
-        # FIXME: Needs components to do https://github.com/thestk/rtmidi/blob/12b64c18912816d0cf9b11233c4bf978f2824b76/CMakeLists.txt#L259
-        self.cpp_info.libs = ["rtmidi"]
+        self.cpp_info.components["RtMidi"].libs = ["rtmidi"]
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(
+            self.cpp_info.components["RtMidi"].frameworks.extend(
                 ["CoreFoundation", "CoreAudio", "CoreMidi"]
             )
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("winmm")
+            self.cpp_info.components["RtMidi"].system_libs.append("winmm")
         elif self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["RtMidi"].system_libs.append("pthread")
