@@ -48,7 +48,7 @@ class PocoConan(ConanFile):
         "PocoMongoDB": _PocoComponent("enable_mongodb", True, ("PocoNet", ), True),
         "PocoNet": _PocoComponent("enable_net", True, ("PocoFoundation", ), True),
         "PocoNetSSL": _PocoComponent("enable_netssl", True, ("PocoCrypto", "PocoUtil", "PocoNet", ), True),    # also external openssl
-        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", True, ("PocoNet", "PocoUtil", ), True),
+        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", False, ("PocoNet", "PocoUtil", ), True),
         "PocoPDF": _PocoComponent("enable_pdf", False, ("PocoXML", "PocoUtil", ), True),
         "PocoPageCompiler": _PocoComponent("enable_pagecompiler", False, ("PocoNet", "PocoUtil", ), False),
         "PocoFile2Page": _PocoComponent("enable_pagecompiler_file2page", False, ("PocoNet", "PocoUtil", "PocoXML", "PocoJSON", ), False),
@@ -100,7 +100,6 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.enable_netssl
             del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
@@ -141,6 +140,8 @@ class PocoConan(ConanFile):
         if self.options.enable_data_sqlite:
             if self.options["sqlite3"].threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
         self.requires("pcre/8.44")
@@ -154,7 +155,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.get_safe("enable_netssl", False) or \
+        if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1k")
