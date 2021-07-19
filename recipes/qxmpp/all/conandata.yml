@@ -1,0 +1,7 @@
+sources:
+  "1.4.0":
+    gitTag: "v1.4.0"
+patches:
+  "1.4.0":
+    default: "patches/001-add_conan_1.4.0.patch"
+    gstreamer: "patches/002-add_gstreamer_1.4.0.patch"
