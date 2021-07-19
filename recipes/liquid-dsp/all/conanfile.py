@@ -19,13 +19,11 @@ class LiquidDspConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "simdoverride": [True, False],
-        "withfftw": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "simdoverride": False,
-        "withfftw": False,
     }
 
     _autotools = None
@@ -70,10 +68,6 @@ class LiquidDspConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-
-    def requirements(self):
-        if self.options.withfftw:
-            self.requires("fftw/3.3.9")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
