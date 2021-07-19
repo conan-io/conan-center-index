@@ -66,8 +66,11 @@ class LiquidDspConan(ConanFile):
             self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True,
+        )
 
     def _patch_sources(self):
         if self.settings.os == "Windows":
@@ -80,8 +83,9 @@ class LiquidDspConan(ConanFile):
         self.run("cmd /c generate_link_library.bat")
         with tools.chdir(self._source_subfolder):
             self.run(
-                f"""{os.getenv("AR")} /def:libliquid.def /out:libliquid.lib """
-                f"""/machine:{"X86" if self.settings.arch=="x86" else "X64"}""",
+                "{} /def:libliquid.def /out:libliquid.lib /machine:{}".format(
+                    os.getenv("AR"), "X86" if self.settings.arch == "x86" else "X64"
+                ),
                 win_bash=tools.os_info.is_windows,
             )
 
@@ -139,11 +143,11 @@ class LiquidDspConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("./bootstrap.sh", win_bash=tools.os_info.is_windows)
                 self.run(
-                    f"""./configure {configure_args_str}""",
+                    "./configure {}".format(configure_args_str),
                     win_bash=tools.os_info.is_windows,
                 )
                 self.run(
-                    f"""make {self._target_name} -j{ncpus}""",
+                    "make {} -j{}".format(self._target_name, ncpus),
                     win_bash=tools.os_info.is_windows,
                 )
         self._rename_libraries()
