@@ -17,11 +17,15 @@ class LibpngConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "neon": [True, "check", False],
+        "sse": [True, False],
         "api_prefix": "ANY",
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "neon": True,
+        "sse": True,
         "api_prefix": "",
     }
 
@@ -34,9 +38,21 @@ class LibpngConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _has_neon_support(self):
+        return "arm" in self.settings.arch
+
+    @property
+    def _has_sse_support(self):
+        return self.settings.arch in ["x86", "x86_64"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_neon_support:
+            del self.options.neon
+        if not self._has_sse_support:
+            del self.options.sse
 
     def configure(self):
         if self.options.shared:
@@ -68,6 +84,14 @@ class LibpngConan(ConanFile):
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}',
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
+    @property
+    def _neon_sse_mapping(self):
+        return {
+            "True": "on",
+            "False": "off",
+            "check": "check",
+        }
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -77,6 +101,10 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
+        if self._has_neon_support:
+            self._cmake.definitions["PNG_ARM_NEON"] = self._neon_sse_mapping[str(self.options.neon)]
+        if self._has_sse_support:
+            self._cmake.definitions["PNG_INTEL_SSE"] = self._neon_sse_mapping[str(self.options.sse)]
         self._cmake.configure()
         return self._cmake
 
@@ -92,6 +120,10 @@ class LibpngConan(ConanFile):
             "--without-binconfigs",
             "--with-libpng-prefix={}".format(self.options.api_prefix),
         ]
+        if self._has_neon_support:
+            args.append("--enable-arm-neon={}".format(self._neon_sse_mapping[str(self.options.neon)]))
+        if self._has_sse_support:
+            args.append("--enable-intel-sse={}".format(self._neon_sse_mapping[str(self.options.sse)]))
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
