@@ -140,7 +140,7 @@ class LibZipConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
         if self.options.crypto == "openssl":
-            self.cpp_info.components["_libzip"].requires.append("openssl::openssl")
+            self.cpp_info.components["_libzip"].requires.append("openssl::crypto")
         elif self.options.crypto == "mbedtls":
             self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
 
