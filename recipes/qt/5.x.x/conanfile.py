@@ -672,6 +672,9 @@ class QtConan(ConanFile):
     @property
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
+    
+    def _cmake_qt5_private_file(self, module):
+        return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
 
     def package(self):
         with tools.chdir("build_folder"):
@@ -743,6 +746,33 @@ Examples = bin/datadir/examples""")
                     """.format(target=target, ext=extension, namespace=namespace, uppercase_target=target.upper()))
 
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+
+        def _create_private_module(module, dependencies=[]):
+            dependencies_string = ';'.join('Qt5::%s' % dependency for dependency in dependencies)
+            contents = textwrap.dedent("""\
+            if(NOT TARGET Qt5::{0}Private)
+                add_library(Qt5::{0}Private INTERFACE IMPORTED)
+                set_target_properties(Qt5::{0}Private PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
+                    INTERFACE_LINK_LIBRARIES "{2}"
+                )
+                
+                add_library(Qt::{0}Private INTERFACE IMPORTED)
+                set_target_properties(Qt::{0}Private PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "Qt5::{0}Private"
+                    _qt_is_versionless_target "TRUE"
+                )
+            endif()""".format(module, self.version, dependencies_string))
+
+            tools.save(os.path.join(self.package_folder, self._cmake_qt5_private_file(module)), contents)
+
+        _create_private_module("Core", ["Core"])
+
+        if self.options.gui:
+            _create_private_module("Gui", ["CorePrivate", "Gui"])
+
+        if self.options.qtdeclarative:
+            _create_private_module("Qml", ["CorePrivate", "Qml"])
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -861,6 +891,8 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Qml"))
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
@@ -1054,12 +1086,18 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
+        
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt5", "qt")
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            if os.path.isfile(module):
+                self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
