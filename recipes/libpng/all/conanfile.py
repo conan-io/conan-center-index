@@ -18,14 +18,18 @@ class LibpngConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "neon": [True, "check", False],
+        "msa": [True, False],
         "sse": [True, False],
+        "vsx": [True, False],
         "api_prefix": "ANY",
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "neon": True,
+        "msa": True,
         "sse": True,
+        "vsx": True,
         "api_prefix": "",
     }
 
@@ -43,16 +47,28 @@ class LibpngConan(ConanFile):
         return "arm" in self.settings.arch
 
     @property
+    def _has_msa_support(self):
+        return "mips" in self.settings.arch
+
+    @property
     def _has_sse_support(self):
         return self.settings.arch in ["x86", "x86_64"]
+
+    @property
+    def _has_vsx_support(self):
+        return "ppc" in self.settings.arch
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_neon_support:
             del self.options.neon
+        if not self._has_msa_support:
+            del self.options.msa
         if not self._has_sse_support:
             del self.options.sse
+        if not self._has_vsx_support:
+            del self.options.vsx
 
     def configure(self):
         if self.options.shared:
@@ -85,7 +101,7 @@ class LibpngConan(ConanFile):
                                       'COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/$<TARGET_LINKER_FILE_NAME:${S_TARGET}> $<TARGET_LINKER_FILE_DIR:${S_TARGET}>/${DEST_FILE}')
 
     @property
-    def _neon_sse_mapping(self):
+    def _neon_msa_sse_vsx_mapping(self):
         return {
             "True": "on",
             "False": "off",
@@ -102,9 +118,13 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
         if self._has_neon_support:
-            self._cmake.definitions["PNG_ARM_NEON"] = self._neon_sse_mapping[str(self.options.neon)]
+            self._cmake.definitions["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
+        if self._has_msa_support:
+            self._cmake.definitions["PNG_MIPS_MSA"] = self._neon_msa_sse_vsx_mapping[str(self.options.msa)]
         if self._has_sse_support:
-            self._cmake.definitions["PNG_INTEL_SSE"] = self._neon_sse_mapping[str(self.options.sse)]
+            self._cmake.definitions["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
+        if self._has_vsx_support:
+            self._cmake.definitions["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
         self._cmake.configure()
         return self._cmake
 
@@ -121,9 +141,13 @@ class LibpngConan(ConanFile):
             "--with-libpng-prefix={}".format(self.options.api_prefix),
         ]
         if self._has_neon_support:
-            args.append("--enable-arm-neon={}".format(self._neon_sse_mapping[str(self.options.neon)]))
+            args.append("--enable-arm-neon={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.neon)]))
+        if self._has_msa_support:
+            args.append("--enable-mips-msa={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.msa)]))
         if self._has_sse_support:
-            args.append("--enable-intel-sse={}".format(self._neon_sse_mapping[str(self.options.sse)]))
+            args.append("--enable-intel-sse={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.sse)]))
+        if self._has_vsx_support:
+            args.append("--enable-powerpc-vsx={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]))
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
