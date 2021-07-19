@@ -36,7 +36,7 @@ class TinyMidiConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Only Linux is supported")
+            raise ConanInvalidConfiguration("Only Linux and FreeBSD are supported")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
@@ -66,7 +66,6 @@ class TinyMidiConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._get_autotools()
             make_args = self._make_args(autotools)
-            self.run("pwd")
             autotools.make(args=make_args)
 
     def package(self):
@@ -84,4 +83,3 @@ class TinyMidiConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinymidi"]
-
