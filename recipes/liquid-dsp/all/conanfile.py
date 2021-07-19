@@ -17,12 +17,10 @@ class LiquidDspConan(ConanFile):
     exports_sources = ["generate_link_library.bat", "patches/**"]
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
         "simdoverride": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
         "simdoverride": False,
     }
 
@@ -56,16 +54,7 @@ class LiquidDspConan(ConanFile):
             return self._target_name
         return "libliquid.lib"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.settings.os != "Windows":
-            if not self.options.fPIC:
-                raise ConanInvalidConfiguration("This library hardcodes fPIC")
-        if self.options.shared:
-            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
