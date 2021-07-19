@@ -30,10 +30,14 @@ class BloatyConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("bloaty package requires Linux")
+        version = tools.Version(self.settings.compiler.version)
+        compiler = self.settings.compiler
+        if compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
+        if compiler == "gcc" and version < "5.1":
+            raise ConanInvalidConfiguration("bloaty requires gcc 5.1+")
 
     def package_id(self):
         del self.info.settings.compiler
