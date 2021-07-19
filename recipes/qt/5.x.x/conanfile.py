@@ -322,7 +322,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
@@ -672,7 +672,7 @@ class QtConan(ConanFile):
     @property
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
-    
+
     def _cmake_qt5_private_file(self, module):
         return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
 
@@ -756,7 +756,7 @@ Examples = bin/datadir/examples""")
                     INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
                     INTERFACE_LINK_LIBRARIES "{2}"
                 )
-                
+
                 add_library(Qt::{0}Private INTERFACE IMPORTED)
                 set_target_properties(Qt::{0}Private PROPERTIES
                     INTERFACE_LINK_LIBRARIES "Qt5::{0}Private"
@@ -1088,7 +1088,7 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
-        
+
         self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
         self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
