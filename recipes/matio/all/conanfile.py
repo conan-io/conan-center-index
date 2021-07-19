@@ -96,7 +96,7 @@ class MatioConan(ConanFile):
             self.cpp_info.libs = ["libmatio"]
         else:
             self.cpp_info.libs = ["matio"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
         bin_path = os.path.join(self.package_folder, "bin")
