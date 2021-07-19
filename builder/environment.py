@@ -25,7 +25,8 @@ def prepare_environment():
         del environ['CONAN_CHANNEL']
 
     conan_run(['config', 'install',
-              'https://github.com/trassir/conan-config.git'])
+               '-sf', 'config',
+               'https://github.com/trassir/conan-config.git'])
 
     conan_run(['remote', 'clean'])
 
