@@ -78,16 +78,16 @@ class RtMidiConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "rtmidi"
         self.cpp_info.names["cmake_find_package"] = "RtMidi"
         self.cpp_info.names["cmake_find_package_multi"] = "RtMidi"
-        self.cpp_info.components["RtMidi"].names["cmake_find_package"] = "rtmidi"
-        self.cpp_info.components["RtMidi"].names["cmake_find_package_multi"] = "rtmidi"
-        self.cpp_info.components["RtMidi"].libs = ["rtmidi"]
+        self.cpp_info.components["librtmidi"].names["cmake_find_package"] = "rtmidi"
+        self.cpp_info.components["librtmidi"].names["cmake_find_package_multi"] = "rtmidi"
+        self.cpp_info.components["librtmidi"].libs = ["rtmidi"]
         if self._with_alsa:
-            self.cpp_info.components["RtMidi"].requires.append("libalsa::libalsa")
+            self.cpp_info.components["librtmidi"].requires.append("libalsa::libalsa")
         if self.settings.os == "Macos":
-            self.cpp_info.components["RtMidi"].frameworks.extend(
+            self.cpp_info.components["librtmidi"].frameworks.extend(
                 ["CoreFoundation", "CoreAudio", "CoreMidi"]
             )
         if self.settings.os == "Windows":
-            self.cpp_info.components["RtMidi"].system_libs.append("winmm")
+            self.cpp_info.components["librtmidi"].system_libs.append("winmm")
         elif self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["RtMidi"].system_libs.append("pthread")
+            self.cpp_info.components["librtmidi"].system_libs.append("pthread")
