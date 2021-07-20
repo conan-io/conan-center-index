@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -615,7 +615,7 @@
+@@ -614,7 +614,7 @@
      # examples, even though the previous version of what we
      # had worked.
      #####

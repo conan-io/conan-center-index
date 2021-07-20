@@ -1,17 +1,16 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -85,8 +85,8 @@ IF(MSVC)
+@@ -85,8 +85,7 @@ IF(MSVC)
  ENDIF()
  
  #Add custom CMake Module
 -SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/"
 -  CACHE INTERNAL "Location of our custom CMake modules.")
 +list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
-+
  
  # auto-configure style checks, other CMake modules.
  INCLUDE(CheckLibraryExists)
-@@ -393,17 +393,17 @@ IF(NOT MSVC)
+@@ -393,17 +392,17 @@ IF(NOT MSVC)
      SET(BUILD_FORTRAN ON)
    ENDIF()
    IF(BUILD_FORTRAN)
@@ -33,26 +32,24 @@
        DEPENDS build-netcdf-fortran
        )
  
-@@ -788,7 +788,7 @@
- ENDIF(USE_HDF5 OR ENABLE_NETCDF_4)
+@@ -789,7 +788,6 @@ ENDIF(USE_HDF5 OR ENABLE_NETCDF_4)
  
  # See if we have libcurl
--FIND_PACKAGE(CURL)
+ FIND_PACKAGE(CURL)
 -ADD_DEFINITIONS(-DCURL_STATICLIB=1)
-+FIND_PACKAGE(CURL REQUIRED)
-+#ADD_DEFINITIONS(-DCURL_STATICLIB=1)
  INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIRS})
  
-@@ -854,4 +854,4 @@
+ # Check to see if CURLOPT_USERNAME is defined.
+@@ -854,7 +852,7 @@ ENDIF()
  # Option to support byte-range reading of remote datasets
  OPTION(ENABLE_BYTERANGE "Enable byte-range access to remote datasets.." OFF)
  
 -IF(NOT CURL_LIBRARY)
-+IF(NOT CURL_LIBRARIES)
++IF(NOT CURL_FOUND)
    IF(ENABLE_BYTERANGE)
      MESSAGE(FATAL_ERROR "Byte-range support specified, CURL libraries are not found.")
    ENDIF()
-@@ -1193,8 +1193,8 @@ IF(ENABLE_DOXYGEN)
+@@ -1193,8 +1191,8 @@ IF(ENABLE_DOXYGEN)
    ###
    OPTION(ENABLE_DOXYGEN_BUILD_RELEASE_DOCS "Build release documentation.  This is of interest only to the netCDF developers." OFF)
    IF(ENABLE_DOXYGEN_BUILD_RELEASE_DOCS)
@@ -63,7 +60,7 @@
      SET(DOXYGEN_SEARCHENGINE "NO" CACHE STRING "")
      SET(ENABLE_DOXYGEN_SERVER_BASED_SEARCH NO CACHE STRING "")
    ELSE()
-@@ -1499,7 +1499,7 @@ MACRO(add_bin_env_temp_large_test prefix F)
+@@ -1499,7 +1497,7 @@ MACRO(add_bin_env_temp_large_test prefix F)
        )
    ENDIF()
  
@@ -72,7 +69,7 @@
    IF(MSVC)
      SET_PROPERTY(TARGET ${prefix}_${F} PROPERTY FOLDER "tests")
      SET_TARGET_PROPERTIES(${prefix}_${F} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-@@ -1680,7 +1680,7 @@ ENDIF(ENABLE_BASH_SCRIPT_TESTING)
+@@ -1680,7 +1678,7 @@ ENDIF(ENABLE_BASH_SCRIPT_TESTING)
  
  MACRO(add_sh_test prefix F)
    IF(HAVE_BASH)
