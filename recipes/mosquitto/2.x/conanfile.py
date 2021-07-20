@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-required_conan_version = ">=1.31.0"
+required_conan_version = ">=1.33.0"
 
 
 class Mosquitto(ConanFile):
@@ -71,9 +71,8 @@ class Mosquitto(ConanFile):
             self.requires("libwebsockets/4.2.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.replace("-", ".") + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
