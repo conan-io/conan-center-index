@@ -94,7 +94,7 @@ class LiquidDspConan(ConanFile):
             if self.settings.os == "Windows" and self.options.shared:
                 tools.rename("libliquid.so", "libliquid.dll")
             elif self.settings.os == "Windows" and not self.options.shared:
-                os.rename("libliquid.a", "libliquid.lib")
+                tools.rename("libliquid.a", "libliquid.lib")
             elif self.settings.os == "Macos" and not self.options.shared:
                 os.rename("libliquid.ar", "libliquid.a")
 
