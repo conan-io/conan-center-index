@@ -73,7 +73,7 @@ class OdbcConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
