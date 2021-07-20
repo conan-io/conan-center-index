@@ -129,8 +129,7 @@ class LiquidDspConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        ncpus = os.cpu_count()
-        ncpus = ncpus if ncpus else 1
+        ncpus = tools.cpu_count()
         configure_args = []
         if self.settings.build_type == "Debug":
             configure_args.append("--enable-debug-messages")
