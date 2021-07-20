@@ -84,7 +84,8 @@ class Mpg123Conan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
-        self.build_requires("yasm/1.3.0")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.build_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
            not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
