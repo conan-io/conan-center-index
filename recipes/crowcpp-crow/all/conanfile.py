@@ -18,8 +18,8 @@ class CrowConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
-        # To be removed in next released versions.
-        self.requires("openssl/1.1.1k")
+        if self.version == "0.2":
+            self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(
