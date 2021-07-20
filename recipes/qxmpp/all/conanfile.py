@@ -34,7 +34,7 @@ class QxmppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("qxmpp-*")[0]
-        rename(extracted_dir, self._source_subfolder)
+        rename(extracted_dir, self.name)
 
         gitTag: str = self.conan_data["sources"][self.version]["gitTag"]
 
@@ -60,10 +60,10 @@ class QxmppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=join(self._source_subfolder, "LICENSE.LGPL"))
-        self.copy("*.h", dst="include/base", src=join(self._source_subfolder, "base"))
-        self.copy("*.h", dst="include/client", src=join(self._source_subfolder, "client"))
-        self.copy("*.h", dst="include/server", src=join(self._source_subfolder, "server"))
+        self.copy("LICENSE", dst="licenses", src=join(self.name, "LICENSE.LGPL"))
+        self.copy("*.h", dst="include/base", src=join(self.name, "base"))
+        self.copy("*.h", dst="include/client", src=join(self.name, "client"))
+        self.copy("*.h", dst="include/server", src=join(self.name, "server"))
         self.copy("*qxmpp.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
