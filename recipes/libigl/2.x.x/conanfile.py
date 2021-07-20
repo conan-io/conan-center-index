@@ -39,7 +39,7 @@ class LibiglConan(ConanFile):
             "apple-clang": "5.1",
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
@@ -59,9 +59,9 @@ class LibiglConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
+    def configure(self):
+        if self.options.header_only:
+            del self.options.fPIC
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
