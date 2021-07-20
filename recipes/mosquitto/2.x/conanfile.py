@@ -13,23 +13,27 @@ class Mosquitto(ConanFile):
     description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "ssl": [True, False],
-               "clients": [True, False],
-               "broker": [True, False],
-               "apps": [True, False],
-               "cjson": [True, False],
-               "build_cpp": [True, False],
-               "websockets": [True, False],
-            }
-    default_options = {"shared": False,
-                       "ssl": True,
-                       "clients": False,
-                       "broker": False,
-                       "apps": False,
-                       "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
-                       "build_cpp": True,
-                       "websockets": False,
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "ssl": [True, False],
+        "clients": [True, False],
+        "broker": [True, False],
+        "apps": [True, False],
+        "cjson": [True, False],
+        "build_cpp": [True, False],
+        "websockets": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "ssl": True,
+        "clients": False,
+        "broker": False,
+        "apps": False,
+        "cjson": True, # https://github.com/eclipse/mosquitto/commit/bbe0afbfbe7bb392361de41e275759ee4ef06b1c
+        "build_cpp": True,
+        "websockets": False,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
