@@ -60,6 +60,14 @@ class Mpg123Conan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        if self.options.module == "libalsa":
+            self.requires("libalsa/1.2.4")
+        if self.options.module == "tinyalsa":
+            self.requires("tinyalsa/1.1.1")
+
+    def validate(self):
         try:
             int(self.options.seektable)
         except ValueError:
@@ -67,12 +75,6 @@ class Mpg123Conan(ConanFile):
         if self.settings.os != "Windows":
             if self.options.module == "win32":
                 raise ConanInvalidConfiguration("win32 is an invalid module for non-Windows os'es")
-
-    def requirements(self):
-        if self.options.module == "libalsa":
-            self.requires("libalsa/1.2.4")
-        if self.options.module == "tinyalsa":
-            self.requires("tinyalsa/1.1.1")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
