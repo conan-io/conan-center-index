@@ -36,8 +36,6 @@ class BloatyConan(ConanFile):
         compiler = self.settings.compiler
         if compiler.cppstd:
             tools.check_min_cppstd(self, "11")
-        if compiler == "gcc" and version < "5.1":
-            raise ConanInvalidConfiguration("bloaty requires gcc 5.1+")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -56,8 +54,6 @@ class BloatyConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if not self.settings.compiler.cppstd:
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         env_vars = {"PKG_CONFIG_PATH": self.build_folder}
         with tools.environment_append(env_vars):
             self._cmake.configure()
