@@ -61,13 +61,12 @@ class NettleTLS(ConanFile):
             raise ConanInvalidConfiguration("Nettle cannot be built using Visual Studio")
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not supported (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
             self.build_requires("msys2/cci.latest")
 
@@ -93,9 +92,15 @@ class NettleTLS(ConanFile):
         tools.replace_in_file(makefile_in,
                               "SUBDIRS = tools testsuite examples",
                               "SUBDIRS = ")
+        # Fix broken tests for compilers like apple-clang with -Werror,-Wimplicit-function-declaration
+        tools.replace_in_file(os.path.join(self._source_subfolder, "aclocal.m4"),
+                              "cat >conftest.c <<EOF",
+                              "cat >conftest.c <<EOF\n#include <stdlib.h>")
 
     def build(self):
         self._patch_sources()
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
