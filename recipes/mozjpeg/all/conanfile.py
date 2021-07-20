@@ -78,9 +78,9 @@ class MozjpegConan(ConanFile):
         if not self._use_cmake:
             if self.settings.os != "Windows":
                 self.build_requires("libtool/2.4.6")
-                self.build_requires("pkgconf/1.7.3")
+                self.build_requires("pkgconf/1.7.4")
         if self.options.get_safe("SIMD"):
-            self.build_requires("nasm/2.14")
+            self.build_requires("nasm/2.15.05")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
