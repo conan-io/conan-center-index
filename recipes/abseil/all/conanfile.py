@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import json
 import os
 import re
@@ -39,16 +38,6 @@ class ConanRecipe(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        version = tools.Version(self.settings.compiler.version)
-        compiler = self.settings.compiler
-        if compiler == "gcc" and version < "5.1":
-            raise ConanInvalidConfiguration("abseil requires gcc 5.1+")
-        if compiler == "clang" and version < "3.7":
-            raise ConanInvalidConfiguration("abseil requires clang 3.7+")
-        if compiler == "apple-clang" and version < "7.3":
-            raise ConanInvalidConfiguration("abseil requires Xcode 7.3.1+")
-        if compiler == "Visual Studio" and version < "14":
-            raise ConanInvalidConfiguration("abseil requires at least Visual Studio 2015 Update 3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
