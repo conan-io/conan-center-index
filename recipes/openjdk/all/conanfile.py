@@ -23,7 +23,7 @@ class OpenJDK(ConanFile):
         if self.settings.os not in ["Windows", "Macos", "Linux"]:
             raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
-    def source(self):
+    def build(self):
         tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)],
                   destination=self._source_subfolder, strip_root=True)
 
