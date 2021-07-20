@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
 
 class CrowConan(ConanFile):
     name = "crowcpp-crow"
@@ -10,7 +11,6 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "BSD-3-Clause"
-    required_conan_version = ">=1.33.0"
 
     @property
     def _source_subfolder(self):
