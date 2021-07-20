@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Mpg123Conan(ConanFile):
     name = "mpg123"
@@ -83,8 +85,8 @@ class Mpg123Conan(ConanFile):
             self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mpg123-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _audio_module(self):
