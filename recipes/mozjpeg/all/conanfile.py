@@ -2,7 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 import os
 
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class MozjpegConan(ConanFile):
@@ -83,8 +83,8 @@ class MozjpegConan(ConanFile):
             self.build_requires("nasm/2.14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
