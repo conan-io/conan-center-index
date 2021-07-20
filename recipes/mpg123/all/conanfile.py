@@ -198,3 +198,7 @@ class Mpg123Conan(ConanFile):
             self.cpp_info.components["libout123"].requires.append("tinyalsa::tinyalsa")
         if self.options.module == "win32":
             self.cpp_info.components["libout123"].system_libs.append("winmm")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
