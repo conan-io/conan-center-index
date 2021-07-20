@@ -8,15 +8,6 @@ sources:
   "0.10.35":
     url: https://github.com/mackron/miniaudio/archive/199d6a7875b4288af6a7b615367c8fdc2019b03c.tar.gz
     sha256: 3D9C5FCB112E24E9C038F7520C93D52882CECE6C93DF259FD33A389B7DEB7C40
-  "0.10.36":
-    url: https://github.com/mackron/miniaudio/archive/81d720e09f6060e8064d51d90ce67486ec123680.tar.gz
-    sha256: BD0E537308D2881116CE050093EEDF4C0CB64EF453B906A655CFE3A5F0601D5F
-  "0.10.37":
-    url: https://github.com/mackron/miniaudio/archive/90c7eef4f433a28921099c8c82bfc76f14afb9b5.tar.gz
-    sha256: C70C5E19B99897D086F3D326A407684781C149EEA5E0F625EAF9AEE56C6DFB31
-  "0.10.38":
-    url: https://github.com/mackron/miniaudio/archive/0f5cb7829d4f6fe0201449b5ad1947bef0468ea8.tar.gz
-    sha256: 918FD1A458217BFE8D855F4F9C15BF7D62C510F19103FB619BAE01D1ED06681F
   "0.10.39":
     url: https://github.com/mackron/miniaudio/archive/8bf157f10e278302f8a6c1c9cd1065f2bea26dd2.tar.gz
     sha256: 573C511F1FD1C64BD331160E357DE611A144E5BDBAF1CD872195B8D535FA557E
