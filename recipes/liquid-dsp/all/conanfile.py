@@ -129,12 +129,16 @@ class LiquidDspConan(ConanFile):
         self._patch_sources()
         ncpus = tools.cpu_count()
         configure_args = []
+        cflags = ["-static-libgcc"]
         if self.settings.build_type == "Debug":
             configure_args.append("--enable-debug-messages")
+            cflags.extend(["-g", "-O0"])
+        else:
+            cflags.extend(["-s", "-O2", "-DNDEBUG"])
         if self.options.simdoverride:
             configure_args.append("--enable-simdoverride")
         if self.settings.compiler == "Visual Studio":
-            configure_args.append("CFLAGS='-static-libgcc'")
+            configure_args.append("CFLAGS='{}'".format(" ".join(cflags)))
         configure_args_str = " ".join(configure_args)
         with self._build_context():
             with tools.chdir(self._source_subfolder):
