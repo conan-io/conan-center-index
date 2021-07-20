@@ -58,6 +58,8 @@ class ConanRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure()
