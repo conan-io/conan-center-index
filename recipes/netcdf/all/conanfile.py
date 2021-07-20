@@ -114,7 +114,7 @@ class NetcdfConan(ConanFile):
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap:
             self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:
