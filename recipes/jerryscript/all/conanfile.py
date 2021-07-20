@@ -39,7 +39,9 @@ class JerryScriptStackConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
+        if self.options.shared:
+            del self.options.fPIC
+            
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
 

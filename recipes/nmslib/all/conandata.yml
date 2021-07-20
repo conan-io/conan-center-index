@@ -10,3 +10,5 @@ patches:
     patch_file: patches/0002-cmake-fix-install.patch
   - base_path: source_subfolder
     patch_file: patches/0003-cmake-fix-flags.patch
+  - base_path: source_subfolder
+    patch_file: patches/0004-missing-utils-header.patch

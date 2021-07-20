@@ -21,10 +21,12 @@ class PocoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_fork": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_fork": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "is_lib"))
@@ -46,7 +48,7 @@ class PocoConan(ConanFile):
         "PocoMongoDB": _PocoComponent("enable_mongodb", True, ("PocoNet", ), True),
         "PocoNet": _PocoComponent("enable_net", True, ("PocoFoundation", ), True),
         "PocoNetSSL": _PocoComponent("enable_netssl", True, ("PocoCrypto", "PocoUtil", "PocoNet", ), True),    # also external openssl
-        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", True, ("PocoNet", "PocoUtil", ), True),
+        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", False, ("PocoNet", "PocoUtil", ), True),
         "PocoPDF": _PocoComponent("enable_pdf", False, ("PocoXML", "PocoUtil", ), True),
         "PocoPageCompiler": _PocoComponent("enable_pagecompiler", False, ("PocoNet", "PocoUtil", ), False),
         "PocoFile2Page": _PocoComponent("enable_pagecompiler_file2page", False, ("PocoNet", "PocoUtil", "PocoXML", "PocoJSON", ), False),
@@ -56,6 +58,7 @@ class PocoConan(ConanFile):
         "PocoUtil": _PocoComponent("enable_util", True, ("PocoFoundation", "PocoXML", "PocoJSON", ), True),
         "PocoXML": _PocoComponent("enable_xml", True, ("PocoFoundation", ), True),
         "PocoZip": _PocoComponent("enable_zip", True, ("PocoUtil", "PocoXML", ), True),
+        "PocoActiveRecord": _PocoComponent("enable_active_record", True, ("PocoFoundation", "PocoData", ), True),
     }
 
     for comp in _poco_component_tree.values():
@@ -97,7 +100,7 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.enable_netssl
+            del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
@@ -106,6 +109,8 @@ class PocoConan(ConanFile):
             del self.options.enable_data_mysql
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
+        if tools.Version(self.version) < "1.11":
+            del self.options.enable_active_record
 
     def configure(self):
         if self.options.shared:
@@ -135,6 +140,8 @@ class PocoConan(ConanFile):
         if self.options.enable_data_sqlite:
             if self.options["sqlite3"].threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
         self.requires("pcre/8.44")
@@ -148,7 +155,7 @@ class PocoConan(ConanFile):
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.get_safe("enable_netssl", False) or \
+        if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1k")
@@ -200,6 +207,9 @@ class PocoConan(ConanFile):
         # On Windows, Poco needs a message (MC) compiler.
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             self._cmake.configure(build_dir=self._build_subfolder)
+        # Disable fork
+        if not self.options.get_safe("enable_fork", True):
+            self._cmake.definitions["POCO_NO_FORK_EXEC"] = True
         return self._cmake
 
     def build(self):
@@ -213,6 +223,7 @@ class PocoConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     @property
     def _ordered_libs(self):

@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
 from contextlib import contextmanager
 
+required_conan_version = ">=1.33.0"
+
 
 class LibdisasmConan(ConanFile):
     name = "libdisasm"
@@ -28,11 +30,6 @@ class LibdisasmConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20190524")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,10 +40,14 @@ class LibdisasmConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
@@ -74,6 +75,8 @@ class LibdisasmConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
+            self._autotools.flags.append("-FS")
 
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -86,7 +89,7 @@ class LibdisasmConan(ConanFile):
         for patch in self.conan_data["patches"].get(self.version, []):
             tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -102,12 +105,13 @@ class LibdisasmConan(ConanFile):
                 autotools.install(args=["-C", "x86dis"])
 
         os.unlink(os.path.join(self.package_folder, "lib", "libdisasm.la"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            dlllib = os.path.join(self.package_folder, "lib", "disasm.dll.lib")
+            if os.path.exists(dlllib):
+                tools.rename(dlllib, os.path.join(self.package_folder, "lib", "disasm.lib"))
 
     def package_info(self):
-        libname = "disasm"
-        if self.settings.os == "Windows" and self.options.shared:
-            libname += ".dll.lib" if self.settings.compiler == "Visual Studio" else ".dll.a"
-        self.cpp_info.libs = [libname]
+        self.cpp_info.libs = ["disasm"]
 
         if self.settings.os != "Windows":
             bin_path = os.path.join(self.package_folder, "bin")

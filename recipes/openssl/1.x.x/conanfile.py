@@ -74,6 +74,7 @@ class OpenSSLConan(ConanFile):
                "shared": [True, False],
                "fPIC": [True, False],
                "no_asm": [True, False],
+               "enable_weak_ssl_ciphers": [True, False],
                "386": [True, False],
                "no_sse2": [True, False],
                "no_bf": [True, False],

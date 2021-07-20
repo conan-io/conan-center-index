@@ -41,3 +41,10 @@ sources:
       - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.1/6.1.1/single/qt-everywhere-src-6.1.1.tar.xz"
       - "https://ftp.fau.de/qtproject/archive/qt/6.1/6.1.1/single/qt-everywhere-src-6.1.1.tar.xz"
     sha256: "6ac937aae4c7b5a3eac90ea4d13f31ded9f78ebc93007bb919fae65c58c808c3"
+  "6.1.2":
+    url:
+      - "https://download.qt.io/archive/qt/6.1/6.1.2/single/qt-everywhere-src-6.1.2.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.1/6.1.2/single/qt-everywhere-src-6.1.2.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.1/6.1.2/single/qt-everywhere-src-6.1.2.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.1/6.1.2/single/qt-everywhere-src-6.1.2.tar.xz"
+    sha256: "4b40f10eb188506656f13dbf067b714145047f41d7bf83f03b727fa1c7c4cdcb"

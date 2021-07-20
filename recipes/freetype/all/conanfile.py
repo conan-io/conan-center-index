@@ -73,8 +73,8 @@ class FreetypeConan(ConanFile):
             self.requires("brotli/1.0.9")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{1}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         # Do not accidentally enable dependencies we have disabled
@@ -157,13 +157,31 @@ conan_staticlibs="{staticlibs}"
         self.copy("LICENSE.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {
-                "freetype": "Freetype::Freetype",
-            }
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_vars_rel_path)
         )
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_target_rel_path),
+            {"freetype": "Freetype::Freetype"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            if(DEFINED Freetype_FOUND)
+                set(FREETYPE_FOUND ${Freetype_FOUND})
+            endif()
+            if(DEFINED Freetype_INCLUDE_DIRS)
+                set(FREETYPE_INCLUDE_DIRS ${Freetype_INCLUDE_DIRS})
+            endif()
+            if(DEFINED Freetype_LIBRARIES)
+                set(FREETYPE_LIBRARIES ${Freetype_LIBRARIES})
+            endif()
+            if(DEFINED Freetype_VERSION)
+                set(FREETYPE_VERSION_STRING ${Freetype_VERSION})
+            endif()
+        """)
+        tools.save(module_file, content)
 
     @staticmethod
     def _create_cmake_module_alias_targets(module_file, targets):
@@ -182,7 +200,12 @@ conan_staticlibs="{staticlibs}"
         return os.path.join("lib", "cmake")
 
     @property
-    def _module_file_rel_path(self):
+    def _module_vars_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
+
+    @property
+    def _module_target_rel_path(self):
         return os.path.join(self._module_subfolder,
                             "conan-official-{}-targets.cmake".format(self.name))
 
@@ -202,9 +225,11 @@ conan_staticlibs="{staticlibs}"
         self.user_info.LIBTOOL_VERSION = self._libtool_version
         self._chmod_plus_x(freetype_config)
         # cmake's FindFreetype.cmake module with imported target: Freetype::Freetype
-        self.cpp_info.names["cmake_find_package"] = "Freetype"
+        self.cpp_info.filenames["cmake_find_package"] = "Freetype"
         self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
+        self.cpp_info.names["cmake_find_package"] = "Freetype"
         self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "freetype2"

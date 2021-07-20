@@ -16,14 +16,14 @@ class LibpqConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_zlib": [True, False],
+        "with_zlib": [True, False, "deprecated"],
         "with_openssl": [True, False],
         "disable_rpath": [True, False]
     }
     default_options = {
         'shared': False,
         'fPIC': True,
-        'with_zlib': True,
+        'with_zlib': "deprecated",
         'with_openssl': False,
         'disable_rpath': False
     }
@@ -61,10 +61,12 @@ class LibpqConan(ConanFile):
         if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
             if self.options.shared:
                 raise ConanInvalidConfiguration("static mingw build is not possible")
+        # Looking into source code, it appears that zlib is not used in libpq
+        if self.options.with_zlib != "deprecated":
+            self.output.warn("with_zlib option is deprecated, do not use anymore")
+        del self.options.with_zlib
 
     def requirements(self):
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1h")
 
@@ -77,7 +79,7 @@ class LibpqConan(ConanFile):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = ['--without-readline']
-            args.append('--with-zlib' if self.options.with_zlib else '--without-zlib')
+            args.append('--without-zlib')
             args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
             if tools.cross_building(self.settings) and not self.options.with_openssl:
                 args.append("--disable-strong-random")
@@ -126,12 +128,6 @@ class LibpqConan(ConanFile):
             tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
             config_default_pl = os.path.join(self._source_subfolder, "src", "tools", "msvc", "config_default.pl")
             solution_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "Solution.pm")
-            if self.options.with_zlib:
-                tools.replace_in_file(solution_pm,
-                                      "zdll.lib", "%s.lib" % self.deps_cpp_info["zlib"].libs[0])
-                tools.replace_in_file(config_default_pl,
-                                      "zlib      => undef",
-                                      "zlib      => '%s'" % self.deps_cpp_info["zlib"].rootpath.replace("\\", "/"))
             if self.options.with_openssl:
                 for ssl in ["VC\libssl32", "VC\libssl64", "libssl"]:
                     tools.replace_in_file(solution_pm,
@@ -235,9 +231,6 @@ class LibpqConan(ConanFile):
         self.env_info.PostgreSQL_ROOT = self.package_folder
 
         self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
-
-        if self.options.with_zlib:
-            self.cpp_info.components["pq"].requires.append("zlib::zlib")
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")

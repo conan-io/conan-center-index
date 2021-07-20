@@ -34,7 +34,9 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_v4l": [True, False],
-        "dnn": [True, False]
+        "neon": [True, False],
+        "dnn": [True, False],
+        "detect_cpu_baseline": [True, False]
     }
     default_options = {
         "shared": False,
@@ -56,7 +58,9 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
-        "dnn": True
+        "neon": True,
+        "dnn": True,
+        "detect_cpu_baseline": False
     }
 
     short_paths = True
@@ -83,6 +87,8 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+        if "arm" not in self.settings.arch:
+            del self.options.neon
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -289,6 +295,12 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        
+        if self.options.detect_cpu_baseline:
+            self._cmake.definitions["CPU_BASELINE"] = "DETECT"
+        
+        if self.options.get_safe("neon") is not None:
+            self._cmake.definitions["ENABLE_NEON"] = self.options.get_safe("neon")
 
         self._cmake.definitions["WITH_PROTOBUF"] = self.options.dnn
         if self.options.dnn:
