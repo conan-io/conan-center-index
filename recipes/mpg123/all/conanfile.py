@@ -65,7 +65,7 @@ class Mpg123Conan(ConanFile):
         except ValueError:
             raise ConanInvalidConfiguration("seektable must be an integer")
         if self.settings.os != "Windows":
-            if self.options == "win32":
+            if self.options.module == "win32":
                 raise ConanInvalidConfiguration("win32 is an invalid module for non-Windows os'es")
 
     def requirements(self):
