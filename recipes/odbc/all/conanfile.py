@@ -1,7 +1,8 @@
-import glob
-import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
+import os
+import shutil
 
 
 class OdbcConan(ConanFile):
@@ -42,6 +43,9 @@ class OdbcConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
 
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "unixODBC-%s" % self.version
@@ -65,9 +69,17 @@ class OdbcConan(ConanFile):
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         autotools = self._configure_autotools()
         autotools.make()
 
