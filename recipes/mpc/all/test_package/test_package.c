@@ -12,4 +12,5 @@ int main (void) {
     mpc_out_str (stdout, 10, 0, z, MPC_RNDNN);
     printf ("\n%i %i\n", MPC_INEX_RE (inex), MPC_INEX_IM (inex));
     mpc_clear (z);
+    return 0;
 }
