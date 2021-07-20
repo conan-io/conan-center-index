@@ -26,6 +26,8 @@ class PcapplusplusConan(ConanFile):
         if self.settings.os not in ["Macos", "Linux"]:
             raise ConanInvalidConfiguration("%s is not supported" % self.settings.os)
 
+        del self.settings.compiler.libcxx
+
     def requirements(self):
         if self.settings.os == "Windows":
             # FIXME: missing winpcap recipe (https://github.com/bincrafters/community/pull/1395)

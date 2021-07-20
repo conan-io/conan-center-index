@@ -1,14 +1,14 @@
 from conans import ConanFile, CMake
 import os
+import logging
 
 
 class PcapplusplusTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-
+ 
     def configure(self):
-        pass
-        # del self.settings.compiler.libcxx
+        del self.settings.compiler.libcxx
 
     def build(self):
         cmake = CMake(self)
