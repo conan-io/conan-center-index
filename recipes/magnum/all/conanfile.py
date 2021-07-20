@@ -63,7 +63,7 @@ class MagnumConan(ConanFile):
         "with_text": True,
         "with_texturetools": True,
         "with_trade": True,
-        "with_vk": False,
+        "with_vk": True,
 
         "with_cglcontext": True,
 
@@ -109,6 +109,8 @@ class MagnumConan(ConanFile):
             self.requires("opengl/system")
         if self.options.sdl2_application:
             self.requires("sdl/2.0.14")
+        if self.options.with_vk:
+            self.requires("vulkan-loader/1.2.182")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -283,7 +285,11 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["trade"].requires = ["magnum_main", "corrade::plugin_manager"]
 
         # VK
-        # TODO: target here, disabled by default
+        if self.options.with_vk:
+            self.cpp_info.components["vk"].names["cmake_find_package"] = "Vk"
+            self.cpp_info.components["vk"].names["cmake_find_package_multi"] = "Vk"
+            self.cpp_info.components["vk"].libs = ["MagnumVk"]
+            self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
         if self.options.with_cglcontext:
             self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
