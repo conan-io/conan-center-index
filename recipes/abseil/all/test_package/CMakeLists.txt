@@ -13,3 +13,4 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 # Test also global target
 add_executable(${PROJECT_NAME}_global test_package.cpp)
 target_link_libraries(${PROJECT_NAME}_global CONAN_PKG::abseil)
+target_compile_features(${PROJECT_NAME}_global PRIVATE cxx_std_11)
