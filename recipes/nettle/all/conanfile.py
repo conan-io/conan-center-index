@@ -61,9 +61,13 @@ class NettleTLS(ConanFile):
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
+        if self._settings_build == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
