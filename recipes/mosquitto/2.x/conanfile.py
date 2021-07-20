@@ -158,12 +158,14 @@ class Mosquitto(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["libmosquittopp"].system_libs = ["ws2_32"]
 
-        if self.options.broker:
-            self.cpp_info.components["mosquitto_broker"].libdirs = []
-            self.cpp_info.components["mosquitto_broker"].include_dirs = []
+        if self.options.broker or self.options.get_safe("apps") or self.options.get_safe("clients"):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        if self.options.broker:
+            self.cpp_info.components["mosquitto_broker"].libdirs = []
+            self.cpp_info.components["mosquitto_broker"].include_dirs = []
             if self.options.websockets:
                 self.cpp_info.components["mosquitto_broker"].requires.append("libwebsockets::libwebsockets")
             if self.settings.os in ("FreeBSD", "Linux"):
@@ -176,9 +178,6 @@ class Mosquitto(ConanFile):
                 option_comp_name = "mosquitto_{}".format(option)
                 self.cpp_info.components[option_comp_name].libdirs = []
                 self.cpp_info.components[option_comp_name].include_dirs = []
-                bin_path = os.path.join(self.package_folder, "bin")
-                self.output.info("Appending PATH env var with : {}".format(bin_path))
-                self.env_info.PATH.append(bin_path)
                 self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
                 if self.options.cjson:
                     self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")
