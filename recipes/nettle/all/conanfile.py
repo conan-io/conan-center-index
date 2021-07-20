@@ -117,4 +117,4 @@ class NettleTLS(ConanFile):
 
         self.cpp_info.components["libnettle"].libs = ["nettle"]
         self.cpp_info.components["libnettle"].requires = ["hogweed"]
-        self.cpp_info.components["libnettle"].names["pkgconfig"] = ["nettle"]
+        self.cpp_info.components["libnettle"].names["pkgconfig"] = "nettle"
