@@ -45,15 +45,15 @@ class NettleTLS(ConanFile):
         if self.settings.arch != "x86_64" and not str(self.settings.arch).startswith("arm"):
             del self.options.fat
 
-    def requirements(self):
-        if self.options.public_key:
-            self.requires("gmp/6.2.1")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.public_key:
+            self.requires("gmp/6.2.1")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio":
@@ -61,13 +61,13 @@ class NettleTLS(ConanFile):
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
             self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
