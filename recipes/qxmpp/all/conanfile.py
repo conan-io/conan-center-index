@@ -35,11 +35,6 @@ class QxmppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("qxmpp-*")[0]
         rename(extracted_dir, self.name)
-
-        gitTag: str = self.conan_data["sources"][self.version]["gitTag"]
-
-        self.run("git clone https://github.com/qxmpp-project/qxmpp.git")
-        self.run(f"cd qxmpp && git checkout tags/{gitTag} -b {gitTag} && cd ..")
         patches = self.conan_data["patches"][self.version]
         for patch in patches:
             tools.patch(**patch)
