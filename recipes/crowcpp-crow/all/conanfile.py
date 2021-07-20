@@ -3,6 +3,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class CrowConan(ConanFile):
     name = "crowcpp-crow"
     homepage = "https://github.com/CrowCpp/crow"
@@ -30,6 +31,8 @@ class CrowConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_TESTING"] = False
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build(target="amalgamation")
 
