@@ -10,6 +10,7 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "BSD-3-Clause"
+    required_conan_version = ">=1.33.0"
 
     @property
     def _source_subfolder(self):
@@ -18,7 +19,7 @@ class CrowConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.75.0")
         # To be removed in next released versions.
-        self.requires("openssl/1.1.1i")
+        self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(
