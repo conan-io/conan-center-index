@@ -41,6 +41,7 @@ side implementation."""
 
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(configure_dir=self._source_subfolder)
+        self._autotools.flags.append("-std=c99")
         return self._autotools
 
     @property
