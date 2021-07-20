@@ -32,12 +32,13 @@ class MpcConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("The mpc package cannot be built on Visual Studio.")
-
     def requirements(self):
         self.requires("mpfr/4.1.0")
+
+    def validate(self):
+        # FIXME: add Visual Studio support, upstream has a makefile.vc
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("mpc can be built with Visual Studio, but it's not supported yet in this recipe.")
 
     @property
     def _settings_build(self):
