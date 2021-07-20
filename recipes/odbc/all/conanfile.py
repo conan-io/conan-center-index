@@ -36,12 +36,14 @@ class OdbcConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
 
     def requirements(self):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
