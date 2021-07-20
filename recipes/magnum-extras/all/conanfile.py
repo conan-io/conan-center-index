@@ -101,7 +101,7 @@ class MagnumExtrasConan(ConanFile):
             self.cpp_info.components["ui"].names["cmake_find_package"] = "Ui"
             self.cpp_info.components["ui"].names["cmake_find_package_multi"] = "Ui"
             self.cpp_info.components["ui"].libs = ["MagnumUi"]
-            self.cpp_info.components["ui"].requires = ["corrade::interconnect", "magnum::magnum_main", "magnum::gl", "magnum::test"]
+            self.cpp_info.components["ui"].requires = ["corrade::interconnect", "magnum::magnum_main", "magnum::gl", "magnum::text"]
 
         if self.options.with_player or self.options.with_ui_gallery:
             bin_path = os.path.join(self.package_folder, "bin")
