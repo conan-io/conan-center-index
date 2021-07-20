@@ -2,8 +2,6 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
-import glob
-import copy
 
 
 class LiquidDspConan(ConanFile):
