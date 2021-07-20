@@ -1,0 +1,10 @@
+sources:
+  "1.0.1":
+    url: "https://www.codesynthesis.com/download/libstudxml/1.0/libstudxml-1.0.1.tar.gz"
+    sha256: "4665e0dbd4849988d61d039b22effc93439caadb92a84ca3aa41048973e284e4"
+patches:
+  "1.0.1":
+    - patch_file: "patches/configure-ac.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/makefile-am.patch"
+      base_path: "source_subfolder"
