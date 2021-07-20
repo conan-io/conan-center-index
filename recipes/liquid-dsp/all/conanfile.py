@@ -158,7 +158,7 @@ class LiquidDspConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy(
             pattern="liquid.h",
-            dst="include/liquid",
+            dst=os.path.join("include", "liquid"),
             src=os.path.join(self._source_subfolder, "include"),
         )
         self.copy(pattern="libliquid.dll", dst="bin", src=self._source_subfolder)
