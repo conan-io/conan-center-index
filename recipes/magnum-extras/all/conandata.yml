@@ -1,0 +1,4 @@
+sources:
+  "2020.06":
+    url: "https://github.com/mosra/magnum-extras/archive/refs/tags/v2020.06.tar.gz"
+    sha256: "a8d7babc50ac070984d39f6cc15c3ce2af7b41fe980fe81b0405da6f5ba3c36d"
