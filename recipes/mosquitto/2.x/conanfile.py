@@ -159,25 +159,26 @@ class Mosquitto(ConanFile):
                 self.cpp_info.components["libmosquittopp"].system_libs = ["ws2_32"]
 
         if self.options.broker:
-            self.cpp_info.components["broker"].libdirs = []
-            self.cpp_info.components["broker"].include_dirs = []
+            self.cpp_info.components["mosquitto_broker"].libdirs = []
+            self.cpp_info.components["mosquitto_broker"].include_dirs = []
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
             if self.options.websockets:
-                self.cpp_info.components["broker"].requires.append("libwebsockets::libwebsockets")
+                self.cpp_info.components["mosquitto_broker"].requires.append("libwebsockets::libwebsockets")
             if self.settings.os in ("FreeBSD", "Linux"):
-                self.cpp_info.components["broker"].system_libs = ["pthread", "m"]
+                self.cpp_info.components["mosquitto_broker"].system_libs = ["pthread", "m"]
             elif self.settings.os == "Windows":
-                self.cpp_info.components["broker"].system_libs = ["ws2_32"]
+                self.cpp_info.components["mosquitto_broker"].system_libs = ["ws2_32"]
 
         for option in ["apps", "clients"]:
             if self.options.get_safe(option):
-                self.cpp_info.components[option].libdirs = []
-                self.cpp_info.components[option].include_dirs = []
+                option_comp_name = "mosquitto_{}".format(option)
+                self.cpp_info.components[option_comp_name].libdirs = []
+                self.cpp_info.components[option_comp_name].include_dirs = []
                 bin_path = os.path.join(self.package_folder, "bin")
                 self.output.info("Appending PATH env var with : {}".format(bin_path))
                 self.env_info.PATH.append(bin_path)
-                self.cpp_info.components[option].requires = ["openssl::openssl", "libmosquitto"]
+                self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
                 if self.options.cjson:
-                    self.cpp_info.components[option].requires.append("cjson::cjson")
+                    self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")
