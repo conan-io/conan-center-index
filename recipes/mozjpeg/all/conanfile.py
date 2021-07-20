@@ -119,8 +119,6 @@ class MozjpegConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            with tools.chdir(self._source_subfolder):
-                self.run("autoreconf -fiv")
             self._autotools = AutoToolsBuildEnvironment(self)
             yes_no = lambda v: "yes" if v else "no"
             args = [
@@ -147,6 +145,8 @@ class MozjpegConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.build()
         else:
+            with tools.chdir(self._source_subfolder):
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
             autotools = self._configure_autotools()
             autotools.make()
 
