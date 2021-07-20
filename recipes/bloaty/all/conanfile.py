@@ -30,12 +30,10 @@ class BloatyConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("bloaty package requires Linux")
-        version = tools.Version(self.settings.compiler.version)
-        compiler = self.settings.compiler
-        if compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -54,6 +52,8 @@ class BloatyConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         env_vars = {"PKG_CONFIG_PATH": self.build_folder}
         with tools.environment_append(env_vars):
             self._cmake.configure()
