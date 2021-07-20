@@ -4,6 +4,8 @@ import glob
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class OdbcConan(ConanFile):
     name = "odbc"
@@ -49,9 +51,8 @@ class OdbcConan(ConanFile):
         self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "unixODBC-%s" % self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
