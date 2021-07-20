@@ -96,7 +96,7 @@ class LiquidDspConan(ConanFile):
             elif self.settings.os == "Windows" and not self.options.shared:
                 tools.rename("libliquid.a", "libliquid.lib")
             elif self.settings.os == "Macos" and not self.options.shared:
-                os.rename("libliquid.ar", "libliquid.a")
+                tools.rename("libliquid.ar", "libliquid.a")
 
     @contextmanager
     def _build_context(self):
