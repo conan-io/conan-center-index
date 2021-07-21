@@ -227,3 +227,7 @@ class IceoryxConan(ConanFile):
                 self.cpp_info.components[cmake_lib_name].requires = requires
 
         _register_components(self._iceoryx_components)
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
