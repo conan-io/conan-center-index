@@ -63,7 +63,7 @@ class IceoryxConan(ConanFile):
             self.package_folder,
             "etc"
         )
-    
+
     @property
     def _pkg_res(self):
         return os.path.join(
@@ -91,12 +91,12 @@ class IceoryxConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
-    def config_options(self):
+    def requirements(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1")
         if self.settings.os == "Linux":
             self.requires("acl/2.3.1")
-    
+
     def validate(self):
         os = self.settings.os
         compiler = self.settings.compiler
@@ -191,7 +191,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["utils"].build_modules["cmake_find_package_multi"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_utils-targets.cmake")
         ]
-        # posh component 
+        # posh component
         self.cpp_info.components["posh"].name = "posh"
         self.cpp_info.components["posh"].libs = ["iceoryx_posh"]
         self.cpp_info.components["posh"].requires = ["utils"]
@@ -219,7 +219,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["posh_roudi"].build_modules["cmake_find_package_multi"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_posh_roudi-targets.cmake")
         ]
-        # posh config component 
+        # posh config component
         self.cpp_info.components["posh_config"].name = "posh_config"
         self.cpp_info.components["posh_config"].libs = ["iceoryx_posh_config"]
         self.cpp_info.components["posh_config"].requires = ["posh_roudi", "utils", "posh"]
@@ -233,7 +233,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["bind_c"].name = "binding_c"
         self.cpp_info.components["bind_c"].libs = ["iceoryx_binding_c"]
         self.cpp_info.components["bind_c"].requires = ["utils", "posh"]
-        if self.settings.os in ["Linux","Macos","Neutrino"]:        
+        if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["bind_c"].system_libs.extend(["pthread", "stdc++"])
         self.cpp_info.components["bind_c"].builddirs = self._pkg_cmake
         self.cpp_info.components["bind_c"].build_modules["cmake_find_package"] = [
