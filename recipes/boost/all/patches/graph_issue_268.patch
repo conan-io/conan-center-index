@@ -1,8 +1,8 @@
 diff --git a/boost/graph/detail/adjacency_list.hpp b/boost/graph/detail/adjacency_list.hpp
-index c1a2ada2..806b3f0e 100644
+index 4b11fa51..8ba6b12e 100644
 --- a/boost/graph/detail/adjacency_list.hpp
 +++ b/boost/graph/detail/adjacency_list.hpp
-@@ -2070,15 +2070,20 @@ namespace detail
+@@ -2068,15 +2068,20 @@ namespace detail
      inline void reindex_edge_list(
          EdgeList& el, vertex_descriptor u, boost::disallow_parallel_edge_tag)
      {
