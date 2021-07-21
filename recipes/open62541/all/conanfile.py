@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 import yaml
 
@@ -276,9 +277,18 @@ class Open62541Conan(ConanFile):
         tools.remove_files_by_mask(os.path.join(
             self.package_folder, "lib"), '*.pdb')
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*")):
+            if not cmake_file.endswith(self._module_file_rel_path):
+                os.remove(cmake_file)
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake", "open62541")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder, "open62541Macros.cmake")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"
@@ -296,8 +306,5 @@ class Open62541Conan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "win32"))
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "posix"))
-        self.cpp_info.builddirs = [
-            "lib",
-            os.path.join("lib", "cmake"),
-            os.path.join("lib", "cmake", "open62541")
-        ]
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules = [self._module_file_rel_path]
