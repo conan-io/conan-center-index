@@ -49,7 +49,7 @@ class DarwinToolchainConan(ConanFile):
             raise ConanInvalidConfiguration("watchOS: Only supported archs are [armv7k, armv8, x86, x86_64]")
 
     def package(self):
-        self.copy("darwin-toolchain.cmake")
+        pass
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
