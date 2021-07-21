@@ -150,6 +150,11 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
+        if self.options.web_socket:
+            if self.options["libwebsockets"].with_ssl != self.options.encryption:
+                raise ConanInvalidConfiguration(
+                    "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
+
     def source(self):
         archive_name = self.name + "-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
