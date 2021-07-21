@@ -226,3 +226,7 @@ class IceoryxConan(ConanFile):
         libcxx = tools.stdcpp_library(self)
         if libcxx:
             self.cpp_info.components["iceoryx_binding_c"].system_libs.append(libcxx)
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
