@@ -16,13 +16,13 @@ class JerryScriptStackConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_cmdline": [True, False],
-        "build_cmdline_test": [True, False],
-        "build_cmdline_snapshot": [True, False],
-        "build_libfuzzer": [True, False],
-        "build_port_default": [True, False],
-        "build_ext": [True, False],
-        "build_math": [True, False],
+        "tool_cmdline": [True, False],
+        "tool_cmdline_test": [True, False],
+        "tool_cmdline_snapshot": [True, False],
+        "libfuzzer_support": [True, False],
+        "default_port_implementation": [True, False],
+        "jerry_ext": [True, False],
+        "jerry_math": [True, False],
         "link_time_optimization": [True, False],
         "strip_symbols": [True, False],
         "amalgamated": [True, False],
@@ -134,11 +134,11 @@ class JerryScriptStackConan(ConanFile):
         except:
             raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit should be a positive integer")
 
-        if self.options.build_math is None:
+        if self.options.jerry_math is None:
             if Version(self.version) < Version("2.4.0"):
-                self.options.build_math = True
+                self.options.jerry_math = True
             else:
-                self.options.build_math = False
+                self.options.jerry_math = False
 
         if self.settings.arch == "x86_64":
             self.options.system_allocator = False
@@ -166,13 +166,13 @@ class JerryScriptStackConan(ConanFile):
         if Version(self.version) < Version("2.4.0"):
             amalgamation_definition = "ENABLE_ALL_IN_ONE"
             libmath_definition = "JERRY_LIBM"
-        self._cmake.definitions["JERRY_CMDLINE"] = self.options.build_cmdline
-        self._cmake.definitions["JERRY_CMDLINE_TEST"] = self.options.build_cmdline_test
-        self._cmake.definitions["JERRY_CMDLINE_SNAPSHOT"] = self.options.build_cmdline_snapshot
-        self._cmake.definitions["JERRY_LIBFUZZER"] = self.options.build_libfuzzer
-        self._cmake.definitions["JERRY_PORT_DEFAULT"] = self.options.build_port_default
-        self._cmake.definitions["JERRY_EXT"] = self.options.build_ext
-        self._cmake.definitions[libmath_definition] = self.options.build_math
+        self._cmake.definitions["JERRY_CMDLINE"] = self.options.tool_cmdline
+        self._cmake.definitions["JERRY_CMDLINE_TEST"] = self.options.tool_cmdline_test
+        self._cmake.definitions["JERRY_CMDLINE_SNAPSHOT"] = self.options.tool_cmdline_snapshot
+        self._cmake.definitions["JERRY_LIBFUZZER"] = self.options.libfuzzer_support
+        self._cmake.definitions["JERRY_PORT_DEFAULT"] = self.options.default_port_implementation
+        self._cmake.definitions["JERRY_EXT"] = self.options.jerry_ext
+        self._cmake.definitions[libmath_definition] = self.options.jerry_math
         self._cmake.definitions["ENABLE_STRIP"] = self.options.strip_symbols
         self._cmake.definitions["ENABLE_LTO"] = self.options.link_time_optimization
         self._cmake.definitions[amalgamation_definition] = self.options.amalgamated
