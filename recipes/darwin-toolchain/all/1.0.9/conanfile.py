@@ -8,7 +8,6 @@ import copy
 
 class DarwinToolchainConan(ConanFile):
     name = "darwin-toolchain"
-    version = "1.0.9"
     license = "Apple"
     settings = "os", "arch", "build_type"
     options = {"bitcode": [True, False]}
