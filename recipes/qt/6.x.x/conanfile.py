@@ -576,6 +576,7 @@ class QtConan(ConanFile):
             tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
+        tools.remove_files_by_mask(self.package_folder, "ensure_pro_file.cmake")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
@@ -643,6 +644,9 @@ class QtConan(ConanFile):
             tools.save(os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
+
+        if self.options.gui:
+            _create_private_module("Gui", ["CorePrivate", "Gui"])
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
@@ -895,11 +899,15 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Core"))
 
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt6_private_file("Gui"))
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt6_private_file("Gui"))
+
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt6", "qt")
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            if os.path.isfile(module):
+                self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
