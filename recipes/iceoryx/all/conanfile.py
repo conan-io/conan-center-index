@@ -35,11 +35,11 @@ class IceoryxConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            return self.options.fPIC
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            return self.options.fPIC
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.toml_config:
