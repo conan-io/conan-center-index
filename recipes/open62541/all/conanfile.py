@@ -103,10 +103,6 @@ class Open62541Conan(ConanFile):
         if self.options.discovery == "With Multicast":
             self.requires("pro-mdnsd/0.8.4")
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -269,7 +265,8 @@ class Open62541Conan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
