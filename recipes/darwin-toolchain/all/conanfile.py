@@ -113,7 +113,7 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.env_info.CONAN_CMAKE_OSX_SYSROOT = sysroot
         self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = self._cmake_system_processor
-        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.package_folder, "darwin-toolchain.cmake")
+        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(self.recipe_folder, "darwin-toolchain.cmake")
 
     def package_id(self):
         self.info.header_only()
