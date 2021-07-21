@@ -24,64 +24,9 @@ class IceoryxConan(ConanFile):
     exports_sources = ["patches/**","CMakeLists.txt"]
     _cmake = None
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, alias, aliased):
-        content = ""
-        content += textwrap.dedent("""\
-            if(TARGET {aliased} AND NOT TARGET {alias})
-                add_library({alias} INTERFACE IMPORTED)
-                set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-            endif()
-        """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join(
-            "lib",
-            "cmake"
-        )
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _pkg_share(self):
-        return os.path.join(
-            self.package_folder,
-            "share"
-        )
-
-    @property
-    def _pkg_etc(self):
-        return os.path.join(
-            self.package_folder,
-            "etc"
-        )
-
-    @property
-    def _pkg_res(self):
-        return os.path.join(
-            self.package_folder,
-            "res"
-        )
-
-    @property
-    def _pkg_cmake(self):
-        return os.path.join(
-            self.package_folder,
-            "lib/cmake"
-        )
-
-    @property
-    def _target_aliases(self):
-        return {
-            "iceoryx_posh::iceoryx_posh": "iceoryx::posh",
-            "iceoryx_posh::iceoryx_posh_roudi": "iceoryx::posh_roudi",
-            "iceoryx_binding_c::iceoryx_binding_c": "iceoryx::binding_c",
-            "iceoryx_utils::iceoryx_utils": "iceoryx::utils"
-        }
 
     def requirements(self):
         if self.options.toml_config:
@@ -135,8 +80,8 @@ class IceoryxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(self._pkg_share)
-        tools.rmdir(self._pkg_cmake)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.mkdir(self._pkg_res)
         if self.options.toml_config:
             tools.rename(
@@ -158,6 +103,37 @@ class IceoryxConan(ConanFile):
                 aliased
             )
 
+    @property
+    def _pkg_etc(self):
+        return os.path.join(self.package_folder, "etc")
+
+    @property
+    def _pkg_res(self):
+        return os.path.join(self.package_folder, "res")
+
+    @property
+    def _target_aliases(self):
+        return {
+            "iceoryx_posh::iceoryx_posh": "iceoryx::posh",
+            "iceoryx_posh::iceoryx_posh_roudi": "iceoryx::posh_roudi",
+            "iceoryx_binding_c::iceoryx_binding_c": "iceoryx::binding_c",
+            "iceoryx_utils::iceoryx_utils": "iceoryx::utils"
+        }
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, alias, aliased):
+        content = textwrap.dedent("""\
+            if(TARGET {aliased} AND NOT TARGET {alias})
+                add_library({alias} INTERFACE IMPORTED)
+                set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+            endif()
+        """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
         self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
@@ -177,7 +153,7 @@ class IceoryxConan(ConanFile):
             self.cpp_info.components["utils"].system_libs.append("pthread")
         if self.settings.os == "Linux":
             self.cpp_info.components["utils"].system_libs.append("atomic")
-        self.cpp_info.components["utils"].builddirs = self._pkg_cmake
+        self.cpp_info.components["utils"].builddirs = self._module_subfolder
         self.cpp_info.components["utils"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_utils-targets.cmake")
         ]
@@ -190,7 +166,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["posh"].requires = ["utils"]
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["posh"].system_libs.append("pthread")
-        self.cpp_info.components["posh"].builddirs = self._pkg_cmake
+        self.cpp_info.components["posh"].builddirs = self._module_subfolder
         self.cpp_info.components["posh"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_posh-targets.cmake")
         ]
@@ -205,7 +181,7 @@ class IceoryxConan(ConanFile):
             self.cpp_info.components["post_roudi"].requires.append("cpptoml::cpptoml")
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["posh_roudi"].system_libs.append("pthread")
-        self.cpp_info.components["posh_roudi"].builddirs = self._pkg_cmake
+        self.cpp_info.components["posh_roudi"].builddirs = self._module_subfolder
         self.cpp_info.components["posh_roudi"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_posh_roudi-targets.cmake")
         ]
@@ -228,7 +204,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["bind_c"].requires = ["utils", "posh"]
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["bind_c"].system_libs.extend(["pthread", "stdc++"])
-        self.cpp_info.components["bind_c"].builddirs = self._pkg_cmake
+        self.cpp_info.components["bind_c"].builddirs = self._module_subfolder
         self.cpp_info.components["bind_c"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_binding_c-targets.cmake")
         ]
