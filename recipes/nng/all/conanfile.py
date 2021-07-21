@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NngConan(ConanFile):
     name = "nng"
@@ -30,10 +32,6 @@ class NngConan(ConanFile):
     generators = "cmake"
     _cmake = None
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -47,6 +45,10 @@ class NngConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and \
                 tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("MSVC < 14 is not supported")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
