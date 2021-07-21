@@ -3,6 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
+required_conan_version = ">=1.33.0"
+
+
 class IceoryxConan(ConanFile):
 
     name = "iceoryx"
