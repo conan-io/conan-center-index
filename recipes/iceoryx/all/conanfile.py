@@ -48,31 +48,29 @@ class IceoryxConan(ConanFile):
             self.requires("acl/2.3.1")
 
     def validate(self):
-        os = self.settings.os
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
+
         if compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                'Using Iceoryx with Visual Studio currently just possible with "shared=False"')
-        if compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration(
-                "Iceoryx doesn't support 'compiler.libcxx=libstdc++'")
-        if compiler == "clang" and version == "7.0" and compiler.libcxx == "libc++" and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(
-                "{} {} with {} in {} mode not supported".format(compiler, version, compiler.libcxx, self.settings.build_type))
-        if os == "Linux" and compiler == "gcc" and version <= "5":
-            raise ConanInvalidConfiguration(
-                "Using Iceoryx with gcc on Linux requires gcc 6 or higher.")
-        if os == "Linux" and compiler == "gcc" and version == "6":
-            self.output.warn(
-                "Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
-            self.output.warn(
-                "GCC 6 will built with warnings.")
-        if compiler == "Visual Studio" and version < "16":
-            raise ConanInvalidConfiguration(
-                "Iceoryx is just supported for Visual Studio compiler 16 and higher.")
+
+        if compiler == "Visual Studio":
+            if version < "16":
+                raise ConanInvalidConfiguration("Iceoryx is just supported for Visual Studio 2019 and higher.")
+            if self.options.shared:
+                raise ConanInvalidConfiguration('Using Iceoryx with Visual Studio currently just possible with "shared=False"')
+        if compiler == "gcc":
+            if version < "6":
+                raise ConanInvalidConfiguration("Using Iceoryx with gcc requires gcc 6 or higher.")
+            if version < "9" and compiler.get_safe("libcxx") == "libstdc++":
+                raise ConanInvalidConfiguration("{} {} with {} not supported".format(compiler, version, compiler.libcxx))
+            if version == "6":
+                self.output.warn("Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
+                self.output.warn("GCC 6 will build with warnings.")
+        if compiler == "clang":
+            if version == "7.0" and compiler.get_safe("libcxx") == "libc++" and self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration("{} {} with {} in {} mode not supported".format(
+                                                compiler, version, compiler.libcxx, self.settings.build_type))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
