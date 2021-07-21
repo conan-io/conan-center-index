@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class MatioConan(ConanFile):
     name = "matio"
@@ -36,20 +38,6 @@ class MatioConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    def requirements(self):
-        if self.options.with_hdf5:
-            self.requires("hdf5/1.12.0")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -57,10 +45,26 @@ class MatioConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not self.options.with_hdf5 and self.options.mat73:
-            raise ConanInvalidConfiguration("Support of version 7.3 MAT files requires HDF5")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.with_hdf5:
+            self.requires("hdf5/1.12.0")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if not self.options.with_hdf5 and self.options.mat73:
+            raise ConanInvalidConfiguration("Support of version 7.3 MAT files requires HDF5")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -92,7 +96,7 @@ class MatioConan(ConanFile):
             self.cpp_info.libs = ["libmatio"]
         else:
             self.cpp_info.libs = ["matio"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
         bin_path = os.path.join(self.package_folder, "bin")
