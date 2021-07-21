@@ -108,6 +108,7 @@ class NetcdfConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "netCDF"
         self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
+        self.cpp_info.components["libnetcdf"].names["pkg_config"] = "netcdf"
         self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
         self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
         if self._with_hdf5:
