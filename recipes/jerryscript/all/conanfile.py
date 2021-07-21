@@ -81,8 +81,8 @@ class JerryScriptStackConan(ConanFile):
         return "build_subfolder"
     
     def package_id(self):
-        if not self.options.profile in self.predefined_profiles
-            with open(self.options.profile, "r") as profile_file
+        if not self.options.profile in self.predefined_profiles:
+            with open(self.options.profile, "r") as profile_file:
                 self.info.options.profile = profile_file.read()
 
     def config_options(self):
