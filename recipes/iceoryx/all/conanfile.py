@@ -156,7 +156,7 @@ class IceoryxConan(ConanFile):
             self.cpp_info.components["utils"].system_libs.append("pthread")
         if self.settings.os == "Linux":
             self.cpp_info.components["utils"].system_libs.append("atomic")
-        self.cpp_info.components["utils"].builddirs = self._module_subfolder
+        self.cpp_info.components["utils"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["utils"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_utils-targets.cmake")
         ]
@@ -169,7 +169,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["posh"].requires = ["utils"]
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["posh"].system_libs.append("pthread")
-        self.cpp_info.components["posh"].builddirs = self._module_subfolder
+        self.cpp_info.components["posh"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["posh"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_posh-targets.cmake")
         ]
@@ -184,7 +184,7 @@ class IceoryxConan(ConanFile):
             self.cpp_info.components["post_roudi"].requires.append("cpptoml::cpptoml")
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["posh_roudi"].system_libs.append("pthread")
-        self.cpp_info.components["posh_roudi"].builddirs = self._module_subfolder
+        self.cpp_info.components["posh_roudi"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["posh_roudi"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_posh_roudi-targets.cmake")
         ]
@@ -207,7 +207,7 @@ class IceoryxConan(ConanFile):
         self.cpp_info.components["bind_c"].requires = ["utils", "posh"]
         if self.settings.os in ["Linux","Macos","Neutrino"]:
             self.cpp_info.components["bind_c"].system_libs.extend(["pthread", "stdc++"])
-        self.cpp_info.components["bind_c"].builddirs = self._module_subfolder
+        self.cpp_info.components["bind_c"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["bind_c"].build_modules["cmake_find_package"] = [
             os.path.join(self._module_subfolder, "conan-official-iceoryx_binding_c-targets.cmake")
         ]
