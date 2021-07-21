@@ -36,7 +36,7 @@ class NngConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -86,9 +86,9 @@ class NngConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "nng"
         self.cpp_info.libs = ["nng"]
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs.extend(['mswsock', 'ws2_32'])
+            self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(['pthread'])
+            self.cpp_info.system_libs.extend(["pthread"])
 
         if self.options.shared:
             self.cpp_info.defines.append("NNG_SHARED_LIB")
