@@ -313,7 +313,10 @@ class LibcurlConan(ConanFile):
             params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
         # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
-        if tools.Version(self.version) <= "7.77.0":
+        if tools.Version(self.version) >= "7.78.0":
+            if self.options.with_libmetalink:
+                raise ConanInvalidConfiguration("Support for metalink was removed in libcurl version 7.78.0")
+        else:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         # Cross building flags
