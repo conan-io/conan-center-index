@@ -21,7 +21,7 @@ class LibZipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
-        "crypto": [False, "win32", "openssl", "mbedtls"],
+        "crypto": [False, "win32", "openssl", "mbedtls", "auto"],
         "tools": [True, False],
     }
     default_options = {
@@ -57,6 +57,12 @@ class LibZipConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+        # Deprecate "auto" value of crypto option
+        if self.options.crypto == "auto":
+            crypto_value = "win32" if self.settings.os == "Windows" else "openssl"
+            self.output.warn("'auto' value of 'crypto' option is deprecated, fallback to default value on {}: {}".format(self.settings.os, crypto_value))
+            self.options.crypto = crypto_value
 
     def requirements(self):
         self.requires("zlib/1.2.11")
