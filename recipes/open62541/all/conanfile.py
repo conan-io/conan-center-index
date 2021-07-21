@@ -87,6 +87,28 @@ class Open62541Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+        if self.options.web_socket:
+            self.options["libwebsockets"].with_ssl = self.options.encryption
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+        if not self.options.cpp_compatible:
+            del self.settings.compiler.cppstd
+            del self.settings.compiler.libcxx
+
+    def requirements(self):
+        if self.options.encryption == "mbedtls":
+            self.requires("mbedtls/2.25.0")
+        elif self.options.encryption == "openssl":
+            self.requires("openssl/1.1.1k")
+        if self.options.web_socket:
+            self.requires("libwebsockets/4.2.0")
+        if self.options.discovery == "With Multicast":
+            self.requires("pro-mdnsd/0.8.4")
+
+    def validate(self):
         if not self.options.subscription:
             if self.options.subscription_events:
                 raise ConanInvalidConfiguration(
@@ -128,27 +150,6 @@ class Open62541Conan(ConanFile):
         if self.options.pub_sub != False and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
-
-        if self.options.web_socket:
-            self.options["libwebsockets"].with_ssl = self.options.encryption
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-        if not self.options.cpp_compatible:
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
-
-    def requirements(self):
-        if self.options.encryption == "mbedtls":
-            self.requires("mbedtls/2.25.0")
-        elif self.options.encryption == "openssl":
-            self.requires("openssl/1.1.1k")
-        if self.options.web_socket:
-            self.requires("libwebsockets/4.2.0")
-        if self.options.discovery == "With Multicast":
-            self.requires("pro-mdnsd/0.8.4")
 
     def source(self):
         archive_name = self.name + "-" + self.version
