@@ -82,7 +82,7 @@ class NngConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["nng"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(['mswsock', 'ws2_32'])
         elif self.settings.os == "Linux":
