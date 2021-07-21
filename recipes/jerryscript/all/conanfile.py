@@ -91,7 +91,7 @@ class JerryScriptStackConan(ConanFile):
     short_paths = True
 
     _cmake = None
-    predefined_profiles = ["es.next", "es5.1", "minimal"]
+    _predefined_profiles = ["es.next", "es5.1", "minimal"]
 
     @property
     def _source_subfolder(self):
@@ -102,7 +102,7 @@ class JerryScriptStackConan(ConanFile):
         return "build_subfolder"
     
     def package_id(self):
-        if not self.options.profile in self.predefined_profiles:
+        if not self.options.profile in self._predefined_profiles:
             with open(self.options.profile, "r") as profile_file:
                 self.info.options.profile = profile_file.read()
 
@@ -124,7 +124,7 @@ class JerryScriptStackConan(ConanFile):
                 self.options.profile = "es5.1"
             else:
                 self.options.profile = "es.next"
-        if (not self.options.profile in self.predefined_profiles) and not os.path.isfile(self.options.profile):
+        if (not self.options.profile in self._predefined_profiles) and not os.path.isfile(self.options.profile):
             raise ConanInvalidConfiguration("jerryscript feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
         
         try:
