@@ -36,7 +36,7 @@ class Open62541Conan(ConanFile):
         "discovery": [True, False, "With Multicast"],
         "discovery_semaphore": [True, False],
         "query": [True, False],
-        "encryption": [False, "openssl", "mbedtls-apache", "mbedtls-gpl"],
+        "encryption": [False, "openssl", "mbedtls"],
         "json_support": [True, False],
         "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
@@ -82,26 +82,6 @@ class Open62541Conan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def requirements(self):
-        if tools.Version(self.version) >= "1.1.0":
-            if self.options.encryption == "mbedtls-apache":
-                self.requires("mbedtls/2.16.3-apache")
-            elif self.options.encryption == "mbedtls-gpl":
-                self.requires("mbedtls/2.16.3-gpl")
-            elif self.options.encryption == "openssl":
-                self.requires("openssl/1.1.1j")
-
-            if self.options.web_socket:
-                self.requires("libwebsockets/4.1.6")
-        else:
-            if self.options.encryption == "mbedtls-apache":
-                self.requires("mbedtls/2.16.3-apache")
-            elif self.options.encryption == "mbedtls-gpl":
-                self.requires("mbedtls/2.16.3-gpl")
-
-        if self.options.discovery == "With Multicast":
-            self.requires("pro-mdnsd/0.8.4")
 
     def configure(self):
         if self.options.shared:
@@ -159,6 +139,16 @@ class Open62541Conan(ConanFile):
         if not self.options.cpp_compatible:
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
+
+    def requirements(self):
+        if self.options.encryption == "mbedtls":
+            self.requires("mbedtls/2.25.0")
+        elif self.options.encryption == "openssl":
+            self.requires("openssl/1.1.1k")
+        if self.options.web_socket:
+            self.requires("libwebsockets/4.2.0")
+        if self.options.discovery == "With Multicast":
+            self.requires("pro-mdnsd/0.8.4")
 
     def source(self):
         archive_name = self.name + "-" + self.version
