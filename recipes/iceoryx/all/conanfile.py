@@ -68,10 +68,8 @@ class IceoryxConan(ConanFile):
                 self.output.warn("Iceoryx package is compiled with gcc 6, it is recommended to use 7 or higher")
                 self.output.warn("GCC 6 will build with warnings.")
         if compiler == "clang":
-            if version == "7.0" and compiler.get_safe("libcxx") == "libc++" and \
-               self.settings.build_type == "Debug" and self.options.shared:
-                raise ConanInvalidConfiguration("{} {} with {} in {} mode not supported".format(
-                                                compiler, version, compiler.libcxx, self.settings.build_type))
+            if version < "8" and compiler.get_safe("libcxx") == "libc++":
+                raise ConanInvalidConfiguration("clang < 8 with libc++ not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
