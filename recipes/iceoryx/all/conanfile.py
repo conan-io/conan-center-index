@@ -56,9 +56,6 @@ class IceoryxConan(ConanFile):
         if compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration(
                 'Using Iceoryx with Visual Studio currently just possible with "shared=False"')
-        if (compiler == "gcc" or compiler == "clang") and compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration(
-                'Using Iceoryx with gcc or clang on Linux requires "compiler.libcxx=libstdc++11"')
         if os == "Linux" and compiler == "gcc" and version <= "5":
             raise ConanInvalidConfiguration(
                 "Using Iceoryx with gcc on Linux requires gcc 6 or higher.")
