@@ -88,6 +88,11 @@ class NettleTLS(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        # srcdir in unix path causes some troubles in asm files on Windows
+        if self.settings.os == "Windows":
+            tools.replace_in_file(os.path.join(self.build_folder, "config.m4"),
+                                  tools.unix_path(os.path.join(self.build_folder, self._source_subfolder)),
+                                  os.path.join(self.build_folder, self._source_subfolder).replace("\\", "/"))
         return self._autotools
 
     def _patch_sources(self):
