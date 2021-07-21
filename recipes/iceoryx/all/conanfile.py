@@ -93,8 +93,8 @@ class IceoryxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # tools.rmdir(os.path.join(self.package_folder, "share"))
+        # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.mkdir(self._pkg_res)
         if self.options.toml_config:
             tools.rename(
@@ -149,6 +149,9 @@ class IceoryxConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
+        # FIXME: We should provide 3 CMake config files:
+        #        iceoryx_utilsConfig.cmake, iceoryx_poshConfig.cmake and iceoryx_binding_cConfig.cmake
+        #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
         self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
         # platform component
