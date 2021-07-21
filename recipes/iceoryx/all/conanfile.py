@@ -117,7 +117,7 @@ class IceoryxConan(ConanFile):
         tools.rmdir(self._pkg_etc)
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            self._target_aliases
+            {v["target"]:"iceoryx::{}".format(k) for k, v in self._iceoryx_components.items()}
         )
 
     @property
@@ -129,15 +129,62 @@ class IceoryxConan(ConanFile):
         return os.path.join(self.package_folder, "res")
 
     @property
-    def _target_aliases(self):
+    def _iceoryx_components(self):
+        def pthread():
+            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def rt():
+            return ["rt"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def atomic():
+            return ["atomic"] if self.settings.os == "Linux" else []
+
+        def acl():
+            return ["acl::acl"] if self.settings.os == "Linux" else []
+
+        def cpptoml():
+            return ["cpptoml::cpptoml"] if self.options.toml_config else []
+
+        def libcxx():
+            libcxx = tools.stdcpp_library(self)
+            return [libcxx] if libcxx and not self.options.shared else []
+
         return {
-            "iceoryx_utils::iceoryx_platform": "iceoryx::iceoryx_platform",
-            "iceoryx_utils::iceoryx_utils": "iceoryx::iceoryx_utils",
-            "iceoryx_posh::iceoryx_posh": "iceoryx::iceoryx_posh",
-            "iceoryx_posh::iceoryx_posh_roudi": "iceoryx::iceoryx_posh_roudi",
-            "iceoryx_posh::iceoryx_posh_gateway": "iceoryx::iceoryx_posh_gateway",
-            "iceoryx_posh::iceoryx_posh_config": "iceoryx::iceoryx_posh_config",
-            "iceoryx_binding_c::iceoryx_binding_c": "iceoryx::iceoryx_binding_c",
+            "iceoryx_platform": {
+                "target": "iceoryx_utils::iceoryx_platform",
+                "system_libs": pthread(),
+                "requires": [],
+            },
+            "iceoryx_utils": {
+                "target": "iceoryx_utils::iceoryx_utils",
+                "system_libs": pthread() + rt() + atomic(),
+                "requires": ["iceoryx_platform"] + acl(),
+            },
+            "iceoryx_posh": {
+                "target": "iceoryx_posh::iceoryx_posh",
+                "system_libs": pthread(),
+                "requires": ["iceoryx_utils"],
+            },
+            "iceoryx_posh_roudi": {
+                "target": "iceoryx_posh::iceoryx_posh_roudi",
+                "system_libs": pthread(),
+                "requires": ["iceoryx_utils", "iceoryx_posh"] + cpptoml(),
+            },
+            "iceoryx_posh_gateway": {
+                "target": "iceoryx_posh::iceoryx_posh_gateway",
+                "system_libs": pthread(),
+                "requires": ["iceoryx_utils", "iceoryx_posh"],
+            },
+            "iceoryx_posh_config": {
+                "target": "iceoryx_posh::iceoryx_posh_config",
+                "system_libs": pthread(),
+                "requires": ["iceoryx_posh_roudi", "iceoryx_utils", "iceoryx_posh"],
+            },
+            "iceoryx_binding_c": {
+                "target": "iceoryx_binding_c::iceoryx_binding_c",
+                "system_libs": pthread() + libcxx(),
+                "requires": ["iceoryx_utils", "iceoryx_posh"],
+            },
         }
 
     @staticmethod
@@ -167,82 +214,18 @@ class IceoryxConan(ConanFile):
         #        It's not possible yet, see https://github.com/conan-io/conan/issues/9000
         self.cpp_info.names["cmake_find_package"] = "iceoryx"
         self.cpp_info.names["cmake_find_multi_package"] = "iceoryx"
-        # platform component
-        self.cpp_info.components["iceoryx_platform"].names["cmake_find_package"] = "iceoryx_platform"
-        self.cpp_info.components["iceoryx_platform"].names["cmake_find_package_multi"] = "iceoryx_platform"
-        self.cpp_info.components["iceoryx_platform"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_platform"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_platform"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_platform"].libs = ["iceoryx_platform"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_platform"].system_libs.append("pthread")
-        # iceoryx_utils component
-        self.cpp_info.components["iceoryx_utils"].names["cmake_find_package"] = "iceoryx_utils"
-        self.cpp_info.components["iceoryx_utils"].names["cmake_find_package_multi"] = "iceoryx_utils"
-        self.cpp_info.components["iceoryx_utils"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_utils"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_utils"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_utils"].libs = ["iceoryx_utils"]
-        self.cpp_info.components["iceoryx_utils"].requires = ["iceoryx_platform"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["iceoryx_utils"].requires.append("acl::acl")
-            self.cpp_info.components["iceoryx_utils"].system_libs.extend(["atomic", "rt"])
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_utils"].system_libs.append("pthread")
-        # iceoryx_posh component
-        self.cpp_info.components["iceoryx_posh"].names["cmake_find_package"] = "iceoryx_posh"
-        self.cpp_info.components["iceoryx_posh"].names["cmake_find_package_multi"] = "iceoryx_posh"
-        self.cpp_info.components["iceoryx_posh"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_posh"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh"].libs = ["iceoryx_posh"]
-        self.cpp_info.components["iceoryx_posh"].requires = ["iceoryx_utils"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_posh"].system_libs.append("pthread")
-        # iceoryx_posh_roudi component
-        self.cpp_info.components["iceoryx_posh_roudi"].names["cmake_find_package"] = "iceoryx_posh_roudi"
-        self.cpp_info.components["iceoryx_posh_roudi"].names["cmake_find_package_multi"] = "iceoryx_posh_roudi"
-        self.cpp_info.components["iceoryx_posh_roudi"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_posh_roudi"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_roudi"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_roudi"].libs = ["iceoryx_posh_roudi"]
-        self.cpp_info.components["iceoryx_posh_roudi"].requires = ["iceoryx_utils", "iceoryx_posh"]
-        if self.options.toml_config:
-            self.cpp_info.components["iceoryx_post_roudi"].requires.append("cpptoml::cpptoml")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_posh_roudi"].system_libs.append("pthread")
-        # iceoryx_posh_gateway component
-        self.cpp_info.components["iceoryx_posh_gateway"].names["cmake_find_package"] = "iceoryx_posh_gateway"
-        self.cpp_info.components["iceoryx_posh_gateway"].names["cmake_find_package_multi"] = "iceoryx_posh_gateway"
-        self.cpp_info.components["iceoryx_posh_gateway"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_posh_gateway"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_gateway"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_gateway"].libs = ["iceoryx_posh_gateway"]
-        self.cpp_info.components["iceoryx_posh_gateway"].requires = ["iceoryx_utils", "iceoryx_posh"]
-        # iceoryx_posh_config component
-        self.cpp_info.components["iceoryx_posh_config"].names["cmake_find_package"] = "iceoryx_posh_config"
-        self.cpp_info.components["iceoryx_posh_config"].names["cmake_find_package_multi"] = "iceoryx_posh_config"
-        self.cpp_info.components["iceoryx_posh_config"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_posh_config"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_config"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_posh_config"].libs = ["iceoryx_posh_config"]
-        self.cpp_info.components["iceoryx_posh_config"].requires = ["iceoryx_posh_roudi", "iceoryx_utils", "iceoryx_posh"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_posh_config"].system_libs.append("pthread")
-        # bind_c component
-        self.cpp_info.components["iceoryx_binding_c"].names["cmake_find_package"] = "iceoryx_binding_c"
-        self.cpp_info.components["iceoryx_binding_c"].names["cmake_find_package_multi"] = "iceoryx_binding_c"
-        self.cpp_info.components["iceoryx_binding_c"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["iceoryx_binding_c"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_binding_c"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["iceoryx_binding_c"].libs = ["iceoryx_binding_c"]
-        self.cpp_info.components["iceoryx_binding_c"].requires = ["iceoryx_utils", "iceoryx_posh"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["iceoryx_binding_c"].system_libs.append("pthread")
-        libcxx = tools.stdcpp_library(self)
-        if libcxx:
-            self.cpp_info.components["iceoryx_binding_c"].system_libs.append(libcxx)
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        def _register_components(components):
+            for cmake_lib_name, values in components.items():
+                system_libs = values.get("system_libs", [])
+                requires = values.get("requires", [])
+                self.cpp_info.components[cmake_lib_name].names["cmake_find_package"] = cmake_lib_name
+                self.cpp_info.components[cmake_lib_name].names["cmake_find_package_multi"] = cmake_lib_name
+                self.cpp_info.components[cmake_lib_name].builddirs.append(self._module_subfolder)
+                self.cpp_info.components[cmake_lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components[cmake_lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                self.cpp_info.components[cmake_lib_name].libs = [cmake_lib_name]
+                self.cpp_info.components[cmake_lib_name].system_libs = system_libs
+                self.cpp_info.components[cmake_lib_name].requires = requires
+
+        _register_components(self._iceoryx_components)
