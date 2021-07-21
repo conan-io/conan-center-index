@@ -18,3 +18,7 @@ patches:
       base_path: "qt5/qtwebengine"
     - patch_file: "patches/7371d3a.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/QTBUG-90395.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/declarative_missing_header.diff"
+      base_path: "qt5/qtdeclarative"
