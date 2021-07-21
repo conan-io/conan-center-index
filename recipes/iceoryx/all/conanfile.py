@@ -16,12 +16,14 @@ class IceoryxConan(ConanFile):
     topics = ("Shared Memory", "IPC", "ROS", "Middleware")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-         "shared":          [True, False],
-         "toml_config":     [True, False]
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "toml_config": [True, False],
     }
     default_options = {
-        "shared":           False,
-        "toml_config":      True
+        "shared": False,
+        "fPIC": True,
+        "toml_config": True,
     }
     generators = ["cmake", "cmake_find_package"]
     exports_sources = ["patches/**","CMakeLists.txt"]
@@ -30,6 +32,14 @@ class IceoryxConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            return self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            return self.options.fPIC
 
     def requirements(self):
         if self.options.toml_config:
