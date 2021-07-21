@@ -19,7 +19,6 @@ class JerryScriptStackConan(ConanFile):
         "tool_cmdline": [True, False],
         "tool_cmdline_test": [True, False],
         "tool_cmdline_snapshot": [True, False],
-        "libfuzzer_support": [True, False],
         "default_port_implementation": [True, False],
         "jerry_ext": [True, False],
         "jerry_math": [True, False],
@@ -56,7 +55,6 @@ class JerryScriptStackConan(ConanFile):
         "tool_cmdline": True,
         "tool_cmdline_test": False,
         "tool_cmdline_snapshot": False,
-        "libfuzzer_support": False,
         "default_port_implementation": True,
         "jerry_ext": True,
         "jerry_math": None,
@@ -169,7 +167,6 @@ class JerryScriptStackConan(ConanFile):
         self._cmake.definitions["JERRY_CMDLINE"] = self.options.tool_cmdline
         self._cmake.definitions["JERRY_CMDLINE_TEST"] = self.options.tool_cmdline_test
         self._cmake.definitions["JERRY_CMDLINE_SNAPSHOT"] = self.options.tool_cmdline_snapshot
-        self._cmake.definitions["JERRY_LIBFUZZER"] = self.options.libfuzzer_support
         self._cmake.definitions["JERRY_PORT_DEFAULT"] = self.options.default_port_implementation
         self._cmake.definitions["JERRY_EXT"] = self.options.jerry_ext
         self._cmake.definitions[libmath_definition] = self.options.jerry_math
