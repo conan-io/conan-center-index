@@ -17,7 +17,7 @@ class DarwinToolchainConan(ConanFile):
     homepage = "https://developer.apple.com"
     topics = ("xcode", "bitcode", "darwin")
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "darwin-toolchain.cmake"
+    exports = "darwin-toolchain.cmake"
 
     @property
     def _cmake_system_name(self):
