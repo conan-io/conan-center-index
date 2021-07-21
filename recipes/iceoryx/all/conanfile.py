@@ -61,6 +61,10 @@ class IceoryxConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Iceoryx is just supported for Visual Studio compiler 16 and higher.")
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -68,10 +72,6 @@ class IceoryxConan(ConanFile):
         self._cmake.definitions["TOML_CONFIG"] = self.options.toml_config
         self._cmake.configure()
         return self._cmake
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
-                  destination=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
