@@ -211,7 +211,6 @@ class Open62541Conan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.verbose = True
 
         version = tools.Version(self.version)
         self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major
