@@ -2,6 +2,7 @@ import os
 import os.path
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class JerryScriptStackConan(ConanFile):
     name = "jerryscript"
@@ -15,6 +16,15 @@ class JerryScriptStackConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_cmdline": [True, False],
+        "build_cmdline_test": [True, False],
+        "build_cmdline_snapshot": [True, False],
+        "build_libfuzzer": [True, False],
+        "build_port_default": [True, False],
+        "build_ext": [True, False],
+        "build_math": [True, False],
+        "link_time_optimization": [True, False],
+        "strip_symbols": [True, False],
         "amalgamated": [True, False],
         "debugger": [True, False],
         "keep_line_info": [True, False],
@@ -43,10 +53,19 @@ class JerryScriptStackConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_cmdline": True,
+        "build_cmdline_test": False,
+        "build_cmdline_snapshot": False,
+        "build_libfuzzer": False,
+        "build_port_default": True,
+        "build_ext": True,
+        "build_math": None,
+        "link_time_optimization": True,
+        "strip_symbols": True,
         "amalgamated": False,
         "debugger": False,
         "keep_line_info": False,
-        "profile": "es.next",
+        "profile": None,
         "promise_callback": False,
         "external_context": False,
         "snapshot_execution": False,
@@ -99,14 +118,28 @@ class JerryScriptStackConan(ConanFile):
 
         if not self.options.debugger:
             del self.options.keep_line_info
+        
+        if self.options.profile is None:
+            if Version(self.version) < Version("2.4.0"):
+                self.options.profile = "es5.1"
+            else:
+                self.options.profile = "es.next"
         if (not self.options.profile in self.predefined_profiles) and not os.path.isfile(self.options.profile):
             raise ConanInvalidConfiguration("jerryscript feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
+        
         try:
             assert(int(self.options.heap_size) >= 0), "must be bigger than or equal to 0"
             assert(int(self.options.gc_mark_limit) >= 0), "must be bigger than or equal to 0"
             assert(int(self.options.stack_limit) >= 0), "must be bigger than or equal to 0"
         except:
             raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit should be a positive integer")
+
+        if self.options.build_math is None:
+            if Version(self.version) < Version("2.4.0"):
+                self.options.build_math = True
+            else:
+                self.options.build_math = False
+
         if self.settings.arch == "x86_64":
             self.options.system_allocator = False
         if self.options.system_allocator:
@@ -128,9 +161,21 @@ class JerryScriptStackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["JERRY_CMDLINE"] = False
-        self._cmake.definitions["ENABLE_LTO"] = False
-        self._cmake.definitions["ENABLE_AMALGAM"] = self.options.amalgamated
+        amalgamation_definition = "ENABLE_AMALGAM"
+        libmath_definition = "JERRY_MATH"
+        if Version(self.version) < Version("2.4.0"):
+            amalgamation_definition = "ENABLE_ALL_IN_ONE"
+            libmath_definition = "JERRY_LIBM"
+        self._cmake.definitions["JERRY_CMDLINE"] = self.options.build_cmdline
+        self._cmake.definitions["JERRY_CMDLINE_TEST"] = self.options.build_cmdline_test
+        self._cmake.definitions["JERRY_CMDLINE_SNAPSHOT"] = self.options.build_cmdline_snapshot
+        self._cmake.definitions["JERRY_LIBFUZZER"] = self.options.build_libfuzzer
+        self._cmake.definitions["JERRY_PORT_DEFAULT"] = self.options.build_port_default
+        self._cmake.definitions["JERRY_EXT"] = self.options.build_ext
+        self._cmake.definitions[libmath_definition] = self.options.build_math
+        self._cmake.definitions["ENABLE_STRIP"] = self.options.strip_symbols
+        self._cmake.definitions["ENABLE_LTO"] = self.options.link_time_optimization
+        self._cmake.definitions[amalgamation_definition] = self.options.amalgamated
         self._cmake.definitions["JERRY_DEBUGGER"] = self.options.debugger
         self._cmake.definitions["JERRY_LINE_INFO"] = self.options.keep_line_info
         self._cmake.definitions["JERRY_PROFILE"] = self.options.profile
