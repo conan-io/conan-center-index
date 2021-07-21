@@ -59,7 +59,7 @@ class IceoryxConan(ConanFile):
         if compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(
                 "Iceoryx doesn't support 'compiler.libcxx=libstdc++'")
-        if compiler == "clang" and version == "7.0" and compiler.libcxx == "libstdc++" and self.settings.build_type == "Debug":
+        if compiler == "clang" and version == "7.0" and compiler.libcxx == "libc++" and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(
                 "{} {} with {} in {} mode not supported".format(compiler, version, compiler.libcxx, self.settings.build_type))
         if os == "Linux" and compiler == "gcc" and version <= "5":
