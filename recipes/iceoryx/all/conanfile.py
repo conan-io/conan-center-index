@@ -47,10 +47,6 @@ class IceoryxConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _build_folder(self):
-        return "build"
-
-    @property
     def _pkg_share(self):
         return os.path.join(
             self.package_folder,
