@@ -42,6 +42,7 @@ class NngConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
         if self.settings.compiler == "Visual Studio" and \
                 tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("MSVC < 14 is not supported")
