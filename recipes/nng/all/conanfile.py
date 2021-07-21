@@ -7,11 +7,9 @@ class NngConan(ConanFile):
     name = "nng"
     description = "nanomsg-next-generation: light-weight brokerless messaging"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
     homepage = "https://github.com/nanomsg/nng"
     license = "MIT"
     topics = ("nanomsg", "communication", "messaging", "protocols")
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +26,8 @@ class NngConan(ConanFile):
     }
 
     _source_subfolder = "source_subfolder"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     def source(self):
@@ -62,6 +62,8 @@ class NngConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
