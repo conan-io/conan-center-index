@@ -27,10 +27,13 @@ class NngConan(ConanFile):
         "http": True,
     }
 
-    _source_subfolder = "source_subfolder"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
