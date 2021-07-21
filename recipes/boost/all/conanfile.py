@@ -1433,7 +1433,7 @@ class BoostConan(ConanFile):
                     libprefix = "lib"
                 return libprefix + n
 
-            all_detected_libraries = set(tools.collect_libs(self))
+            all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.collect_libs(self))
             all_expected_libraries = set()
             incomplete_components = list()
 
