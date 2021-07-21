@@ -83,10 +83,6 @@ class IceoryxConan(ConanFile):
             "iceoryx_utils::iceoryx_utils": "iceoryx::utils"
         }
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def requirements(self):
         if self.options.toml_config:
             self.requires("cpptoml/0.1.1")
@@ -130,7 +126,8 @@ class IceoryxConan(ConanFile):
                   destination=self._source_subfolder)
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
