@@ -274,7 +274,6 @@ class LibcurlConan(ConanFile):
         params = [
             "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
             "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
-            "--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)),
             "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
             "--with-schannel={}".format(yes_no(self.options.with_ssl == "schannel")),
             "--with-secure-transport={}".format(yes_no(self.options.with_ssl == "darwinssl")),
@@ -312,6 +311,10 @@ class LibcurlConan(ConanFile):
 
         if self._has_zstd_option:
             params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
+
+        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
+        if tools.Version(self.version) <= "7.77.0":
+            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         # Cross building flags
         if tools.cross_building(self.settings):
