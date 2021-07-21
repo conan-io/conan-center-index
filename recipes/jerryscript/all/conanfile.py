@@ -38,6 +38,7 @@ class JerryScriptStackConan(ConanFile):
         "system_allocator": [True, False],
         "valgrind": [True, False],
         "gc_before_each_alloc": [True, False],
+        "vm_exec_stop": [True, False],
     }
     default_options = {
         "shared": False,
@@ -65,6 +66,7 @@ class JerryScriptStackConan(ConanFile):
         "system_allocator": False,
         "valgrind": False,
         "gc_before_each_alloc": False,
+        "vm_exec_stop": False,
     }
     generators = "cmake"
     short_paths = True
@@ -150,6 +152,7 @@ class JerryScriptStackConan(ConanFile):
         self._cmake.definitions["JERRY_SYSTEM_ALLOCATOR"] = self.options.system_allocator
         self._cmake.definitions["JERRY_VALGRIND"] = self.options.valgrind
         self._cmake.definitions["JERRY_MEM_GC_BEFORE_EACH_ALLOC"] = self.options.gc_before_each_alloc
+        self._cmake.definitions["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
