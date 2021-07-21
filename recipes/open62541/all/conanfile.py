@@ -83,20 +83,19 @@ class Open62541Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-        if self.options.web_socket:
-            self.options["libwebsockets"].with_ssl = self.options.encryption
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.cpp_compatible:
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
+
+        if self.options.web_socket:
+            self.options["libwebsockets"].with_ssl = self.options.encryption
 
     def requirements(self):
         if self.options.encryption == "mbedtls":
