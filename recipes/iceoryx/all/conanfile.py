@@ -93,8 +93,8 @@ class IceoryxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        # tools.rmdir(os.path.join(self.package_folder, "share"))
-        # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.mkdir(self._pkg_res)
         if self.options.toml_config:
             tools.rename(
