@@ -115,6 +115,7 @@ class NettleTLS(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.components["hogweed"].names["pkgconfig"] = "hogweed"
         self.cpp_info.components["hogweed"].libs = ["hogweed"]
         if self.options.public_key:
             self.cpp_info.components["hogweed"].requires.append("gmp::libgmp")
