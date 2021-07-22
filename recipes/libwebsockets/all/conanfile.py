@@ -200,7 +200,7 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.40.0")
+            self.requires("libuv/1.41.1")
 
         if self.options.with_libevent == "libevent":
             self.requires("libevent/2.1.12")
@@ -210,20 +210,20 @@ class LibwebsocketsConan(ConanFile):
         if self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.11")
         elif self.options.with_zlib == "miniz":
-            self.requires("miniz/2.1.0")
+            self.requires("miniz/2.2.0")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.36")
+            self.requires("libmount/2.36.2")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.36.0")
 
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.5.0")
+            self.requires("wolfssl/4.6.0")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
