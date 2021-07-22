@@ -23,8 +23,8 @@ class HanaConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "4.9.3",
-            "Visual Studio": "14.0",
+            "gcc": "5",
+            "Visual Studio": "14",
             "clang": "3.4",
             "apple-clang": "3.4",
         }
