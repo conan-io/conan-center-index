@@ -167,15 +167,19 @@ class LibcurlConan(ConanFile):
         del self.info.options.darwin_ssl
         del self.info.options.with_wolfssl
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
                 self.build_requires("ninja/1.10.2")
         else:
             self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.3")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+            self.build_requires("pkgconf/1.7.4")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
