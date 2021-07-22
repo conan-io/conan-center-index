@@ -69,8 +69,8 @@ class OpenEXRConan(ConanFile):
                                       "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_BINDIR}")
 
         # Add  "_d" suffix to lib file names.
-        for lib in ("OpenEXR", "IlmBase"):
-            if self.settings.build_type == "Debug":
+        if pkg_version < "2.5.7" and self.settings.build_type == "Debug":
+            for lib in ("OpenEXR", "IlmBase"):
                 tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
                                       "set(verlibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${@LIB@_LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX})".replace("@LIB@", lib.upper()),
                                       "set(verlibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${@LIB@_LIB_SUFFIX}_d${CMAKE_SHARED_LIBRARY_SUFFIX})".replace("@LIB@", lib.upper()))
