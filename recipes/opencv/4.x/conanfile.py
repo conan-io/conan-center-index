@@ -91,18 +91,11 @@ class OpenCVConan(ConanFile):
             del self.options.neon
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and \
-           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
-            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
-            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.contrib:
             del self.options.contrib_freetype
             del self.options.contrib_sfm
-            if self.options.with_cuda:
-                raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if not self.options.with_cuda:
             del self.options.with_cublas
             del self.options.with_cufft
@@ -146,6 +139,15 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
         if self.options.dnn:
             self.requires("protobuf/3.17.1")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and \
+           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
+            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
+            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
+        if self.options.with_cuda and not self.options.contrib:
+            raise ConanInvalidConfiguration("contrib must be enabled for cuda")
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):
