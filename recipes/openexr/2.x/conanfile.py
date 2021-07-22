@@ -11,7 +11,7 @@ class OpenEXRConan(ConanFile):
                   "Magic for use in computer imaging applications."
     topics = ("conan", "openexr", "hdr", "image", "picture")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/openexr/openexr"
+    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
