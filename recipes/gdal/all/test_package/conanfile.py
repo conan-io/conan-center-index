@@ -1,6 +1,6 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -13,7 +13,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run("gdal_translate --formats", run_environment=True)
+            if self.options["gdal"].tools:
+                self.run("gdal_translate --formats", run_environment=True)
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
             bin_path_c = os.path.join("bin", "test_package_c")

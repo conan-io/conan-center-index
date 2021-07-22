@@ -1,7 +1,9 @@
-import glob
-import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class OdbcConan(ConanFile):
@@ -35,17 +37,21 @@ class OdbcConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
 
     def requirements(self):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
+
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "unixODBC-%s" % self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -65,9 +71,17 @@ class OdbcConan(ConanFile):
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -78,8 +92,7 @@ class OdbcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-            os.remove(la_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
