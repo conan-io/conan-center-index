@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException, ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -276,7 +276,7 @@ class LibwebsocketsConan(ConanFile):
             print("Test : " + str(lib_fullpath))
             if os.path.isfile(lib_fullpath):
                 return lib_fullpath
-        raise ConanInvalidConfiguration("Library {} not found".format(lib_fullpath))
+        raise ConanException("Library {} not found".format(lib_fullpath))
 
     def _find_libraries(self, dep):
         return [self._find_library(lib, dep) for lib in self.deps_cpp_info[dep].libs]
