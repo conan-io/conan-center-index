@@ -15,19 +15,21 @@ class HanaConan(ConanFile):
     settings = "compiler"
     no_copy_source = True
 
-    _compiler_cpp14_support = {
-        "gcc": "4.9.3",
-        "Visual Studio": "14.0",
-        "clang": "3.4",
-        "apple-clang": "3.4",
-    }
-
     @property
     def _source_subfolder(self):
         return "_source_subfolder"
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    @property
+    def _compiler_cpp14_support(self):
+        return {
+            "gcc": "4.9.3",
+            "Visual Studio": "14.0",
+            "clang": "3.4",
+            "apple-clang": "3.4",
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
         try:
             minimum_required_version = self._compiler_cpp14_support[str(self.settings.compiler)]
