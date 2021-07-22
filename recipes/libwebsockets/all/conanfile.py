@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -445,16 +446,46 @@ class LibwebsocketsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {self._cmake_target: "Libwebsockets::{}".format(self._cmake_target)}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
+
+    @property
+    def _cmake_target(self):
+        return "websockets_shared" if self.options.shared else "websockets"
 
     def package_info(self):
-        # TODO: CMake imported target shouldn't be namespaced
-        cmake_target = "websockets_shared" if self.options.shared else "websockets"
         pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
         self.cpp_info.names["cmake_find_package"] = "Libwebsockets"
         self.cpp_info.names["cmake_find_package_multi"] = "Libwebsockets"
         self.cpp_info.names["pkg_config"] = pkgconfig_name
-        self.cpp_info.components["_libwebsockets"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libwebsockets"].names["cmake_find_package"] = self._cmake_target
+        self.cpp_info.components["_libwebsockets"].names["cmake_find_package_multi"] = self._cmake_target
+        self.cpp_info.components["_libwebsockets"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["_libwebsockets"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["_libwebsockets"].names["pkgconfig_name"] = pkgconfig_name
         self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
