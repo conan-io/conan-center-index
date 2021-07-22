@@ -136,20 +136,20 @@ class OpenCVConan(ConanFile):
             self.requires("libwebp/1.2.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.8.0")
+            self.requires("harfbuzz/2.8.2")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.4.0")
+            self.requires("glog/0.5.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires("protobuf/3.15.5")
+            self.requires("protobuf/3.17.1")
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):
-            self.build_requires("protobuf/3.15.5")
+            self.build_requires("protobuf/3.17.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0],
