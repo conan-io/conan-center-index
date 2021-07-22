@@ -52,7 +52,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": False,
         "with_libidn": False,
         "with_librtmp": False,
-        "with_libmetalink": "deprecated",
+        "with_libmetalink": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
         "with_nghttp2": False,
