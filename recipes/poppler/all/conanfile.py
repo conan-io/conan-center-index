@@ -175,6 +175,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["BUILD_QT5_TESTS"] = False
         self._cmake.definitions["BUILD_QT6_TESTS"] = False
         self._cmake.definitions["BUILD_CPP_TESTS"] = False
+        self._cmake.definitions["BUILD_MANUAL_TESTS"] = False
 
         self._cmake.definitions["ENABLE_UTILS"] = False
         self._cmake.definitions["ENABLE_CPP"] = self.options.cpp
@@ -192,6 +193,9 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["WITH_Iconv"] = self.options.get_safe("with_libiconv")
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
+        if self.options.with_openjpeg:
+            # FIXME: openjpeg's cmake_find_package should provide these variables
+            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = self.requires["openjpeg"].ref.version.split(".", 1)[0]
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_LIBCURL"] = self.options.with_libcurl
 
@@ -201,10 +205,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
         self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "5"
         self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6"
-        self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
-        if self.options.with_openjpeg:
-            # FIXME: openjpeg's cmake_find_package should provide these variables
-            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = self.requires["openjpeg"].ref.version.split(".", 1)[0]
+        
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_DCTDECODER"] = self._dct_decoder
         self._cmake.definitions["USE_FLOAT"] = self.options.float
@@ -218,7 +219,7 @@ class PopplerConan(ConanFile):
     def _patch_sources(self):
         for patchdata in self.conan_data["patches"][self.version]:
             tools.patch(**patchdata)
-        if not self.options.shared:
+        if tools.Version(self.version) < "21.07.0" and not self.options.shared:
             poppler_global = os.path.join(self._source_subfolder, "cpp", "poppler-global.h")
             tools.replace_in_file(poppler_global, "__declspec(dllimport)", "")
             tools.replace_in_file(poppler_global, "__declspec(dllexport)", "")
