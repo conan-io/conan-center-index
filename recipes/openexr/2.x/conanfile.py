@@ -48,9 +48,14 @@ class OpenEXRConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["PYILMBASE_ENABLE"] = False
-        self._cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
         self._cmake.definitions["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
+        self._cmake.definitions["ILMBASE_BUILD_BOTH_STATIC_SHARED"] = False
+        self._cmake.definitions["PYILMBASE_ENABLE"] = False
+        if tools.Version(self.version) < "2.5.0":
+            self._cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
+        else:
+            self._cmake.definitions["INSTALL_OPENEXR_EXAMPLES"] = False
+            self._cmake.definitions["INSTALL_OPENEXR_DOCS"] = False
         self._cmake.definitions["OPENEXR_BUILD_UTILS"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
