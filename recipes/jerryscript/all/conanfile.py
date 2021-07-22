@@ -40,7 +40,7 @@ class JerryScriptStackConan(ConanFile):
         "logging": [True, False],
         "memory_statistics": [True, False],
         "heap_size": "ANY",
-        "gc_limit": range(8193),
+        "gc_limit": "ANY",
         "gc_mark_limit": "ANY",
         "stack_limit": "ANY",
         "cpointer_32_bit": [True, False],
@@ -104,9 +104,43 @@ class JerryScriptStackConan(ConanFile):
             with open(self.options.profile, "r") as profile_file:
                 self.info.options.profile = profile_file.read()
 
+    def validate(self):
+        # validate integers
+        try:
+            assert(int(self.options.heap_size) >= 0), "must be bigger than or equal to 0"
+            assert(int(self.options.gc_limit) >= 0), "must be bigger than or equal to 0"
+            assert(int(self.options.gc_mark_limit) >= 0), "must be bigger than or equal to 0"
+            assert(int(self.options.stack_limit) >= 0), "must be bigger than or equal to 0"
+        except:
+            raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit, gc limit should be a positive integer")
+        try:
+            assert(int(self.options.gc_limit) <= 8192), "must be less than 8192"
+        except:
+            raise ConanInvalidConfiguration("jerryscript gc limit should be less than or equal to 8192")
+        # validate profile file
+        if (not self.options.profile in self._predefined_profiles) and not os.path.isfile(self.options.profile):
+            raise ConanInvalidConfiguration("jerryscript feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
+        # validate the use of the system allocator option
+        if self.settings.arch == "x86_64" and self.options.system_allocator:
+            raise ConanInvalidConfiguration("jerryscript system allocator not available on 64bit systems")
+        if self.options.system_allocator and not self.options.cpointer_32_bit:
+            raise ConanInvalidConfiguration("jerryscript system allocator must be used with 32 bit pointers")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # version dependent default of profile
+        if self.options.profile is None:
+            if Version(self.version) < "2.4.0":
+                self.options.profile = "es5.1"
+            else:
+                self.options.profile = "es.next"
+        # version dependent default of jerry math
+        if self.options.jerry_math is None:
+            if Version(self.version) < "2.4.0":
+                self.options.jerry_math = True
+            else:
+                self.options.jerry_math = False
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -116,32 +150,6 @@ class JerryScriptStackConan(ConanFile):
 
         if not self.options.debugger:
             del self.options.keep_line_info
-        
-        if self.options.profile is None:
-            if Version(self.version) < Version("2.4.0"):
-                self.options.profile = "es5.1"
-            else:
-                self.options.profile = "es.next"
-        if (not self.options.profile in self._predefined_profiles) and not os.path.isfile(self.options.profile):
-            raise ConanInvalidConfiguration("jerryscript feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
-        
-        try:
-            assert(int(self.options.heap_size) >= 0), "must be bigger than or equal to 0"
-            assert(int(self.options.gc_mark_limit) >= 0), "must be bigger than or equal to 0"
-            assert(int(self.options.stack_limit) >= 0), "must be bigger than or equal to 0"
-        except:
-            raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit should be a positive integer")
-
-        if self.options.jerry_math is None:
-            if Version(self.version) < Version("2.4.0"):
-                self.options.jerry_math = True
-            else:
-                self.options.jerry_math = False
-
-        if self.settings.arch == "x86_64":
-            self.options.system_allocator = False
-        if self.options.system_allocator:
-            self.options.cpointer_32_bit = True
 
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
