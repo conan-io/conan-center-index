@@ -36,6 +36,8 @@ class AafConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
             raise ConanInvalidConfiguration("Static runtime not supported")
         if self.settings.os == "Linux":
@@ -54,6 +56,8 @@ class AafConan(ConanFile):
             cmake.definitions["PLATFORM"] = "apple-clang"
         elif self.settings.compiler == "Visual Studio":
             cmake.definitions["PLATFORM"] = "vc"
+        else:
+            cmake.definitions["PLATFORM"] = self.settings.os
 
         cmake.definitions["ARCH"] = "x86_64"
         cmake.configure(build_folder=self._build_subfolder)
@@ -70,4 +74,3 @@ class AafConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
