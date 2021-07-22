@@ -18,7 +18,7 @@ class LibwebsocketsConan(ConanFile):
         "with_libuv": [True, False],
         "with_libevent": [False, "libevent", "libev"],
         "with_zlib": [False, "zlib", "miniz", "bundled"],
-        "with_ssl": [False, "openssl", "mbedtls-apache", "mbedtls-gpl", "wolfssl"],
+        "with_ssl": [False, "openssl", "mbedtls", "wolfssl"],
         "with_sqlite3": [True, False],
         "with_libmount": [True, False],
         "with_hubbub": [True, False],
@@ -197,7 +197,7 @@ class LibwebsocketsConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        
+
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
                 # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
@@ -227,14 +227,9 @@ class LibwebsocketsConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
-
-        if self.options.with_ssl == "mbedtls-apache":
-            self.requires("mbedtls/2.16.3-apache")
-
-        if self.options.with_ssl == "mbedtls-gpl":
-            self.requires("mbedtls/2.16.3-gpl")
-
-        if self.options.with_ssl == "wolfssl":
+        elif self.options.with_ssl == "mbedtls":
+            self.requires("mbedtls/2.25.0")
+        elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.5.0")
 
         if self.options.with_hubbub:
@@ -298,13 +293,12 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_LINK_TESTAPPS_DYNAMIC"] = True
         self._cmake.definitions["LWS_WITH_SHARED"] = self.options.shared
         self._cmake.definitions["LWS_WITH_STATIC"] = not self.options.shared
-        self._cmake.definitions["LWS_WITH_SSL"] = self.options.with_ssl
-
+        self._cmake.definitions["LWS_WITH_SSL"] = bool(self.options.with_ssl)
 
         if self.options.with_ssl == "openssl":
             self._cmake.definitions["LWS_OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
             self._cmake.definitions["LWS_OPENSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["openssl"].include_paths)
-        elif self.options.with_ssl == "mbedtls-apache" or self.options.with_ssl == "mbedtls-gpl":
+        elif self.options.with_ssl == "mbedtls":
             self._cmake.definitions["LWS_WITH_MBEDTLS"] = True
             self._cmake.definitions["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
             self._cmake.definitions["LWS_MBEDTLS_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["mbedtls"].include_paths)
@@ -325,7 +319,6 @@ class LibwebsocketsConan(ConanFile):
             self._cmake.definitions["LWS_LIBUV_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libuv"))
             self._cmake.definitions["LWS_LIBUV_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["libuv"].include_paths)
 
-
         self._cmake.definitions["LWS_WITH_LIBEVENT"] = self.options.with_libevent == "libevent"
         if self.options.with_libevent == "libevent":
             self._cmake.definitions["LWS_LIBEVENT_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libevent"))
@@ -340,7 +333,6 @@ class LibwebsocketsConan(ConanFile):
         elif self.options.with_zlib == "miniz":
             self._cmake.definitions["MINIZ_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("miniz"))
             self._cmake.definitions["MINIZ_INCLUDE_DIRS"] = self._cmakify_path_list(self.deps_cpp_info["miniz"].include_paths)
-
 
         self._cmake.definitions["LWS_WITH_SQLITE3"] = self.options.with_sqlite3
         if self.options.with_sqlite3:
@@ -483,7 +475,7 @@ class LibwebsocketsConan(ConanFile):
             self.cpp_info.components["_libwebsockets"].requires.append("sqlite3::sqlite3")
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["_libwebsockets"].requires.append("openssl::openssl")
-        elif self.options.with_ssl in ["mbedtls-apache", "mbedtls-gpl"]:
+        elif self.options.with_ssl == "mbedtls":
             self.cpp_info.components["_libwebsockets"].requires.append("mbedtls::mbedtls")
         elif self.options.with_ssl == "wolfssl":
             self.cpp_info.components["_libwebsockets"].requires.append("wolfssl::wolfssl")
