@@ -125,6 +125,11 @@ index 2ec91d0..ec2c80b 100644
     PATHS     
     ${PC_LCMS2_LIBDIR}
     ${PC_LCMS2_LIBRARY_DIRS}
+--- cpp/CMakeLists.txt
++++ cpp/CMakeLists.txt
+@@ -34,1 +34,1 @@
+-target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
++target_link_libraries(poppler-cpp poppler CONAN_PKG::libiconv)
 diff --git a/qt5/src/CMakeLists.txt b/qt5/src/CMakeLists.txt
 index d80c81f..01d3e3e 100644
 --- a/qt5/src/CMakeLists.txt
