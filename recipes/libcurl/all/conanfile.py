@@ -31,7 +31,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
-        "with_libmetalink": [True, False],
+        "with_libmetalink": [True, False, "deprecated"],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
         "with_nghttp2": [True, False],
@@ -52,7 +52,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": False,
         "with_libidn": False,
         "with_librtmp": False,
-        "with_libmetalink": False,
+        "with_libmetalink": "deprecated",
         "with_libpsl": False,
         "with_largemaxwritesize": False,
         "with_nghttp2": False,
@@ -134,6 +134,8 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
+        if self.options.with_libmetalink and tools.Version(self.version) >= "7.78.0":
+            raise ConanInvalidConfiguration("Support for metalink was removed in libcurl version 7.78.0")
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
@@ -312,12 +314,6 @@ class LibcurlConan(ConanFile):
         if self._has_zstd_option:
             params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
-        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
-        if tools.Version(self.version) >= "7.78.0":
-            if self.options.with_libmetalink:
-                raise ConanInvalidConfiguration("Support for metalink was removed in libcurl version 7.78.0")
-        else:
-            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         # Cross building flags
         if tools.cross_building(self.settings):
