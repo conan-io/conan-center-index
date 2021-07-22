@@ -285,6 +285,7 @@ class Open62541Conan(ConanFile):
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._module_subfolder, "*")):
             if not cmake_file.endswith(self._module_file_rel_path):
                 os.remove(cmake_file)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     @property
@@ -298,6 +299,7 @@ class Open62541Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"
         self.cpp_info.names["cmake_find_package_multi"] = "open62541"
+        self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [
             "include",
