@@ -4,7 +4,7 @@ import shutil
 
 class AxtlsConan(ConanFile):
     name = "axtls"
-    version = "1.5.3.dssl1"
+    version = "1.5.3.dssl2"
     license = "GPL-3.0"
     author = "Starkov Kirill <k.starkov@dssl.ru>"
     url = "dssl.ru"
@@ -32,14 +32,16 @@ class AxtlsConan(ConanFile):
 
     def _make(self, args):
         if tools.os_info.is_windows:
-            cmake = CMake(self)
+            cmake = CMake(self, generator="Ninja")
+            cmake.verbose = True
             cmake.build(build_dir=self._build_subfolder)
         else:
             self.run("make -C {source} {args}".format(source = self._source_subfolder, args = args))
 
     def _configure(self):
         if tools.os_info.is_windows:
-            cmake = CMake(self)
+            cmake = CMake(self, generator="Ninja")
+            cmake.verbose = True
             cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         else:
             prefix = tools.unix_path(self.package_folder)
@@ -64,7 +66,8 @@ class AxtlsConan(ConanFile):
 
     def _install(self):
         if tools.os_info.is_windows:
-            cmake = CMake(self)
+            cmake = CMake(self, generator="Ninja")
+            cmake.verbose = True
             cmake.install(build_dir=self._build_subfolder)
         else:
             self._make("install")
@@ -81,9 +84,9 @@ class AxtlsConan(ConanFile):
         tools.check_with_algorithm_sum("sha1", "osx10_compat.patch", "e211d33b1198e932ac251a811b783583ce1ec278")
         tools.check_with_algorithm_sum("sha1", "SNI.patch",          "13ec4af9bab09839a4cd6fc0d7c935749cba04f9")
         
-        tools.check_with_algorithm_sum("sha1", "CMakeLists.txt",     "8e630ec627764ad346a2021d27a56bd8df1b7e99")
-        tools.check_with_algorithm_sum("sha1", "win_config.h",       "087cdfe927f8ed1cfb855c4e3b9fea6116307be4")
-        tools.check_with_algorithm_sum("sha1", "win.patch",          "baede56a9505fbdcb1f937ab42f86922e127d4a9")
+        tools.check_with_algorithm_sum("sha1", "CMakeLists.txt",     "0aeb4f29cc1ad2d66b2d77417acd619f0de80988")
+        tools.check_with_algorithm_sum("sha1", "win_config.h",       "484eb1f669576af2793614482ba33b8bce40e0db")
+        tools.check_with_algorithm_sum("sha1", "win.patch",          "edc81ccb8a2a00ab0452a827f6a2b75eb2225e8e")
 
         # apply patches
         tools.patch(base_path = self._source_subfolder, patch_file = "SNI.patch", strip = 1)
