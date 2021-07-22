@@ -295,10 +295,10 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
-        
+
         if self.options.detect_cpu_baseline:
             self._cmake.definitions["CPU_BASELINE"] = "DETECT"
-        
+
         if self.options.get_safe("neon") is not None:
             self._cmake.definitions["ENABLE_NEON"] = self.options.get_safe("neon")
 
@@ -342,6 +342,14 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
+
+        if tools.cross_building(self.settings):
+            # FIXME: too specific and error prone, should be delegated to CMake helper
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
