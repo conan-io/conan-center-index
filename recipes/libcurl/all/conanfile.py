@@ -204,7 +204,7 @@ class LibcurlConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         self._patch_misc_files()
-        self._patch_mingw_files()
+        self._patch_autotools()
         self._patch_cmake()
 
     def _patch_misc_files(self):
@@ -221,42 +221,46 @@ class LibcurlConan(ConanFile):
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
-    def _patch_mingw_files(self):
-        if not self._is_mingw:
+    def _patch_autotools(self):
+        if self._is_using_cmake_build:
             return
-        # patch for zlib naming in mingw
-        if self.options.with_zlib:
-            configure_ac = os.path.join(self._source_subfolder, "configure.ac")
-            zlib_name = self.deps_cpp_info["zlib"].libs[0]
-            tools.replace_in_file(configure_ac,
-                                  "AC_CHECK_LIB(z,",
-                                  "AC_CHECK_LIB({},".format(zlib_name))
-            tools.replace_in_file(configure_ac,
-                                  "-lz ",
-                                  "-l{} ".format(zlib_name))
 
-        if self.options.shared:
-            # for mingw builds - do not compile curl tool, just library
-            # linking errors are much harder to fix than to exclude curl tool
-            top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
-            tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
-            tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
-            # patch for shared mingw build
-            lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
-            tools.replace_in_file(lib_makefile,
-                                  "noinst_LTLIBRARIES = libcurlu.la",
-                                  "")
-            tools.replace_in_file(lib_makefile,
-                                  "noinst_LTLIBRARIES =",
-                                  "")
-            tools.replace_in_file(lib_makefile,
-                                  "lib_LTLIBRARIES = libcurl.la",
-                                  "noinst_LTLIBRARIES = libcurl.la")
-            # add directives to build dll
-            # used only for native mingw-make
-            if not tools.cross_building(self.settings):
-                added_content = tools.load("lib_Makefile_add.am")
-                tools.save(lib_makefile, added_content, append=True)
+        # Disable curl tool for these reasons:
+        # - link errors if mingw shared or iOS/tvOS/watchOS
+        # - it makes recipe consistent with CMake build where we don't build curl tool
+        top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+        tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
+
+        if self._is_mingw:
+            # patch for zlib naming in mingw
+            if self.options.with_zlib:
+                configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+                zlib_name = self.deps_cpp_info["zlib"].libs[0]
+                tools.replace_in_file(configure_ac,
+                                      "AC_CHECK_LIB(z,",
+                                      "AC_CHECK_LIB({},".format(zlib_name))
+                tools.replace_in_file(configure_ac,
+                                      "-lz ",
+                                      "-l{} ".format(zlib_name))
+
+            if self.options.shared:
+                # patch for shared mingw build
+                lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
+                tools.replace_in_file(lib_makefile,
+                                      "noinst_LTLIBRARIES = libcurlu.la",
+                                      "")
+                tools.replace_in_file(lib_makefile,
+                                      "noinst_LTLIBRARIES =",
+                                      "")
+                tools.replace_in_file(lib_makefile,
+                                      "lib_LTLIBRARIES = libcurl.la",
+                                      "noinst_LTLIBRARIES = libcurl.la")
+                # add directives to build dll
+                # used only for native mingw-make
+                if not tools.cross_building(self.settings):
+                    added_content = tools.load("lib_Makefile_add.am")
+                    tools.save(lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
