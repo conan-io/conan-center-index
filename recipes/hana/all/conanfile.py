@@ -2,8 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
-required_conan_version = ">=1.28.0"
 
 class HanaConan(ConanFile):
     name = "hana"
@@ -41,8 +41,8 @@ class HanaConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hana-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
