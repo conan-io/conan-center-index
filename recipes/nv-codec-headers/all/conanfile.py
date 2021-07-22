@@ -1,6 +1,4 @@
-from enum import auto
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.35.0"
@@ -20,7 +18,7 @@ class FFNvEncHeaders(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows:
-            if "CONAN_MAKE_PROGRAM" not in os.environ and not tools.which("make"):
+            if "CONAN_MAKE_PROGRAM" not in os.environ:
                 self.build_requires("make/4.2.1")
 
     def source(self):
@@ -41,9 +39,6 @@ class FFNvEncHeaders(ConanFile):
         tmp = tools.load(os.path.join("include", "ffnvcodec", "nvEncodeAPI.h"))
         license_contents = tmp[2:tmp.find("*/", 1)] # The license begins with a C comment /* and ends with */
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
-
-        # Package it
-        self.copy("license*", dst="licenses",  ignore_case=True, keep_path=False)
 
         autotools = self._configure_autotools()
         vars = autotools.vars
