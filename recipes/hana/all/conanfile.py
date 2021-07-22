@@ -21,7 +21,7 @@ class HanaConan(ConanFile):
         return "_source_subfolder"
 
     @property
-    def _compiler_cpp14_support(self):
+    def _compilers_minimum_version(self):
         return {
             "gcc": "4.9.3",
             "Visual Studio": "14.0",
@@ -32,13 +32,18 @@ class HanaConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
-        try:
-            minimum_required_version = self._compiler_cpp14_support[str(self.settings.compiler)]
-            if self.settings.compiler.version < tools.Version(minimum_required_version):
-                raise ConanInvalidConfiguration(
-                    "This compiler is too old. This library needs a compiler with c++14 support")
-        except KeyError:
-            self.output.warn("This recipe might not support the compiler. Consider adding it.")
+
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("{} {} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name, self.version))
+        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration("{} {} requires C++14, which your compiler does not support.".format(self.name, self.version))
 
     def package_id(self):
         self.info.header_only()
