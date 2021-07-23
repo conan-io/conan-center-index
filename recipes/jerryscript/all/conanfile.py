@@ -100,9 +100,8 @@ class JerryScriptStackConan(ConanFile):
         return "build_subfolder"
     
     def package_id(self):
-        if not self.info.options.profile in self._predefined_profiles:
-            with open(self.info.options.profile, "r") as profile_file:
-                self.info.options.profile = profile_file.read()
+        if not self.options.profile in self._predefined_profiles:
+            self.info.options.profile = tools.load(str(self.options.profile))
 
     def validate(self):
         # validate integers
