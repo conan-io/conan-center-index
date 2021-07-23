@@ -1,6 +1,6 @@
 #include "jerryscript.h"
 
-int main(void)
+int main()
 {
     const jerry_char_t script[] = "var str = 'Hello, World!';";
 

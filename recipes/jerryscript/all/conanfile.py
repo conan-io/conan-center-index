@@ -1,8 +1,8 @@
-import os
-import os.path
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+import os
+
+required_conan_version = ">=1.33.0"
 
 class JerryScriptStackConan(ConanFile):
     name = "jerryscript"
@@ -57,13 +57,13 @@ class JerryScriptStackConan(ConanFile):
         "tool_cmdline_snapshot": False,
         "default_port_implementation": True,
         "jerry_ext": True,
-        "jerry_math": False,
+        "jerry_math": False,  # Initialized in `config_options`
         "link_time_optimization": True,
         "strip_symbols": True,
         "amalgamated": False,
         "debugger": False,
         "keep_line_info": False,
-        "profile": None,
+        "profile": None,  # Initialized in `config_options`
         "promise_callback": False,
         "external_context": False,
         "snapshot_execution": False,
@@ -98,48 +98,17 @@ class JerryScriptStackConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
-    def package_id(self):
-        if not self.options.profile in self._predefined_profiles:
-            self.info.options.profile = tools.load(str(self.options.profile))
-
-    def validate(self):
-        # validate integers
-        try:
-            assert(int(self.options.heap_size) >= 0), "must be bigger than or equal to 0"
-            assert(int(self.options.gc_limit) >= 0), "must be bigger than or equal to 0"
-            assert(int(self.options.gc_mark_limit) >= 0), "must be bigger than or equal to 0"
-            assert(int(self.options.stack_limit) >= 0), "must be bigger than or equal to 0"
-        except:
-            raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit, gc limit should be a positive integer")
-        try:
-            assert(int(self.options.gc_limit) <= 8192), "must be less than 8192"
-        except:
-            raise ConanInvalidConfiguration("jerryscript gc limit should be less than or equal to 8192")
-        # validate profile file
-        if (not self.options.profile in self._predefined_profiles) and not os.path.isfile(self.options.profile):
-            raise ConanInvalidConfiguration("jerryscript feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
-        # validate the use of the system allocator option
-        if self.settings.arch == "x86_64" and self.options.system_allocator:
-            raise ConanInvalidConfiguration("jerryscript system allocator not available on 64bit systems")
-        if self.options.system_allocator and not self.options.cpointer_32_bit:
-            raise ConanInvalidConfiguration("jerryscript system allocator must be used with 32 bit pointers")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # version dependent default of profile
-        if self.options.profile is None:
-            if Version(self.version) < "2.4.0":
-                self.options.profile = "es5.1"
-            else:
-                self.options.profile = "es.next"
-        # version dependent default of jerry math
-        if self.options.jerry_math is None:
-            if Version(self.version) < "2.4.0":
-                self.options.jerry_math = True
-            else:
-                self.options.jerry_math = False
+        # profile and jerry_match default option value depend on version
+        if tools.Version(self.version) < "2.4.0":
+            self.options.profile = "es5.1"
+            self.options.jerry_math = True
+        else:
+            self.options.profile = "es.next"
+            self.options.jerry_math = False
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -153,10 +122,36 @@ class JerryScriptStackConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
 
+    def validate(self):
+        # validate integers
+        try:
+            checks = (
+                (0 <= int(self.options.heap_size), "heap_size must be bigger than or equal to 0"),
+                (0 <= int(self.options.gc_limit) <= 8192, "gc_limit must be in the range [0, 8192]"),
+                (0 <= int(self.options.gc_mark_limit), "gc_mark_limit must be bigger than or equal to 0"),
+                (0 <= int(self.options.stack_limit), "stack_limit must be bigger than or equal to 0"),
+            )
+            for check_res, txt in checks:
+                if not check_res:
+                    raise ConanInvalidConfiguration(txt)
+        except ValueError as e:
+            raise ConanInvalidConfiguration("jerryscript heap size, gc mark limit, stack limit, gc limit should be a positive integer")
+        # validate profile file
+        if self.options.profile not in self._predefined_profiles and not os.path.isfile(str(self.options.profile)):
+            raise ConanInvalidConfiguration("Invalid profile option. Feature profile must either be a valid file or one of these: es.next, es5.1, minimal")
+        # validate the use of the system allocator option
+        if self.settings.arch == "x86_64" and self.options.system_allocator:
+            raise ConanInvalidConfiguration("jerryscript system allocator not available on 64bit systems")
+        if self.options.system_allocator and not self.options.cpointer_32_bit:
+            raise ConanInvalidConfiguration("jerryscript system allocator must be used with 32 bit pointers")
+
+    def package_id(self):
+        if self.options.profile not in self._predefined_profiles:
+            self.info.options.profile = tools.load(str(self.options.profile))
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -168,7 +163,7 @@ class JerryScriptStackConan(ConanFile):
         self._cmake = CMake(self)
         amalgamation_definition = "ENABLE_AMALGAM"
         libmath_definition = "JERRY_MATH"
-        if Version(self.version) < Version("2.4.0"):
+        if tools.Version(self.version) < tools.Version("2.4.0"):
             amalgamation_definition = "ENABLE_ALL_IN_ONE"
             libmath_definition = "JERRY_LIBM"
         self._cmake.definitions["JERRY_CMDLINE"] = self.options.tool_cmdline
@@ -181,7 +176,7 @@ class JerryScriptStackConan(ConanFile):
         self._cmake.definitions["ENABLE_LTO"] = self.options.link_time_optimization
         self._cmake.definitions[amalgamation_definition] = self.options.amalgamated
         self._cmake.definitions["JERRY_DEBUGGER"] = self.options.debugger
-        self._cmake.definitions["JERRY_LINE_INFO"] = self.options.keep_line_info
+        self._cmake.definitions["JERRY_LINE_INFO"] = self.options.get_safe("keep_line_info", False)
         self._cmake.definitions["JERRY_PROFILE"] = self.options.profile
         self._cmake.definitions["JERRY_EXTERNAL_CONTEXT"] = self.options.external_context
         self._cmake.definitions["JERRY_SNAPSHOT_EXEC"] = self.options.snapshot_execution
@@ -217,6 +212,28 @@ class JerryScriptStackConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+        self.cpp_info.components["libjerry-port-default"].names["pkg_config"] = ["libjerry-port-default"]
+        self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
+
+        if self.options.jerry_math:
+            mathlibname = "jerry-libm" if tools.Version(self.version) < "2.4.0" else "jerry-math"
+            self.cpp_info.components["libjerry-math"].names["pkg_config"] = "lib{}".format(mathlibname)
+            self.cpp_info.components["libjerry-math"].libs = [mathlibname]
+            self.cpp_info.components["libjerry-math"].requires = ["libjerry-port-default"]
+            self.cpp_info.components["libjerry-core"].requires.append("libjerry-math")
+
+        if tools.Version(self.version) < "2.4.0":
+            self.cpp_info.components["libjerry-port-default-minimal"].names["pkg_config"] = ["libjerry-port-default-minimal"]
+            self.cpp_info.components["libjerry-port-default-minimal"].libs = ["jerry-port-default-minimal"]
+            self.cpp_info.components["libjerry-port-default"].requires.append("libjerry-port-default-minimal")
+
+        self.cpp_info.components["libjerry-core"].names["pkg_config"] = "libjerry-core"
+        self.cpp_info.components["libjerry-core"].libs = ["jerry-core"]
+        # The pc file does not explicitly add the port. But it's needed for the test
+        self.cpp_info.components["libjerry-core"].requires = ["libjerry-port-default"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.components["libjerry-core"].system_libs.append("m")
+
+        self.cpp_info.components["libjerry-ext"].names["pkg_config"] = "libjerry-ext"
+        self.cpp_info.components["libjerry-ext"].libs = ["jerry-ext"]
+        self.cpp_info.components["libjerry-ext"].requires = ["libjerry-core"]

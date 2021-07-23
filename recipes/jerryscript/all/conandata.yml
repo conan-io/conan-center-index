@@ -8,7 +8,6 @@ sources:
   "2.4.0":
     sha256: 08c950b8689f1229e9796a7beb2e6c5c911f49666db7712ddf006d76a0766b79
     url: https://github.com/jerryscript-project/jerryscript/archive/v2.4.0.zip
-
 patches:
   "2.2.0":
     - base_path: "source_subfolder"
