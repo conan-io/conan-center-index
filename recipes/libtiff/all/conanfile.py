@@ -82,7 +82,7 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.get_safe("libdeflate"):
-            self.requires("libdeflate/1.7")
+            self.requires("libdeflate/1.8")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.jpeg == "libjpeg":
