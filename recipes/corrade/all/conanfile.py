@@ -70,7 +70,7 @@ class CorradeConan(ConanFile):
             self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
             
-            self._cmake.definitions["BUILD_DEPRECARED"] = self.options.build_deprecated
+            self._cmake.definitions["BUILD_DEPRECATED"] = self.options.build_deprecated
             self._cmake.definitions["WITH_INTERCONNECT"] = self.options.with_interconnect
             self._cmake.definitions["WITH_MAIN"] = self.options.with_main
             self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options.with_pluginmanager
