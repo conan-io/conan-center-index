@@ -1143,6 +1143,10 @@ class BoostConan(ConanFile):
                         includes=self._python_includes,
                         libraries=self._python_libraries)
 
+        if not self.options.without_mpi:
+            # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
+            contents += '\nusing mpi ;'
+
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
 
@@ -1429,7 +1433,7 @@ class BoostConan(ConanFile):
                     libprefix = "lib"
                 return libprefix + n
 
-            all_detected_libraries = set(tools.collect_libs(self))
+            all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in tools.collect_libs(self))
             all_expected_libraries = set()
             incomplete_components = list()
 

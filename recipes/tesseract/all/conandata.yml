@@ -4,6 +4,8 @@ sources:
     sha256: "2a66ff0d8595bff8f04032165e6c936389b1e5727c3ce5a27b3e059d218db1cb"
 patches:
   "4.1.1":
+     - patch_file: "patches/0001-install-bundle.patch"
+       base_path: "source_subfolder"
      - patch_file: "patches/0002-Link-with-targets.patch"
        base_path: "source_subfolder"
      - patch_file: "patches/0003-Dont-change-locale.patch"

@@ -2,3 +2,7 @@ sources:
   "cci.20170615":
     url: "https://github.com/4creators/jxrlib/archive/f7521879862b9085318e814c6157490dd9dbbdb4.tar.gz"
     sha256: "8ab20a21f6c3f8cfdedd2511b03a2009e52cce7fa6550202c355063d0d83213e"
+patches:
+  "cci.20170615":
+    - patch_file: patches/0001-missing-declarations.patch
+      base_path: source_subfolder

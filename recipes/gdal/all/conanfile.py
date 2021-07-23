@@ -23,6 +23,7 @@ class GdalConan(ConanFile):
         "fPIC": [True, False],
         "simd_intrinsics": [None, "sse", "ssse3", "avx"],
         "threadsafe": [True, False],
+        "tools": [True, False],
         "with_zlib": [True, False],
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
@@ -87,6 +88,7 @@ class GdalConan(ConanFile):
         "fPIC": True,
         "simd_intrinsics": "sse",
         "threadsafe": True,
+        "tools": False,
         "with_zlib": True,
         "with_libdeflate": True,
         "with_libiconv": True,
@@ -181,9 +183,6 @@ class GdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            min_cppstd = 14 if self.options.with_charls else 11
-            tools.check_min_cppstd(self, min_cppstd)
         if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.simd_intrinsics
         if self.options.without_lerc:
@@ -199,14 +198,7 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
-        if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
-            raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         self._strict_options_requirements()
-
-        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
-        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
-           tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
 
     def _strict_options_requirements(self):
         if self.options.with_qhull:
@@ -214,22 +206,22 @@ class GdalConan(ConanFile):
 
     def requirements(self):
         self.requires("json-c/0.15")
-        self.requires("libgeotiff/1.6.0")
+        self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.2.0")
-        self.requires("proj/8.0.1")
+        self.requires("proj/8.1.0")
         if tools.Version(self.version) >= "3.1.0":
-            self.requires("flatbuffers/1.12.0")
+            self.requires("flatbuffers/2.0.0")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.7")
+            self.requires("libdeflate/1.8")
         if self.options.get_safe("with_libiconv", True):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
         if self.options.with_pg:
-            self.requires("libpq/13.2")
+            self.requires("libpq/13.3")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
@@ -273,7 +265,7 @@ class GdalConan(ConanFile):
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         elif self.options.with_mysql == "mariadb-connector-c":
             self.requires("mariadb-connector-c/3.1.12")
         if self.options.with_xerces:
@@ -289,15 +281,15 @@ class GdalConan(ConanFile):
         if self.options.with_curl:
             self.requires("libcurl/7.77.0")
         if self.options.with_xml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         # if self.options.with_epsilon:
         #     self.requires("epsilon/0.9.2")
         if self.options.with_webp:
@@ -337,8 +329,22 @@ class GdalConan(ConanFile):
             self.requires("libheif/1.12.0")
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            min_cppstd = 14 if self.options.with_charls else 11
+            tools.check_min_cppstd(self, min_cppstd)
+        if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
+            raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+        if tools.cross_building(self.settings):
+            if self.options.shared:
+                raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
+            if self.options.tools:
+                raise ConanInvalidConfiguration("GDAL build system can't cross-build tools")
+        # FIXME: Visual Studio 2015 & 2017 are supported but CI of CCI lacks several Win SDK components
+        if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio" and \
+           tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("Visual Studio < 2019 not yet supported in this recipe for gdal {}".format(self.version))
 
     def _validate_dependency_graph(self):
         if tools.Version(self.deps_cpp_info["libtiff"].version) < "4.0.0":
@@ -351,11 +357,15 @@ class GdalConan(ConanFile):
             elif mongocxx_version < "3.4.0":
                 raise ConanInvalidConfiguration("gdal with mongo-cxx-driver v3 requires 3.4.0 at least.")
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -406,6 +416,28 @@ class GdalConan(ConanFile):
             # Workaround for autoconf 2.71
             with open(os.path.join(self._source_subfolder, "config.rpath"), "w"):
                 pass
+
+        # Disable tools
+        if not self.options.tools:
+            # autotools
+            gnumakefile_apps = os.path.join(self._source_subfolder, "apps", "GNUmakefile")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "default:	gdal-config-inst gdal-config $(BIN_LIST)",
+                                  "default:	gdal-config-inst gdal-config")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst",
+                                  "$(RM) *.o core gdal-config gdal-config-inst")
+            tools.replace_in_file(gnumakefile_apps,
+                                  "for f in $(BIN_LIST) ; do $(INSTALL) $$f $(DESTDIR)$(INST_BIN) ; done",
+                                  "")
+            # msvc
+            vcmakefile_apps = os.path.join(self._source_subfolder, "apps", "makefile.vc")
+            tools.replace_in_file(vcmakefile_apps,
+                                  "default:	",
+                                  "default:	\n\nold-default:	")
+            tools.replace_in_file(vcmakefile_apps,
+                                  "copy *.exe $(BINDIR)",
+                                  "")
 
     def _edit_nmake_opt(self):
         simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
@@ -770,6 +802,10 @@ class GdalConan(ConanFile):
         else:
             with self._autotools_build_environment():
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+                # Required for cross-build to iOS, see https://github.com/OSGeo/gdal/issues/4123
+                tools.replace_in_file(os.path.join("port", "cpl_config.h.in"),
+                                      "/* port/cpl_config.h.in",
+                                      "#pragma once\n/* port/cpl_config.h.in")
                 autotools = self._configure_autotools()
                 autotools.make()
 
@@ -810,6 +846,8 @@ class GdalConan(ConanFile):
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
         self.output.info("Creating GDAL_DATA environment variable: {}".format(gdal_data_path))
         self.env_info.GDAL_DATA = gdal_data_path
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
