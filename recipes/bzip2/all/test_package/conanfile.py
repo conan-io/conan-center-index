@@ -21,6 +21,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            # FIXME: Very ugly interface to get the current test executable path
-            cmd = os.path.join(self.build_folder, self.cpp.build.bindirs[0], "test_package")
+            cmd = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run("%s --help" % cmd, env=["conanrunenv"])
