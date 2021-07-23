@@ -39,10 +39,10 @@ class PodofoConan(ConanFile):
     def requirements(self):
         self.requires("freetype/2.10.4")
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         self.requires("libjpeg/9d")
         self.requires("libunistring/0.9.10")
-        self.requires("libtiff/4.1.0")
+        self.requires("libtiff/4.3.0")
         self.requires("libidn/1.36")
         self.requires("openssl/1.1.1k")
 
