@@ -1,0 +1,24 @@
+Standard CMake X11 finder doesn't update INCLUDE_DIRECTORIES variable, so we have to do it by yourselves
+diff -nru a/Source/cmake/OptionsQt.cmake b/Source/cmake/OptionsQt.cmake
+--- a/Source/cmake/OptionsQt.cmake
++++ b/Source/cmake/OptionsQt.cmake
+@@ -606,6 +601,10 @@
+         unset(CMAKE_REQUIRED_INCLUDES)
+         unset(CMAKE_REQUIRED_FLAGS)
+     endif ()
++    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
++        find_package(OpenGL REQUIRED)
++        include_directories(${OPENGL_INCLUDE_DIRS})
++    endif()
+ 
+     message(STATUS "Qt OpenGL implementation: ${Qt5Gui_OPENGL_IMPLEMENTATION}")
+     message(STATUS "Qt OpenGL libraries: ${Qt5Gui_OPENGL_LIBRARIES}")
+@@ -776,6 +775,7 @@
+     elseif (NOT X11_Xrender_FOUND)
+         message(FATAL_ERROR "libXrender is required for ENABLE_X11_TARGET")
+     endif ()
++    include_directories(${X11_INCLUDE_DIR})
+ endif ()
+ 
+ if (NOT ENABLE_VIDEO)
+

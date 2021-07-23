@@ -4,33 +4,40 @@ virtualrunenv
 virtualenv
 
 [build_requires]
+b2/4.2.0
 jom/1.1.3
+gperf/3.1
+msys2/20200517
 nasm/2.14
 strawberryperl/5.30.0.1
 winflexbison/2.5.22
 
 [requires]
 axtls/1.5.3.dssl2
-b2/4.2.0
 boost/1.69.0
+bzip2/1.0.8
 c-ares/1.15.0
 caffe/1.0.windows
 dlib/19.4
-libcurl/7.64.1
-bzip2/1.0.8
 ffmpeg/3.3.1
 freetype/2.10.1
 gflags/2.2.2
 glog/0.4.0
 hdf5/1.10.6
 hidapi/0.10.1
+icu/64.2
 intel_media_sdk/2018R2_1
 jansson/2.12
 jsoncpp/1.8.3
 leveldb/1.22
+libcurl/7.64.1
 libjpeg/9d.dssl1
+libjpeg-turbo/2.0.4
 libpng/1.6.37
 libpq/11.5
+libwebp/1.1.0
+libxml2/2.9.9
+libxslt/1.1.33
 lmdb/0.9.28.dssl1
 miniupnpc/2.1
 nasm/2.14
@@ -42,7 +49,10 @@ openh264/1.7.0
 openssl/1.1.1d
 protobuf/3.9.1
 protoc/3.9.1.dssl1
+#signalr-qt/0.1
 qt/5.14.1.dssl1
+qtwebkit/5.212.0-alpha4.dssl1
+sqlite3/3.31.0
 sip/4.19.3.dssl1
 snappy/1.1.8
 xz_utils/5.2.4
@@ -57,7 +67,7 @@ caffe:shared=False
 caffe:with_opencv=True
 caffe:with_leveldb=True
 caffe:with_lmdb=True
-curl:shared=True
+libcurl:shared=True
 dlib:shared=header_only
 facesdk:shared=True
 ffmpeg:shared=True
@@ -69,9 +79,11 @@ gflags:shared=True
 glog:shared=True
 hdf5:shared=True
 hidapi:shared=True
+icu:shared=True
 intellivision:shared=True
 jansson:shared=True
 jsoncpp:shared=False
+libpng:shared=True
 libpq:shared=True
 lmdb:shared=True
 miniupnpc:shared=False
@@ -85,9 +97,11 @@ opencv:tiff=False
 openssl:shared=True
 pjsip:shared=False
 protobuf:shared=False
-sdl:shared=True
 signalr-qt:shared=True
 zlib:shared=True
+libxml2:iconv=False
+libxml2:shared=True
+libxslt:shared=True
 
 qt:openssl=True
 qt:qtimageformats=True
@@ -101,7 +115,7 @@ qt:with_glib=False
 qt:with_harfbuzz=not_used
 qt:with_doubleconversion=qt
 qt:with_icu=False
-qt:with_sqlite3=not_used
+qt:with_sqlite3=system
 qt:with_mysql=False
 qt:with_pcre2=False
 qt:with_sdl2=False
