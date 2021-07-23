@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, CMake
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -36,13 +35,14 @@ class OpusConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
-            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
-                                            "Visual Studio 2015 or higher.")
-
     def config_options(self):
         if self.settings.os == "Windows":
              del self.options.fPIC
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
+                                            "Visual Studio 2015 or higher.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
