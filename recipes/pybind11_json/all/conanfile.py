@@ -43,6 +43,5 @@ class Pybind11JsonConan(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "pybind11_json"
         self.cpp_info.names["cmake_find_package_multi"] = "pybind11_json"
         self.cpp_info.names["pkg_config"] = "pybind11_json"
