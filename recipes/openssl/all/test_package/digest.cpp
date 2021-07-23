@@ -53,7 +53,11 @@ int main()
 		sha3_512_string[SHA512_DIGEST_LENGTH*2+1] = {0};
 	char string[] = "happy";
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_library_init();
+#else
+	OPENSSL_init_ssl(0, NULL);
+#endif
 
 	MD5((unsigned char*)&string, strlen(string), (unsigned char*)&md5_digest);
 	SHA1((unsigned char*)&string, strlen(string), (unsigned char*)&sha1_digest);
@@ -87,7 +91,11 @@ int main()
 	printf("sha3 256 digest: %s\n", sha3_256_string);
 	printf("sha3 512 digest: %s\n", sha3_512_string);
 #endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	printf("SSL library version: %s\n", SSLeay_version(SSLEAY_VERSION));
+#else
+	printf("SSL library version: %s\n", OpenSSL_version(OPENSSL_VERSION));
+#endif
 #if defined(WITH_ZLIB)
 	printf("ZLIB version: %s\n", ZLIB_VERSION);
 #endif

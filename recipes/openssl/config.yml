@@ -1,19 +1,31 @@
 versions:
   1.0.2s:
-    folder: all
+    folder: "all"
   1.0.2t:
-    folder: all
+    folder: "all"
   1.0.2u:
-    folder: all
+    folder: "all"
   1.1.0k:
-    folder: all
+    folder: "all"
   1.1.0l:
-    folder: all
+    folder: "all"
   1.1.1c:
-    folder: all
+    folder: "all"
   1.1.1d:
-    folder: all
+    folder: "all"
+  1.1.1d.dssl1_components:
+    folder: "all"
   1.1.1e:
-    folder: all
+    folder: "all"
   1.1.1f:
-    folder: all
+    folder: "all"
+  1.1.1g:
+    folder: "all"
+  1.1.1h:
+    folder: "all"
+  1.1.1i:
+    folder: "all"
+  1.1.1j:
+    folder: "all"
+  1.1.1k:
+    folder: "all"
