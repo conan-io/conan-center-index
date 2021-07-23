@@ -38,7 +38,7 @@ class Pybind11JsonConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
         self.copy(
             "*", dst="include", src=os.path.join(self._source_subfolder, "include")
         )
