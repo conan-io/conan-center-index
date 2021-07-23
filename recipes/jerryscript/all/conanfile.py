@@ -58,7 +58,7 @@ class JerryScriptStackConan(ConanFile):
         "default_port_implementation": True,
         "jerry_ext": True,
         "jerry_math": False,  # Initialized in `config_options`
-        "link_time_optimization": True,
+        "link_time_optimization": False,  # Enabled by upstream, but disabled to be confirm cci (add -flto in your package)
         "strip_symbols": True,
         "amalgamated": False,
         "debugger": False,
@@ -99,6 +99,10 @@ class JerryScriptStackConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _jerry_math(self):
+        return self.options.get_safe("jerry_math", False)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -109,6 +113,11 @@ class JerryScriptStackConan(ConanFile):
         else:
             self.options.profile = "es.next"
             self.options.jerry_math = False
+
+        if self.settings.os == "Macos":
+            del self.options.jerry_math  # forced to False
+            del self.options.link_time_optimization  # forced to False
+            del self.options.strip  # forced to False
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -171,9 +180,9 @@ class JerryScriptStackConan(ConanFile):
         self._cmake.definitions["JERRY_CMDLINE_SNAPSHOT"] = self.options.tool_cmdline_snapshot
         self._cmake.definitions["JERRY_PORT_DEFAULT"] = self.options.default_port_implementation
         self._cmake.definitions["JERRY_EXT"] = self.options.jerry_ext
-        self._cmake.definitions[libmath_definition] = self.options.jerry_math
-        self._cmake.definitions["ENABLE_STRIP"] = self.options.strip_symbols
-        self._cmake.definitions["ENABLE_LTO"] = self.options.link_time_optimization
+        self._cmake.definitions[libmath_definition] = self._jerry_math
+        self._cmake.definitions["ENABLE_STRIP"] = self.options.get_safe("jerry_strip", False)
+        self._cmake.definitions["ENABLE_LTO"] = self.options.get_safe("link_time_optimization", False)
         self._cmake.definitions[amalgamation_definition] = self.options.amalgamated
         self._cmake.definitions["JERRY_DEBUGGER"] = self.options.debugger
         self._cmake.definitions["JERRY_LINE_INFO"] = self.options.get_safe("keep_line_info", False)
@@ -215,7 +224,7 @@ class JerryScriptStackConan(ConanFile):
         self.cpp_info.components["libjerry-port-default"].names["pkg_config"] = ["libjerry-port-default"]
         self.cpp_info.components["libjerry-port-default"].libs = ["jerry-port-default"]
 
-        if self.options.jerry_math:
+        if self._jerry_math:
             mathlibname = "jerry-libm" if tools.Version(self.version) < "2.4.0" else "jerry-math"
             self.cpp_info.components["libjerry-math"].names["pkg_config"] = "lib{}".format(mathlibname)
             self.cpp_info.components["libjerry-math"].libs = [mathlibname]
