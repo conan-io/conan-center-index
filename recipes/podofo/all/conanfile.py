@@ -3,6 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 from conans import tools
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class PodofoConan(ConanFile):
     name = "podofo"
     license = "GPL-3.0", "LGPL-3.0"
@@ -51,8 +54,8 @@ class PodofoConan(ConanFile):
         self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("podofo-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
