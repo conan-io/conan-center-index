@@ -1,6 +1,8 @@
 from conans import ConanFile, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Pybind11JsonConan(ConanFile):
     name = "pybind11_json"
