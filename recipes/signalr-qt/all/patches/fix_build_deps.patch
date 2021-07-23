@@ -1,0 +1,12 @@
+--- a/SignalR.pro
++++ b/SignalR.pro
+@@ -2,6 +2,4 @@
+ 
+ SUBDIRS += \
+     ThirdParty/QtExtJson \
+-    SignalRLibraries \
+-    SignalRSamples \
+-    Tests/UnitTests
+\ No newline at end of file
++    SignalRLibraries
+
