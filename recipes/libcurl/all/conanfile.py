@@ -31,7 +31,7 @@ class LibcurlConan(ConanFile):
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
-        "with_libmetalink": [True, False, "deprecated"],
+        "with_libmetalink": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
         "with_nghttp2": [True, False],
@@ -90,11 +90,18 @@ class LibcurlConan(ConanFile):
     def _has_zstd_option(self):
         return tools.Version(self.version) >= "7.72.0"
 
+    @property
+    def _has_metalink_option(self):
+        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
+        return tools.Version(self.version) < "7.78.0" and not self._is_using_cmake_build
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_zstd_option:
             del self.options.with_zstd
+        if not self._has_metalink_option:
+            del self.options.with_libmetalink
         # Default options
         self.options.with_ssl = "darwinssl" if tools.is_apple_os(self.settings.os) else "openssl"
 
@@ -134,14 +141,11 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
-        if self.options.with_libmetalink and tools.Version(self.version) >= "7.78.0":
-            raise ConanInvalidConfiguration("Support for metalink was removed in libcurl version 7.78.0")
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
             del self.options.with_libidn
             del self.options.with_librtmp
-            del self.options.with_libmetalink
             del self.options.with_libpsl
 
     def requirements(self):
@@ -314,6 +318,8 @@ class LibcurlConan(ConanFile):
         if self._has_zstd_option:
             params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
 
+        if self._has_metalink_option:
+            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         # Cross building flags
         if tools.cross_building(self.settings):
