@@ -36,12 +36,6 @@ class PodofoConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("currently this recipe doesn't support shared libraries on MacOS")
-
-        if self.settings.compiler.cppstd and tools.Version("0.9.7") <= self.version:
-            tools.check_min_cppstd(self, 11)
-
     def requirements(self):
         self.requires("freetype/2.10.4")
         if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
@@ -51,6 +45,12 @@ class PodofoConan(ConanFile):
         self.requires("libtiff/4.1.0")
         self.requires("libidn/1.36")
         self.requires("openssl/1.1.1k")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd") and tools.Version(self.version) >= "0.9.7":
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("currently this recipe doesn't support shared libraries on MacOS")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
