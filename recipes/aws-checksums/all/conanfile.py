@@ -1,7 +1,8 @@
-from conans import CMake, ConanFile, tools
 import os
+from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class AwsChecksums(ConanFile):
     name = "aws-checksums"
@@ -11,7 +12,7 @@ class AwsChecksums(ConanFile):
     homepage = "https://github.com/awslabs/aws-checksums"
     license = "Apache-2.0",
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,10 +39,12 @@ class AwsChecksums(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        self.requires("aws-c-common/0.6.7")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "aws-checksums-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -51,12 +54,9 @@ class AwsChecksums(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -75,3 +75,4 @@ class AwsChecksums(ConanFile):
         self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package"] = "aws-checksums"
         self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package_multi"] = "aws-checksums"
         self.cpp_info.components["aws-checksums-lib"].libs = ["aws-checksums"]
+        self.cpp_info.components["aws-checksums-lib"].requires = ["aws-c-common::aws-c-common-lib"]

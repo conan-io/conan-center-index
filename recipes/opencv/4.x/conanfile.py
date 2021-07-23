@@ -91,18 +91,11 @@ class OpenCVConan(ConanFile):
             del self.options.neon
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and \
-           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
-            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
-            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.contrib:
             del self.options.contrib_freetype
             del self.options.contrib_sfm
-            if self.options.with_cuda:
-                raise ConanInvalidConfiguration("contrib must be enabled for cuda")
         if not self.options.with_cuda:
             del self.options.with_cublas
             del self.options.with_cufft
@@ -136,20 +129,29 @@ class OpenCVConan(ConanFile):
             self.requires("libwebp/1.2.0")
         if self.options.get_safe("contrib_freetype"):
             self.requires("freetype/2.10.4")
-            self.requires("harfbuzz/2.8.0")
+            self.requires("harfbuzz/2.8.2")
         if self.options.get_safe("contrib_sfm"):
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.4.0")
+            self.requires("glog/0.5.0")
         if self.options.with_quirc:
             self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires("protobuf/3.15.5")
+            self.requires("protobuf/3.17.1")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and \
+           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
+            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
+            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 4.x due an internal bug.")
+        if self.options.with_cuda and not self.options.contrib:
+            raise ConanInvalidConfiguration("contrib must be enabled for cuda")
 
     def build_requirements(self):
-        if self.options.dnn and tools.cross_building(self.settings):
-            self.build_requires("protobuf/3.15.5")
+        if self.options.dnn and hasattr(self, "settings_build"):
+            self.build_requires("protobuf/3.17.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0],
@@ -295,10 +297,10 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
-        
+
         if self.options.detect_cpu_baseline:
             self._cmake.definitions["CPU_BASELINE"] = "DETECT"
-        
+
         if self.options.get_safe("neon") is not None:
             self._cmake.definitions["ENABLE_NEON"] = self.options.get_safe("neon")
 
@@ -342,6 +344,14 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
+
+        if tools.cross_building(self.settings):
+            # FIXME: too specific and error prone, should be delegated to CMake helper
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

@@ -51,8 +51,8 @@ class LibfabricConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("The libfabric package cannot be built on Visual Studio.")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration("libfabric only builds on Linux, Macos, and FreeBSD.")
         for p in self._providers:
             if self.options.get_safe(p) not in ["auto", "yes", "no", "dl"] and not os.path.isdir(str(self.options.get_safe(p))):
                 raise ConanInvalidConfiguration("Option {} can only be one of 'auto', 'yes', 'no', 'dl' or a directory path")
@@ -95,5 +95,5 @@ class LibfabricConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libfabric"
         self.cpp_info.libs = self.collect_libs()
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]

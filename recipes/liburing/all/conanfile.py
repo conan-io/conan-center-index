@@ -1,8 +1,8 @@
-import os
-import platform
-
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import platform
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -31,39 +31,42 @@ side implementation."""
 
     _autotools = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("liburing is supported only on linux")
+
+        # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
+        linux_kernel_version = re.match("([0-9.]+)", platform.release()).group(1)
+        if tools.Version(linux_kernel_version) < "5.1":
+            raise ConanInvalidConfiguration("This linux kernel version does not support io uring")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(configure_dir=self._source_subfolder)
+        self._autotools.configure()
+        self._autotools.flags.append("-std=gnu99")
         return self._autotools
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
-    def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "liburing is supported only on linux")
-        if tools.Version(platform.release()) < "5.1":
-            raise ConanInvalidConfiguration(
-                "This linux kernel version does not support io uring")
-
-        if self.options.shared:
-            del self.options.fPIC
-
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def build(self):
         with tools.chdir(self._source_subfolder):
@@ -88,4 +91,5 @@ side implementation."""
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "liburing"
         self.cpp_info.libs = ["uring"]
