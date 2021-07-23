@@ -58,7 +58,7 @@ class JerryScriptStackConan(ConanFile):
         "default_port_implementation": True,
         "jerry_ext": True,
         "jerry_math": False,  # Initialized in `config_options`
-        "link_time_optimization": False,  # Enabled by upstream, but disabled to be confirm cci (add -flto in your package)
+        "link_time_optimization": False,  # Enabled by upstream, but disabled to be confirm cci (add -flto in your profile)
         "strip_symbols": True,
         "amalgamated": False,
         "debugger": False,
