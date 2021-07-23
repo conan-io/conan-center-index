@@ -1,0 +1,129 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,20 +1,26 @@
+-project(basisu)
++project(libbasisu VERSION 1.15.0)
+ 
+ cmake_minimum_required(VERSION 3.0)
+ option(BUILD_X64 "build 64-bit" TRUE)
+-option(STATIC "static linking" FALSE)
+ option(SSE "SSE 4.1 support" FALSE)
+ option(ZSTD "ZSTD support for KTX2 transcoding/encoding" TRUE)
++option(BASISU_NO_ITERATOR_DEBUG_LEVEL "Change Iterator debug level" FALSE)
++option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
+ 
+ message("Initial BUILD_X64=${BUILD_X64}")
+ message("Initial CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+ message("Initial SSE=${SSE}")
+ message("Initial ZSTD=${ZSTD}")
++message("Initial shared libs=${BUILD_SHARED_LIBS}")
+ 
+ if( NOT CMAKE_BUILD_TYPE )
+   set( CMAKE_BUILD_TYPE Release )
+ endif()
+ 
++if (BASISU_NO_ITERATOR_DEBUG_LEVEL)
++	add_definitions("-DBASISU_NO_ITERATOR_DEBUG_LEVEL")
++endif()
++
+ message( ${PROJECT_NAME} " build type: " ${CMAKE_BUILD_TYPE} )
+ 
+ if (BUILD_X64)
+@@ -48,13 +54,8 @@ if (NOT MSVC)
+    if (NOT BUILD_X64)
+ 	  set(GCC_COMPILE_FLAGS "${GCC_COMPILE_FLAGS} -m32")
+    endif()
+-
+-   if (EMSCRIPTEN)
+-	  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
+-	  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
+-
+-	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS}")
+-   elseif (STATIC)
++	
++	if (NOT BUILD_SHARED_LIBS)
+       if (SSE)
+ 		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1 -msse4.1")
+ 		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=1 -msse4.1")
+@@ -63,7 +64,6 @@ if (NOT MSVC)
+ 		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=0")
+ 	  endif()
+ 	  
+-	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS} -static-libgcc -static-libstdc++ -static")
+    else()
+    	  if (SSE)
+ 		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1 -msse4.1")
+@@ -72,8 +72,6 @@ if (NOT MSVC)
+ 	  	set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=0")
+ 		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=0")
+ 	  endif()
+-	  
+-	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS} -Wl,-rpath .")
+    endif()
+ 
+    set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${GCC_COMPILE_FLAGS}")
+@@ -94,7 +92,6 @@ else()
+ endif()
+ 
+ set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
+-	basisu_tool.cpp
+ 	encoder/basisu_backend.cpp
+ 	encoder/basisu_basis_file.cpp
+ 	encoder/basisu_comp.cpp
+@@ -115,42 +112,29 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
+ 	encoder/jpgd.cpp
+ 	encoder/basisu_kernels_sse.cpp
+ 	transcoder/basisu_transcoder.cpp
+-	)
++)
+ 
+ if (ZSTD)
+ 	set(BASISU_SRC_LIST ${BASISU_SRC_LIST} zstd/zstd.c)
+ endif()
+ 
+-if (APPLE)
+-   set(BIN_DIRECTORY "bin_osx")
+-else()
+-   set(BIN_DIRECTORY "bin")
+-endif()
+-
+-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${BIN_DIRECTORY})
+-
+-add_executable(basisu ${BASISU_SRC_LIST})
++add_library(${PROJECT_NAME} ${BASISU_SRC_LIST})
+ 
+ if (ZSTD)
+-	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
++	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
+ else()
+-	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)
++	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)
+ endif()
+ 
+-if (NOT MSVC)
+-   target_link_libraries(basisu m pthread)
++if (MSVC)
++	set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++else()
++    target_link_libraries(${PROJECT_NAME} m pthread)
+ endif()
+ 
+-if (NOT EMSCRIPTEN)
+-	install(TARGETS basisu DESTINATION bin)
+-	
+-	if (UNIX)
+-		if (CMAKE_BUILD_TYPE STREQUAL Release)
+-			if (APPLE)
+-				add_custom_command(TARGET basisu POST_BUILD COMMAND strip -X -x ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/basisu)
+-			else()
+-				add_custom_command(TARGET basisu POST_BUILD COMMAND strip -g -X -x ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/basisu)
+-			endif()
+-		endif()
+-	endif()
+-endif()
++install(
++	TARGETS ${PROJECT_NAME}
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
