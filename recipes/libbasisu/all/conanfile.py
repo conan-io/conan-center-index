@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -46,7 +47,17 @@ class LibBasisUniversalConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _minimal_compiler_version(self) -> bool:
+        version = tools.Version(self.settings.compiler.version.value)
+        return (self.settings.compiler == "Visual Studio" and version >= "15") \
+            or (self.settings.compiler == "gcc" and version >= "5.4") \
+            or (self.settings.compiler == "clang" and version >= "3.9") \
+            or (self.settings.compiler == "apple-clang" and version >= "10")
+ 
     def configure(self):
+        if not self._minimal_compiler_version():
+            raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 14 with shared:True".format(self.name, self.version))
+
         if self.options.shared:
             del self.options.fPIC
 
