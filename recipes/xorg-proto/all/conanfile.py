@@ -15,7 +15,9 @@ class XorgProtoConan(ConanFile):
     license = "X11"
     homepage = "https://gitlab.freedesktop.org/xorg/proto/xorgproto"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
+
+    generators = "pkg_config"
 
     _autotools = None
 
@@ -26,6 +28,10 @@ class XorgProtoConan(ConanFile):
     @property
     def _settings_build(self):
         return self.settings_build if hasattr(self, "settings_build") else self.settings
+
+    def build_requirements(self):
+        self.build_requires("xorg-macros/1.19.3")
+        self.build_requires("pkgconf/1.7.4")
 
     def package_id(self):
         self.info.header_only()
