@@ -10,6 +10,6 @@ int main()
         return EXIT_FAILURE;
     }
     int port = UpnpGetServerPort();
-    printf("Bound at %s:%d", UpnpGetServerIpAddress(), port);
+    printf("Bound at %s:%d\n", UpnpGetServerIpAddress(), port);
     return EXIT_SUCCESS;
 }
