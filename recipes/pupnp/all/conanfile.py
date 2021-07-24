@@ -60,6 +60,10 @@ class PupnpConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+        self.build_requires("pkgconf/1.7.4")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extrated_dir = self.name + "-release-" + self.version
@@ -94,13 +98,13 @@ class PupnpConan(ConanFile):
                 )
             )
 
-            self.run("./bootstrap", run_environment=True, cwd=self._source_subfolder)
-
             self._autotools = AutoToolsBuildEnvironment(self)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def build(self):
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
         autotools = self._configure_autotools()
         autotools.make()
 
