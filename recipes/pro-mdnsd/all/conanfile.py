@@ -6,14 +6,11 @@ from conans.tools import download, unzip
 class mdnsdConan(ConanFile):
     name = "pro-mdnsd"
     license = "BSD-3-Clause"
-    exports_sources = [
-        "CMakeLists.txt",
-        "patches/**"
-    ]
     homepage = "https://github.com/Pro/mdnsd"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Improved version of Jeremie Miller's MDNS-SD implementation"
     topics = ("dns", "daemon", "multicast", "embedded", "c")
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
@@ -25,8 +22,9 @@ class mdnsdConan(ConanFile):
         "shared": False,
         "compile_as_cpp": False
     }
-    generators = "cmake"
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -57,6 +55,8 @@ class mdnsdConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
