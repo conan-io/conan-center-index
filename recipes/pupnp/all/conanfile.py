@@ -44,8 +44,11 @@ class PupnpConan(ConanFile):
         "debug": True # Actually enables logging routines...
     }
 
-    _source_subfolder = "source_subfolder"
     _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
