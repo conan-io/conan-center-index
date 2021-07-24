@@ -43,7 +43,6 @@ class PrometheusCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         if self.options.with_pull:
@@ -52,6 +51,10 @@ class PrometheusCppConan(ConanFile):
             self.requires("libcurl/7.77.0")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,7 +67,7 @@ class PrometheusCppConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["USE_THIRDPARTY_LIBRARIES"] = False
         self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.definitions["OVERRIDE_CXX_STANDARD_FLAGS"] = False
+        self._cmake.definitions["OVERRIDE_CXX_STANDARD_FLAGS"] = not tools.valid_min_cppstd(self, 11)
 
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["ENABLE_PULL"] = self.options.with_pull
