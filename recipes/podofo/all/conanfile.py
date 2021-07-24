@@ -10,7 +10,7 @@ class PodofoConan(ConanFile):
     homepage = "http://podofo.sourceforge.net"
     url = "https://github.com/conan-io/conan-center-index"
     description = "PoDoFo is a library to work with the PDF file format."
-    topics = ("conan", "PDF", "PoDoFo", "podofo")
+    topics = ("PDF", "PoDoFo", "podofo")
 
     settings = "os", "compiler", "build_type", "arch"
     options = {
