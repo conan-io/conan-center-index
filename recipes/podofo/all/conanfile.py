@@ -89,6 +89,7 @@ class PodofoConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PODOFO_BUILD_LIB_ONLY"] = True
         self._cmake.definitions["PODOFO_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["PODOFO_BUILD_STATIC"] = not self.options.shared
         if not self.options.threadsafe:
             self._cmake.definitions["PODOFO_NO_MULTITHREAD"] = True
         if not tools.valid_min_cppstd(self, 11) and tools.Version(self.version) >= "0.9.7":
