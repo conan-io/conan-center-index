@@ -111,14 +111,14 @@ class PupnpConan(ConanFile):
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
-        # Adjust install folders so includes go into convenient place
-        # and pkgconfig stays in build folder.
-        autotools.install(args=["upnpincludedir=$(includedir)", "pkgconfigexecdir=no_install"])
+        autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for lib in self._pupnp_libs:
             os.unlink(os.path.join(self.package_folder, "lib", "lib%s.la" % lib))
 
     def package_info(self):
         self.cpp_info.libs.extend(self._pupnp_libs)
+        self.cpp_info.includedirs.append(os.path.join("include", "upnp"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread"])
             self.cpp_info.cflags.extend(["-pthread"])
