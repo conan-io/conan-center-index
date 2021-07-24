@@ -110,6 +110,8 @@ class JerryScriptStackConan(ConanFile):
         if tools.Version(self.version) < "2.4.0":
             self.options.profile = "es5.1"
             self.options.jerry_math = True
+            if self.settings.compiler == "Visual Studio":
+                del self.options.jerry_math  # forced to False
         else:
             self.options.profile = "es.next"
             self.options.jerry_math = False
