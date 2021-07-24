@@ -45,13 +45,15 @@ class PrometheusCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.with_pull:
+            del self.options.with_compression
 
     def requirements(self):
         if self.options.with_pull:
             self.requires("civetweb/1.14")
         if self.options.with_push:
             self.requires("libcurl/7.77.0")
-        if self.options.with_compression:
+        if self.options.get_safe("with_compression"):
             self.requires("zlib/1.2.11")
 
     def validate(self):
@@ -72,7 +74,8 @@ class PrometheusCppConan(ConanFile):
 
         self._cmake.definitions["ENABLE_PULL"] = self.options.with_pull
         self._cmake.definitions["ENABLE_PUSH"] = self.options.with_push
-        self._cmake.definitions["ENABLE_COMPRESSION"] = self.options.with_compression
+        if self.options.with_pull:
+            self._cmake.definitions["ENABLE_COMPRESSION"] = self.options.with_compression
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
