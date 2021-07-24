@@ -27,7 +27,7 @@ class XorgProtoConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         self.build_requires("xorg-macros/1.19.3")
