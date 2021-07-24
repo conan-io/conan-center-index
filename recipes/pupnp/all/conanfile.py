@@ -118,6 +118,7 @@ class PupnpConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libupnp"
         self.cpp_info.libs = ["upnp", "ixml"]
         self.cpp_info.includedirs.append(os.path.join("include", "upnp"))
         if self.settings.os in ["Linux", "FreeBSD"]:
