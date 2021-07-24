@@ -120,7 +120,7 @@ class PupnpConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["upnp", "ixml"]
         self.cpp_info.includedirs.append(os.path.join("include", "upnp"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
             self.cpp_info.cflags.extend(["-pthread"])
             self.cpp_info.cxxflags.extend(["-pthread"])
