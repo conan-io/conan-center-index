@@ -48,16 +48,17 @@ class PupnpConan(ConanFile):
     _autotools = None
 
     def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if self.settings.os == "Windows":
             # Note, pupnp has build instructions for Windows but they
             # include VC 6 and require pthreads-w32 library.
             # Someone who needs it and has possibility to build it could step in.
             raise ConanInvalidConfiguration("Windows builds are not supported.")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-        if self.options.shared:
-            del self.options.fPIC
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
