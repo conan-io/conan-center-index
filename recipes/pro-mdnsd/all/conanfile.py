@@ -31,6 +31,10 @@ class mdnsdConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if not self.options.compile_as_cpp:
             del self.settings.compiler.libcxx
@@ -40,10 +44,6 @@ class mdnsdConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         folder_name = "mdnsd-" + self.version
         os.rename(folder_name, self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def _configure_cmake(self):
         if self._cmake:
