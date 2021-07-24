@@ -70,7 +70,6 @@ class PrometheusCppConan(ConanFile):
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["OVERRIDE_CXX_STANDARD_FLAGS"] = not tools.valid_min_cppstd(self, 11)
 
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["ENABLE_PULL"] = self.options.with_pull
         self._cmake.definitions["ENABLE_PUSH"] = self.options.with_push
         self._cmake.definitions["ENABLE_COMPRESSION"] = self.options.with_compression
