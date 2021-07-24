@@ -50,6 +50,10 @@ class PupnpConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -57,15 +61,21 @@ class PupnpConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os == "Windows":
-            # Note, pupnp has build instructions for Windows but they
+        if self.settings.compiler == "Visual Studio":
+            # Note, pupnp has build instructions for Visual Studio but they
             # include VC 6 and require pthreads-w32 library.
             # Someone who needs it and has possibility to build it could step in.
-            raise ConanInvalidConfiguration("Windows builds are not supported.")
+            raise ConanInvalidConfiguration("Visual Studio not supported yet in this recipe")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -100,13 +110,13 @@ class PupnpConan(ConanFile):
                 )
             )
 
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -125,3 +135,5 @@ class PupnpConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread"])
             self.cpp_info.cflags.extend(["-pthread"])
             self.cpp_info.cxxflags.extend(["-pthread"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32"])
