@@ -144,7 +144,7 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
-        self.requires("pcre/8.44")
+        self.requires("pcre/8.45")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
             self.requires("expat/2.4.1")
