@@ -36,6 +36,8 @@ class mdnsdConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.compile_as_cpp:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
