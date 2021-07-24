@@ -47,8 +47,6 @@ class PupnpConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
-    _pupnp_libs = ["upnp", "ixml"]
-
     def configure(self):
         if self.settings.os == "Windows":
             # Note, pupnp has build instructions for Windows but they
@@ -113,11 +111,10 @@ class PupnpConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for lib in self._pupnp_libs:
-            os.unlink(os.path.join(self.package_folder, "lib", "lib%s.la" % lib))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.libs.extend(self._pupnp_libs)
+        self.cpp_info.libs = ["upnp", "ixml"]
         self.cpp_info.includedirs.append(os.path.join("include", "upnp"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread"])
