@@ -31,6 +31,7 @@ class SqlcipherConan(ConanFile):
     }
 
     exports_sources = "patches/*"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -127,49 +128,44 @@ class SqlcipherConan(ConanFile):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
         self.run('chmod +x configure', cwd=self._source_subfolder)
-        absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
-        absolute_install_dir = absolute_install_dir.replace("\\", "/")
-        autotools_env = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.os == "Linux":
-            autotools_env.libs.append("dl")
-            if not self.options.with_largefile:
-                autotools_env.defines.append("SQLITE_DISABLE_LFS=1")
-        autotools_env.defines.extend(["SQLITE_HAS_CODEC"])
-        if not self._use_commoncrypto():
-            autotools_env.defines.extend(["SQLCIPHER_CRYPTO_OPENSSL"])
+        autotools = self._configure_autotools()
+        autotools.make()
 
-        configure_args = self._get_configure_args(absolute_install_dir)
-        with tools.chdir(self._source_subfolder):
-            env_vars = autotools_env.vars
-            tclsh_cmd = self.deps_env_info.TCLSH
-            env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
-            if self._use_commoncrypto():
-                env_vars["LDFLAGS"] += " -framework Security -framework CoreFoundation "
-            autotools_env.configure(args=configure_args, vars=env_vars)
-            if self.settings.os == "Windows":
-                # sqlcipher will create .exe for the build machine, which we defined to Linux...
-                tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "Makefile"), "BEXE = .exe", "BEXE = ")
-            autotools_env.make(args=["install"])
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
 
-    def _get_configure_args(self, absolute_install_dir):
+        yes_no = lambda v: "yes" if v else "no"
         args = [
-            "--prefix=%s" % absolute_install_dir,
-
-            self._autotools_bool_arg("shared", self.options.shared),
-            self._autotools_bool_arg("static", not self.options.shared),
-            "--enable-tempstore=%s" % self._temp_store_autotools_value,
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-tempstore={}".format(self._temp_store_autotools_value),
             "--disable-tcl",
         ]
         if self.settings.os == "Windows":
             args.extend(["config_BUILD_EXEEXT='.exe'", "config_TARGET_EXEEXT='.exe'"])
+
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Linux":
+            self._autotools.libs.append("dl")
+            if not self.options.with_largefile:
+                self._autotools.defines.append("SQLITE_DISABLE_LFS=1")
+        self._autotools.defines.append("SQLITE_HAS_CODEC")
+
+        env_vars = self._autotools.vars
+        tclsh_cmd = self.deps_env_info.TCLSH
+        env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
         if self._use_commoncrypto():
-            args.extend(["--with-crypto-lib=commoncrypto"])
-        return args
+            env_vars["LDFLAGS"] += " -framework Security -framework CoreFoundation "
+            args.append("--with-crypto-lib=commoncrypto")
+        else:
+            self._autotools.defines.append("SQLCIPHER_CRYPTO_OPENSSL")
 
-    def _autotools_bool_arg(self, arg_base_name, value):
-        prefix = "--enable-" if value else "--disable-"
-
-        return prefix + arg_base_name
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args, vars=env_vars)
+        if self.settings.os == "Windows":
+            # sqlcipher will create .exe for the build machine, which we defined to Linux...
+            tools.replace_in_file("Makefile", "BEXE = .exe", "BEXE = ")
+        return self._autotools
 
     def _use_commoncrypto(self):
         return self.options.crypto_library == "commoncrypto" and tools.is_apple_os(self.settings.os)
@@ -186,21 +182,18 @@ class SqlcipherConan(ConanFile):
             self._build_autotools()
 
     def _package_unix(self):
-        self.copy("*sqlite3.h", src="install")
-        self.copy("*.so*", dst="lib", src="install", keep_path=False, symlinks=True)
-        self.copy("*.a", dst="lib", src="install", keep_path=False)
-        self.copy("*.lib", dst="lib", src="install", keep_path=False)
-        self.copy("*.dll", dst="bin", src="install", keep_path=False)
-        self.copy("*.dylib", dst="lib", src="install", keep_path=False)
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        autotools = self._configure_autotools()
+        autotools.install()
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _package_visual(self):
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
         self.copy("sqlite3.h", src=self._source_subfolder, dst=os.path.join("include", "sqlcipher"))
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
             self._package_visual()
         else:
