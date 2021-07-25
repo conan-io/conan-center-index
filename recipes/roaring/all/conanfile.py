@@ -93,4 +93,6 @@ class ConanRecipe(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "roaring"
+        self.cpp_info.names["cmake_find_package_multi"] = "roaring"
         self.cpp_info.libs = ["roaring"]
