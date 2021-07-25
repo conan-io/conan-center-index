@@ -1,5 +1,4 @@
 import os
-
 from conans import ConanFile, CMake, tools
 
 
@@ -16,12 +15,9 @@ class GeotransTestConan(ConanFile):
         cmake.build()
 
     def imports(self):
-        # self.copy("*.dll", dst="bin", src="bin")
-        # self.copy("*.dylib*", dst="bin", src="lib")
-        # self.copy('*.so*', dst='bin', src='lib')
         # Import the data files from the package
         # The package will not work without these files
-        self.copy('*', dst='data', src='res')
+        self.copy("*", dst="data", src="res")
 
     def test(self):
         if not tools.cross_building(self):

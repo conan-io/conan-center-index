@@ -329,7 +329,6 @@ int main(int argc, char **argv)
    MSP::CCS::CoordinateSystemParameters mgrsParameters(
       MSP::CCS::CoordinateType::militaryGridReferenceSystem);
 
-   std::cout << "Coordinate system parameters set" << '\n';
    //
    // Coordinate Conversion Services 
    //
@@ -354,7 +353,6 @@ int main(int argc, char **argv)
    MSP::CCS::CoordinateConversionService ccsGeocentricToMgrs(
       WGE, &geocentricParameters, 
       WGE, &mgrsParameters);
-   std::cout << "Coordinate conversion services parameters set" << '\n';
 
    try {
 
