@@ -18,14 +18,10 @@ class ConanRecipe(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "avx": [True, False],
-        "neon": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "avx": True,
-        "neon": True,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -40,21 +36,9 @@ class ConanRecipe(ConanFile):
     def _build_subfolder(self):
           return "build_subfolder"
 
-    @property
-    def _has_axv_support(self):
-          return self.settings.arch in ["x86", "x86_64"]
-
-    @property
-    def _has_neon_support(self):
-          return "arm" in self.settings.arch
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_axv_support:
-            del self.options.avx
-        if not self._has_neon_support:
-            del self.options.neon
 
     def configure(self):
         if self.options.shared:
@@ -72,9 +56,6 @@ class ConanRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ROARING_DISABLE_X64"] = not self.settings.arch in ["x86", "x86_64"]
-        self._cmake.definitions["ROARING_DISABLE_AVX"] = not self.options.get_safe("avx", False)
-        self._cmake.definitions["ROARING_DISABLE_NEON"] = not self.options.get_safe("neon", False)
         self._cmake.definitions["ROARING_DISABLE_NATIVE"] = True
         self._cmake.definitions["ROARING_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_ROARING_TESTS"] = False
