@@ -109,8 +109,8 @@ class EpoxyConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "epoxy"
         
         pkgconfig_variables = {
-            'epoxy_has_glx': '1' if self.options.glx else '0',
-            'epoxy_has_egl': '1' if self.options.egl else '0',
+            'epoxy_has_glx': '1' if self.options.get_safe("glx") else '0',
+            'epoxy_has_egl': '1' if self.options.get_safe("egl") else '0',
             'epoxy_has_wgl': '1' if self.settings.os == "Windows" else '0',
         }
         self.cpp_info.set_property(
