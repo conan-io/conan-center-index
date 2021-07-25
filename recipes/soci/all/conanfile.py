@@ -47,19 +47,6 @@ class SociConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _minimum_cpp_standard(self):
-        return 11
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8",
-            "clang": "3.8",
-            "apple-clang": "8.0"
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,15 +54,6 @@ class SociConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
-        tools.check_min_cppstd(self, self._minimum_cpp_standard)
-
-        if compiler not in self._minimum_compilers_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
-        elif compiler_version < self._minimum_compilers_version[compiler]:
-            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def requirements(self):
         prefix  = "Dependencies for"
@@ -100,6 +78,30 @@ class SociConan(ConanFile):
             self.requires("libpq/11.5")
         if self.options.with_boost:
             self.requires("boost/1.73.0")
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "14",
+            "gcc": "4.8",
+            "clang": "3.8",
+            "apple-clang": "8.0"
+        }
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version.value)
+        if compiler not in self._minimum_compilers_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+        elif compiler_version < self._minimum_compilers_version[compiler]:
+            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
