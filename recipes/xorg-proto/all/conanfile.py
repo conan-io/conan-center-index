@@ -110,6 +110,7 @@ class XorgProtoConan(ConanFile):
     def package_info(self):
         for filename, name_version in yaml.safe_load(open(self._pc_data_path)).items():
             # FIXME: generated .pc files contain `Name: xorg-proto-Xproto`, it should be `Name: Xproto`
+            self.cpp_info.components[filename].filenames["pkg_config"] = filename
             self.cpp_info.components[filename].libdirs = []
             self.cpp_info.components[filename].version = name_version["version"]
 
