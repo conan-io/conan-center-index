@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -100,7 +99,7 @@ class SociConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
         compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
+        compiler_version = tools.Version(self.settings.compiler.version.value)
         if compiler not in self._minimum_compilers_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
         elif compiler_version < self._minimum_compilers_version[compiler]:
