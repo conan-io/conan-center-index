@@ -89,9 +89,11 @@ class ConanRecipe(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "roaring"
         self.cpp_info.names["cmake_find_package_multi"] = "roaring"
+        self.cpp_info.names["pkg_config"] = "roaring"
         self.cpp_info.libs = ["roaring"]
