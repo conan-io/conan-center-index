@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class RapidcheckConan(ConanFile):
     name = "rapidcheck"
@@ -45,9 +47,8 @@ class RapidcheckConan(ConanFile):
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        git_hash = os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))[0]
-        os.rename("rapidcheck-{}".format(git_hash), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
