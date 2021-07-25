@@ -1,6 +1,7 @@
 from conans import tools, ConanFile, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -63,9 +64,10 @@ class SqlcipherConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("tcl/8.6.10")
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -115,7 +117,15 @@ class SqlcipherConan(ConanFile):
         vcvars = tools.vcvars_command(self.settings)
         self.run("%s && nmake /f Makefile.msc %s %s" % (vcvars, main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def _build_autotools(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         self.run('chmod +x configure', cwd=self._source_subfolder)
         absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
         absolute_install_dir = absolute_install_dir.replace("\\", "/")
@@ -128,52 +138,18 @@ class SqlcipherConan(ConanFile):
         if not self._use_commoncrypto():
             autotools_env.defines.extend(["SQLCIPHER_CRYPTO_OPENSSL"])
 
-        # sqlcipher config.sub does not contain android configurations...
-        # elf is the most basic `os' for Android
-        host = None
-        if self.settings.os == "Android":
-            host = "%s-linux-elf" % self._arch_id_str_compiler
-        elif self.settings.os == "Windows":
-            arch = str(self.settings.arch)
-            if arch == "x86":
-                arch = "i386"
-            host = "%s-pc-mingw32" % arch
-        elif self.settings.os == "iOS":
-            host = "%s-apple-darwin" % self.settings.arch
-
         configure_args = self._get_configure_args(absolute_install_dir)
         with tools.chdir(self._source_subfolder):
-            # Hack, uname -p returns i386, configure guesses x86_64, we must force i386 so that cross-compilation is correctly detected.
-            # Otherwise host/build are the same, and configure tries to launch a sample executable, and fails miserably.
             env_vars = autotools_env.vars
-            if self.settings.os == "iOS":
-                build = "i386-apple-darwin"
-            # same for mingw...
-            elif self.settings.os == "Windows":
-                build = "x86_64-linux"
-                env_vars["config_TARGET_EXEEXT"] = ".exe"
-            else:
-                build = None
             tclsh_cmd = self.deps_env_info.TCLSH
             env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
             if self._use_commoncrypto():
                 env_vars["LDFLAGS"] += " -framework Security -framework CoreFoundation "
-            autotools_env.configure(args=configure_args, host=host, build=build, vars=env_vars)
+            autotools_env.configure(args=configure_args, vars=env_vars)
             if self.settings.os == "Windows":
                 # sqlcipher will create .exe for the build machine, which we defined to Linux...
                 tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "Makefile"), "BEXE = .exe", "BEXE = ")
             autotools_env.make(args=["install"])
-
-    @property
-    def _arch_id_str_compiler(self):
-        return {"x86": "i686",
-                "armv6": "arm",
-                "armv7": "arm",
-                "armv7hf": "arm",
-                # Hack: config.guess of sqlcipher does not like aarch64
-                "armv8": "armv8",
-                "mips64": "mips64"}.get(str(self.settings.arch),
-                                        str(self.settings.arch))
 
     def _get_configure_args(self, absolute_install_dir):
         args = [
