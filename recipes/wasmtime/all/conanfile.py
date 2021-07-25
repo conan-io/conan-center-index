@@ -60,13 +60,13 @@ class WasmtimeConan(ConanFile):
         except KeyError:
             msg = (
                 "{} recipe lacks information about the {} compiler, "
-                "support for the required C++{} features is assumed"
+                "support for the required C{} features is assumed"
             ).format(self.name, compiler, self._minimum_cpp_standard)
             self.output.warn(msg)
 
-        if (not (self.version in self.conan_data["sources"]) or
-            not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
-            not (str(self.settings.arch) in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
+        try:
+            self.conan_data["sources"][self.version][str(self.settings.os)]
+        except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
     def source(self):
@@ -99,5 +99,5 @@ class WasmtimeConan(ConanFile):
 
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['ws2_32', 'bcrypt', 'advapi32', 'userenv', 'ntdll', 'shell32', 'ole32']
-        if self.settings.os == 'Linux':
+        elif self.settings.os == 'Linux':
             self.cpp_info.system_libs = ['pthread', 'dl', 'm']
