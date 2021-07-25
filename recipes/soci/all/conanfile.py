@@ -62,12 +62,12 @@ class SociConan(ConanFile):
         message = "not configured in this conan package."
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.36.0")
         if self.options.with_db2:
             # self.requires("db2/0.0.0") # TODO add support for db2
             raise ConanInvalidConfiguration("{} DB2 {} ".format(prefix, message))
         if self.options.with_odbc:
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         if self.options.with_oracle:
             # self.requires("oracle_db/0.0.0") # TODO add support for oracle
             raise ConanInvalidConfiguration("{} ORACLE {} ".format(prefix, message))
@@ -75,11 +75,11 @@ class SociConan(ConanFile):
             # self.requires("firebird/0.0.0") # TODO add support for firebird
             raise ConanInvalidConfiguration("{} firebird {} ".format(prefix, message))
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_postgresql:
-            self.requires("libpq/11.5")
+            self.requires("libpq/13.3")
         if self.options.with_boost:
-            self.requires("boost/1.73.0")
+            self.requires("boost/1.76.0")
 
     @property
     def _minimum_cpp_standard(self):
