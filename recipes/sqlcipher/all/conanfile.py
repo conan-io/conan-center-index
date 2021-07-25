@@ -11,25 +11,29 @@ class SqlcipherConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.zetetic.net/sqlcipher/"
     description = "SQLite extension that provides 256 bit AES encryption of database files."
+    topics = ("database", "encryption", "SQLite")
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
-                "shared": [True, False],
-                "fPIC": [True, False],
-                "crypto_library": ["openssl", "libressl", "commoncrypto"],
-                "with_largefile": [True, False],
-                "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"]
-              }
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "crypto_library": ["openssl", "libressl", "commoncrypto"],
+        "with_largefile": [True, False],
+        "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
+    }
     default_options = {
-                        "shared": False,
-                        "fPIC": True,
-                        "crypto_library": "openssl",
-                        "with_largefile": True,
-                        "temporary_store": "default_memory"
-                      }
-    topics = ("database", "encryption", "SQLite")
-    exports_sources = "patches/*"
-    _source_subfolder = "source_subfolder"
+        "shared": False,
+        "fPIC": True,
+        "crypto_library": "openssl",
+        "with_largefile": True,
+        "temporary_store": "default_memory",
+    }
 
+    exports_sources = "patches/*"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         del self.settings.compiler.libcxx
