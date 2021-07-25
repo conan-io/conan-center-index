@@ -1,7 +1,5 @@
-from conans import tools, ConanFile, AutoToolsBuildEnvironment, RunEnvironment
+from conans import tools, ConanFile, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-import platform
-import sys
 import os
 
 
@@ -28,7 +26,6 @@ class SqlcipherConan(ConanFile):
                       }
     topics = ("database", "encryption", "SQLite")
     exports_sources = "patches/*"
-    generators = "cmake"
     _source_subfolder = "source_subfolder"
 
 
