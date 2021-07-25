@@ -122,12 +122,17 @@ class SqlcipherConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
+    @staticmethod
+    def _chmod_plus_x(filename):
+        if os.name == "posix":
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
+
     def _build_autotools(self):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
-        self.run('chmod +x configure', cwd=self._source_subfolder)
+        self._chmod_plus_x(os.path.join(self._source_subfolder, "configure"))
         autotools = self._configure_autotools()
         autotools.make()
 
