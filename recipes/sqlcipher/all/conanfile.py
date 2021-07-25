@@ -132,7 +132,10 @@ class SqlcipherConan(ConanFile):
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
-        self._chmod_plus_x(os.path.join(self._source_subfolder, "configure"))
+        configure = os.path.join(self._source_subfolder, "configure")
+        self._chmod_plus_x(configure)
+        if self.settings.os == "Macos":
+            tools.replace_in_file(configure, r"-install_name \$rpath/", "-install_name ")
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -178,9 +181,6 @@ class SqlcipherConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-
         if self.settings.compiler == "Visual Studio":
             self._build_visual()
         else:
