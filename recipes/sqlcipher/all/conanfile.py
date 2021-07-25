@@ -55,12 +55,15 @@ class SqlcipherConan(ConanFile):
         elif self.options.crypto_library == "libressl":
             self.requires("libressl/3.2.1")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        # It is possible to have a MinGW cross-build toolchain (Linux to Windows)
-        # Only require msys2 when building on an actual Windows system
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and tools.os_info.is_windows:
-            self.build_requires("msys2/20190524")
         self.build_requires("tcl/8.6.10")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
