@@ -70,10 +70,6 @@ class SociConan(ConanFile):
             self.requires("boost/1.76.0")
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
-
-    @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "14",
@@ -84,7 +80,7 @@ class SociConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            tools.check_min_cppstd(self, 11)
 
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version.value)
