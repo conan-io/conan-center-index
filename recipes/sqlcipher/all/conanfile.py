@@ -36,24 +36,26 @@ class SqlcipherConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.settings.os != "Linux":
-            del self.options.with_largefile
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.with_largefile
 
     def configure(self):
-        if self.options.crypto_library == "commoncrypto" and not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
             self.requires("openssl/1.1.1k")
         elif self.options.crypto_library == "libressl":
             self.requires("libressl/3.2.1")
+
+    def validate(self):
+        if self.options.crypto_library == "commoncrypto" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
 
     @property
     def _settings_build(self):
