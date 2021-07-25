@@ -66,7 +66,7 @@ class SociConan(ConanFile):
         if self.options.with_db2:
             # self.requires("db2/0.0.0") # TODO add support for db2
             raise ConanInvalidConfiguration("{} DB2 {} ".format(prefix, message))
-        if self.options.with_odbc:
+        if self.settings.os != "Windows" and self.options.with_odbc:
             self.requires("odbc/2.3.9")
         if self.options.with_oracle:
             # self.requires("oracle_db/0.0.0") # TODO add support for oracle
@@ -173,6 +173,9 @@ class SociConan(ConanFile):
         if self.settings.os == "Windows":
             for index, name in enumerate(self.cpp_info.libs):
                 self.cpp_info.libs[index] = self._rename_library_win(name)
+
+        if self.settings.os == "Windows" and self.options.with_odbc:
+            self.cpp_info.system_libs.append("odbc32")
 
     def _rename_library_win(self, name):
         if self.options.shared:
