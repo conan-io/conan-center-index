@@ -12,15 +12,20 @@ class ConanRecipe(ConanFile):
 
     homepage = "https://github.com/RoaringBitmap/CRoaring"
     url = "https://github.com/conan-io/conan-center-index"
-
     license = "Apache-2.0"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True}
     _cmake = None
 
     @property
@@ -51,8 +56,8 @@ class ConanRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions['ENABLE_ROARING_TESTS'] = False
-        self._cmake.definitions['ROARING_BUILD_STATIC'] = not self.options.shared
+        self._cmake.definitions["ENABLE_ROARING_TESTS"] = False
+        self._cmake.definitions["ROARING_BUILD_STATIC"] = not self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -63,9 +68,9 @@ class ConanRecipe(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
-        self.cpp_info.libs = ['roaring']
+        self.cpp_info.libs = ["roaring"]
