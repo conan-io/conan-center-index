@@ -200,6 +200,7 @@ class SqlcipherConan(ConanFile):
             self._package_unix()
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "sqlcipher"
         self.cpp_info.libs = ["sqlcipher"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
