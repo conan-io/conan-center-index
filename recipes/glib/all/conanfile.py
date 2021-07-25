@@ -6,10 +6,11 @@ import glob
 
 required_conan_version = ">=1.36.0"
 
+
 class GLibConan(ConanFile):
     name = "glib"
     description = "GLib provides the core application building blocks for libraries and applications written in C"
-    topics = ("conan", "glib", "gobject", "gio", "gmodule")
+    topics = ("glib", "gobject", "gio", "gmodule")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
     license = "LGPL-2.1"
@@ -54,7 +55,7 @@ class GLibConan(ConanFile):
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
         if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
-            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")        
+            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
