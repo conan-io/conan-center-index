@@ -1,1 +1,0 @@
-https://github.com/conan-community/conan-opencv/commit/ea28df74114ecc1a04c28f18d3c382f50430bf40

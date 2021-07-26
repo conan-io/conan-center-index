@@ -44,7 +44,7 @@ nasm/2.14
 onnxruntime/1.7.2
 openal/1.20.1
 openblas/0.3.7.dssl1
-opencv/2.4.13.5
+opencv/2.4.13.7
 openh264/1.7.0
 openssl/1.1.1d.dssl1
 protobuf/3.9.1.dssl1
@@ -91,9 +91,10 @@ neurotechnology:shared=True
 openal:shared=True
 openblas:shared=True
 opencv:shared=True
-opencv:jasper=False
-opencv:openexr=False
-opencv:tiff=False
+opencv:with_jasper=False
+opencv:with_eigen=False
+opencv:with_openexr=False
+opencv:with_tiff=False
 openssl:shared=True
 pjsip:shared=False
 protobuf:shared=False
