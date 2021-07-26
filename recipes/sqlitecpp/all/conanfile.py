@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -31,10 +30,6 @@ class SQLiteCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _is_mingw_windows(self):
-        return self.settings.os == 'Windows' and self.settings.compiler == 'gcc'
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -49,9 +44,9 @@ class SQLiteCppConan(ConanFile):
 
     def _patch_clang(self):
         if self.settings.compiler == "clang" and \
-           Version(self.settings.compiler.version) < "6.0" and \
+           tools.Version(self.settings.compiler.version) < "6.0" and \
            self.settings.compiler.libcxx == "libc++" and \
-           Version(self.version) < "3":
+           tools.Version(self.version) < "3":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "include", "SQLiteCpp", "Utils.h"),
                 "const nullptr_t nullptr = {};",
