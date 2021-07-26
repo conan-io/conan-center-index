@@ -83,7 +83,7 @@ class DateConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if self.options.header_only:
             self.output.info("Header only package, skipping build")
