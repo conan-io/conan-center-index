@@ -3,10 +3,13 @@ cmake
 virtualrunenv
 
 [build_requires]
+autoconf/2.71
+automake/1.16.1
 b2/4.2.0
 bison/3.5.3
 flex/2.6.4
 gperf/3.1
+libtool/2.4.6
 ninja/1.9.0
 meson/0.53.2
 m4/1.4.18
@@ -28,7 +31,7 @@ icu/64.2
 jansson/2.12
 jsoncpp/1.8.3
 libalsa/1.1.9
-libcurl/7.64.1
+libcurl/7.64.1.dssl1_components
 libdrm/2.4.100
 libelf/0.8.13
 libiconv/1.15

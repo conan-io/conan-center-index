@@ -15,32 +15,34 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _test_executable(self):
+        if self.settings.os == "Windows":
+            return os.path.join("bin", "test_package.exe")
+        else:
+            return os.path.join("bin", "test_package")
+
     def test(self):
-        if tools.cross_building(self.settings) and self.settings.os in ["Android", "iOS"]:
-            return 
-
-        if "arm" in self.settings.arch:
-            self.test_arm()
-        elif tools.cross_building(self.settings) and self.settings.os == "Windows":
-            self.test_mingw_cross()
+        if not tools.cross_building(self):
+            self.run(self._test_executable, run_environment=True)
         else:
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            # We will dump information for the generated executable
+            if self.settings.os in ["Android", "iOS"]:
+                # FIXME: Check output for these hosts
+                return
 
-    def test_mingw_cross(self):
-        bin_path = os.path.join("bin", "test_package.exe")
-        output = subprocess.check_output(["file", bin_path]).decode()
-        assert re.search(r"PE32.*executable.*Windows", output)
+            output = subprocess.check_output(["file", self._test_executable]).decode()
 
-    def test_arm(self):
-        file_ext = "so" if self.options["libcurl"].shared else "a"
-        lib_path = os.path.join(self.deps_cpp_info["libcurl"].libdirs[0], "libcurl.%s" % file_ext)
-        output = subprocess.check_output(["readelf", "-h", lib_path]).decode()
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                assert "Mach-O 64-bit executable arm64" in output, "Not found in output: {}".format(output)
 
-        if "armv8" in self.settings.arch:
-            if self.settings.arch == "armv8_32":
-                assert re.search(r"Machine:\s+ARM", output)
-            else:
-                assert re.search(r"Machine:\s+AArch64", output)
-        else:
-            assert re.search(r"Machine:\s+ARM", output)
+            elif self.settings.os == "Linux":
+                if self.settings.arch == "armv8_32":
+                    assert re.search(r"Machine:\s+ARM", output), "Not found in output: {}".format(output)
+                elif "armv8" in self.settings.arch:
+                    assert re.search(r"Machine:\s+AArch64", output), "Not found in output: {}".format(output)
+                elif "arm" in self.settings.arch:
+                    assert re.search(r"Machine:\s+ARM", output), "Not found in output: {}".format(output)
+
+            elif self.settings.os == "Windows": # FIXME: It satisfies not only MinGW
+                assert re.search(r"PE32.*executable.*Windows", output), "Not found in output: {}".format(output)
