@@ -15,11 +15,16 @@ class SQLiteCppConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "lint": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "lint": False
-                       }
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "lint": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "lint": False,
+    }
 
     @property
     def _source_subfolder(self):
@@ -30,7 +35,7 @@ class SQLiteCppConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
