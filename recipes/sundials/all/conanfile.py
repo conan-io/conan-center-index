@@ -16,23 +16,29 @@ class SundialsConan(ConanFile):
     topics = ("sundials", "integrators", "ode", "non-linear solvers")
     homepage = "https://github.com/LLNL/sundials"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "build_arkode": [True, False],
-               "build_cvode": [True, False],
-               "build_cvodes": [True, False],
-               "build_ida": [True, False],
-               "build_idas": [True, False],
-               "build_kinsol": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "build_arkode": True,
-                       "build_cvode": True,
-                       "build_cvodes": True,
-                       "build_ida": True,
-                       "build_idas": True,
-                       "build_kinsol": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_arkode": [True, False],
+        "build_cvode": [True, False],
+        "build_cvodes": [True, False],
+        "build_ida": [True, False],
+        "build_idas": [True, False],
+        "build_kinsol": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_arkode": True,
+        "build_cvode": True,
+        "build_cvodes": True,
+        "build_ida": True,
+        "build_idas": True,
+        "build_kinsol": True,
+    }
+
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     short_paths = True
