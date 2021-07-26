@@ -93,10 +93,10 @@ class STXConan(ConanFile):
                 'which clang < 10 with libc++ lacks'
             )
 
-        if compiler == 'apple-clang' and compiler_version < 10:
+        if compiler == 'apple-clang' and compiler_version < 12:
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which apple-clang < 10 with libc++ lacks'
+                'which apple-clang < 12 with libc++ lacks'
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
