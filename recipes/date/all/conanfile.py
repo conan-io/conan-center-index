@@ -50,10 +50,8 @@ class DateConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.header_only:
-            return
-        if not self.options.use_system_tz_db:
-            self.requires("libcurl/7.69.1")
+        if not self.options.header_only and not self.options.use_system_tz_db:
+            self.requires("libcurl/7.78.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
