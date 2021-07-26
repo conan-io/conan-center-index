@@ -1,6 +1,8 @@
 from conans import CMake, ConanFile, tools
 import glob, os
 
+required_conan_version = ">=1.29.1"
+
 
 class ConanFile(ConanFile):
     name = "openscenegraph"
@@ -24,14 +26,12 @@ class ConanFile(ConanFile):
         "enable_windowing_system": [True, False],
         "enable_deprecated_serializers": [True, False],
         "use_fontconfig": [True, False],
-        # "with_asio": [True, False], # osg seems to not work with recent versions of asio, see https://github.com/openscenegraph/OpenSceneGraph/issues/921
-        # "with_collada": [True, False],
+        "with_asio": [True, False],
         "with_curl": [True, False],
         "with_dcmtk": [True, False],
         "with_freetype": [True, False],
         "with_gdal": [True, False],
         "with_gif": [True, False],
-        # "with_gstreamer": [True, False],
         "with_gta": [True, False],
         "with_jasper": [True, False],
         "with_jpeg": [True, False],
@@ -53,14 +53,12 @@ class ConanFile(ConanFile):
         "enable_windowing_system": True,
         "enable_deprecated_serializers": False,
         "use_fontconfig": True,
-        # "with_asio": False,
-        # "with_collada": False,
+        "with_asio": False,
         "with_curl": False,
         "with_dcmtk": False,
         "with_freetype": True,
         "with_gdal": False,
         "with_gif": True,
-        # "with_gstreamer": False,
         "with_gta": False,
         "with_jasper": False,
         "with_jpeg": True,
@@ -105,36 +103,35 @@ class ConanFile(ConanFile):
             del self.options.with_png
             del self.options.with_dcmtk
 
+        if self.options.get_safe("with_asio", False):
+            raise ConanInvalidConfiguration("ASIO support in OSG is broken, see https://github.com/openscenegraph/OpenSceneGraph/issues/921")
+
     def requirements(self):
         if self.options.enable_windowing_system and self.settings.os == "Linux":
             self.requires("xorg/system")
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.13.91")
+            self.requires("fontconfig/2.13.92")
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
-            self.requires("asio/1.16.0")
-            self.requires("boost/1.73.0")
-        # if self.options.with_collada:
-        #     self.requires("libxml2/2.9.10")
+            self.requires("asio/1.18.1")
+            self.requires("boost/1.75.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.74.0")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.5")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.2")
+            self.requires("freetype/2.10.4")
         if self.options.with_gdal:
-            self.requires("gdal/3.1.2")
+            self.requires("gdal/3.1.4")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
-        # if self.options.with_gstreamer:
-        #     self.requires("glib/2.65.1")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.21")
+            self.requires("jasper/2.0.24")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9d")
         if self.options.get_safe("with_openexr"):
@@ -142,7 +139,7 @@ class ConanFile(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
@@ -192,7 +189,6 @@ class ConanFile(ConanFile):
         cmake.definitions["OSG_WITH_INVENTOR"] = False
         cmake.definitions["OSG_WITH_JASPER"] = self.options.with_jasper
         cmake.definitions["OSG_WITH_OPENCASCADE"] = False
-        cmake.definitions["OSG_WITH_COLLADA"] = False  # self.options.with_collada
         cmake.definitions["OSG_WITH_FBX"] = False
         cmake.definitions["OSG_WITH_ZLIB"] = self.options.with_zlib
         cmake.definitions["OSG_WITH_GDAL"] = self.options.with_gdal
@@ -201,7 +197,6 @@ class ConanFile(ConanFile):
         cmake.definitions["OSG_WITH_LIBVNCSERVER"] = False
         cmake.definitions["OSG_WITH_DCMTK"] = self.options.get_safe("with_dcmtk", False)
         cmake.definitions["OSG_WITH_FFMPEG"] = False
-        cmake.definitions["OSG_WITH_GSTREAMER"] = False  # self.options.with_gstreamer
         cmake.definitions["OSG_WITH_DIRECTSHOW"] = False
         cmake.definitions["OSG_WITH_SDL"] = False
         cmake.definitions["OSG_WITH_POPPLER"] = False
@@ -236,10 +231,7 @@ class ConanFile(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for pdb in glob.iglob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb)
-        for pdb in glob.iglob(os.path.join(self.package_folder, "bin", "osgPlugins-{}".format(self.version), "*.pdb")):
-            os.unlink(pdb)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
         # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script

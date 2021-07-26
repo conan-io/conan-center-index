@@ -16,10 +16,11 @@ class IosCMakeConan(ConanFile):
         "enable_visibility": [True, False],
         "enable_strict_try_compile": [True, False],
         "toolchain_target": ["auto", "OS", "OS64", "OS64COMBINED",
-                       "SIMULATOR", "SIMULATOR64",
+                       "SIMULATOR", "SIMULATOR64", "SIMULATORARM64",
                        "TVOS", "TVOSCOMBINED",
                        "SIMULATOR_TVOS", "WATCHOS",
-                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS"]
+                       "WATCHOSCOMBINED", "SIMULATOR_WATCHOS",
+                       "MAC", "MAC_ARM64", "MAC_CATALYST", "MAC_CATALYST_ARM64"]
     }
     default_options = {
         "enable_bitcode": True,
@@ -127,7 +128,7 @@ class IosCMakeConan(ConanFile):
         self.env_info.CONAN_USER_CMAKE_FLAGS = cmake_flags
         self.output.info("Setting toolchain options to: {}".format(cmake_flags))
         cmake_wrapper = os.path.join(self.package_folder, "bin", "cmake-wrapper")
-        self.output.info("Setting CONAN_CMAKE_PROGRAM to: {}".format(cmake_flags))
+        self.output.info("Setting CONAN_CMAKE_PROGRAM to: {}".format(cmake_wrapper))
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
         tool_chain = os.path.join(self.package_folder,
                                     "lib",
@@ -135,8 +136,14 @@ class IosCMakeConan(ConanFile):
                                     "ios-cmake",
                                     "ios.toolchain.cmake")
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = tool_chain
+        # add some more env_info, for the case users generate a toolchain file via conan and want to access that info
+        self.env_info.CONAN_ENABLE_BITCODE_FLAG = str(self.options.enable_bitcode)
+        self.env_info.CONAN_ENABLE_ARC_FLAG = str(self.options.enable_arc)
+        self.env_info.CONAN_ENABLE_VISIBILITY_FLAG = str(self.options.enable_visibility)
+        self.env_info.CONAN_ENABLE_STRICT_TRY_COMPILE_FLAG = str(self.options.enable_strict_try_compile)
+        # the rest should be exported from profile info anyway
 
     def package_id(self):
         self.info.header_only()
-        # TODO , since we have 2 profles I am not sure that this is still required
+        # TODO , since we have 2 profiles I am not sure that this is still required
         # since this will always be / has to be  a build profile

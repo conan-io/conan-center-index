@@ -2,7 +2,13 @@ sources:
   "3.6.5":
     url: "https://dicom.offis.de/download/dcmtk/dcmtk365/dcmtk-3.6.5.tar.gz"
     sha256: "a05178665f21896dbb0974106dba1ad144975414abd760b4cf8f5cc979f9beb9"
+  "3.6.6":
+    url: "https://dicom.offis.de/download/dcmtk/dcmtk366/dcmtk-3.6.6.tar.gz"
+    sha256: "6859c62b290ee55677093cccfd6029c04186d91cf99c7642ae43627387f3458e"
 patches:
   "3.6.5":
     - patch_file: "patches/0001-cmake-use-conan-packages.patch"
+      base_path: "source_subfolder"
+  "3.6.6":
+    - patch_file: "patches/0002-cmake-use-conan-packages.patch"
       base_path: "source_subfolder"

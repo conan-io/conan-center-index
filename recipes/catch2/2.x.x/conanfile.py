@@ -46,6 +46,8 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
+        self._cmake.definitions["CATCH_BUILD_STATIC_LIBRARY"] = self.options.with_main
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -90,7 +92,9 @@ class ConanRecipe(ConanFile):
 
             self.cpp_info.components["Catch2WithMain"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
             self.cpp_info.components["Catch2WithMain"].libs = ["Catch2WithMain"]
+            self.cpp_info.components["Catch2WithMain"].system_libs = ["log"] if self.settings.os == "Android" else []
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
             self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
         else:
             self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
+            self.cpp_info.system_libs = ["log"] if self.settings.os == "Android" else []

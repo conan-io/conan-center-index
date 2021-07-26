@@ -25,6 +25,9 @@ class PupnpConan(ConanFile):
         "client": [True, False],
         "device": [True, False],
         "largefile": [True, False],
+        "tools": [True, False],
+        "blocking-tcp": [True, False],
+        "debug":  [True, False]
     }
     default_options = {
         "shared": False,
@@ -35,6 +38,9 @@ class PupnpConan(ConanFile):
         "client": True,
         "device": True,
         "largefile": True,
+        "tools": True,
+        "blocking-tcp": False,
+        "debug": True # Actually enables logging routines...
     }
 
     _source_subfolder = "source_subfolder"
@@ -50,6 +56,9 @@ class PupnpConan(ConanFile):
             raise ConanInvalidConfiguration("Windows builds are not supported.")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -78,6 +87,9 @@ class PupnpConan(ConanFile):
                         "client",
                         "device",
                         "largefile",
+                        "tools",
+                        "blocking-tcp",
+                        "debug"
                     ),
                 )
             )

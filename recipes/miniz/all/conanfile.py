@@ -1,5 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
+
 
 class MinizConan(ConanFile):
     name = "miniz"
@@ -31,17 +34,25 @@ class MinizConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.Version(self.version) >= "2.2.0":
+            self._cmake.definitions["BUILD_EXAMPLES"] = False
+            self._cmake.definitions["BUILD_FUZZERS"] = False
+            self._cmake.definitions["AMALGAMATE_SOURCES"] = False
+            self._cmake.definitions["BUILD_HEADER_ONLY"] = False
+            self._cmake.definitions["INSTALL_PROJECT"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -55,8 +66,12 @@ class MinizConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy(pattern="*.dll", dst="bin", src=os.path.join(self._build_subfolder, "bin"), keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "miniz"
+        self.cpp_info.names["cmake_find_package_multi"] = "miniz"
+        self.cpp_info.names["pkg_config"] = "miniz"
+        self.cpp_info.libs = ["miniz"]
         self.cpp_info.includedirs = ["include", os.path.join("include", "miniz")]

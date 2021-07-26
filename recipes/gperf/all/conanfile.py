@@ -11,6 +11,7 @@ class GperfConan(ConanFile):
     settings = "os", "arch", "compiler"
     _source_subfolder = "source_subfolder"
     _autotools = None
+    exports_sources = "patches/*"
 
     @property
     def _is_msvc(self):
@@ -49,9 +50,6 @@ class GperfConan(ConanFile):
                             "RANLIB=:"])
             elif self.settings.compiler == "gcc" and self.settings.os == "Windows":
                 self._autotools.link_flags.extend(["-static", "-static-libgcc"])
-            elif tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
-                target = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
-                self._autotools.flags.append(target)
 
             self._autotools.configure(args=args)
         return self._autotools
@@ -62,6 +60,8 @@ class GperfConan(ConanFile):
             autotools.make()
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 self._build_configure()

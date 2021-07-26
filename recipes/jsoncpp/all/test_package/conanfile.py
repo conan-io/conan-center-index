@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["JSONCPP_SHARED"] = self.options["jsoncpp"].shared
         cmake.configure()
         cmake.build()
 

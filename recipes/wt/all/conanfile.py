@@ -3,7 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class WtConan(ConanFile):
     name = "wt"
@@ -53,7 +54,7 @@ class WtConan(ConanFile):
         "connector_http": True,
         "connector_isapi": True,
         "connector_fcgi": False
-        }
+    }
 
     _cmake = None
 
@@ -94,32 +95,30 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.76.0")
         if self.options.connector_http:
             self.requires("zlib/1.2.11")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.32.3")
+            self.requires("sqlite3/3.35.5")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.17")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/12.2")
+            self.requires("libpq/13.2")
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.5.0")
 
-    # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
-    def _validate_dependency_graph(self):
+    def validate(self):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -159,24 +158,36 @@ class WtConan(ConanFile):
                         libs.append(l)
             return libs
 
+        # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
+        #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
+        self._cmake.definitions["BOOST_PREFIX"] = self.deps_cpp_info["boost"].rootpath
+        if self.options.connector_http:
+            self._cmake.definitions["ZLIB_PREFIX"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl:
-            self._cmake.definitions["OPENSSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["SSL_PREFIX"] = self.deps_cpp_info["openssl"].rootpath
             self._cmake.definitions["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
             self._cmake.definitions["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
             self._cmake.definitions["OPENSSL_FOUND"] = True
+        if self.options.get_safe("with_sqlite"):
+            self._cmake.definitions["SQLITE3_PREFIX"] = self.deps_cpp_info["sqlite3"].rootpath
         if self.options.get_safe("with_mysql"):
+            self._cmake.definitions["MYSQL_PREFIX"] = self.deps_cpp_info["libmysqlclient"].rootpath
             self._cmake.definitions["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
             self._cmake.definitions["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             self._cmake.definitions["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             self._cmake.definitions["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
+            self._cmake.definitions["POSTGRES_PREFIX"] = self.deps_cpp_info["libpq"].rootpath
             self._cmake.definitions["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
             self._cmake.definitions["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
             self._cmake.definitions["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
+            self._cmake.definitions["ODBC_PREFIX"] = self.deps_cpp_info["odbc"].rootpath
             self._cmake.definitions["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
             self._cmake.definitions["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
             self._cmake.definitions["ODBC_FOUND"] = True
+        if self.options.get_safe("with_unwind"):
+            self._cmake.definitions["UNWIND_PREFIX"] = self.deps_cpp_info["libunwind"].rootpath
         if self.settings.os == "Windows":
             self._cmake.definitions["CONNECTOR_FCGI"] = False
             self._cmake.definitions["CONNECTOR_ISAPI"] = self.options.connector_isapi
@@ -187,7 +198,6 @@ class WtConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._validate_dependency_graph()
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(OpenSSL)", "#find_package(OpenSSL)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")

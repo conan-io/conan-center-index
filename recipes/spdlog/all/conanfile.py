@@ -12,7 +12,7 @@ class SpdlogConan(ConanFile):
     topics = ("conan", "spdlog", "logging", "header-only")
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -38,20 +38,21 @@ class SpdlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.options.header_only:
             del self.options.shared
             del self.options.fPIC
         elif self.settings.os == "Windows" and self.options.shared and Version(self.version) < "1.6.0":
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
-        if self.settings.os != "Windows" and \
-           (self.options.wchar_support or self.options.wchar_filenames):
+        if self.settings.os != "Windows" and (self.options.wchar_support or self.options.wchar_filenames):
             raise ConanInvalidConfiguration("wchar is only supported under windows")
         if self.settings.compiler == "Visual Studio" and self.options.get_safe("shared", False) and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def requirements(self):
         if Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.1.2")
+            self.requires("fmt/7.1.3")
         elif Version(self.version) >= "1.5.0":
             self.requires("fmt/6.2.1")
         else:

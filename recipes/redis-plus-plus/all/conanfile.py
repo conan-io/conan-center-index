@@ -65,15 +65,18 @@ class RedisPlusPlusConan(ConanFile):
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_TEST"] = False
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
+            if tools.Version(self.version) >= "1.2.3":
+                self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                              "")
+        if tools.Version(self.version) < "1.2.3":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
+                                  "")
 
     def build(self):
         self._patch_sources()
@@ -84,10 +87,21 @@ class RedisPlusPlusConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        # Introduced in 1.2.3
+        self.cpp_info.names["cmake_find_package"] = "redis++"
+        self.cpp_info.names["cmake_find_package_multi"] = "redis++"
+        self.cpp_info.names["pkg_config"] = "redis++"
+        self.cpp_info.components["redis++lib"].names["cmake_find_package"] = "redis++" + "_static" if not self.options.shared else ""
+        self.cpp_info.components["redis++lib"].names["cmake_find_package_multi"] = "redis++" + "_static" if not self.options.shared else ""
+
         suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
-        self.cpp_info.libs = ["redis++" + suffix]
-        self.cpp_info.requires = ["hiredis::hiredislib"]
+        self.cpp_info.components["redis++lib"].libs = ["redis++" + suffix]
+        self.cpp_info.components["redis++lib"].requires = ["hiredis::hiredis"]
         if self.options.with_tls:
-            self.cpp_info.requires.append("hiredis::hiredis_ssl")
+            self.cpp_info.components["redis++lib"].requires.append("hiredis::hiredis_ssl")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["redis++lib"].system_libs.append("pthread")

@@ -11,7 +11,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
      target_link_libraries       (libtesseract PUBLIC
 -        ${Leptonica_LIBRARIES}
 -        ${LibArchive_LIBRARIES}
-+        Leptonica::Leptonica
++        leptonica
 +        LibArchive::LibArchive
      )
      export(TARGETS libtesseract FILE ${CMAKE_CURRENT_BINARY_DIR}/TesseractTargets.cmake)

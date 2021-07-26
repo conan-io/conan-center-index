@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class PCRE2Conan(ConanFile):
     name = "pcre2"
@@ -10,8 +12,7 @@ class PCRE2Conan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,6 +37,8 @@ class PCRE2Conan(ConanFile):
         "support_jit": False
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -70,9 +73,21 @@ class PCRE2Conan(ConanFile):
             self.requires("bzip2/1.0.8")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
+        # FindPackageHandleStandardArgs.cmake which can break conan generators
+        if tools.Version(self.version) < "10.34":
+            tools.replace_in_file(cmakelists, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        else:
+            tools.replace_in_file(cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(cmakelists,
+                              "RUNTIME DESTINATION bin",
+                              "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -95,6 +110,7 @@ class PCRE2Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

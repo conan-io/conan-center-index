@@ -2,6 +2,7 @@ from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class OpusFileConan(ConanFile):
     name = "opusfile"
@@ -41,6 +42,10 @@ class OpusFileConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
+    
+    def validate(self):
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Opusfile doesn't support building as shared with Visual Studio")
 
@@ -48,20 +53,17 @@ class OpusFileConan(ConanFile):
         self.requires("ogg/1.3.4")
         self.requires("opus/1.3.1")
         if self.options.http:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
 
     def build_requirements(self):
         if not self._is_msvc:
-            # FIXME: needs libtool for `autoreconf`, but the `configure.ac` file uses `m4_esyscmd` with bash code as argument.
-            # Looks like this does not work with a MSVC-built m4.
-            # self.build_requires("libtool/2.4.6")
+            self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.4")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _build_vs(self):
         includedir = os.path.abspath(os.path.join(self._source_subfolder, "include"))
@@ -96,7 +98,7 @@ class OpusFileConan(ConanFile):
             self._build_vs()
         else:
             with tools.chdir(self._source_subfolder):
-                self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
             autotools = self._configure_autotools()
             autotools.make()
 

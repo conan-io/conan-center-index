@@ -14,6 +14,9 @@ sources:
   3.17.03:
     url: "https://github.com/electronicarts/EASTL/archive/3.17.03.tar.gz"
     sha256: "50a072066e30fda364d482df6733572d8ca440a33825d81254b59a6ca9f4375a"
+  3.17.06:
+    url: "https://github.com/electronicarts/EASTL/archive/3.17.06.tar.gz"
+    sha256: "9ebeef26cdf091877ee348450d2711cd0bb60ae435309126c0adf8fec9a01ea5"
 patches:
   3.15.00:
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
@@ -28,6 +31,11 @@ patches:
     - patch_file: "patches/3.15.00-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
   3.17.03:
+    - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
+      base_path: "source_subfolder"
+  3.17.06:
     - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"

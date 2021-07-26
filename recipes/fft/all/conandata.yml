@@ -1,0 +1,4 @@
+sources:
+  "cci.20061228":
+    url: "http://www.kurims.kyoto-u.ac.jp/~ooura/fft2d.tgz"
+    sha256: "ada7e99087c4ed477bfdf11413f2ba8db8a840ba9bbf8ac94f4f3972e2a7cec9"

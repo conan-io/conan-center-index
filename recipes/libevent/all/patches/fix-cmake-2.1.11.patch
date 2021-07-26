@@ -9,34 +9,6 @@
  string(REGEX MATCH "SunOS" SOLARIS "${CMAKE_SYSTEM_NAME}")
  
  
-@@ -823,14 +823,14 @@ if (NOT EVENT__DISABLE_OPENSSL)
- 
-     set(EVENT__HAVE_OPENSSL 1)
- 
--    message(STATUS "OpenSSL include: ${OPENSSL_INCLUDE_DIR}")
--    message(STATUS "OpenSSL lib: ${OPENSSL_LIBRARIES}")
-+    message(STATUS "OpenSSL include: ${OpenSSL_INCLUDE_DIRS}")
-+    message(STATUS "OpenSSL lib: ${OpenSSL_LIBRARIES}")
- 
--    include_directories(${OPENSSL_INCLUDE_DIR})
-+    include_directories(${OpenSSL_INCLUDE_DIRS})
- 
-     list(APPEND SRC_OPENSSL bufferevent_openssl.c)
-     list(APPEND HDR_PUBLIC include/event2/bufferevent_ssl.h)
--    list(APPEND LIB_APPS ${OPENSSL_LIBRARIES})
-+    list(APPEND LIB_APPS ${OpenSSL_LIBRARIES})
- endif()
- 
- if (NOT EVENT__DISABLE_THREAD_SUPPORT)
-@@ -932,7 +932,7 @@ add_event_library(event_extra
- 
- if (NOT EVENT__DISABLE_OPENSSL)
-     add_event_library(event_openssl
--        LIBRARIES event_core_shared ${OPENSSL_LIBRARIES}
-+        LIBRARIES event_core_shared ${OpenSSL_LIBRARIES}
-         SOURCES ${SRC_OPENSSL})
- endif()
- 
 @@ -946,7 +946,6 @@ endif()
  # library exists for historical reasons; it contains the contents of
  # both libevent_core and libevent_extra. You shouldn’t use it; it may

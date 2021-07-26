@@ -1,0 +1,115 @@
+From 7cd46cc46a5742d91933eee75d2504022d2ab48f Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alejandro.colomar@exfo.com>
+Date: Sat, 29 May 2021 07:31:46 +0200
+Subject: [PATCH] add iterator include
+
+---
+ lang/c++/api/buffer/detail/BufferDetail.hh | 1 +
+ lang/c++/impl/DataFile.cc                  | 1 +
+ lang/c++/impl/Stream.cc                    | 1 +
+ lang/c++/impl/parsing/JsonCodec.cc         | 1 +
+ lang/c++/impl/parsing/ResolvingDecoder.cc  | 1 +
+ lang/c++/impl/parsing/ValidatingCodec.cc   | 1 +
+ lang/c++/test/CodecTests.cc                | 1 +
+ lang/c++/test/DataFileTests.cc             | 1 +
+ 8 files changed, 8 insertions(+)
+
+diff --git a/lang/c++/api/buffer/detail/BufferDetail.hh b/lang/c++/api/buffer/detail/BufferDetail.hh
+index 03e237ef..b0a4b4b2 100644
+--- a/lang/c++/api/buffer/detail/BufferDetail.hh
++++ b/lang/c++/api/buffer/detail/BufferDetail.hh
+@@ -30,6 +30,7 @@
+ #include <exception>
+ #include <cassert>
+ #include <deque>
++#include <iterator>
+ 
+ /**
+  * \file BufferDetail.hh
+diff --git a/lang/c++/impl/DataFile.cc b/lang/c++/impl/DataFile.cc
+index e20e6058..4c56d06b 100644
+--- a/lang/c++/impl/DataFile.cc
++++ b/lang/c++/impl/DataFile.cc
+@@ -20,6 +20,7 @@
+ #include "Compiler.hh"
+ #include "Exception.hh"
+ 
++#include <iterator>
+ #include <sstream>
+ 
+ #include <boost/random/mersenne_twister.hpp>
+diff --git a/lang/c++/impl/Stream.cc b/lang/c++/impl/Stream.cc
+index 7023f3f2..e8b2cf2f 100644
+--- a/lang/c++/impl/Stream.cc
++++ b/lang/c++/impl/Stream.cc
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include "Stream.hh"
++#include <iterator>
+ #include <vector>
+ 
+ namespace avro {
+diff --git a/lang/c++/impl/parsing/JsonCodec.cc b/lang/c++/impl/parsing/JsonCodec.cc
+index 8bca2984..eda76141 100644
+--- a/lang/c++/impl/parsing/JsonCodec.cc
++++ b/lang/c++/impl/parsing/JsonCodec.cc
+@@ -23,6 +23,7 @@
+ #include <algorithm>
+ #include <ctype.h>
+ #include <memory>
++#include <iterator>
+ #include <boost/math/special_functions/fpclassify.hpp>
+ 
+ #include "ValidatingCodec.hh"
+diff --git a/lang/c++/impl/parsing/ResolvingDecoder.cc b/lang/c++/impl/parsing/ResolvingDecoder.cc
+index f6dbacab..b4987045 100644
+--- a/lang/c++/impl/parsing/ResolvingDecoder.cc
++++ b/lang/c++/impl/parsing/ResolvingDecoder.cc
+@@ -24,6 +24,7 @@
+ #include <algorithm>
+ #include <memory>
+ #include <ctype.h>
++#include <iterator>
+ 
+ #include "ValidatingCodec.hh"
+ #include "Symbol.hh"
+diff --git a/lang/c++/impl/parsing/ValidatingCodec.cc b/lang/c++/impl/parsing/ValidatingCodec.cc
+index fdf6ef89..974427f8 100644
+--- a/lang/c++/impl/parsing/ValidatingCodec.cc
++++ b/lang/c++/impl/parsing/ValidatingCodec.cc
+@@ -22,6 +22,7 @@
+ #include <map>
+ #include <algorithm>
+ #include <memory>
++#include <iterator>
+ #include <boost/any.hpp>
+ 
+ #include "ValidSchema.hh"
+diff --git a/lang/c++/test/CodecTests.cc b/lang/c++/test/CodecTests.cc
+index a1949a05..50eef90b 100644
+--- a/lang/c++/test/CodecTests.cc
++++ b/lang/c++/test/CodecTests.cc
+@@ -30,6 +30,7 @@
+ #include <stack>
+ #include <string>
+ #include <functional>
++#include <iterator>
+ #include <boost/bind.hpp>
+ 
+ #include <boost/test/included/unit_test_framework.hpp>
+diff --git a/lang/c++/test/DataFileTests.cc b/lang/c++/test/DataFileTests.cc
+index 8c4605f4..d74802d1 100644
+--- a/lang/c++/test/DataFileTests.cc
++++ b/lang/c++/test/DataFileTests.cc
+@@ -25,6 +25,7 @@
+ 
+ #include <thread>
+ #include <chrono>
++#include <iterator>
+ 
+ #include <sstream>
+ 
+-- 
+2.32.0.rc0
+

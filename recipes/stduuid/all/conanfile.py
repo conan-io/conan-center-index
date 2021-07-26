@@ -12,7 +12,6 @@ class StduuidConan(ConanFile):
     homepage = "https://github.com/mariusbancila/stduuid"
     license = "MIT"
     settings = "os", "compiler"
-    requires = "ms-gsl/2.0.0"
 
     no_copy_source = True
     _source_subfolder = "source_subfolder"
@@ -23,6 +22,7 @@ class StduuidConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
+        self.requires("ms-gsl/2.0.0")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 

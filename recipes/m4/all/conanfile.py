@@ -102,6 +102,7 @@ class M4Conan(ConanFile):
 
     def package_id(self):
         self.info.include_build_settings()
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

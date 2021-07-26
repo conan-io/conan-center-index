@@ -2,3 +2,7 @@ sources:
   "1.6.37":
     url: "https://github.com/glennrp/libpng/archive/v1.6.37.tar.gz"
     sha256: "ca74a0dace179a8422187671aee97dd3892b53e168627145271cad5b5ac81307"
+patches:
+  "1.6.37":
+    - patch_file: "patches/CMakeLists-zlib.patch"
+      base_path: "source_subfolder"

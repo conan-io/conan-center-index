@@ -7,7 +7,7 @@ class StbConan(ConanFile):
     topics = ("conan", "stb", "single-file")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nothings/stb"
-    license = ("Public domain", "MIT")
+    license = ("Unlicense", "MIT")
     no_copy_source = True
     _source_subfolder = "source_subfolder"
 

@@ -1,7 +1,7 @@
 import os
 import re
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 
 class AprConan(ConanFile):
@@ -37,6 +37,11 @@ class AprConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+        if (self.settings.compiler == "apple-clang" and
+            tools.Version(self.settings.compiler.version) == "12" and
+            self.version == "1.7.0"):
+            raise ConanInvalidConfiguration("apr does not (yet) support apple-clang 12")
 
     @property
     def _source_subfolder(self):
@@ -115,7 +120,7 @@ class AprConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "apr-1"
-        self.cpp_info.libs = ["apr-1"]
+        self.cpp_info.libs = ["libapr-1" if self.settings.compiler == "Visual Studio" and self.options.shared else "apr-1"]
         if not self.options.shared:
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os == "Linux":

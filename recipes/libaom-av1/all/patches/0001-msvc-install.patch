@@ -1,0 +1,25 @@
+diff --git a/build/cmake/aom_install.cmake b/build/cmake/aom_install.cmake
+index cd40fe424..72b7fff07 100644
+--- a/build/cmake/aom_install.cmake
++++ b/build/cmake/aom_install.cmake
+@@ -93,4 +93,20 @@ macro(setup_aom_install_targets)
+                       "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+     endif()
+   endif()
++
++  if (MSVC)
++    if(BUILD_SHARED_LIBS)
++      set_target_properties(aom_static PROPERTIES OUTPUT_NAME aom_static)
++    endif()
++    set(AOM_INSTALL_LIBS aom)
++    install(
++      FILES ${AOM_INSTALL_INCS}
++      DESTINATION "include/aom")
++    install(
++      TARGETS ${AOM_INSTALL_LIBS}
++      RUNTIME DESTINATION bin
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib)
++  endif()
++
+ endmacro()

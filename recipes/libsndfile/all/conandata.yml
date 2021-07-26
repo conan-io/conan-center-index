@@ -1,11 +1,17 @@
 sources:
+  "1.0.31":
+    url: "https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2"
+    sha256: "a8cfb1c09ea6e90eff4ca87322d4168cdbe5035cb48717b40bf77e751cc02163"
+  "1.0.30":
+    url: "https://github.com/libsndfile/libsndfile/releases/download/v1.0.30/libsndfile-1.0.30.tar.bz2"
+    sha256: "9df273302c4fa160567f412e10cc4f76666b66281e7ba48370fb544e87e4611a"
   "1.0.29":
-    url: "https://github.com/erikd/libsndfile/archive/v1.0.29.tar.gz"
-    sha256: "c5541ccfa672b3f461ac21a38cdd37b1fe061cc62a422800b9d53649dee549ee"
-  "1.0.30":
-    url: "https://github.com/erikd/libsndfile/archive/v1.0.30.tar.gz"
-    sha256: "5942b963d1db3ed8ab1ffb85708322aa9637df76d9fe84e1dfe49a97a90e8f47"
+    url: "https://github.com/libsndfile/libsndfile/releases/download/v1.0.29/libsndfile-1.0.29.tar.bz2"
+    sha256: "2ba20d44817c8176f097ab25eff44ef0aeec9e00973def5a7174c5ae0764b22f"
 patches:
+  "1.0.31":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.31-0001-disable-static-runtime-logic.patch"
   "1.0.30":
-    - base_path: source_subfolder
-      patch_file: patches/0001-disable-static-runtime-logic.patch
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.30-0001-disable-static-runtime-logic.patch"

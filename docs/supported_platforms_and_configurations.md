@@ -1,12 +1,23 @@
 # Supported platforms and configurations
 
-The pipeline iterates a fixed list of profiles for every Conan reference, 
-it computes the packageID for each profile and discard duplicates. Then it 
-builds the packages for the remaining profiles and upload them to 
+<!-- toc -->
+## Contents
+
+  * [Introduction](#introduction)
+    * [Build Images](#build-images)
+  * [Windows](#windows)
+  * [Linux](#linux)
+  * [MacOS](#macos)<!-- endToc -->
+
+## Introduction
+
+The pipeline iterates a fixed list of profiles for every Conan reference,
+it computes the packageID for each profile and discard duplicates. Then it
+builds the packages for the remaining profiles and upload them to
 [JFrog ConanCenter](https://conan.io/center/) once the pull-request is merged.
 
-Because duplicated packageIDs are discarded, the pipeline iterates the 
-profiles always in the same order and the profiles selected to build when 
+Because duplicated packageIDs are discarded, the pipeline iterates the
+profiles always in the same order and the profiles selected to build when
 there is a duplicate follow some rules:
 
  * Static linkage (option `shared=False`) is preferred over dynamic linking.
@@ -15,17 +26,20 @@ there is a duplicate follow some rules:
  * Older compiler versions are considered first.
  * In Linux, GCC is iterated before Clang.
 
-Currently, given the following supported platforms and configurations we 
-are generating **136 different binary packages for a C++ library** 
-and **88 for a C library**. 
+Currently, given the following supported platforms and configurations we
+are generating **136 different binary packages for a C++ library**
+and **88 for a C library**.
 
+### Build Images
+
+For more information see [conan-io/conan-docker-tools](https://github.com/conan-io/conan-docker-tools)
 
 ## Windows
 
 - Compilers: Visual Studio:
-  - 2015 (14.0.25431.01 Update 3)
-  - 2017 (15.9.19+28307.1000)
-  - 2019 (16.4.4+29728.190)
+  - 2015 (19.0.24215)
+  - 2017 (19.16.27035)
+  - 2019 (19.28.29333)
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
 - Build types: Release, Debug
@@ -37,8 +51,8 @@ and **88 for a C library**.
 ## Linux
 
 - Compilers:
-  - GCC versions 4.9, 5, 6, 7, 8, 9
-  - Clang versions 3.9, 4.0, 5.0, 6.0, 7.0, 8, 9
+  - GCC versions: 10, 4.9, 5, 6, 7, 8, 9
+  - Clang versions: 10, 11, 3.9, 4.0, 5.0, 6.0, 7.0, 8, 9
 - C++ Standard Library (`libcxx`):
   - GCC compiler: `libstdc++`, `libstdc++11`
   - Clang compiler: `libstdc++`, `libc++`
@@ -50,10 +64,11 @@ and **88 for a C library**.
 
 ## MacOS
 
-- Compilers: Apple-clang versions 9.1, 10.0, 11.0 (three latest versions, we will rotate the older when a new compiler version is released)
+- Compilers: Apple-clang versions 10.0.1, 11.0.0, 12.0.0, 12.0.0 (three latest versions, we will rotate the older when a new compiler version is released)
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
 - Options:
   - Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
   - Header Only (option `"header_only": [True, False]` is only added with the value True)
+

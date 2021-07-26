@@ -17,10 +17,12 @@ class GlewConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_egl": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_egl": False
     }
 
     _cmake = None
@@ -36,6 +38,7 @@ class GlewConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_egl
 
     def configure(self):
         if self.options.shared:
@@ -55,7 +58,8 @@ class GlewConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_UTILS"] = "OFF"
+        self._cmake.definitions["BUILD_UTILS"] = False
+        self._cmake.definitions["GLEW_EGL"] = self.options.get_safe("with_egl", False)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

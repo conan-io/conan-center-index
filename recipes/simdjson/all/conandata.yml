@@ -17,3 +17,18 @@ sources:
   "0.8.0":
     url: "https://github.com/lemire/simdjson/archive/v0.8.0.tar.gz"
     sha256: "0279e453b8468b95d810aea8d27c7c17b86c94d906ebb318ba07cd05914c8ef2"
+  "0.8.2":
+    url: "https://github.com/lemire/simdjson/archive/v0.8.2.tar.gz"
+    sha256: "6540b7fe5d7cb37afdf8be487b2c6abf31a503fe6709c581d2b198b0016cc5fc"
+  "0.9.1":
+    url: "https://github.com/lemire/simdjson/archive/v0.9.1.tar.gz"
+    sha256: "05a78fc9410ae2f4febb5855ecb44defb956c3a23c73a77eb590aa7a5a8eb09d"
+  "0.9.2":
+    url: "https://github.com/lemire/simdjson/archive/v0.9.2.tar.gz"
+    sha256: "5c04b14404998a92799a737b1d9ee47268de831f32f959f6b04ed9ae385cd80f"
+  "0.9.5":
+    url: "https://github.com/lemire/simdjson/archive/v0.9.5.tar.gz"
+    sha256: "db69582fc5e4ece8c0a6a64894efeef475fe22fe466bd67195422de11b08b4d2"
+  "0.9.6":
+    url: "https://github.com/simdjson/simdjson/archive/refs/tags/v0.9.6.tar.gz"
+    sha256: "ffca979ad1f0255048db3054942788efa21f05d8f3ad8faa5aeb61e731e13d6f"

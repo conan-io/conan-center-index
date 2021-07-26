@@ -1,0 +1,4 @@
+sources:
+  "3.2.1":
+    sha256: "d4000e02102acaf259998c870e25214739d1f16f67f99cb35e4f46841399da68"
+    url: "http://downloads.sourceforge.net/freeglut/freeglut/freeglut-3.2.1.tar.gz"

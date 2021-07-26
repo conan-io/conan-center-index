@@ -1,0 +1,4 @@
+sources:
+  "0.4.1":
+    url: "https://github.com/andlabs/libui/archive/refs/tags/alpha4.1.tar.gz"
+    sha256: "f51a9e20e9f9a4c0bce1571ee37f203f42de33e3ac7359a6aac87a54798e8716"

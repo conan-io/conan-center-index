@@ -3,7 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 import stat
-import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class GmpConan(ConanFile):
@@ -55,8 +56,7 @@ class GmpConan(ConanFile):
             self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("gmp-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -69,6 +69,7 @@ class GmpConan(ConanFile):
             os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
             "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
             "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
             "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),
@@ -127,9 +128,7 @@ class GmpConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libgmp.la"))
-        if self.options.enable_cxx:
-            os.unlink(os.path.join(self.package_folder, "lib", "libgmpxx.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.components["libgmp"].libs = ["gmp"]

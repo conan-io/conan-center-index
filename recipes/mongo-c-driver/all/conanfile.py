@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 class MongoCDriverConan(ConanFile):
@@ -69,27 +69,27 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.2.1")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.8")
+            self.requires("snappy/1.1.9")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.5.0")
         if self.options.with_icu:
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -100,12 +100,6 @@ class MongoCDriverConan(ConanFile):
              "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
             {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
             {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
-            # Fix Openssl
-            {"old": "OPENSSL_FOUND", "new": "OpenSSL_FOUND"},
-            {"old": "OPENSSL_VERSION", "new": "OpenSSL_VERSION"},
-            {"old": "OPENSSL_CRYPTO_LIBRARY", "new": "OpenSSL_Crypto_LIBS"},
-            {"old": "OPENSSL_LIBRARIES", "new": "OpenSSL_LIBRARIES"},
-            {"old": "OPENSSL_INCLUDE_DIR", "new": "OpenSSL_INCLUDE_DIR"},
             # Fix LibreSSL
             {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
         ]

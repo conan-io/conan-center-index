@@ -1,5 +1,81 @@
 # Changelog
 
+### 01-June-2021 - 08:59 CEST
+
+ - [request_reviews] Add column to enable/disable review requests (any user)
+ - [testing] Use declared Conan version to run tests
+ - [internal] Pay some technical debt
+ - [internal] Simplify workflow, all packages already have properties
+
+### 24-May-2021 - 15:59 CEST
+
+- [feature] Start to crossbuild Apple M1 using two profiles approach (extra build).
+- [feature] Detect and report when a PR has missing dependencies.
+- [feature] Upgrade Conan version to 1.35.2.
+- [feature] Use only one Artifactory repository per pull request.
+
+### 13-May-2021 - 17:20 CEST
+
+- [fix] Add `--dry-build` to `conan info` commands, it will expand also the build-requires that would have
+  failed during the build stage.
+- [fix] Escape character comma when assigning properties to Artifactory.
+- [fix] Add `--force` when adding remotes.
+
+### 30-April-2021 - 13:52 CEST
+
+- [feature] Add mark in logs to indicate output has been trimmed.
+- [feature] Stop uploading packages to Bintray.
+- [job] RequestReviews: Automatically request team reviews for PRs ready for review.
+- [job] Add checks to validate infrastructure: MacOS version and AVX2 in CPU features.
+
+### 08-April-2021 - 17:01 CEST
+
+- [feature] Hide previous comments by the bot.
+- [feature] Use Artifactory API to promote packages from one repository to another.
+- [job] Add ability to specify a repository and branch for the hooks when running the export check.
+- [job] Add checks to validate infrastructure: Python version, Macos features.
+
+### 05-March-2021 - 15:28 CET
+
+- [feature] Stop generating packages for apple-clang 9.1.
+- [feature] Raise error if `ConanInvalidConfiguration` is raised from `build()` method.
+- [feature] BuildSingleReference: All PRs use the new workflow.
+- [feature] Allow modifications in the *.github* folder for GitHub bots and actions.
+- [feature] Use BuildSingleReference job to build packages (if needed) during a merge.
+- [feature] BuildSingleReference: Add build environment property to packages.
+- [feature] Tapaholes: Delete repositories after running jobs.
+- [feature] AutomaticMerge: Add information to the description of the job.
+- [feature] Add new "CleanupArtifactory" job to remove repositories of unmerged PRs.
+- [feature] PopulateProperties: Remove packages after using them to compute properties.
+- [fix] Add timeout and retry flags to all `curl` commands to avoid intermittent job failures.
+
+### 22-February-2021 - 10:42 CET
+
+- [feature] Add new profiles to generate new compiler configurations in pull requests:
+  - Linux: gcc 10, clang 10, clang 11.
+  - Macos: apple-clang 12.0.
+- [feature] Updated Conan client to the 1.33.1 version.
+- [engineering] PromotePackages: Remove packages after uploading.
+
+### 05-February-2021 - 13:20 CET
+
+- [job] New job to upgrade Conan version (Windows and Macos workers).
+- [job] New job to validate infrastructure: versions of tools, installed components,... (more checks to be added).
+- [feature] Call external DeleteRepo job to remove repositories from Artifactory after a pull-request is merged.
+- [feature] New workflow for pull-requests: use `BuildSingleReference` job and better messages (canary deployment).
+- [engineering] Refactor functions to retrieve information from GitHub API.
+
+### 27-January-2021 - 09:37 CET
+
+- Feature: PropulateProperties: Notify alert error if there are orphan packages, but keep going.
+- Feature: Capture output and exit code running Conan commands.
+- Feature: New job to delete an Artifactory repo.
+- Fix: AutomaticMerge: Fix alerts when there are no errors.
+- Fix: PopulateProperties: Do not raise if a property assignment fails, go with the next one.
+- Fix: Improve packages generated message.
+- Fix: BuildSingleReference: Add boolean parameter to configure hooks errors.
+- Fix: Handle scenario where a package doesn't have properties.
+
 ### 30-December-2020 - 13:24 CET
 
 - [feature] BuildSingleReference: Run tests for packages that already exist.
@@ -21,10 +97,10 @@
 
 ### 27-November-2020 - 10:14 CEST
 
- - [feature] More (and better) properties are stored in Artifactory for each package.
- - [feature] Use modularized jobs in CI to run parts of the pipeline.
- - [fix] Fix error affecting PRs that were blocked in the past by a team member
- - [fix] Fix issue with properties associated to new configurations
+- [feature] More (and better) properties are stored in Artifactory for each package.
+- [feature] Use modularized jobs in CI to run parts of the pipeline.
+- [fix] Fix error affecting PRs that were blocked in the past by a team member.
+- [fix] Fix issue with properties associated to new configurations.
 
 ### 18-November-2020 - 12:58 CEST
 
@@ -57,26 +133,26 @@
 
 ### 10-October-2020 - 21:20 CEST
 
- - [fix] Wait longer for Artifactory to create new repositories.
+- [fix] Wait longer for Artifactory to create new repositories.
 
 ### 10-October-2020 - 20:52 CEST
 
- - [job] TapaholesRepo: use full path to the recipe itself.
+- [job] TapaholesRepo: use full path to the recipe itself.
 
 ### 10-October-2020 - 20:36 CEST
 
- - [job] BuildSingleReference: assign properties at recipe-revision level
+- [job] BuildSingleReference: assign properties at recipe-revision level
 
 ### 10-October-2020 - 15:53 CEST
 
- - [job] TapaholesRepo: create remote repository for each run.
- - [job] BuildSingleReference: apply environment to every Conan command.
+- [job] TapaholesRepo: create remote repository for each run.
+- [job] BuildSingleReference: apply environment to every Conan command.
 
 ### 09-October-2020 - 23:43 CEST
 
- - [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
- - [fix] Use existing TMP folder in Windows.
- - [fix] BuildSingleReference: minor fixes.
+- [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
+- [fix] Use existing TMP folder in Windows.
+- [fix] BuildSingleReference: minor fixes.
 
 ### 07-October-2020 - 17:06 CEST
 

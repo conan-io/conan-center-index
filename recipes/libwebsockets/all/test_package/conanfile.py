@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["LIBWEBSOCKETS_SHARED"] = self.options["libwebsockets"].shared
         cmake.configure()
         cmake.build()
 

@@ -55,6 +55,9 @@ class PhysXConan(ConanFile):
             del self.options.enable_simd
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
             raise ConanInvalidConfiguration("Current os is not supported")
 
@@ -153,6 +156,8 @@ class PhysXConan(ConanFile):
                                   "")
 
         # No error for compiler warnings
+        tools.replace_in_file(os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
+                              "/WX", "")
         for cmake_os in ("linux", "mac", "android", "ios"):
             tools.replace_in_file(os.path.join(physx_source_cmake_dir, cmake_os, "CMakeLists.txt"),
                                   "-Werror", "")
@@ -162,6 +167,8 @@ class PhysXConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self, build_type=self._get_physx_build_type())
+
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
 
         # Options defined in physx/compiler/public/CMakeLists.txt
         self._cmake.definitions["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()

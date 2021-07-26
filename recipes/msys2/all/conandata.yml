@@ -1,34 +1,7 @@
 sources:
-  "20161025":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20161025.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20161025.tar.xz",
-      ]
-      sha256: "8bafd3d52f5a51528a8671c1cae5591b36086d6ea5b1e76e17e390965cf6768f"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20161025.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20161025.tar.xz"
+  "cci.latest":
+    url: [
+            "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20210604.tar.xz",
+            "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210604.tar.xz",
     ]
-      sha256: "bb1f1a0b35b3d96bf9c15092da8ce969a84a134f7b08811292fbc9d84d48c65d"
-  "20190524":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20190524.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20190524.tar.xz",
-    ]
-      sha256: "7a463afae8bf6ce8262f010a9a1648d056ad5cefc66d6eb69fe948c57d4ccb53"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20190524.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20190524.tar.xz",
-      ]
-      sha256: "168e156fa9f00d90a8445676c023c63be6e82f71487f4e2688ab5cb13b345383"
-  "20200517":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20200517.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz",
-    ]
-      sha256: "4dbdde708a4bcf3c056e8f4f28b1b0e7a3210ffacc6296a7d11fdaf076fd431e"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200517.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20200517.tar.xz",
-      ]
-      sha256: "c4443113497acb2d2e285d40b929fc55f33f8f669902595ecdf66a655b63dc60"
+    sha256: "ebbdb74d54f8ea1eeb1a744d50e47cc649785e9b4328435f290aca5a0a58bd4f"

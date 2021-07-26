@@ -1,6 +1,7 @@
 from conans import ConanFile, Meson, tools
-import glob
 import os
+
+required_conan_version = ">= 1.33.0"
 
 
 class PkgConfConan(ConanFile):
@@ -42,11 +43,10 @@ class PkgConfConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pkgconf-pkgconf-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.1")
+        self.build_requires("meson/0.58.1")
 
     @property
     def _sharedstatedir(self):
@@ -64,12 +64,13 @@ class PkgConfConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "shared_library(", "library(")
         if not self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                   "'-DLIBPKGCONF_EXPORT'",
                                   "'-DPKGCONFIG_IS_STATIC'")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+            "project('pkgconf', 'c',",
+            "project('pkgconf', 'c',\ndefault_options : ['c_std=gnu99'],")
 
     def build(self):
         self._patch_sources()
@@ -82,20 +83,21 @@ class PkgConfConan(ConanFile):
         meson.install()
 
         if self.settings.compiler == "Visual Studio":
-            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-                os.unlink(pdb)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
             if not self.options.shared:
                 os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-
 
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "libpkgconf"))
+        if tools.Version(self.version) >= "1.7.4":
+            self.cpp_info.includedirs.append(os.path.join("include", "pkgconf"))
+        self.cpp_info.names["pkg_config"] = "libpkgconf"
         self.cpp_info.libs = ["pkgconf"]
         if not self.options.shared:
             self.cpp_info.defines = ["PKGCONFIG_IS_STATIC"]

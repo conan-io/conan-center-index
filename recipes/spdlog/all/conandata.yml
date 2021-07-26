@@ -23,3 +23,9 @@ sources:
   "1.8.2":
     sha256: e20e6bd8f57e866eaf25a5417f0a38a116e537f1a77ac7b5409ca2b180cec0d5
     url: https://github.com/gabime/spdlog/archive/v1.8.2.tar.gz
+  "1.8.5":
+    sha256: 944d0bd7c763ac721398dca2bb0f3b5ed16f67cef36810ede5061f35a543b4b8
+    url: https://github.com/gabime/spdlog/archive/v1.8.5.tar.gz
+  "1.9.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.9.0.tar.gz"
+    sha256: "9ad181d75aaedbf47c8881e7b947a47cac3d306997e39de24dba60db633e70a7"

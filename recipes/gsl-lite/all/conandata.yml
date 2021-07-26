@@ -8,3 +8,9 @@ sources:
   "0.37.0":
     sha256: 980c8e91dd25bfaac7bfbd7151f04027fa68ff0bf652baa11de137242641e399
     url: https://github.com/gsl-lite/gsl-lite/archive/0.37.0.zip
+  "0.38.0":
+    sha256: 03c5380b08dd57c0f3d1102a1966cf5e4ec65e72daf75608ab125276b0ae17f8
+    url: https://github.com/gsl-lite/gsl-lite/archive/v0.38.0.zip
+  "0.38.1":
+    url: "https://github.com/gsl-lite/gsl-lite/archive/v0.38.1.tar.gz"
+    sha256: "c2fa2315fff312f3897958903ed4d4e027f73fa44235459ecb467ad7b7d62b18"

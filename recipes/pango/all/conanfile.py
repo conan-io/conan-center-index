@@ -5,6 +5,8 @@ import glob
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 class PangoConan(ConanFile):
     name = "pango"
     license = "LGPL-2.0-and-later"
@@ -17,7 +19,7 @@ class PangoConan(ConanFile):
     default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": "auto", "with_fontconfig": "auto"}
     generators = "pkg_config"
     _autotools = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -29,12 +31,19 @@ class PangoConan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
+    
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("this recipe does not support GCC before version 5. contributions are welcome")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -53,20 +62,20 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.57.1")
 
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
 
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.with_xft:
             self.requires("xorg/system")
         if self.options.with_cairo:
-            self.requires("cairo/1.17.2")
-        self.requires("harfbuzz/2.7.2")
-        self.requires("glib/2.67.0")
+            self.requires("cairo/1.17.4")
+        self.requires("harfbuzz/2.7.4")
+        self.requires("glib/2.67.6")
         self.requires("fribidi/1.0.9")
 
     def source(self):
@@ -134,7 +143,7 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             self.cpp_info.components['pango_'].requires.append('cairo::cairo_')
         self.cpp_info.components['pango_'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
-        
+
         if self.options.with_freetype:
             self.cpp_info.components['pangoft2'].libs = ['pangoft2-1.0']
             self.cpp_info.components['pangoft2'].names['pkg_config'] = 'pangoft2'
@@ -150,7 +159,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pangoroot'].names['pkg_config'] = 'pangoroot'
             if self.options.with_freetype:
                 self.cpp_info.components['pangoroot'].requires = ['pangoft2']
-            
+
         if self.options.with_xft:
             self.cpp_info.components['pangoxft'].libs = ['pangoxft-1.0']
             self.cpp_info.components['pangoxft'].names['pkg_config'] = 'pangoxft'

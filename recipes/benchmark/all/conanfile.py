@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class BenchmarkConan(ConanFile):
     name = "benchmark"
@@ -18,27 +20,37 @@ class BenchmarkConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_lto": [True, False],
-        "enable_exceptions": [True, False]
+        "enable_exceptions": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "enable_lto": False, "enable_exceptions": True}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_lto": False,
+        "enable_exceptions": True,
+    }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     _cmake = None
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= 12:
-                raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 12".format(self.name, self.version))
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= 12:
+            raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 12".format(self.name, self.version))
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue #639")
 
@@ -52,15 +64,12 @@ class BenchmarkConan(ConanFile):
         self._cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
         self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
 
-        # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
         if self.settings.os != "Windows":
             if tools.cross_building(self.settings):
                 self._cmake.definitions["HAVE_STD_REGEX"] = False
                 self._cmake.definitions["HAVE_POSIX_REGEX"] = False
                 self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
-            else:
-                self._cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
-            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
+            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if self.settings.compiler.get_safe("libcxx") == "libc++" else "OFF"
         else:
             self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"
 
@@ -80,8 +89,8 @@ class BenchmarkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["benchmark", "benchmark_main"]
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")

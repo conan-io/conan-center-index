@@ -1,0 +1,4 @@
+sources:
+  "2.1":
+    url: https://github.com/ryanhaining/cppitertools/archive/v2.1.tar.gz
+    sha256: f7bcd4531e37083609bb92c3f0ae03b56e7197002d0dc9c695104dcef445f2ab

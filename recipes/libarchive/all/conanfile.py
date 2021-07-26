@@ -93,7 +93,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_nettle:
             self.requires("nettle/3.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -103,7 +103,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.4.9")
 
     def validate(self):
         if self.options.with_expat and self.options.with_libxml2:
@@ -166,18 +166,10 @@ class LibarchiveConan(ConanFile):
             tools.replace_in_file(cmakelists_path, "BZIP2_FOUND", "BZip2_FOUND")
             tools.replace_in_file(cmakelists_path, "BZIP2_INCLUDE_DIR", "BZip2_INCLUDE_DIR")
             tools.replace_in_file(cmakelists_path, "BZIP2_LIBRARIES", "BZip2_LIBRARIES")
-        if self.options.with_libxml2:
-            tools.replace_in_file(cmakelists_path, "LIBXML2_FOUND", "LibXml2_FOUND")
-            tools.replace_in_file(cmakelists_path, "LIBXML2_INCLUDE_DIR", "LibXml2_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "LIBXML2_LIBRARIES", "LibXml2_LIBRARIES")
         if self.options.with_openssl:
             tools.replace_in_file(cmakelists_path,
                                   "IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES \"Darwin\")",
                                   "IF(ENABLE_OPENSSL)")
-            tools.replace_in_file(cmakelists_path, "OPENSSL_FOUND", "OpenSSL_FOUND")
-            tools.replace_in_file(cmakelists_path, "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
-            tools.replace_in_file(cmakelists_path, "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
-            tools.replace_in_file(cmakelists_path, "OPENSSL_CRYPTO_LIBRARY", "OpenSSL_LIBRARIES")
         if self.options.with_lzma:
             tools.replace_in_file(cmakelists_path, "LIBLZMA_FOUND", "LibLZMA_FOUND")
             tools.replace_in_file(cmakelists_path, "LIBLZMA_INCLUDE_DIR", "LibLZMA_INCLUDE_DIR")

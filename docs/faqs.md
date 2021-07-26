@@ -1,7 +1,29 @@
 # FAQs
 
-
 This section gathers the most common questions from the community related to packages and usability of this repository.
+
+<!-- toc -->
+## Contents
+
+  * [What is the policy on recipe name collisions?](#what-is-the-policy-on-recipe-name-collisions)
+  * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
+  * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
+  * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
+  * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
+  * [Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?](#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
+  * [Are python requires allowed in the `conan-center-index`?](#are-python-requires-allowed-in-the-conan-center-index)
+  * [What version should packages use for libraries without official releases?](#what-version-should-packages-use-for-libraries-without-official-releases)
+  * [Is the Jenkins orchestration library publicly available?](#is-the-jenkins-orchestration-library-publicly-available)
+  * [Why not x86 binaries?](#why-not-x86-binaries)
+      * [But if there are no packages available, what will the x86 validation look like?](#but-if-there-are-no-packages-available-what-will-the-x86-validation-look-like)
+  * [Why PDB files are not allowed?](#why-pdb-files-are-not-allowed)
+      * [Why is there no option for PDB, as there is for fPIC?](#why-is-there-no-option-for-pdb-as-there-is-for-fpic)
+  * [Why _installer_ packages remove some settings from their package ID?](#why-_installer_-packages-remove-some-settings-from-their-package-id)
+  * [Can I remove an option from recipe](#can-i-remove-an-option-from-recipe)
+  * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
+  * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
+  * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -12,6 +34,12 @@ This repository will try to follow the most well-known names for each of the rec
 However, if it is not possible and there is the case of a new recipe producing a name collision, the first recipe contributed will have precedence over it. Generally, recipes contributed to the repo won't change its name in order to not break users.
 
 For example, `GSL` is the name of `Guidelines Support Library` from Microsoft and `GNU Scientific Library` from GNU. Both libraries are commonly known as `gsl`, however, to disambiguate (if there is already a `gsl` package in this repo) we could use `ms-gsl` in the first case or `gnu-gsl` in the second.
+
+## What is the policy on creating packages from pre-compiled binaries?
+
+The policy is that in the general case [recipes should build packages from sources](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md), because of reproducibility and security concerns. The implication is that the sources must be publicly available, and in a format that can be consumed programmatically.
+
+Check the link for further details.
 
 ## Should reference names use `-` or `_`?
 
@@ -97,7 +125,6 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
 
-
 ## Why _installer_ packages remove some settings from their package ID?
 
 There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
@@ -106,3 +133,70 @@ There are some recipes in `conan-center-index` that provide packages that contai
 We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
 
 Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
+
+## Can I remove an option from recipe
+
+It's preferable to leave all options (ie. not removing them) because it may break other packages which require those deleted options.
+Prefer the deprecation path with a mapping from old options to new ones:
+
+* Add "deprecated" as option value
+* Set "deprecated" as default option
+* Check the option value, if the value is different from "deprecated", raise a warning
+* Remove the option from Package ID
+
+```python
+options = {"foobar": [True, False, "deprecated"]}
+default_options = {"foobar": "deprecated"}
+
+def configure(self):
+    if self.options.foobar != "deprecated":
+        self.out.warn("foobar option is deprecated, do not use anymore.")
+
+def package_id(self):
+    del self.info.options.foobar
+```
+
+This is the safest way, users will be warned of deprecation and their projects will not risk breaking.
+As aditional examples, take a look on follow recipes: [dcmtk](https://github.com/conan-io/conan-center-index/blob/5e6089005f0bb66cd16db7b0e5f37f5081c7820c/recipes/dcmtk/all/conanfile.py#L24), [gtsam](https://github.com/conan-io/conan-center-index/blob/f7f18ab050e5d97fac70932b0ba4c115a930958c/recipes/gtsam/all/conanfile.py#L40)
+and [libcurl](https://github.com/conan-io/conan-center-index/blob/f834ee1c82564199fdd9ca2f95231693c1a7136a/recipes/libcurl/all/conanfile.py#L24).
+
+However, if logic is too complex (this is subjective and depends on the Conan review team) then just remove the option.
+After one month, we will welcome a PR removing the option that was deprecated.
+
+
+## Can I split a project into an installer and library package?
+
+No. Some projects provide more than a simple library, but also applications. For those projects, both libraries and executables should be kept together under the same Conan package. In the past, we tried to separate popular projects, like Protobuf, and it proved to be a complex and hard task to be maintained, requiring custom patches to disable parts of the building. Also, with the [context](https://docs.conan.io/en/latest/systems_cross_building/cross_building.html#conan-v1-24-and-newer) feature, we can use the same package as build requirement, for the same build platform, and as a regular requirement, for the host platform, when cross-building. It's recommended using 2 profiles in that case, one for build platform (where the compilation tools are being executed) and one for host platform (where the generated binaries will run).
+
+## What license should I use for Public Domain?
+
+[The Public Domain](https://fairuse.stanford.edu/overview/public-domain/welcome/) is not a license by itselt. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) to be used instead. By default, if a project uses Public Domain and there is no offcial license listed, you should use [Unlicense](https://spdx.org/licenses/Unlicense).
+
+## Why is a `tools.check_min_cppstd` call not enough?
+
+Very often C++ projects require a minimum standard version, such as 14 or 17, in order to compile. Conan offers tools which enable checking the relevant setting is enabled and above this support for a certain version is present. Otherwise, it uses the compiler's default.
+
+```python
+def configure(self):
+    tools.check_min_cppstd(self, 14) 👈 Wrong!
+```
+
+This fails to cover the waste number of use cases for the following reasons:
+
+1. `cppstd` is not configured in the `--detect`ed profiles generated by Conan, the majority of users simply do not have this setting.
+2. A shocking number of projects override this setting within their respective build scripts, this setting does not get applied in those cases.
+3. Conan-Center-Index does **not** manage the `cppstd` setting for the compilers it supports to generate binaries.
+
+```python
+def validate(self):
+    # 👇 Correct
+    if self.settings.compiler.get_safe("cppstd"):
+        tools.check_min_cppstd(self, 14)
+```
+
+As a result, all calls to `tools.check_min_cppstd` must be guarded by a check for the setting and the only way to ensure the C++ standard is to check the compiler's version to know if it offers sufficient support. An example of this can be found [here](https://github.com/conan-io/conan/issues/8002).
+
+## What is the policy for adding older versions of a package?
+
+We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
+This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.

@@ -1,4 +1,22 @@
 sources:
   "4.3.0":
-    sha256: 97eb98343da636c314edccb08173e25cea13b155233ebb4d74e065d55f791364
-    url: https://github.com/boostorg/build/archive/4.3.0.tar.gz
+    sha256: 138c90b66edb0a28e225705a2cbf897a8cef5f87e68befc748f8e6808e21628a
+    url: https://github.com/bfgroup/b2/archive/4.3.0.tar.gz
+  "4.4.0":
+    sha256: fa4079370644110604895ff08057fe2eff3289bcffdaec55fcdf43ea33ff25a8
+    url: https://github.com/bfgroup/b2/archive/4.4.0.tar.gz
+  "4.4.1":
+    sha256: 4fb15abd994968a24868c13502f080c4a28b20f59831acf9eabd64a3b257554f
+    url: https://github.com/bfgroup/b2/archive/4.4.1.tar.gz
+  "4.4.2":
+    sha256: 575e59b89191a6a6780d7165cae3222b8a7a1e7d5e8165b3524eefe32fc3de46
+    url: https://github.com/bfgroup/b2/archive/4.4.2.tar.gz
+  "4.5.0":
+    url: "https://github.com/bfgroup/b2/archive/4.5.0.tar.gz"
+    sha256: "39c3b51bf9c5f32b1c249d2d405274976b166e1bdca1fc5205b595f1cb5dbac3"
+  "4.6.0":
+    url: "https://github.com/bfgroup/b2/archive/4.6.0.tar.gz"
+    sha256: "3a308e0f79a039d8a9495b375f3292f5163000c19caa79c5687e4cb5b1938b49"
+  "4.6.1":
+    url: "https://github.com/bfgroup/b2/archive/4.6.1.tar.gz"
+    sha256: "a3f3323eaeb2c27d7a3ca86842665c6c3bc3d93cc626ba362ae6d0c5a7bfbe2c"

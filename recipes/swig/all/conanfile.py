@@ -10,7 +10,7 @@ class SwigConan(ConanFile):
     homepage = "http://www.swig.org"
     license = "GPL-3.0-or-later"
     topics = ("conan", "swig", "python", "java", "wrapper")
-    exports_sources = "patches/**"
+    exports_sources = "patches/**", "cmake/*"
     settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
@@ -23,34 +23,45 @@ class SwigConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.1")
-        self.build_requires("automake/1.16.2")
+        self.build_requires("automake/1.16.3")
 
     def requirements(self):
-        self.requires("pcre/8.41")
+        self.requires("pcre/8.44")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("swig-rel-{}".format(self.version), self._source_subfolder)
 
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
     @contextmanager
     def _build_context(self):
         env = {}
         if self.settings.compiler != "Visual Studio":
-            env["YACC"] = self.deps_user_info["bison"].YACC
+            env["YACC"] = self._user_info_build["bison"].YACC
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env.update({
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} link".format(self.deps_user_info["automake"].ar_lib),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "AR": "{} link".format(self._user_info_build["automake"].ar_lib),
                     "LD": "link",
                 })
                 with tools.environment_append(env):
@@ -109,6 +120,7 @@ class SwigConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
+        self.copy("*", src="cmake", dst=self._module_subfolder)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
@@ -117,10 +129,19 @@ class SwigConan(ConanFile):
     def _swiglibdir(self):
         return os.path.join(self.package_folder, "bin", "swiglib").replace("\\", "/")
 
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
+
     def package_info(self):
-        # FIXME: Don't set cmake_find_package name because conan cmake generators do not define SWIG_EXECUTABLE
-        # self.cpp_info.names["cmake_find_package"] = "SWIG"
-        # self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
+        self.cpp_info.names["cmake_find_package"] = "SWIG"
+        self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
+        self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

@@ -4,6 +4,12 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(redis++ REQUIRED)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if(BUILDING_SHARED)
+    target_link_libraries(${PROJECT_NAME} redis++::redis++)
+else()
+    target_link_libraries(${PROJECT_NAME} redis++::redis++_static)
+endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)

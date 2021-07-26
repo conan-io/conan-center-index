@@ -4,10 +4,11 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["USE_SHARED"] = self.options["libjpeg-turbo"].shared
         cmake.configure()
         cmake.build()
 

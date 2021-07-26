@@ -1,0 +1,20 @@
+sources:
+  "1.2.182":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.182.tar.gz"
+    sha256: "0d1f9fde9d21642526e9baa55d30364c95035c4fe3c6db96836631991b44dd90"
+  "1.2.172":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.172.tar.gz"
+    sha256: "713dcb73c73194d17251fcd9cff62e5831d4ec30dac2efcf6440595016368ddb"
+  "1.2.170.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.170.0.tar.gz"
+    sha256: "08c125987d4f6b086fcf952be7dce630b677fc943b336030178737bb1eb2ed49"
+  "1.2.162.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.162.0.tar.gz"
+    sha256: "f8f5ec2485e7fdba3f58c1cde5a25145ece1c6a686c91ba4016b28c0af3f21dd"
+  "1.2.154.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
+    sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
+patches:
+  "1.2.154.0":
+    - patch_file: "patches/fix-mingw.patch"
+      base_path: "source_subfolder"

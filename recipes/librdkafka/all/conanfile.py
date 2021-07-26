@@ -55,9 +55,9 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.5.0")
         if self.options.ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
 
@@ -99,13 +99,15 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.run_environment(self):
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSES.txt", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
+        with tools.run_environment(self):
+            cmake = self._configure_cmake()
+            cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))

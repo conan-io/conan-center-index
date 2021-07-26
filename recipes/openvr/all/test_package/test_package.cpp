@@ -1,5 +1,6 @@
+#include <openvr.h>
+
 #include <cstdlib>
-#include <openvr/openvr.h>
 
 int main()
 {

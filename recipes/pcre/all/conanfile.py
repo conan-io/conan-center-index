@@ -10,8 +10,7 @@ class PCREConan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +24,8 @@ class PCREConan(ConanFile):
         "with_zlib": [True, False],
         "with_jit": [True, False],
         "with_utf": [True, False],
-        "with_unicode_properties": [True, False]
+        "with_unicode_properties": [True, False],
+        "with_stack_for_recursion": [True, False]
     }
     default_options = {
         "shared": False,
@@ -39,9 +39,12 @@ class PCREConan(ConanFile):
         "with_zlib": True,
         "with_jit": False,
         "with_utf": False,
-        "with_unicode_properties": False
+        "with_unicode_properties": False,
+        "with_stack_for_recursion": True
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -85,16 +88,23 @@ class PCREConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def patch_cmake(self):
-        """Patch CMake file to avoid man and share during install stage
-        """
+    def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # Avoid man and share during install stage
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
+        # Do not override CMAKE_MODULE_PATH and do not add ${PROJECT_SOURCE_DIR}/cmake
+        # because it contains a custom FindPackageHandleStandardArgs.cmake which
+        # can break conan generators
+        tools.replace_in_file(
+            cmake_file, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
+        # Avoid CMP0006 error (macos bundle)
+        tools.replace_in_file(
+            cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -113,13 +123,14 @@ class PCREConan(ConanFile):
         self._cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
         self._cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
         self._cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
+        self._cmake.definitions["PCRE_NO_RECURSE"] = not self.options.with_stack_for_recursion
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        self.patch_cmake()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -127,6 +138,7 @@ class PCREConan(ConanFile):
         self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PCRE"

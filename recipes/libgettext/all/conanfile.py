@@ -1,9 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
-import shutil
-import glob
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
+
 
 class GetTextConan(ConanFile):
     name = "libgettext"
@@ -15,8 +14,8 @@ class GetTextConan(ConanFile):
     deprecated = "gettext"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"]}
+    default_options = {"shared": False, "fPIC": True, "threads": "auto"}
 
     @property
     def _source_subfolder(self):
@@ -44,21 +43,21 @@ class GetTextConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if(self.options.threads == "auto"):
+            self.options.threads = { "Solaris": "solaris", "Windows": "windows" }.get(str(self.settings.os), "posix")
+
     def requirements(self):
         self.requires("libiconv/1.16")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and \
-               tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20200517")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self._is_msvc:
             self.build_requires("automake/1.16.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "gettext-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -75,6 +74,7 @@ class GetTextConan(ConanFile):
                 "--disable-csharp",
                 "--disable-libasprintf",
                 "--disable-curses",
+                "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
                 "--with-libiconv-prefix=%s" % libiconv_prefix]
         build = None
         host = None
@@ -118,13 +118,13 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*.so*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*.dylib*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
-        os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
-                  os.path.join(self.package_folder, "include", "libintl.h"))
+        tools.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
+                     os.path.join(self.package_folder, "include", "libintl.h"))
         if self._is_msvc and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "gnuintl.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["gnuintl"]
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(['CoreFoundation'])
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.frameworks.append("CoreFoundation")

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.7)
 project(sqlite3 C)
 
 include(conanbuildinfo.cmake)
@@ -21,6 +21,11 @@ option(ENABLE_UNLOCK_NOTIFY "Enable support for the unlock notify API")
 option(ENABLE_DEFAULT_SECURE_DELETE "Turns on secure deletion by default")
 option(USE_ALLOCA "The alloca() memory allocator will be used in a few situations where it is appropriate.")
 option(OMIT_LOAD_EXTENSION "Omits the entire extension loading mechanism from SQLite")
+if(SQLITE3_VERSION VERSION_GREATER_EQUAL "3.35.0")
+    option(ENABLE_MATH_FUNCTIONS "Enables the built-in SQL math functions" ON)
+else()
+    set(ENABLE_MATH_FUNCTIONS OFF)
+endif()
 option(HAVE_FDATASYNC "Use fdatasync() instead of fsync() on unix systems")
 option(HAVE_GMTIME_R "Use the threadsafe gmtime_r()")
 option(HAVE_LOCALTIME_R "Use the threadsafe localtime_r()")
@@ -29,6 +34,7 @@ option(HAVE_STRERROR_R "Use strerror_r()")
 option(HAVE_USLEEP "Use usleep() system call to implement the xSleep method")
 option(DISABLE_GETHOSTUUID "Disable function gethostuuid")
 set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or BLOB")
+option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 
 add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
 if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
@@ -79,6 +85,9 @@ endif()
 if(OMIT_LOAD_EXTENSION)
     target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_OMIT_LOAD_EXTENSION)
 endif()
+if(ENABLE_MATH_FUNCTIONS)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_MATH_FUNCTIONS)
+endif()
 if(HAVE_FDATASYNC)
     target_compile_definitions(${PROJECT_NAME}  PRIVATE HAVE_FDATASYNC)
 endif()
@@ -104,6 +113,9 @@ target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_THREADSAFE=${THREADSA
 if(MAX_BLOB_SIZE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_MAX_LENGTH=${MAX_BLOB_SIZE})
 endif()
+if(DISABLE_DEFAULT_VFS)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_OS_OTHER=1)
+endif()
 
 if(THREADSAFE)
     find_package(Threads REQUIRED)
@@ -114,24 +126,33 @@ if(NOT OMIT_LOAD_EXTENSION)
     target_link_libraries(${PROJECT_NAME}  PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
-if(ENABLE_FTS5)
+if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
     find_library(MATH_LIBRARY m)
     if(MATH_LIBRARY)
         target_link_libraries(${PROJECT_NAME}  PRIVATE ${MATH_LIBRARY})
     endif()
 endif()
 
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(DIRECTORY source_subfolder/ DESTINATION include
+install(DIRECTORY source_subfolder/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
     add_executable(sqlite3-bin source_subfolder/shell.c)
     target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
     set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
-    install(TARGETS sqlite3-bin RUNTIME DESTINATION bin)
+    include(CheckSymbolExists)
+    check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
+    if(NOT HAVE_SYSTEM)
+        target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
+    endif()
+    install(TARGETS sqlite3-bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
 endif()

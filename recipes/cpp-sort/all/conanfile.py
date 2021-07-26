@@ -1,7 +1,8 @@
-import os
-
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CppSortConan(ConanFile):
@@ -27,10 +28,11 @@ class CppSortConan(ConanFile):
         return {
             "apple-clang": "9.4",
             "clang": "3.8",
-            "gcc": "5.5"
+            "gcc": "5.5",
+            "Visual Studio": "16"
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
@@ -50,9 +52,8 @@ class CppSortConan(ConanFile):
             self.output.warn(msg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         # Install with CMake
@@ -71,6 +72,12 @@ class CppSortConan(ConanFile):
 
         # Remove CMake config files (only files in lib)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "cpp-sort"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpp-sort"
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags = ["/permissive-"]
 
     def package_id(self):
         self.info.header_only()

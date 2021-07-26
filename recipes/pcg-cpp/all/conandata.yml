@@ -1,0 +1,4 @@
+sources:
+  "cci.20210406":
+    url: "https://github.com/imneme/pcg-cpp/archive/ffd522e7188bef30a00c74dc7eb9de5faff90092.tar.gz"
+    sha256: "81e4ab1936971627e6cc49fba279d0891b657d4397fc7940f6e751a37e4fdc94"

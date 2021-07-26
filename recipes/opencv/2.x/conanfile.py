@@ -1,8 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class OpenCVConan(ConanFile):
@@ -13,25 +14,32 @@ class OpenCVConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "with_jpeg": [True, False],
-               "with_png": [True, False],
-               "with_tiff": [True, False],
-               "with_jasper": [True, False],
-               "with_openexr": [True, False],
-               "with_eigen": [True, False],
-               "with_tbb": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "with_jpeg": True,
-                       "with_png": True,
-                       "with_tiff": True,
-                       "with_jasper": True,
-                       "with_openexr": True,
-                       "with_eigen": True,
-                       "with_tbb": False}
-    exports_sources = "CMakeLists.txt"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_jpeg": [True, False],
+        "with_png": [True, False],
+        "with_tiff": [True, False],
+        "with_jasper": [True, False],
+        "with_openexr": [True, False],
+        "with_eigen": [True, False],
+        "with_tbb": [True, False],
+        "with_gtk": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_jpeg": True,
+        "with_png": True,
+        "with_tiff": True,
+        "with_jasper": True,
+        "with_openexr": True,
+        "with_eigen": True,
+        "with_tbb": False,
+        "with_gtk": True,
+    }
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -46,6 +54,8 @@ class OpenCVConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.with_gtk
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -54,10 +64,6 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self.settings.os == "Linux":
-            self.build_requires("gtk/system")
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg:
@@ -65,21 +71,25 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.25")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.2")
+            self.requires("openexr/2.5.5")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.7")
+            self.requires("eigen/3.3.9")
         if self.options.with_tbb:
-            self.requires("tbb/2020.2")
+            self.requires("tbb/2020.3")
+        if self.options.get_safe("with_gtk"):
+            self.requires("gtk/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("opencv-{}".format(self.version), self._source_subfolder)
 
     def _patch_opencv(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
         # allow to find conan-supplied OpenEXR
         if self.options.with_openexr:
@@ -150,6 +160,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENCL"] = False
         self._cmake.definitions["WITH_CUDA"] = False
 
+        self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
         self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
         self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
@@ -178,41 +189,33 @@ class OpenCVConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "staticlib"))
         tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
+        )
 
-    def package_info(self):
-        version = self.version.split(".")[:-1]  # last version number is not used
-        version = "".join(version) if self.settings.os == "Windows" else ""
-        debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
 
-        def get_lib_name(module):
-            return "opencv_%s%s%s" % (module, version, debug)
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
 
-        def add_components(components):
-            # TODO: OpenCV doesn't use cmake target namespace
-            for component in components:
-                conan_component = component["target"]
-                cmake_target = component["target"]
-                lib_name = get_lib_name(component["lib"])
-                requires = component["requires"]
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[conan_component].libs = [lib_name]
-                self.cpp_info.components[conan_component].requires = requires
-                if self.settings.os == "Linux":
-                    self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
 
-                # CMake components names
-                conan_component_alias = conan_component + "_alias"
-                cmake_component = component["lib"]
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
-                self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                self.cpp_info.components[conan_component_alias].includedirs = []
-                self.cpp_info.components[conan_component_alias].libdirs = []
-                self.cpp_info.components[conan_component_alias].resdirs = []
-                self.cpp_info.components[conan_component_alias].bindirs = []
-                self.cpp_info.components[conan_component_alias].frameworkdirs = []
-
+    @property
+    def _opencv_components(self):
         def imageformats_deps():
             components = []
             if self.options.with_jasper:
@@ -233,14 +236,14 @@ class OpenCVConan(ConanFile):
         def tbb():
             return ["tbb::tbb"] if self.options.with_tbb else []
 
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
+        def gtk():
+            return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
-        add_components([
+        opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + tbb()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + tbb()},
             {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + tbb()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + tbb() + imageformats_deps()},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + tbb() + gtk() + imageformats_deps()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui"] + tbb()},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"] + tbb()},
             {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + tbb()},
@@ -255,7 +258,51 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_superres",   "lib": "superres",   "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()},
             {"target": "opencv_ts",         "lib": "ts",         "requires": ["opencv_core", "opencv_flann", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_video"] + tbb()},
             {"target": "opencv_videostab",  "lib": "videostab",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()}
-        ])
+        ]
+        return opencv_components
+
+    def package_info(self):
+        version = self.version.split(".")[:-1]  # last version number is not used
+        version = "".join(version) if self.settings.os == "Windows" else ""
+        debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
+
+        def get_lib_name(module):
+            return "opencv_%s%s%s" % (module, version, debug)
+
+        def add_components(components):
+            for component in components:
+                conan_component = component["target"]
+                cmake_target = component["target"]
+                lib_name = get_lib_name(component["lib"])
+                requires = component["requires"]
+                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
+                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[conan_component].builddirs.append(self._module_subfolder)
+                module_rel_path = os.path.join(self._module_subfolder, self._module_file)
+                self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [module_rel_path]
+                self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [module_rel_path]
+                self.cpp_info.components[conan_component].libs = [lib_name]
+                self.cpp_info.components[conan_component].requires = requires
+                if self.settings.os == "Linux":
+                    self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+
+                # CMake components names
+                cmake_component = component["lib"]
+                if cmake_component != cmake_target:
+                    conan_component_alias = conan_component + "_alias"
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                    self.cpp_info.components[conan_component_alias].includedirs = []
+                    self.cpp_info.components[conan_component_alias].libdirs = []
+                    self.cpp_info.components[conan_component_alias].resdirs = []
+                    self.cpp_info.components[conan_component_alias].bindirs = []
+                    self.cpp_info.components[conan_component_alias].frameworkdirs = []
+
+        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
+
+        add_components(self._opencv_components)
 
         if self.settings.os == "Windows":
             self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]

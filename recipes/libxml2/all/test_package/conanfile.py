@@ -1,10 +1,10 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +12,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_package")
-        arg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "books.xml"))
-        bin_arg_path = "%s %s" % (bin_path, arg_path)
-        self.run(bin_arg_path, run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            xml_path = os.path.join(self.source_folder, "books.xml")
+            bin_arg_path = "%s %s" % (bin_path, xml_path)
+            self.run(bin_arg_path, run_environment=True)

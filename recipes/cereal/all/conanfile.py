@@ -1,6 +1,8 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class CerealConan(ConanFile):
@@ -35,25 +37,25 @@ class CerealConan(ConanFile):
         cmake.configure()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        self._create_module_official_cmake_targets(
-            os.path.join(self.package_folder, self._module_folder, self._module_file),
-            [{"official": "cereal", "namespaced": "cereal::cereal"}]
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            {"cereal": "cereal::cereal"}
         )
 
     @staticmethod
-    def _create_module_official_cmake_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(module_file, targets):
         content = ""
-        for target in targets:
-            content += (
-                "if(TARGET {namespaced} AND NOT TARGET {official})\n"
-                "    add_library({official} INTERFACE IMPORTED)\n"
-                "    target_link_libraries({official} INTERFACE {namespaced})\n"
-                "endif()\n"
-            ).format(official=target["official"], namespaced=target["namespaced"])
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
 
     @property
-    def _module_folder(self):
+    def _module_subfolder(self):
         return os.path.join("lib", "cmake")
 
     @property
@@ -61,8 +63,10 @@ class CerealConan(ConanFile):
         return "conan-official-{}-targets.cmake".format(self.name)
 
     def package_info(self):
-        self.cpp_info.builddirs = [self._module_folder]
-        self.cpp_info.build_modules = [os.path.join(self._module_folder, self._module_file)]
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        module_target_rel_path = os.path.join(self._module_subfolder, self._module_file)
+        self.cpp_info.build_modules["cmake_find_package"] = [module_target_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_target_rel_path]
         if self.options.thread_safe:
             self.cpp_info.defines = ["CEREAL_THREAD_SAFE=1"]
             if self.settings.os == "Linux":
