@@ -430,7 +430,7 @@ class OpenCVConan(ConanFile):
 
         def parallel():
             if self.options.parallel:
-                return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
+                return ["tbb::tbb"] if self.options.parallel == "tbb" else []
             return []
 
         def quirc():
