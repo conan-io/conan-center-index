@@ -34,7 +34,7 @@ libcurl/7.64.1
 libjpeg/9d.dssl1
 libjpeg-turbo/2.0.4
 libpng/1.6.37
-libpq/11.5
+libpq/11.5.dssl1_components
 libwebp/1.1.0
 libxml2/2.9.9
 libxslt/1.1.33
