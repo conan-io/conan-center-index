@@ -9,7 +9,7 @@ class RoaringConan(ConanFile):
     name = "roaring"
 
     description = "Portable Roaring bitmaps in C and C++"
-    topics = ("conan", "bitset", "compression", "index", "format")
+    topics = ("bitset", "compression", "index", "format")
 
     homepage = "https://github.com/RoaringBitmap/CRoaring"
     url = "https://github.com/conan-io/conan-center-index"
