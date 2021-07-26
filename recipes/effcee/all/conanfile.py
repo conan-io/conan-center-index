@@ -6,7 +6,7 @@ class EffceeConan(ConanFile):
     name = "effcee"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/effcee/"
-    description = "Zstandard - Fast real-time compression algorithm"
+    description = "a C++ library for stateful pattern matching of strings, inspired by LLVM's FileCheck"
     topics = ("conan", "effcee", "strings", "algorithm", "matcher")
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
