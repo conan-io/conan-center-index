@@ -20,7 +20,6 @@ class SQLiteCppConan(ConanFile):
                        "fPIC": True,
                        "lint": False
                        }
-    requires = ("sqlite3/3.32.3")
 
     @property
     def _source_subfolder(self):
@@ -37,6 +36,9 @@ class SQLiteCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("sqlite3/3.36.0")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
