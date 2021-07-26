@@ -12,8 +12,7 @@ class SQLiteCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SRombauts/SQLiteCpp"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,6 +24,10 @@ class SQLiteCppConan(ConanFile):
         "fPIC": True,
         "lint": False,
     }
+
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -66,11 +69,13 @@ class SQLiteCppConan(ConanFile):
                 "")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SQLITECPP_INTERNAL_SQLITE"] = False
-        cmake.definitions["SQLITECPP_RUN_CPPLINT"] = self.options.lint
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SQLITECPP_INTERNAL_SQLITE"] = False
+        self._cmake.definitions["SQLITECPP_RUN_CPPLINT"] = self.options.lint
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch_sources()
