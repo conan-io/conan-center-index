@@ -195,7 +195,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
         if self.options.with_openjpeg:
             # FIXME: openjpeg's cmake_find_package should provide these variables
-            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = self.requires["openjpeg"].ref.version.split(".", 1)[0]
+            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = tools.Version(self.requires["openjpeg"].ref.version).major
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_LIBCURL"] = self.options.with_libcurl
 
