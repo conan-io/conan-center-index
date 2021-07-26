@@ -85,11 +85,9 @@ class DateConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        if self.options.header_only:
-            self.output.info("Header only package, skipping build")
-            return
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses",
@@ -103,28 +101,25 @@ class DateConan(ConanFile):
             self.copy(pattern="iso_week.h", dst=dst, src=src)
             self.copy(pattern="julian.h", dst=dst, src=src)
             self.copy(pattern="islamic.h", dst=dst, src=src)
-            return
-
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-        if self.options.header_only:
-            return
+        if not self.options.header_only:
+            self.cpp_info.libs = tools.collect_libs(self)
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append("pthread")
 
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            if self.options.use_system_tz_db and not self.settings.os == "Windows":
+                use_os_tzdb = 1
+            else:
+                use_os_tzdb = 0
 
-        if self.options.use_system_tz_db and not self.settings.os == "Windows":
-            use_os_tzdb = 1
-        else:
-            use_os_tzdb = 0
+            defines = ["USE_OS_TZDB={}".format(use_os_tzdb)]
+            if self.settings.os == "Windows" and self.options.shared:
+                defines.append("DATE_USE_DLL=1")
 
-        defines = ["USE_OS_TZDB={}".format(use_os_tzdb)]
-        if self.settings.os == "Windows" and self.options.shared:
-            defines.append("DATE_USE_DLL=1")
-
-        self.cpp_info.defines.extend(defines)
+            self.cpp_info.defines.extend(defines)
