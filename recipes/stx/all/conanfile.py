@@ -11,24 +11,26 @@ class STXConan(ConanFile):
     license = 'MIT'
     url = 'https://github.com/conan-io/conan-center-index'
     description = 'C++17 & C++ 20 error-handling and utility extensions.'
-    generators = 'cmake', 'cmake_find_package'
     topics = 'error-handling', 'result', 'option', 'backtrace', 'panic'
+
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
+        'fPIC': [True, False],
         'backtrace': [True, False],
         'panic_handler': [None, 'default', 'backtrace'],
         'shared': [True, False],
-        'fPIC': [True, False],
         'visible_panic_hook': [True, False],
     }
     default_options = {
+        'fPIC': True,
         'backtrace': False,
         'panic_handler': 'default',
         'shared': False,
-        'fPIC': True,
         'visible_panic_hook': False,
     }
+
     exports_sources = ['CMakeLists.txt', 'patches/*']
+    generators = 'cmake', 'cmake_find_package'
 
     @property
     def _source_subfolder(self):
