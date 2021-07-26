@@ -45,3 +45,6 @@ class FFNvEncHeaders(ConanFile):
         autotools.install(args=["PREFIX={}".format(self.package_folder)])
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def package_info(self):
+        self.cpp_info.names["pkg_config"] = "ffnvcodec"
