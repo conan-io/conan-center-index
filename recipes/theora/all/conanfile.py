@@ -16,20 +16,12 @@ class TheoraConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = (
-        "ogg/1.3.4",
-        "vorbis/1.3.7"
-    )
-    _source_subfolder = "source_subfolder"
+
     _autotools = None
 
     @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
-    def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("gnu-config/cci.20201022")
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -40,6 +32,14 @@ class TheoraConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("ogg/1.3.4")
+        self.requires("vorbis/1.3.7")
+
+    def build_requirements(self):
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
@@ -64,6 +64,10 @@ class TheoraConan(ConanFile):
                 configure_args.extend(['--disable-shared', '--enable-static'])
             self._autotools.configure(args=configure_args)
         return self._autotools
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def build(self):
         if self.settings.compiler == 'Visual Studio':
