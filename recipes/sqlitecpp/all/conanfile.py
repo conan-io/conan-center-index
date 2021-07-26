@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class SQLiteCppConan(ConanFile):
     name = "sqlitecpp"
     description = "SQLiteCpp is a smart and easy to use C++ sqlite3 wrapper"
-    topics = ("conan", "sqlitecpp", "sqlite3")
+    topics = ("sqlitecpp", "sqlite3")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SRombauts/SQLiteCpp"
     license = "MIT"
