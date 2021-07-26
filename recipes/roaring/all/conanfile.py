@@ -5,7 +5,7 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class ConanRecipe(ConanFile):
+class RoaringConan(ConanFile):
     name = "roaring"
 
     description = "Portable Roaring bitmaps in C and C++"
