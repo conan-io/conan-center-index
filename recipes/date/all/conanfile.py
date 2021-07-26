@@ -118,6 +118,9 @@ class DateConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["date-tz"].system_libs.append("pthread")
 
+            if not self.options.use_system_tz_db:
+                self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
+
             if self.options.use_system_tz_db and not self.settings.os == "Windows":
                 use_os_tzdb = 1
             else:
