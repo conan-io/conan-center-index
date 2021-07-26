@@ -56,7 +56,6 @@ class CeleroConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CELERO_COMPILE_DYNAMIC_LIBRARIES"] = self.options.shared
-        self._cmake.definitions["VCPKG_CRT_LINKAGE"] = "dynamic" if self.options.shared else "static"
         self._cmake.definitions["CELERO_COMPILE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["CELERO_ENABLE_EXPERIMENTS"] = False
         self._cmake.definitions["CELERO_ENABLE_FOLDERS"] = False
