@@ -44,6 +44,8 @@ class DateConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+            self.options.use_system_tz_db = True
 
     def configure(self):
         if self.options.shared:
