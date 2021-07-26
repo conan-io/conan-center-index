@@ -3,6 +3,8 @@ import shutil
 import stat
 from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class TheoraConan(ConanFile):
     name = "theora"
@@ -47,7 +49,7 @@ class TheoraConan(ConanFile):
         filename = url[url.rfind("/") + 1:]
         tools.download(url, filename)
         tools.check_sha256(filename, source["sha256"])
-        
+
         shutil.move(filename, os.path.join(self._source_subfolder, 'lib', filename))
 
     def _configure_autotools(self):
