@@ -57,6 +57,29 @@ class TheoraConan(ConanFile):
 
         shutil.move(filename, os.path.join(self._source_subfolder, 'lib', filename))
 
+    def _build_msvc(self):
+        def format_libs(libs):
+            return " ".join([l + ".lib" for l in libs])
+
+        project = "libtheora"
+        config = "dynamic" if self.options.shared else "static"
+        vcvproj_dir = os.path.join(self._source_subfolder, "win32", "VS2008", project)
+        vcvproj = "{}_{}.vcproj".format(project, config)
+
+        # fix hard-coded ogg names
+        vcvproj_path = os.path.join(vcvproj_dir, vcvproj)
+        if self.options.shared:
+            tools.replace_in_file(vcvproj_path,
+                                  "libogg.lib",
+                                  format_libs(self.deps_cpp_info["ogg"].libs))
+        if "MT" in self.settings.compiler.runtime:
+            tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
+            tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
+
+        with tools.chdir(vcvproj_dir):
+            msbuild = MSBuild(self)
+            msbuild.build(vcvproj, platforms={"x86": "Win32", "x86_64": "x64"})
+
     def _configure_autotools(self):
         if not self._autotools:
             permission = stat.S_IMODE(os.lstat("configure").st_mode)
@@ -85,41 +108,6 @@ class TheoraConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.make()
-
-    def _build_msvc(self):
-        # error C2491: 'rint': definition of dllimport function not allowed
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'examples', 'encoder_example.c'),
-                              'static double rint(double x)',
-                              'static double rint_(double x)')
-
-        def format_libs(libs):
-            return ' '.join([l + '.lib' for l in libs])
-
-        # fix hard-coded library names
-        project = 'libtheora'
-        config = "dynamic" if self.options.shared else "static"
-
-        vcvproj = '%s_%s.vcproj' % (project, config)
-        vcvproj_path = os.path.join(self._source_subfolder, 'win32', 'VS2008', project, vcvproj)
-        tools.replace_in_file(vcvproj_path,
-                                'libogg.lib',
-                                format_libs(self.deps_cpp_info['ogg'].libs), strict=False)
-        tools.replace_in_file(vcvproj_path,
-                                'libogg_static.lib',
-                                format_libs(self.deps_cpp_info['ogg'].libs), strict=False)
-        if "MT" in self.settings.compiler.runtime:
-            tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
-            tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
-
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32', 'VS2008', 'libtheora')):
-            proj = 'libtheora_dynamic' if self.options.shared else 'libtheora_static'
-            msbuild = MSBuild(self)
-            try:
-                # upgrade .vcproj
-                msbuild.build(proj + '.vcproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
-            except:
-                # build .vcxproj
-                msbuild.build(proj + '.vcxproj', platforms={'x86': 'Win32', 'x86_64': 'x64'})
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
