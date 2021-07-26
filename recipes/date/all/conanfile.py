@@ -48,14 +48,16 @@ class DateConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
 
     def requirements(self):
         if self.options.header_only:
             return
         if not self.options.use_system_tz_db:
             self.requires("libcurl/7.69.1")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def package_id(self):
         if self.options.header_only:
