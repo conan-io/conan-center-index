@@ -18,12 +18,12 @@ class SQLiteCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "lint": [True, False],
+        "lint": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "lint": False,
+        "lint": "deprecated",
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -45,6 +45,8 @@ class SQLiteCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.lint != "deprecated":
+            self.output.warn("lint option is deprecated, do not use anymore")
 
     def requirements(self):
         self.requires("sqlite3/3.36.0")
@@ -54,6 +56,9 @@ class SQLiteCppConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
+
+    def package_id(self):
+        del self.info.options.lint
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -76,7 +81,7 @@ class SQLiteCppConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SQLITECPP_INTERNAL_SQLITE"] = False
-        self._cmake.definitions["SQLITECPP_RUN_CPPLINT"] = self.options.lint
+        self._cmake.definitions["SQLITECPP_RUN_CPPLINT"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
