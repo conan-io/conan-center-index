@@ -35,7 +35,6 @@ class TheoraConan(ConanFile):
 
     def requirements(self):
         self.requires("ogg/1.3.4")
-        self.requires("vorbis/1.3.7")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
@@ -102,12 +101,6 @@ class TheoraConan(ConanFile):
         tools.replace_in_file(vcvproj_path,
                                 'libogg_static.lib',
                                 format_libs(self.deps_cpp_info['ogg'].libs), strict=False)
-        tools.replace_in_file(vcvproj_path,
-                                'libvorbis.lib',
-                                format_libs(self.deps_cpp_info['vorbis'].libs), strict=False)
-        tools.replace_in_file(vcvproj_path,
-                                'libvorbis_static.lib',
-                                format_libs(self.deps_cpp_info['vorbis'].libs), strict=False)
         if "MT" in self.settings.compiler.runtime:
             tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcvproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
