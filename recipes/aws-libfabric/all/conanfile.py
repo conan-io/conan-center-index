@@ -24,7 +24,7 @@ class LibfabricConan(ConanFile):
         }
     }
     default_options = {
-        **{ p: False for p in _providers if p not in ["efa", ] },
+        **{ p: False for p in _providers },
         **{
             "shared": False,
             "fPIC": True,
@@ -34,7 +34,6 @@ class LibfabricConan(ConanFile):
             "with_bgq_mr": "basic"
         }
     }
-    build_requires = "autoconf/2.71", "automake/1.16.3", "libtool/2.4.6"
 
     @property
     def _source_subfolder(self):
@@ -42,15 +41,18 @@ class LibfabricConan(ConanFile):
 
     _autotools = None
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def config_options(self):
-        if self.settings.os == "Windows":
+        if tools.os_info.is_windows:
             del self.options.fPIC
+        if tools.os_info.is_linux:
+            self.options.efa = True
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.efa == None:
-            self.options.efa = self.settings.os in ["Linux", ]
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -69,7 +71,7 @@ class LibfabricConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
         yes_no_dl = lambda v: {"True": "yes", "False": "no", "shared": "dl"}[str(v)]
