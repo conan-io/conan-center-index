@@ -607,3 +607,5 @@ class OpenCVConan(ConanFile):
             self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
         elif self.settings.os == "iOS":
             self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
+        if self.options.parallel == "openmp":
+            self.cpp_info.components["opencv_core"].system_libs.append("openmp")
