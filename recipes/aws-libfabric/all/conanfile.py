@@ -45,9 +45,9 @@ class LibfabricConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def config_options(self):
-        if tools.os_info.is_windows:
+        if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.os_info.is_linux:
+        elif self.settings.os == "Linux":
             self.options.efa = True
 
     def configure(self):
