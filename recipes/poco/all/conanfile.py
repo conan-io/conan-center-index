@@ -144,12 +144,12 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
-        self.requires("pcre/8.44")
+        self.requires("pcre/8.45")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
             self.requires("expat/2.4.1")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
@@ -162,7 +162,7 @@ class PocoConan(ConanFile):
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/13.2")
+            self.requires("libpq/13.3")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
