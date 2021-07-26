@@ -9,7 +9,8 @@ class GeotransConan(ConanFile):
     license = (
         "NGA GEOTRANS ToS (https://earth-info.nga.mil/php/download.php?file=wgs-terms)"
     )
-    url = "https://earth-info.nga.mil/"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://earth-info.nga.mil/"
     description = "MSP GEOTRANS is the NGA and DOD approved coordinate converter and datum translator."
     topics = (
         "geotrans",
@@ -23,7 +24,7 @@ class GeotransConan(ConanFile):
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
     _cmake = None
@@ -74,7 +75,6 @@ class GeotransConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.name = "geotrans"
         self.cpp_info.names["cmake_find_package"] = "geotrans"
         self.cpp_info.names["cmake_find_package_multi"] = "geotrans"
         self.cpp_info.components["dtcc"].names["cmake_find_package"] = "dtcc"
