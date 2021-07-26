@@ -106,10 +106,17 @@ class DateConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "date"
+        self.cpp_info.names["cmake_find_package_multi"] = "date"
+
+        # date-tz
         if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.components["date-tz"].names["cmake_find_package"] = "date-tz"
+            self.cpp_info.components["date-tz"].names["cmake_find_package_multi"] = "date-tz"
+            lib_name = "{}tz".format("date-" if tools.Version(self.version) >= "3.0.0" else "")
+            self.cpp_info.components["date-tz"].libs = [lib_name]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.append("pthread")
+                self.cpp_info.components["date-tz"].system_libs.append("pthread")
 
             if self.options.use_system_tz_db and not self.settings.os == "Windows":
                 use_os_tzdb = 1
@@ -120,4 +127,4 @@ class DateConan(ConanFile):
             if self.settings.os == "Windows" and self.options.shared:
                 defines.append("DATE_USE_DLL=1")
 
-            self.cpp_info.defines.extend(defines)
+            self.cpp_info.components["date-tz"].defines.extend(defines)
