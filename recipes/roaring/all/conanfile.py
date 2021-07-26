@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -47,6 +48,9 @@ class ConanRecipe(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+        if tools.Version(self.version) >= "3.0.0":
+            if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11":
+                raise ConanInvalidConfiguration("roaring >= 3.0.0 requires at least apple-clang 11 to support runtime dispatching.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
