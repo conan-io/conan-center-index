@@ -42,7 +42,11 @@ class STXConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def configure(self):
+    def requirements(self):
+        if self.options.backtrace:
+            self.requires('abseil/20200923.1')
+
+    def validate(self):
         if (self.options.panic_handler == 'backtrace' and
                 not self.options.backtrace):
             raise ConanInvalidConfiguration(
@@ -95,10 +99,6 @@ class STXConan(ConanFile):
                 'shared library build does not work on windows with '
                 'STX version <= 1.0.1'
             )
-
-    def requirements(self):
-        if self.options.backtrace:
-            self.requires('abseil/20200923.1')
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version],
