@@ -27,11 +27,11 @@ class STXConan(ConanFile):
         'visible_panic_hook': False,
     }
     exports_sources = ['CMakeLists.txt', 'patches/*']
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
@@ -81,10 +81,10 @@ class STXConan(ConanFile):
                 'which clang < 10 with libc++ lacks'
             )
 
-        if compiler == 'apple-clang':
+        if compiler == 'apple-clang' and compiler_version < 10:
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which apple-clang with libc++ lacks'
+                'which apple-clang < 10 with libc++ lacks'
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
