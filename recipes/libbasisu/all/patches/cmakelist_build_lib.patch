@@ -22,24 +22,31 @@
  message("Initial ZSTD=${ZSTD}")
  
  if( NOT CMAKE_BUILD_TYPE )
-@@ -23,10 +23,10 @@ else()
- 	message("Building 32-bit")
- endif()
+@@ -17,16 +17,10 @@ endif()
  
--if (SSE)
--	message("SSE enabled")
+ message( ${PROJECT_NAME} " build type: " ${CMAKE_BUILD_TYPE} )
+ 
+-if (BUILD_X64)
+-	message("Building 64-bit")
 +if (SSE4)
 +	message("SSE4.1 enabled")
  else()
+-	message("Building 32-bit")
+-endif()
+-
+-if (SSE)
+-	message("SSE enabled")
+-else()
 -	message("SSE disabled")
 +	message("SSE4.1 disabled")
  endif()
  
  if (ZSTD)
-@@ -43,37 +43,24 @@ if (NOT MSVC)
+@@ -42,38 +36,25 @@ if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
  
-    set(CMAKE_CXX_FLAGS -std=c++11)
+-   set(CMAKE_CXX_FLAGS -std=c++11)
 -   set(GCC_COMPILE_FLAGS "-fvisibility=hidden -fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
 -
 -   if (NOT BUILD_X64)
@@ -49,6 +56,7 @@
 -   if (EMSCRIPTEN)
 -	  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
 -	  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
++   # set(CMAKE_CXX_FLAGS -D_GLIBCXX_USE_CXX11_ABI=0) # -std=c++11)
 +   set(GCC_COMPILE_FLAGS "-fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
  
 -	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS}")
@@ -80,7 +88,7 @@
     endif()
  
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${GCC_COMPILE_FLAGS}")
-@@ -84,7 +71,7 @@ if (NOT MSVC)
+@@ -84,7 +65,7 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_COMPILE_FLAGS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_COMPILE_FLAGS} -D_DEBUG")
  else()
@@ -89,7 +97,7 @@
  		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1")
  		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=1")
  	else()
-@@ -94,7 +81,6 @@ else()
+@@ -94,7 +75,6 @@ else()
  endif()
  
  set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
@@ -97,7 +105,7 @@
  	encoder/basisu_backend.cpp
  	encoder/basisu_basis_file.cpp
  	encoder/basisu_comp.cpp
-@@ -115,42 +101,24 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
+@@ -115,42 +95,27 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
  	encoder/jpgd.cpp
  	encoder/basisu_kernels_sse.cpp
  	transcoder/basisu_transcoder.cpp
@@ -129,8 +137,14 @@
  
 -if (NOT MSVC)
 -   target_link_libraries(basisu m pthread)
--endif()
--
++if (WIN32)
++	set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++else()
++	set(THREADS_PREFER_PTHREAD_FLAG ON)
++	find_package(Threads REQUIRED)
++	target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads m)
+ endif()
+ 
 -if (NOT EMSCRIPTEN)
 -	install(TARGETS basisu DESTINATION bin)
 -	
@@ -143,10 +157,6 @@
 -			endif()
 -		endif()
 -	endif()
-+if (WIN32)
-+	set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-+else()
-+	set(THREADS_PREFER_PTHREAD_FLAG ON)
-+	find_package(Threads REQUIRED)
-+	target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads m)
- endif()
+-endif()
++target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
++set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
