@@ -82,15 +82,13 @@ class TheoraConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            permission = stat.S_IMODE(os.lstat("configure").st_mode)
-            os.chmod("configure", (permission | stat.S_IEXEC))
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             configure_args = ['--disable-examples']
             if self.options.shared:
                 configure_args.extend(['--disable-static', '--enable-shared'])
             else:
                 configure_args.extend(['--disable-shared', '--enable-static'])
-            self._autotools.configure(args=configure_args)
+            self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     @property
@@ -105,9 +103,11 @@ class TheoraConan(ConanFile):
                         os.path.join(self._source_subfolder, "config.sub"))
             shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                         os.path.join(self._source_subfolder, "config.guess"))
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.make()
+            configure = os.path.join(self._source_subfolder, "configure")
+            permission = stat.S_IMODE(os.lstat(configure).st_mode)
+            os.chmod(configure, (permission | stat.S_IEXEC))
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -118,9 +118,8 @@ class TheoraConan(ConanFile):
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
         else:
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+            autotools = self._configure_autotools()
+            autotools.install()
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
