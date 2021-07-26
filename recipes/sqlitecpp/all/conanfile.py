@@ -3,6 +3,8 @@ from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class SQLiteCppConan(ConanFile):
     name = "sqlitecpp"
@@ -42,9 +44,8 @@ class SQLiteCppConan(ConanFile):
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SQLiteCpp-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_clang(self):
         if self.settings.compiler == "clang" and \
