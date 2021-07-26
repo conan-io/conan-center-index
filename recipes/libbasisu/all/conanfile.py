@@ -18,20 +18,17 @@ class LibBasisUniversalConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
-        "sse": [True, False],
-        "x64": [True, False],
-        "zstd": [True, False],
-        "no_iterator_debug_level": [True, False]
+        "use_sse4": [True, False],
+        "with_zstd": [True, False],
+        "custom_iterator_debug_level": [True, False]
     }
     default_options = {
         "fPIC": True,
         "shared": False,
-        "sse": True,
-        "x64": True,
-        "zstd": True,
-        "no_iterator_debug_level": True
+        "use_sse4": True,
+        "with_zstd": True,
+        "custom_iterator_debug_level": False
     }
-    short_paths = True
 
     _cmake = None
 
@@ -46,18 +43,26 @@ class LibBasisUniversalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler != "Visual Studio":
+            del self.options.custom_iterator_debug_level
 
-    def _minimal_compiler_version(self) -> bool:
-        version = tools.Version(self.settings.compiler.version.value)
-        return (self.settings.compiler == "Visual Studio" and version >= "15") \
-            or (self.settings.compiler == "gcc" and version >= "5.4") \
-            or (self.settings.compiler == "clang" and version >= "3.9") \
-            or (self.settings.compiler == "apple-clang" and version >= "10")
+    def _minimum_compiler_version(self) -> bool:
+        return {
+            "Visual Studio": "15",
+            "gcc": "5.4",
+            "clang": "3.9",
+            "apple-clang": "10"
+        }
  
-    def configure(self):
-        if not self._minimal_compiler_version():
-            raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 14 with shared:True".format(self.name, self.version))
+    def validate(self):
+        min_version = self._minimum_compiler_version().get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        elif tools.Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration("{} {} does not support compiler with version {} {}, minimum supported compiler version is {} ".format(self.name, self.version, self.settings.compiler, self.settings.compiler.version, min_version))
 
+    def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
@@ -67,25 +72,17 @@ class LibBasisUniversalConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_X64"] = self.options.x64
-        self._cmake.definitions["SSE"] = self.options.sse
-        self._cmake.definitions["ZSTD"] = self.options.zstd
-        self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = self.options.no_iterator_debug_level
-
+        self._cmake.definitions["SSE4"] = self.options.use_sse4
+        self._cmake.definitions["ZSTD"] = self.options.with_zstd
+        custom_iterator_debug_level = self.options.get_safe("custom_iterator_debug_level", default="False")
+        self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = not custom_iterator_debug_level
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
-    def _clear_vs_project_files(self):
-        tools.remove_files_by_mask(self._source_subfolder, "*.sln")
-        tools.remove_files_by_mask(self._source_subfolder, "*.vcxproj")
-        tools.remove_files_by_mask(self._source_subfolder, "*.vcxproj.filters")
-        
+ 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        self._clear_vs_project_files()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -93,12 +90,16 @@ class LibBasisUniversalConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=os.path.join("include", self.name, "transcoder"), src=os.path.join(self._source_subfolder, "transcoder"))
         self.copy("*.h", dst=os.path.join("include", self.name, "encoder"), src=os.path.join(self._source_subfolder, "encoder"))
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="*.so", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib*", dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = [self.name]
+        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = self.name
         self.cpp_info.names["cmake_find_package_multi"] = self.name
         self.cpp_info.includedirs = ["include", os.path.join("include", self.name)]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m", "pthread"]
