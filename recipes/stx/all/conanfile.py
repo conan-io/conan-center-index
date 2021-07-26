@@ -15,17 +15,17 @@ class STXConan(ConanFile):
 
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
+        'shared': [True, False],
         'fPIC': [True, False],
         'backtrace': [True, False],
         'panic_handler': [None, 'default', 'backtrace'],
-        'shared': [True, False],
         'visible_panic_hook': [True, False],
     }
     default_options = {
+        'shared': False,
         'fPIC': True,
         'backtrace': False,
         'panic_handler': 'default',
-        'shared': False,
         'visible_panic_hook': False,
     }
 
@@ -42,6 +42,10 @@ class STXConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == 'Windows':
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
