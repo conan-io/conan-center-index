@@ -52,7 +52,7 @@ protoc/3.9.1.dssl1
 signalr-qt/0.1.dssl1
 qt/5.14.1.dssl1
 qtwebkit/5.212.0-alpha4.dssl1
-sqlite3/3.31.0
+sqlite3/3.31.0.dssl1_components
 sip/4.19.3.dssl1
 snappy/1.1.8
 xz_utils/5.2.4
