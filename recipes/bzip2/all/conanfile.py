@@ -59,8 +59,7 @@ class Bzip2Conan(ConanFile):
         cmake_toolchain.generate()
 
     def build(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
+        tools.files.apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
