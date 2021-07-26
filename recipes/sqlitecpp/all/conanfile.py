@@ -92,5 +92,5 @@ class SQLiteCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "SQLiteCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "SQLiteCpp"
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
