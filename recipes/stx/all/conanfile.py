@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class STXConan(ConanFile):
     name = 'stx'
@@ -99,8 +101,8 @@ class STXConan(ConanFile):
             self.requires('abseil/20200923.1')
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        tools.rename('STX-{}'.format(self.version), dst=self._source_subfolder)
+        tools.get(**self.conan_data['sources'][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
