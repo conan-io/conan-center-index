@@ -49,5 +49,5 @@ patches:
       # patch_source: https://www.postgresql.org/message-id/attachment/45881/0002-Use-return-instead-of-exit-in-configure.patch
       # patch_type: portability
   "13.3":
-    - patch_file: "patches/13.3/001-Disable-thread-safety-check-under-thread-sanitizer.patch"
+    - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
       base_path: "source_subfolder"
