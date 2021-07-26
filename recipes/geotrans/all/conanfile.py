@@ -32,10 +32,6 @@ class GeotransConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,20 +49,23 @@ class GeotransConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(
-            source_folder=self._source_subfolder
-        )
+        self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
-
 
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("*.txt", dst="licenses", src=os.path.join(self._source_subfolder, "GEOTRANS3", "docs"))
+        self.copy(
+            "*.txt",
+            dst="licenses",
+            src=os.path.join(self._source_subfolder, "GEOTRANS3", "docs"),
+        )
         self.copy("*", dst="res", src=os.path.join(self._source_subfolder, "data"))
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "CCS", "src"))
+        self.copy(
+            "*.h", dst="include", src=os.path.join(self._source_subfolder, "CCS", "src")
+        )
         self.copy("*.lib", dst="lib", src="lib", keep_path=False)
         self.copy("*.dll", dst="bin", src="lib", keep_path=False)
         self.copy("*.so", dst="lib", src="lib", keep_path=False)
@@ -75,6 +74,22 @@ class GeotransConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.cxxflags = ["-pthread"]
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = [path[0] for path in os.walk("include")]
+        self.cpp_info.name = "geotrans"
+        self.cpp_info.names["cmake_find_package"] = "geotrans"
+        self.cpp_info.names["cmake_find_package_multi"] = "geotrans"
+        self.cpp_info.components["dtcc"].names["cmake_find_package"] = "dtcc"
+        self.cpp_info.components["dtcc"].names["cmake_find_package_multi"] = "dtcc"
+        self.cpp_info.components["dtcc"].libs = ["MSPdtcc"]
+        self.cpp_info.components["dtcc"].includedirs = [
+            path[0]
+            for path in os.walk(os.path.join("include", "dtcc", "CoordinateSystems"))
+        ]
+        self.cpp_info.components["dtcc"].cxxflags = ["-pthread"]
+        self.cpp_info.components["ccs"].names["cmake_find_package"] = "ccs"
+        self.cpp_info.components["ccs"].names["cmake_find_package_multi"] = "ccs"
+        self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
+        self.cpp_info.components["ccs"].requires = ["dtcc"]
+        self.cpp_info.components["ccs"].includedirs = [
+            path[0] for path in os.walk("include")
+        ]
+        self.cpp_info.components["ccs"].cxxflags = ["-pthread"]

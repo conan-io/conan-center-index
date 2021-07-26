@@ -3,14 +3,14 @@ project(PackageTest CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+find_package(geotrans REQUIRED COMPONENTS dtcc ccs)
+#
+set(EXTERNAL_LIBS 
+    geotrans::dtcc
+    geotrans::ccs
+   )
+
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-
-
-# CTest is a testing tool that can be used to test your project.
-# enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+target_link_libraries(example ${EXTERNAL_LIBS})

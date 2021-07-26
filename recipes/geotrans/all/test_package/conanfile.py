@@ -4,8 +4,11 @@ from conans import ConanFile, CMake, tools
 
 class GeotransTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    default_options = {"geotrans:shared": True}
+    generators = (
+        "cmake",
+        "cmake_find_package",
+        "cmake_paths",
+    )
 
     def build(self):
         cmake = CMake(self)
