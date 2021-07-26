@@ -6,3 +6,7 @@ patches:
   "1.0.0":
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0003-no-hardcoded-libcxx.patch"
