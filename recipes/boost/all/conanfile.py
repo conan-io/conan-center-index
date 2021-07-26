@@ -958,6 +958,16 @@ class BoostConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             flags.append("cxxflags=%s" % cppstd_flag(self.settings))
 
+        if self.settings.compiler.sanitizer:
+          setting = str(self.settings.compiler.sanitizer)
+          setting = setting.replace('Behavior', '')  # UndefinedBehavior => Undefined
+          if setting != "AddressUndefined":
+            sanitizers = [setting.lower()]
+          else:
+            sanitizers = ['address', 'undefined']
+          for sanitizer in sanitizers:
+            flags.append("%s-sanitizer=on" % sanitizer)
+
         # LDFLAGS
         link_flags = []
 
