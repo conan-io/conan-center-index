@@ -1446,7 +1446,10 @@ class BoostConan(ConanFile):
                         continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
-                    libs.append(add_libprefix(name.format(**libformatdata)) + libsuffix)
+                    new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
+                    if self.options.namespace != 'boost':
+                        new_name = new_name.replace('boost_', str(self.options.namespace) + '_')
+                    libs.append(new_name)
                 return libs
 
             for module in self._dependencies["dependencies"].keys():
