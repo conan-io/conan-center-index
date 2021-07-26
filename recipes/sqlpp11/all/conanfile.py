@@ -16,7 +16,7 @@ class Sqlpp11Conan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("date/2.4.1")
+        self.requires("date/3.0.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
