@@ -89,7 +89,7 @@ class LibjpegTurboConan(ConanFile):
                self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility
 
     def build_requirements(self):
-        if self.options.get_safe("SIMD"):
+        if self.options.get_safe("SIMD") and self.settings.arch in ["x86", "x86_64"]:
             self.build_requires("nasm/2.14")
 
     def source(self):
