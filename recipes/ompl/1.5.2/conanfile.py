@@ -24,7 +24,7 @@ class ConanOmpl(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {"shared": [True, False], "run_tests": [
         True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "run_tests": False, "fPIC": True}
+    default_options = {"shared": False, "run_tests": False, "fPIC": True}
 
     def configure(self):
         if self.options.shared:
