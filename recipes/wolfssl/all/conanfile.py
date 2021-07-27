@@ -4,6 +4,9 @@ from contextlib import contextmanager
 import os
 
 
+required_conan_version = ">=1.33.0"
+
+
 class WolfSSLConan(ConanFile):
     name = "wolfssl"
     license = "GPL-2.0-or-later"
@@ -65,12 +68,12 @@ class WolfSSLConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}-stable".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
