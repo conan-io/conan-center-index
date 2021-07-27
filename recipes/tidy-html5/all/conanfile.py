@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class TidyHtml5Conan(ConanFile):
@@ -9,15 +11,21 @@ class TidyHtml5Conan(ConanFile):
     homepage = "http://www.html-tidy.org"
     description = "The granddaddy of HTML tools, with support for modern standards"
     topics = ("html", "parser", "xml", "tools")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "support_localizations": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "support_localizations": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "support_localizations": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "support_localizations": True,
+    }
+
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -28,8 +36,9 @@ class TidyHtml5Conan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -37,9 +46,8 @@ class TidyHtml5Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -67,24 +75,14 @@ class TidyHtml5Conan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=os.path.join(self._source_subfolder, 'README'))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
-        #FIXME: tidy does not install under a CMake namespace
-        self.cpp_info.names["cmake_find_package"] = "tidy"
-        self.cpp_info.names["cmake_find_package_multi"] = "tidy"
         self.cpp_info.names["pkg_config"] = "tidy"
-
-        suffix = 'd' if self.settings.compiler == 'Visual Studio' and self.settings.build_type == 'Debug' else ''
-        if self.options.shared:
-            self.cpp_info.components["tidy-share"].names["cmake_find_package"] = "tidy-share"
-            self.cpp_info.components["tidy-share"].names["cmake_find_package_multi"] = "tidy-share"
-            self.cpp_info.components["tidy-share"].libs = ["tidy" + suffix]
-        else:
-            self.cpp_info.components["tidy-static"].names["cmake_find_package"] = "tidy-static"
-            self.cpp_info.components["tidy-static"].names["cmake_find_package_multi"] = "tidy-static"
-            self.cpp_info.components["tidy-static"].libs = ["tidys" + suffix]
-            self.cpp_info.components["tidy-static"].defines.append('TIDY_STATIC')
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        suffix += "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["tidy" + suffix]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("TIDY_STATIC")
