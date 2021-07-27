@@ -101,12 +101,12 @@ class UnivalueConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "univalue.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "univalue.lib"))
 
     def package_info(self):
-        suffix = ".dll" if self.options.shared and self.settings.os == "Windows" else ""
-        if self.settings.compiler == "Visual Studio":
-            suffix += ".lib"
-        self.cpp_info.libs = ["univalue{}".format(suffix)]
+        self.cpp_info.libs = ["univalue"]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
 
