@@ -13,32 +13,37 @@ class LibjpegTurboConan(ConanFile):
     homepage = "https://libjpeg-turbo.org"
     license = "BSD-3-Clause, Zlib"
     provides = "libjpeg"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "SIMD": [True, False],
+        "arithmetic_encoder": [True, False],
+        "arithmetic_decoder": [True, False],
+        "libjpeg7_compatibility": [True, False],
+        "libjpeg8_compatibility": [True, False],
+        "mem_src_dst": [True, False],
+        "turbojpeg": [True, False],
+        "java": [True, False],
+        "enable12bit": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "SIMD": True,
+        "arithmetic_encoder": True,
+        "arithmetic_decoder": True,
+        "libjpeg7_compatibility": True,
+        "libjpeg8_compatibility": True,
+        "mem_src_dst": True,
+        "turbojpeg": True,
+        "java": False,
+        "enable12bit": False,
+    }
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "SIMD": [True, False],
-               "arithmetic_encoder": [True, False],
-               "arithmetic_decoder": [True, False],
-               "libjpeg7_compatibility": [True, False],
-               "libjpeg8_compatibility": [True, False],
-               "mem_src_dst": [True, False],
-               "turbojpeg": [True, False],
-               "java": [True, False],
-               "enable12bit": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "SIMD": True,
-                       "arithmetic_encoder": True,
-                       "arithmetic_decoder": True,
-                       "libjpeg7_compatibility": True,
-                       "libjpeg8_compatibility": True,
-                       "mem_src_dst": True,
-                       "turbojpeg": True,
-                       "java": False,
-                       "enable12bit": False}
-
     _cmake = None
 
     @property
