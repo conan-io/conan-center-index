@@ -40,12 +40,14 @@ class TsilConan(ConanFile):
         return "TSIL_SIZE_DOUBLE" if self.options.size == "double" else "TSIL_SIZE_LONG"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("TSIL does not support {}".format(self.settings.compiler))
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("TSIL does not support {}".format(self.settings.compiler))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
