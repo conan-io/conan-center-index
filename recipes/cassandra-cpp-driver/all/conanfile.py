@@ -44,7 +44,7 @@ class CassandraCppDriverConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-            
+
         self._cmake = CMake(self)
         self._cmake.definitions["VERSION"] = self.version
         self._cmake.definitions["CASS_BUILD_EXAMPLES"] = False
@@ -75,7 +75,7 @@ class CassandraCppDriverConan(ConanFile):
 
         # FIXME: To use kerberos, its conan package is needed. Uncomment this when kerberos conan package is ready.
         # self._cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
-        
+
         if self.settings.os == "Linux":
             self._cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
 
@@ -92,9 +92,6 @@ class CassandraCppDriverConan(ConanFile):
             del self.options.use_timerfd
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos is unsupported")
-
         if self.options.use_atomic == "boost":
             # Compilation error on Linux
             if self.settings.os == "Linux":
@@ -124,9 +121,15 @@ class CassandraCppDriverConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("cpp-driver-{}".format(self.version), self._source_subfolder)
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\"",
+                              "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\" OR \"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"AppleClang\"")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
