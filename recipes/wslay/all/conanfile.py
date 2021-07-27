@@ -67,6 +67,6 @@ class WslayConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["wslay_shared" if self.options.shared else "wslay"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
