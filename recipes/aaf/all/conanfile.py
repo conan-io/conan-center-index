@@ -79,4 +79,4 @@ class AafConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.libs = ["dl"]
+            self.cpp_info.system_libs = ["dl"]
