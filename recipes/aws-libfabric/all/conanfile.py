@@ -73,7 +73,8 @@ class LibfabricConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
-            self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+
         yes_no_dl = lambda v: {"True": "yes", "False": "no", "shared": "dl"}[str(v)]
         args = [
             "--with-bgq-progress={}".format(self.options.with_bgq_progress),
