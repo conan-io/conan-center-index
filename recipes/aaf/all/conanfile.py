@@ -37,11 +37,15 @@ class AafConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.requires("libuuid/1.0.3")
+
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
             raise ConanInvalidConfiguration("Static runtime not supported")
-        if self.settings.os in ("FreeBSD", "Linux"):
-            raise ConanInvalidConfiguration("Linux is not (yet) supported by this recipe")
+        # if self.settings.os in ("FreeBSD", "Linux"):
+        #     raise ConanInvalidConfiguration("Linux is not (yet) supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -74,3 +78,5 @@ class AafConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.libs = ["dl"]
