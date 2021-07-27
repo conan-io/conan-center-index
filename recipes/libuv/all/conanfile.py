@@ -73,7 +73,7 @@ class libuvConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["uv" if self.options.shared else "uv_a"]
         if self.options.shared:
             self.cpp_info.defines = ["USING_UV_SHARED=1"]
         if self.settings.os == "Linux":
