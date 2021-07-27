@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
 required_conan_version = ">=1.33.0"
@@ -153,8 +152,7 @@ class LibjpegTurboConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         # remove binaries and pdb files
         for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
-            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
-                os.remove(bin_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), pattern_to_remove)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"
