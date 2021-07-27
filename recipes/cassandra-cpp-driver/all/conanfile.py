@@ -52,17 +52,6 @@ class CassandraCppDriverConan(ConanFile):
             del self.options.fPIC
             del self.options.use_timerfd
 
-    def configure(self):
-        if self.options.use_atomic == "boost":
-            # Compilation error on Linux
-            if self.settings.os == "Linux":
-                raise ConanInvalidConfiguration(
-                    "Boost.Atomic is not supported on Linux at the moment")
-
-        if self.options.with_kerberos:
-            raise ConanInvalidConfiguration(
-                "Kerberos is not supported at the moment")
-
     def requirements(self):
         self.requires("libuv/1.41.1")
         self.requires("http_parser/2.9.4")
@@ -77,6 +66,17 @@ class CassandraCppDriverConan(ConanFile):
 
         if self.options.use_atomic == "boost":
             self.requires("boost/1.76.0")
+
+    def validate(self):
+        if self.options.use_atomic == "boost":
+            # Compilation error on Linux
+            if self.settings.os == "Linux":
+                raise ConanInvalidConfiguration(
+                    "Boost.Atomic is not supported on Linux at the moment")
+
+        if self.options.with_kerberos:
+            raise ConanInvalidConfiguration(
+                "Kerberos is not supported at the moment")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
