@@ -1,0 +1,4 @@
+sources:
+  "1.5.2":
+    url: "https://github.com/ompl/ompl/archive/refs/tags/1.5.2.zip"
+    sha256: "1b9f25339e014c448334cb8bd5d7d52d1dcf457227cc2dde4c2210d1d494258d"
