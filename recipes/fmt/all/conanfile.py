@@ -13,7 +13,7 @@ class FmtConan(ConanFile):
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
     topics = ("fmt", "format", "iostream", "printf")
-    url = "https://github.com/conan-io/conan-center-index"
+    url = "https://github.com/conan-io/conan-center-index/"
     license = "MIT"
     exports_sources = ["patches/**"]
     settings = "os", "compiler", "build_type", "arch"
