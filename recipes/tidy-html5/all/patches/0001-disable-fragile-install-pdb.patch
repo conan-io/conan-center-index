@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -416,7 +416,7 @@ install(TARGETS ${name}
+         LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+         )
+ install( FILES ${HFILES} DESTINATION ${INCLUDE_INSTALL_DIR} )
+-if(MSVC)
++if(0)
+     # install(FILES $<TARGET_PDB_FILE:${name}> DESTINATION lib OPTIONAL)
+     INSTALL(FILES ${PROJECT_BINARY_DIR}/${name}.dir/Debug/${name}.pdb
+     DESTINATION lib CONFIGURATIONS Debug )
