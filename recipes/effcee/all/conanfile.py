@@ -2,11 +2,15 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
+
 class EffceeConan(ConanFile):
     name = "effcee"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/effcee/"
-    description = "Zstandard - Fast real-time compression algorithm"
+    description = "Effcee is a C++ library for stateful pattern matching" \
+                  " of strings, inspired by LLVM's FileCheck"
     topics = ("conan", "effcee", "strings", "algorithm", "matcher")
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -36,8 +40,11 @@ class EffceeConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+        if self.settings.compiler == "Visual Studio" and \
+                "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared"
+                                            " library with MT runtime is not"
+                                            " supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -49,9 +56,9 @@ class EffceeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
         self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
-        self._cmake.definitions["RE2_BUILD_TESTING"] = False
         if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = (self.settings.compiler.runtime in ["MD", "MDd"])
+            self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
+                (self.settings.compiler.runtime in ["MD", "MDd"])
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -61,7 +68,7 @@ class EffceeConan(ConanFile):
             tools.patch(**patch)
 
     def requirements(self):
-        self.requires('re2/20210601')
+        self.requires("re2/20210601")
 
     def build(self):
         self._patch_sources()
@@ -69,7 +76,8 @@ class EffceeConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
