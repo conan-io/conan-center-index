@@ -20,7 +20,7 @@ class CassandraCppDriverConan(ConanFile):
         "with_openssl": [True, False],
         "with_zlib": [True, False],
         "with_kerberos": [True, False],
-        "use_timerfd": [True, False]
+        "use_timerfd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,7 +30,7 @@ class CassandraCppDriverConan(ConanFile):
         "with_openssl": True,
         "with_zlib": True,
         "with_kerberos": False,
-        "use_timerfd": True
+        "use_timerfd": True,
     }
 
     generators = "cmake"
@@ -40,47 +40,6 @@ class CassandraCppDriverConan(ConanFile):
     ]
 
     _cmake = None
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["VERSION"] = self.version
-        self._cmake.definitions["CASS_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
-        self._cmake.definitions["CASS_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["CASS_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["CASS_BUILD_TESTS"] = False
-        self._cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
-        self._cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
-        self._cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
-        self._cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
-
-        if self.options.use_atomic == "boost":
-            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
-            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
-
-        elif self.options.use_atomic == "std":
-            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
-            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = True
-        else:
-            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
-            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
-
-        self._cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["CASS_USE_STATIC_LIBS"] = False
-        self._cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["CASS_USE_LIBSSH2"] = False
-
-        # FIXME: To use kerberos, its conan package is needed. Uncomment this when kerberos conan package is ready.
-        # self._cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
-
-        if self.settings.os == "Linux":
-            self._cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
-
-        self._cmake.configure()
-        return self._cmake
 
     @property
     def _source_subfolder(self):
@@ -127,6 +86,47 @@ class CassandraCppDriverConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\"",
                               "\"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"Clang\" OR \"${CMAKE_CXX_COMPILER_ID}\" STREQUAL \"AppleClang\"")
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["VERSION"] = self.version
+        self._cmake.definitions["CASS_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
+        self._cmake.definitions["CASS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CASS_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["CASS_BUILD_TESTS"] = False
+        self._cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
+        self._cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
+        self._cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
+        self._cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
+
+        if self.options.use_atomic == "boost":
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
+
+        elif self.options.use_atomic == "std":
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = True
+        else:
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
+
+        self._cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["CASS_USE_STATIC_LIBS"] = False
+        self._cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["CASS_USE_LIBSSH2"] = False
+
+        # FIXME: To use kerberos, its conan package is needed. Uncomment this when kerberos conan package is ready.
+        # self._cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
+
+        if self.settings.os == "Linux":
+            self._cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
+
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._patch_sources()
