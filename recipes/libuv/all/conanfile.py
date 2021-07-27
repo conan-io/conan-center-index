@@ -76,7 +76,7 @@ class libuvConan(ConanFile):
         self.cpp_info.libs = ["uv" if self.options.shared else "uv_a"]
         if self.options.shared:
             self.cpp_info.defines = ["USING_UV_SHARED=1"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "rt"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
