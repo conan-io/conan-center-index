@@ -1,6 +1,8 @@
-import os.path
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CassandraCppDriverConan(ConanFile):
@@ -77,8 +79,8 @@ class CassandraCppDriverConan(ConanFile):
             self.requires("boost/1.76.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("cpp-driver-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
