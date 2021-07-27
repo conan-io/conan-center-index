@@ -8,18 +8,18 @@ class AafConan(ConanFile):
     homepage = "https://sourceforge.net/projects/aaf/"
     description = "A  cross-platform SDK for AAF. AAF is a metadata management system and file format for use in professional multimedia creation and authoring."
     topics = ("aaf", "multimedia", "crossplatform")
-    license = "AAF SDK PUBLIC SOURCE LICENSE"
+    license = "AAFSDKPSL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-            "shared": [True, False],
-            "fPIC": [True, False]
-            }
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
     default_options = {
-            "shared": False,
-            "fPIC": True
-            }
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _source_subfolder(self):
@@ -40,8 +40,8 @@ class AafConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
             raise ConanInvalidConfiguration("Static runtime not supported")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
+        if self.settings.os in ("FreeBSD", "Linux"):
+            raise ConanInvalidConfiguration("Linux is not (yet) supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -59,7 +59,7 @@ class AafConan(ConanFile):
         else:
             cmake.definitions["PLATFORM"] = self.settings.os
 
-        cmake.definitions["ARCH"] = "x86_64"
+        cmake.definitions["ARCH"] = "x86_64"  # ARCH is used only for setting the output directory. So itsvalue does not matter here.
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
