@@ -80,3 +80,7 @@ class TsilConan(ConanFile):
         self.cpp_info.defines.append(self._tsil_size)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
