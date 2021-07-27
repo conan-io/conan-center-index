@@ -10,16 +10,21 @@ class FFNvEncHeaders(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/FFmpeg/nv-codec-headers"
     license = "MIT"
+    settings = "os"
 
     _autotools = None
 
-    def package_id(self):
-        self.info.header_only()
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows":
             if "CONAN_MAKE_PROGRAM" not in os.environ:
                 self.build_requires("make/4.2.1")
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
