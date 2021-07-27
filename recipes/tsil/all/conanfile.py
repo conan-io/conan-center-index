@@ -39,6 +39,10 @@ class TsilConan(ConanFile):
     def _tsil_size(self):
         return "TSIL_SIZE_DOUBLE" if self.options.size == "double" else "TSIL_SIZE_LONG"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
