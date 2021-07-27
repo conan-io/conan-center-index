@@ -48,7 +48,7 @@ that have future-proof scalability"""
 
     def package_id(self):
         del self.info.options.tbbmalloc
-        del self.info.options.tbbmalloc_proxy
+        del self.info.options.tbbproxy
 
     def build_requirements(self):
         if tools.os_info.is_windows:
