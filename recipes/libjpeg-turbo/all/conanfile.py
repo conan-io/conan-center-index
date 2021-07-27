@@ -43,7 +43,7 @@ class LibjpegTurboConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
+
     def _simd_extensions_available(self):
         macos_silicon = self.settings.os == "Macos" and self.settings.arch == "armv8"
         return not (self.settings.os == "Emscripten" or macos_silicon)
@@ -112,10 +112,15 @@ class LibjpegTurboConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            # FIXME: Toolchain file should provide valid value here
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
+
+        if tools.cross_building(self.settings):
+            # TODO: too specific and error prone, should be delegated to a conan helper function
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake
