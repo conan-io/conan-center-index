@@ -1,7 +1,9 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibjpegTurboConan(ConanFile):
@@ -91,8 +93,8 @@ class LibjpegTurboConan(ConanFile):
             self.build_requires("nasm/2.14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
