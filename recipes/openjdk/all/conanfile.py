@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class OpenJDK(ConanFile):
     name = "openjdk"

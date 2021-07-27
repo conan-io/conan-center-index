@@ -9,7 +9,7 @@ class TestPackage(ConanFile):
     test_type = "build_requires"
 
     def build(self):
-        pass # nothing to build, but tests should not warn
+        pass  # nothing to build, but tests should not warn
 
     def test(self):
         output = StringIO()
