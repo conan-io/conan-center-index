@@ -50,10 +50,6 @@ class LibjpegTurboConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _simd_extensions_available(self):
-        macos_silicon = self.settings.os == "Macos" and self.settings.arch == "armv8"
-        return not (self.settings.os == "Emscripten" or macos_silicon)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,7 +63,7 @@ class LibjpegTurboConan(ConanFile):
         if self.options.enable12bit:
             del self.options.java
             del self.options.turbojpeg
-        if self.options.enable12bit or not self._simd_extensions_available():
+        if self.options.enable12bit or self.settings.os == "Emscripten":
             del self.options.SIMD
         if self.options.enable12bit or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
             del self.options.arithmetic_encoder
