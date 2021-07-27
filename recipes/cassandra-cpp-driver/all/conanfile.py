@@ -52,6 +52,10 @@ class CassandraCppDriverConan(ConanFile):
             del self.options.fPIC
             del self.options.use_timerfd
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("libuv/1.41.1")
         self.requires("http_parser/2.9.4")
