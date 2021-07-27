@@ -103,19 +103,19 @@ class CassandraCppDriverConan(ConanFile):
                 "Kerberos is not supported at the moment")
 
     def requirements(self):
-        self.requires("libuv/1.40.0")
+        self.requires("libuv/1.41.1")
         self.requires("http_parser/2.9.4")
         self.requires("rapidjson/cci.20200410")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.11")
             self.requires("zlib/1.2.11")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.76.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
