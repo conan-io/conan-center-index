@@ -128,7 +128,7 @@ class WolfSSLConan(ConanFile):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
-            if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler == "Visual Studio" and self.version < "4.7":
                 tools.replace_in_file("libtool",
                                       "AR_FLAGS=\"Ucru\"", "AR_FLAGS=\"cru\"")
             autotools.make()
@@ -142,12 +142,13 @@ class WolfSSLConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libwolfssl.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
+                os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "wolfssl"
         libname = "wolfssl"
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            libname += ".dll.lib"
         self.cpp_info.libs = [libname]
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
