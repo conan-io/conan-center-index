@@ -429,9 +429,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def parallel():
-            if self.options.parallel:
-                return ["tbb::tbb"] if self.options.parallel == "tbb" else []
-            return []
+            return ["tbb::tbb"] if self.options.parallel == "tbb" else []
 
         def quirc():
             return ["quirc::quirc"] if self.options.with_quirc else []
@@ -607,5 +605,3 @@ class OpenCVConan(ConanFile):
             self.cpp_info.components["opencv_videoio"].frameworks = ["Cocoa", "Accelerate", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "QuartzCore"]
         elif self.settings.os == "iOS":
             self.cpp_info.components["opencv_videoio"].frameworks = ["AVFoundation", "QuartzCore"]
-        if self.options.parallel == "openmp":
-            self.cpp_info.components["opencv_core"].system_libs.append("openmp")
