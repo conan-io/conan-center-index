@@ -1,4 +1,3 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -37,6 +36,9 @@ class EffceeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("re2/20210601")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
@@ -66,9 +68,6 @@ class EffceeConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-    def requirements(self):
-        self.requires("re2/20210601")
 
     def build(self):
         self._patch_sources()
