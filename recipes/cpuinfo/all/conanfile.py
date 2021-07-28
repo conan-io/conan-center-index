@@ -44,6 +44,8 @@ class CpuinfoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("shared cpuinfo not supported on Windows")
 
