@@ -12,7 +12,9 @@
 #include <tao/json/events/discard.hpp>
 #include <tao/json/events/from_value.hpp>
 
-namespace tao::json
+namespace tao
+{
+namespace json
 {
    template< typename Consumer, std::uint64_t Min, std::uint64_t Max >
    struct validate_integer
@@ -42,7 +44,8 @@ namespace tao::json
       }
    };
 
-}  // namespace tao::json
+}  // namespace json
+}  // namespace tao
 
 int main( int /*unused*/, char** /*unused*/ )
 {
