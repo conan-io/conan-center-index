@@ -6,6 +6,4 @@ conan_basic_setup()
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-find_package(re2 REQUIRED CONFIG)
-
 add_subdirectory(source_subfolder/)
