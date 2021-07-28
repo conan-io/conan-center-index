@@ -35,6 +35,7 @@ class LibpqxxRecipe(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
