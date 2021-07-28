@@ -124,7 +124,9 @@ class MsixConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["runtimeobject"]
-            if self.options.crypto_lib == "crypt32":
-                self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.system_libs.append("delayimp")
+            if self.options.crypto_lib == "crypt32":
+                self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust"])
+            if self.options.xml_parser == "msxml6":
+                self.cpp_info.system_libs.append("msxml6")
