@@ -36,14 +36,14 @@ class FriBiDiCOnan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         self.build_requires("meson/0.58.0")
