@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CpuinfoConan(ConanFile):
@@ -47,9 +48,8 @@ class CpuinfoConan(ConanFile):
             raise ConanInvalidConfiguration("shared cpuinfo not supported on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("cpuinfo-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
