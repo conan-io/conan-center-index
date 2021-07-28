@@ -1,8 +1,10 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
+
 
 class LibStudXmlConan(ConanFile):
     name = "libstudxml"
@@ -45,7 +47,7 @@ class LibStudXmlConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            # Transitively requires autoconf and automake
+            self.build_requires("gnu-config/cci.20201022")
             self.build_requires("libtool/2.4.6")
 
     def requirements(self):
@@ -87,7 +89,16 @@ class LibStudXmlConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def _build_autotools(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config", "config.guess"))
+
         if self.settings.compiler.get_safe("libcxx") == "libc++":
             # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
             # include dir, libc++ ends up including their 'version' file instead, causing a compile error
