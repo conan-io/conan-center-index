@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(tweetnacl)
+project(tweetnacl C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
