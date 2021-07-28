@@ -26,6 +26,7 @@ class ArrowConan(ConanFile):
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
+        "runtime_simd_level": ["NONE", "SSE4_2", "AVX2", "AVX512", "MAX"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
         "with_csv": [True, False],
@@ -64,6 +65,7 @@ class ArrowConan(ConanFile):
         "encryption": False,
         "filesystem_layer": False,
         "hdfs_bridgs": False,
+        "runtime_simd_level": "MAX",
         "with_backtrace": False,
         "with_boost": "auto",
         "with_brotli": False,
@@ -99,6 +101,8 @@ class ArrowConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "2.0.0":
+            del self.options.runtime_simd_level
 
     def configure(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
@@ -285,7 +289,6 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_JEMALLOC"] = self._with_jemalloc()
         self._cmake.definitions["ARROW_JSON"] = self.options.with_json
 
-        # self._cmake.definitions["ARROW_BOOST_VENDORED"] = False
         self._cmake.definitions["BOOST_SOURCE"] = "SYSTEM"
         self._cmake.definitions["Protobuf_SOURCE"] = "SYSTEM"
         self._cmake.definitions["gRPC_SOURCE"] = "SYSTEM"
@@ -311,6 +314,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
         if tools.Version(self.version) >= "2.0":
             self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
+            self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = self.options.runtime_simd_level
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
