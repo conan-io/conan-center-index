@@ -111,7 +111,7 @@ class LibStudXmlConan(ConanFile):
             tools.remove_files_by_mask(self._source_subfolder, "version")
 
         with tools.chdir(self._source_subfolder):
-            self.run("./bootstrap", win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         autotools = self._configure_autotools()
         autotools.make()
