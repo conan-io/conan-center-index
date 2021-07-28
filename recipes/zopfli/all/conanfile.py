@@ -10,7 +10,7 @@ class ZopfliConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/zopfli/"
     description = "Zopfli Compression Algorithm is a compression library programmed in C to perform very good, but slow, deflate or zlib compression."
-    topics = ("conan", )
+    topics = ("zopfli", "compression", "deflate", "gzip", "zlib")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
