@@ -60,8 +60,12 @@ class PackageReference():
         yield path.join('recipes', self.name, self.version, file)
         full_ver = self.version.split('.')
         for i in range(len(full_ver) - 1, 0, -1):
-            masked_ver = full_ver[:i] + ['x']
-            yield path.join('recipes', self.name, '.'.join(masked_ver), file)
+            for j in range(len(full_ver) - i, -1, -1):
+                masked_ver = full_ver[:i] + j * ['x']
+                yield path.join('recipes',
+                                self.name,
+                                '.'.join(masked_ver),
+                                file)
         yield path.join('recipes', self.name, 'all', file)
 
     def __init__(self, strref):
