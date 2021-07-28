@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+import os
+
 
 required_conan_version = ">=1.33.0"
 
@@ -10,8 +12,6 @@ class AwsCCal(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-cal"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,11 +22,18 @@ class AwsCCal(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt", "patches/*"
+    generators = "cmake", "cmake_find_package"
+
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _needs_openssl(self):
+        return self.settings.os != "Windows" and not tools.is_apple_os(self.settings.os)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,7 +47,7 @@ class AwsCCal(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.6.7")
-        if self.settings.os == "Linux":
+        if self._needs_openssl:
             self.requires("openssl/1.1.1k")
 
     def source(self):
@@ -52,10 +59,13 @@ class AwsCCal(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["USE_OPENSSL"] = self._needs_openssl
         self._cmake.configure()
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -74,5 +84,11 @@ class AwsCCal(ConanFile):
         self.cpp_info.components["aws-c-cal-lib"].names["cmake_find_package_multi"] = "aws-c-cal"
         self.cpp_info.components["aws-c-cal-lib"].libs = ["aws-c-cal"]
         self.cpp_info.components["aws-c-cal-lib"].requires = ["aws-c-common::aws-c-common-lib"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::openssl")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["aws-c-cal-lib"].system_libs.append("ncrypt")
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["aws-c-cal-lib"].frameworks.append("Security")
+        elif self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")
+        if self._needs_openssl:
+            self.cpp_info.components["_dummy_crypto"].requires.append("openssl::crypto")
