@@ -58,9 +58,13 @@ class EffceeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
         self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
-                (self.settings.compiler.runtime in ["MD", "MDd"])
+        if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
+                    (self.settings.compiler.runtime in ["MD", "MDd"])
+            else:
+                # Do not force linkage to static libgcc and libstdc++ for MinGW
+                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
