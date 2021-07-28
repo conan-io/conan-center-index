@@ -61,7 +61,7 @@ class EffceeConan(ConanFile):
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
-                    (self.settings.compiler.runtime in ["MD", "MDd"])
+                    "MD" in self.settings.compiler.runtime
             else:
                 # Do not force linkage to static libgcc and libstdc++ for MinGW
                 self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = True
