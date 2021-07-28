@@ -44,6 +44,7 @@ class ZopfliConan(ConanFile):
             return self._cmake
         cmake = CMake(self)
         cmake.definitions['ZOPFLI_BUILD_INSTALL'] = True
+        cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         cmake.configure()
         self._cmake = cmake
         return self._cmake
@@ -73,4 +74,4 @@ class ZopfliConan(ConanFile):
         self.cpp_info.components["libzopflipng"].names["cmake_find_package"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].names["cmake_find_package_multi"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
-        self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]        
+        self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
