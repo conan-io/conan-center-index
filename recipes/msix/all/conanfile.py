@@ -74,14 +74,14 @@ class MsixConan(ConanFile):
     def configure(self):
         if self.settings.os == "Linux" and (self.settings.compiler != "clang"):
             raise ConanInvalidConfiguration("Only clang is supported on Linux")
-        if self.settings.os == "Linux" and (self.options.crypto_lib == "crypt32"):
-            raise ConanInvalidConfiguration("crypt32 is not available on Linux")
         if self.settings.os == "Linux" and self.options.shared:
             self.options.fPIC = True
         if self.settings.os != "Android" and self.options.xml_parser == "javaxml":
             raise ConanInvalidConfiguration("javaxml is supported only for Android")
         if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
             raise ConanInvalidConfiguration("applexml is supported only for MacOS")
+        if self.settings.os != "Windows" and (self.options.crypto_lib == "crypt32"):
+            raise ConanInvalidConfiguration("crypt32 is supported only for Windows")
         if self.settings.os != "Windows" and self.options.xml_parser == "msxml6":
             raise ConanInvalidConfiguration("msxml6 is supported only for Windows")
         if self.options.pack:
@@ -100,8 +100,6 @@ class MsixConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux" and not self.options.skip_bundles:
             self.requires("icu/68.2")
-        if self.settings.os != "Windows" and not self.options.crypto_lib:
-            self.requires("openssl/1.0.2t")
         if self.options.crypto_lib == "openssl":
             self.requires("openssl/1.0.2t")
         if self.options.use_external_zlib:
@@ -126,7 +124,7 @@ class MsixConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["runtimeobject"]
-            if not self.options.crypto_lib or self.options.crypto_lib == "crypt32":
+            if self.options.crypto_lib == "crypt32":
                 self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.system_libs.append("delayimp")
