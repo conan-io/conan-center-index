@@ -35,6 +35,7 @@ class CassandraCppDriverConan(ConanFile):
         "use_timerfd": True,
     }
 
+    short_paths = True
     generators = "cmake"
     exports_sources = [
         "CMakeLists.txt",
