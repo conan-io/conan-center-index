@@ -61,12 +61,12 @@ class LibBasisUniversalConan(ConanFile):
                 self.name, self.settings.compiler))
         elif tools.Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration("{} {} does not support compiler with version {} {}, minimum supported compiler version is {} ".format(self.name, self.version, self.settings.compiler, self.settings.compiler.version, min_version))
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -77,8 +77,7 @@ class LibBasisUniversalConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SSE4"] = self.options.use_sse4
         self._cmake.definitions["ZSTD"] = self.options.with_zstd
-        custom_iterator_debug_level = self.options.get_safe("custom_iterator_debug_level", default="False")
-        self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = not custom_iterator_debug_level
+        self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = not self.options.get_safe("custom_iterator_debug_level", default=self.default_options["custom_iterator_debug_level"])
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
  

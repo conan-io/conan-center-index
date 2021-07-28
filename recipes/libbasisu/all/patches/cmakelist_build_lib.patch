@@ -42,7 +42,7 @@
  endif()
  
  if (ZSTD)
-@@ -42,38 +36,25 @@ if (NOT MSVC)
+@@ -42,38 +36,24 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
  
@@ -56,7 +56,6 @@
 -   if (EMSCRIPTEN)
 -	  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
 -	  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
-+   # set(CMAKE_CXX_FLAGS -D_GLIBCXX_USE_CXX11_ABI=0) # -std=c++11)
 +   set(GCC_COMPILE_FLAGS "-fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
  
 -	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS}")
@@ -88,7 +87,7 @@
     endif()
  
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${GCC_COMPILE_FLAGS}")
-@@ -84,7 +65,7 @@ if (NOT MSVC)
+@@ -84,7 +64,7 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_COMPILE_FLAGS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_COMPILE_FLAGS} -D_DEBUG")
  else()
@@ -97,7 +96,7 @@
  		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1")
  		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=1")
  	else()
-@@ -94,7 +75,6 @@ else()
+@@ -94,7 +74,6 @@ else()
  endif()
  
  set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
@@ -105,7 +104,7 @@
  	encoder/basisu_backend.cpp
  	encoder/basisu_basis_file.cpp
  	encoder/basisu_comp.cpp
-@@ -115,42 +95,27 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
+@@ -115,42 +94,27 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
  	encoder/jpgd.cpp
  	encoder/basisu_kernels_sse.cpp
  	transcoder/basisu_transcoder.cpp
