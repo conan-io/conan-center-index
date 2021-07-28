@@ -40,6 +40,9 @@ class LibStudXmlConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("expat/2.4.1")
+
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < "9":
@@ -49,9 +52,6 @@ class LibStudXmlConan(ConanFile):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("gnu-config/cci.20201022")
             self.build_requires("libtool/2.4.6")
-
-    def requirements(self):
-        self.requires("expat/2.4.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
