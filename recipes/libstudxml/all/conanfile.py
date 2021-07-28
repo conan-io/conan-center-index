@@ -111,7 +111,7 @@ class LibStudXmlConan(ConanFile):
         autotools.make()
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         if self.settings.compiler == "Visual Studio":
