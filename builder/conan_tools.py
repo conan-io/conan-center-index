@@ -33,8 +33,6 @@ def _is_gha_buildable(line):
         return False
     if '# GHA: ignore' in line:
         return False
-    if '/system' in line:
-        return False
     if '@' in line:
         return False
     if '/' not in line:
