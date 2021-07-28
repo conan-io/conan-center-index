@@ -78,3 +78,7 @@ class ZopfliConan(ConanFile):
         self.cpp_info.components["libzopflipng"].names["cmake_find_package_multi"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
         self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
