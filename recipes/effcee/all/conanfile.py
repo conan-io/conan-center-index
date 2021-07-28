@@ -43,7 +43,7 @@ class EffceeConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
         if self.settings.compiler == "Visual Studio" and \
-                "MT" in self.settings.compiler.runtime:
+           self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared"
                                             " library with MT runtime is not"
                                             " supported")
