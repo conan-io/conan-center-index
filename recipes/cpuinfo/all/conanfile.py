@@ -72,8 +72,14 @@ class CpuinfoConan(ConanFile):
         self._cmake.definitions["CLOG_RUNTIME_TYPE"] = "default"
         self._cmake.definitions["CLOG_BUILD_TESTS"] = False
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        if self.settings.arch == "armv8":
-            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "armv8"
+
+        # CMAKE_SYSTEM_PROCESSOR must be manually set if cross-building
+        if tools.cross_building(self.settings):
+            cmake_system_processor = {
+                "armv8": "arm64",
+                "armv8.3": "arm64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake
