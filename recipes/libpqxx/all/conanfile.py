@@ -39,21 +39,25 @@ class LibpqxxRecipe(ConanFile):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
-        minimal_version = {
+        gcc_minimal_version = "8" if Version(self.version) >= "7.5.0" else "7"
+        minimum_compiler_version = {
             "Visual Studio": "15",
-            "gcc": "7",
+            "gcc": gcc_minimal_version,
             "clang": "6",
             "apple-clang": "10"
         }
 
-        if compiler in minimal_version and \
-           compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not"
-                                            " supported." % (self.name, compiler, compiler_version))
+        minimum_cpp_standard = 17
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+        if compiler in minimum_compiler_version and \
+           compiler_version < minimum_compiler_version[compiler]:
+            raise ConanInvalidConfiguration("{} requires a compiler that supports"
+                                            " at least C++{}. {} {} is not"
+                                            " supported."
+                                            .format(self.name, minimum_cpp_standard, compiler, compiler_version))
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, minimum_cpp_standard)
 
     def requirements(self):
         self.requires("libpq/12.2")
