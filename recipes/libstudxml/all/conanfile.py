@@ -48,10 +48,16 @@ class LibStudXmlConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < "9":
                 raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("gnu-config/cci.20201022")
             self.build_requires("libtool/2.4.6")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -65,7 +71,7 @@ class LibStudXmlConan(ConanFile):
             else:
                 args.extend(["--disable-shared", "--enable-static"])
 
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
@@ -105,7 +111,7 @@ class LibStudXmlConan(ConanFile):
             tools.remove_files_by_mask(self._source_subfolder, "version")
 
         with tools.chdir(self._source_subfolder):
-            self.run("./bootstrap")
+            self.run("./bootstrap", win_bash=tools.os_info.is_windows)
 
         autotools = self._configure_autotools()
         autotools.make()
