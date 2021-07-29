@@ -69,7 +69,8 @@ class LibRtlSdrConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
-        cmake.build()
+        # Do not build tools
+        cmake.build(target="rtlsdr_shared" if self.options.shared else "rtlsdr_static")
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
