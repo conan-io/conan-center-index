@@ -68,6 +68,7 @@ class LibRtlSdrConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        os.rename("Findlibusb.cmake", "Findlibusb_.cmake")
         cmake = self._configure_cmake()
         # Do not build tools
         cmake.build(target="rtlsdr_shared" if self.options.shared else "rtlsdr_static")
