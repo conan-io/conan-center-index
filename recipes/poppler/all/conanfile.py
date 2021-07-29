@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class PopplerConan(ConanFile):
     name = "poppler"
@@ -153,8 +155,8 @@ class PopplerConan(ConanFile):
             self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("poppler-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _dct_decoder(self):
@@ -225,7 +227,6 @@ class PopplerConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "FREETYPE_INCLUDE_DIRS",
                               "Freetype_INCLUDE_DIRS")
-
 
     def build(self):
         self._patch_sources()
