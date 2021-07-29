@@ -1,0 +1,22 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f1907e3..3d6a49b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -211,9 +211,14 @@ if(WIN32)
+     target_link_libraries(rtl_eeprom libgetopt_static)
+     target_link_libraries(rtl_adsb libgetopt_static)
+     target_link_libraries(rtl_power libgetopt_static)
+-    target_link_libraries(rtl_raw2wav libgetopt_static m)
+-    target_link_libraries(rtl_wavestat libgetopt_static m)
+-    target_link_libraries(rtl_wavestream libgetopt_static m)
++    target_link_libraries(rtl_raw2wav libgetopt_static)
++    target_link_libraries(rtl_wavestat libgetopt_static)
++    target_link_libraries(rtl_wavestream libgetopt_static)
++    if(NOT MSVC)
++        target_link_libraries(rtl_raw2wav m)
++        target_link_libraries(rtl_wavestat m)
++        target_link_libraries(rtl_wavestream m)
++    endif()
+     set_property(TARGET rtl_sdr APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
+     set_property(TARGET rtl_tcp APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
+     set_property(TARGET rtl_udp APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )

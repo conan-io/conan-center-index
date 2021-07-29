@@ -6,3 +6,5 @@ patches:
   "0.8":
     - patch_file: "patches/conan_build_fixes.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/conan_link_fixes.patch"
+      base_path: "source_subfolder"
