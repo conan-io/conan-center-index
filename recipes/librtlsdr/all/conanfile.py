@@ -110,3 +110,7 @@ class LibRtlSdrConan(ConanFile):
                 )
             except:
                 pass
+
+    def package_info(self):
+        if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
+            self.cpp_info.system_libs.append("pthread")
