@@ -329,6 +329,7 @@ class OpenSSLConan(ConanFile):
             "Macos-ppc32be-*": "%sdarwin-ppc-cc" % self._target_prefix,
             "Macos-ppc64-*": "darwin64-ppc-cc",
             "Macos-ppc64be-*": "darwin64-ppc-cc",
+            "Macos-armv8-*": "darwin64-arm64-cc" if self._full_version >= "1.1.1i" else "darwin-common",
             "Macos-*-*": "darwin-common",
             "iOS-x86_64-*": "darwin64-x86_64-cc",
             "iOS-*-*": "iphoneos-cross",
