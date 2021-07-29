@@ -13,7 +13,7 @@ class LibRtlSdrConan(ConanFile):
     homepage = "https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr"
     license = "GPL-2.0"
     topics = ("conan", "sdr", "rtl-sdr")
-    generators = ("cmake_find_package", "pkg_config")
+    generators = ("cmake", "cmake_find_package", "pkg_config")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,9 +40,6 @@ class LibRtlSdrConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.24")
-        # Same rules as libusb. What's the get_safe equivalent for this?
-        if self.settings.os in ["Linux", "Android"]:
-            self.options["libusb"].enable_udev = True
         if self.settings.compiler == "Visual Studio":
             self.requires("pthreads4w/3.0.0")
 
@@ -61,13 +58,17 @@ class LibRtlSdrConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        # self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.configure(
-            source_folder=self._source_subfolder, build_folder=self._build_subfolder
+            source_folder=self._source_subfolder,
+            build_folder=self._build_subfolder,
         )
         return self._cmake
 
     def build(self):
+        # Don't use the librarie's *bad* findLibUSB.cmake
+        os.remove(
+            os.path.join(self._source_subfolder, "cmake/Modules/FindLibUSB.cmake")
+        )
         cmake = self._configure_cmake()
         cmake.build()
 
