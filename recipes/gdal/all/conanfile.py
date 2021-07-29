@@ -196,8 +196,6 @@ class GdalConan(ConanFile):
             del self.options.with_null
             del self.options.with_zlib # zlib and png are always used in nmake build,
             del self.options.with_png  # and it's not trivial to fix
-        else:
-            del self.options.with_libiconv
         self._strict_options_requirements()
 
     def _strict_options_requirements(self):
@@ -216,7 +214,7 @@ class GdalConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.8")
-        if self.options.get_safe("with_libiconv", True):
+        if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
@@ -654,7 +652,7 @@ class GdalConan(ConanFile):
         args.append("--with-libz={}".format("yes" if self.options.with_zlib else "no"))
         if self._has_with_libdeflate_option:
             args.append("--with-libdeflate={}".format("yes" if self.options.with_libdeflate else "no"))
-        args.append("--with-libiconv-prefix={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)))
+        args.append("--with-libiconv-prefix={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath if self.options.with_libiconv else "no")))
         args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
         args.append("--with-zstd={}".format("yes" if self.options.get_safe("with_zstd") else "no")) # Optional direct dependency of gdal only if lerc lib enabled
         # Drivers:
