@@ -1,8 +1,7 @@
-from contextlib import contextmanager
-import os
-
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -15,8 +14,7 @@ class GdalConan(ConanFile):
     topics = ("conan", "gdal", "osgeo", "geospatial", "raster", "vector")
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
-    generators = "pkg_config"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -149,6 +147,8 @@ class GdalConan(ConanFile):
         "with_heif": False,
     }
 
+    exports_sources = "patches/**"
+    generators = "pkg_config"
     _autotools= None
     _nmake_args = None
 
