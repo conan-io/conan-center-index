@@ -11,10 +11,16 @@ class PatchElfConan(ConanFile):
     homepage = "https://github.com/NixOS/patchelf"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False,  # TODO justify
+    }
 
     _autotools = None
-
-    # TODO introduce shared, fpic?
 
     @property
     def _source_subfolder(self):
@@ -34,7 +40,12 @@ class PatchElfConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)  # TODO check if we need this win thingy
-        self._autotools.configure(configure_dir=self._source_subfolder)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
