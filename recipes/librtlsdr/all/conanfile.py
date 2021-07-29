@@ -14,6 +14,7 @@ class LibRtlSdrConan(ConanFile):
     license = "GPL-2.0"
     topics = ("conan", "sdr", "rtl-sdr")
     generators = ("cmake", "cmake_find_package", "pkg_config")
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,10 +66,8 @@ class LibRtlSdrConan(ConanFile):
         return self._cmake
 
     def build(self):
-        # Don't use the librarie's *bad* findLibUSB.cmake
-        os.remove(
-            os.path.join(self._source_subfolder, "cmake/Modules/FindLibUSB.cmake")
-        )
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
