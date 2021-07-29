@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -58,8 +59,8 @@ class PatchElfConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["libpatchelf"].names["pkg_config"] = "patchelf"
-        self.cpp_info.components["libpatchelf"].libs = ["patchelf"]
         self.cpp_info.components["libpatchelf"].includedirs.append("src")
