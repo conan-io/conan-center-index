@@ -60,7 +60,7 @@ class LibRtlSdrConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.configure(
-            args=["-DCMAKE_BUILD_TYPE={}".format(self.settings.build_type)],
+            args=["-DCMAKE_BUILD_TYPE={}".format(self.settings.build_type), "-DCMAKE_VERBOSE_MAKEFILE=ON"],
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder,
         )
