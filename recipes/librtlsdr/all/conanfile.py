@@ -122,8 +122,7 @@ class LibRtlSdrConan(ConanFile):
             self.cpp_info.defines.extend(["rtlsdr_STATIC=1"])
         # Necessary to libusb
         if self.settings.os in ["Linux", "Android"]:
-            if self.options.enable_udev:
-                self.cpp_info.system_libs.append("udev")
+            self.cpp_info.system_libs.append("udev")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]
             self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
