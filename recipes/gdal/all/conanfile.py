@@ -484,6 +484,10 @@ class GdalConan(ConanFile):
         if self._nmake_args:
             return self._nmake_args
 
+        rootpath = lambda req: self.deps_cpp_info[req].rootpath
+        include_paths = lambda req: " -I".join(self.deps_cpp_info[req].include_paths)
+        version = lambda req: tools.Version(self.deps_cpp_info[req].version)
+
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
         args.append("DATADIR=\"{}\"".format(os.path.join(self.package_folder, "res", "gdal")))
@@ -491,74 +495,74 @@ class GdalConan(ConanFile):
             args.append("WIN64=1")
         args.append("DEBUG={}".format("1" if self.settings.build_type == "Debug" else "0"))
         args.append("DLLBUILD={}".format("1" if self.options.shared else "0"))
-        args.append("PROJ_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["proj"].include_paths)))
+        args.append("PROJ_INCLUDE=\"-I{}\"".format(include_paths("proj")))
         if self.options.with_libiconv:
-            args.append("LIBICONV_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libiconv"].include_paths)))
+            args.append("LIBICONV_INCLUDE=\"-I{}\"".format(include_paths("libiconv")))
             args.append("LIBICONV_CFLAGS=\"-DICONV_CONST=\"")
         args.append("JPEG_EXTERNAL_LIB=1")
         if self.options.with_jpeg == "libjpeg":
-            args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg"].include_paths)))
+            args.append("JPEGDIR=\"{}\"".format(include_paths("libjpeg")))
         elif self.options.with_jpeg == "libjpeg-turbo":
-            args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg-turbo"].include_paths)))
+            args.append("JPEGDIR=\"{}\"".format(include_paths("libjpeg-turbo")))
         args.append("PNG_EXTERNAL_LIB=1")
-        args.append("PNGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpng"].include_paths)))
+        args.append("PNGDIR=\"{}\"".format(include_paths("libpng")))
         if self.options.with_gif:
             args.append("GIF_SETTING=EXTERNAL")
         if self.options.with_pcraster:
             args.append("PCRASTER_SETTING=INTERNAL")
-        args.append("TIFF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libtiff"].include_paths)))
-        args.append("GEOTIFF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgeotiff"].include_paths)))
+        args.append("TIFF_INC=\"-I{}\"".format(include_paths("libtiff")))
+        args.append("GEOTIFF_INC=\"-I{}\"".format(include_paths("libgeotiff")))
         if self.options.with_libkml:
-            args.append("LIBKML_DIR=\"{}\"".format(self.deps_cpp_info["libkml"].rootpath))
+            args.append("LIBKML_DIR=\"{}\"".format(rootpath("libkml")))
         if self.options.with_expat:
-            args.append("EXPAT_DIR=\"{}\"".format(self.deps_cpp_info["expat"].rootpath))
-            args.append("EXPAT_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["expat"].include_paths)))
+            args.append("EXPAT_DIR=\"{}\"".format(rootpath("expat")))
+            args.append("EXPAT_INCLUDE=\"-I{}\"".format(include_paths("expat")))
         if self.options.with_xerces:
-            args.append("XERCES_DIR=\"{}\"".format(self.deps_cpp_info["xerces-c"].rootpath))
-            args.append("XERCES_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["xerces-c"].include_paths)))
+            args.append("XERCES_DIR=\"{}\"".format(rootpath("xerces-c")))
+            args.append("XERCES_INCLUDE=\"-I{}\"".format(include_paths("xerces-c")))
         if self.options.with_jasper:
-            args.append("JASPER_DIR=\"{}\"".format(self.deps_cpp_info["jasper"].rootpath))
+            args.append("JASPER_DIR=\"{}\"".format(rootpath("jasper")))
         if self.options.with_hdf4:
-            args.append("HDF4_DIR=\"{}\"".format(self.deps_cpp_info["hdf4"].rootpath))
-            args.append("HDF4_INCLUDE=\"{}\"".format(" -I".join(self.deps_cpp_info["hdf4"].include_paths)))
-            if tools.Version(self.deps_cpp_info["hdf4"].version) >= "4.2.5":
+            args.append("HDF4_DIR=\"{}\"".format(rootpath("hdf4")))
+            args.append("HDF4_INCLUDE=\"{}\"".format(include_paths("hdf4")))
+            if version("hdf4") >= "4.2.5":
                 args.append("HDF4_HAS_MAXOPENFILES=YES")
         if self.options.with_hdf5:
-            args.append("HDF5_DIR=\"{}\"".format(self.deps_cpp_info["hdf5"].rootpath))
+            args.append("HDF5_DIR=\"{}\"".format(rootpath("hdf5")))
         if self.options.with_kea:
-            args.append("KEA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["kealib"].include_paths)))
+            args.append("KEA_CFLAGS=\"-I{}\"".format(include_paths("kealib")))
         if self.options.with_pg:
-            args.append("PG_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpq"].include_paths)))
+            args.append("PG_INC_DIR=\"{}\"".format(include_paths("libpq")))
         if self.options.with_mysql == "libmysqlclient":
-            args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libmysqlclient"].include_paths)))
+            args.append("MYSQL_INC_DIR=\"{}\"".format(include_paths("libmysqlclient")))
         elif self.options.with_mysql == "mariadb-connector-c":
-            args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["mariadb-connector-c"].include_paths)))
+            args.append("MYSQL_INC_DIR=\"{}\"".format(include_paths("mariadb-connector-c")))
         if self.options.get_safe("with_sqlite3"):
-            args.append("SQLITE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["sqlite3"].include_paths)))
+            args.append("SQLITE_INC=\"-I{}\"".format(include_paths("sqlite3")))
         if self.options.get_safe("with_pcre"):
-            args.append("PCRE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["pcre"].include_paths)))
+            args.append("PCRE_INC=\"-I{}\"".format(include_paths("pcre")))
         if self.options.with_cfitsio:
-            args.append("FITS_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["cfitsio"].include_paths)))
+            args.append("FITS_INC_DIR=\"{}\"".format(include_paths("cfitsio")))
         if self.options.with_netcdf:
             args.extend([
                 "NETCDF_SETTING=YES",
-                "NETCDF_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["netcdf"].include_paths))
+                "NETCDF_INC_DIR=\"{}\"".format(include_paths("netcdf"))
             ])
             if self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
                 args.append("NETCDF_HAS_NC4=YES")
         if self.options.with_curl:
-            args.append("CURL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libcurl"].include_paths)))
+            args.append("CURL_INC=\"-I{}\"".format(include_paths("libcurl")))
         if self.options.with_geos:
-            args.append("GEOS_CFLAGS=\"-I{} -DHAVE_GEOS\"".format(" -I".join(self.deps_cpp_info["geos"].include_paths)))
+            args.append("GEOS_CFLAGS=\"-I{} -DHAVE_GEOS\"".format(include_paths("geos")))
         if self.options.with_openjpeg:
             args.append("OPENJPEG_ENABLED=YES")
         if self.options.get_safe("with_zlib", True):
             args.append("ZLIB_EXTERNAL_LIB=1")
-            args.append("ZLIB_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zlib"].include_paths)))
+            args.append("ZLIB_INC=\"-I{}\"".format(include_paths("zlib")))
         if self.options.get_safe("with_libdeflate"):
-            args.append("LIBDEFLATE_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libdeflate"].include_paths)))
+            args.append("LIBDEFLATE_CFLAGS=\"-I{}\"".format(include_paths("libdeflate")))
         if self.options.with_poppler:
-            poppler_version = tools.Version(self.deps_cpp_info["poppler"].version)
+            poppler_version = version("poppler")
             args.extend([
                 "POPPLER_ENABLED=YES",
                 "POPPLER_MAJOR_VERSION={}".format(poppler_version.major),
@@ -567,37 +571,37 @@ class GdalConan(ConanFile):
         if self.options.with_podofo:
             args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
-            args.append("ZSTD_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zstd"].include_paths)))
+            args.append("ZSTD_CFLAGS=\"-I{}\"".format(include_paths("zstd")))
         if self.options.with_webp:
             args.append("WEBP_ENABLED=YES")
-            args.append("WEBP_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libwebp"].include_paths)))
+            args.append("WEBP_CFLAGS=\"-I{}\"".format(include_paths("libwebp")))
         if self.options.with_xml2:
-            args.append("LIBXML2_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libxml2"].include_paths)))
+            args.append("LIBXML2_INC=\"-I{}\"".format(include_paths("libxml2")))
         if self.options.with_gta:
-            args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
+            args.append("GTA_CFLAGS=\"-I{}\"".format(include_paths("libgta")))
         if self.options.with_mongocxx:
-            args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["mongo-cxx-driver"].include_paths)))
+            args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(include_paths("mongo-cxx-driver")))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
         if self.options.with_cryptopp:
-            args.append("CRYPTOPP_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["cryptopp"].include_paths)))
+            args.append("CRYPTOPP_INC=\"-I{}\"".format(include_paths("cryptopp")))
             if self.options["cryptopp"].shared:
                 args.append("USE_ONLY_CRYPTODLL_ALG=YES")
         if self.options.with_crypto:
-            args.append("OPENSSL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openssl"].include_paths)))
+            args.append("OPENSSL_INC=\"-I{}\"".format(include_paths("openssl")))
         if self.options.without_lerc:
             args.append("HAVE_LERC=0")
         if self.options.with_charls:
-            charls_version = tools.Version(self.deps_cpp_info["charls"].version)
+            charls_version = version("charls")
             if charls_version >= "2.1.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2_1")
             elif charls_version >= "2.0.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2")
         if self.options.with_dds:
-            args.append("CRUNCH_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["crunch"].include_paths)))
+            args.append("CRUNCH_INC=\"-I{}\"".format(include_paths("crunch")))
         if self.options.get_safe("with_exr"):
-            args.append("EXR_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openexr"].include_paths)))
+            args.append("EXR_INC=\"-I{}\"".format(include_paths("openexr")))
         if self.options.get_safe("with_heif"):
-            args.append("HEIF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libheif"].include_paths)))
+            args.append("HEIF_INC=\"-I{}\"".format(include_paths("libheif")))
 
         self._nmake_args = args
         return self._nmake_args
