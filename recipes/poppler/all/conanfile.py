@@ -81,7 +81,7 @@ class PopplerConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        # Poppler requires C++14 
+        # Poppler requires C++14
         return {
             "Visual Studio": "15",
             "gcc": "5",
@@ -101,16 +101,16 @@ class PopplerConan(ConanFile):
             del self.options.with_libiconv
         if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
-        
+
         # C++ standard required
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False) 
-        if not minimum_version: 
-            self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.") 
-        elif tools.Version(self.settings.compiler.version) < minimum_version: 
-            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.") 
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
@@ -240,6 +240,7 @@ class PopplerConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libpoppler"].libs = ["poppler"]
+        self.cpp_info.components["libpoppler"].includedirs.append(os.path.join("include", "poppler"))
         self.cpp_info.components["libpoppler"].names["pkg_config"] = "poppler"
         if not self.options.shared:
             self.cpp_info.components["libpoppler"].defines = ["POPPLER_STATIC"]
