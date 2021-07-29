@@ -8,7 +8,7 @@ required_conan_version = ">=1.28.0"
 class LibRtlSdrConan(ConanFile):
     name = "librtlsdr"
     description = "Software to turn the RTL2832U into an SDR"
-    url = "https://github.com/librtlsdr/librtlsdr"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr"
     license = "GPL-2.0"
     topics = ("conan", "sdr", "rtl-sdr")
