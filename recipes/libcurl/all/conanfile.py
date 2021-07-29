@@ -1,8 +1,12 @@
 import glob
 import os
 import re
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.layout import cmake_layout
+
 
 required_conan_version = ">=1.33.0"
 
@@ -11,12 +15,12 @@ class LibcurlConan(ConanFile):
     name = "libcurl"
 
     description = "command line tool and library for transferring data with URLs"
-    topics = ("conan", "curl", "libcurl", "data-transfer")
+    topics = ("curl", "libcurl", "data-transfer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
-    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
+    exports_sources = ["lib_Makefile_add.am", "patches/*"]
+    generators = "CMakeToolchain", "CMakeDeps", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -64,15 +68,6 @@ class LibcurlConan(ConanFile):
 
     _autotools = None
     _autotools_vars = None
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _is_mingw(self):
@@ -178,9 +173,12 @@ class LibcurlConan(ConanFile):
                 self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-        tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
+        tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True, verify=False)
+        tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=False)  # TODO: RECUPERAR ESTOOOOOOOOOO>>>>>>>>>>>>>
+
+    def layout(self):
+        self.cpp.package.components["curl"].includedirs = ["include"]
+        cmake_layout(self)
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -191,7 +189,7 @@ class LibcurlConan(ConanFile):
         #     but does not work on OS X 10.11 with SIP)
         # 2. copying dylib's to the build directory (fortunately works on OS X)
         if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
+            self.copy("*.dylib*", dst=self.source_folder, keep_path=False)
 
     def build(self):
         self._patch_sources()
@@ -201,15 +199,14 @@ class LibcurlConan(ConanFile):
             self._build_with_autotools()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        tools.files.apply_conandata_patches(self)
         self._patch_misc_files()
         self._patch_mingw_files()
         self._patch_cmake()
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "curl", "curl.h"),
+            tools.replace_in_file(os.path.join(self.source_folder, "include", "curl", "curl.h"),
                                   "define CURL_MAX_WRITE_SIZE 16384",
                                   "define CURL_MAX_WRITE_SIZE 10485760")
 
@@ -217,7 +214,7 @@ class LibcurlConan(ConanFile):
         # for additional info, see this comment https://github.com/conan-io/conan-center-index/pull/1008#discussion_r386122685
         if self.settings.compiler == "apple-clang" and self.settings.compiler.version == "9.1":
             if self.options.with_ssl == "darwinssl":
-                tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "vtls", "sectransp.c"),
+                tools.replace_in_file(os.path.join(self.source_folder, "lib", "vtls", "sectransp.c"),
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
@@ -226,7 +223,7 @@ class LibcurlConan(ConanFile):
             return
         # patch for zlib naming in mingw
         if self.options.with_zlib:
-            configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+            configure_ac = os.path.join(self.source_folder, "configure.ac")
             zlib_name = self.deps_cpp_info["zlib"].libs[0]
             tools.replace_in_file(configure_ac,
                                   "AC_CHECK_LIB(z,",
@@ -238,11 +235,11 @@ class LibcurlConan(ConanFile):
         if self.options.shared:
             # for mingw builds - do not compile curl tool, just library
             # linking errors are much harder to fix than to exclude curl tool
-            top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+            top_makefile = os.path.join(self.source_folder, "Makefile.am")
             tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
             tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
             # patch for shared mingw build
-            lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
+            lib_makefile = os.path.join(self.source_folder, "lib", "Makefile.am")
             tools.replace_in_file(lib_makefile,
                                   "noinst_LTLIBRARIES = libcurlu.la",
                                   "")
@@ -263,10 +260,10 @@ class LibcurlConan(ConanFile):
             return
         # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
         if self._has_zstd_option:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
+            tools.replace_in_file(os.path.join(self.source_folder, "CMake", "FindZstd.cmake"),
                                   "if(UNIX)", "if(TRUE)")
         # TODO: check this patch, it's suspicious
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        tools.replace_in_file(os.path.join(self.source_folder, "CMakeLists.txt"),
                               "include(CurlSymbolHiding)", "")
 
     def _get_configure_command_args(self):
@@ -348,7 +345,7 @@ class LibcurlConan(ConanFile):
         return version
 
     def _build_with_autotools(self):
-        with tools.chdir(self._source_subfolder):
+        with tools.chdir(self.source_folder):
             # autoreconf
             self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
 
@@ -402,51 +399,47 @@ class LibcurlConan(ConanFile):
 
         return self._autotools, self._autotools_vars
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        if self._is_win_x_android:
-            self._cmake = CMake(self, generator="Ninja")
-        else:
-            self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_CURL_EXE"] = False
-        self._cmake.definitions["CURL_DISABLE_LDAP"] = not self.options.with_ldap
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions["CURL_STATICLIB"] = not self.options.shared
-        self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
+    def generate(self):
+        cmake_toolchain = CMakeToolchain(self)
+        cmake_toolchain.variables["BUILD_TESTING"] = False
+        cmake_toolchain.variables["BUILD_CURL_EXE"] = False
+        cmake_toolchain.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
+        cmake_toolchain.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        cmake_toolchain.variables["CURL_STATICLIB"] = not self.options.shared
+        cmake_toolchain.variables["CMAKE_DEBUG_POSTFIX"] = ""
         if tools.Version(self.version) >= "7.72.0":
-            self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+            cmake_toolchain.variables["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         else:
-            self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
-        self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+            cmake_toolchain.variables["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
+        cmake_toolchain.variables["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         if tools.Version(self.version) >= "7.70.0":
-            self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
-        self._cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
-        self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
+            cmake_toolchain.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        cmake_toolchain.variables["USE_NGHTTP2"] = self.options.with_nghttp2
+        cmake_toolchain.variables["CURL_ZLIB"] = self.options.with_zlib
+        cmake_toolchain.variables["CURL_BROTLI"] = self.options.with_brotli
         if self._has_zstd_option:
-            self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
-        self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+            cmake_toolchain.variables["CURL_ZSTD"] = self.options.with_zstd
+        cmake_toolchain.variables["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
+        cmake_toolchain.variables["ENABLE_ARES"] = self.options.with_c_ares
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake_toolchain.generate()
 
     def _build_with_cmake(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses")
         self.copy("cacert.pem", dst="res")
         if self._is_using_cmake_build:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
+            cmake.configure()
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         else:
             with tools.run_environment(self):
-                with tools.chdir(self._source_subfolder):
+                with tools.chdir(self.source_folder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
             tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -460,12 +453,12 @@ class LibcurlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CURL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
-        self.cpp_info.names["pkg_config"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
-        self.cpp_info.components["curl"].names["pkg_config"] = "libcurl"
+        self.cpp_info.set_property("cmake_find_package", "CURL")
+        self.cpp_info.set_property("cmake_find_package_multi", "CURL")
+        self.cpp_info.set_property("pkg_config", "libcurl")
+        self.cpp_info.components["curl"].set_property("cmake_find_package", "libcurl")
+        self.cpp_info.components["curl"].set_property("cmake_find_package_multi", "libcurl")
+        self.cpp_info.components["curl"].set_property("pkg_config", "libcurl")
 
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
