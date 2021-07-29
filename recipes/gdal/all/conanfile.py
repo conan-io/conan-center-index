@@ -60,7 +60,6 @@ class GdalConan(ConanFile):
         "with_sqlite3": [True, False],
         # "with_rasterlite2": [True, False],
         "with_pcre": [True, False],
-        # "with_epsilon": [True, False],
         "with_webp": [True, False],
         "with_geos": [True, False],
         # "with_sfcgal": [True, False],
@@ -125,7 +124,6 @@ class GdalConan(ConanFile):
         "with_sqlite3": True,
         # "with_rasterlite2": False,
         "with_pcre": False,
-        # "with_epsilon": False,
         "with_webp": False,
         "with_geos": True,
         # "with_sfcgal": False,
@@ -288,8 +286,6 @@ class GdalConan(ConanFile):
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
             self.requires("pcre/8.45")
-        # if self.options.with_epsilon:
-        #     self.requires("epsilon/0.9.2")
         if self.options.with_webp:
             self.requires("libwebp/1.2.0")
         if self.options.with_geos:
@@ -729,7 +725,8 @@ class GdalConan(ConanFile):
         args.append("--without-idb") # commercial library
         if tools.Version(self.version) < "3.2.0":
             args.append("--without-sde") # commercial library
-        args.append("--without-epsilon") # TODO: to implement when epsilon lib available
+        if tools.Version(self.version) < "3.3.0":
+            args.append("--without-epsilon")
         args.append("--with-webp={}".format(rootpath_no(self.options.with_webp, "libwebp")))
         args.append("--with-geos={}".format(yes_no(self.options.with_geos)))
         args.append("--without-sfcgal") # TODO: to implement when sfcgal lib available
@@ -764,7 +761,10 @@ class GdalConan(ConanFile):
         args.append("--without-armadillo") # TODO: to implement when armadillo lib available
         args.append("--with-cryptopp={}".format(rootpath_no(self.options.with_cryptopp, "cryptopp")))
         args.append("--with-crypto={}".format(yes_no(self.options.with_crypto)))
-        args.append("--with-lerc={}".format(yes_no(not self.options.without_lerc)))
+        if tools.Version(self.version) >= "3.3.0":
+            args.append("--with-lerc={}".format(internal_no(not self.options.without_lerc)))
+        else:
+            args.append("--with-lerc={}".format(yes_no(not self.options.without_lerc)))
         if self.options.with_null:
             args.append("--with-null")
         if self._has_with_exr_option:
