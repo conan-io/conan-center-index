@@ -5,8 +5,8 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class CsvParserConan(ConanFile):
-    name = "csv-parser"
+class VincentlaucsbCsvParserConan(ConanFile):
+    name = "vincentlaucsb-csv-parser"
     description = "Vince's CSV Parser with simple and intuitive syntax"
     topics = ("conan", "csv-parser", "csv", "rfc 4180", "parser", "generator")
     url = "https://github.com/conan-io/conan-center-index"
@@ -20,7 +20,8 @@ class CsvParserConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        tools.check_min_cppstd(self, 11)
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
@@ -34,11 +35,9 @@ class CsvParserConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "single_include"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CSVParser"
-        self.cpp_info.names["cmake_find_package_multi"] = "CSVParser"
-
-        if self.settings.os == "Linux" or self.settings.os == "FreeBSD":
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("pthread")
