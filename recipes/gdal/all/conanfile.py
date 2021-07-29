@@ -206,7 +206,7 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.15")
         self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.2.0")
+        self.requires("libtiff/4.3.0")
         self.requires("proj/8.1.0")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.0")
@@ -277,7 +277,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.77.0")
+            self.requires("libcurl/7.78.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.12")
         # if self.options.with_spatialite:
