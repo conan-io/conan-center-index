@@ -75,7 +75,38 @@ class LibRtlSdrConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self.copy(
+            "*.h", dst="include", src=os.path.join(self._source_subfolder, "include")
+        )
+        self.copy("*.lib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy("*.dll", src=self._build_subfolder, dst="bin", keep_path=False)
+        self.copy(
+            "*.so*",
+            src=self._build_subfolder,
+            dst="lib",
+            keep_path=False,
+            symlinks=True,
+        )
+        self.copy("*.dylib", src=self._build_subfolder, dst="lib", keep_path=False)
+        self.copy("*.a", src=self._build_subfolder, dst="lib", keep_path=False)
+        for name in ("shared", "static"):
+            for extension in (".lib", ".so", ".dylib", ".a"):
+                try:
+                    tools.rename(
+                        os.path.join(
+                            self.package_folder,
+                            "lib/rtlsdr_{}{}".format(name, extension),
+                        ),
+                        os.path.join(
+                            self.package_folder, "lib/librtlsdr{}".format(extension)
+                        ),
+                    )
+                except:
+                    pass
+            try:
+                tools.rename(
+                    os.path.join(self.package_folder, "bin/rtlsdr_{}.dll".format(name)),
+                    os.path.join(self.package_folder, "bin/librtlsdr.dll"),
+                )
+            except:
+                pass
