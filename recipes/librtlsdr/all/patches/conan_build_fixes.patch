@@ -12,7 +12,7 @@ index c2c3f63..8aeb142 100644
 -    /usr/include
 -    /usr/local/include
 -  )
- 
+
 -#standard library name for libusb-1.0
 -set(libusb1_library_names usb-1.0)
 -
@@ -28,7 +28,7 @@ index c2c3f63..8aeb142 100644
 -    /usr/lib
 -    /usr/local/lib
 -  )
-+find_package(libusb REQUIRED COMPONENTS libusb)
- 
++find_package(libusb CONFIG)
+
  include(CheckFunctionExists)
  if(LIBUSB_INCLUDE_DIRS)
