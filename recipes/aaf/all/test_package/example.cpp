@@ -2,7 +2,7 @@
 #include "AAFResult.h"
 
 int main() {
-    HRESULT hr = AAFLoad(nullptr);
+    HRESULT hr = AAFLoad(NULL);
 
     if (AAFRESULT_SUCCEEDED(hr)) {
         return 0;
