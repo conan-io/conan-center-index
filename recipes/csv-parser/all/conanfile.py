@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -18,14 +19,13 @@ class CsvParserConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _supports_cpp11(self):
-        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
-        compiler = self.settings.compiler
-        version = tools.Version(compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
-
     def validate(self):
         tools.check_min_cppstd(self, 11)
+
+        compiler = self.settings.compiler
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if compiler == "gcc" and compiler_version < "7":
+            raise ConanInvalidConfiguration("gcc version < 7 not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
