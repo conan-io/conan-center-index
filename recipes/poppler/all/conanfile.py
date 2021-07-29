@@ -74,23 +74,6 @@ class PopplerConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property
-    def _cppstd_required(self):
-        if self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6":
-            return 17
-        else:
-            return 14
-
-    @property
-    def _minimum_compilers_version(self):
-        # Poppler requires C++14
-        return {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1"
-        }
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -101,18 +84,6 @@ class PopplerConan(ConanFile):
             del self.options.with_gtk
         if not self.options.cpp:
             del self.options.with_libiconv
-        if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
-
-        # C++ standard required
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 14)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
 
     def requirements(self):
         self.requires("poppler-data/0.4.10")
@@ -151,6 +122,30 @@ class PopplerConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
+    @property
+    def _minimum_compilers_version(self):
+        # Poppler requires C++14
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1"
+        }
+
+    def validate(self):
+        if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
+
+        # C++ standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
+
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
 
@@ -164,6 +159,13 @@ class PopplerConan(ConanFile):
             return "none"
         else:
             return str(self.options.with_libjpeg)
+
+    @property
+    def _cppstd_required(self):
+        if self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6":
+            return 17
+        else:
+            return 14
 
     def _configure_cmake(self):
         if self._cmake:
