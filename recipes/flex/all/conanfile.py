@@ -88,4 +88,11 @@ class FlexConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
+        lex_path = os.path.join(bindir, "flex")
+        self.output.info("Setting LEX environment variable: {}".format(lex_path))
+        self.env_info.LEX = lex_path
