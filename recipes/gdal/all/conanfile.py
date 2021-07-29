@@ -546,6 +546,9 @@ class GdalConan(ConanFile):
             ])
             if self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
                 args.append("NETCDF_HAS_NC4=YES")
+            if tools.Version(self.version) >= "3.3.0" and \
+               os.path.isfile(os.path.join(self.deps_cpp_info["netcdf"].rootpath, "include", "netcdf_mem.h")):
+                args.append("NETCDF_HAS_NETCDF_MEM=YES")
         if self.options.with_curl:
             args.append("CURL_INC=\"-I{}\"".format(include_paths("libcurl")))
         if self.options.with_geos:
