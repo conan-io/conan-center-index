@@ -30,9 +30,15 @@ patches:
   "1.40.0":
     - base_path: "source_subfolder"
       patch_file: "patches/1.40.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
   "1.41.0":
     - base_path: "source_subfolder"
       patch_file: "patches/1.41.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
   "1.41.1":
     - base_path: "source_subfolder"
       patch_file: "patches/1.41.0/fix-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.40.0/fix-ios.patch"
