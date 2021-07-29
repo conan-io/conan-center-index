@@ -18,9 +18,14 @@ class CsvParserConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def _supports_cpp11(self):
+        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
+        compiler = self.settings.compiler
+        version = tools.Version(compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+        tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
