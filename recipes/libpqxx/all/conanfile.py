@@ -59,9 +59,11 @@ class LibpqxxRecipe(ConanFile):
                                             " supported."
                                             .format(self.name, minimum_cpp_standard, compiler, compiler_version))
 
-        if self.settings.os == "Macos" and Version(self.settings.os.version) < "10.15":
-            raise ConanInvalidConfiguration(
-                "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
+        if self.settings.os == "Macos":
+            os_version = self.settings.get_safe("os.version")
+            if os_version and Version(os_version) < "10.15":
+                raise ConanInvalidConfiguration(
+                    "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, minimum_cpp_standard)
