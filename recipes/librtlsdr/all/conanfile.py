@@ -40,6 +40,8 @@ class LibRtlSdrConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.24")
+        if self.options["libusb"].enable_udev is not None:
+            self.options["libusb"].enable_udev = True
         if self.settings.compiler == "Visual Studio":
             self.requires("pthreads4w/3.0.0")
 
