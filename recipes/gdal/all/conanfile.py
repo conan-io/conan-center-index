@@ -357,7 +357,7 @@ class GdalConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
