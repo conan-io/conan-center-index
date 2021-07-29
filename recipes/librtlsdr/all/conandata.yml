@@ -1,0 +1,4 @@
+sources:
+  "0.8":
+    url: "https://github.com/librtlsdr/librtlsdr/archive/refs/tags/v0.8.0.tar.gz"
+    sha256: "CE18CD70C92D44E81E804B6B4DCD655E0E370D7C8A9C59C6A8FE59E60D3447FC"
