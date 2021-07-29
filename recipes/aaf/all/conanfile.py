@@ -38,14 +38,13 @@ class AafConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("expat/2.4.1")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
             raise ConanInvalidConfiguration("Static runtime not supported")
-        # if self.settings.os in ("FreeBSD", "Linux"):
-        #     raise ConanInvalidConfiguration("Linux is not (yet) supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
