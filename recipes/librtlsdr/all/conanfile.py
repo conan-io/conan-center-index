@@ -13,7 +13,7 @@ class LibRtlSdrConan(ConanFile):
     homepage = "https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr"
     license = "GPL-2.0"
     topics = ("conan", "sdr", "rtl-sdr")
-    generators = "cmake_find_package"
+    generators = ("cmake_find_package", "pkg_config")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
