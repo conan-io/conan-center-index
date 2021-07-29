@@ -114,9 +114,6 @@ class PopplerConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
 
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
-
     def requirements(self):
         self.requires("poppler-data/0.4.10")
         self.requires("freetype/2.10.4")
@@ -153,6 +150,9 @@ class PopplerConan(ConanFile):
             self.requires("libcurl/7.75.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+
+    def build_requirements(self):
+        self.build_requires("pkgconf/1.7.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
