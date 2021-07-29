@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import glob
 
 required_conan_version = ">=1.28.0"
 
@@ -50,7 +51,7 @@ class LibRtlSdrConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = glob.glob(self.name + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -58,7 +59,9 @@ class LibRtlSdrConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         # self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure(
+            source_folder=self._source_subfolder, build_folder=self._build_subfolder
+        )
         return self._cmake
 
     def build(self):
