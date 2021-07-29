@@ -113,8 +113,9 @@ class LibRtlSdrConan(ConanFile):
                 pass
 
     def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if self.options.shared:
             self.cpp_info.defines.extend(["rtlsdr_SHARED=1"])
         else:
