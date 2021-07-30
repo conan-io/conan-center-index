@@ -26,7 +26,7 @@ class ArrowConan(ConanFile):
         "encryption": [True, False],
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
-        "runtime_simd_level": ["NONE", "SSE4_2", "AVX2", "AVX512", "MAX"],
+        "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
         "with_csv": [True, False],
@@ -65,7 +65,7 @@ class ArrowConan(ConanFile):
         "encryption": False,
         "filesystem_layer": False,
         "hdfs_bridgs": False,
-        "runtime_simd_level": "MAX",
+        "runtime_simd_level": "max",
         "with_backtrace": False,
         "with_boost": "auto",
         "with_brotli": False,
@@ -314,7 +314,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
         if tools.Version(self.version) >= "2.0":
             self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
-            self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = self.options.runtime_simd_level
+            self._cmake.definitions["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
