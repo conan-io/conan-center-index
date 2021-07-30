@@ -45,17 +45,11 @@ class LibTarConan(ConanFile):
             self.requires("zlib/1.2.11")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("libtar does not support Visual Studio")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libtar does not support Windows")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
