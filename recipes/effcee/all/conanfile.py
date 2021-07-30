@@ -1,4 +1,3 @@
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -37,11 +36,14 @@ class EffceeConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("re2/20210601")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
         if self.settings.compiler == "Visual Studio" and \
-                "MT" in self.settings.compiler.runtime:
+           self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared"
                                             " library with MT runtime is not"
                                             " supported")
@@ -56,9 +58,13 @@ class EffceeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["EFFCEE_BUILD_TESTING"] = False
         self._cmake.definitions["EFFCEE_BUILD_SAMPLES"] = False
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
-                (self.settings.compiler.runtime in ["MD", "MDd"])
+        if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = \
+                    "MD" in self.settings.compiler.runtime
+            else:
+                # Do not force linkage to static libgcc and libstdc++ for MinGW
+                self._cmake.definitions["EFFCEE_ENABLE_SHARED_CRT"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -66,9 +72,6 @@ class EffceeConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-    def requirements(self):
-        self.requires("re2/20210601")
 
     def build(self):
         self._patch_sources()
@@ -82,4 +85,4 @@ class EffceeConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["effcee"]
