@@ -71,11 +71,6 @@ class BloatyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "bloaty-profiler"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "bloaty-profiler"
-        self.cpp_info.names["cmake_find_package"] = "bloaty"
-        self.cpp_info.names["cmake_find_package_multi"] = "bloaty"
-
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
