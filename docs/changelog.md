@@ -13,7 +13,7 @@
 
 - [feature] Do not run the CI for branches starting with `bot/...` (branches intended for automations).
 - [feature] Remove all remotes when configuring the Conan client.
-- [feature] ValidateInfrastructure: Update "Supported platformas and configurations" doc automatically.
+- [feature] ValidateInfrastructure: Update "Supported platforms and configurations" doc automatically.
 - [fix] UpdateSearchIndex: Fix parsing of package data.
 - [feature] BuildSingleReference: Add `MSBUILDDISABLENODEREUSE` environment variable for MSBuild to avoid errors when compiling in parallel.
 
