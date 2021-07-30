@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 
 class LibRtlSdrConan(ConanFile):
@@ -14,7 +14,7 @@ class LibRtlSdrConan(ConanFile):
     license = "GPL-2.0"
     topics = ("conan", "sdr", "rtl-sdr")
     generators = ("cmake", "cmake_find_package")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -51,16 +51,21 @@ class LibRtlSdrConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True
+        )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.configure(
-            args=["-DCMAKE_BUILD_TYPE={}".format(self.settings.build_type), "-DCMAKE_VERBOSE_MAKEFILE=ON"],
+            args=[
+                "-DCMAKE_BUILD_TYPE={}".format(self.settings.build_type),
+                "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            ],
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder,
         )
