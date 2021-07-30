@@ -3,16 +3,17 @@ project(geotrans VERSION 3.8 LANGUAGES CXX)
 ####
 # Conan
 ####
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 ####
 # Directories
 ####
 
-set(DTCCDIR "${CMAKE_CURRENT_SOURCE_DIR}/CCS/src/dtcc/CoordinateSystems")
-set(CCSERVICEDIR "${CMAKE_CURRENT_SOURCE_DIR}/CCS/src")
-set(SRCDIR "${CMAKE_CURRENT_SOURCE_DIR}/GEOTRANS3/java_gui/geotrans3/jni")
+set(SRC_SUBFOLDER "${CMAKE_SOURCE_DIR}/source_subfolder")
+set(DTCCDIR "${SRC_SUBFOLDER}/CCS/src/dtcc/CoordinateSystems")
+set(CCSERVICEDIR "${SRC_SUBFOLDER}/CCS/src")
+set(SRCDIR "${SRC_SUBFOLDER}/GEOTRANS3/java_gui/geotrans3/jni")
 
 ####
 # Sources
@@ -46,23 +47,34 @@ endforeach()
 list(REMOVE_DUPLICATES INCS)
 list(FILTER INCS EXCLUDE REGEX ".*${DTCCDIR}.*")
 
+set(PUBLIC_HEADERS ${DTTC_HEADERS} ${CCS_HEADERS})
+
+####
+# Dependencies
+####
+
+find_package(Threads REQUIRED)
 
 # Create libMSPdtcc
 add_library(MSPdtcc ${DTCCSRCS} ${CCSERVICESRCS})
 target_compile_features(MSPdtcc PUBLIC cxx_std_11)
-target_compile_options(MSPdtcc PRIVATE -pthread -Wno-deprecated)
+target_compile_options(MSPdtcc PRIVATE -Wno-deprecated)
 target_include_directories(MSPdtcc PUBLIC include ${DTTCINCS} ${INCS})
+set_target_properties(MSPdtcc PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+target_link_libraries(MSPdtcc PRIVATE Threads::Threads)
 
 # Create libMSPCoordinateConversionService
 add_library(MSPCoordinateConversionService ${CCSSRCS} ${CCSERVICESRCS})
 target_compile_features(MSPCoordinateConversionService PUBLIC cxx_std_11)
-target_compile_options(MSPCoordinateConversionService PRIVATE -pthread -Wno-deprecated)
+target_compile_options(MSPCoordinateConversionService PRIVATE -Wno-deprecated)
 target_include_directories(MSPCoordinateConversionService PUBLIC include ${DTTCINCS} ${INCS})
+set_target_properties(MSPCoordinateConversionService  PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
-include(GnuInstallDirs)
+include(GNUInstallDirs)
 install(TARGETS MSPdtcc MSPCoordinateConversionService
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(DIRECTORY data/ DESTINATION res)
+install(DIRECTORY "${SRC_SUBFOLDER}/data/" DESTINATION res)
