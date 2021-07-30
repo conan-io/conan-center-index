@@ -90,6 +90,7 @@ class MsixConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.crypto_lib = "crypt32"
 
     def configure(self):
         if self.settings.os == "Linux" and self.options.shared:
