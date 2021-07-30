@@ -62,7 +62,8 @@ class OnnxRuntimeConan(ConanFile):
         return "build_subfolder"
 
     def build_requirements(self):
-        self.build_requires("protobuf/3.15.5")
+        if tools.cross_building(self) and hasattr(self, "settings_build"):
+            self.build_requires("protobuf/3.15.5")
 
     def requirements(self):
         self.requires("protobuf/3.15.5")
