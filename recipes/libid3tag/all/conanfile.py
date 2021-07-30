@@ -37,19 +37,25 @@ class LibId3TagConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
 
-    def validate(self):
-        if self._is_msvc and self.options.shared:
-            raise ConanInvalidConfiguration("libid3tag does not support shared library for MSVC")
-
-    def build_requirements(self):
-        if not self._is_msvc:
-            self.build_requires("gnu-config/cci.20201022")
-
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio" or (
             self.settings.compiler == "clang" and self.settings.os == "Windows"
         )
+
+    def validate(self):
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("libid3tag does not support shared library for MSVC")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def build_requirements(self):
+        if not self._is_msvc:
+            self.build_requires("gnu-config/cci.20201022")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -83,7 +89,7 @@ class LibId3TagConan(ConanFile):
                 args = ["--disable-static", "--enable-shared"]
             else:
                 args = ["--disable-shared", "--enable-static"]
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
