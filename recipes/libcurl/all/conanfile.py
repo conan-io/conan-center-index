@@ -148,6 +148,8 @@ class LibcurlConan(ConanFile):
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
+            if tools.Version(self.version) < "7.75.0":
+                del self.options.with_libidn
             del self.options.with_libpsl
 
     def requirements(self):
@@ -443,7 +445,8 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
         self._cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         self._cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp
-        self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
+        if tools.Version(self.version) >= "7.75.0":
+            self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
         self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
 
         self._cmake.configure(build_folder=self._build_subfolder)
