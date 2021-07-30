@@ -1,8 +1,8 @@
 diff --git a/cmake/Modules/FindLibUSB.cmake b/cmake/Modules/FindLibUSB.cmake
-index c2c3f63..4e50226 100644
+index c2c3f63..5eb0692 100644
 --- a/cmake/Modules/FindLibUSB.cmake
 +++ b/cmake/Modules/FindLibUSB.cmake
-@@ -1,36 +1,12 @@
+@@ -1,36 +1,15 @@
 -if(NOT LIBUSB_FOUND)
 -  pkg_check_modules (LIBUSB_PKG libusb-1.0)
 -  find_path(LIBUSB_INCLUDE_DIR NAMES libusb.h
@@ -31,7 +31,10 @@ index c2c3f63..4e50226 100644
 +include(Findlibusb_)
 +set(LIBUSB_INCLUDE_DIRS ${libusb_INCLUDES} CACHE INTERNAL "LUSB") 
 +set(LIBUSB_INCLUDE_DIR ${libusb_INCLUDES} CACHE INTERNAL "LUSB")
-+set(LIBUSB_LIBRARIES ${libusb_LIBS} CACHE INTERNAL "LUSB") 
++set(LIBUSB_LIBRARIES ${libusb_LIBRARIES}  CACHE INTERNAL "LUSB") 
++add_link_options(${libusb_LINKER_FLAGS_LIST})
++add_compile_definitions(${libusb_COMPILE_DEFINITIONS})
++add_compile_options("${libusb_COMPILE_OPTIONS_LIST}")
  
  include(CheckFunctionExists)
 -if(LIBUSB_INCLUDE_DIRS)
@@ -46,7 +49,7 @@ index c2c3f63..4e50226 100644
  
  CHECK_FUNCTION_EXISTS("libusb_handle_events_timeout_completed" HAVE_LIBUSB_HANDLE_EVENTS_TIMEOUT_COMPLETED)
  if(HAVE_LIBUSB_HANDLE_EVENTS_TIMEOUT_COMPLETED)
-@@ -41,15 +17,3 @@ CHECK_FUNCTION_EXISTS("libusb_error_name" HAVE_LIBUSB_ERROR_NAME)
+@@ -41,15 +20,3 @@ CHECK_FUNCTION_EXISTS("libusb_error_name" HAVE_LIBUSB_ERROR_NAME)
  if(HAVE_LIBUSB_ERROR_NAME)
      add_definitions(-DHAVE_LIBUSB_ERROR_NAME=1)
  endif(HAVE_LIBUSB_ERROR_NAME)

@@ -125,11 +125,3 @@ class LibRtlSdrConan(ConanFile):
             self.cpp_info.defines.extend(["rtlsdr_SHARED=1"])
         else:
             self.cpp_info.defines.extend(["rtlsdr_STATIC=1"])
-        # Necessary to libusb
-        if self.settings.os in ["Linux", "Android"]:
-            self.cpp_info.system_libs.append("udev")
-        elif self.settings.os == "Macos":
-            self.cpp_info.system_libs = ["objc"]
-            self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["advapi32"]
