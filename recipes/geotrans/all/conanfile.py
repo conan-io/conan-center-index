@@ -59,6 +59,12 @@ class GeotransConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
+        self.output.info("""geotrans: In order to use this library, the MPCCS_DATA environment variable *must* be set. An example of setting this can be found in the consumer `conanfile.py` example in `test_package/conanfile.py` of this package recipe. Alternatively, this data directory can be moved to a location of your choice from its location in `res` using the `imports` method  available in a consumer `conanfile.py`, i.e.:
+
+def imports(self):
+    self.copy("*", dst="data", src="res")
+
+You can then set the environment variable MPCCS_DATA to the location of this `data` directory.""")
 
     def package(self):
         self.copy(
