@@ -32,6 +32,10 @@ class GeotransConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,13 +47,12 @@ class GeotransConan(ConanFile):
             destination=self._source_subfolder,
             filename="master.tgz"
         )
-        shutil.copy("CMakeLists.txt", self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -62,17 +65,11 @@ class GeotransConan(ConanFile):
             dst="licenses",
             src=os.path.join(self._source_subfolder, "GEOTRANS3", "docs"),
         )
-        self.copy("*", dst="res", src=os.path.join(self._source_subfolder, "data"))
-        self.copy(
-            "*.h", dst="include", src=os.path.join(self._source_subfolder, "CCS", "src")
-        )
-        self.copy("*.lib", dst="lib", src="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", src="lib", keep_path=False)
-        self.copy("*.so", dst="lib", src="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", src="lib", keep_path=False)
-        self.copy("*.a", dst="lib", src="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
+        self.user_info.data_path = os.path.join(self.package_folder, "res")
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.name = "geotrans"
         self.cpp_info.names["cmake_find_package"] = "geotrans"
@@ -81,10 +78,11 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["dtcc"].names["cmake_find_package_multi"] = "dtcc"
         self.cpp_info.components["dtcc"].libs = ["MSPdtcc"]
         self.cpp_info.components["dtcc"].includedirs = [
-            path[0]
-            for path in os.walk(os.path.join("include", "dtcc", "CoordinateSystems"))
+            path[0] for path in os.walk("include")
         ]
-        self.cpp_info.components["dtcc"].cxxflags = ["-pthread"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["dtcc"].system_libs.append("pthread")
+
         self.cpp_info.components["ccs"].names["cmake_find_package"] = "ccs"
         self.cpp_info.components["ccs"].names["cmake_find_package_multi"] = "ccs"
         self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
@@ -92,4 +90,3 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["ccs"].includedirs = [
             path[0] for path in os.walk("include")
         ]
-        self.cpp_info.components["ccs"].cxxflags = ["-pthread"]

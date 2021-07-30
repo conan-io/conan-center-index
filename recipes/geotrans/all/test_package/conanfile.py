@@ -7,24 +7,17 @@ class GeotransTestConan(ConanFile):
     generators = (
         "cmake",
         "cmake_find_package",
-        "cmake_paths",
     )
 
     def build(self):
         cmake = CMake(self)
-        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
-        # in "test_package"
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        # Import the data files from the package
-        # The package will not work without these files
-        self.copy("*", dst="data", src="res")
-
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
-            data_loc = "..{sep}data".format(sep=os.sep)
-            os.environ["MSPCCS_DATA"] = data_loc
-            self.run(".{sep}example".format(sep=os.sep))
+            with tools.environment_append(
+                {"MSPCCS_DATA": self.deps_user_info["geotrans"].data_path}
+            ):
+                bin_path = os.path.join("bin", "example")
+                self.run(bin_path, run_environment=True)
