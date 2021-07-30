@@ -89,7 +89,7 @@ class LibId3TagConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def _build_autotools(self):
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
