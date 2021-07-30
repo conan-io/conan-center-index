@@ -48,3 +48,6 @@ patches:
       # url: https://www.postgresql.org/message-id/09A4B554-82B1-4536-B191-2461342EE0BB%40icloud.com
       # patch_source: https://www.postgresql.org/message-id/attachment/45881/0002-Use-return-instead-of-exit-in-configure.patch
       # patch_type: portability
+  "13.3":
+    - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
+      base_path: "source_subfolder"
