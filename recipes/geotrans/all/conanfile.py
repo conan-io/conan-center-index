@@ -41,7 +41,12 @@ class GeotransConan(ConanFile):
             del self.options.fPIC
         if self.options.shared:
             del self.options.fPIC
-
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+         # And if this is a C library:
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
     def source(self):
         tools.get(
             **self.conan_data["sources"][self.version],
