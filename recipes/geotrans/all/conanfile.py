@@ -63,17 +63,11 @@ class GeotransConan(ConanFile):
             dst="licenses",
             src=os.path.join(self._source_subfolder, "GEOTRANS3", "docs"),
         )
-        self.copy("*", dst="res", src=os.path.join(self._source_subfolder, "data"))
-        self.copy(
-            "*.h", dst="include", src=os.path.join(self._source_subfolder, "CCS", "src")
-        )
-        self.copy("*.lib", dst="lib", src="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", src="lib", keep_path=False)
-        self.copy("*.so", dst="lib", src="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", src="lib", keep_path=False)
-        self.copy("*.a", dst="lib", src="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
+        self.user_info.data_path = os.path.join(self.package_folder, "res")
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.names["cmake_find_package"] = "geotrans"
         self.cpp_info.names["cmake_find_package_multi"] = "geotrans"
@@ -84,7 +78,7 @@ class GeotransConan(ConanFile):
             path[0]
             for path in os.walk(os.path.join("include", "dtcc", "CoordinateSystems"))
         ]
-        self.cpp_info.components["dtcc"].cxxflags = ["-pthread"]
+        self.cpp_info.components["dtcc"].system_libs = ["pthread"]
         self.cpp_info.components["ccs"].names["cmake_find_package"] = "ccs"
         self.cpp_info.components["ccs"].names["cmake_find_package_multi"] = "ccs"
         self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
@@ -92,4 +86,4 @@ class GeotransConan(ConanFile):
         self.cpp_info.components["ccs"].includedirs = [
             path[0] for path in os.walk("include")
         ]
-        self.cpp_info.components["ccs"].cxxflags = ["-pthread"]
+        self.cpp_info.components["ccs"].system_libs = ["pthread"]

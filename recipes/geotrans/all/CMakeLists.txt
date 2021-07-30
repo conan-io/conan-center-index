@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.8)
 project(geotrans VERSION 3.8 LANGUAGES CXX)
 ####
 # Conan
@@ -58,3 +58,11 @@ add_library(MSPCoordinateConversionService ${CCSSRCS} ${CCSERVICESRCS})
 target_compile_features(MSPCoordinateConversionService PUBLIC cxx_std_11)
 target_compile_options(MSPCoordinateConversionService PRIVATE -pthread -Wno-deprecated)
 target_include_directories(MSPCoordinateConversionService PUBLIC include ${DTTCINCS} ${INCS})
+
+include(GnuInstallDirs)
+install(TARGETS MSPdtcc MSPCoordinateConversionService
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(DIRECTORY data/ DESTINATION res)
