@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        with tarfile.open("test.tar", "w") as f:
+        with tarfile.open("test.tar", "w", format=tarfile.GNU_FORMAT) as f:
             import io
             bio = io.BytesIO()
             bio.write(b"secret text\n")
