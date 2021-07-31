@@ -8,7 +8,7 @@ class XlntConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tfussell/xlnt"
     description = "Cross-platform user-friendly xlsx library for C++11+"
-    topics = ("conan", 'xlsx', 'spreadsheet', 'excel', 'cpp', 'c-plus-plus', 'api', 'microsoft', 'read', 'write')
+    topics = ("xlsx", "spreadsheet", "excel", "cpp", "c-plus-plus", "api", "microsoft", "read", "write")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
