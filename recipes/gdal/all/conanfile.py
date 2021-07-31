@@ -330,7 +330,7 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
-        if tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
             if self.options.shared:
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
             if self.options.tools:
