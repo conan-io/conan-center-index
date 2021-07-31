@@ -46,7 +46,7 @@ class XlntConan(ConanFile):
         # https://github.com/tfussell/xlnt/blob/master/docs/introduction/Installation.md#compiling-xlnt-1xx-from-source-on-ubuntu-1604-lts-xenial-xerus
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.2":
             raise ConanInvalidConfiguration("Xlnt requires a minimum of gcc 6.2.0")
-        if self.settings.compiler in ["clang", "appple-clang"]:
+        if self.settings.compiler in ["clang", "apple-clang"]:
             # https://github.com/tfussell/xlnt/issues/486
             raise ConanInvalidConfiguration("Xlnt doesn't build with clang")
 
