@@ -176,6 +176,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = False
         self._cmake.definitions["BUILD_opencv_python_tests"] = False
         self._cmake.definitions["BUILD_opencv_ts"] = False
+        self._cmake.definitions["BUILD_opencv_dnn"] = False
 
         self._cmake.definitions["WITH_CUFFT"] = False
         self._cmake.definitions["WITH_CUBLAS"] = False
