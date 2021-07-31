@@ -1,8 +1,10 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
+
 
 class LibStudXmlConan(ConanFile):
     name = "libstudxml"
@@ -38,18 +40,24 @@ class LibStudXmlConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("expat/2.4.1")
+
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < "9":
                 raise ConanInvalidConfiguration("Visual Studio {} is not supported.".format(self.settings.compiler.version))
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            # Transitively requires autoconf and automake
+            self.build_requires("gnu-config/cci.20201022")
             self.build_requires("libtool/2.4.6")
-
-    def requirements(self):
-        self.requires("expat/2.4.1")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -63,7 +71,7 @@ class LibStudXmlConan(ConanFile):
             else:
                 args.extend(["--disable-shared", "--enable-static"])
 
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
@@ -87,20 +95,29 @@ class LibStudXmlConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(sln_path, platforms={"x86": "Win32"})
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def _build_autotools(self):
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config", "config.guess"))
+
         if self.settings.compiler.get_safe("libcxx") == "libc++":
             # libc++ includes a file called 'version', and since libstudxml adds source_subfolder as an
             # include dir, libc++ ends up including their 'version' file instead, causing a compile error
             tools.remove_files_by_mask(self._source_subfolder, "version")
 
         with tools.chdir(self._source_subfolder):
-            self.run("./bootstrap")
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         autotools = self._configure_autotools()
         autotools.make()
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         if self.settings.compiler == "Visual Studio":
