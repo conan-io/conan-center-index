@@ -21,6 +21,7 @@ class XlntConan(ConanFile):
                        "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake",
+    requires = ("libstudxml/1.0.1", "miniz/2.2.0", "pybind11/2.7.0", "utfcpp/3.2.1")
     _cmake = None
 
     @property
@@ -33,6 +34,7 @@ class XlntConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.rmdir(os.path.join(self._source_subfolder, "third-party")
 
     def configure(self):
         if self.options.shared:
