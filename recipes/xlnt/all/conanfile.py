@@ -35,6 +35,7 @@ class XlntConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         tools.rmdir(os.path.join(self._source_subfolder, "third-party"))
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "CMakeLists.txt"), "")
 
     def configure(self):
         if self.options.shared:
