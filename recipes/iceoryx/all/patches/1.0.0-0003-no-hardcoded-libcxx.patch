@@ -1,0 +1,10 @@
+--- a/iceoryx_binding_c/CMakeLists.txt
++++ b/iceoryx_binding_c/CMakeLists.txt
+@@ -88,7 +88,6 @@ target_include_directories(${PROJECT_NAME}
+ if(NOT (WIN32 OR QNX))
+     target_link_libraries(${PROJECT_NAME}
+       PUBLIC
+-        stdc++
+         pthread
+       PRIVATE
+         iceoryx_posh::iceoryx_posh

@@ -1,0 +1,21 @@
+On Visual Studio,
+openjpeg typedefs a INT32, as does Windows' basetsd.h through some code in poppler/Error.h.
+openjpeg conditionally does not typedef it, when basetsd.h is first, so change the include order. 
+
+--- goo/JpegWriter.cc
++++ goo/JpegWriter.cc
+@@ -19,12 +19,12 @@
+
+ #ifdef ENABLE_LIBJPEG
+
++#include "poppler/Error.h"
++
+ extern "C" {
+ #    include <jpeglib.h>
+ }
+
+-#    include "poppler/Error.h"
+-
+ struct JpegWriterPrivate
+ {
+     bool progressive;

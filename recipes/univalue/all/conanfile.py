@@ -37,9 +37,13 @@ class UnivalueConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -101,12 +105,12 @@ class UnivalueConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "univalue.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "univalue.lib"))
 
     def package_info(self):
-        suffix = ".dll" if self.options.shared and self.settings.os == "Windows" else ""
-        if self.settings.compiler == "Visual Studio":
-            suffix += ".lib"
-        self.cpp_info.libs = ["univalue{}".format(suffix)]
+        self.cpp_info.libs = ["univalue"]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
 

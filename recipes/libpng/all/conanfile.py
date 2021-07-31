@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+from conans import ConanFile, CMake, tools
 import glob
 import os
 
@@ -35,7 +35,6 @@ class LibpngConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake", "cmake_find_package"]
-    _autotools = None
     _cmake = None
 
     @property
@@ -108,6 +107,16 @@ class LibpngConan(ConanFile):
             "check": "check",
         }
 
+    @property
+    def _libpng_cmake_system_processor(self):
+        # FIXME: too specific and error prone, should be delegated to a conan helper function
+        # It should satisfy libpng CMakeLists specifically, do not use it naively in an other recipe
+        if "mips" in self.settings.arch:
+            return "mipsel"
+        if "ppc" in self.settings.arch:
+            return "powerpc"
+        return str(self.settings.arch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -117,6 +126,8 @@ class LibpngConan(ConanFile):
         self._cmake.definitions["PNG_STATIC"] = not self.options.shared
         self._cmake.definitions["PNG_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["PNG_PREFIX"] = self.options.api_prefix
+        if tools.cross_building(self.settings):
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = self._libpng_cmake_system_processor
         if self._has_neon_support:
             self._cmake.definitions["PNG_ARM_NEON"] = self._neon_msa_sse_vsx_mapping[str(self.options.neon)]
         if self._has_msa_support:
@@ -128,55 +139,22 @@ class LibpngConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--without-binconfigs",
-            "--with-libpng-prefix={}".format(self.options.api_prefix),
-        ]
-        if self._has_neon_support:
-            args.append("--enable-arm-neon={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.neon)]))
-        if self._has_msa_support:
-            args.append("--enable-mips-msa={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.msa)]))
-        if self._has_sse_support:
-            args.append("--enable-intel-sse={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.sse)]))
-        if self._has_vsx_support:
-            args.append("--enable-powerpc-vsx={}".format(self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]))
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
-
     def build(self):
         self._patch()
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.build()
-        else:
-            autotools = self._configure_autotools()
-            autotools.make()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
-            if self.options.shared:
-                for binfile in glob.glob(os.path.join(self.package_folder, "bin", "*")):
-                    if not binfile.endswith(".dll"):
-                        os.remove(binfile)
-            else:
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
+        cmake = self._configure_cmake()
+        cmake.install()
+        if self.options.shared:
+            for binfile in glob.glob(os.path.join(self.package_folder, "bin", "*")):
+                if not binfile.endswith(".dll"):
+                    os.remove(binfile)
         else:
-            autotools = self._configure_autotools()
-            autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "bin"))
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "libpng"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -186,7 +164,7 @@ class LibpngConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libpng" # TODO: we should also create libpng16.pc file
 
         prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
-        suffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["{}png16{}".format(prefix, suffix)]
         if self.settings.os in ["Linux", "Android", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
