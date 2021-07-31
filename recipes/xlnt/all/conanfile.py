@@ -35,7 +35,12 @@ class XlntConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         tools.rmdir(os.path.join(self._source_subfolder, "third-party"))
-        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "CMakeLists.txt"), "")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "libstudxml", "content.hxx"), "#include <xml/content>")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "libstudxml", "parser.hxx"), "#include <xml/parser>")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "libstudxml", "qname.hxx"), "#include <xml/qname>")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "libstudxml", "serializer.hxx"), "#include <xml/serializer>")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "dummy.cpp"), "")
+        tools.save(os.path.join(self._source_subfolder, "third-party", "libstudxml", "CMakeLists.txt"), "add_library(libstudxml OBJECT dummy.cpp)")
 
     def configure(self):
         if self.options.shared:
