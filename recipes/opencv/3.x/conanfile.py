@@ -132,8 +132,6 @@ class OpenCVConan(ConanFile):
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
-        openexr_cmake = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
-        tools.replace_in_file(os.path.join(openexr_cmake, "set(OPENEXR_ROOT "")", ""))
 
     def _configure_cmake(self):
         if self._cmake:
