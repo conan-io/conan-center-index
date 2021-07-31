@@ -59,4 +59,5 @@ class PatchElfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libpatchelf"].names["pkg_config"] = "patchelf"
-        self.cpp_info.components["libpatchelf"].includedirs.append("src")
+        self.cpp_info.components["libpatchelf"].libs = ["patchelf"]
+        self.cpp_info.components["libpatchelf"].includedirs.append(os.path.join("include", "patchelf"))
