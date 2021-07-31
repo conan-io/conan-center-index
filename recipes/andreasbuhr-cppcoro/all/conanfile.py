@@ -99,10 +99,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
         comp = self.cpp_info.components["cppcoro"]
         comp.names["cmake_find_package"] = "cppcoro"
         comp.names["cmake_find_package_multi"] = "cppcoro"
+        comp.libs = ["cppcoro"]
 
         if self.settings.compiler == "Visual Studio":
             comp.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
             comp.cxxflags.append("-fcoroutines")
+            comp.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
         elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
             comp.cxxflags.append("-fcoroutines-ts")
