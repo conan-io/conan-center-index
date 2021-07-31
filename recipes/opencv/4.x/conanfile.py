@@ -539,7 +539,7 @@ class OpenCVConan(ConanFile):
     def package_info(self):
         version = self.version.split(".")
         version = "".join(version) if self.settings.os == "Windows" else ""
-        debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
+        debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
 
         def get_lib_name(module):
             prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
