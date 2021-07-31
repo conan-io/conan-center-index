@@ -42,6 +42,7 @@ class PatchElfConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)  # TODO check if we need this win thingy
         yes_no = lambda v: "yes" if v else "no"
+        # TODO these are unrecognized by wsl's configure tool, no matter the compiler. Are they recognized on the workstation?
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
