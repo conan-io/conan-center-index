@@ -1,8 +1,11 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
-required_conan_version = ">=1.33.0"
+# CCI policy is to require the latest conan client
+required_conan_version = ">=1.37.0"
 
 class XlntConan(ConanFile):
     name = "xlnt"
@@ -38,6 +41,11 @@ class XlntConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        # https://github.com/tfussell/xlnt/blob/master/docs/introduction/Installation.md#compiling-xlnt-1xx-from-source-on-ubuntu-1604-lts-xenial-xerus
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.2":
+            raise ConanInvalidConfiguration("Xlnt requires a minimum of gcc 6.2.0")
 
     def _configure_cmake(self):
         if self._cmake:
