@@ -53,7 +53,7 @@ class PatchElfConan(ConanFile):
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         self.copy(pattern="*.h", dst=os.path.join("include", "patchelf"), keep_path=False)
         self.copy(pattern="*.o", dst="lib", keep_path=False)
-        os.rename(os.path.join(self.package_folder, "lib", "patchelf.o"), os.path.join(self.package_folder, "lib", "libpatchelf.o"))
+        os.rename(os.path.join(self.package_folder, "lib", "patchelf.o"), os.path.join(self.package_folder, "lib", "libpatchelf.a"))
 
         autotools = self._configure_autotools()
         autotools.install()
