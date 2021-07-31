@@ -1,4 +1,7 @@
 sources:
+  "1.9.1":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.1.src.tar.gz"
+    sha256: "67aeae1be4e1565519898f46f1f7092f1973cce8a767e93101ee0111717091d1"
   "1.8.20":
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.20.src.tar.gz"
     sha256: "e0db6979286fd7ccd3a99af9f97397f2bae50532e4ecb312aa18862f8401ddec"
@@ -9,6 +12,9 @@ sources:
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
     sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
 patches:
+  "1.9.1":
+    - patch_file: "patches/1.9.1-0001-imported-target.patch"
+      base_path: "source_subfolder"
   "1.8.20":
     - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
       base_path: "source_subfolder"

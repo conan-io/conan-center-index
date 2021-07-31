@@ -1,0 +1,5 @@
+versions:
+  "1.19":
+    folder: "all"
+  "cci.20210404":
+    folder: "all"

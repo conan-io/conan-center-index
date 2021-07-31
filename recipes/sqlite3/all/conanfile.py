@@ -95,11 +95,7 @@ class ConanSqlite3(ConanFile):
             raise ConanInvalidConfiguration("build_executable=True cannot be combined with enable_default_vfs=False")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        archive_name = os.path.basename(url)
-        archive_name = os.path.splitext(archive_name)[0]
-        os.rename(archive_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

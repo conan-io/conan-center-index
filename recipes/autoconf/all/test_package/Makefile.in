@@ -5,7 +5,7 @@ SRCS = test_package_c.c test_package_cpp.cpp
 OBJS := $(patsubst %.c,%.@OBJEXT@,$(patsubst %.cpp,%.@OBJEXT@,$(SRCS)))
 
 test_package@EXEEXT@: $(OBJS)
-	@CXX@ $^ -o $@
+	@CXX@ @CXXFLAGS@ @LDFLAGS@ $^ -o $@
 
 %.@OBJEXT@: %.cpp
 	@CXX@ @CXXFLAGS@ @CPPFLAGS@ -c $< @CC_MINUS_O@ $@

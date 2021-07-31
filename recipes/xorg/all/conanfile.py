@@ -54,7 +54,7 @@ class ConanXOrg(ConanFile):
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                             "libXcursor-devel", "libXdmcp-devel", "libXft-devel", "libXtst-devel", "libXinerama-devel",
-                            "xorg-x11-xkb-utils-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
+                            "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
                             "xkeyboard-config-devel", "xcb-util-devel"]

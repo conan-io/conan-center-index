@@ -1,0 +1,10 @@
+sources:
+  "0.3.0":
+    - url: "https://github.com/dbzhang800/QtXlsxWriter/archive/v0.3.0.zip"
+      sha256: "e665317de4f1551936d519781ab8f96b6738926595f3f26ecb6c50db4ff0419e"
+    - url: "https://raw.githubusercontent.com/dbzhang800/QtXlsxWriter/d013edc9cf39b450f035528114b349a70b1507ba/LICENSE"
+      sha256: "b89e97a417a8061f438c437d0485e3e4d135a6c25d976cc457a9a23281ee5f51"
+patches:
+  "0.3.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0.3.0/fix-export-macro.patch"

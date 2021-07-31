@@ -1,9 +1,9 @@
-import glob
+from conans import ConanFile, CMake, tools
 import json
 import os
 import re
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+
+required_conan_version = ">=1.33.0"
 
 
 class ConanRecipe(ConanFile):
@@ -35,20 +35,19 @@ class ConanRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.compiler.cppstd:
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('abseil-cpp-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if not self.settings.compiler.cppstd:
+        if not tools.valid_min_cppstd(self, 11):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["BUILD_TESTING"] = False

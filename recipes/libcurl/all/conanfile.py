@@ -90,11 +90,18 @@ class LibcurlConan(ConanFile):
     def _has_zstd_option(self):
         return tools.Version(self.version) >= "7.72.0"
 
+    @property
+    def _has_metalink_option(self):
+        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
+        return tools.Version(self.version) < "7.78.0" and not self._is_using_cmake_build
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_zstd_option:
             del self.options.with_zstd
+        if not self._has_metalink_option:
+            del self.options.with_libmetalink
         # Default options
         self.options.with_ssl = "darwinssl" if tools.is_apple_os(self.settings.os) else "openssl"
 
@@ -139,7 +146,6 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             del self.options.with_libidn
             del self.options.with_librtmp
-            del self.options.with_libmetalink
             del self.options.with_libpsl
 
     def requirements(self):
@@ -274,10 +280,9 @@ class LibcurlConan(ConanFile):
         params = [
             "--with-libidn2={}".format(yes_no(self.options.with_libidn)),
             "--with-librtmp={}".format(yes_no(self.options.with_librtmp)),
-            "--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)),
             "--with-libpsl={}".format(yes_no(self.options.with_libpsl)),
             "--with-schannel={}".format(yes_no(self.options.with_ssl == "schannel")),
-            "--with-darwinssl={}".format(yes_no(self.options.with_ssl == "darwinssl")),
+            "--with-secure-transport={}".format(yes_no(self.options.with_ssl == "darwinssl")),
             "--with-brotli={}".format(yes_no(self.options.with_brotli)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
@@ -312,6 +317,9 @@ class LibcurlConan(ConanFile):
 
         if self._has_zstd_option:
             params.append("--with-zstd={}".format(yes_no(self.options.with_zstd)))
+
+        if self._has_metalink_option:
+            params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
 
         # Cross building flags
         if tools.cross_building(self.settings):
@@ -486,11 +494,13 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
+            if tools.Version(self.version) >= "7.77.0":
+                self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
-                self.cpp_info.components["curl"].frameworks.extend(["Cocoa", "Security"])
+                self.cpp_info.components["curl"].frameworks.extend(["CoreFoundation", "Security"])
 
         if self._is_mingw:
             # provide pthread for dependent packages

@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibsndfileConan(ConanFile):
     name = "libsndfile"
@@ -29,7 +31,7 @@ class LibsndfileConan(ConanFile):
         "with_external_libs": True,
 
     }
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -57,11 +59,12 @@ class LibsndfileConan(ConanFile):
             del self.options.fPIC
         if self.options.with_sqlite != "deprecated":
             self.output.warn("with_sqlite is a deprecated option. Do not use.")
-        del self.options.with_sqlite
+
+    def package_id(self):
+        del self.info.options.with_sqlite
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -92,6 +95,9 @@ class LibsndfileConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "RUNTIME DESTINATION			${CMAKE_INSTALL_BINDIR}",
+                              "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -107,7 +113,7 @@ class LibsndfileConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SndFile"
-        self.cpp_info.names["cmake_find_package"] = "SndFile"
+        self.cpp_info.names["cmake_find_package_multi"] = "SndFile"
         self.cpp_info.names["pkg_config"] = "sndfile"
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
         if self.options.with_external_libs:
@@ -120,6 +126,7 @@ class LibsndfileConan(ConanFile):
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.programs:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

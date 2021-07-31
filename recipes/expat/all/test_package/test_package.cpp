@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include "expat.h"
 
+#ifdef XML_UNICODE_WCHAR_T
+#include <wchar.h>
+#endif
+
 #ifdef XML_LARGE_SIZE
 #if defined(XML_USE_MSC_EXTENSIONS) && _MSC_VER < 1400
 #define XML_FMT_INT_MOD "I64"
@@ -19,7 +23,7 @@
 #endif
 
 static void XMLCALL
-startElement(void *userData, const char *name, const char **atts)
+startElement(void *userData, const XML_Char *name, const XML_Char **atts)
 {
   int i;
   int *depthPtr = (int *)userData;
@@ -27,12 +31,16 @@ startElement(void *userData, const char *name, const char **atts)
 
   for (i = 0; i < *depthPtr; i++)
     putchar('\t');
+#ifdef XML_UNICODE_WCHAR_T
+  fputws(name, stdout);
+#else
   puts(name);
+#endif
   *depthPtr += 1;
 }
 
 static void XMLCALL
-endElement(void *userData, const char *name)
+endElement(void *userData, const XML_Char *name)
 {
   int *depthPtr = (int *)userData;
   (void)name;

@@ -1,0 +1,14 @@
+---
+--- openvdb/openvdb/CMakeLists.txt
++++ openvdb/openvdb/CMakeLists.txt
+@@ -413,8 +413,7 @@ if(WIN32)
+   # @note OPENVDB_OPENEXR_STATICLIB is old functionality from the makefiles
+   #       used in PlatformConfig.h to configure EXR exports. Once this file
+   #       is completely removed, this define can be too
+-  get_target_property(ILMBASE_LIB_TYPE IlmBase::Half TYPE)
+-  if(OPENEXR_USE_STATIC_LIBS OR (${ILMBASE_LIB_TYPE} STREQUAL STATIC_LIBRARY))
++  if(OPENEXR_USE_STATIC_LIBS)
+     list(APPEND OPENVDB_CORE_PUBLIC_DEFINES -DOPENVDB_OPENEXR_STATICLIB)
+   endif()
+   list(APPEND OPENVDB_CORE_PUBLIC_DEFINES -D_WIN32 -DNOMINMAX)
+

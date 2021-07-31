@@ -143,3 +143,30 @@
 +set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES OpenJPEG::OpenJPEG)
 +#target_compile_definitions(itkopenjpeg INTERFACE)
 +install(TARGETS itkopenjpeg EXPORT ${ITK3P_INSTALL_EXPORT_NAME}) 
+--- Modules/ThirdParty/TBB/CMakeLists.txt
++++ Modules/ThirdParty/TBB/CMakeLists.txt
+@@ -8,14 +8,14 @@ set(ITKTBB_NO_SRC 1)
+ # When this module is loaded by an app, load TBB too.
+ set(ITKTBB_EXPORT_CODE_INSTALL "
+ set(TBB_DIR \"${TBB_DIR}\")
+-find_package(TBB REQUIRED CONFIG)
++find_package(TBB REQUIRED)
+ ")
+ 
+ # When this module is configured by an app, configure TBB too.
+ set(ITKTBB_EXPORT_CODE_BUILD "
+ if(NOT ITK_BINARY_DIR)
+   set(TBB_DIR \"${TBB_DIR}\")
+-  find_package(TBB REQUIRED CONFIG)
++  find_package(TBB REQUIRED)
+ endif()
+ ")
+ 
+diff --git a/Modules/ThirdParty/TBB/itk-module-init.cmake b/Modules/ThirdParty/TBB/itk-module-init.cmake
+index 1b7ee20a..0859ef33 100644
+--- a/Modules/ThirdParty/TBB/itk-module-init.cmake
++++ b/Modules/ThirdParty/TBB/itk-module-init.cmake
+@@ -1,2 +1,2 @@
+-find_package(TBB REQUIRED CONFIG) # must have TBBConfig.cmake, provided since version tbb2017_20170604oss
++find_package(TBB REQUIRED)
+ get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
