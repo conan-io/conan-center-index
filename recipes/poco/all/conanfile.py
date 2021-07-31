@@ -4,7 +4,7 @@ from collections import namedtuple, OrderedDict
 import os
 
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class PocoConan(ConanFile):
@@ -21,10 +21,12 @@ class PocoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_fork": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_fork": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "is_lib"))
@@ -46,7 +48,7 @@ class PocoConan(ConanFile):
         "PocoMongoDB": _PocoComponent("enable_mongodb", True, ("PocoNet", ), True),
         "PocoNet": _PocoComponent("enable_net", True, ("PocoFoundation", ), True),
         "PocoNetSSL": _PocoComponent("enable_netssl", True, ("PocoCrypto", "PocoUtil", "PocoNet", ), True),    # also external openssl
-        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", True, ("PocoNet", "PocoUtil", ), True),
+        "PocoNetSSLWin": _PocoComponent("enable_netssl_win", False, ("PocoNet", "PocoUtil", ), True),
         "PocoPDF": _PocoComponent("enable_pdf", False, ("PocoXML", "PocoUtil", ), True),
         "PocoPageCompiler": _PocoComponent("enable_pagecompiler", False, ("PocoNet", "PocoUtil", ), False),
         "PocoFile2Page": _PocoComponent("enable_pagecompiler_file2page", False, ("PocoNet", "PocoUtil", "PocoXML", "PocoJSON", ), False),
@@ -56,6 +58,7 @@ class PocoConan(ConanFile):
         "PocoUtil": _PocoComponent("enable_util", True, ("PocoFoundation", "PocoXML", "PocoJSON", ), True),
         "PocoXML": _PocoComponent("enable_xml", True, ("PocoFoundation", ), True),
         "PocoZip": _PocoComponent("enable_zip", True, ("PocoUtil", "PocoXML", ), True),
+        "PocoActiveRecord": _PocoComponent("enable_active_record", True, ("PocoFoundation", "PocoData", ), True),
     }
 
     for comp in _poco_component_tree.values():
@@ -91,14 +94,13 @@ class PocoConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "poco-poco-{}-release".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.enable_netssl
+            del self.options.enable_fork
         else:
             del self.options.enable_netssl_win
         if tools.Version(self.version) < "1.9":
@@ -107,10 +109,18 @@ class PocoConan(ConanFile):
             del self.options.enable_data_mysql
             del self.options.enable_data_postgresql
             del self.options.enable_jwt
+        if tools.Version(self.version) < "1.11":
+            del self.options.enable_active_record
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.enable_xml:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoXML"))
+        if not self.options.enable_json:
+            util_dependencies = self._poco_component_tree["PocoUtil"].dependencies
+            self._poco_component_tree["PocoUtil"] = self._poco_component_tree["PocoUtil"]._replace(dependencies = tuple(x for x in util_dependencies if x != "PocoJSON"))
 
     def validate(self):
         if self.options.enable_apacheconnector:
@@ -130,31 +140,33 @@ class PocoConan(ConanFile):
         if self.options.enable_data_sqlite:
             if self.options["sqlite3"].threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
 
     def requirements(self):
-        self.requires("pcre/8.44")
+        self.requires("pcre/8.45")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
-            self.requires("expat/2.2.10")
+            self.requires("expat/2.4.1")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.36.0")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
             # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-        if self.options.get_safe("enable_netssl", False) or \
+        if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
-            self.requires("odbc/2.3.7")
+            self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/13.1")
+            self.requires("libpq/13.3")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
-            self.requires('apr-util/1.6.1')
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("apr-util/1.6.1")
+            self.requires("libmysqlclient/8.0.25")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -164,6 +176,7 @@ class PocoConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         if tools.Version(self.version) < "1.10.1":
             self._cmake.definitions["POCO_STATIC"] = not self.options.shared
         for comp in self._poco_component_tree.values():
@@ -191,6 +204,9 @@ class PocoConan(ConanFile):
             self._cmake.definitions["APRUTIL_ROOT_LIBRARY_DIRS"] = ";".join(self.deps_cpp_info["apr-util"].lib_paths)
 
         self.output.info(self._cmake.definitions)
+        # Disable fork
+        if not self.options.get_safe("enable_fork", True):
+            self._cmake.definitions["POCO_NO_FORK_EXEC"] = True
         # On Windows, Poco needs a message (MC) compiler.
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             self._cmake.configure(build_dir=self._build_subfolder)
@@ -207,6 +223,7 @@ class PocoConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     @property
     def _ordered_libs(self):
@@ -238,5 +255,11 @@ class PocoConan(ConanFile):
                 self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
                 if self.options.enable_data_odbc:
                     self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
+        self.cpp_info.defines.append("POCO_UNBUNDLED")
+        if self.options.enable_util:
+            if not self.options.enable_json:
+                self.cpp_info.defines.append("POCO_UTIL_NO_JSONCONFIGURATION")
+            if not self.options.enable_xml:
+                self.cpp_info.defines.append("POCO_UTIL_NO_XMLCONFIGURATION")
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"

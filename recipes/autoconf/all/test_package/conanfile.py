@@ -9,8 +9,8 @@ class TestPackageConan(ConanFile):
     exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp",
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):

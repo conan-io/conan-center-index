@@ -20,14 +20,16 @@ class PahoMqttcConan(ConanFile):
         "fPIC": [True, False],
         "ssl": [True, False],
         "asynchronous": [True, False],
-        "samples": [True, False, "deprecated"]
+        "samples": [True, False, "deprecated"],
+        "high_performance": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "ssl": True,
         "asynchronous": True,
-        "samples": "deprecated"
+        "samples": "deprecated",
+        "high_performance": False
     }
 
     _cmake = None
@@ -36,9 +38,16 @@ class PahoMqttcConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _has_high_performance_option(self):
+        return tools.Version(self.version) >= "1.3.2"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if not self._has_high_performance_option:
+            del self.options.high_performance
 
     def configure(self):
         if self.options.shared:
@@ -77,6 +86,8 @@ class PahoMqttcConan(ConanFile):
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+        if self._has_high_performance_option:
+            self._cmake.definitions["PAHO_HIGH_PERFORMANCE"] = self.options.high_performance
         self._cmake.configure()
         return self._cmake
 

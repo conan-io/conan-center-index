@@ -84,7 +84,7 @@ void test_h5pp(h5pp::File & file, const WriteType & writeData, std::string_view 
     file.writeDataset(writeData,dsetpath);
     h5pp::logger::log->debug("Reading {}",tag);
     auto readData = file.readDataset<ReadType>(dsetpath);
-    if constexpr(h5pp::type::sfinae::is_ScalarN<ReadType>()) {
+    if constexpr(h5pp::type::sfinae::is_Scalar2_v<ReadType> or h5pp::type::sfinae::is_Scalar3_v<ReadType>) {
         compareScalar(writeData,readData);
     }
     else if constexpr (has_scalarN_v<ReadType>){

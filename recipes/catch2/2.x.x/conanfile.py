@@ -46,6 +46,8 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
+        self._cmake.definitions["CATCH_BUILD_STATIC_LIBRARY"] = self.options.with_main
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

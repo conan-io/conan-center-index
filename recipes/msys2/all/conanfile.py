@@ -60,81 +60,14 @@ class MSYS2Conan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if tools.Version(self.version) >= "20210105" and self.settings.arch != "x86_64":
+        if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
-        if tools.Version(self.version) <= "20161025":
-            raise ConanInvalidConfiguration("msys2 v.20161025 is no longer supported")    
-
-    def _download(self, url, sha256):
-        from six.moves.urllib.parse import urlparse
-        filename = os.path.basename(urlparse(url[0]).path)
-        tools.download(url=url, filename=filename, sha256=sha256)
-        return filename
-
-    @property
-    def _keyring_subfolder(self):
-        return os.path.join(self.package_folder, "bin", "keyring")
-
-    @property
-    def _keyring_file(self):
-        return os.path.join(self._keyring_subfolder, "msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz")
-    
-    @property
-    def _keyring_sig(self):
-        return os.path.join(self._keyring_subfolder, "msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig")    
-
-    # download the new keyring
-    # https://www.msys2.org/news/#2020-06-29-new-packagers
-    def _download_keyring(self):
-        tools.download( "http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz",
-                        self._keyring_file,
-                        sha256="f1cc152902fd6018868b64d015cab9bf547ff9789d8bd7c0d798fb2b22367b2b" )
-        tools.download( "http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig",
-                        self._keyring_sig,
-                        sha256="bbd22e88f33c81c40b145c34d8027d60f714d4fd1d0dccd456895f398cc56297" )
-
-    def _install_pacman_keyring(self):
-        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
-            self.run('bash -l -c  "pacman-key --init;pacman-key --populate"')
-            verify_command = 'bash -l -c "pacman-key --verify %s"' % self._keyring_sig.replace("\\", "/")
-            self.run(verify_command)
-
-            install_command = 'bash -l -c "pacman -U %s --noconfirm"' % self._keyring_file.replace("\\", "/")
-            self.run(install_command)
-            self._kill_pacman()
-
-    def _update_very_old_pacman(self):
-        if (tools.Version(self.version) < "20200517"):
-            # Fix (https://github.com/msys2/MSYS2-packages/issues/1967)
-            # install zstd and pacman manually
-            pacman_packages_x64=["http://repo.msys2.org/msys/x86_64/libzstd-1.4.4-2-x86_64.pkg.tar.xz",
-                                 "http://repo.msys2.org/msys/x86_64/zstd-1.4.4-2-x86_64.pkg.tar.xz",
-                                 "http://repo.msys2.org/msys/x86_64/pacman-5.2.1-6-x86_64.pkg.tar.xz"]
-            
-            if (self.settings.arch == "x86_64"):
-                for i in pacman_packages_x64:
-                    self.run('bash -l -c "pacman --noconfirm -U %s"' % i)
-
-            pacman_packages_x32=["http://repo.msys2.org/msys/i686/libzstd-1.4.4-2-i686.pkg.tar.xz",
-                                 "http://repo.msys2.org/msys/i686/zstd-1.4.4-2-i686.pkg.tar.xz",
-                                 "http://repo.msys2.org/msys/i686/pacman-5.2.1-6-i686.pkg.tar.xz"]
-
-            if (self.settings.arch == "x86"):                     
-                for i in pacman_packages_x32:
-                    self.run('bash -l -c "pacman --noconfirm -U %s"' % i)
-
-            self._kill_pacman()
 
 
     def _update_pacman(self):
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             try:
-                self._update_very_old_pacman()
-
                 self._kill_pacman()
-                # https://www.msys2.org/news/   see  2020-05-31 - Update may fail with "could not open file"
-                # update pacman separately first
-                self.run('bash -l -c "pacman --debug --noconfirm -Sydd pacman"')
 
                 # https://www.msys2.org/docs/ci/
                 self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
@@ -144,6 +77,7 @@ class MSYS2Conan(ConanFile):
                 self.run('bash -l -c "pacman --debug -Rc dash --noconfirm"')
             except ConanException:
                 self.run('bash -l -c "cat /var/log/pacman.log || echo nolog"')
+                self._kill_pacman()
                 raise
 
     # https://github.com/msys2/MSYS2-packages/issues/1966
@@ -174,22 +108,16 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        subdir = "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
+        subdir = "msys64"
         return os.path.join(self.package_folder, "bin", subdir)
 
     def source(self):
         # sources are different per configuration - do download in build
         pass
 
-    def _do_source(self):
-        filename = self._download(**self.conan_data["sources"][self.version][str(self.settings.arch)])
-        tools.unzip(filename)
-        self._download_keyring()
-
     def build(self):
-        os.makedirs(os.path.join(self.package_folder, "bin"))
-        with tools.chdir(os.path.join(self.package_folder, "bin")):
-            self._do_source()
+        tools.get(**self.conan_data["sources"][self.version],
+                    destination=os.path.join(self.package_folder, "bin"))
         with lock():
             self._do_build()
 
@@ -200,14 +128,13 @@ class MSYS2Conan(ConanFile):
         if self.options.additional_packages:
             packages.extend(str(self.options.additional_packages).split(","))
 
-        if (tools.Version(self.version) < "20210105"):
-            self._install_pacman_keyring()
-
         self._update_pacman()
 
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
+            for package in ['pkgconf']:
+                self.run('bash -l -c "pacman -Rs $(pacman -Qsq %s) --noconfirm"' % package)
 
         self._kill_pacman()
 
@@ -239,6 +166,8 @@ class MSYS2Conan(ConanFile):
                         os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         msys_root = self._msys_dir
         msys_bin = os.path.join(msys_root, "usr", "bin")
 

@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
@@ -50,6 +51,10 @@ class MpirConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
            "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20200517")
+
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def source(self):
         tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])

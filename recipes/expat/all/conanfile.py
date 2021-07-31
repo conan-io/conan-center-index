@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class ExpatConan(ConanFile):
     name = "expat"
@@ -10,8 +12,12 @@ class ExpatConan(ConanFile):
     homepage = "https://github.com/libexpat/libexpat"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "char_type": ["char", "wchar_t", "ushort"],
+    }
+    default_options = {"shared": False, "fPIC": True, "char_type": "char"}
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
@@ -22,6 +28,8 @@ class ExpatConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "2.2.8":
+            del self.options.char_type
 
     def configure(self):
         if self.options.shared:
@@ -30,9 +38,11 @@ class ExpatConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True
+        )
 
     def _configure_cmake(self):
         if self._cmake:
@@ -40,17 +50,19 @@ class ExpatConan(ConanFile):
         self._cmake = CMake(self)
         if tools.Version(self.version) < "2.2.8":
             self._cmake.definitions["BUILD_doc"] = "Off"
-            self._cmake.definitions["BUILD_examples"] =  "Off"
+            self._cmake.definitions["BUILD_examples"] = "Off"
             self._cmake.definitions["BUILD_shared"] = self.options.shared
             self._cmake.definitions["BUILD_tests"] = "Off"
             self._cmake.definitions["BUILD_tools"] = "Off"
         else:
             # These options were renamed in 2.2.8 to be more consistent
             self._cmake.definitions["EXPAT_BUILD_DOCS"] = "Off"
-            self._cmake.definitions["EXPAT_BUILD_EXAMPLES"] =  "Off"
+            self._cmake.definitions["EXPAT_BUILD_EXAMPLES"] = "Off"
             self._cmake.definitions["EXPAT_SHARED_LIBS"] = self.options.shared
             self._cmake.definitions["EXPAT_BUILD_TESTS"] = "Off"
             self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
+            # EXPAT_CHAR_TYPE was added in 2.2.8
+            self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -75,3 +87,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
+        if self.options.get_safe("char_type") in ["wchar_t", "ushort"]:
+            self.cpp_info.defines.append("XML_UNICODE")
+        if self.options.get_safe("char_type") == "wchar_t":
+            self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")

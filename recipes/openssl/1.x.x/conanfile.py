@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import textwrap
+from contextlib import contextmanager
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -73,6 +74,7 @@ class OpenSSLConan(ConanFile):
                "shared": [True, False],
                "fPIC": [True, False],
                "no_asm": [True, False],
+               "enable_weak_ssl_ciphers": [True, False],
                "386": [True, False],
                "no_sse2": [True, False],
                "no_bf": [True, False],
@@ -116,6 +118,14 @@ class OpenSSLConan(ConanFile):
                "no_ssl": [True, False],
                "no_ts": [True, False],
                "no_whirlpool": [True, False],
+               "no_ec": [True, False],
+               "no_ecdh": [True, False],
+               "no_ecdsa": [True, False],
+               "no_rfc3779": [True, False],
+               "no_seed": [True, False],
+               "no_sock": [True, False],
+               "no_ssl3": [True, False],
+               "no_tls1": [True, False],
                "capieng_dialog": [True, False],
                "enable_capieng": [True, False],
                "openssldir": "ANY"}
@@ -143,6 +153,8 @@ class OpenSSLConan(ConanFile):
             del self.options.no_idea
             del self.options.no_md4
             del self.options.no_ocsp
+            del self.options.no_seed
+            del self.options.no_sock
             del self.options.no_srp
             del self.options.no_ts
             del self.options.no_whirlpool
@@ -480,8 +492,7 @@ class OpenSSLConan(ConanFile):
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
         if self.settings.os == "Neutrino":
-            args.append("-lsocket no-asm")
-
+            args.append("no-asm -lsocket -latomic")
         if self._full_version < "1.1.0":
             if self.options.get_safe("no_zlib"):
                 args.append("no-zlib")
@@ -617,7 +628,10 @@ class OpenSSLConan(ConanFile):
     def _perl(self):
         if tools.os_info.is_windows and not self._win_bash:
             # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
-            return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
+            if "strawberryperl" in self.deps_cpp_info.deps:
+                return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
+            elif hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
+                return self.user_info_build["strawberryperl"].perl
         return "perl"
 
     @property
@@ -680,6 +694,20 @@ class OpenSSLConan(ConanFile):
             return "gcc"
         return "cc"
 
+    @contextmanager
+    def _make_context(self):
+        if self._use_nmake:
+            # Windows: when cmake generates its cache, it populates some environment variables as well.
+            # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
+            # break nmake (don't know about mingw make). So we fix them
+            def sanitize_env_var(var):
+                return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
+            env = {key: sanitize_env_var(tools.get_env(key)) for key in ("CC", "RC") if tools.get_env(key)}
+            with tools.environment_append(env):
+                yield
+        else:
+            yield
+
     def build(self):
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
@@ -699,7 +727,8 @@ class OpenSSLConan(ConanFile):
                 else:
                     self._patch_configure()
                     self._patch_makefile_org()
-                self._make()
+                with self._make_context():
+                    self._make()
 
     @property
     def _cross_building(self):
@@ -846,7 +875,9 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_threads:
                 self.cpp_info.components["crypto"].system_libs.append("pthread")
                 self.cpp_info.components["ssl"].system_libs.append("pthread")
-
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.components["crypto"].system_libs.append("atomic")
+            self.cpp_info.components["ssl"].system_libs.append("atomic")
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
         self.cpp_info.components["crypto"].names['pkg_config'] = 'libcrypto'

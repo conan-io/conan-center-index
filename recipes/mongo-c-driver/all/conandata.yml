@@ -1,4 +1,7 @@
 sources:
+  "1.17.6":
+    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.6/mongo-c-driver-1.17.6.tar.gz"
+    sha256: "8644deec7ae585e8d12566978f2017181e883f303a028b5b3ccb83c91248b150"
   "1.17.4":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.4/mongo-c-driver-1.17.4.tar.gz"
     sha256: "9ec8fe7fb54d636886fa823460658ccf660e3d82520d10810fb7c9d302ac974f"
@@ -9,6 +12,9 @@ sources:
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.2/mongo-c-driver-1.17.2.tar.gz"
     sha256: "bc53d5f72ab628a1ae549db6888325d6dc34db3ca31c5e16e550c1bb4266d864"
 patches:
+  "1.17.6":
+    - patch_file: "patches/disable-shared-when-static-1.17.6.patch"
+      base_path: "source_subfolder"
   "1.17.4":
     - patch_file: "patches/disable-shared-when-static.patch"
       base_path: "source_subfolder"

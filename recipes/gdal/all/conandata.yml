@@ -64,3 +64,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.2.x/fix-include-xerces.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.2.x/fix-ogrelasticlayer-gcc-less-5.patch"
+      base_path: "source_subfolder"

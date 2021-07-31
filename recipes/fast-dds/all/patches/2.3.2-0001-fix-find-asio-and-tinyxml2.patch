@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8a9cb0209..400c681e7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -225,8 +225,8 @@ if(NOT BUILD_SHARED_LIBS)
+ endif()
+ 
+ eprosima_find_package(fastcdr REQUIRED)
+-eprosima_find_thirdparty(Asio asio VERSION 1.10.8)
+-eprosima_find_thirdparty(TinyXML2 tinyxml2)
++eprosima_find_thirdparty(asio REQUIRED)
++eprosima_find_thirdparty(tinyxml2 REQUIRED)
+ 
+ find_package(foonathan_memory REQUIRED)
+ message(STATUS "Found foonathan_memory: ${foonathan_memory_DIR}")
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index 04d313bf2..c7d64f04d 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -455,7 +455,7 @@ elseif(NOT EPROSIMA_INSTALLER)
+     # Link library to external libraries.
+     target_link_libraries(${PROJECT_NAME} ${PRIVACY} fastcdr foonathan_memory
+         ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS}
+-        ${TINYXML2_LIBRARY}
++        tinyxml2::tinyxml2
+         $<$<BOOL:${LINK_SSL}>:OpenSSL::SSL$<SEMICOLON>OpenSSL::Crypto>
+         $<$<BOOL:${WIN32}>:iphlpapi$<SEMICOLON>Shlwapi>
+         ${THIRDPARTY_BOOST_LINK_LIBS}

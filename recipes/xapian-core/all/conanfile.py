@@ -2,6 +2,9 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class XapianCoreConan(ConanFile):
@@ -45,21 +48,19 @@ class XapianCoreConan(ConanFile):
         self.requires("zlib/1.2.11")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 msvc_cl_sh =  os.path.join(self.build_folder, "msvc_cl.sh").replace("\\", "/")
-                env.update({
+                env = {
                     "AR": "lib",
                     "CC": msvc_cl_sh,
                     "CXX": msvc_cl_sh,
@@ -68,12 +69,11 @@ class XapianCoreConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
-            with tools.environment_append(env):
-                yield
+            yield
 
     @property
     def _datarootdir(self):
@@ -116,8 +116,8 @@ class XapianCoreConan(ConanFile):
             if self.options.shared:
                 pass
             else:
-                os.rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
-                          os.path.join(self.package_folder, "lib", "xapian.lib"))
+                tools.rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
+                             os.path.join(self.package_folder, "lib", "xapian.lib"))
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "bin", "xapian-config")))
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libxapian.la")))
@@ -125,23 +125,57 @@ class XapianCoreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self._datarootdir, "doc"))
         tools.rmdir(os.path.join(self._datarootdir, "man"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            set(XAPIAN_FOUND TRUE)
+            set(XAPIAN_INCLUDE_DIR ${xapian_INCLUDE_DIR}
+                                   ${xapian_INCLUDE_DIR_RELEASE}
+                                   ${xapian_INCLUDE_DIR_RELWITHDEBINFO}
+                                   ${xapian_INCLUDE_DIR_MINSIZEREL}
+                                   ${xapian_INCLUDE_DIR_DEBUG})
+            set(XAPIAN_LIBRARIES ${xapian_LIBRARIES}
+                                 ${xapian_LIBRARIES_RELEASE}
+                                 ${xapian_LIBRARIES_RELWITHDEBINFO}
+                                 ${xapian_LIBRARIES_MINSIZEREL}
+                                 ${xapian_LIBRARIES_DEBUG})
+        """)
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.libs = ["xapian"]
         if not self.options.shared:
-            if self.settings.os == "Linux":
+            if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.system_libs = ["rt"]
-            if self.settings.os == "SunOS":
+            elif self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["rpcrt4", "ws2_32"]
+            elif self.settings.os == "SunOS":
                 self.cpp_info.system_libs = ["socket", "nsl"]
 
         self.cpp_info.names["cmake_find_package"] = "xapian"
         self.cpp_info.names["cmake_find_package_multi"] = "xapian"
-        # FIXME: must define XAPIAN_INCLUDE_DIRS and XAPIAN_LIBRARIES cmake variables
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.names["pkg_config"] = "xapian-core"
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(binpath))
         self.env_info.PATH.append(binpath)
 
-        automake_path = os.path.join(self._datarootdir, "aclocal")
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_path))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.unix_path(automake_path))
+        xapian_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(xapian_aclocal))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(tools.unix_path(xapian_aclocal))

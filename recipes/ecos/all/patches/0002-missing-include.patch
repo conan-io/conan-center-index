@@ -1,0 +1,10 @@
+--- a/ecos_bb/ecos_bb.c
++++ b/ecos_bb/ecos_bb.c
+@@ -31,6 +31,7 @@
+ #include "math.h"
+ #include "equil.h"
+ #include "spla.h"
++#include <string.h>
+ 
+ #define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
+ 

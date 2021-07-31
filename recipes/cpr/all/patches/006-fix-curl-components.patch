@@ -20,7 +20,7 @@
 -                message(FATAL_ERROR "Curl not found on this system. To use the build in version set CPR_FORCE_USE_SYSTEM_CURL to OFF.")
 -            endif()
 -        endif()
-+    find_package(CURL)
++    find_package(CURL REQUIRED)
 +    if(CURL_FOUND)
 +        message(STATUS "Curl found on this system.")
      else()

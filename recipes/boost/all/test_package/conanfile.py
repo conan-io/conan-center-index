@@ -34,7 +34,14 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_LOCALE"] = not self.options["boost"].without_locale
             cmake.definitions["WITH_NOWIDE"] = not self._boost_option("without_nowide", True)
             cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
+            cmake.definitions["WITH_STACKTRACE"] = not self.options["boost"].without_stacktrace
+            cmake.definitions["WITH_STACKTRACE_ADDR2LINE"] = self.deps_user_info["boost"].stacktrace_addr2line_available
+            cmake.definitions["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
+            if self.options["boost"].namespace != 'boost' and not self.options["boost"].namespace_alias:
+                cmake.definitions['BOOST_NAMESPACE'] = self.options["boost"].namespace
             cmake.configure()
+            # Disable parallel builds because c3i (=conan-center's test/build infrastructure) seems to choke here
+            cmake.parallel = False
             cmake.build()
 
     def test(self):
@@ -65,3 +72,14 @@ class TestPackageConan(ConanFile):
             with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
                 self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
             self.run(os.path.join("bin", "numpy_exe"), run_environment=True)
+        if not self.options["boost"].without_stacktrace:
+            self.run(os.path.join("bin", "stacktrace_noop_exe"), run_environment=True)
+            if str(self.deps_user_info["boost"].stacktrace_addr2line_available) == "True":
+                self.run(os.path.join("bin", "stacktrace_addr2line_exe"), run_environment=True)
+            if self.settings.os == "Windows":
+                self.run(os.path.join("bin", "stacktrace_windbg_exe"), run_environment=True)
+                self.run(os.path.join("bin", "stacktrace_windbg_cached_exe"), run_environment=True)
+            else:
+                self.run(os.path.join("bin", "stacktrace_basic_exe"), run_environment=True)
+            if self._boost_option("with_stacktrace_backtrace", False):
+                self.run(os.path.join("bin", "stacktrace_backtrace_exe"), run_environment=True)

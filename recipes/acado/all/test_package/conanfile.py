@@ -8,6 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        # FIXME: CCI infrastructure should provide cpu count input to avoid errors
+        cmake.parallel = False
         cmake.configure()
         cmake.build()
 

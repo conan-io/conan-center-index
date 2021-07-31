@@ -99,9 +99,7 @@ class OpenALConan(ConanFile):
             self.requires("libalsa/1.2.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "openal-soft-openal-soft-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -171,7 +169,7 @@ class OpenALConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])
