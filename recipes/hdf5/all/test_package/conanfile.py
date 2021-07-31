@@ -9,6 +9,10 @@ class Hdf5TestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions.update({
+            "HDF5_CXX": self.options["hdf5"].enable_cxx,
+            "HDF5_PARALLEL": self.options["hdf5"].parallel
+        })
         cmake.configure()
         cmake.build()
 
