@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 include("conanbuildinfo.cmake")
 conan_basic_setup()
 
