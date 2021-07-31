@@ -13,11 +13,9 @@ class PatchElfConan(ConanFile):
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": False,  # TODO justify
     }
 
@@ -31,6 +29,7 @@ class PatchElfConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def configure(self):
+        # TODO check if available for win, adapt remainder if yes
         if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("PatchELF is only available for GNU-like operating systems (e.g. Linux)")
 
@@ -41,13 +40,7 @@ class PatchElfConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)  # TODO check if we need this win thingy
-        yes_no = lambda v: "yes" if v else "no"
-        # TODO these are unrecognized by wsl's configure tool, no matter the compiler. Are they recognized on the workstation?
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        self._autotools.configure(configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
@@ -57,7 +50,9 @@ class PatchElfConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy(pattern="*.o", dst="lib", keep_path=False)
+        self.copy(pattern="*.h", dst=os.path.join("include", "patchelf"), keep_path=False)
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
