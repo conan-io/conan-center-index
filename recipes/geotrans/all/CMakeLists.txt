@@ -69,6 +69,7 @@ target_compile_features(MSPCoordinateConversionService PUBLIC cxx_std_11)
 target_compile_options(MSPCoordinateConversionService PRIVATE -Wno-deprecated)
 target_include_directories(MSPCoordinateConversionService PUBLIC include ${DTTCINCS} ${INCS})
 set_target_properties(MSPCoordinateConversionService  PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+target_link_libraries(MSPCoordinateConversionService PUBLIC MSPdtcc)
 
 include(GNUInstallDirs)
 install(TARGETS MSPdtcc MSPCoordinateConversionService

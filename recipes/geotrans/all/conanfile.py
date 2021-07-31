@@ -83,10 +83,6 @@ You can then set the environment variable MPCCS_DATA to the location of this `da
     def package_info(self):
         self.user_info.data_path = os.path.join(self.package_folder, "res")
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.names["cmake_find_package"] = "geotrans"
-        self.cpp_info.names["cmake_find_package_multi"] = "geotrans"
-        self.cpp_info.components["dtcc"].names["cmake_find_package"] = "dtcc"
-        self.cpp_info.components["dtcc"].names["cmake_find_package_multi"] = "dtcc"
         self.cpp_info.components["dtcc"].libs = ["MSPdtcc"]
         self.cpp_info.components["dtcc"].includedirs = [
             path[0] for path in os.walk("include")
@@ -94,8 +90,6 @@ You can then set the environment variable MPCCS_DATA to the location of this `da
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["dtcc"].system_libs.append("pthread")
 
-        self.cpp_info.components["ccs"].names["cmake_find_package"] = "ccs"
-        self.cpp_info.components["ccs"].names["cmake_find_package_multi"] = "ccs"
         self.cpp_info.components["ccs"].libs = ["MSPCoordinateConversionService"]
         self.cpp_info.components["ccs"].requires = ["dtcc"]
         self.cpp_info.components["ccs"].includedirs = [
