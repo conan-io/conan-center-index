@@ -90,6 +90,10 @@ class AprConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "include", "apr.h.in"),
                                   "@osuuid@", "0")
 
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            self.build_requires("libtool/2.4.6")
+
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
