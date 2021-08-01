@@ -57,9 +57,14 @@ class PdfiumConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
-        if self.settings.compiler == "gcc":
-            if tools.Version(self.settings.compiler.version) < 8:
-                raise ConanInvalidConfiguration("pdfium needs at least gcc 8")
+        minimum_compiler_versions = {
+            "gcc": 8,
+            "Visual Studio": 15,
+        }
+        min_compiler_version = minimum_compiler_versions.get(str(self.settings.compiler))
+        if min_compiler_version:
+            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                raise ConanInvalidConfiguration("pdfium needs at least compiler version {}".format(min_compiler_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version]["pdfium-cmake"],
