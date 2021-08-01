@@ -80,10 +80,11 @@ class CfitsioConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # Remove embedded zlib files
-        for zlib_file in glob.glob(os.path.join(self._source_subfolder, "zlib", "*")):
-            if not zlib_file.endswith(("zcompress.c", "zuncompress.c")):
-                os.remove(zlib_file)
+        if tools.Version(self.version) < "4.0.0":
+            # Remove embedded zlib files
+            for zlib_file in glob.glob(os.path.join(self._source_subfolder, "zlib", "*")):
+                if not zlib_file.endswith(("zcompress.c", "zuncompress.c")):
+                    os.remove(zlib_file)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -94,7 +95,13 @@ class CfitsioConan(ConanFile):
         self._cmake.definitions["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
         if self.settings.os != "Windows":
             self._cmake.definitions["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
-            self._cmake.definitions["UseCurl"] = self.options.with_curl
+            if tools.Version(self.version) >= "4.0.0":
+                self._cmake.definitions["USE_CURL"] = self.options.with_curl
+            else:
+                self._cmake.definitions["UseCurl"] = self.options.with_curl
+        if tools.Version(self.version) >= "4.0.0":
+            self._cmake.definitions["TESTS"] = False
+            self._cmake.definitions["UTILS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
