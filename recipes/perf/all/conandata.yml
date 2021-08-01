@@ -1,0 +1,4 @@
+sources:
+  "5.13":
+    url: https://github.com/torvalds/linux/archive/refs/tags/v5.13.tar.gz
+    sha256: 9ce4c15b10d4dc9e353f3105dd11b9d2d2ef83e24772d68d3cf0830fe5f527a1
