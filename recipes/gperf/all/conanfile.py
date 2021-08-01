@@ -11,7 +11,7 @@ class GperfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
-    topics = ("conan", "gperf", "hash-generator", "hash")
+    topics = ("gperf", "hash-generator", "hash")
 
     settings = "os", "arch", "compiler", "build_type"
 
