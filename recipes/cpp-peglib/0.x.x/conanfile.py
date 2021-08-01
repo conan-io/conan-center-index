@@ -29,5 +29,5 @@ class CpppeglibConan(ConanFile):
         self.copy("peglib.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
