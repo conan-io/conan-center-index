@@ -29,6 +29,7 @@ class MinizipConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -54,11 +55,13 @@ class MinizipConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_BZIP2"] = self.options.bzip2
-        cmake.definitions["BUILD_TOOLS"] = self.options.tools
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_BZIP2"] = self.options.bzip2
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
