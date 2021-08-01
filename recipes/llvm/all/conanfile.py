@@ -64,8 +64,8 @@ class Llvm(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, '14')
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "19.1":
-            raise ConanInvalidConfiguration("Need MSVC >= 19.1")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16.4":
+            raise ConanInvalidConfiguration("An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
     def build(self):
         enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
