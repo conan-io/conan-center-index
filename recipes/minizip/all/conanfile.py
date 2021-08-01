@@ -27,7 +27,7 @@ class MinizipConan(ConanFile):
         "tools": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     @property
@@ -61,7 +61,8 @@ class MinizipConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         shutil.move("CMakeLists.txt", os.path.join(self._source_subfolder, 'CMakeLists.txt'))
         cmake = self._configure_cmake()
         cmake.build()
