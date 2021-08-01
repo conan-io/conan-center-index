@@ -64,8 +64,6 @@ class RedisPlusPlusConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd_required)
         
         if tools.Version(self.version) >= "1.3.0":
             min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
@@ -75,14 +73,17 @@ class RedisPlusPlusConan(ConanFile):
             else:
                 self.output.warn("redis-plus-plus requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
+    def validate(self):
+        if self.options.with_tls != self.options["hiredis"].with_ssl:
+            raise ConanInvalidConfiguration("with_tls must match hiredis:with_ssl option")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd_required)
+
     def requirements(self):
         self.requires("hiredis/1.0.0")
         if self.options.get_safe("enable_async") == "libuv":
             self.requires("libuv/1.41.1")
-
-    def validate(self):
-        if self.options.with_tls != self.options["hiredis"].with_ssl:
-            raise ConanInvalidConfiguration("with_tls must match hiredis:with_ssl option")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
