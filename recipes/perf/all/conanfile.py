@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import os
 
 required_conan_version = ">=1.35.0"
@@ -12,6 +13,7 @@ class Perf(ConanFile):
     homepage = "https://perf.wiki.kernel.org/index.php"
     license = "GPL-2.0 WITH Linux-syscall-note"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/*"
 
     _source_subfolder = "source_subfolder"
 
@@ -20,15 +22,15 @@ class Perf(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("perf is supported only on Linux")
 
-    def system_requirements(self):
-        installer = SystemPackageTool()
-        for package in [ "flex", "bison" ]:
-            installer.install(package)
+    def build_requirements(self):
+        self.build_requires("flex/2.6.4")
+        self.build_requires("bison/3.5.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
+        apply_conandata_patches(self)
         autotools = AutoToolsBuildEnvironment(self)
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
             autotools.make()
