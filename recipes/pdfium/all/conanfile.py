@@ -82,10 +82,6 @@ class PdfiumConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    @property
-    def _use_cmake(self):
-        return True
-
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
