@@ -23,7 +23,7 @@ class PatchElfConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def configure(self):
-        if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
+        if not tools.is_apple_os(self.settings.os) and self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("PatchELF is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
