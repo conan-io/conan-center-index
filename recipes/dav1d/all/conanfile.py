@@ -1,7 +1,8 @@
 import os
 from conans import ConanFile, Meson, tools
 
-required_conan_version = ">= 1.29.1"
+required_conan_version = ">=1.33.0"
+
 
 class Dav1dConan(ConanFile):
     name = "dav1d"
@@ -63,8 +64,8 @@ class Dav1dConan(ConanFile):
             self.build_requires("nasm/2.15.05")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("dav1d-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
