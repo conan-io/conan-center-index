@@ -11,7 +11,7 @@ class GperfConan(ConanFile):
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
     topics = ("conan", "gperf", "hash-generator", "hash")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     _source_subfolder = "source_subfolder"
     _autotools = None
     exports_sources = "patches/*"
@@ -23,6 +23,9 @@ class GperfConan(ConanFile):
     @property
     def _is_mingw_windows(self):
         return self.settings.os == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     @property
     def _settings_build(self):
@@ -79,10 +82,6 @@ class GperfConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.compiler
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
