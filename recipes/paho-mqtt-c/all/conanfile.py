@@ -67,6 +67,9 @@ class PahoMqttcConan(ConanFile):
         if not self.options.shared and tools.Version(self.version) < "1.3.4":
             raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
 
+    def package_id(self):
+        del self.info.options.samples
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -116,9 +119,6 @@ class PahoMqttcConan(ConanFile):
         self.copy(os.path.join("bin", "*{}.*".format(self._lib_target)), dst="bin", keep_path=False)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-
-    def package_id(self):
-        del self.info.options.samples
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
