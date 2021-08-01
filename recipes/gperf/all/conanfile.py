@@ -48,7 +48,7 @@ class GperfConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
                 self._autotools.flags.append("-FS")
-            self._autotools.configure(configure_dir=self._source_subfolder)
+            self._autotools.configure()
         return self._autotools
 
     @property
@@ -57,24 +57,25 @@ class GperfConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self._is_msvc:
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CFLAGS": "-{}".format(self.settings.compiler.runtime),
-                    "CXXLAGS": "-{}".format(self.settings.compiler.runtime),
-                    "CPPFLAGS": "-D_WIN32_WINNT=_WIN32_WINNT_WIN8",
-                    "LD": "link",
-                    "NM": "dumpbin -symbols",
-                    "STRIP": ":",
-                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                    "RANLIB": ":",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+        with tools.chdir(self._source_subfolder):
+            if self._is_msvc:
+                with tools.vcvars(self.settings):
+                    env = {
+                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                        "CFLAGS": "-{}".format(self.settings.compiler.runtime),
+                        "CXXLAGS": "-{}".format(self.settings.compiler.runtime),
+                        "CPPFLAGS": "-D_WIN32_WINNT=_WIN32_WINNT_WIN8",
+                        "LD": "link",
+                        "NM": "dumpbin -symbols",
+                        "STRIP": ":",
+                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                        "RANLIB": ":",
+                    }
+                    with tools.environment_append(env):
+                        yield
+            else:
+                yield
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
