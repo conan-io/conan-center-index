@@ -24,10 +24,13 @@ class GperfConan(ConanFile):
     def _is_mingw_windows(self):
         return self.settings.os == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if self.settings.os == "Windows" and tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
