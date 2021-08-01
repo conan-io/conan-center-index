@@ -68,8 +68,7 @@ if (BUILD_TOOLS)
         target_compile_options(miniunz_bin PUBLIC /W3 /wd4005 /wd4996 /wd4018 -D_CRT_SECURE_NO_WARNINGS)
     endif()
 
-    install (TARGETS minizip_bin miniunz_bin
-             RUNTIME DESTINATION bin)
+    install(TARGETS minizip_bin miniunz_bin DESTINATION bin)
 endif()
 
 install(
