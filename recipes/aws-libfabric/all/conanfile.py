@@ -19,8 +19,8 @@ class LibfabricConan(ConanFile):
             "shared": [True, False],
             "fPIC": [True, False],
             "with_libnl": [True, False],
-            "with_bgq_progress": ["auto", "manual"],
-            "with_bgq_mr": ["basic", "scalable"]
+            "bgq_progress": ["auto", "manual"],
+            "bgq_mr": ["basic", "scalable"]
         }
     }
     default_options = {
@@ -30,8 +30,8 @@ class LibfabricConan(ConanFile):
             "fPIC": True,
             "tcp": True,
             "with_libnl": False,
-            "with_bgq_progress": "manual",
-            "with_bgq_mr": "basic"
+            "bgq_progress": "manual",
+            "bgq_mr": "basic"
         }
     }
 
@@ -77,9 +77,13 @@ class LibfabricConan(ConanFile):
 
         yes_no_dl = lambda v: {"True": "yes", "False": "no", "shared": "dl"}[str(v)]
         args = [
-            "--with-bgq-progress={}".format(self.options.with_bgq_progress),
-            "--with-bgq-mr={}".format(self.options.with_bgq_mr),
+            "--with-bgq-progress={}".format(self.options.bgq_progress),
+            "--with-bgq-mr={}".format(self.options.bgq_mr),
         ]
+        if self.options.shared:
+            args.extend(['--disable-static', '--enable-shared'])
+        else:
+            args.extend(['--disable-shared', '--enable-static'])
         for p in self._providers:
             args.append("--enable-{}={}".format(p, yes_no_dl(getattr(self.options, p))))
         if self.options.with_libnl:
@@ -103,11 +107,6 @@ class LibfabricConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libfabric.a")
-        else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libfabric.so*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libfabric.dylib")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libfabric"
