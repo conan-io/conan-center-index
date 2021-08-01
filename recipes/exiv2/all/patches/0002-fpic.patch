@@ -14,18 +14,3 @@ index c52b352f..92fcd847 100644
  target_include_directories(exiv2lib_int PRIVATE ${ZLIB_INCLUDE_DIR})
  target_include_directories(exiv2lib PRIVATE 
      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/xmpsdk/include>
-diff --git a/xmpsdk/CMakeLists.txt b/xmpsdk/CMakeLists.txt
-index a22698fb..5de35526 100644
---- a/xmpsdk/CMakeLists.txt
-+++ b/xmpsdk/CMakeLists.txt
-@@ -45,10 +45,6 @@ if (MSVC)
-     target_compile_definitions(exiv2-xmp PRIVATE XML_STATIC)
- endif()
- 
--if (BUILD_SHARED_LIBS)
--    set_property(TARGET exiv2-xmp PROPERTY POSITION_INDEPENDENT_CODE ON)
--endif()
--
- # The private dependencies of a static library still need to be exported because they are needed to properly link the consumers of the static library.
- install(TARGETS exiv2-xmp EXPORT exiv2Config	
-     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}	
