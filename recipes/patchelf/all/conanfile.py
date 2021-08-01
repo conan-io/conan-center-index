@@ -32,13 +32,13 @@ class PatchElfConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv --warnings=all".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
+            self.run("{} -fiv --warnings=all".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
 
