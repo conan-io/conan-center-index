@@ -22,10 +22,10 @@ class GlobConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "9",
             "Visual Studio": "15.7",
-            "clang": "6",
-            "apple-clang": "10",
+            "clang": "7",
+            "apple-clang": "11",
         }
 
     def configure(self):
