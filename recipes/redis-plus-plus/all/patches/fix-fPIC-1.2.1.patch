@@ -1,0 +1,29 @@
+From 8d4c400541686fb991f1e5080ef1bc3a9584769c Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Sun, 1 Aug 2021 10:35:45 -0400
+Subject: [PATCH] respect fPIC
+
+---
+ CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index eb3ff66..0f1eb75 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -63,7 +63,6 @@ if (REDIS_PLUS_PLUS_BUILD_STATIC)
+     endif()
+ 
+     set_target_properties(${STATIC_LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+-    set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+ # Build shared library
+@@ -90,7 +90,6 @@ if (REDIS_PLUS_PLUS_BUILD_SHARED)
+ 
+     set_target_properties(${SHARED_LIB} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+     set_target_properties(${SHARED_LIB} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+-    set_target_properties(${SHARED_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+ option(REDIS_PLUS_PLUS_BUILD_TEST "Build tests for redis++" ON)

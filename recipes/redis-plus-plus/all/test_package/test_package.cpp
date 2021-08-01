@@ -3,8 +3,17 @@
 using namespace sw::redis;
 
 int main() {
+
+    ConnectionOptions opts;
+    opts.host = "127.0.0.1";
+    opts.port = 6379;
+
+    #ifdef BUILDING_WITH_TLS
+    opts.tls.enabled = true;
+    #endif
+
     try{
-        auto redis = Redis("tcp://127.0.0.1:6379");
+        auto redis = Redis(opts);
         redis.set("key", "val");
         redis.rpush("list", {"a", "b", "c"});
     }

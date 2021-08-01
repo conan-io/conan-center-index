@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["BUILDING_SHARED"] = self.options["redis-plus-plus"].shared
+        cmake.definitions["BUILDING_WITH_TLS"] = self.options["redis-plus-plus"].with_tls
         cmake.configure()
         cmake.build()
 

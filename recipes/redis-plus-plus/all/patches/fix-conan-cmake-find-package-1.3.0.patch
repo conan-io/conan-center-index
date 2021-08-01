@@ -1,0 +1,22 @@
+From 38ec33f9834568ddf98fad61287f65df76ba7142 Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Sun, 1 Aug 2021 11:09:27 -0400
+Subject: [PATCH] remove send `find_package` call
+
+since Conan does not correctly recreate the hiredis CMake installed scripts
+---
+ CMakeLists.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a5fbef5..65ee942 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -96,7 +96,6 @@ if(hiredis_FOUND)
+     list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis)
+ 
+     if(REDIS_PLUS_PLUS_USE_TLS)
+-        find_package(hiredis_ssl REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
+     endif()
+ else()
