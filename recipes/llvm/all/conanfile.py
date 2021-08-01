@@ -67,7 +67,7 @@ class Llvm(ConanFile):
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16.4":
             raise ConanInvalidConfiguration("An up to date version of Microsoft Visual Studio 2019 or newer is required.")
 
-    def build(self):
+    def _cmake_configure(self):
         enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
         self.output.info('Enabled LLVM subprojects: {}'.format(', '.join(enabled_projects)))
 
@@ -78,10 +78,14 @@ class Llvm(ConanFile):
             },
             source_folder = os.path.join(self._source_subfolder, 'llvm')
         )
+        return cmake
+
+    def build(self):
+        cmake = self._cmake_configure()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
+        cmake = self._cmake_configure()
         cmake.install()
 
         self.copy(
