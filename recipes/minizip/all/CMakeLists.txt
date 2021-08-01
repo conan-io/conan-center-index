@@ -1,25 +1,20 @@
 # This CMake file has been extracted from VCPKG and is under MIT license:
 # https://github.com/microsoft/vcpkg/blob/master/ports/minizip/CMakeLists.txt
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.4)
 project(minizip C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(PROJECT_VERSION 1.2.11)
-set(PROJECT_VERSION_MAJOR 1)
-set(PROJECT_VERSION_MINOR 2)
-set(PROJECT_VERSION_PATCH 11)
-
 option(ENABLE_BZIP2 "Build minizip with bzip2 support" ON)
 option(BUILD_TOOLS "Build minizip tool" OFF)
 
-if (MSVC AND WIN32 AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+include(GNUInstallDirs)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 set(MIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/contrib/minizip")
-include_directories(${MIN_SRC} ${ZLIB_INCLUDE_DIRS})
+include_directories(${MIN_SRC})
 
 set(SOURCE_FILES
   ${MIN_SRC}/ioapi.c
@@ -42,7 +37,7 @@ if(WIN32)
     list(APPEND HEADER_FILES ${MIN_SRC}/iowin32.h)
 endif()
 
-add_library(minizip ${SOURCE_FILES} ${HEADER_FILES})
+add_library(minizip ${SOURCE_FILES})
 target_link_libraries(minizip PUBLIC ${CONAN_LIBS})
 target_compile_definitions(minizip PRIVATE -D_ZLIB_H)
 
@@ -68,14 +63,14 @@ if (BUILD_TOOLS)
         target_compile_options(miniunz_bin PUBLIC /W3 /wd4005 /wd4996 /wd4018 -D_CRT_SECURE_NO_WARNINGS)
     endif()
 
-    install(TARGETS minizip_bin miniunz_bin DESTINATION bin)
+    install(TARGETS minizip_bin miniunz_bin DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 install(
   TARGETS minizip
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(FILES ${HEADER_FILES} DESTINATION include/minizip)
+install(FILES ${HEADER_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/minizip)
