@@ -19,7 +19,7 @@ class RedisPlusPlusConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tls": [True, False],
-        "enable_async": [False, "libuv"]
+        "enable_async": [False, "libuv"],
     }
     default_options = {
         "shared": False,
