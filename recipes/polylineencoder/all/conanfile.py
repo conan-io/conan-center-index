@@ -48,4 +48,4 @@ class PolylineencoderConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs.append(self.name)
+        self.cpp_info.libs.append("polylineencoder")
