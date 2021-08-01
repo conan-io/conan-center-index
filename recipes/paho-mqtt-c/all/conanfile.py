@@ -59,12 +59,13 @@ class PahoMqttcConan(ConanFile):
         if self.options.samples != "deprecated":
             self.output.warn("samples option is deprecated and they are no longer provided in the package.")
 
-        if not self.options.shared and tools.Version(self.version) < "1.3.4":
-            raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
-
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1k")
+
+    def validate(self):
+        if not self.options.shared and tools.Version(self.version) < "1.3.4":
+            raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
