@@ -2,6 +2,8 @@ from conans import ConanFile, tools, CMake
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class MinizipConan(ConanFile):
     name = "minizip"
@@ -49,8 +51,8 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("zlib-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
