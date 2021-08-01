@@ -104,7 +104,7 @@ class Exiv2Conan(ConanFile):
         self.cpp_info.components["exiv2lib"].requires = [ "libiconv::libiconv"]
         if self.options.with_png:
             self.cpp_info.components["exiv2lib"].requires.append("libpng::libpng")
-        if self.options.with_png:
+        if self.options.with_curl:
             self.cpp_info.components["exiv2lib"].requires.append("libcurl::libcurl")
 
         if self.settings.os in ("FreeBSD", "Linux"):
