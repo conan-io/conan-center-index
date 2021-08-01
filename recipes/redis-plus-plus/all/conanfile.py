@@ -50,7 +50,7 @@ class RedisPlusPlusConan(ConanFile):
 
     @property
     def _min_cppstd_required(self):
-        return 17 if self._has_build_async else 11
+        return 17 if tools.Version(self.version) >= "1.3.0" else 11
 
     @property
     def _min_compilers_version(self):
