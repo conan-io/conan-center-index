@@ -18,7 +18,7 @@ if (MSVC AND WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-set(MIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/contrib/minizip")
+set(MIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/contrib/minizip")
 include_directories(${MIN_SRC} ${ZLIB_INCLUDE_DIRS})
 
 set(SOURCE_FILES

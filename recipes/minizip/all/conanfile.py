@@ -60,13 +60,12 @@ class MinizipConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_BZIP2"] = self.options.bzip2
         self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        shutil.move("CMakeLists.txt", os.path.join(self._source_subfolder, 'CMakeLists.txt'))
         cmake = self._configure_cmake()
         cmake.build()
 
