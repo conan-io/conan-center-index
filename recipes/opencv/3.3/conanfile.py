@@ -122,14 +122,6 @@ class OpenCVConan(ConanFile):
 
     def _patch_opencv(self):
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
-        if self.options.contrib:
-            freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
-            tools.replace_in_file(freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED)")
-            tools.replace_in_file(freetype_cmake, "FREETYPE_", "Freetype_")
-
-            tools.replace_in_file(freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED)")
-            tools.replace_in_file(freetype_cmake, "HARFBUZZ_", "harfbuzz_")
-
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
         jpeg2000_cc_path = os.path.join(self._source_subfolder, "modules", "imgcodecs", "src", "grfmt_jpeg2000.cpp")
