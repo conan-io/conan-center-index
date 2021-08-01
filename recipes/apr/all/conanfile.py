@@ -38,11 +38,6 @@ class AprConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-        if (self.settings.compiler == "apple-clang" and
-            tools.Version(self.settings.compiler.version) == "12" and
-            self.version == "1.7.0"):
-            raise ConanInvalidConfiguration("apr does not (yet) support apple-clang 12")
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -67,6 +62,13 @@ class AprConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        if (self.settings.compiler == "apple-clang" and
+            tools.Version(self.settings.compiler.version) == "12" and
+            self.version == "1.7.0"):
+            with tools.chdir( self._source_subfolder ):
+                os.remove( "configure" )
+                self.run( "./buildconf" )
+
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
