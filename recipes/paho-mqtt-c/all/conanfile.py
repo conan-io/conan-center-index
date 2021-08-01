@@ -12,8 +12,7 @@ class PahoMqttcConan(ConanFile):
     topics = ("mqtt", "iot", "eclipse", "ssl", "tls", "paho", "c")
     license = "EPL-2.0"
     description = "Eclipse Paho MQTT C client library for Linux, Windows and MacOS"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,6 +31,8 @@ class PahoMqttcConan(ConanFile):
         "high_performance": False
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -54,9 +55,9 @@ class PahoMqttcConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        
+
         if self.options.samples != "deprecated":
-            self.output.warn("samples option is deprecated and they are no longer provided in the package.")            
+            self.output.warn("samples option is deprecated and they are no longer provided in the package.")
 
         if not self.options.shared and tools.Version(self.version) < "1.3.4":
             raise ConanInvalidConfiguration("{}/{} does not support static linking".format(self.name, self.version))
@@ -94,6 +95,9 @@ class PahoMqttcConan(ConanFile):
     def _patch_source(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "SET(CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")",
+                              "LIST(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/cmake/modules\")")
         if not self.options.get_safe("fPIC", True):
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "POSITION_INDEPENDENT_CODE ON", "")
 
@@ -115,7 +119,7 @@ class PahoMqttcConan(ConanFile):
 
     def package_id(self):
         del self.info.options.samples
-        
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
         self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
