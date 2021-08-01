@@ -37,6 +37,7 @@ class Perf(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy("LICENSES/**", src=self._source_subfolder, dst="licenses")
 
         self.copy("perf", src=os.path.join(self._source_subfolder, "tools", "perf"), dst="bin")
 
