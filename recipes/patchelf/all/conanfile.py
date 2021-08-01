@@ -12,12 +12,6 @@ class PatchElfConan(ConanFile):
     homepage = "https://github.com/NixOS/patchelf"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "fPIC": False,  # TODO justify
-    }
 
     _autotools = None
 
