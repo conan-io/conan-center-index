@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -28,7 +27,7 @@ class MinizipConan(ConanFile):
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     _cmake = None
 
     @property
