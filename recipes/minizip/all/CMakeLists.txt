@@ -1,4 +1,4 @@
-# This CMake file has been extracted from VCPKG and is under MIT license: 
+# This CMake file has been extracted from VCPKG and is under MIT license:
 # https://github.com/microsoft/vcpkg/blob/master/ports/minizip/CMakeLists.txt
 cmake_minimum_required(VERSION 3.8)
 project(minizip C)
@@ -11,7 +11,7 @@ set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 2)
 set(PROJECT_VERSION_PATCH 11)
 
-option(USE_BZIP2 "Build minizip with bzip2 support" ON)
+option(ENABLE_BZIP2 "Build minizip with bzip2 support" ON)
 option(BUILD_TOOLS "Build minizip tool" OFF)
 
 if (MSVC AND WIN32 AND BUILD_SHARED_LIBS)
