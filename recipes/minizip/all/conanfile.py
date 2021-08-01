@@ -7,7 +7,6 @@ required_conan_version = ">=1.33.0"
 
 class MinizipConan(ConanFile):
     name = "minizip"
-    version = "1.2.11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
