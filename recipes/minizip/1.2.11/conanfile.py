@@ -1,6 +1,6 @@
+from conans import ConanFile, tools, CMake
 import os
 import shutil
-from conans import ConanFile, tools, CMake
 
 
 class MinizipConan(ConanFile):
@@ -11,9 +11,21 @@ class MinizipConan(ConanFile):
     license = "Zlib"
     description = "An experimental package to read and write files in .zip format, written on top of zlib"
     topics = ("zip", "compression", "inflate")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "bzip2": [True, False], "tools": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "bzip2": True, "tools": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "bzip2": [True, False],
+        "tools": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "bzip2": True,
+        "tools": False,
+    }
+
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake", "cmake_find_package"
 
