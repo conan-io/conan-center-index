@@ -86,3 +86,8 @@ class MinizipConan(ConanFile):
         self.cpp_info.includedirs = ["include", os.path.join("include", "minizip")]
         if self.options.bzip2:
             self.cpp_info.defines.append('HAVE_BZIP2')
+
+        if self.options.tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
