@@ -72,7 +72,7 @@ class PdfiumConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["PDFIUM_ROOT"] = os.path.join(self.source_folder, self._source_subfolder).replace("\\", "/")
-        self._cmake.definitions["USE_LIBJPEG_TURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
+        self._cmake.definitions["PDF_LIBJPEG_TURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
         self._cmake.configure()
         return self._cmake
 
