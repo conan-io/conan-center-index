@@ -1,0 +1,6 @@
+sources:
+  "3.3.1":
+    - sha256: 5dca3bb0d661af311e25a72b04a7e4c22c47c1aa86eb73e70063cd378a2aa6ee
+      url: https://github.com/opencv/opencv/archive/3.3.1.tar.gz
+    - sha256: 6f3ce148dc6e147496f0dbec1c99e917e13bf138f5a8ccfc3765f5c2372bd331
+      url: https://github.com/opencv/opencv_contrib/archive/3.3.1.tar.gz
