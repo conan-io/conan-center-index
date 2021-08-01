@@ -33,7 +33,9 @@ class Perf(ConanFile):
         apply_conandata_patches(self)
         autotools = AutoToolsBuildEnvironment(self)
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
-            autotools.make()
+            vars=autotools.vars
+            vars["NO_LIBPYTHON"] = "1"
+            autotools.make(vars=vars)
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
