@@ -91,7 +91,7 @@ class AprConan(ConanFile):
                                   "@osuuid@", "0")
 
     def build_requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os == "Macos":
             self.build_requires("libtool/2.4.6")
 
     def build(self):
