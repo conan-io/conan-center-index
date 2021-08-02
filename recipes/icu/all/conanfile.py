@@ -1,11 +1,10 @@
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import glob
 import os
-import platform
 import shutil
 
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-
 required_conan_version = ">=1.33.0"
+
 
 class ICUBase(ConanFile):
     name = "icu"
@@ -15,30 +14,31 @@ class ICUBase(ConanFile):
                   "providing Unicode and Globalization support for software applications."
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "icu", "icu4c", "i see you", "unicode")
-    settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/*.patch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "data_packaging": ["files", "archive", "library", "static"],
-               "with_unit_tests": [True, False],
-               "silent": [True, False],
-               "with_dyload": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "data_packaging": "archive",
-                       "with_unit_tests": False,
-                       "silent": True,
-                       "with_dyload": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "data_packaging": ["files", "archive", "library", "static"],
+        "with_unit_tests": [True, False],
+        "silent": [True, False],
+        "with_dyload": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "data_packaging": "archive",
+        "with_unit_tests": False,
+        "silent": True,
+        "with_dyload": True,
+    }
+
+    exports_sources = "patches/*.patch"
     _env_build = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _is_msvc(self):
