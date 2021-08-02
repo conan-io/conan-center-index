@@ -113,6 +113,10 @@ class Llvm(ConanFile):
                 else:
                     shutil.rmtree(ignore_path)
 
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.1":
+            raise ConanInvalidConfiguration("Compiler version too low for this package.")
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.builddirs = ['lib/cmake']
