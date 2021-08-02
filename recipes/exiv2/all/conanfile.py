@@ -1,4 +1,5 @@
 import os
+import textwrap
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
@@ -95,6 +96,31 @@ class Exiv2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"exiv2lib": "exiv2::exiv2lib"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "exiv2"
@@ -115,8 +141,16 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].system_libs.extend(["psapi", "ws2_32"])
             self.cpp_info.components["exiv2lib"].defines.append("WIN32_LEAN_AND_MEAN")
 
+        self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["exiv2lib"].builddirs.append(self._module_subfolder)
+
         # component exiv2-xmp
         if self.options.with_xmp == "bundled":
             self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
             self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
             self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
+
+            self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components["exiv2-xmp"].builddirs.append(self._module_subfolder)
