@@ -20,13 +20,13 @@ class JasperConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
-        "jpegturbo": [True, False]
+        "jpegturbo": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_libjpeg": "libjpeg",
-        "jpegturbo": False
+        "jpegturbo": "deprecated",
     }
 
     _cmake = None
@@ -50,17 +50,18 @@ class JasperConan(ConanFile):
         del self.settings.compiler.libcxx
 
         # Handle deprecated libjpeg option
-        if self.options.jpegturbo:
+        if self.options.jpegturbo != "deprecated":
             self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
-        if self.options.with_libjpeg == "libjpeg" and self.options.jpegturbo:
-            self.options.with_libjpeg = "libjpeg-turbo"
-        del self.options.jpegturbo
+            self.options.with_libjpeg = "libjpeg-turbo" if self.options.jpegturbo else "libjpeg"
 
     def requirements(self):
         if self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.6")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
+
+    def package_id(self):
+        del self.options.jpegturbo
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
