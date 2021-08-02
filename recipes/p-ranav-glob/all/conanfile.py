@@ -5,8 +5,8 @@ from conans.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.33.0"
 
 
-class GlobConan(ConanFile):
-    name = "glob"
+class PRanavGlobConan(ConanFile):
+    name = "p-ranav-glob"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/glob"
