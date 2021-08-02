@@ -72,9 +72,10 @@ class VkBootstrapConan(ConanFile):
         if tools.Version(self.version) < "0.3.0":
             # We don't need full Vulkan SDK, just headers, but vulkan-headers recipe alone can't emulate FindVulkan.cmake
             tools.replace_in_file(cmakelists, "find_package(Vulkan REQUIRED)", "")
-        # No warnings as errors
-        tools.replace_in_file(cmakelists, "-pedantic-errors", "")
-        tools.replace_in_file(cmakelists, "/WX", "")
+        if tools.Version(self.version) < "0.4.0":
+            # No warnings as errors
+            tools.replace_in_file(cmakelists, "-pedantic-errors", "")
+            tools.replace_in_file(cmakelists, "/WX", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -83,6 +84,8 @@ class VkBootstrapConan(ConanFile):
         self._cmake.definitions["VK_BOOTSTRAP_TEST"] = False
         if tools.Version(self.version) >= "0.3.0":
             self._cmake.definitions["VK_BOOTSTRAP_VULKAN_HEADER_DIR"] = ";".join(self.deps_cpp_info["vulkan-headers"].include_paths)
+        if tools.Version(self.version) >= "0.4.0":
+            self._cmake.definitions["VK_BOOTSTRAP_WERROR"] = False
         self._cmake.configure()
         return self._cmake
 
