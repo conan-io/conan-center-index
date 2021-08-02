@@ -30,6 +30,7 @@ class Exiv2Conan(ConanFile):
         "with_xmp": "bundled",
         "with_curl": False,
     }
+    provides = []
 
     _cmake = None
 
@@ -51,7 +52,7 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
-            self.provides = "xmp-toolkit-sdk"
+            self.provides.append("xmp-toolkit-sdk")
 
     def requirements(self):
         self.requires("libiconv/1.16")
