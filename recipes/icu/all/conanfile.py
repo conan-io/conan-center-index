@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
@@ -60,6 +61,32 @@ class ICUBase(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if not bool(self._platform):
+            raise ConanInvalidConfiguration(
+                "Compiling ICU for {} with {} not supported yet".format(str(self.settings.os),
+                                                                        str(self.settings.compiler)))
+
+    @property
+    def _platform(self):
+        return {
+            ("Windows", "Visual Studio"): "Cygwin/MSVC",
+            ("Windows", "gcc"): "MinGW",
+            ("AIX", "gcc"): "AIX/GCC",
+            ("AIX", "xlc"): "AIX",
+            ("SunOS", "gcc"): "Solaris/GCC",
+            ("Linux", "gcc"): "Linux/gcc",
+            ("Linux", "clang"): "Linux",
+            ("Macos", "gcc"): "MacOSX",
+            ("Macos", "clang"): "MacOSX",
+            ("Macos", "apple-clang"): "MacOSX",
+            ("iOS", "apple-clang"): "MacOSX",
+            ("tvOS", "apple-clang"): "MacOSX",
+            ("watchOS", "apple-clang"): "MacOSX",
+            ("FreeBSD", "gcc"): "FreeBSD",
+            ("FreeBSD", "clang"): "FreeBSD",
+        }.get((str(self.settings.os), str(self.settings.compiler)))
 
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
@@ -138,26 +165,9 @@ class ICUBase(ConanFile):
     @property
     def _build_config_cmd(self):
         prefix = self.package_folder.replace("\\", "/")
-        platform = {
-            ("Windows", "Visual Studio"): "Cygwin/MSVC",
-            ("Windows", "gcc"): "MinGW",
-            ("AIX", "gcc"): "AIX/GCC",
-            ("AIX", "xlc"): "AIX",
-            ("SunOS", "gcc"): "Solaris/GCC",
-            ("Linux", "gcc"): "Linux/gcc",
-            ("Linux", "clang"): "Linux",
-            ("Macos", "gcc"): "MacOSX",
-            ("Macos", "clang"): "MacOSX",
-            ("Macos", "apple-clang"): "MacOSX",
-            ("iOS", "apple-clang"): "MacOSX",
-            ("tvOS", "apple-clang"): "MacOSX",
-            ("watchOS", "apple-clang"): "MacOSX",
-            ("FreeBSD", "gcc"): "FreeBSD",
-            ("FreeBSD", "clang"): "FreeBSD",
-        }.get((str(self.settings.os), str(self.settings.compiler)))
         arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
-        args = [platform,
+        args = [self._platform,
                 "--prefix={0}".format(prefix),
                 "--disable-samples",
                 "--disable-layout",
@@ -167,7 +177,7 @@ class ICUBase(ConanFile):
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
-        if self.settings.os in ["iOS", "watchOS", "tvOS"]:
+        if self.settings.os in ["iOS", "tvOS", "watchOS"]:
             args.append("--disable-tools")
 
         env_build = self._configure_autotools()
@@ -339,7 +349,7 @@ class ICUBase(ConanFile):
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
-        if self.settings.os not in ["iOS", "watchOS", "tvOS"]:
+        if self.settings.os not in ["iOS", "tvOS", "watchOS"]:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
