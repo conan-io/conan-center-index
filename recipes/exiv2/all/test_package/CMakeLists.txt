@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(exiv2 REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} exiv2::exiv2lib exiv2::exiv2-xmp)
+target_link_libraries(${PROJECT_NAME} exiv2::exiv2lib)

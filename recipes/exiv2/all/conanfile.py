@@ -118,3 +118,4 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
             self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
+            self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
