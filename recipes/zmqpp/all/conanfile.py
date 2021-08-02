@@ -34,7 +34,7 @@ class ZmqppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zeromq/4.3.3")
+        self.requires("zeromq/4.3.4")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
