@@ -69,12 +69,14 @@ class MinizipConan(ConanFile):
         cmake.build()
 
     def _extract_license(self):
-        tmp = tools.load(os.path.join(self._source_subfolder, "zlib.h"))
-        return tmp[2:tmp.find("*/", 1)]
+        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
+            tmp = tools.load("zlib.h")
+            license_contents = tmp[2:tmp.find("*/", 1)]
+            tools.save("LICENSE", license_contents)
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"),
-                   self._extract_license())
+        self._extract_license()
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
