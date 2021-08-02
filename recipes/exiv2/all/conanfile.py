@@ -76,6 +76,7 @@ class Exiv2Conan(ConanFile):
         self._cmake.definitions["EXIV2_ENABLE_PNG"] = self.options.with_png
         self._cmake.definitions["EXIV2_ENABLE_XMP"] = self.options.with_xmp == "bundled"
         self._cmake.definitions["EXIV2_ENABLE_EXTERNAL_XMP"] = self.options.with_xmp == "external"
+        # NLS is used only for tool which is not built
         self._cmake.definitions["EXIV2_ENABLE_NLS"] = False
         self._cmake.definitions["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         self._cmake.definitions["EXIV2_ENABLE_CURL"] = self.options.with_curl
