@@ -17,7 +17,10 @@ class TestPackageConan(ConanFile):
             output = StringIO()
             bin_path = os.path.join("bin", "test_package")
             val = 42
-            self.run("{} {}".format(bin_path, val), run_environment=True, output=output)
+            self.run("{} {}".format(bin_path, val),
+                     run_environment=True,
+                     output=output)
             text = output.getvalue()
+            print(f'{val}*{val}=')
             print(text)
-            assert(str(val*val) in text)
+            assert (str(val * val) in text)

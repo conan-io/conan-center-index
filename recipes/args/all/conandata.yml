@@ -1,4 +1,7 @@
 sources:
-  "2.1":
-    url: "https://github.com/p-ranav/argparse/archive/v2.1.tar.gz"
-    sha256: "0a82f464b568b8ee6650fc837f371eb9c81417e2ef9fb3b51f65ad50fa3b8662"
+  "6.2.2":
+    url: "https://github.com/Taywee/args/archive/refs/tags/6.2.2.tar.gz"
+    sha256: "8016fb0fc079d746433be3df9cf662e3e931e730aaf9f69f2287eac79ac643c1"
+  "6.2.6":
+    url: "https://github.com/Taywee/args/archive/refs/tags/6.2.6.tar.gz"
+    sha256: "f0b2b41a0d06c4739abb6b62ccad0e655fe494d1de606688454ea397a3313d46"

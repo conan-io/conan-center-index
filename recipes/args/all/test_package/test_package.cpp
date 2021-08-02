@@ -1,26 +1,22 @@
-#include <argparse.hpp>
+#include <args.hxx>
 
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  argparse::ArgumentParser program("test_package");
+  args::ArgumentParser parser("test_package");
 
-  program.add_argument("square")
-    .help("display the square of a given integer")
-    .action([](const std::string& value) { return std::stoi(value); });
+  args::Positional<int> arg{parser, "arg",
+                            "display the square of the given integer"};
 
   try {
-    program.parse_args(argc, argv);
-  }
-  catch (const std::runtime_error& err) {
-    std::cout << err.what() << std::endl;
-    std::cout << program;
-    return 0;
+    parser.ParseCLI(argc, argv);
+  } catch (const args::Error &e) {
+    std::cout << e.what() << std::endl;
+    return 1;
   }
 
-  auto input = program.get<int>("square");
+  int input = arg.Get();
   std::cout << (input * input) << std::endl;
 
   return 0;
 }
-
