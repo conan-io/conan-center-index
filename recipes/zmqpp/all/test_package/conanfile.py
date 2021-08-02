@@ -8,7 +8,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["ZMQPP_BUILD_SHARED"] = self.options["zmqpp"].shared
         cmake.configure()
         cmake.build()
 
