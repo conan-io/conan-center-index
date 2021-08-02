@@ -1,6 +1,7 @@
-import os
-
 from conans import ConanFile, tools
+
+required_conan_version = ">=1.33.0"
+
 
 class CpppeglibConan(ConanFile):
     name = "cpp-peglib"
@@ -16,17 +17,17 @@ class CpppeglibConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("peglib.h", dst="include", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
