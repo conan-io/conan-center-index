@@ -48,6 +48,10 @@ class Exiv2Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_xmp == "bundled":
+            # recipe has bundled xmp-toolkit-sdk of old version
+            # avoid conflict with a future xmp recipe
+            self.provides = "xmp-toolkit-sdk"
 
     def requirements(self):
         self.requires("libiconv/1.16")
