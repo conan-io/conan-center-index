@@ -34,7 +34,7 @@ class VkBootstrapConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("vulkan-headers/1.2.170.0")
+        self.requires("vulkan-headers/1.2.184")
 
     @property
     def _compilers_minimum_version(self):
