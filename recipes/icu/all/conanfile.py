@@ -134,19 +134,23 @@ class ICUBase(ConanFile):
     @property
     def _build_config_cmd(self):
         prefix = self.package_folder.replace("\\", "/")
-        platform = {("Windows", "Visual Studio"): "Cygwin/MSVC",
-                    ("Windows", "gcc"): "MinGW",
-                    ("AIX", "gcc"): "AIX/GCC",
-                    ("AIX", "xlc"): "AIX",
-                    ("SunOS", "gcc"): "Solaris/GCC",
-                    ("Linux", "gcc"): "Linux/gcc",
-                    ("Linux", "clang"): "Linux",
-                    ("Macos", "gcc"): "MacOSX",
-                    ("Macos", "clang"): "MacOSX",
-                    ("Macos", "apple-clang"): "MacOSX",
-                    ("FreeBSD", "gcc"): "FreeBSD",
-                    ("FreeBSD", "clang"): "FreeBSD"}.get((str(self.settings.os),
-                                                          str(self.settings.compiler)))
+        platform = {
+            ("Windows", "Visual Studio"): "Cygwin/MSVC",
+            ("Windows", "gcc"): "MinGW",
+            ("AIX", "gcc"): "AIX/GCC",
+            ("AIX", "xlc"): "AIX",
+            ("SunOS", "gcc"): "Solaris/GCC",
+            ("Linux", "gcc"): "Linux/gcc",
+            ("Linux", "clang"): "Linux",
+            ("Macos", "gcc"): "MacOSX",
+            ("Macos", "clang"): "MacOSX",
+            ("Macos", "apple-clang"): "MacOSX",
+            ("iOS", "apple-clang"): "MacOSX",
+            ("tvOS", "apple-clang"): "MacOSX",
+            ("watchOS", "apple-clang"): "MacOSX",
+            ("FreeBSD", "gcc"): "FreeBSD",
+            ("FreeBSD", "clang"): "FreeBSD",
+        }.get((str(self.settings.os), str(self.settings.compiler)))
         arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
@@ -159,10 +163,15 @@ class ICUBase(ConanFile):
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
+        if self.settings.os in ["iOS", "watchOS", "tvOS"]:
+            args.append("--disable-tools")
+
         env_build = self._configure_autotools()
         if tools.cross_building(self.settings, skip_x64_x86=True):
-            if env_build.host:
-                args.append("--host=%s" % env_build.host)
+            if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                args.append("--host={}".format(tools.get_gnu_triplet("Macos", str(self.settings.arch))))
+            elif env_build.host:
+                args.append("--host={}".format(env_build.host))
             bin_path = self.deps_env_info["icu"].PATH[0]
             base_path, _ = bin_path.rsplit('/', 1)
             args.append("--with-cross-build={}".format(base_path))
@@ -326,9 +335,10 @@ class ICUBase(ConanFile):
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.settings.os not in ["iOS", "watchOS", "tvOS"]:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
 
     def _lib_name(self, lib):
         name = lib
