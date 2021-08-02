@@ -19,14 +19,14 @@ class Exiv2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_png": [True, False],
-        "with_xmp": [True, False],
+        "with_xmp": [False, "bundled", "external"],
         "with_curl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_png": True,
-        "with_xmp": True,
+        "with_xmp": "bundled",
         "with_curl": False,
     }
 
@@ -52,7 +52,7 @@ class Exiv2Conan(ConanFile):
         self.requires("libiconv/1.16")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
-        if self.options.with_xmp:
+        if self.options.with_xmp == "bundled":
             self.requires("expat/2.4.1")
         if self.options.with_curl:
             self.requires("libcurl/7.64.1")
@@ -74,7 +74,8 @@ class Exiv2Conan(ConanFile):
         self._cmake.definitions["EXIV2_BUILD_SAMPLES"] = False
         self._cmake.definitions["EXIV2_BUILD_EXIV2_COMMAND"] = False
         self._cmake.definitions["EXIV2_ENABLE_PNG"] = self.options.with_png
-        self._cmake.definitions["EXIV2_ENABLE_XMP"] = self.options.with_xmp
+        self._cmake.definitions["EXIV2_ENABLE_XMP"] = self.options.with_xmp == "bundled"
+        self._cmake.definitions["EXIV2_ENABLE_EXTERNAL_XMP"] = self.options.with_xmp == "external"
         self._cmake.definitions["EXIV2_ENABLE_NLS"] = False
         self._cmake.definitions["EXIV2_ENABLE_WEBREADY"] = self.options.with_curl
         self._cmake.definitions["EXIV2_ENABLE_CURL"] = self.options.with_curl
@@ -114,6 +115,6 @@ class Exiv2Conan(ConanFile):
             self.cpp_info.components["exiv2lib"].defines.append("WIN32_LEAN_AND_MEAN")
 
         # component exiv2-xmp
-        if self.options.with_xmp:
+        if self.options.with_xmp == "bundled":
             self.cpp_info.components["exiv2-xmp"].libs = ["exiv2-xmp"]
             self.cpp_info.components["exiv2-xmp"].requires = [ "expat::expat" ]
