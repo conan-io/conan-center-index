@@ -25,6 +25,17 @@ class VkBootstrapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("vulkan-headers/1.2.170.0")
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -34,13 +45,7 @@ class VkBootstrapConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
 
@@ -58,9 +63,6 @@ class VkBootstrapConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("vk-boostrap shared not supported with Visual Studio")
-
-    def requirements(self):
-        self.requires("vulkan-headers/1.2.170.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
