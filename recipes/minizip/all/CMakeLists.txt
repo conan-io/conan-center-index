@@ -27,7 +27,6 @@ if(WIN32)
 endif()
 
 set(HEADER_FILES
-  ${MIN_SRC}/crypt.h
   ${MIN_SRC}/ioapi.h
   ${MIN_SRC}/unzip.h
   ${MIN_SRC}/zip.h
