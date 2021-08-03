@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class OpenVDBConan(ConanFile):
     name = "openvdb"
     description = (
-        "OpenVDB is an open source C++ library comprising a novel hierarchical data"
+        "OpenVDB is an open source C++ library comprising a novel hierarchical data "
         "structure and a large suite of tools for the efficient storage and "
         "manipulation of sparse volumetric data discretized on three-dimensional grids."
     )
@@ -26,7 +26,7 @@ class OpenVDBConan(ConanFile):
         "with_blosc": [True, False],
         "with_zlib": [True, False],
         "with_log4cplus": [True, False],
-        "simd": [None, "SSE42", "AVX"],
+        "simd": [None, "sse42", "avx"],
     }
     default_options = {
         "shared": False,
