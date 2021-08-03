@@ -79,6 +79,7 @@ class PcapplusplusConan(ConanFile):
                 config_args.append("--arm64")
 
             autotools = AutoToolsBuildEnvironment(self)
+            autotools.cxx_flags.extend(["-D{}".format(d) for d in autotools.defines])
             with tools.environment_append(autotools.vars):
                 self.run(" ".join(config_args), run_environment=True)
                 autotools.make(target="libs")
