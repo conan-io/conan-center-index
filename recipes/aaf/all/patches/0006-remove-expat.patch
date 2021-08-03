@@ -1,26 +1,21 @@
-commit 6b2c4ece07218499ff50ceecb009f152a3102ced
+commit 4ddfc8e5aa592ca8db86e6e54943b88db61b1594
 Author: Martin Delille <martin@delille.org>
-Date:   Tue Jul 27 16:54:26 2021 +0200
+Date:   Tue Aug 3 11:49:46 2021 +0200
 
     Remove expat
 
 diff --git a/ref-impl/CMakeLists.txt b/ref-impl/CMakeLists.txt
-index b1fe34c52..09550edf6 100644
+index b1fe34c52..8f4df30b9 100644
 --- a/ref-impl/CMakeLists.txt
 +++ b/ref-impl/CMakeLists.txt
-@@ -37,9 +37,11 @@ project(MakeSDK LANGUAGES CXX)
+@@ -37,7 +37,6 @@ project(MakeSDK LANGUAGES CXX)
  
  add_subdirectory(aafiid)
  add_subdirectory(aaflib)
 -add_subdirectory(expat)
  add_subdirectory(libjpeg)
  add_subdirectory(plugins)
-+
-+find_package(expat REQUIRED)
-+
  add_subdirectory(src/com-api)
- add_subdirectory(src/impl)
- add_subdirectory(src/OM)
 diff --git a/ref-impl/src/OM/CMakeLists.txt b/ref-impl/src/OM/CMakeLists.txt
 index e0c5be195..571caa598 100644
 --- a/ref-impl/src/OM/CMakeLists.txt
