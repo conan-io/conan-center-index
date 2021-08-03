@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.33.0"
 
@@ -68,19 +67,6 @@ class VkBootstrapConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # TODO: move those modifications to patches when upstream CMakeLists will be more stable
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        if tools.Version(self.version) < "0.3.0":
-            # We don't need full Vulkan SDK, just headers, but vulkan-headers recipe alone can't emulate FindVulkan.cmake
-            tools.replace_in_file(cmakelists, "find_package(Vulkan REQUIRED)", "")
-        if tools.Version(self.version) < "0.4.0":
-            # No warnings as errors
-            tools.replace_in_file(cmakelists, "-pedantic-errors", "")
-            tools.replace_in_file(cmakelists, "/WX", "")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -94,7 +80,8 @@ class VkBootstrapConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
