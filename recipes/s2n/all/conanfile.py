@@ -10,7 +10,7 @@ class S2n(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aws/s2n-tls"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt", "patches/*"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -39,7 +39,6 @@ class S2n(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.7")
         self.requires("openssl/1.1.1k")
 
     def source(self):
@@ -55,8 +54,6 @@ class S2n(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -74,4 +71,4 @@ class S2n(ConanFile):
         self.cpp_info.components["s2n-lib"].names["cmake_find_package"] = "s2n"
         self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
         self.cpp_info.components["s2n-lib"].libs = ["s2n"]
-        self.cpp_info.components["s2n-lib"].requires = ["aws-c-common::aws-c-common-lib", "openssl::crypto"]
+        self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
