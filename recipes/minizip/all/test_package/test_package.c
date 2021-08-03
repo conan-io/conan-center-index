@@ -8,7 +8,6 @@
     #include <minizip/iowin32.h>
 #endif
 
-#include <minizip/crypt.h>
 #include <minizip/mztools.h>
 
 const char text[] = "Conveying or northward offending admitting perfectly my.";
