@@ -1,11 +1,8 @@
-#include <aws/compression/compression.h>
-
-#include <stdlib.h>
+#include <s2n.h>
 
 int main() {
-    struct aws_allocator *allocator = aws_default_allocator();
-    aws_compression_library_init(allocator);
-    aws_compression_library_clean_up();
+    s2n_init();
+    s2n_cleanup();
 
-    return EXIT_SUCCESS;
+    return 0;
 }
