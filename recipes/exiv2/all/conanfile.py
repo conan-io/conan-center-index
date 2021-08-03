@@ -1,6 +1,7 @@
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
-from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
 
@@ -60,6 +61,8 @@ class Exiv2Conan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.4.1")
+        elif self.options.with_xmp == "external":
+            raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
         if self.options.with_curl:
             self.requires("libcurl/7.64.1")
 
