@@ -27,6 +27,10 @@ class LibpqxxRecipe(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _mac_os_minimum_required_version(self):
+        return "10.15"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -61,7 +65,7 @@ class LibpqxxRecipe(ConanFile):
 
         if self.settings.os == "Macos":
             os_version = self.settings.get_safe("os.version")
-            if os_version and Version(os_version) < "10.15":
+            if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
@@ -81,6 +85,9 @@ class LibpqxxRecipe(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_DOC"] = False
             self._cmake.definitions["BUILD_TEST"] = False
+            if self.settings.os == "Macos":
+                # Set `-mmacosx-version-min` to enable C++17 standard library support.
+                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
