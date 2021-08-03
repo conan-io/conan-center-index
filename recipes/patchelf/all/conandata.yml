@@ -1,0 +1,4 @@
+sources:
+  "0.12":
+    url: "https://github.com/NixOS/patchelf/archive/refs/tags/0.12.tar.gz"
+    sha256: "3dca33fb862213b3541350e1da262249959595903f559eae0fbc68966e9c3f56"
