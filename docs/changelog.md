@@ -1,6 +1,6 @@
 # Changelog
 
-### TBD
+### 3-August-2021 - 13:29 CEST
 
 - [feature] BuildSingleReference: Create packages for apple-clang armv8 (Apple M1) in pull-requests' builds.
 - [feature] BuildSingleReference: Enforce empty workspace for Windows and MacOS nodes.
