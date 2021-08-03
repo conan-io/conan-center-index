@@ -1,5 +1,5 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -74,4 +74,4 @@ class S2n(ConanFile):
         self.cpp_info.components["s2n-lib"].names["cmake_find_package"] = "s2n"
         self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
         self.cpp_info.components["s2n-lib"].libs = ["s2n"]
-        self.cpp_info.components["s2n-lib"].requires = ["aws-c-common::aws-c-common-lib", "openssl"]
+        self.cpp_info.components["s2n-lib"].requires = ["aws-c-common::aws-c-common-lib", "openssl::crypto"]
