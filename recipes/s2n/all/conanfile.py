@@ -72,3 +72,5 @@ class S2n(ConanFile):
         self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
         self.cpp_info.components["s2n-lib"].libs = ["s2n"]
         self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["s2n-lib"].system_libs = ["m"]
