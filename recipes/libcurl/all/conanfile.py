@@ -325,10 +325,10 @@ class LibcurlConan(ConanFile):
         if self._has_metalink_option:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
         
-        if !self.options.with_proxy:
+        if not self.options.with_proxy:
             params.append("--disable-proxy")
        
-        if !self.options.with_rtsp:
+        if not self.options.with_rtsp:
             params.append("--disable-rtsp")
 
         # Cross building flags
