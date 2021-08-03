@@ -1066,6 +1066,9 @@ Examples = bin/datadir/examples""")
         if self.options.qtwinextras:
             _create_module("WinExtras")
 
+        if self.options.qtxmlpatterns:
+             _create_module("XmlPatterns", ["Network"])
+
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
