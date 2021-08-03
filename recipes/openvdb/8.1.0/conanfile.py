@@ -66,9 +66,8 @@ class OpenVDBConan(ConanFile):
         if version < self._compilers_min_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a %s version greater than %s" % (self.name, compiler, self._compilers_min_version[compiler]))
 
-    def configure(self):
+    def validate(self):
         if self.options.shared:
-            del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
@@ -78,6 +77,10 @@ class OpenVDBConan(ConanFile):
             if self.options.simd:
                 raise ConanInvalidConfiguration("Only intel architectures support SSE4 or AVX.")
         self._check_compilier_version()
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         self.requires("boost/1.76.0")
@@ -117,7 +120,7 @@ endif()
         self._cmake = CMake(self)
 
         # Force MD(d)
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
             self._cmake.definitions["CMAKE_MSVC_RUNTIME_LIBRARY"] = "MultiThreaded$<$<CONFIG:Debug>:Debug>"
 
         # exposed options
