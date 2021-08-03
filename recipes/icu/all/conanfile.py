@@ -53,6 +53,10 @@ class ICUBase(ConanFile):
     def _make_tool(self):
         return "make" if self.settings.os != "FreeBSD" else "gmake"
 
+    @property
+    def _enable_icu_tools(self):
+        return self.settings.os not in ["iOS", "tvOS", "watchOS"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -177,7 +181,7 @@ class ICUBase(ConanFile):
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
-        if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+        if not self._enable_icu_tools:
             args.append("--disable-tools")
 
         env_build = self._configure_autotools()
@@ -330,26 +334,26 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
         self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
 
-        # icutu
-        self.cpp_info.components["icu-tu"].names["cmake_find_package"] = "tu"
-        self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
-        self.cpp_info.components["icu-tu"].libs = [self._lib_name("icutu")]
-        self.cpp_info.components["icu-tu"].requires = ["icu-i18n", "icu-uc"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["icu-tu"].system_libs = ["pthread"]
-
-        # icutest
-        self.cpp_info.components["icu-test"].names["cmake_find_package"] = "test"
-        self.cpp_info.components["icu-test"].names["cmake_find_package_multi"] = "test"
-        self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
-        self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
-
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
-        if self.settings.os not in ["iOS", "tvOS", "watchOS"]:
+        if self._enable_icu_tools:
+            # icutu
+            self.cpp_info.components["icu-tu"].names["cmake_find_package"] = "tu"
+            self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
+            self.cpp_info.components["icu-tu"].libs = [self._lib_name("icutu")]
+            self.cpp_info.components["icu-tu"].requires = ["icu-i18n", "icu-uc"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["icu-tu"].system_libs = ["pthread"]
+
+            # icutest
+            self.cpp_info.components["icu-test"].names["cmake_find_package"] = "test"
+            self.cpp_info.components["icu-test"].names["cmake_find_package_multi"] = "test"
+            self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
+            self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
+
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
