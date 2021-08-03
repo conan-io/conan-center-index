@@ -105,15 +105,15 @@ class BackwardCppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions['STACK_WALKING_UNWIND'] = self._has_stack_walking("unwind")
-        self._cmake.definitions['STACK_WALKING_BACKTRACE'] = self._has_stack_walking("backtrace")
-        self._cmake.definitions['STACK_DETAILS_AUTO_DETECT'] = False
-        self._cmake.definitions['STACK_DETAILS_BACKTRACE_SYMBOL'] = self._has_stack_details("backtrace_symbol")
-        self._cmake.definitions['STACK_DETAILS_DW'] = self._has_stack_details("dw")
-        self._cmake.definitions['STACK_DETAILS_BFD'] = self._has_stack_details("bfd")
-        self._cmake.definitions['STACK_DETAILS_DWARF'] = self._has_stack_details("dwarf")
-        self._cmake.definitions['BACKWARD_SHARED'] = self.options.shared
-        self._cmake.definitions['BACKWARD_TESTS'] = False
+        self._cmake.definitions["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
+        self._cmake.definitions["STACK_WALKING_BACKTRACE"] = self._has_stack_walking("backtrace")
+        self._cmake.definitions["STACK_DETAILS_AUTO_DETECT"] = False
+        self._cmake.definitions["STACK_DETAILS_BACKTRACE_SYMBOL"] = self._has_stack_details("backtrace_symbol")
+        self._cmake.definitions["STACK_DETAILS_DW"] = self._has_stack_details("dw")
+        self._cmake.definitions["STACK_DETAILS_BFD"] = self._has_stack_details("bfd")
+        self._cmake.definitions["STACK_DETAILS_DWARF"] = self._has_stack_details("dwarf")
+        self._cmake.definitions["BACKWARD_SHARED"] = self.options.shared
+        self._cmake.definitions["BACKWARD_TESTS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -136,14 +136,14 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Backward"
         self.cpp_info.names["cmake_find_package_multi"] = "Backward"
 
-        self.cpp_info.defines.append('BACKWARD_HAS_UNWIND={}'.format(int(self._has_stack_walking("unwind"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE={}'.format(int(self._has_stack_walking("backtrace"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_UNWIND={}".format(int(self._has_stack_walking("unwind"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_BACKTRACE={}".format(int(self._has_stack_walking("backtrace"))))
 
-        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE_SYMBOL={}'.format(int(self._has_stack_details("backtrace_symbol"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self._has_stack_details("dw"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self._has_stack_details("bfd"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self._has_stack_details("dwarf"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_PDB_SYMBOL={}'.format(int(self.settings.os == "Windows")))
+        self.cpp_info.defines.append("BACKWARD_HAS_BACKTRACE_SYMBOL={}".format(int(self._has_stack_details("backtrace_symbol"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_DW={}".format(int(self._has_stack_details("dw"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_BFD={}".format(int(self._has_stack_details("bfd"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_DWARF={}".format(int(self._has_stack_details("dwarf"))))
+        self.cpp_info.defines.append("BACKWARD_HAS_PDB_SYMBOL={}".format(int(self.settings.os == "Windows")))
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
