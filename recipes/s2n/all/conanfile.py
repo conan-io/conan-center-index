@@ -51,6 +51,7 @@ class S2n(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["UNSAFE_TREAT_WARNINGS_AS_ERRORS"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -73,5 +74,5 @@ class S2n(ConanFile):
         self.cpp_info.components["s2n-lib"].names["cmake_find_package_multi"] = "s2n"
         self.cpp_info.components["s2n-lib"].libs = ["s2n"]
         self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["s2n-lib"].system_libs = ["m"]
