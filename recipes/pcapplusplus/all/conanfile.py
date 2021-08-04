@@ -7,7 +7,6 @@ required_conan_version = ">=1.33.0"
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
-    version = "21.05"
     license = "Unlicense"
     description = "PcapPlusPlus is a multiplatform C++ library for capturing, parsing and crafting of network packets"
     topics = ("conan", "pcapplusplus", "pcap", "network", "security", "packet")
