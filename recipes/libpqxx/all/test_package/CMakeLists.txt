@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
 # Set `-mmacosx-version-min` to enable C++17 standard library support.
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
 project(test_package CXX)
 
