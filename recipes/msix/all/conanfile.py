@@ -93,8 +93,8 @@ class MsixConan(ConanFile):
             self.options.crypto_lib = "crypt32"
 
     def configure(self):
-        if self.settings.os == "Linux" and self.options.shared:
-            self.options.fPIC = True
+        if self.options.shared:
+            del self.options.fPIC
         if self.options.xml_parser == "xerces":
             self.options["xerces-c"].char_type = "char16_t"
             self.options["xerces-c"].shared = False
