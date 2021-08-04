@@ -22,10 +22,12 @@ class FtjamConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("ftjam does not work, built with Visual Studio")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("ftjam doesn't build with Visual Studio yet")
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
