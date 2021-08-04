@@ -272,6 +272,7 @@ class SDLConan(ConanFile):
         sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
         self.cpp_info.components["libsdl2"].names["cmake_find_package"] = sdl2_cmake_target
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
+        self.cpp_info.components["libsdl2"].names["pkg_config"] = "sdl2"
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
         if self.options.get_safe("iconv", False):
