@@ -67,26 +67,6 @@ class MsixConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def validate(self):
-        if self.settings.os != "Android" and self.options.xml_parser == "javaxml":
-            raise ConanInvalidConfiguration("javaxml is supported only for Android")
-        if self.settings.os == "Linux" and self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Only clang is supported on Linux")
-        if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
-            raise ConanInvalidConfiguration("applexml is supported only for MacOS")
-        if self.settings.os != "Windows" and self.options.crypto_lib == "crypt32":
-            raise ConanInvalidConfiguration("crypt32 is supported only for Windows")
-        if self.settings.os != "Windows" and self.options.xml_parser == "msxml6":
-            raise ConanInvalidConfiguration("msxml6 is supported only for Windows")
-        if self.options.pack:
-            if self.settings.os == "Macos":
-                if not self.options.use_external_zlib:
-                    raise ConanInvalidConfiguration("Using libCompression APIs and packaging features is not supported")
-                if self.options.xml_parser != "xerces":
-                    raise ConanInvalidConfiguration("Xerces is the only supported parser for MacOS pack")
-            if not self.options.use_validation_parser:
-                raise ConanInvalidConfiguration("Packaging requires validation parser")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -109,6 +89,26 @@ class MsixConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.xml_parser == "xerces":
             self.requires("xerces-c/3.2.3")
+
+    def validate(self):
+        if self.settings.os != "Android" and self.options.xml_parser == "javaxml":
+            raise ConanInvalidConfiguration("javaxml is supported only for Android")
+        if self.settings.os == "Linux" and self.settings.compiler != "clang":
+            raise ConanInvalidConfiguration("Only clang is supported on Linux")
+        if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
+            raise ConanInvalidConfiguration("applexml is supported only for MacOS")
+        if self.settings.os != "Windows" and self.options.crypto_lib == "crypt32":
+            raise ConanInvalidConfiguration("crypt32 is supported only for Windows")
+        if self.settings.os != "Windows" and self.options.xml_parser == "msxml6":
+            raise ConanInvalidConfiguration("msxml6 is supported only for Windows")
+        if self.options.pack:
+            if self.settings.os == "Macos":
+                if not self.options.use_external_zlib:
+                    raise ConanInvalidConfiguration("Using libCompression APIs and packaging features is not supported")
+                if self.options.xml_parser != "xerces":
+                    raise ConanInvalidConfiguration("Xerces is the only supported parser for MacOS pack")
+            if not self.options.use_validation_parser:
+                raise ConanInvalidConfiguration("Packaging requires validation parser")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
