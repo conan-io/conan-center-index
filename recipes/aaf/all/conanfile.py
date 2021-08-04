@@ -44,8 +44,6 @@ class AafConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
-            raise ConanInvalidConfiguration("Static runtime not supported")
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARM v8 not supported")
 
@@ -79,6 +77,9 @@ class AafConan(ConanFile):
         self.copy("LEGAL/AAFSDKPSL.TXT", dst="licenses", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["aaflib", "aafiid", "com-api"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["AAF", "AAFIID", "AAFCOAPI"]
+        else:
+            self.cpp_info.libs = ["aaflib", "aafiid", "com-api"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["dl"]
