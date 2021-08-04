@@ -78,7 +78,8 @@ class MsixConan(ConanFile):
         if self.options.xml_parser == "xerces":
             self.options["xerces-c"].char_type = "char16_t"
             self.options["xerces-c"].shared = False
-        tools.check_min_cppstd(self, "14")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
 
     def requirements(self):
         if self.settings.os == "Linux" and not self.options.skip_bundles:
