@@ -302,8 +302,18 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].libdirs.append("/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].sharedlinkflags.append("-Wl,-rpath,/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].exelinkflags.append("-Wl,-rpath,/opt/vc/lib")
-        elif self.settings.os == "Macos":
-            self.cpp_info.components["libsdl2"].frameworks = ["Cocoa", "Carbon", "IOKit", "CoreVideo", "CoreAudio", "AudioToolbox", "ForceFeedback"]
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["libsdl2"].frameworks = [
+                "CoreVideo", "CoreAudio", "AudioToolbox",
+                "AVFoundation", "Foundation", "QuartzCore",
+            ]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
+            elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                self.cpp_info.components["libsdl2"].frameworks.extend([
+                    "UIKit", "OpenGLES", "GameController", "CoreMotion",
+                    "CoreGraphics", "CoreBluetooth", "CoreHaptics",
+                ])
             if tools.Version(self.version) >= "2.0.14":
                 self.cpp_info.components["libsdl2"].frameworks.append("Metal")
         elif self.settings.os == "Windows":
