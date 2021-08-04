@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -7,11 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        self.build_cmake()
-
-    def build_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SDL2_SHARED"] = self.options["sdl"].shared
         if self.settings.os == "Linux":
             cmake.definitions["WITH_X11"] = self.options["sdl"].x11
             cmake.definitions["WITH_ALSA"] = self.options["sdl"].alsa
@@ -25,6 +21,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
