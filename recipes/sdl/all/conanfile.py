@@ -115,10 +115,6 @@ class SDLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
@@ -131,6 +127,27 @@ class SDLConan(ConanFile):
                 self.requires("pulseaudio/14.2")
             if self.options.opengl:
                 self.requires("opengl/system")
+
+    def _check_pkg_config(self, option, package_name):
+        if option:
+            pkg_config = tools.PkgConfig(package_name)
+            if not pkg_config.provides:
+                raise ConanInvalidConfiguration("package %s is not available" % package_name)
+
+    def _check_dependencies(self):
+        if self.settings.os == "Linux":
+            self._check_pkg_config(self.options.jack, "jack")
+            self._check_pkg_config(self.options.esd, "esound")
+            self._check_pkg_config(self.options.wayland, "wayland-client")
+            self._check_pkg_config(self.options.wayland, "wayland-protocols")
+            self._check_pkg_config(self.options.directfb, "directfb")
+
+    def validate(self):
+        self._check_dependencies()
+        if self.settings.os == "Macos" and not self.options.iconv:
+            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
+        if self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def package_id(self):
         del self.info.options.sdl2main
@@ -158,23 +175,6 @@ class SDLConan(ConanFile):
                                   'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
                                   '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
         self._build_cmake()
-
-    def _check_pkg_config(self, option, package_name):
-        if option:
-            pkg_config = tools.PkgConfig(package_name)
-            if not pkg_config.provides:
-                raise ConanInvalidConfiguration("package %s is not available" % package_name)
-
-    def _check_dependencies(self):
-        if self.settings.os == "Linux":
-            self._check_pkg_config(self.options.jack, "jack")
-            self._check_pkg_config(self.options.esd, "esound")
-            self._check_pkg_config(self.options.wayland, "wayland-client")
-            self._check_pkg_config(self.options.wayland, "wayland-protocols")
-            self._check_pkg_config(self.options.directfb, "directfb")
-
-    def validate(self):
-        self._check_dependencies()
 
     def _configure_cmake(self):
         if not self._cmake:
