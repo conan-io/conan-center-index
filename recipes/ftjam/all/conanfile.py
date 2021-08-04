@@ -65,41 +65,38 @@ class FtjamConan(ConanFile):
         return self._autotools
 
     def build(self):
-        # toolset name of the system building ftjam
-        jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.libs = []
-        env = autotools.vars
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
-            if self.settings.compiler == "Visual Studio":
-                autotools = AutoToolsBuildEnvironment(self)
+            if self.settings.os == "Windows":
+                # toolset name of the system building ftjam
+                jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
+                autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 autotools.libs = []
+                env = autotools.vars
                 with tools.environment_append(env):
-                    with tools.vcvars(self.settings):
-                        self.run("nmake -f builds/win32-visualc.mk JAM_TOOLSET={}".format(jam_toolset))
-            else:
-                if self.settings.os == "Windows":
-                    with tools.environment_append(env):
+                    if self.settings.compiler == "Visual Studio":
+                        with tools.vcvars(self.settings):
+                            self.run("nmake -f builds/win32-visualc.mk JAM_TOOLSET={}".format(jam_toolset))
+                    else:
                         with tools.environment_append({"PATH": [os.getcwd()]}):
                             autotools.make(args=["JAM_TOOLSET={}".format(jam_toolset), "-f", "builds/win32-gcc.mk"])
-                else:
-                    autotools = self._configure_autotools()
-                    autotools.make()
+            else:
+                autotools = self._configure_autotools()
+                autotools.make()
 
     def package(self):
         txt = tools.load(os.path.join(self._source_subfolder, "jam.c"))
         license_txt = txt[:txt.find("*/")+3]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_txt)
-        if self.settings.compiler == "Visual Studio":
-            pass
-        else:
-            if self.settings.os == "Windows":
-                self.copy("*.exe", src=os.path.join(self._source_subfolder, "bin.nt"), dst=os.path.join(self.package_folder, "bin"))
+        if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio":
+                pass
             else:
-                with tools.chdir(self._source_subfolder):
-                    autotools = self._configure_autotools()
-                    autotools.install()
+                self.copy("*.exe", src=os.path.join(self._source_subfolder, "bin.nt"), dst=os.path.join(self.package_folder, "bin"))
+        else:
+            with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autotools()
+                autotools.install()
 
     def _jam_toolset(self, os, compiler):
         if compiler == "Visual Studio":
