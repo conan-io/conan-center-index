@@ -21,6 +21,6 @@ class TestPackageConan(ConanFile):
                 name = conan-center-index
                 email = info@conan.io
                 """))
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
