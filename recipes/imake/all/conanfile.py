@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
@@ -33,6 +34,7 @@ class ImakeConan(ConanFile):
         "xmkmf": True,
     }
 
+    exports_sources = "patches/*"
     generators = "pkg_config"
 
     _autotools = None
@@ -43,29 +45,56 @@ class ImakeConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
         self.requires("xorg-proto/2021.4")
 
     def build_requirements(self):
+        self.build_requires("automake/1.16.3")
         self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows":
+            self.build_requires("msys2/cci.latest")
 
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def package_id(self):
-        del self.settings.compiler
+        del self.info.settings.compiler
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self):
+                env = {
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CPP": "{} cl -E".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build == "Windows")
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
+        self._autotools.libs = []
+        if self.settings.os == "Windows":
+            self._autotools.defines.append("WIN32")
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.defines.append("_CRT_SECURE_NO_WARNINGS")
+            self._autotools.defines.append("CROSSCOMPILE_CPP")
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-ccmakedep={}".format(yes_no(self.options.ccmakedep)),
@@ -77,17 +106,27 @@ class ImakeConan(ConanFile):
             "--enable-revpath={}".format(yes_no(self.options.revpath)),
             "--enable-xmkmf={}".format(yes_no(self.options.xmkmf)),
         ]
+
+        # FIXME: RAWCPP (ac_cv_path_RAWCPP) is not compatible with MSVC preprocessor. It needs to be cpp.
+        if tools.get_env("CPP"):
+            conf_args.extend([
+                "--with-script-preproc-cmd={}".format(tools.get_env("CPP")),
+            ])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
