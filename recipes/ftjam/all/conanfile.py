@@ -42,7 +42,7 @@ class FtjamConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
         if self.settings.os != "Windows":
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
