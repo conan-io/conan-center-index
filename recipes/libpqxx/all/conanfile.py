@@ -82,9 +82,8 @@ class LibpqxxRecipe(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_DOC"] = False
             self._cmake.definitions["BUILD_TEST"] = False
-            if self.settings.os == "Macos":
-                # Set `-mmacosx-version-min` to enable C++17 standard library support.
-                self._cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
+            # Set `-mmacosx-version-min` to enable C++17 standard library support.
+            self._cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
