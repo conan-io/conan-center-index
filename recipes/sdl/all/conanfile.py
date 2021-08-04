@@ -134,20 +134,16 @@ class SDLConan(ConanFile):
             if not pkg_config.provides:
                 raise ConanInvalidConfiguration("package %s is not available" % package_name)
 
-    def _check_dependencies(self):
+    def validate(self):
+        if self.settings.os == "Macos" and not self.options.iconv:
+            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
         if self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("Linux not supported yet")
             self._check_pkg_config(self.options.jack, "jack")
             self._check_pkg_config(self.options.esd, "esound")
             self._check_pkg_config(self.options.wayland, "wayland-client")
             self._check_pkg_config(self.options.wayland, "wayland-protocols")
             self._check_pkg_config(self.options.directfb, "directfb")
-
-    def validate(self):
-        self._check_dependencies()
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def package_id(self):
         del self.info.options.sdl2main
