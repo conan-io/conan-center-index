@@ -75,4 +75,4 @@ class S2n(ConanFile):
         self.cpp_info.components["s2n-lib"].libs = ["s2n"]
         self.cpp_info.components["s2n-lib"].requires = ["openssl::crypto"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["s2n-lib"].system_libs = ["m"]
+            self.cpp_info.components["s2n-lib"].system_libs = ["m", "pthread"]
