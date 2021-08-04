@@ -32,10 +32,13 @@ class FtjamConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
         if self.settings.os != "Windows":
