@@ -46,6 +46,8 @@ class AafConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime in ("MT", "MTd"):
             raise ConanInvalidConfiguration("Static runtime not supported")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("ARM v8 not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
