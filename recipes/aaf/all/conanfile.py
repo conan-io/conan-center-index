@@ -64,6 +64,7 @@ class AafConan(ConanFile):
             cmake.definitions["PLATFORM"] = self.settings.os
 
         cmake.definitions["ARCH"] = "x86_64"  # ARCH is used only for setting the output directory. So itsvalue does not matter here.
+        cmake.definitions["AAF_NO_STRUCTURED_STORAGE"] = False
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
