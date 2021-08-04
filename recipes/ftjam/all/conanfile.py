@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class FtjamConan(ConanFile):
     name = "ftjam"
@@ -25,10 +27,6 @@ class FtjamConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ftjam-{}".format(self.version), self._source_subfolder)
-
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
@@ -37,6 +35,10 @@ class FtjamConan(ConanFile):
             self.build_requires("automake/1.16.2")
         if self.settings.os != "Windows":
             self.build_requires("bison/3.5.3")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "jamgram.c"),
