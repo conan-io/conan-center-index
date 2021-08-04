@@ -29,6 +29,9 @@ class FtjamConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("ftjam doesn't build with Visual Studio yet")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
@@ -59,12 +62,6 @@ class FtjamConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self.settings.build_type != "Release":
-            raise ConanInvalidConfiguration("This build_type is disabled in order to diminish the number of builds")
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime != "MT":
-                raise ConanInvalidConfiguration("This runtime is disabled in order to diminish the number of builds")
-
         # toolset name of the system building ftjam
         jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -109,10 +106,6 @@ class FtjamConan(ConanFile):
         if os == "Windows":
             return "MINGW"
         return None
-
-    def package_id(self):
-        del self.info.settings.build_type
-        del self.info.settings.compiler
 
     def package_info(self):
         jam_path = os.path.join(self.package_folder, "bin")
