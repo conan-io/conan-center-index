@@ -119,7 +119,7 @@ class FtjamConan(ConanFile):
         if self.settings.os == "Windows":
             jam_bin += ".exe"
         self.output.info("Setting JAM environment variable: {}".format(jam_bin))
-        self.env_info.JAM.append(jam_bin)
+        self.env_info.JAM = jam_bin
 
         # toolset of the system using ftjam
         jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
