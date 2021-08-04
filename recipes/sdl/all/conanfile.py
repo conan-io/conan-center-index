@@ -12,8 +12,7 @@ class SDLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = ["cmake", "pkg_config"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -69,12 +68,20 @@ class SDLConan(ConanFile):
         "sdl2main": True,
         "opengl": True,
         "opengles": True,
-        "vulkan": True
+        "vulkan": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = ["cmake", "pkg_config"]
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
