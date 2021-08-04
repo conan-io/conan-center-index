@@ -1,6 +1,9 @@
-from conans import ConanFile, Meson, tools
+from conans import ConanFile, tools
+from conan.tools.meson import MesonToolchain, Meson
 from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class InihConan(ConanFile):
@@ -10,7 +13,7 @@ class InihConan(ConanFile):
     topics = ("conan", "inih", "ini", "configuration", "parser")
     homepage = "https://github.com/benhoyt/inih"
     url = "https://github.com/conan-io/conan-center-index"
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,24 +42,30 @@ class InihConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Shared inih is not supported")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared inih is not supported on Windows")
+
     def build_requirements(self):
-        self.build_requires("meson/0.55.3")
+        self.build_requires("meson/0.59.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-r{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.definitions["distro_install"] = True
+        tc.generate()
 
     def _configure_meson(self):
         if self._meson:
             return self._meson
-        self._meson = Meson(self)
-        self._meson.options["distro_install"] = True
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._meson = Meson(self, build_folder=self._build_subfolder)
+        self._meson.configure(source_folder=self._source_subfolder)
         return self._meson
 
     def build(self):
@@ -71,8 +80,9 @@ class InihConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             # https://github.com/mesonbuild/meson/issues/7378
-            os.rename(os.path.join(self.package_folder, "lib", "libinih.a"),
-                      os.path.join(self.package_folder, "lib", "inih.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "libinih.a"),
+                         os.path.join(self.package_folder, "lib", "inih.lib"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "inih"
         self.cpp_info.libs = ["inih"]
