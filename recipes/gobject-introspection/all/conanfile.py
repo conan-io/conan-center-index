@@ -46,7 +46,7 @@ class GobjectIntrospectionConan(ConanFile):
             self.build_requires("bison/3.7.1")
 
     def requirements(self):
-        self.requires("glib/2.68.2")
+        self.requires("glib/2.69.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -55,6 +55,7 @@ class GobjectIntrospectionConan(ConanFile):
         meson = Meson(self)
         defs = dict()
         defs["build_introspection_data"] = self.options["glib"].shared
+        defs["datadir"] = os.path.join(self.package_folder, "res")
 
         meson.configure(
             source_folder=self._source_subfolder,
@@ -92,10 +93,7 @@ class GobjectIntrospectionConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.move(
-            os.path.join(self.package_folder, "share"),
-            os.path.join(self.package_folder, "res"),
-        )
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
