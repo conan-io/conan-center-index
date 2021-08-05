@@ -121,9 +121,10 @@ class ImakeConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # tools.replace_in_file(os.path.join(self._source_subfolder, ""))
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make()
+            autotools.make(args=["V=1"])
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
@@ -133,6 +134,8 @@ class ImakeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
