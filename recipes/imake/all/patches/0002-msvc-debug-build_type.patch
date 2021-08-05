@@ -1,0 +1,16 @@
+Needed when building MSVC with build_type=Debug
+--- mdepend.cpp
++++ mdepend.cpp
+@@ -125,9 +125,9 @@
+ 			    shift
+ 			    ;;
+ 
+-			# Flag to tell compiler to output dependencies directly
+-			# For example, with Sun compilers, -xM or -xM1 or
+-			# with gcc, -M
++			XCOMM Flag to tell compiler to output dependencies directly
++			XCOMM For example, with Sun compilers, -xM or -xM1 or
++			XCOMM with gcc, -M
+ 		        -d)
+ 			    compilerlistsdepends="y"
+ 			    compilerlistdependsflag="$2"

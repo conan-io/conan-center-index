@@ -93,8 +93,11 @@ class ImakeConan(ConanFile):
         if self.settings.os == "Windows":
             self._autotools.defines.append("WIN32")
         if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.append("_CRT_SECURE_NO_WARNINGS")
-            self._autotools.defines.append("CROSSCOMPILE_CPP")
+            self._autotools.defines.extend([
+                "_CRT_SECURE_NO_WARNINGS",
+                "CROSSCOMPILE_CPP",
+            ])
+            self._autotools.flags.append("-FS")
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-ccmakedep={}".format(yes_no(self.options.ccmakedep)),
