@@ -117,6 +117,8 @@ class LibMysqlClientCConan(ConanFile):
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("clang 6 or newer is required")
+        if tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -143,17 +145,6 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIB"] = "system"
-  
-        if tools.cross_building(self, skip_x64_x86=True):
-            # FIXME actually check all these
-            self._cmake.definitions["HAVE_SUPPORTED_CLANG_VERSION"] = 1
-            self._cmake.definitions["HAVE_LLVM_LIBCPP"] = 1
-            self._cmake.definitions["HAVE_CLOCK_GETTIME"] = 1
-            self._cmake.definitions["HAVE_CLOCK_REALTIME"] = 1
-            self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
-            self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE__TRYRUN_OUTPUT"] = ""
-            self._cmake.definitions["HAVE_CXX_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
-            self._cmake.definitions["HAVE_CXX_FLOATING_POINT_FUSED_MADD_EXITCODE__TRYRUN_OUTPUT"] = ""
  
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
