@@ -74,7 +74,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_zstd": [True, False],
         "with_gstreamer": [True, False],
-        "With_dbus": [True, False],
+        "with_dbus": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -112,7 +112,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_zstd": True,
         "with_gstreamer": False,
-        "With_dbus": False,
+        "with_dbus": False,
 
         "gui": True,
         "widgets": True,
