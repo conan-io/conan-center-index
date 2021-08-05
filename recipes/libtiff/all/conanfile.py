@@ -149,6 +149,19 @@ class LibtiffConan(ConanFile):
             if self._has_webp_option:
                 self._cmake.definitions["webp"] = self.options.webp
             self._cmake.definitions["cxx"] = self.options.cxx
+
+            # Workaround for iOS/tvOS/watchOS when dependencies are found with find_path() and find_library()
+            # see https://github.com/conan-io/conan-center-index/issues/6637
+            if tools.cross_building(self) and self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                cmake_find_root_path = []
+                if self.options.get_safe("libdeflate"):
+                    cmake_find_root_path.append(self.deps_cpp_info["libdeflate"].rootpath)
+                if self.options.jbig:
+                    cmake_find_root_path.append(self.deps_cpp_info["jbig"].rootpath)
+                if self.options.get_safe("zstd"):
+                    cmake_find_root_path.append(self.deps_cpp_info["zstd"].rootpath)
+                self._cmake.definitions["CMAKE_FIND_ROOT_PATH"] = ";".join(cmake_find_root_path)
+
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
