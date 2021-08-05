@@ -145,6 +145,11 @@ class LibMysqlClientCConan(ConanFile):
             self._cmake.definitions["WITH_ZLIB"] = "system"
   
         if tools.cross_building(self, skip_x64_x86=True):
+            # FIXME actually check all these
+            self._cmake.definitions["HAVE_SUPPORTED_CLANG_VERSION"] = 1
+            self._cmake.definitions["HAVE_LLVM_LIBCPP"] = 1
+            self._cmake.definitions["HAVE_CLOCK_GETTIME"] = 1
+            self._cmake.definitions["HAVE_CLOCK_REALTIME"] = 1
             self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
             self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE__TRYRUN_OUTPUT"] = ""
             self._cmake.definitions["HAVE_CXX_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
