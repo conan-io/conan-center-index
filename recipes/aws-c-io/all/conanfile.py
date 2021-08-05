@@ -75,3 +75,5 @@ class AwsCIO(ConanFile):
 
         if self.settings.os == "Macos":
             self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["aws-c-io-lib"].system_libs = ["crypt32", "secur32"]
