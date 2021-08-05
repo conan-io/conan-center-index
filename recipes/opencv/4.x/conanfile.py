@@ -353,6 +353,11 @@ class OpenCVConan(ConanFile):
             }.get(str(self.settings.arch), str(self.settings.arch))
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
+            # Workaround for cross-build to at least iOS/tvOS/watchOS,
+            # when dependencies are found with find_path() and find_library()
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
