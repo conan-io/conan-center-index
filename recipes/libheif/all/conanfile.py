@@ -11,8 +11,7 @@ class Libheif(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/strukturag/libheif"
     license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,6 +28,8 @@ class Libheif(ConanFile):
         "with_libaomav1": False,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -46,12 +47,6 @@ class Libheif(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         self.requires("libde265/1.0.8")
@@ -61,6 +56,14 @@ class Libheif(ConanFile):
             self.requires("libaom-av1/2.0.1")
         if self.options.get_safe("with_dav1d"):
             self.requires("dav1d/0.8.1")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
