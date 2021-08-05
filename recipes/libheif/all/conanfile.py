@@ -53,7 +53,7 @@ class Libheif(ConanFile):
         if self.options.with_x265:
             self.requires("libx265/3.4")
         if self.options.with_libaomav1:
-            self.requires("libaom-av1/2.0.1")
+            self.requires("libaom-av1/3.1.1")
         if self.options.get_safe("with_dav1d"):
             self.requires("dav1d/0.8.1")
 
