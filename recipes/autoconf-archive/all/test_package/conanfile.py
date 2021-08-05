@@ -22,3 +22,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         self.run(os.path.join(".", "hello"))
+

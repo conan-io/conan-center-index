@@ -46,3 +46,4 @@ class AutoconfArchiveConan(ConanFile):
         aclocal_path = os.path.join(self.package_folder, "share", "aclocal")
         self.output.info("Appending ACLOCAL_PATH environment var: {}".format(aclocal_path))
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
+
