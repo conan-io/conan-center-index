@@ -112,6 +112,8 @@ class XorgProtoConan(ConanFile):
             # FIXME: generated .pc files contain `Name: xorg-proto-Xproto`, it should be `Name: Xproto`
             self.cpp_info.components[filename].filenames["pkg_config"] = filename
             self.cpp_info.components[filename].libdirs = []
+            if hasattr(self, "settings_build"):
+                self.cpp_info.components[filename].requires = ["xorg-macros::xorg-macros"]
             self.cpp_info.components[filename].version = name_version["version"]
 
         self.cpp_info.components["xproto"].includedirs.append(os.path.join("include", "X11"))
