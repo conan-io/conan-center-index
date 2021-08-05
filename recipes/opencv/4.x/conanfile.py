@@ -118,9 +118,9 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.5")
+            self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
         if self.options.parallel == "tbb":
