@@ -57,7 +57,7 @@ class Libheif(ConanFile):
         self.requires("libde265/1.0.8")
         if self.options.with_x265:
             self.requires("libx265/3.4")
-        if self.options.get_safe("with_libaomav1"):
+        if self.options.with_libaomav1:
             self.requires("libaom-av1/2.0.1")
         if self.options.get_safe("with_dav1d"):
             self.requires("dav1d/0.8.1")
@@ -76,8 +76,8 @@ class Libheif(ConanFile):
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_X265"] = not self.options.with_x265
         self._cmake.definitions["WITH_X265"] = self.options.with_x265
         # aom
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LibAOM"] = not self.options.get_safe("with_libaomav1", False)
-        self._cmake.definitions["WITH_AOM"] = self.options.get_safe("with_libaomav1", False)
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LibAOM"] = not self.options.with_libaomav1
+        self._cmake.definitions["WITH_AOM"] = self.options.with_libaomav1
         # dav1d
         self._cmake.definitions["WITH_DAV1D"] = self.options.get_safe("with_dav1d", False)
 
@@ -113,7 +113,7 @@ class Libheif(ConanFile):
         self.cpp_info.components["heif"].requires = ["libde265::libde265"]
         if self.options.with_x265:
             self.cpp_info.components["heif"].requires.append("libx265::libx265")
-        if self.options.get_safe("with_libaomav1"):
+        if self.options.with_libaomav1:
             self.cpp_info.components["heif"].requires.append("libaom-av1::libaom-av1")
         if self.options.get_safe("with_dav1d"):
             self.cpp_info.components["heif"].requires.append("dav1d::dav1d")
