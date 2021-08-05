@@ -4,6 +4,7 @@ from conans.tools import Version
 import os
 
 
+
 class LibMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
     url = "https://github.com/conan-io/conan-center-index"
