@@ -145,7 +145,6 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIB"] = "system"
- 
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
