@@ -4,7 +4,6 @@ from conans.tools import Version
 import os
 
 
-
 class LibMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
     url = "https://github.com/conan-io/conan-center-index"
@@ -144,7 +143,13 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIB"] = "system"
-
+  
+        if tools.cross_building(self, skip_x64_x86=True):
+            self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
+            self._cmake.definitions["HAVE_C_FLOATING_POINT_FUSED_MADD_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["HAVE_CXX_FLOATING_POINT_FUSED_MADD_EXITCODE"] = 1
+            self._cmake.definitions["HAVE_CXX_FLOATING_POINT_FUSED_MADD_EXITCODE__TRYRUN_OUTPUT"] = ""
+ 
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
