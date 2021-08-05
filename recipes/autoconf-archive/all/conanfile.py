@@ -37,8 +37,8 @@ class AutoconfArchiveConan(ConanFile):
             self._autotools.make()
 
     def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with tools.chdir(os.path.join(self._source_subfolder)):
-            self.copy("COPYING", dst="licenses", src=self._source_subfolder)
             self._autotools = self._configure_autotools()
             self._autotools.install()
 
