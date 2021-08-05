@@ -27,7 +27,7 @@ Avoid trailing white-space characters, if possible
 
 If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency is preferred.
 
-## Subfolder Properties 
+## Subfolder Properties
 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
 
@@ -112,8 +112,10 @@ and dependencies are correct.
 
 When components are defined in the `package_info` in `conanfile.py` the following conditions are desired
 
-- use the `cmake_find_package` or `cmake_find_package_multi` generators in `test_package/conanfile.py`
-- corresponding call to `find_package()` with the components _explicitly_ used in `target_link_libraries`
+- use `cmake_find_package` if library has an [official](cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) CMake module emulated in the recipe.
+- use `cmake_find_package_multi` if library provides official cmake config file emulated in the recipe. If there are more than one target, try to use all of
+them, or add an other executable linking to the global (usually unofficial) target.
+- otherwise, use cmake generator to not suggest an unofficial cmake target in test package.
 
 ### Recommended feature options names
 
