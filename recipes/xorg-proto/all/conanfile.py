@@ -113,7 +113,7 @@ class XorgProtoConan(ConanFile):
             self.cpp_info.components[filename].filenames["pkg_config"] = filename
             self.cpp_info.components[filename].libdirs = []
             if hasattr(self, "settings_build"):
-                self.cpp_info.components[filename].requires = ["xorg-macros"]
+                self.cpp_info.components[filename].requires = ["xorg-macros::xorg-macros"]
             self.cpp_info.components[filename].version = name_version["version"]
 
         self.cpp_info.components["xproto"].includedirs.append(os.path.join("include", "X11"))
