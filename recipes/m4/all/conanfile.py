@@ -2,20 +2,29 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class M4Conan(ConanFile):
     name = "m4"
     description = "GNU M4 is an implementation of the traditional Unix macro processor"
     topics = ("conan", "m4", "macro", "macro processor")
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/m4/"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-only"
-    exports_sources = ["patches/*.patch"]
     settings = "os", "arch", "compiler", "build_type"
 
+    exports_sources = "patches/*.patch",
+
     _autotools = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _is_msvc(self):
@@ -26,18 +35,21 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("m4-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         conf_args = []
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         build_canonical_name = None
         host_canonical_name = None
         if self.settings.compiler == "Visual Studio":
@@ -88,21 +100,17 @@ class M4Conan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
-            if bool(os.environ.get("CONAN_RUN_TESTS", "")):
+            if tools.get_env("CONAN_RUN_TESTS", False):
                 self.output.info("Running m4 checks...")
                 with tools.chdir("tests"):
                     autotools.make(target="check")
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
