@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     @contextlib.contextmanager
     def _build_context(self):
