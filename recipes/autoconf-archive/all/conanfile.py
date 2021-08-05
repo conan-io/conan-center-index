@@ -2,6 +2,8 @@ import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 
+required_conan_version = ">=1.33.0"
+
 class AutoconfArchiveConan(ConanFile):
     name = "autoconf-archive"
     url = "https://github.com/conan-io/conan-center-index"
