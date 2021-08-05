@@ -80,6 +80,13 @@ class Libheif(ConanFile):
         self._cmake.definitions["WITH_AOM"] = self.options.get_safe("with_libaomav1", False)
         # dav1d
         self._cmake.definitions["WITH_DAV1D"] = self.options.get_safe("with_dav1d", False)
+
+        # Workaround for cross-build to at least iOS/tvOS/watchOS,
+        # when dependencies are found with find_path() and find_library()
+        if tools.cross_building(self):
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
+
         self._cmake.configure()
         return self._cmake
 
