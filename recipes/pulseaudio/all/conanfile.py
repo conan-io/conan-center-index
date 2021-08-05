@@ -130,8 +130,6 @@ class PulseAudioConan(ConanFile):
         self.cpp_info.components["pulse"].requires = ["libsndfile::libsndfile", "libcap::libcap"]
         if self.options.with_alsa:
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
-        if self.options.with_glib:
-            self.cpp_info.components["pulse"].requires.append("glib::glib")
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.with_x11:
