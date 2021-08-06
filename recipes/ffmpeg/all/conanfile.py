@@ -110,7 +110,7 @@ class FFMpegConan(ConanFile):
             raise ConanInvalidConfiguration("Linux not supported yet")
         if self.settings.os != "Macos" and self.options.ssl == "securetransport":
             raise ConanInvalidConfiguration("securetransport is only available on Macos")
-        if self.settings.os == "Macos" and self.arch== "armv8" and self.options.vpx:
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.vpx:
             raise ConanInvalidConfiguration("libvpx doesn/t support armv8 supported yet")
 
     def config_options(self):
