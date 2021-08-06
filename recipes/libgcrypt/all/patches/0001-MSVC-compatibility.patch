@@ -1,0 +1,117 @@
+From fdb9278b2a4467c8a65b9d3f21b46c038096f6f0 Mon Sep 17 00:00:00 2001
+From: SSE4 <tomskside@gmail.com>
+Date: Thu, 25 Jul 2019 04:59:59 -0700
+Subject: [PATCH] - MSVC compatibility
+
+Signed-off-by: SSE4 <tomskside@gmail.com>
+---
+ cipher/cipher-ccm.c      | 4 ++++
+ cipher/cipher-poly1305.c | 2 +-
+ cipher/stribog.c         | 2 +-
+ compat/clock.c           | 4 +++-
+ compat/getpid.c          | 7 ++++++-
+ src/hwf-x86.c            | 2 +-
+ 6 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/cipher/cipher-ccm.c b/cipher/cipher-ccm.c
+index d7f14d8..6d7593a 100644
+--- a/cipher/cipher-ccm.c
++++ b/cipher/cipher-ccm.c
+@@ -40,7 +40,11 @@ do_cbc_mac (gcry_cipher_hd_t c, const unsigned char *inbuf, size_t inlen,
+ {
+   const unsigned int blocksize = 16;
+   gcry_cipher_encrypt_t enc_fn = c->spec->encrypt;
++#ifdef _MSC_VER
++  unsigned char * tmp = (unsigned char*) _alloca(sizeof(unsigned char) * blocksize);
++#else
+   unsigned char tmp[blocksize];
++#endif
+   unsigned int burn = 0;
+   unsigned int unused = c->u_mode.ccm.mac_unused;
+   size_t nblocks;
+diff --git a/cipher/cipher-poly1305.c b/cipher/cipher-poly1305.c
+index a2a74e8..5f35ee7 100644
+--- a/cipher/cipher-poly1305.c
++++ b/cipher/cipher-poly1305.c
+@@ -71,7 +71,7 @@ poly1305_fill_bytecounts (gcry_cipher_hd_t c)
+ static void
+ poly1305_do_padding (gcry_cipher_hd_t c, u32 ctr[2])
+ {
+-  static const byte zero_padding_buf[15] = {};
++  static const byte zero_padding_buf[15] = {0};
+   u32 padding_count;
+ 
+   /* Padding to 16 byte boundary. */
+diff --git a/cipher/stribog.c b/cipher/stribog.c
+index 7b6e330..3ca6d80 100644
+--- a/cipher/stribog.c
++++ b/cipher/stribog.c
+@@ -1284,7 +1284,7 @@ static void
+ stribog_final (void *context)
+ {
+   STRIBOG_CONTEXT *hd = context;
+-  u64 Z[8] = {};
++  u64 Z[8] = {0};
+   int i;
+ 
+   _gcry_md_block_write (context, NULL, 0); /* flush */ ;
+diff --git a/compat/clock.c b/compat/clock.c
+index 2a2c205..9385ba9 100644
+--- a/compat/clock.c
++++ b/compat/clock.c
+@@ -14,7 +14,7 @@
+ #include <config.h>
+ #endif
+ 
+-#ifdef HAVE_W32CE_SYSTEM
++#if defined(HAVE_W32CE_SYSTEM) || defined(HAVE_W32_SYSTEM)
+ #include <windows.h>
+ #include <time.h>
+ #include <assert.h>
+@@ -23,7 +23,9 @@ clock_t
+ _gcry_clock (void)
+ {
+   assert (CLOCKS_PER_SEC == 1000);
++#ifndef _MSC_VER
+ #warning Replace by a correct implementation.
++#endif
+   /* It seems that GetProcessTimes is available in the kernel but
+      without a declaration.  If that fails we would need to walk over
+      all threads and tally up the GetThreadTimes.  */
+diff --git a/compat/getpid.c b/compat/getpid.c
+index 032387c..37b410b 100644
+--- a/compat/getpid.c
++++ b/compat/getpid.c
+@@ -14,10 +14,15 @@
+ #include <config.h>
+ #endif
+ 
+-#ifdef HAVE_W32CE_SYSTEM
++#if defined(HAVE_W32CE_SYSTEM) || defined(HAVE_W32_SYSTEM)
+ #include <windows.h>
+ #include <sys/types.h>
+ 
++# ifndef __GNUC__
++  typedef long ssize_t;
++  typedef int  pid_t;
++# endif /*!__GNUC__*/
++
+ pid_t
+ _gcry_getpid (void)
+ {
+diff --git a/src/hwf-x86.c b/src/hwf-x86.c
+index 0d3a1f4..999de7d 100644
+--- a/src/hwf-x86.c
++++ b/src/hwf-x86.c
+@@ -28,7 +28,7 @@
+ #include "g10lib.h"
+ #include "hwf-common.h"
+ 
+-#if !defined (__i386__) && !defined (__x86_64__)
++#if !defined (__i386__) && !defined (__x86_64__) && !defined(_M_IX86) && !defined(_M_X64) && !defined(_M_AMD64)
+ # error Module build for wrong CPU.
+ #endif
+ 
+-- 
+2.22.0.windows.1
+
