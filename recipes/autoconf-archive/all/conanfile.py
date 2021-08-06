@@ -1,9 +1,8 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 import os
 
-
 required_conan_version = ">=1.33.0"
+
 
 class AutoconfArchiveConan(ConanFile):
     name = "autoconf-archive"
@@ -15,25 +14,26 @@ class AutoconfArchiveConan(ConanFile):
     settings = "os"
 
     _autotools = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("only Linux is supported")
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
             self._autotools.configure()
         return self._autotools
 
@@ -47,10 +47,13 @@ class AutoconfArchiveConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder)):
             self._autotools = self._configure_autotools()
             self._autotools.install()
-        tools.mkdir(os.path.join(self.package_folder, "bin").replace("\\", "/"))
-        tools.rename(os.path.join(self.package_folder, "share").replace("\\", "/"), os.path.join(self.package_folder, "bin", "share").replace("\\", "/"))
+
+        tools.mkdir(os.path.join(self.package_folder, "res"))
+        tools.rename(os.path.join(self.package_folder, "share", "aclocal"),
+                     os.path.join(self.package_folder, "res", "aclocal"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        aclocal_path = os.path.join(self.package_folder, "bin", "share", "aclocal").replace("\\", "/")
-        self.output.info("Appending ACLOCAL_PATH environment var: {}".format(aclocal_path))
-        self.env_info.ACLOCAL_PATH.append(aclocal_path)
+        aclocal_path = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment var: {}".format(aclocal_path))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal_path)
