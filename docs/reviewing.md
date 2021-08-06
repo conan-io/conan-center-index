@@ -105,17 +105,20 @@ def _configure_cmake(self):
 
 ### Minimalistic Source Code
 
-The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instatiation of objects to ensure linkage
+The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instantiation of objects to ensure linkage
 and dependencies are correct.
 
 ### Verifying Components
 
 When components are defined in the `package_info` in `conanfile.py` the following conditions are desired
 
-- use `cmake_find_package` if library has an [official](cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) CMake module emulated in the recipe.
-- use `cmake_find_package_multi` if library provides official cmake config file emulated in the recipe. If there are more than one target, try to use all of
-them, or add an other executable linking to the global (usually unofficial) target.
-- otherwise, use cmake generator to not suggest an unofficial cmake target in test package.
+* use `cmake_find_package` if library has an [official](cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) CMake module emulated in the recipe.
+* use `cmake_find_package_multi` if library provides official cmake config file emulated in the recipe. If there are more than one target, try to use all of them, or add an other executable linking to the global (usually unofficial) target. There are some ways to identify when use it:
+    * Usually, project install their cmake files on `package_folder/lib/cmake`. The folder are removed from package folder by calling `tools.rmdir(os.path.join(self.package_folder), "lib", "cmake")`
+    * Also, the upstream's cmakefile can use [install(EXPORT ..)](https://cmake.org/cmake/help/latest/command/install.html#export)
+      to indicate an exported CMake config file.
+    * When `self.cpp_info.filenames["cmake_find_package_multi"]`, `self.cpp_info.names["cmake_find_package_multi"]` are declared
+* otherwise, use [cmake generator](https://docs.conan.io/en/latest/reference/generators/cmake.html) to not suggest an unofficial cmake target in test package.
 
 ### Recommended feature options names
 
