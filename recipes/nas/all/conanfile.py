@@ -45,6 +45,7 @@ class NasRecipe(ConanFile):
     def build_requirements(self):
         self.build_requires("bison/3.7.1")
         self.build_requires("flex/2.6.4")
+        self.build_requires("imake/1.0.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
