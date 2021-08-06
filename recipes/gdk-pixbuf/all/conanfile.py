@@ -25,7 +25,8 @@ class LibnameConan(ConanFile):
         "with_libtiff": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_jasper": [True, False],
-        }
+        "with_introspection": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -33,7 +34,8 @@ class LibnameConan(ConanFile):
         "with_libtiff": True,
         "with_libjpeg": "libjpeg",
         "with_jasper": False,
-        }
+        "with_introspection": False,
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -55,6 +57,8 @@ class LibnameConan(ConanFile):
     def build_requirements(self):
         self.build_requires('meson/0.57.1')
         self.build_requires('pkgconf/1.7.3')
+        if self.options.with_introspection:
+            self.build_requires('gobject-introspection/1.68.0')
     
     def requirements(self):
         self.requires('glib/2.68.0')
@@ -91,6 +95,7 @@ class LibnameConan(ConanFile):
         defs['x11'] = 'false'
         defs['builtin_loaders'] = 'all'
         defs['gio_sniffing'] = 'false'
+        defs['introspection'] = 'enabled' if self.options.with_introspection else 'disabled'
         args=[]
         args.append('--wrap-mode=nofallback')
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
