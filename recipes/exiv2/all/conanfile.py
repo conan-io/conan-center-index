@@ -61,10 +61,12 @@ class Exiv2Conan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.4.1")
-        elif self.options.with_xmp == "external":
-            raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
         if self.options.with_curl:
             self.requires("libcurl/7.64.1")
+
+    def validate(self):
+        if self.options.with_xmp == "external":
+            raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
