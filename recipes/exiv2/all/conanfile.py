@@ -104,9 +104,12 @@ class Exiv2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        targets = {"exiv2lib": "exiv2::exiv2lib"}
+        if self.options.with_xmp == "bundled":
+            targets.update({"exiv2-xmp": "exiv2::exiv2-xmp"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"exiv2lib": "exiv2::exiv2lib"}
+            targets
         )
 
     @staticmethod
