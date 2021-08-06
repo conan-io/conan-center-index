@@ -47,7 +47,7 @@ class LibpqxxRecipe(ConanFile):
         minimum_compiler_version = {
             "Visual Studio": "16" if lib_version_7_5_0_or_above else "15",
             "gcc": "8" if lib_version_7_5_0_or_above else "7",
-            "clang": "7" if lib_version_7_5_0_or_above else "6",
+            "clang": "6",
             "apple-clang": "10"
         }
 
