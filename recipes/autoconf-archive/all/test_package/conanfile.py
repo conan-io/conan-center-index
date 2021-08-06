@@ -5,7 +5,7 @@ import shutil
 required_conan_version = ">=1.36.0"
 
 class TestPackageConan(ConanFile):
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     exports_sources = "configure.ac", "Makefile.am", "hello.c"
     test_type = "build_requires"
 
@@ -21,5 +21,5 @@ class TestPackageConan(ConanFile):
         autotools.make()
 
     def test(self):
-        self.run(os.path.join(".", "hello"))
-
+        if not tools.cross_building(self):
+            self.run(os.path.join(".", "hello"))

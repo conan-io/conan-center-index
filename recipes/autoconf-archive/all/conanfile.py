@@ -1,5 +1,5 @@
-import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import os
 
 
 required_conan_version = ">=1.33.0"
@@ -12,8 +12,12 @@ class AutoconfArchiveConan(ConanFile):
     description = "The GNU Autoconf Archive is a collection of more than 500 macros for GNU Autoconf"
     topics = ("conan", "GNU", "autoconf", "autoconf-archive", "macro")
     settings = "os"
-    _source_subfolder = "source_subfolder"
+
     _autotools = None
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         if self.settings.os != "Linux":
@@ -23,9 +27,8 @@ class AutoconfArchiveConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_name = "autoconf-archive-" + self.version
-        tools.rename(extracted_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_folder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -45,7 +48,6 @@ class AutoconfArchiveConan(ConanFile):
             self._autotools.install()
 
     def package_info(self):
-        aclocal_path = os.path.join(self.package_folder, "share", "aclocal")
+        aclocal_path = os.path.join(self.package_folder, "share", "aclocal").replace("\\", "/")
         self.output.info("Appending ACLOCAL_PATH environment var: {}".format(aclocal_path))
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
-
