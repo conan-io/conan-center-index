@@ -49,7 +49,7 @@ class Dav1dConan(ConanFile):
             self.options.assembly = False
 
     def validate(self):
-        if tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def configure(self):
