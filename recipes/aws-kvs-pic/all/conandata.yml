@@ -1,0 +1,8 @@
+sources:
+  "cci.20210705":
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/b82fd00f116f837f2ceb0f3587fd5fc0e371c994.zip"
+    sha256: "b6783d670d26c4396e70140c17681183e852fe04c3de7b53ebaaef1293464c07"
+patches:
+  "cci.20210705":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-do-not-enforce-fpic.patch"
