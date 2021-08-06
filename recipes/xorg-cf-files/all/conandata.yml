@@ -1,0 +1,8 @@
+sources:
+  "1.0.8":
+    url: "https://www.x.org/pub/individual/util/xorg-cf-files-1.0.6.tar.gz"
+    sha256: "6d56094e5d1a6c7d7a9576ac3a0fc2c042344509ea900d59f4b23df668b96c7a"
+patches:
+  "1.0.8":
+    - patch_file: "patches/1.0.8-0001-win-fixes.patch"
+      base_path: "source_subfolder"
