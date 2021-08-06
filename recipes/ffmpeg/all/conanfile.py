@@ -230,8 +230,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch == "x86":
             args.append("--arch=x86")
 
-        if self.settings.os != "Windows":
-            args.append("--enable-pic" if self.options.fPIC else "--disable-pic")
+        args.append("--enable-pic" if self.options.get_safe("fPIC") else "--disable-pic")
 
         args.append("--enable-postproc" if self.options.postproc else "--disable-postproc")
         args.append("--enable-zlib" if self.options.zlib else "--disable-zlib")
