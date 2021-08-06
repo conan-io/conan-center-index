@@ -331,7 +331,7 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.frameworks.append("AudioToolbox")
             if self.options.videotoolbox:
                 self.cpp_info.frameworks.append("VideoToolbox")
-            if self.options.ssl = "securetransport":
+            if self.options.ssl == "securetransport":
                 self.cpp_info.frameworks.append("Security")
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])
