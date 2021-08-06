@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 import shutil
@@ -103,6 +104,13 @@ class FFMpegConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            if self.options.qsv:
+                raise ConanInvalidConfiguration("intel_media_sdk not available yet in CCI")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Linux not supported yet")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -128,11 +136,9 @@ class FFMpegConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
+        self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        if self.settings.os == "Linux":
-            if not tools.which("pkg-config"):
-                self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         if self.options.zlib:
@@ -171,9 +177,6 @@ class FFMpegConan(ConanFile):
             self.requires("libwebp/1.0.3")
         if self.options.openssl:
             self.requires("openssl/1.1.1k")
-        if self.settings.os == "Windows":
-            if self.options.qsv:
-                raise ConanInvalidConfiguration("intel_media_sdk not available yet in CCI")
         if self.settings.os == "Linux":
             if self.options.alsa:
                 self.requires("libalsa/1.1.9")
@@ -200,9 +203,7 @@ class FFMpegConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
-        args = ['--prefix=%s' % full_install_subfolder,
-                "--disable-doc",
+        args = ["--disable-doc",
                 "--disable-programs"]
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
