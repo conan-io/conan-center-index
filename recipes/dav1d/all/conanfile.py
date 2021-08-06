@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -46,6 +47,10 @@ class Dav1dConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
             # debug builds with assembly often causes linker hangs or LNK1000
             self.options.assembly = False
+
+    def validate(self):
+        if tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def configure(self):
         if self.options.shared:
