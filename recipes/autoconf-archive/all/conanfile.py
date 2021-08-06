@@ -47,8 +47,10 @@ class AutoconfArchiveConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder)):
             self._autotools = self._configure_autotools()
             self._autotools.install()
+        tools.mkdir(os.path.join(self.package_folder, "bin").replace("\\", "/"))
+        tools.rename(os.path.join(self.package_folder, "share").replace("\\", "/"), os.path.join(self.package_folder, "bin", "share").replace("\\", "/"))
 
     def package_info(self):
-        aclocal_path = os.path.join(self.package_folder, "share", "aclocal").replace("\\", "/")
+        aclocal_path = os.path.join(self.package_folder, "bin", "share", "aclocal").replace("\\", "/")
         self.output.info("Appending ACLOCAL_PATH environment var: {}".format(aclocal_path))
         self.env_info.ACLOCAL_PATH.append(aclocal_path)
