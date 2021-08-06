@@ -35,7 +35,7 @@ class FFMpegConan(ConanFile):
                "mp3lame": [True, False],
                "fdk_aac": [True, False],
                "webp": [True, False],
-               "openssl": [True, False],
+               "ssl": [False, "openssl", "securetransport"],
                "alsa": [True, False],
                "pulse": [True, False],
                "vaapi": [True, False],
@@ -46,7 +46,6 @@ class FFMpegConan(ConanFile):
                "coreimage": [True, False],
                "audiotoolbox": [True, False],
                "videotoolbox": [True, False],
-               "securetransport": [True, False],
                "qsv": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
@@ -68,7 +67,7 @@ class FFMpegConan(ConanFile):
                        "mp3lame": True,
                        "fdk_aac": True,
                        "webp": True,
-                       "openssl": True,
+                       "ssl": "openssl",
                        "alsa": True,
                        "pulse": True,
                        "vaapi": True,
@@ -79,7 +78,6 @@ class FFMpegConan(ConanFile):
                        "coreimage": True,
                        "audiotoolbox": True,
                        "videotoolbox": True,
-                       "securetransport": False,  # conflicts with OpenSSL
                        "qsv": True}
     generators = "pkg_config"
     _autotools = None
@@ -110,6 +108,8 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("intel_media_sdk not available yet in CCI")
         if self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Linux not supported yet")
+        if self.settings.os != "Macos" and self.options.ssl == "securetransport":
+            raise ConanInvalidConfiguration("securetransport is only available on Macos")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -126,7 +126,6 @@ class FFMpegConan(ConanFile):
             del self.options.coreimage
             del self.options.audiotoolbox
             del self.options.videotoolbox
-            del self.options.securetransport
         if self.settings.os != "Windows":
             del self.options.qsv
 
@@ -175,7 +174,7 @@ class FFMpegConan(ConanFile):
             self.requires("libfdk_aac/2.0.2")
         if self.options.webp:
             self.requires("libwebp/1.0.3")
-        if self.options.openssl:
+        if self.options.ssl == "openssl":
             self.requires("openssl/1.1.1k")
         if self.settings.os == "Linux":
             if self.options.alsa:
@@ -192,7 +191,7 @@ class FFMpegConan(ConanFile):
             # warning LNK4049: locally defined symbol x264_bit_depth imported
             tools.replace_in_file(os.path.join(self._source_subfolder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
-        if self.options.openssl:
+        if self.options.ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
@@ -248,7 +247,7 @@ class FFMpegConan(ConanFile):
         args.append("--enable-libmp3lame" if self.options.mp3lame else "--disable-libmp3lame")
         args.append("--enable-libfdk-aac" if self.options.fdk_aac else "--disable-libfdk-aac")
         args.append("--enable-libwebp" if self.options.webp else "--disable-libwebp")
-        args.append("--enable-openssl" if self.options.openssl else "--disable-openssl")
+        args.append("--enable-openssl" if self.options.ssl == "openssl" else "--disable-openssl")
 
         if self.options.x264 or self.options.x265 or self.options.postproc:
             args.append("--enable-gpl")
@@ -274,7 +273,7 @@ class FFMpegConan(ConanFile):
             args.append("--enable-coreimage" if self.options.avfoundation else "--disable-coreimage")
             args.append("--enable-audiotoolbox" if self.options.audiotoolbox else "--disable-audiotoolbox")
             args.append("--enable-videotoolbox" if self.options.videotoolbox else "--disable-videotoolbox")
-            args.append("--enable-securetransport" if self.options.securetransport else "--disable-securetransport")
+            args.append("--enable-securetransport" if self.options.ssl == "securetransport" else "--disable-securetransport")
 
         if self.settings.os == "Windows":
             args.append("--enable-libmfx" if self.options.qsv else "--disable-libmfx")
@@ -330,7 +329,7 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.frameworks.append("AudioToolbox")
             if self.options.videotoolbox:
                 self.cpp_info.frameworks.append("VideoToolbox")
-            if self.options.securetransport:
+            if self.options.ssl = "securetransport":
                 self.cpp_info.frameworks.append("Security")
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])
