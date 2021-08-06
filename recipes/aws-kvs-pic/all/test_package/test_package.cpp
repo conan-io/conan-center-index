@@ -3,10 +3,12 @@
 
 int main(int argc, char *argv[])
 {
-    PDeviceInfo myDeviceInfo;
-    PClientCallbacks myPClientCallbacks;
-    PCLIENT_HANDLE myHandle;
-    createKinesisVideoClient(myDeviceInfo, myPClientCallbacks, myHandle);
+
+    CLIENT_HANDLE clientHandle = INVALID_CLIENT_HANDLE_VALUE;
+    PDeviceInfo pDeviceInfo = NULL;
+    PClientCallbacks pClientCallbacks = NULL;
+
+    createKinesisVideoClient(pDeviceInfo, pClientCallbacks, &clientHandle);
 
     printf("aws-kps-pic test_package ran successfully \n");
 
