@@ -1,3 +1,2 @@
-bin_PROGRAMS = hello
-hello_sources = hello.c
-
+bin_PROGRAMS = test_package
+test_package_sources = test_package.c
