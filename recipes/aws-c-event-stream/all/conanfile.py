@@ -1,5 +1,5 @@
-import os
 from conans import CMake, ConanFile, tools
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -41,7 +41,10 @@ class AwsCEventStream(ConanFile):
 
     def requirements(self):
         self.requires("aws-checksums/0.1.11")
-        self.requires("aws-c-io/0.10.5")
+        if tools.Version(self.version) < "0.2.2":
+            self.requires("aws-c-common/0.6.7")
+        else:
+            self.requires("aws-c-io/0.10.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
