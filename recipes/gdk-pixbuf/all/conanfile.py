@@ -61,7 +61,7 @@ class LibnameConan(ConanFile):
             self.build_requires('gobject-introspection/1.68.0')
     
     def requirements(self):
-        self.requires('glib/2.68.0')
+        self.requires('glib/2.69.0')
         if self.options.with_libpng:
             self.requires('libpng/1.6.37')
         if self.options.with_libtiff:
