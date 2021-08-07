@@ -209,7 +209,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
         self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "5"
         self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6"
-        
+
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_DCTDECODER"] = self._dct_decoder
         self._cmake.definitions["USE_FLOAT"] = self.options.float
@@ -217,6 +217,13 @@ class PopplerConan(ConanFile):
         if self.settings.os == "Windows":
             self._cmake.definitions["ENABLE_RELOCATABLE"] = self.options.shared
         self._cmake.definitions["EXTRA_WARN"] = False
+
+        # Workaround for cross-build to at least iOS/tvOS/watchOS,
+        # when dependencies are found with find_path() and find_library()
+        if tools.cross_building(self):
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
