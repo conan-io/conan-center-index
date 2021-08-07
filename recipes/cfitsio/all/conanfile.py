@@ -13,8 +13,7 @@ class CfitsioConan(ConanFile):
     topics = ("conan", "cfitsio", "fits", "image", "nasa", "astronomy", "astrophysics", "space")
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,7 +21,7 @@ class CfitsioConan(ConanFile):
         "threadsafe": [True, False],
         "simd_intrinsics": [None, "sse2", "ssse3"],
         "with_bzip2": [True, False],
-        "with_curl": [True, False]
+        "with_curl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,9 +29,11 @@ class CfitsioConan(ConanFile):
         "threadsafe": False,
         "simd_intrinsics": None,
         "with_bzip2": False,
-        "with_curl": False
+        "with_curl": False,
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
