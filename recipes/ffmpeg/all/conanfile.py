@@ -86,14 +86,6 @@ class FFMpegConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -128,14 +120,10 @@ class FFMpegConan(ConanFile):
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
         self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self.settings.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
@@ -188,7 +176,7 @@ class FFMpegConan(ConanFile):
                 self.requires("vdpau/system")
 
     def _patch_sources(self):
-        if self._is_msvc and self.options.with_x264 and not self.options["libx264"].shared:
+        if self.settings.compiler == "Visual Studio" and self.options.with_x264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -219,7 +207,7 @@ class FFMpegConan(ConanFile):
             args.append("--cc=%s" % tools.get_env("CC"))
         if tools.get_env("CC"):
             args.append("--cxx=%s" % tools.get_env("CXX"))
-        if self._is_msvc:
+        if self.settings.compiler == "Visual Studio":
             args.append("--toolchain=msvc")
             args.append("--extra-cflags=-%s" % self.settings.compiler.runtime)
             if int(str(self.settings.compiler.version)) <= 12:
@@ -323,7 +311,7 @@ class FFMpegConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self._is_msvc and not self.options.shared:
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
             # ffmpeg produces .a files which are actually .lib files
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 libs = glob.glob("*.a")
@@ -334,7 +322,7 @@ class FFMpegConan(ConanFile):
         libs = ["avdevice", "avfilter", "avformat", "avcodec", "swresample", "swscale", "avutil"]
         if self.options.with_postproc:
             libs.insert(-1, 'postproc')
-        if self._is_msvc:
+        if self.settings.compiler == "Visual Studio":
             if self.options.shared:
                 self.cpp_info.libs = libs
                 self.cpp_info.libdirs.append("bin")
