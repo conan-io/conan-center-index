@@ -47,17 +47,16 @@ class CfitsioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_bzip2
+            del self.options.with_curl
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.simd_intrinsics
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.simd_intrinsics
-        if self.settings.os == "Windows":
-            del self.options.with_bzip2
-            del self.options.with_curl
 
     def requirements(self):
         self.requires("zlib/1.2.11")
