@@ -324,6 +324,7 @@ class FFMpegConan(ConanFile):
             libs.insert(-1, 'postproc')
         for lib in libs:
             self.cpp_info.components[lib].libs = [lib]
+            self.cpp_info.components[lib].names["pkg_config"] = lib
 
         if self.options.with_zlib:
             self.cpp_info.components["avformat"].requires.append("zlib::zlib")
