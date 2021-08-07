@@ -4,6 +4,8 @@ import os
 import glob
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
@@ -88,7 +90,7 @@ class FFMpegConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc" and os.name == "nt"
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
     def _is_msvc(self):
@@ -216,10 +218,10 @@ class FFMpegConan(ConanFile):
         if self.settings.build_type == "Debug":
             args.extend(["--disable-optimizations", "--disable-mmx", "--disable-stripping", "--enable-debug"])
         # since ffmpeg"s build system ignores CC and CXX
-        if "CC" in os.environ:
-            args.append("--cc=%s" % os.environ["CC"])
-        if "CXX" in os.environ:
-            args.append("--cxx=%s" % os.environ["CXX"])
+        if tools.get_env("CC"):
+            args.append("--cc=%s" % tools.get_env("CC"))
+        if tools.get_env("CC"):
+            args.append("--cxx=%s" % tools.get_env("CXX"))
         if self._is_msvc:
             args.append("--toolchain=msvc")
             args.append("--extra-cflags=-%s" % self.settings.compiler.runtime)
@@ -230,7 +232,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch == "x86":
             args.append("--arch=x86")
 
-        if self.options.get_safe("fPIC"):
+        if self.options.get_safe("fPIC", True):
             args.append("--enable-pic")
 
         args.append("--enable-postproc" if self.options.postproc else "--disable-postproc")
