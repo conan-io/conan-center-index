@@ -113,6 +113,7 @@ class CfitsioConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "cfitsio"
         self.cpp_info.libs = ["cfitsio"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
