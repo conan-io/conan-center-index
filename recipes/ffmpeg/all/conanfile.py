@@ -47,8 +47,7 @@ class FFMpegConan(ConanFile):
                "avfoundation": [True, False],
                "coreimage": [True, False],
                "audiotoolbox": [True, False],
-               "videotoolbox": [True, False],
-               "qsv": [True, False]}
+               "videotoolbox": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "postproc": True,
@@ -79,8 +78,7 @@ class FFMpegConan(ConanFile):
                        "avfoundation": True,
                        "coreimage": True,
                        "audiotoolbox": True,
-                       "videotoolbox": True,
-                       "qsv": True}
+                       "videotoolbox": True}
     generators = "pkg_config"
     _autotools = None
 
@@ -107,9 +105,6 @@ class FFMpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.os == "Windows":
-            if self.options.qsv:
-                raise ConanInvalidConfiguration("intel_media_sdk not available yet in CCI")
         if self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Linux not supported yet")
         if self.settings.os != "Macos" and self.options.ssl == "securetransport":
