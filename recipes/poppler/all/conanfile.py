@@ -112,9 +112,6 @@ class PopplerConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
-        if self.options.with_nss:
-            # FIXME: missing nss recipe
-            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.splash:
@@ -147,6 +144,10 @@ class PopplerConan(ConanFile):
             self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
+
+        if self.options.with_nss:
+            # FIXME: missing nss recipe
+            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
