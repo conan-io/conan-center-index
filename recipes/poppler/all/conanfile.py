@@ -12,8 +12,7 @@ class PopplerConan(ConanFile):
     topics = ("conan", "poppler", "pdf", "rendering")
     license = "GPL-2.0-or-later", "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -60,6 +59,9 @@ class PopplerConan(ConanFile):
         "with_zlib": True,
         "float": False,
     }
+
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     @property
