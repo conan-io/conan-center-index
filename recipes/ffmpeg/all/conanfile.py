@@ -105,17 +105,17 @@ class FFMpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Linux not supported yet")
         if self.settings.os != "Macos" and self.options.ssl == "securetransport":
             raise ConanInvalidConfiguration("securetransport is only available on Macos")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.vpx:
-            raise ConanInvalidConfiguration("libvpx doesn/t support armv8 supported yet")
+            raise ConanInvalidConfiguration("libvpx doesn't support armv8 supported yet")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.sdl2:
+            raise ConanInvalidConfiguration("sdl2 not supported yet")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if not self.settings.os in ["Linux", "FreeBSD"]:
             del self.options.vaapi
             del self.options.vdpau
             del self.options.xcb
@@ -177,13 +177,17 @@ class FFMpegConan(ConanFile):
             self.requires("libwebp/1.0.3")
         if self.options.ssl == "openssl":
             self.requires("openssl/1.1.1k")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.alsa:
                 self.requires("libalsa/1.1.9")
             if self.options.xcb:
                 self.requires("xorg/system")
             if self.options.pulse:
                 self.requires("pulseaudio/13.0")
+            if self.options.vaapi:
+                self.requires("vaapi/system")
+            if self.options.vdpau:
+                self.requires("vdpau/system")
 
     def _patch_sources(self):
         if self._is_msvc and self.options.x264 and not self.options["libx264"].shared:
@@ -256,7 +260,7 @@ class FFMpegConan(ConanFile):
         if self.options.fdk_aac:
             args.append("--enable-nonfree")
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             args.append("--enable-alsa" if self.options.alsa else "--disable-alsa")
             args.append("--enable-libpulse" if self.options.pulse else "--disable-libpulse")
             args.append("--enable-vaapi" if self.options.vaapi else "--disable-vaapi")
@@ -332,12 +336,8 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.frameworks.append("VideoToolbox")
             if self.options.ssl == "securetransport":
                 self.cpp_info.frameworks.append("Security")
-        elif self.settings.os == "Linux":
+        elif self.settings.os is ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
-            if self.options.vaapi:
-                self.cpp_info.system_libs.extend(["va", "va-drm", "va-x11"])
-            if self.options.vdpau:
-                self.cpp_info.system_libs.extend(["vdpau", "X11"])
             if self.options.xcb:
                 self.cpp_info.system_libs.extend(["xcb-shm", "xcb-shape", "xcb-xfixes"])
             if self.settings.os != "Windows" and self.options.fPIC:
