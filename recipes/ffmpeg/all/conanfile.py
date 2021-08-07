@@ -322,36 +322,76 @@ class FFMpegConan(ConanFile):
         libs = ["avdevice", "avfilter", "avformat", "avcodec", "swresample", "swscale", "avutil"]
         if self.options.with_postproc:
             libs.insert(-1, 'postproc')
-        if self.settings.compiler == "Visual Studio":
-            if self.options.shared:
-                self.cpp_info.libs = libs
-                self.cpp_info.libdirs.append("bin")
-            else:
-                self.cpp_info.libs = ["lib" + lib for lib in libs]
-        else:
-            self.cpp_info.libs = libs
+        for lib in libs:
+            self.cpp_info.components[lib].libs = [lib]
+
+        if self.options.with_zlib:
+            self.cpp_info.components["avformat"].requires.append("zlib::zlib")
+            self.cpp_info.components["avcodec"].requires.append("zlib::zlib")
+        if self.options.with_bzlib:
+            self.cpp_info.components["avformat"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["avcodec"].requires.append("xz_utils::xz_utils")
+        if self.options.with_iconv:
+            self.cpp_info.components["avformat"].requires.append("libiconv::libiconv")
+            self.cpp_info.components["avcodec"].requires.append("libiconv::libiconv")
+        if self.options.with_freetype:
+            self.cpp_info.components["avfilter"].requires.append("freetype::freetype")
+        if self.options.with_openjpeg:
+            self.cpp_info.components["avcodec"].requires.append("openjpeg::openjpeg")
+        if self.options.with_openh264:
+            self.cpp_info.components["avcodec"].requires.append("openh264::openh264")
+        if self.options.with_vorbis:
+            self.cpp_info.components["avcodec"].requires.append("vorbis::vorbis")
+        if self.options.with_opus:
+            self.cpp_info.components["avcodec"].requires.append("opus::opus")
+        if self.options.with_x264:
+            self.cpp_info.components["avcodec"].requires.append("libx264::libx264")
+        if self.options.with_x265:
+            self.cpp_info.components["avcodec"].requires.append("libx265::libx265")
+        if self.options.with_vpx:
+            self.cpp_info.components["avcodec"].requires.append("libvpx::libvpx")
+        if self.options.with_mp3lame:
+            self.cpp_info.components["avcodec"].requires.append("libmp3lame::libmp3lame")
+        if self.options.with_fdk_aac:
+            self.cpp_info.components["avcodec"].requires.append("libfdk_aac::libfdk_aac")
+        if self.options.with_webp:
+            self.cpp_info.components["avcodec"].requires.append("libwebp::libwebp")
+        if self.options.with_ssl == "openssl":
+            self.cpp_info.components["avformat"].requires.append("openssl::ssl")
+
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreVideo", "CoreMedia", "CoreGraphics", "CoreFoundation", "OpenGL", "Foundation"]
+            self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics", "OpenGL"]
+            self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
+            self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
             if self.options.with_appkit:
-                self.cpp_info.frameworks.append("AppKit")
+                self.cpp_info.components["avdevice"].frameworks.append("AppKit")
+                self.cpp_info.components["avfilter"].frameworks.append("AppKit")
             if self.options.with_avfoundation:
-                self.cpp_info.frameworks.append("AVFoundation")
+                self.cpp_info.components["avdevice"].frameworks.append("AVFoundation")
             if self.options.with_coreimage:
-                self.cpp_info.frameworks.append("CoreImage")
+                self.cpp_info.components["avfilter"].frameworks = ["CoreImage"]
             if self.options.with_audiotoolbox:
-                self.cpp_info.frameworks.append("AudioToolbox")
+                self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
             if self.options.with_videotoolbox:
-                self.cpp_info.frameworks.append("VideoToolbox")
+                self.cpp_info.components["avcodec"].frameworks.append("VideoToolbox")
             if self.options.with_ssl == "securetransport":
-                self.cpp_info.frameworks.append("Security")
-        elif self.settings.os is ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["dl", "pthread"])
+                self.cpp_info.components["avformat"].frameworks.append("Security")
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.with_alsa:
+                self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
             if self.options.with_xcb:
-                self.cpp_info.system_libs.extend(["xcb-shm", "xcb-shape", "xcb-xfixes"])
-            if self.settings.os != "Windows" and self.options.fPIC:
+                self.cpp_info.components["avdevice"].requires.append("xorg::xcb")
+            if self.options.with_pulse:
+                self.cpp_info.components["avdevice"].requires.append("pulseaudio::pulseaudio")
+            if self.options.with_vaapi:
+                self.cpp_info.components["avcodec"].requires.append("vaapi::vaapi")
+            if self.options.with_vdpau:
+                self.cpp_info.components["avcodec"].requires.append("vdpau::vdpau")
+            if self.options.fPIC:
                 # https://trac.ffmpeg.org/ticket/1713
                 # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                 # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
-                self.cpp_info.sharedlinkflags.append("-Wl,-Bsymbolic")
+                self.cpp_info.components["avcodec"].sharedlinkflags.append("-Wl,-Bsymbolic")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32", "secur32", "shlwapi", "strmiids", "vfw32", "bcrypt"])
+            self.cpp_info.components["avdevice"].system_libs.extend(["ws2_32", "secur32", "shlwapi", "strmiids", "vfw32", "bcrypt"])
