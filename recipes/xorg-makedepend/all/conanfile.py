@@ -37,7 +37,7 @@ class XorgMakedepend(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not supported by xorg-gccmakedep")
+            raise ConanInvalidConfiguration("Windows is not supported by xorg-makedepend")
 
     def configure(self):
         del self.settings.compiler.cppstd
