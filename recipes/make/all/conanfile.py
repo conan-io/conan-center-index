@@ -56,8 +56,9 @@ class MakeConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
 
-        make = "gnumake.exe" if self.settings.os == "Windows" else "make"
+        make = os.path.join(self.package_folder, "bin", "gnumake.exe" if self.settings.os == "Windows" else "make")
 
-        make = os.path.join(self.package_folder, "bin", make)
+        self.user_info.make = make
+
         self.output.info('Creating CONAN_MAKE_PROGRAM environment variable: %s' % make)
         self.env_info.CONAN_MAKE_PROGRAM = make
