@@ -102,7 +102,8 @@ class LibnameConan(ConanFile):
         return meson
 
     def build(self):
-        shutil.move('libpng.pc', 'libpng16.pc')
+        if self.options.with_libpng:
+            shutil.move('libpng.pc', 'libpng16.pc')
         meson = self._configure_meson()
         meson.build()
 
