@@ -19,66 +19,66 @@ class FFMpegConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "postproc": [True, False],
-               "zlib": [True, False],
-               "bzlib": [True, False],
-               "lzma": [True, False],
-               "iconv": [True, False],
-               "freetype": [True, False],
-               "openjpeg": [True, False],
-               "openh264": [True, False],
-               "opus": [True, False],
-               "vorbis": [True, False],
-               "zmq": [True, False],
-               "sdl2": [True, False],
-               "x264": [True, False],
-               "x265": [True, False],
-               "vpx": [True, False],
-               "mp3lame": [True, False],
-               "fdk_aac": [True, False],
-               "webp": [True, False],
-               "ssl": [False, "openssl", "securetransport"],
-               "alsa": [True, False],
-               "pulse": [True, False],
-               "vaapi": [True, False],
-               "vdpau": [True, False],
-               "xcb": [True, False],
-               "appkit": [True, False],
-               "avfoundation": [True, False],
-               "coreimage": [True, False],
-               "audiotoolbox": [True, False],
-               "videotoolbox": [True, False]}
+               "with_postproc": [True, False],
+               "with_zlib": [True, False],
+               "with_bzlib": [True, False],
+               "with_lzma": [True, False],
+               "with_iconv": [True, False],
+               "with_freetype": [True, False],
+               "with_openjpeg": [True, False],
+               "with_openh264": [True, False],
+               "with_opus": [True, False],
+               "with_vorbis": [True, False],
+               "with_zmq": [True, False],
+               "with_sdl2": [True, False],
+               "with_x264": [True, False],
+               "with_x265": [True, False],
+               "with_vpx": [True, False],
+               "with_mp3lame": [True, False],
+               "with_fdk_aac": [True, False],
+               "with_webp": [True, False],
+               "with_ssl": [False, "openssl", "securetransport"],
+               "with_alsa": [True, False],
+               "with_pulse": [True, False],
+               "with_vaapi": [True, False],
+               "with_vdpau": [True, False],
+               "with_xcb": [True, False],
+               "with_appkit": [True, False],
+               "with_avfoundation": [True, False],
+               "with_coreimage": [True, False],
+               "with_audiotoolbox": [True, False],
+               "with_videotoolbox": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "postproc": True,
-                       "zlib": True,
-                       "bzlib": True,
-                       "lzma": True,
-                       "iconv": True,
-                       "freetype": True,
-                       "openjpeg": True,
-                       "openh264": True,
-                       "opus": True,
-                       "vorbis": True,
-                       "zmq": False,
-                       "sdl2": False,
-                       "x264": True,
-                       "x265": True,
-                       "vpx": True,
-                       "mp3lame": True,
-                       "fdk_aac": True,
-                       "webp": True,
-                       "ssl": "openssl",
-                       "alsa": True,
-                       "pulse": True,
-                       "vaapi": True,
-                       "vdpau": True,
-                       "xcb": True,
-                       "appkit": True,
-                       "avfoundation": True,
-                       "coreimage": True,
-                       "audiotoolbox": True,
-                       "videotoolbox": True}
+                       "with_postproc": True,
+                       "with_zlib": True,
+                       "with_bzlib": True,
+                       "with_lzma": True,
+                       "with_iconv": True,
+                       "with_freetype": True,
+                       "with_openjpeg": True,
+                       "with_openh264": True,
+                       "with_opus": True,
+                       "with_vorbis": True,
+                       "with_zmq": False,
+                       "with_sdl2": False,
+                       "with_x264": True,
+                       "with_x265": True,
+                       "with_vpx": True,
+                       "with_mp3lame": True,
+                       "with_fdk_aac": True,
+                       "with_webp": True,
+                       "with_ssl": "openssl",
+                       "with_alsa": True,
+                       "with_pulse": True,
+                       "with_vaapi": True,
+                       "with_vdpau": True,
+                       "with_xcb": True,
+                       "with_appkit": True,
+                       "with_avfoundation": True,
+                       "with_coreimage": True,
+                       "with_audiotoolbox": True,
+                       "with_videotoolbox": True}
     generators = "pkg_config"
     _autotools = None
 
@@ -105,30 +105,28 @@ class FFMpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def validate(self):
-        if self.settings.os != "Macos" and self.options.ssl == "securetransport":
+        if self.settings.os != "Macos" and self.options.with_ssl == "securetransport":
             raise ConanInvalidConfiguration("securetransport is only available on Macos")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.vpx:
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_vpx:
             raise ConanInvalidConfiguration("libvpx doesn't support armv8 supported yet")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.sdl2:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl2:
             raise ConanInvalidConfiguration("sdl2 not supported yet")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self.settings.os in ["Linux", "FreeBSD"]:
-            del self.options.vaapi
-            del self.options.vdpau
-            del self.options.xcb
-            del self.options.alsa
-            del self.options.pulse
+            del self.options.with_vaapi
+            del self.options.with_vdpau
+            del self.options.with_xcb
+            del self.options.with_alsa
+            del self.options.with_pulse
         if self.settings.os != "Macos":
-            del self.options.appkit
-            del self.options.avfoundation
-            del self.options.coreimage
-            del self.options.audiotoolbox
-            del self.options.videotoolbox
-        if self.settings.os != "Windows":
-            del self.options.qsv
+            del self.options.with_appkit
+            del self.options.with_avfoundation
+            del self.options.with_coreimage
+            del self.options.with_audiotoolbox
+            del self.options.with_videotoolbox
 
     @property
     def _settings_build(self):
@@ -141,62 +139,62 @@ class FFMpegConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
-        if self.options.zlib:
+        if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.bzlib:
+        if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
-        if self.options.lzma:
+        if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.options.iconv:
+        if self.options.with_iconv:
             self.requires("libiconv/1.16")
-        if self.options.freetype:
+        if self.options.with_freetype:
             self.requires("freetype/2.10.4")
-        if self.options.openjpeg:
+        if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
-        if self.options.openh264:
+        if self.options.with_openh264:
             self.requires("openh264/1.7.0")
-        if self.options.vorbis:
+        if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
-        if self.options.opus:
+        if self.options.with_opus:
             self.requires("opus/1.3.1")
-        if self.options.zmq:
+        if self.options.with_zmq:
             self.requires("zeromq/4.3.4")
-        if self.options.sdl2:
+        if self.options.with_sdl2:
             self.requires("sdl/2.0.14")
-        if self.options.x264:
+        if self.options.with_x264:
             self.requires("libx264/20190605")
-        if self.options.x265:
+        if self.options.with_x265:
             self.requires("libx265/3.4")
-        if self.options.vpx:
+        if self.options.with_vpx:
             self.requires("libvpx/1.9.0")
-        if self.options.mp3lame:
+        if self.options.with_mp3lame:
             self.requires("libmp3lame/3.100")
-        if self.options.fdk_aac:
+        if self.options.with_fdk_aac:
             self.requires("libfdk_aac/2.0.2")
-        if self.options.webp:
+        if self.options.with_webp:
             self.requires("libwebp/1.0.3")
-        if self.options.ssl == "openssl":
+        if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            if self.options.alsa:
+            if self.options.with_alsa:
                 self.requires("libalsa/1.1.9")
-            if self.options.xcb:
+            if self.options.with_xcb:
                 self.requires("xorg/system")
-            if self.options.pulse:
+            if self.options.with_pulse:
                 self.requires("pulseaudio/13.0")
-            if self.options.vaapi:
+            if self.options.with_vaapi:
                 self.requires("vaapi/system")
-            if self.options.vdpau:
+            if self.options.with_vdpau:
                 self.requires("vdpau/system")
 
     def _patch_sources(self):
-        if self._is_msvc and self.options.x264 and not self.options["libx264"].shared:
+        if self._is_msvc and self.options.with_x264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
             tools.replace_in_file(os.path.join(self._source_subfolder, "libavcodec", "libx264.c"),
                                   "#define X264_API_IMPORTS 1", "")
-        if self.options.ssl == "openssl":
+        if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
             openssl_libraries = " ".join(["-l%s" % lib for lib in self.deps_cpp_info["openssl"].libs])
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
@@ -234,59 +232,81 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("fPIC", True):
             args.append("--enable-pic")
 
-        args.append("--enable-postproc" if self.options.postproc else "--disable-postproc")
-        args.append("--enable-zlib" if self.options.zlib else "--disable-zlib")
-        args.append("--enable-bzlib" if self.options.bzlib else "--disable-bzlib")
-        args.append("--enable-lzma" if self.options.lzma else "--disable-lzma")
-        args.append("--enable-iconv" if self.options.iconv else "--disable-iconv")
-        args.append("--enable-libfreetype" if self.options.freetype else "--disable-libfreetype")
-        args.append("--enable-libopenjpeg" if self.options.openjpeg else "--disable-libopenjpeg")
-        args.append("--enable-libopenh264" if self.options.openh264 else "--disable-libopenh264")
-        args.append("--enable-libvorbis" if self.options.vorbis else "--disable-libvorbis")
-        args.append("--enable-libopus" if self.options.opus else "--disable-libopus")
-        args.append("--enable-libzmq" if self.options.zmq else "--disable-libzmq")
-        args.append("--enable-sdl2" if self.options.sdl2 else "--disable-sdl2")
-        args.append("--enable-libx264" if self.options.x264 else "--disable-libx264")
-        args.append("--enable-libx265" if self.options.x265 else "--disable-libx265")
-        args.append("--enable-libvpx" if self.options.vpx else "--disable-libvpx")
-        args.append("--enable-libmp3lame" if self.options.mp3lame else "--disable-libmp3lame")
-        args.append("--enable-libfdk-aac" if self.options.fdk_aac else "--disable-libfdk-aac")
-        args.append("--enable-libwebp" if self.options.webp else "--disable-libwebp")
-        args.append("--enable-openssl" if self.options.ssl == "openssl" else "--disable-openssl")
+        if not self.options.with_postproc:
+            args.append("--disable-postproc")
+        if not self.options.with_bzlib:
+            args.append("--disable-zlib")
+        if not self.options.with_zlib:
+            args.append("--disable-zlib")
+        if not self.options.with_lzma:
+            args.append("--disable-lzma")
+        if not self.options.with_iconv:
+            args.append("--disable-iconv")
+        if self.options.with_freetype:
+            args.append("--enable-libfreetype")
+        if self.options.with_openjpeg:
+            args.append("--enable-libopenjpeg")
+        if self.options.with_openh264:
+            args.append("--enable-libopenh264")
+        if self.options.with_vorbis:
+            args.append("--enable-libvorbis")
+        if self.options.with_opus:
+            args.append("--enable-libopus")
+        if self.options.with_zmq:
+            args.append("--enable-libzmq")
+        if not self.options.with_sdl2:
+            args.append("--disable-sdl2")
+        if self.options.with_x264:
+            args.append("--enable-libx264")
+        if self.options.with_x265:
+            args.append("--enable-libx265")
+        if self.options.with_vpx:
+            args.append("--enable-libvpx")
+        if self.options.with_mp3lame:
+            args.append("--enable-libmp3lame")
+        if self.options.with_fdk_aac:
+            args.append("--enable-libfdk-aac")
+        if self.options.with_webp:
+            args.append("--enable-libwebp")
+        if self.options.with_ssl == "openssl":
+            args.append("--enable-openssl")
 
-        if self.options.x264 or self.options.x265 or self.options.postproc:
+        if self.options.with_x264 or self.options.with_x265 or self.options.with_postproc:
             args.append("--enable-gpl")
 
-        if self.options.fdk_aac:
+        if self.options.with_fdk_aac:
             args.append("--enable-nonfree")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            args.append("--enable-alsa" if self.options.alsa else "--disable-alsa")
-            args.append("--enable-libpulse" if self.options.pulse else "--disable-libpulse")
-            args.append("--enable-vaapi" if self.options.vaapi else "--disable-vaapi")
-            args.append("--enable-vdpau" if self.options.vdpau else "--disable-vdpau")
-            if self.options.xcb:
+            if not self.options.with_alsa:
+                args.append("--disable-alsa")
+            if self.options.with_pulse:
+                args.append("--enable-libpulse")
+            if not self.options.with_vaapi:
+                args.append("--disable-vaapi")
+            if not self.options.with_vdpau:
+                args.append("--disable-vdpau")
+            if self.options.with_xcb:
                 args.extend(["--enable-libxcb", "--enable-libxcb-shm",
                              "--enable-libxcb-shape", "--enable-libxcb-xfixes"])
-            else:
-                args.extend(["--disable-libxcb", "--disable-libxcb-shm",
-                             "--disable-libxcb-shape", "--disable-libxcb-xfixes"])
 
         if self.settings.os == "Macos":
-            args.append("--enable-appkit" if self.options.appkit else "--disable-appkit")
-            args.append("--enable-avfoundation" if self.options.avfoundation else "--disable-avfoundation")
-            args.append("--enable-coreimage" if self.options.avfoundation else "--disable-coreimage")
-            args.append("--enable-audiotoolbox" if self.options.audiotoolbox else "--disable-audiotoolbox")
-            args.append("--enable-videotoolbox" if self.options.videotoolbox else "--disable-videotoolbox")
-            args.append("--enable-securetransport" if self.options.ssl == "securetransport" else "--disable-securetransport")
-
-        if self.settings.os == "Windows":
-            args.append("--enable-libmfx" if self.options.qsv else "--disable-libmfx")
+            if not self.options.with_appkit:
+                args.append("--disable-appkit")
+            if not self.options.with_avfoundation:
+                args.append("--disable-avfoundation")
+            if not self.options.with_coreimage:
+                args.append("--disable-coreimage")
+            if not self.options.with_audiotoolbox:
+                args.append("--disable-audiotoolbox")
+            if not self.options.with_videotoolbox:
+                args.append("--disable-videotoolbox")
+            if self.options.with_ssl != "securetransport":
+                args.append("--disable-securetransport")
 
         # FIXME disable CUDA and CUVID by default, revisit later
         args.extend(["--disable-cuda", "--disable-cuvid"])
 
-        # ffmpeg"s configure is not actually from autotools, so it doesn"t understand standard options like
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -312,7 +332,7 @@ class FFMpegConan(ConanFile):
 
     def package_info(self):
         libs = ["avdevice", "avfilter", "avformat", "avcodec", "swresample", "swscale", "avutil"]
-        if self.options.postproc:
+        if self.options.with_postproc:
             libs.insert(-1, 'postproc')
         if self._is_msvc:
             if self.options.shared:
@@ -324,21 +344,21 @@ class FFMpegConan(ConanFile):
             self.cpp_info.libs = libs
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreVideo", "CoreMedia", "CoreGraphics", "CoreFoundation", "OpenGL", "Foundation"]
-            if self.options.appkit:
+            if self.options.with_appkit:
                 self.cpp_info.frameworks.append("AppKit")
-            if self.options.avfoundation:
+            if self.options.with_avfoundation:
                 self.cpp_info.frameworks.append("AVFoundation")
-            if self.options.coreimage:
+            if self.options.with_coreimage:
                 self.cpp_info.frameworks.append("CoreImage")
-            if self.options.audiotoolbox:
+            if self.options.with_audiotoolbox:
                 self.cpp_info.frameworks.append("AudioToolbox")
-            if self.options.videotoolbox:
+            if self.options.with_videotoolbox:
                 self.cpp_info.frameworks.append("VideoToolbox")
-            if self.options.ssl == "securetransport":
+            if self.options.with_ssl == "securetransport":
                 self.cpp_info.frameworks.append("Security")
         elif self.settings.os is ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
-            if self.options.xcb:
+            if self.options.with_xcb:
                 self.cpp_info.system_libs.extend(["xcb-shm", "xcb-shape", "xcb-xfixes"])
             if self.settings.os != "Windows" and self.options.fPIC:
                 # https://trac.ffmpeg.org/ticket/1713
