@@ -185,6 +185,16 @@ class FFMpegConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @property
+    def _arch(self):
+        return {
+            "armv6": "arm",
+            "armv7": "arm",
+            "armv8": "aarch64",
+            "x86": "x86",
+            "x86_64": "x86_64",
+        }.get(str(self.settings.arch))
+
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_x264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
@@ -203,107 +213,75 @@ class FFMpegConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = ["--disable-doc",
-                "--disable-programs"]
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
-        args.append("--pkg-config-flags=--static")
+        self._autotools.libs = []
+        opt_enable_disable = lambda what, v: "--{}-{}".format("enable" if v else "disable", what)
+        args = [
+            "--disable-doc",
+            "--disable-programs",
+            # Libraries
+            opt_enable_disable("shared", self.options.shared),
+            opt_enable_disable("static", not self.options.shared),
+            opt_enable_disable("pic", self.options.get_safe("fPIC", True)),
+            opt_enable_disable("postproc", self.options.postproc),
+            # Dependencies
+            opt_enable_disable("bzlib", self.options.with_bzlib),
+            opt_enable_disable("zlib", self.options.with_zlib),
+            opt_enable_disable("lzma", self.options.with_lzma),
+            opt_enable_disable("iconv", self.options.with_iconv),
+            opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
+            opt_enable_disable("libopenh264", self.options.with_openh264),
+            opt_enable_disable("libvorbis", self.options.with_vorbis),
+            opt_enable_disable("libopus", self.options.with_opus),
+            opt_enable_disable("libzmq", self.options.with_zmq),
+            opt_enable_disable("sdl2", self.options.with_sdl),
+            opt_enable_disable("libx264", self.options.with_x264),
+            opt_enable_disable("libx265", self.options.with_x265),
+            opt_enable_disable("libvpx", self.options.with_vpx),
+            opt_enable_disable("libmp3lame", self.options.with_mp3lame),
+            opt_enable_disable("libfdk-aac", self.options.with_fdk_aac),
+            opt_enable_disable("libwebp", self.options.with_webp),
+            opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
+            opt_enable_disable("alsa", self.options.get_safe("with_alsa")),
+            opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
+            opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
+            opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
+            opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
+            opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
+            opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
+            opt_enable_disable("libxcb-xfixes", self.options.get_safe("with_xcb")),
+            opt_enable_disable("appkit", self.options.get_safe("with_appkit")),
+            opt_enable_disable("avfoundation", self.options.get_safe("with_avfoundation")),
+            opt_enable_disable("coreimage", self.options.get_safe("with_coreimage")),
+            opt_enable_disable("audiotoolbox", self.options.get_safe("with_audiotoolbox")),
+            opt_enable_disable("videotoolbox", self.options.get_safe("with_videotoolbox")),
+            opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
+            "--disable-cuda",  # FIXME: CUDA support
+            "--disable-cuvid",  # FIXME: CUVID support
+            # Licenses
+            opt_enable_disable("nonfree", self.options.with_fdk_aac),
+            opt_enable_disable("gpl", self.options.with_x264 or self.options.with_x265 or self.options.with_postproc)
+        ]
+        if self._arch:
+            args.append("--arch={}".format(self._arch))
         if self.settings.build_type == "Debug":
-            args.extend(["--disable-optimizations", "--disable-mmx", "--disable-stripping", "--enable-debug"])
+            args.extend([
+                "--disable-optimizations",
+                "--disable-mmx",
+                "--disable-stripping",
+                "--enable-debug",
+            ])
         # since ffmpeg"s build system ignores CC and CXX
+        if tools.get_env("AS"):
+            args.append("--as={}".format(tools.get_env("AS")))
         if tools.get_env("CC"):
-            args.append("--cc=%s" % tools.get_env("CC"))
-        if tools.get_env("CC"):
-            args.append("--cxx=%s" % tools.get_env("CXX"))
+            args.append("--cc={}".format(tools.get_env("CC")))
+        if tools.get_env("CXX"):
+            args.append("--cxx=".format(tools.get_env("CXX")))
         if self.settings.compiler == "Visual Studio":
             args.append("--toolchain=msvc")
-            args.append("--extra-cflags=-%s" % self.settings.compiler.runtime)
-            if int(str(self.settings.compiler.version)) <= 12:
-                # Visual Studio 2013 (and earlier) doesn"t support "inline" keyword for C (only for C++)
-                args.append("--extra-cflags=-Dinline=__inline" % self.settings.compiler.runtime)
-
-        if self.settings.arch == "x86":
-            args.append("--arch=x86")
-
-        if self.options.get_safe("fPIC", True):
-            args.append("--enable-pic")
-
-        if not self.options.postproc:
-            args.append("--disable-postproc")
-        if not self.options.with_bzlib:
-            args.append("--disable-zlib")
-        if not self.options.with_zlib:
-            args.append("--disable-zlib")
-        if not self.options.with_lzma:
-            args.append("--disable-lzma")
-        if not self.options.with_iconv:
-            args.append("--disable-iconv")
-        if self.options.with_freetype:
-            args.append("--enable-libfreetype")
-        if self.options.with_openjpeg:
-            args.append("--enable-libopenjpeg")
-        if self.options.with_openh264:
-            args.append("--enable-libopenh264")
-        if self.options.with_vorbis:
-            args.append("--enable-libvorbis")
-        if self.options.with_opus:
-            args.append("--enable-libopus")
-        if self.options.with_zmq:
-            args.append("--enable-libzmq")
-        if not self.options.with_sdl:
-            args.append("--disable-sdl2")
-        if self.options.with_x264:
-            args.append("--enable-libx264")
-        if self.options.with_x265:
-            args.append("--enable-libx265")
-        if self.options.with_vpx:
-            args.append("--enable-libvpx")
-        if self.options.with_mp3lame:
-            args.append("--enable-libmp3lame")
-        if self.options.with_fdk_aac:
-            args.append("--enable-libfdk-aac")
-        if self.options.with_webp:
-            args.append("--enable-libwebp")
-        if self.options.with_ssl == "openssl":
-            args.append("--enable-openssl")
-
-        if self.options.with_x264 or self.options.with_x265 or self.options.with_postproc:
-            args.append("--enable-gpl")
-
-        if self.options.with_fdk_aac:
-            args.append("--enable-nonfree")
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            if not self.options.with_alsa:
-                args.append("--disable-alsa")
-            if self.options.with_pulse:
-                args.append("--enable-libpulse")
-            if not self.options.with_vaapi:
-                args.append("--disable-vaapi")
-            if not self.options.with_vdpau:
-                args.append("--disable-vdpau")
-            if self.options.with_xcb:
-                args.extend(["--enable-libxcb", "--enable-libxcb-shm",
-                             "--enable-libxcb-shape", "--enable-libxcb-xfixes"])
-
-        if self.settings.os == "Macos":
-            if not self.options.with_appkit:
-                args.append("--disable-appkit")
-            if not self.options.with_avfoundation:
-                args.append("--disable-avfoundation")
-            if not self.options.with_coreimage:
-                args.append("--disable-coreimage")
-            if not self.options.with_audiotoolbox:
-                args.append("--disable-audiotoolbox")
-            if not self.options.with_videotoolbox:
-                args.append("--disable-videotoolbox")
-            if self.options.with_ssl != "securetransport":
-                args.append("--disable-securetransport")
-
-        # FIXME disable CUDA and CUVID by default, revisit later
-        args.extend(["--disable-cuda", "--disable-cuvid"])
+            if tools.Version(str(self.settings.compiler.version)) <= 12:
+                # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
+                self._autotools.defines.append("inline=__inline")
 
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
