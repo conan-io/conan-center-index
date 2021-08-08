@@ -74,6 +74,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_zstd": [True, False],
         "with_gstreamer": [True, False],
+        "with_dbus": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -111,6 +112,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_zstd": True,
         "with_gstreamer": False,
+        "with_dbus": False,
 
         "gui": True,
         "widgets": True,
@@ -349,6 +351,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_gstreamer", False):
             raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -530,6 +534,11 @@ class QtConan(ConanFile):
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
             args.append("--gstreamer" if self.options.with_gstreamer else "--no-gstreamer")
+
+        if self.options.with_dbus:
+            args.append("-dbus-linked")
+        else:
+            args.append("-no-dbus")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -842,7 +851,9 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
 
         if self.options.gui:
-            gui_reqs = ["DBus"]
+            gui_reqs = []
+            if self.options.with_dbus:
+                gui_reqs.append("DBus")
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -885,7 +896,8 @@ Examples = bin/datadir/examples""")
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
-        _create_module("DBus")
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
