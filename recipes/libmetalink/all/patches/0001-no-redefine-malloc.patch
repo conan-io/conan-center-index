@@ -1,0 +1,10 @@
+--- a/configure
++++ b/configure
+@@ -13264,7 +13264,6 @@ else
+ esac
+ 
+ 
+-$as_echo "#define malloc rpl_malloc" >>confdefs.h
+ 
+ fi
+ 
