@@ -30,7 +30,6 @@ class LibmetalinkConan(ConanFile):
         "xml_backend": "expat",
     }
 
-    exports_sources = "patches/**"
     generators = "pkg_config"
     _autotools = None
 
@@ -78,14 +77,6 @@ class LibmetalinkConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-
     @contextmanager
     def _build_context(self):
         with tools.run_environment(self):
@@ -113,6 +104,7 @@ class LibmetalinkConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--with-libexpat={}".format(yes_no(self.options.xml_backend == "expat")),
             "--with-libxml2={}".format(yes_no(self.options.xml_backend == "libxml2")),
+            "ac_cv_func_malloc_0_nonnull=yes",
         ]
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-FS")
@@ -120,7 +112,10 @@ class LibmetalinkConan(ConanFile):
         return self._autotools
 
     def build(self):
-        self._patch_sources()
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
