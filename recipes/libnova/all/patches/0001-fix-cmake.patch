@@ -22,7 +22,7 @@
      set(CMAKE_CXX_FLAGS_RELEASE "/MD /Ox /Ob2 /D NDEBUG")
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2 /GS-")
 -endif(MSVC)
-+endif(0)
++endif()
  
  
  # set the debug postfix
@@ -40,8 +40,19 @@
  
  set(LIBRARY_PUBLIC_HEADERS
  	${HEADER_PATH}/julian_day.h
-@@ -75,13 +75,19 @@ add_library(${LIBRARY_NAME}
+@@ -36,6 +36,7 @@ set(LIBRARY_PUBLIC_HEADERS
+ 	${HEADER_PATH}/parallax.h
+ 	${HEADER_PATH}/airmass.h
+ 	${HEADER_PATH}/heliocentric_time.h
++	${HEADER_PATH}/constellation.h
+ )
+ 
+ add_library(${LIBRARY_NAME} 
+@@ -73,15 +74,22 @@ add_library(${LIBRARY_NAME}
+ 	parallax.c
+ 	airmass.c
  	heliocentric_time.c
++  constellation.c
  )
  
 -if(MSVC)
@@ -62,7 +73,7 @@
  
  
  
-@@ -93,8 +99,8 @@ if(WIN32)
+@@ -93,8 +101,8 @@ if(WIN32)
      set(INSTALL_LIBDIR bin)
      set(INSTALL_ARCHIVEDIR lib)
  else(WIN32)
@@ -73,7 +84,7 @@
  endif(WIN32)
  
  install(
-@@ -106,5 +112,5 @@ install(
+@@ -106,5 +114,5 @@ install(
  
  install(
      FILES       ${LIBRARY_PUBLIC_HEADERS}
