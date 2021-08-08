@@ -31,7 +31,7 @@ class FFMpegConan(ConanFile):
         "with_opus": [True, False],
         "with_vorbis": [True, False],
         "with_zmq": [True, False],
-        "with_sdl2": [True, False],
+        "with_sdl": [True, False],
         "with_x264": [True, False],
         "with_x265": [True, False],
         "with_vpx": [True, False],
@@ -64,7 +64,7 @@ class FFMpegConan(ConanFile):
         "with_opus": True,
         "with_vorbis": True,
         "with_zmq": False,
-        "with_sdl2": False,
+        "with_sdl": False,
         "with_x264": True,
         "with_x265": True,
         "with_vpx": True,
@@ -145,7 +145,7 @@ class FFMpegConan(ConanFile):
             self.requires("opus/1.3.1")
         if self.options.with_zmq:
             self.requires("zeromq/4.3.4")
-        if self.options.with_sdl2:
+        if self.options.with_sdl:
             self.requires("sdl/2.0.14")
         if self.options.with_x264:
             self.requires("libx264/20190605")
@@ -178,7 +178,7 @@ class FFMpegConan(ConanFile):
             raise ConanInvalidConfiguration("securetransport is only available on Macos")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_vpx:
             raise ConanInvalidConfiguration("libvpx doesn't support armv8 supported yet")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl2:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl:
             raise ConanInvalidConfiguration("sdl2 not supported yet")
 
     def source(self):
@@ -252,7 +252,7 @@ class FFMpegConan(ConanFile):
             args.append("--enable-libopus")
         if self.options.with_zmq:
             args.append("--enable-libzmq")
-        if not self.options.with_sdl2:
+        if not self.options.with_sdl:
             args.append("--disable-sdl2")
         if self.options.with_x264:
             args.append("--enable-libx264")
