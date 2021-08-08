@@ -31,6 +31,10 @@ class IntelIpSecMbConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -48,10 +52,9 @@ class IntelIpSecMbConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not tools.which("make"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_MAKE_PROGRAM"):
             self.build_requires("make/4.2.1")
-        if not tools.which("nasm"):
-            self.build_requires("nasm/2.15.05")
+        self.build_requires("nasm/2.15.05")
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -60,10 +63,11 @@ class IntelIpSecMbConan(ConanFile):
 
     def build(self):
         autotools = self._configure_autotools()
-        args = []
-        args.append(None if self.options.shared else "SHARED=n")
-        args.append(None if self.settings.build_type != "Debug" else "DEBUG=y")
-        args = [arg for arg in args if arg is not None]
+        yn = lambda v: "y" if v else "n"
+        args = [
+            "SHARED={}".format(yn(self.options.shared)),
+            "DEBUG={}".format(yn(self.settings.build_type == "Debug")),
+        ]
         with tools.chdir(self._source_subfolder):
             autotools.make(args)
 
@@ -79,4 +83,4 @@ class IntelIpSecMbConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "IPSec_MB"
         self.cpp_info.names["cmake_find_package_multi"] = "IPSec_MB"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["IPSec_MB"]
