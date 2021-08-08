@@ -61,9 +61,7 @@ class OpenALConan(ConanFile):
             "gcc": "5",
             "clang": "5",
         }.get(str(self.settings.compiler))
-        if not min_version:
-            return True, "Unknown compiler. Assuming your compiler supports c++14"
-        elif tools.Version(self.settings.compiler.version) < min_version:
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
             return False, "This compiler version does not support c++14"
         return True, None
 
@@ -77,9 +75,7 @@ class OpenALConan(ConanFile):
             "gcc": "5",
             "clang": "5",
         }.get(str(self.settings.compiler))
-        if not min_version:
-            return True, "Unknown compiler. Assuming your compiler supports c++11"
-        elif tools.Version(self.settings.compiler.version) < min_version:
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
             return False, "This compiler version does not support c++11"
         return True, None
 
