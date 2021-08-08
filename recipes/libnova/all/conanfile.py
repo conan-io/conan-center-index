@@ -56,6 +56,7 @@ class LibnovaConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_SHARED_LIBRARY"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
