@@ -138,7 +138,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_openh264:
-            self.requires("openh264/1.7.0")
+            self.requires("openh264/2.1.1")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -148,7 +148,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/2.0.14")
         if self.options.with_x264:
-            self.requires("libx264/20190605")
+            self.requires("libx264/20191217")
         if self.options.with_x265:
             self.requires("libx265/3.4")
         if self.options.with_vpx:
@@ -158,16 +158,16 @@ class FFMpegConan(ConanFile):
         if self.options.with_fdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_webp:
-            self.requires("libwebp/1.0.3")
+            self.requires("libwebp/1.2.0")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_alsa:
-                self.requires("libalsa/1.1.9")
+                self.requires("libalsa/1.2.4")
             if self.options.with_xcb:
                 self.requires("xorg/system")
             if self.options.with_pulse:
-                self.requires("pulseaudio/13.0")
+                self.requires("pulseaudio/14.2")
             if self.options.with_vaapi:
                 self.requires("vaapi/system")
             if self.options.with_vdpau:
