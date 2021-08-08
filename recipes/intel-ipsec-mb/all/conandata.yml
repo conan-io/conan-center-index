@@ -1,0 +1,5 @@
+sources:
+  "1.0":
+    url: "https://github.com/intel/intel-ipsec-mb/archive/refs/tags/v1.0.tar.gz"
+    sha256: "03501aea472d3c8fdf8f1f207816eefeaf5e4ebbdc71d88dcb26b2519841bb74"
+
