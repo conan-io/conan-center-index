@@ -1,5 +1,4 @@
-#include <libnova/julian_day.h>
-#include <libnova/mars.h>
+#include <libnova/libnova.h>
 
 #include <stdio.h>
 
