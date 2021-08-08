@@ -35,6 +35,23 @@ class OpenALConan(ConanFile):
             del self.options.fPIC
 
     @property
+    def _openal_cxx_backend(self):
+        return tools.Version(self.version) >= "1.20"
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        # OpenAL's API is pure C, thus the c++ standard does not matter
+        # Because the backend is C++, the C++ STL matters
+        del self.settings.compiler.cppstd
+        if not self._openal_cxx_backend:
+            del self.settings.compiler.libcxx
+
+    def requirements(self):
+        if self.settings.os == "Linux":
+            self.requires("libalsa/1.2.4")
+
+    @property
     def _supports_cxx14(self):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
             if tools.Version(self.settings.compiler.version) < "9":
@@ -66,19 +83,7 @@ class OpenALConan(ConanFile):
             return False, "This compiler version does not support c++11"
         return True, None
 
-    @property
-    def _openal_cxx_backend(self):
-        return tools.Version(self.version) >= "1.20"
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        # OpenAL's API is pure C, thus the c++ standard does not matter
-        # Because the backend is C++, the C++ STL matters
-        del self.settings.compiler.cppstd
-        if not self._openal_cxx_backend:
-            del self.settings.compiler.libcxx
-
+    def validate(self):
         if tools.Version(self.version) >= "1.21":
             ok, msg = self._supports_cxx14
             if not ok:
@@ -91,10 +96,6 @@ class OpenALConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
             if msg:
                 self.output.warn(msg)
-
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("libalsa/1.2.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
