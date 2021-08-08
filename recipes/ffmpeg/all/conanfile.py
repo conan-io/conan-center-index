@@ -92,6 +92,10 @@ class FFMpegConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -117,7 +121,7 @@ class FFMpegConan(ConanFile):
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
         self.build_requires("pkgconf/1.7.4")
-        if self.settings.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def requirements(self):
