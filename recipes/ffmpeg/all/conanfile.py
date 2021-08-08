@@ -92,24 +92,6 @@ class FFMpegConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def validate(self):
-        if self.settings.os != "Macos" and self.options.with_ssl == "securetransport":
-            raise ConanInvalidConfiguration("securetransport is only available on Macos")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_vpx:
-            raise ConanInvalidConfiguration("libvpx doesn't support armv8 supported yet")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl2:
-            raise ConanInvalidConfiguration("sdl2 not supported yet")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -125,6 +107,12 @@ class FFMpegConan(ConanFile):
             del self.options.with_coreimage
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
@@ -180,6 +168,18 @@ class FFMpegConan(ConanFile):
                 self.requires("vaapi/system")
             if self.options.with_vdpau:
                 self.requires("vdpau/system")
+
+    def validate(self):
+        if self.settings.os != "Macos" and self.options.with_ssl == "securetransport":
+            raise ConanInvalidConfiguration("securetransport is only available on Macos")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_vpx:
+            raise ConanInvalidConfiguration("libvpx doesn't support armv8 supported yet")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl2:
+            raise ConanInvalidConfiguration("sdl2 not supported yet")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_x264 and not self.options["libx264"].shared:
