@@ -73,5 +73,3 @@ class AwsCHttp(ConanFile):
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
         self.cpp_info.components["aws-c-http-lib"].requires = ["aws-c-compression::aws-c-compression-lib", "aws-c-io::aws-c-io-lib"]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["aws-c-http-lib"].system_libs = ["shlwapi"]
