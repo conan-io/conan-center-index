@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
 import os
 import shutil
 
@@ -54,8 +53,8 @@ class LibmetalinkConan(ConanFile):
             self.requires("libxml2/2.9.12")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("libmetalink does not support shared builds with Visual Studio")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("libmetalink does not support Visual Studio yet")
 
     @property
     def _settings_build(self):
@@ -66,8 +65,6 @@ class LibmetalinkConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -76,22 +73,6 @@ class LibmetalinkConan(ConanFile):
     @property
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
-
-    @contextmanager
-    def _build_context(self):
-        with tools.run_environment(self):
-            if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
-                    env = {
-                        "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                        "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                    }
-                    with tools.environment_append(env):
-                        yield
-            else:
-                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -106,8 +87,6 @@ class LibmetalinkConan(ConanFile):
             "--with-libxml2={}".format(yes_no(self.options.xml_backend == "libxml2")),
             "ac_cv_func_malloc_0_nonnull=yes",
         ]
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
@@ -116,13 +95,13 @@ class LibmetalinkConan(ConanFile):
                     os.path.join(self._source_subfolder, "config.sub"))
         shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
                     os.path.join(self._source_subfolder, "config.guess"))
-        with self._build_context():
+        with tools.run_environment(self):
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
+        with tools.run_environment(self):
             autotools = self._configure_autotools()
             autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
