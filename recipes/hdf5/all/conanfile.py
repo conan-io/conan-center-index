@@ -25,7 +25,8 @@ class Hdf5Conan(ConanFile):
         "threadsafe": [True, False],
         "with_zlib": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
-        "szip_encoding": [True, False]
+        "szip_encoding": [True, False],
+        "parallel": [True, False]
     }
     default_options = {
         "shared": False,
@@ -35,7 +36,8 @@ class Hdf5Conan(ConanFile):
         "threadsafe": False,
         "with_zlib": True,
         "szip_support": None,
-        "szip_encoding": False
+        "szip_encoding": False,
+        "parallel": False
     }
 
     _cmake = None
@@ -55,7 +57,6 @@ class Hdf5Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -72,6 +73,11 @@ class Hdf5Conan(ConanFile):
         if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             # While building it runs some executables like H5detect
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
+        if self.options.parallel:
+            if self.options.enable_cxx:
+                raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive")
+            if self.options.get_safe("threadsafe", False):
+                raise ConanInvalidConfiguration("Parallel and Threadsafe options are mutually exclusive")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -80,6 +86,8 @@ class Hdf5Conan(ConanFile):
             self.requires("libaec/1.0.4")
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
+        if self.options.parallel:
+            self.requires("openmpi/4.1.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -119,7 +127,7 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_ENABLE_TRACE"] = False
         if self.settings.build_type == "Debug":
             self._cmake.definitions["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
-        self._cmake.definitions["HDF5_ENABLE_PARALLEL"] = False
+        self._cmake.definitions["HDF5_ENABLE_PARALLEL"] = self.options.parallel
         self._cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         self._cmake.definitions["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         if bool(self.options.szip_support):
@@ -137,10 +145,6 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if tools.Version(self.version) >= "1.10.0":
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
-
-        # apple-clang 12 changed defaults (now enforces C99) and it adds 'implicit-function-declaration' as error
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12" and tools.Version(self.version) < "1.11":
-            self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wno-error=implicit-function-declaration"
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

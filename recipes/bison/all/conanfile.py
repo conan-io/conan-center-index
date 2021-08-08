@@ -40,6 +40,8 @@ class BisonConan(ConanFile):
             self.build_requires("msys2/20190524")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
+        if self.settings.os != "Windows":
+            self.build_requires("flex/2.6.4")
 
     def config_options(self):
         if self.settings.os == "Windows":

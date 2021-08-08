@@ -30,7 +30,13 @@ class FlexConan(ConanFile):
     def requirements(self):
         self.requires("m4/1.4.18")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
@@ -88,4 +94,11 @@ class FlexConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
+        lex_path = os.path.join(bindir, "flex").replace("\\", "/")
+        self.output.info("Setting LEX environment variable: {}".format(lex_path))
+        self.env_info.LEX = lex_path

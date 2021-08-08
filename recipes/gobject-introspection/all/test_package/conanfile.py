@@ -8,11 +8,12 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if self.settings.os != 'Windows':
-            self.run('g-ir-annotation-tool --version', run_environment=True)
-            self.run('g-ir-compiler --version', run_environment=True)
-            self.run('g-ir-generate --version', run_environment=True)
-            self.run('g-ir-inspect -h', run_environment=True)
-            self.run('g-ir-scanner --version', run_environment=True)
+            with tools.environment_append({'PKG_CONFIG_PATH': "."}):
+                pkg_config = tools.PkgConfig("gobject-introspection-1.0")
+                for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
+                    self.run('%s --version' % pkg_config.variables[tool], run_environment=True)
+                self.run('g-ir-annotation-tool --version', run_environment=True)
+                self.run('g-ir-inspect -h', run_environment=True)
 
         cmake = CMake(self)
         cmake.configure()
