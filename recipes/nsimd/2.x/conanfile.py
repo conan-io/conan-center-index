@@ -3,6 +3,9 @@ import sys
 
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
+
 class NsimdConan(ConanFile):
     name = "nsimd"
     homepage = "https://github.com/agenium-scale/nsimd"
@@ -31,8 +34,7 @@ class NsimdConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         python_cmd = sys.executable
@@ -44,8 +46,6 @@ class NsimdConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
