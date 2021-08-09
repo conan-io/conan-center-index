@@ -25,7 +25,8 @@
  add_dependencies(libjsonnet md5 stdlib)
  target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json)
 @@ -50,7 +50,7 @@ install(TARGETS libjsonnet
- 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
  target_include_directories(libjsonnet INTERFACE
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
 -
@@ -48,9 +49,11 @@
 +if (NOT BUILD_STATIC_LIBS)
  add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
  add_dependencies(libjsonnet++ jsonnet)
- # target_link_libraries(libjsonnet libjsonnet)
+-# target_link_libraries(libjsonnet libjsonnet)
++target_link_libraries(libjsonnet++ libjsonnet)
 @@ -24,7 +24,7 @@
- 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+-	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
  target_include_directories(libjsonnet++ INTERFACE
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
 -
