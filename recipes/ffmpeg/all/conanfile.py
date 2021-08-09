@@ -162,17 +162,16 @@ class FFMpegConan(ConanFile):
             self.requires("libwebp/1.2.0")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
-        if self.settings.os in ("Linux", "FreeBSD"):
-            if self.options.with_alsa:
-                self.requires("libalsa/1.2.5.1")
-            if self.options.with_xcb:
-                self.requires("xorg/system")
-            if self.options.with_pulse:
-                self.requires("pulseaudio/14.2")
-            if self.options.with_vaapi:
-                self.requires("vaapi/system")
-            if self.options.with_vdpau:
-                self.requires("vdpau/system")
+        if self.options.get_safe("with_alsa"):
+            self.requires("libalsa/1.2.5.1")
+        if self.options.get_safe("with_xcb"):
+            self.requires("xorg/system")
+        if self.options.get_safe("with_pulse"):
+            self.requires("pulseaudio/14.2")
+        if self.options.get_safe("with_vaapi"):
+            self.requires("vaapi/system")
+        if self.options.get_safe("with_vdpau"):
+            self.requires("vdpau/system")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
