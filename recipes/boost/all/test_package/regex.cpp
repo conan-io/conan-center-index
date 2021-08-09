@@ -1,6 +1,10 @@
 #include <boost/regex.hpp>
 #include <iostream>
 
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 int main(int argc, const char * const argv[])
 {
     std::string line;
