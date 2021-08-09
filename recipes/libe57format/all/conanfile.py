@@ -72,4 +72,7 @@ class LibE57FormatConan(ConanFile):
         self.cpp_info.libs = ["E57Format-d" if self.settings.build_type == "Debug" else "E57Format"]
         self.cpp_info.names["cmake_find_package"] = "E57Format"
         self.cpp_info.names["cmake_find_package_multi"] = "E57Format"
-        self.cpp_info.names["pkg_config"] = "E57Format"
+        self.cpp_info.filenames["cmake_find_package"] = "e57format"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "e57format"
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
