@@ -1,6 +1,9 @@
 from conans import tools, ConanFile, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.39.0"
+required_conan_version = ">=1.33.0"
+
 
 class IntelIpSecMbConan(ConanFile):
     name = "intel-ipsec-mb"
@@ -31,10 +34,6 @@ class IntelIpSecMbConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -52,8 +51,6 @@ class IntelIpSecMbConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_MAKE_PROGRAM"):
-            self.build_requires("make/4.2.1")
         self.build_requires("nasm/2.15.05")
 
     def validate(self):
@@ -62,23 +59,31 @@ class IntelIpSecMbConan(ConanFile):
             raise ConanInvalidConfiguration(message)
 
     def build(self):
-        autotools = self._configure_autotools()
         yn = lambda v: "y" if v else "n"
-        args = [
+        make_args = [
             "SHARED={}".format(yn(self.options.shared)),
             "DEBUG={}".format(yn(self.settings.build_type == "Debug")),
         ]
-        with tools.chdir(self._source_subfolder):
-            autotools.make(args)
+        with tools.chdir(os.path.join(self._source_subfolder, "lib")):
+            if self.settings.compiler == "Visual Studio":
+                tools.replace_in_file("win_x64.mak",
+                                      "-MD", "-{}".format(self.settings.compiler.runtime))
+                with tools.vcvars(self):
+                    self.run("nmake -nologo -fwin_x64.mak {}".format(" ".join(arg for arg in make_args)))
+            else:
+                autotools = self._configure_autotools()
+                autotools.make(args=make_args)
 
     def package(self):
-        self.copy("*intel-ipsec-mb.h", "include",
-                  self._source_subfolder, keep_path=False)
-        self.copy("*.lib", "lib", self._source_subfolder, keep_path=False)
-        self.copy("*.so*", "lib", self._source_subfolder, keep_path=False)
-        self.copy("*.a", "lib", self._source_subfolder, keep_path=False)
-        self.copy("*.dll", "bin", self._source_subfolder, keep_path=False)
-        self.copy("LICENSE", "licenses", self._source_subfolder, keep_path=True)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
+        self.copy("intel-ipsec-mb.h", src=os.path.join(self._source_subfolder, "lib"), dst="include", keep_path=False)
+        self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+        self.copy("*.so*", src=self._source_subfolder, dst="lib", keep_path=False)
+        self.copy("*.a", src=self._source_subfolder, dst="lib", keep_path=False)
+        self.copy("*.dll", src=self._source_subfolder, dst="bin", keep_path=False)
+        if self.settings.compiler == "Visual Studio":
+            tools.rename(os.path.join(self.package_folder, "lib", "libIPSec_MB.lib"),
+                         os.path.join(self.package_folder, "lib", "IPSec_MB.lib"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "IPSec_MB"
