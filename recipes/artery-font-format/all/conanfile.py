@@ -17,7 +17,6 @@ class ArteryFontFormatConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        tools.tools_files.rename("artery-font", "include/artery-font")
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
