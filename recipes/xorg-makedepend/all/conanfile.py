@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class XorgMakedepend(ConanFile):
     name = "xorg-makedepend"
     description = "Utility to parse C source files to make dependency lists for Makefiles"
-    topics = ("conan", "xorg", "dependency", "obsolete")
+    topics = ("xorg", "dependency", "obsolete")
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
     url = "https://github.com/conan-io/conan-center-index"
