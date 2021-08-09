@@ -507,9 +507,7 @@ class QtConan(ConanFile):
             args += ["-opengl dynamic"]
 
         if self.options.get_safe("with_vulkan", False):
-            args.append("-vulkan")
-        else:
-            args.append("-no-vulkan")
+            args.append("-feature-vulkan")
 
         # openSSL
         if not self.options.openssl:
@@ -866,6 +864,8 @@ Examples = bin/datadir/examples""")
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.get_safe("with_vulkan", False):
+                gui_reqs.append("vulkan-loader::vulkan-loader")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
