@@ -59,14 +59,16 @@ class AprConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def validate(self):
+        if tools.cross_building(self):
+            raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         if (self.settings.compiler == "apple-clang" and
             tools.Version(self.settings.compiler.version) == "12" and
             self.version == "1.7.0"):
-            if tools.cross_building(self):
-                raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
 
             with tools.chdir( self._source_subfolder ):
                 os.remove( "configure" )
