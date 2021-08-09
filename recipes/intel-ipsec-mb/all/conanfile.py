@@ -88,6 +88,4 @@ class IntelIpSecMbConan(ConanFile):
                          os.path.join(self.package_folder, "lib", "IPSec_MB.lib"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "IPSec_MB"
-        self.cpp_info.names["cmake_find_package_multi"] = "IPSec_MB"
         self.cpp_info.libs = ["IPSec_MB"]
