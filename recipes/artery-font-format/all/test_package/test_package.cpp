@@ -4,10 +4,13 @@
 
 #include <artery-font/std-artery-font.h>
 #include <artery-font/stdio-serialization.h>
-#include <stdlib.h>
 
-int main() {
-  FILE *const font_file = fopen("example.arfont", "rb");
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+      std::cerr << "Need an argument\n";
+      return EXIT_FAILURE;
+  }
+  FILE *const font_file = fopen(argv[1], "rb");
   if (font_file == nullptr) {
     std::cerr << "couldn't open font file" << std::endl;
     return EXIT_FAILURE;
