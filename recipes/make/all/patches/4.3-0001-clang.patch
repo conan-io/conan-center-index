@@ -1,8 +1,6 @@
-diff --git a/glob/glob.c b/glob/glob.c
-index f3911bc..8ec8511 100644
---- a/glob/glob.c
-+++ b/glob/glob.c
-@@ -208,7 +208,7 @@ my_realloc (p, n)
+--- lib/glob.c
++++ lib/glob.c
+@@ -208,7 +208,7 @@
  #endif /* __GNU_LIBRARY__ || __DJGPP__ */
  
  
