@@ -8,18 +8,18 @@ required_conan_version = ">=1.33.0"
 class DoxygenConan(ConanFile):
     name = "doxygen"
     description = "A documentation system for C++, C, Java, IDL and PHP --- Note: Dot is disabled in this package"
-    topics = ("conan", "doxygen", "installer", "devtool", "documentation")
+    topics = ("doxygen", "installer", "devtool", "documentation")
     homepage = "https://github.com/doxygen/doxygen"
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "enable_parse": [True, False],
-        "enable_search": [True, False]
+        "enable_search": [True, False],
     }
     default_options = {
         "enable_parse": True,
-        "enable_search": True
+        "enable_search": True,
     }
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
@@ -57,7 +57,7 @@ class DoxygenConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
