@@ -308,8 +308,6 @@ class LibcurlConan(ConanFile):
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
             "--enable-threaded-resolver={}".format(yes_no(self.options.with_c_ares)),
-            "--disable-proxy={}".format(yes_no(self.options.with_proxy)),
-            "--disable-rtsp={}".format(yes_no(self.options.with_rtsp)),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
