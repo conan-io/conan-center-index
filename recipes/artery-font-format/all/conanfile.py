@@ -3,7 +3,6 @@ from conans import ConanFile, CMake, tools
 
 class ArteryFontFormatConan(ConanFile):
     name = "artery-font-format"
-    version = "1.0"
     license = "MIT"
     homepage = "https://github.com/Chlumsky/artery-font-format"
     url = "https://github.com/conan-io/conan-center-index"
@@ -11,12 +10,16 @@ class ArteryFontFormatConan(ConanFile):
     topics = ("conan", "artery", "font", "atlas")
     no_copy_source = True
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_folder)
+                  destination=self._source_subfolder, strip_root=True)
         tools.tools_files.rename("artery-font", "include/artery-font")
 
     def package(self):
-        self.copy("*.h")
-        self.copy("*.hpp")
-        self.copy("LICENSE.txt", dst="licenses", src=self.source_folder)
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
+        self.copy("*.h", src=self._source_subfolder, dst="include")
+        self.copy("*.hpp", src=self._source_subfolder, dst="include")
