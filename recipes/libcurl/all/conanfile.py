@@ -357,7 +357,7 @@ class LibcurlConan(ConanFile):
             else:
                 params.append("--disable-ntlm")
 
-        if not self.options.with_ntlm_nb:
+        if not self.options.with_ntlm_wb:
             params.append("--disable-ntlm-wb")
 
         # Cross building flags
