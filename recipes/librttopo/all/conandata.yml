@@ -1,0 +1,8 @@
+sources:
+  "1.1.0":
+    url: "https://gitlab.com/rttopo/rttopo/-/archive/librttopo-1.1.0/rttopo-librttopo-1.1.0.tar.bz2"
+    sha256: "4b28732c0322849c8754751a384ee3596d06ab316dfc57fe9bbe757c82a27efe"
+patches:
+  "1.1.0":
+    - patch_file: "patches/0001-configure-geos-no-config-file.patch"
+      base_path: "source_subfolder"
