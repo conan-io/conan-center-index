@@ -24,9 +24,7 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD TRUE)
 endif()
 
-set(SRC source_subfolder/cpp/qrcodegen.cpp)
-set(HEADERS source_subfolder/cpp/qrcodegen.hpp)
-set(LIBRARY_NAME qrcodegencpp)
+include(files.cmake)
 
 add_library(${LIBRARY_NAME} ${SRC})
 
