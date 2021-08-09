@@ -23,24 +23,24 @@ class FFMpegConan(ConanFile):
         "fPIC": [True, False],
         "postproc": [True, False],
         "with_zlib": [True, False],
-        "with_bzlib": [True, False],
+        "with_bzip2": [True, False],
         "with_lzma": [True, False],
-        "with_iconv": [True, False],
+        "with_libiconv": [True, False],
         "with_freetype": [True, False],
         "with_openjpeg": [True, False],
         "with_openh264": [True, False],
         "with_opus": [True, False],
         "with_vorbis": [True, False],
-        "with_zmq": [True, False],
+        "with_zeromq": [True, False],
         "with_sdl": [True, False],
-        "with_x264": [True, False],
-        "with_x265": [True, False],
-        "with_vpx": [True, False],
-        "with_mp3lame": [True, False],
-        "with_fdk_aac": [True, False],
-        "with_webp": [True, False],
+        "with_libx264": [True, False],
+        "with_libx265": [True, False],
+        "with_libvpx": [True, False],
+        "with_libmp3lame": [True, False],
+        "with_libfdk_aac": [True, False],
+        "with_libwebp": [True, False],
         "with_ssl": [False, "openssl", "securetransport"],
-        "with_alsa": [True, False],
+        "with_libalsa": [True, False],
         "with_pulse": [True, False],
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
@@ -56,24 +56,24 @@ class FFMpegConan(ConanFile):
         "fPIC": True,
         "postproc": True,
         "with_zlib": True,
-        "with_bzlib": True,
+        "with_bzip2": True,
         "with_lzma": True,
-        "with_iconv": True,
+        "with_libiconv": True,
         "with_freetype": True,
         "with_openjpeg": True,
         "with_openh264": True,
         "with_opus": True,
         "with_vorbis": True,
-        "with_zmq": False,
+        "with_zeromq": False,
         "with_sdl": False,
-        "with_x264": True,
-        "with_x265": True,
-        "with_vpx": True,
-        "with_mp3lame": True,
-        "with_fdk_aac": True,
-        "with_webp": True,
+        "with_libx264": True,
+        "with_libx265": True,
+        "with_libvpx": True,
+        "with_libmp3lame": True,
+        "with_libfdk_aac": True,
+        "with_libwebp": True,
         "with_ssl": "openssl",
-        "with_alsa": True,
+        "with_libalsa": True,
         "with_pulse": True,
         "with_vaapi": True,
         "with_vdpau": True,
@@ -104,7 +104,7 @@ class FFMpegConan(ConanFile):
             del self.options.with_vaapi
             del self.options.with_vdpau
             del self.options.with_xcb
-            del self.options.with_alsa
+            del self.options.with_libalsa
             del self.options.with_pulse
         if self.settings.os != "Macos":
             del self.options.with_appkit
@@ -128,11 +128,11 @@ class FFMpegConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.with_bzlib:
+        if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self.options.with_iconv:
+        if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
@@ -144,25 +144,25 @@ class FFMpegConan(ConanFile):
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
             self.requires("opus/1.3.1")
-        if self.options.with_zmq:
+        if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
             self.requires("sdl/2.0.14")
-        if self.options.with_x264:
+        if self.options.with_libx264:
             self.requires("libx264/20191217")
-        if self.options.with_x265:
+        if self.options.with_libx265:
             self.requires("libx265/3.4")
-        if self.options.with_vpx:
+        if self.options.with_libvpx:
             self.requires("libvpx/1.9.0")
-        if self.options.with_mp3lame:
+        if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
-        if self.options.with_fdk_aac:
+        if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
-        if self.options.with_webp:
+        if self.options.with_libwebp:
             self.requires("libwebp/1.2.0")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1k")
-        if self.options.get_safe("with_alsa"):
+        if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb"):
             self.requires("xorg/system")
@@ -176,7 +176,7 @@ class FFMpegConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("securetransport is only available on Apple")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_vpx:
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_libvpx:
             raise ConanInvalidConfiguration("libvpx doesn't support armv8 (yet)")
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl:
             raise ConanInvalidConfiguration("sdl is not supported by this recipe (yet)")
@@ -196,7 +196,7 @@ class FFMpegConan(ConanFile):
         }.get(str(self.settings.arch))
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio" and self.options.with_x264 and not self.options["libx264"].shared:
+        if self.settings.compiler == "Visual Studio" and self.options.with_libx264 and not self.options["libx264"].shared:
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
             # warning LNK4049: locally defined symbol x264_bit_depth imported
@@ -235,24 +235,24 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("pic", self.options.get_safe("fPIC", True)),
             opt_enable_disable("postproc", self.options.postproc),
             # Dependencies
-            opt_enable_disable("bzlib", self.options.with_bzlib),
+            opt_enable_disable("bzlib", self.options.with_bzip2),
             opt_enable_disable("zlib", self.options.with_zlib),
             opt_enable_disable("lzma", self.options.with_lzma),
-            opt_enable_disable("iconv", self.options.with_iconv),
+            opt_enable_disable("iconv", self.options.with_libiconv),
             opt_enable_disable("libopenjpeg", self.options.with_openjpeg),
             opt_enable_disable("libopenh264", self.options.with_openh264),
             opt_enable_disable("libvorbis", self.options.with_vorbis),
             opt_enable_disable("libopus", self.options.with_opus),
-            opt_enable_disable("libzmq", self.options.with_zmq),
+            opt_enable_disable("libzmq", self.options.with_zeromq),
             opt_enable_disable("sdl2", self.options.with_sdl),
-            opt_enable_disable("libx264", self.options.with_x264),
-            opt_enable_disable("libx265", self.options.with_x265),
-            opt_enable_disable("libvpx", self.options.with_vpx),
-            opt_enable_disable("libmp3lame", self.options.with_mp3lame),
-            opt_enable_disable("libfdk-aac", self.options.with_fdk_aac),
-            opt_enable_disable("libwebp", self.options.with_webp),
+            opt_enable_disable("libx264", self.options.with_libx264),
+            opt_enable_disable("libx265", self.options.with_libx265),
+            opt_enable_disable("libvpx", self.options.with_libvpx),
+            opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
+            opt_enable_disable("libfdk-aac", self.options.with_libfdk_aac),
+            opt_enable_disable("libwebp", self.options.with_libwebp),
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
-            opt_enable_disable("alsa", self.options.get_safe("with_alsa")),
+            opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
@@ -269,8 +269,8 @@ class FFMpegConan(ConanFile):
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_fdk_aac),
-            opt_enable_disable("gpl", self.options.with_x264 or self.options.with_x265 or self.options.with_postproc)
+            opt_enable_disable("nonfree", self.options.with_libfdk_aac),
+            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.with_postproc)
         ]
         if self._arch:
             args.append("--arch={}".format(self._arch))
@@ -301,7 +301,7 @@ class FFMpegConan(ConanFile):
         self._patch_sources()
         tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
                               "echo libx264.lib", "echo x264.lib")
-        if self.options.with_x264:
+        if self.options.with_libx264:
             shutil.copy("x264.pc", "libx264.pc")
         with self._build_context():
             autotools = self._configure_autotools()
@@ -390,7 +390,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
             self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
 
-        if self.options.get_safe("with_alsa"):
+        if self.options.get_safe("with_libalsa"):
             self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
 
         if self.options.get_safe("with_xcb"):
@@ -402,13 +402,13 @@ class FFMpegConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["avcodec"].requires.append("zlib::zlib")
 
-        if self.options.with_bzlib:
+        if self.options.with_bzip2:
             self.cpp_info.components["avformat"].requires.append("bzip2::bzip2")
 
         if self.options.with_lzma:
             self.cpp_info.components["avcodec"].requires.append("xz_utils::xz_utils")
 
-        if self.options.with_iconv:
+        if self.options.with_libiconv:
             self.cpp_info.components["avcodec"].requires.append("libiconv::libiconv")
 
         if self.options.with_freetype:
@@ -426,22 +426,22 @@ class FFMpegConan(ConanFile):
         if self.options.with_opus:
             self.cpp_info.components["avcodec"].requires.append("opus::opus")
 
-        if self.options.with_x264:
+        if self.options.with_libx264:
             self.cpp_info.components["avcodec"].requires.append("libx264::libx264")
 
-        if self.options.with_x265:
+        if self.options.with_libx265:
             self.cpp_info.components["avcodec"].requires.append("libx265::libx265")
 
-        if self.options.with_vpx:
+        if self.options.with_libvpx:
             self.cpp_info.components["avcodec"].requires.append("libvpx::libvpx")
 
-        if self.options.with_mp3lame:
+        if self.options.with_libmp3lame:
             self.cpp_info.components["avcodec"].requires.append("libmp3lame::libmp3lame")
 
-        if self.options.with_fdk_aac:
+        if self.options.with_libfdk_aac:
             self.cpp_info.components["avcodec"].requires.append("libfdk_aac::libfdk_aac")
 
-        if self.options.with_webp:
+        if self.options.with_libwebp:
             self.cpp_info.components["avcodec"].requires.append("libwebp::libwebp")
 
         if self.options.with_ssl == "openssl":
