@@ -50,7 +50,6 @@ class LibE57FormatConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         if self.settings.os == "Windows":
             self._cmake.definitions["USING_STATIC_XERCES"] = True
         self._cmake.configure(build_folder=self._build_subfolder,
