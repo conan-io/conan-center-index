@@ -6,13 +6,13 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             if not os.path.isdir(os.path.join(self.build_folder, "html")):
                 raise ConanException("doxygen did not create html documentation directory")
 
