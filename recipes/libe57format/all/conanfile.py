@@ -50,8 +50,7 @@ class LibE57FormatConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if self.settings.os == "Windows":
-            self._cmake.definitions["USING_STATIC_XERCES"] = True
+        self._cmake.definitions["USING_STATIC_XERCES"] = not self.options["xerces-c"].shared
         self._cmake.configure(build_folder=self._build_subfolder,
                               source_folder=self._source_subfolder)
         return self._cmake

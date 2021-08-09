@@ -6,6 +6,6 @@ conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-find_package(E57Format REQUIRED)
+find_package(e57format REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE E57Format::E57Format)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
