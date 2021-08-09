@@ -57,7 +57,7 @@ class IntelIpSecMbConan(ConanFile):
         if self.settings.arch != "x86_64":
             message = "{} is not supported".format(self.settings.arch)
             raise ConanInvalidConfiguration(message)
-        if (self.settings.os, self.settings.compiler) != ("Windows", "Visual Studio"):
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             raise ConanInvalidConfiguration("inel-ipsec-mb only supports Visual Studio on Windows")
 
     def build(self):
