@@ -65,6 +65,9 @@ class AprConan(ConanFile):
         if (self.settings.compiler == "apple-clang" and
             tools.Version(self.settings.compiler.version) == "12" and
             self.version == "1.7.0"):
+            if tools.cross_building(self):
+                raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
+
             with tools.chdir( self._source_subfolder ):
                 os.remove( "configure" )
                 self.run( "./buildconf" )
