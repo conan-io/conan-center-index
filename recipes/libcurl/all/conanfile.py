@@ -39,6 +39,8 @@ class LibcurlConan(ConanFile):
         "with_brotli": [True, False],
         "with_zstd": [True, False],
         "with_c_ares": [True, False],
+        "with_proxy": [True, False],
+        "with_rtsp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -60,6 +62,8 @@ class LibcurlConan(ConanFile):
         "with_brotli": False,
         "with_zstd": False,
         "with_c_ares": False,
+        "with_proxy": True,
+        "with_rtsp": True,
     }
 
     _autotools = None
@@ -144,8 +148,8 @@ class LibcurlConan(ConanFile):
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
-            del self.options.with_libidn
-            del self.options.with_librtmp
+            if tools.Version(self.version) < "7.75.0":
+                del self.options.with_libidn
             del self.options.with_libpsl
 
     def requirements(self):
@@ -328,6 +332,12 @@ class LibcurlConan(ConanFile):
 
         if self._has_metalink_option:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
+        
+        if not self.options.with_proxy:
+            params.append("--disable-proxy")
+       
+        if not self.options.with_rtsp:
+            params.append("--disable-rtsp")
 
         # Cross building flags
         if tools.cross_building(self.settings):
@@ -445,6 +455,11 @@ class LibcurlConan(ConanFile):
             self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+        self._cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
+        self._cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp
+        if tools.Version(self.version) >= "7.75.0":
+            self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
+        self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
