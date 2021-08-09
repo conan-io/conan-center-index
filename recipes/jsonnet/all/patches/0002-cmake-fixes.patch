@@ -1,0 +1,59 @@
+- install headers
+- optionally disable shared build
+- add md5 objects to c library
+--- core/CMakeLists.txt
++++ core/CMakeLists.txt
+@@ -16,8 +16,8 @@ set(LIBJSONNET_HEADERS
+     string_utils.h
+     unicode.h
+     vm.h)
+-
+-set(LIBJSONNET_SOURCE
++install(FILES ../include/libjsonnet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++set(LIBJSONNET_SOURCE $<TARGET_OBJECTS:md5>
+     desugarer.cpp
+     formatter.cpp
+     lexer.cpp
+@@ -27,7 +27,7 @@ set(LIBJSONNET_SOURCE
+     static_analysis.cpp
+     string_utils.cpp
+     vm.cpp)
+-
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet SHARED ${LIBJSONNET_HEADERS} ${LIBJSONNET_SOURCE})
+ add_dependencies(libjsonnet md5 stdlib)
+ target_link_libraries(libjsonnet md5 nlohmann_json::nlohmann_json)
+@@ -50,7 +50,7 @@ install(TARGETS libjsonnet
+ 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+ target_include_directories(libjsonnet INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet_static STATIC ${LIBJSONNET_SOURCE})
+--- cpp/CMakeLists.txt
++++ cpp/CMakeLists.txt
+@@ -3,11 +3,11 @@
+ set(LIBJSONNETPP_HEADERS
+     ../include/libjsonnet++.h
+ )
+-
++install(FILES ${LIBJSONNETPP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ set(LIBJSONNETPP_SOURCE
+     libjsonnet++.cpp
+ )
+-
++if (NOT BUILD_STATIC_LIBS)
+ add_library(libjsonnet++ SHARED ${LIBJSONNETPP_HEADERS} ${LIBJSONNETPP_SOURCE})
+ add_dependencies(libjsonnet++ jsonnet)
+ # target_link_libraries(libjsonnet libjsonnet)
+@@ -24,7 +24,7 @@
+ 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+ target_include_directories(libjsonnet++ INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
+-
++endif()
+ if (BUILD_STATIC_LIBS)
+     # Static library for jsonnet command-line tool.
+     add_library(libjsonnet++_static STATIC ${LIBJSONNETPP_SOURCE})
