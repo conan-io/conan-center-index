@@ -231,7 +231,9 @@ class BotanConan(ConanFile):
                 botan_abi_flags.append('-m32')
             elif self.settings.arch == 'x86_64':
                 botan_abi_flags.append('-m64')
-            elif self.settings.arch in ['armv7']:
+
+        if botan_compiler in ['apple-clang']:
+            if self.settings.arch in ['armv7']:
                 botan_abi_flags.append('-arch armv7')
             elif self.settings.arch in ['armv8']:
                 botan_abi_flags.append('-arch arm64')
