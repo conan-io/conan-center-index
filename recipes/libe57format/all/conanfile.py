@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -66,6 +67,7 @@ class LibE57FormatConan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["E57Format-d" if self.settings.build_type == "Debug" else "E57Format"]
