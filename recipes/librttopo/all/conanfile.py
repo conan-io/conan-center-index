@@ -1,6 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
-import os
-import shutil
+from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
 
@@ -26,8 +24,9 @@ class LibrttopoConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
-    _autotools = None
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -46,87 +45,34 @@ class LibrttopoConan(ConanFile):
     def requirements(self):
         self.requires("geos/3.9.1")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        if self.settings.compiler != "Visual Studio":
-            self.build_requires("libtool/2.4.6")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @property
-    def _rtgeom_geos_version(self):
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        librttopo_version = tools.Version(self.version)
+        self._cmake.definitions["LIBRTGEOM_VERSION_MAJOR"] = librttopo_version.major
+        self._cmake.definitions["LIBRTGEOM_VERSION_MINOR"] = librttopo_version.minor
+        self._cmake.definitions["LIBRTGEOM_VERSION_PATCH"] = librttopo_version.patch
         geos_version = tools.Version(self.deps_cpp_info["geos"].version)
-        return "{}{}".format(geos_version.major, geos_version.minor)
-
-    def _build_msvc(self):
-        # Honor flags from profile and inject RTGEOM_GEOS_VERSION definition
-        makefilevc = os.path.join(self._source_subfolder, "Makefile.vc")
-        tools.replace_in_file(makefilevc, "!INCLUDE nmake.opt", "")
-        tools.replace_in_file(makefilevc,
-                              "-IC:\OSGeo4W\include",
-                              "$(CFLAGS) -DRTGEOM_GEOS_VERSION={}".format(self._rtgeom_geos_version))
-        tools.replace_in_file(makefilevc, "C:\OSGeo4W\lib\geos_c.lib", "")
-
-        # "configure" librttopo_geom.h.in as it is done in autoconf
-        librttopo_geom = os.path.join(self._source_subfolder, "headers", "librttopo_geom.h")
-        shutil.copy(os.path.join(self._source_subfolder, "headers", "librttopo_geom.h.in"),
-                    librttopo_geom)
-        tools.replace_in_file(librttopo_geom, "@SRID_MAX@", "999999")
-        tools.replace_in_file(librttopo_geom, "@SRID_USR_MAX@", "998999")
-
-        args = "librttopo_i.lib" if self.options.shared else "librttopo.lib"
-        with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake -f makefile.vc {}".format(args))
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "RTGEOM_GEOS_VERSION={}".format(self._rtgeom_geos_version),
-        ]
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        self._cmake.definitions["RTGEOM_GEOS_VERSION"] = "{}{}".format(geos_version.major, geos_version.minor)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            self._build_msvc()
-        else:
-            with tools.chdir(self._source_subfolder):
-                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-            autotools = self._configure_autotools()
-            autotools.make()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "headers"))
-            self.copy("*.lib", dst="lib", src=self._source_subfolder)
-            self.copy("*.dll", dst="bin", src=self._source_subfolder)
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "rttopo"
-        prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
-        suffix = "_i" if self.settings.compiler == "Visual Studio" and self.options.shared else ""
-        self.cpp_info.libs = ["{}rttopo{}".format(prefix, suffix)]
+        self.cpp_info.libs = ["rttopo"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
