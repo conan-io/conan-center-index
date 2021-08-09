@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
@@ -41,6 +42,10 @@ class XorgCfFilesConan(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
+        if tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("This recipe does not support Apple operating systems.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
