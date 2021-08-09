@@ -4,8 +4,8 @@
 #include "qrcodegen/qrcodegen.hpp"
 #endif
 
-#include <cstdint>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -16,7 +16,7 @@ namespace {
     std::string toSvgString(const qrcodegen::QrCode &qr, int border) {
         if (border < 0)
             throw std::domain_error("Border must be non-negative");
-        if (border > INT_MAX / 2 || border * 2 > INT_MAX - qr.getSize())
+        if (border > std::numeric_limits<int>::max() / 2 || border * 2 > std::numeric_limits<int>::max() - qr.getSize())
             throw std::overflow_error("Border too large");
 
         std::ostringstream sb;
