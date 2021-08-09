@@ -24,22 +24,9 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD TRUE)
 endif()
 
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/source_subfolder/cpp/QrSegment.cpp)
-    #version < 1.6.0
-    set(SRC source_subfolder/cpp/QrCode.cpp source_subfolder/cpp/QrSegment.cpp source_subfolder/cpp/BitBuffer.cpp)
-    set(HEADERS source_subfolder/cpp/QrCode.hpp source_subfolder/cpp/QrSegment.hpp source_subfolder/cpp/BitBuffer.hpp)
-    set(LIBRARY_NAME qrcodegen)
-elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/source_subfolder/cpp/QrCode.cpp)
-    #version < 1.7.0
-    set(SRC source_subfolder/cpp/QrCode.cpp)
-    set(HEADERS source_subfolder/cpp/QrCode.hpp)
-    set(LIBRARY_NAME qrcodegen)
-else()
-    #version >= 1.7.0
-    set(SRC source_subfolder/cpp/qrcodegen.cpp)
-    set(HEADERS source_subfolder/cpp/qrcodegen.hpp)
-    set(LIBRARY_NAME qrcodegencpp)
-endif()
+set(SRC source_subfolder/cpp/qrcodegen.cpp)
+set(HEADERS source_subfolder/cpp/qrcodegen.hpp)
+set(LIBRARY_NAME qrcodegencpp)
 
 add_library(${LIBRARY_NAME} ${SRC})
 

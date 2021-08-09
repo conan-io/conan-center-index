@@ -15,3 +15,11 @@ patches:
   "1.4.0":
     - base_path: "source_subfolder"
       patch_file: "patches/001-qrcode-1_4.patch"
+    - base_path: "."
+      patch_file: "patches/002-cmake-pre-1.6.patch"
+  "1.5.0":
+    - base_path: "."
+      patch_file: "patches/002-cmake-pre-1.6.patch"
+  "1.6.0":
+    - base_path: "."
+      patch_file: "patches/003-cmake-1.6.patch"
