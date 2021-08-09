@@ -38,10 +38,6 @@ class JsonnetConan(ConanFile):
         self.requires("nlohmann_json/3.9.1")
 
     def validate(self):
-        if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
-            raise ConanInvalidConfiguration("{} compiler not supported"
-                                            .format(self.settings.compiler))
-
         if tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("jsonnet does not support cross building")
 
@@ -78,7 +74,7 @@ class JsonnetConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 

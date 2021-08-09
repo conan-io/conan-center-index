@@ -1,6 +1,7 @@
 - install headers
 - optionally disable shared build
 - add md5 objects to c library
+- allow MSVC
 --- core/CMakeLists.txt
 +++ core/CMakeLists.txt
 @@ -16,8 +16,8 @@ set(LIBJSONNET_HEADERS
@@ -57,3 +58,27 @@
  if (BUILD_STATIC_LIBS)
      # Static library for jsonnet command-line tool.
      add_library(libjsonnet++_static STATIC ${LIBJSONNETPP_SOURCE})
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -40,7 +40,7 @@
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wextra -Woverloaded-virtual -pedantic -std=c++11 -fPIC ${OPT}")
+ else()
+     # TODO: Windows support.
+-    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
++    message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported")
+ endif()
+ 
+ set(CMAKE_CXX_STANDARD 11)
+--- stdlib/CMakeLists.txt
++++ stdlib/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ # Custom command that will only build stdlib when it changes.
+ add_custom_command(
+ 	OUTPUT ${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+-	COMMAND ${GLOBAL_OUTPUT_PATH}/to_c_array
++	COMMAND to_c_array
+ 			    ${PROJECT_SOURCE_DIR}/stdlib/std.jsonnet
+ 					${PROJECT_SOURCE_DIR}/core/std.jsonnet.h
+ 	DEPENDS to_c_array std.jsonnet)
+
+
