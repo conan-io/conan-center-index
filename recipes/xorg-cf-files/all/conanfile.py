@@ -13,7 +13,7 @@ class XorgCfFilesConan(ConanFile):
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler"
+    settings = "os"  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     exports_sources = "patches/*"
     generators = "pkg_config"
