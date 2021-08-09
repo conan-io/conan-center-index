@@ -6,12 +6,16 @@ import shutil
 class TestPackage(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires(str(self.requires["ftjam"]))
+
     def build(self):
         for f in ("header.h", "main.c", "source.c", "Jamfile"):
             shutil.copy(os.path.join(self.source_folder, f),
                         os.path.join(self.build_folder, f))
-        if not tools.cross_building(self.settings):
-            assert os.path.isfile(os.environ["JAM"])
+        if not tools.cross_building(self):
+            assert os.path.isfile(tools.get_env("JAM"))
 
             vars = AutoToolsBuildEnvironment(self).vars
             vars["CCFLAGS"] = vars["CFLAGS"]
@@ -19,9 +23,9 @@ class TestPackage(ConanFile):
             vars["LINKFLAGS"] = vars["LDFLAGS"]
             vars["LINKLIBS"] = vars["LIBS"]
             with tools.environment_append(vars):
-                self.run("{} -d7".format(os.environ["JAM"]), run_environment=True)
+                self.run("{} -d7".format(tools.get_env("JAM")), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
             self.run(bin_path, run_environment=True)

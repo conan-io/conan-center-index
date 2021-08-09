@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 class TaoCPPPEGTLConan(ConanFile):
     name = "taocpp-pegtl"
@@ -18,7 +18,7 @@ class TaoCPPPEGTLConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
@@ -26,13 +26,12 @@ class TaoCPPPEGTLConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "PEGTL-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "pegtl"

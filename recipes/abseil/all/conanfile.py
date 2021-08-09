@@ -51,6 +51,8 @@ class ConanRecipe(ConanFile):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
+        if tools.cross_building(self):
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         self._cmake.configure()
         return self._cmake
 
