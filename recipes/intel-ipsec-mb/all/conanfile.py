@@ -57,7 +57,7 @@ class IntelIpSecMbConan(ConanFile):
         if self.settings.arch != "x86_64":
             message = "{} is not supported".format(self.settings.arch)
             raise ConanInvalidConfiguration(message)
-        if self.settings.os not in ("Linux", "Windows"):
+        if self.settings.os not in ("FreeBSD", "Linux", "Windows"):
             message = "{} is not supported".format(self.settings.os)
             raise ConanInvalidConfiguration(message)
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
