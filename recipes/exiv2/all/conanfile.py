@@ -61,10 +61,12 @@ class Exiv2Conan(ConanFile):
             self.requires("libpng/1.6.37")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.4.1")
-        elif self.options.with_xmp == "external":
-            raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
         if self.options.with_curl:
             self.requires("libcurl/7.64.1")
+
+    def validate(self):
+        if self.options.with_xmp == "external":
+            raise ConanInvalidConfiguration("adobe-xmp-toolkit is not available on cci (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -104,9 +106,12 @@ class Exiv2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        targets = {"exiv2lib": "exiv2::exiv2lib"}
+        if self.options.with_xmp == "bundled":
+            targets.update({"exiv2-xmp": "exiv2::exiv2-xmp"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"exiv2lib": "exiv2::exiv2lib"}
+            targets
         )
 
     @staticmethod
