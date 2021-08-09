@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "Need an argument\n";
       return EXIT_FAILURE;
   }
+
   FILE *const font_file = fopen(argv[1], "rb");
   if (font_file == nullptr) {
     std::cerr << "couldn't open font file" << std::endl;
