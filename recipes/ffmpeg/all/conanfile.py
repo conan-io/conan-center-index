@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import contextlib
 import glob
 import shutil
 
@@ -209,6 +210,14 @@ class FFMpegConan(ConanFile):
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
                                   "check_lib openssl openssl/ssl.h OPENSSL_init_ssl %s || " % openssl_libraries)
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self):
+                yield
+        else:
+            yield
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -216,8 +225,11 @@ class FFMpegConan(ConanFile):
         self._autotools.libs = []
         opt_enable_disable = lambda what, v: "--{}-{}".format("enable" if v else "disable", what)
         args = [
+            "--pkg-config-flags=--static",  # FIXME: needed?
             "--disable-doc",
             "--disable-programs",
+            "--pkg-config={}".format(tools.get_env("PKG_CONFIG")),
+            opt_enable_disable("cross-compile", tools.cross_building(self, skip_x64_x86=True)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),
@@ -288,21 +300,36 @@ class FFMpegConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
-        autotools.make()
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                              "echo libx264.lib", "echo x264.lib")
+        if self.options.with_x264:
+            shutil.copy("x264.pc", "libx264.pc")
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            # ffmpeg produces .a files which are actually .lib files
-            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                tools.rename(lib, lib[:-2] + ".lib")
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared:
+                # ffmpeg created `.lib` files in the `/bin` folder
+                for fn in os.listdir(os.path.join(self.package_folder, "bin")):
+                    if fn.endswith(".lib"):
+                        tools.rename(os.path.join(self.package_folder, "bin", fn),
+                                     os.path.join(self.package_folder, "lib", fn))
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
+            else:
+                # ffmpeg produces `.a` files that are actually `.lib` files
+                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                    for lib in glob.glob("*.a"):
+                        tools.rename(lib, lib[3:-2] + ".lib")
 
     def package_info(self):
         self.cpp_info.components["avdevice"].libs = ["avdevice"]
@@ -351,16 +378,18 @@ class FFMpegConan(ConanFile):
                     # https://trac.ffmpeg.org/ticket/1713
                     # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                     # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
+                    self.cpp_info.components["avcodec"].exelinkflags.append("-Wl,-Bsymbolic")
                     self.cpp_info.components["avcodec"].sharedlinkflags.append("-Wl,-Bsymbolic")
             self.cpp_info.components["avformat"].system_libs = ["m"]
             self.cpp_info.components["avfilter"].system_libs = ["m", "pthread"]
             self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["avdevice"].system_libs = ["ws2_32", "secur32", "shlwapi", "strmiids", "vfw32", "bcrypt"]
+            self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
+            self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
-            self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
             self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics", "OpenGL"]
+            self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
+            self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
 
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
