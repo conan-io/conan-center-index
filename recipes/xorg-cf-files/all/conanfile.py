@@ -13,7 +13,7 @@ class XorgCfFilesConan(ConanFile):
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os"  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
+    settings = "os", "compiler"
 
     exports_sources = "patches/*"
     generators = "pkg_config"
@@ -46,6 +46,10 @@ class XorgCfFilesConan(ConanFile):
     def validate(self):
         if tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("This recipe does not support Apple operating systems.")
+
+    def package_id(self):
+        del self.info.settings.compiler
+        # self.info.settings.os  # FIXME: can be removed once c3i is able to test multiple os'es from one common package
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
