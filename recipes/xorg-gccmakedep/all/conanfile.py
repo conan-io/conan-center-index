@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class XorgGccmakedep(ConanFile):
     name = "xorg-gccmakedep"
     description = "script to create dependencies in makefiles using 'gcc -M'"
-    topics = ("conan", "xorg", "gcc", "dependency", "obsolete")
+    topics = ("xorg", "gcc", "dependency", "obsolete")
     license = "MIT"
     homepage = "https://gitlab.freedesktop.org/xorg/util/gccmakedep"
     url = "https://github.com/conan-io/conan-center-index"
