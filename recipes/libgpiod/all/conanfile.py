@@ -2,6 +2,7 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 import platform
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -29,7 +30,8 @@ class LibgpiodConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("only Linux is supported")
-        if tools.Version(platform.release()) < "4.8":
+        linux_kernel_version = re.match("([0-9.]+)", platform.release()).group(1)
+        if tools.Version(linux_kernel_version) < "4.8":
             raise ConanInvalidConfiguration("only Linux kernel versions >= 4.8 are supported")
 
     def build_requirements(self):
