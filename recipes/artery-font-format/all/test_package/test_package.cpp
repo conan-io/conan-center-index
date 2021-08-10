@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-      std::cerr << "Need an argument\n";
+      std::cerr << "usage: test_package <arfont file>\n";
       return EXIT_FAILURE;
   }
 
