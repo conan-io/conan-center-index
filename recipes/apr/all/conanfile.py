@@ -46,6 +46,14 @@ class AprConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
+
+    def build_requirements(self):
+        if self.settings.os == "Macos":
+            self.build_requires("libtool/2.4.6")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
@@ -58,10 +66,6 @@ class AprConan(ConanFile):
         self._cmake.definitions["APR_BUILD_TESTAPR"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -94,10 +98,6 @@ class AprConan(ConanFile):
         if self.options.force_apr_uuid:
             tools.replace_in_file(os.path.join(self._source_subfolder, "include", "apr.h.in"),
                                   "@osuuid@", "0")
-
-    def build_requirements(self):
-        if self.settings.os == "Macos":
-            self.build_requires("libtool/2.4.6")
 
     def build(self):
         self._patch_sources()
