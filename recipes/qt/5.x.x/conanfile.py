@@ -508,6 +508,8 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("with_vulkan", False):
             args.append("-feature-vulkan")
+        else:
+            args.append("-no-vulkan")
 
         # openSSL
         if not self.options.openssl:
