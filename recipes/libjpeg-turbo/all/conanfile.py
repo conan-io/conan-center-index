@@ -137,6 +137,11 @@ class LibjpegTurboConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "sharedlib", "CMakeLists.txt"),
                               """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
                               "")
+        if tools.Version(self.version) >= "2.1.1":
+            # avoid explicit fPIC
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  """set_target_properties(simd PROPERTIES POSITION_INDEPENDENT_CODE 1)""",
+                                  "")
 
     def build(self):
         self._patch_sources()
