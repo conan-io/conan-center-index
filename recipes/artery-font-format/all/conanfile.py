@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 
 class ArteryFontFormatConan(ConanFile):
     name = "artery-font-format"
@@ -7,7 +9,8 @@ class ArteryFontFormatConan(ConanFile):
     homepage = "https://github.com/Chlumsky/artery-font-format"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Artery Atlas Font format library"
-    topics = ("conan", "artery", "font", "atlas")
+    topics = ("artery", "font", "atlas")
+
     no_copy_source = True
 
     @property
