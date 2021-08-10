@@ -30,7 +30,6 @@ class IntelIpSecMbConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        print(self.conan_data["sources"][self.version])
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
