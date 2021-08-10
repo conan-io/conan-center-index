@@ -40,6 +40,9 @@ class AwsCAuth(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
+        self.requires("aws-c-common/0.6.7")
+        self.requires("aws-c-cal/0.5.11")
+        self.requires("aws-c-io/0.10.5")
         self.requires("aws-c-http/0.6.5")
 
     def source(self):
@@ -72,4 +75,9 @@ class AwsCAuth(ConanFile):
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
         self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
-        self.cpp_info.components["aws-c-auth-lib"].requires = ["aws-c-http::aws-c-http-lib"]
+        self.cpp_info.components["aws-c-auth-lib"].requires = [
+            "aws-c-common::aws-c-common-lib",
+            "aws-c-cal::aws-c-cal-lib",
+            "aws-c-io::aws-c-io-lib",
+            "aws-c-http::aws-c-http-lib"
+        ]
