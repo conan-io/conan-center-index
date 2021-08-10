@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <assert.h>
+#include <string.h>
 
 template <typename T>
 void uppercase_scalar(T *dst, const T *src, int n) {
@@ -54,7 +55,7 @@ int main() {
   uppercase_simd(&dst_simd[0], (i8 *)input.c_str(), (int)input.size());
   std::cout << "NSIMD uppercase text : " << &dst_simd[0] << std::endl;
 
-  assert(std::string(&dst_scale[0]) == std::string(&dst_simd[0]));
+  assert(memcmp(&dst_scalar[0], &dst_simd[0], dst_simd.size()) == 0);
 
   return 0;
 }
