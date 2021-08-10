@@ -13,11 +13,9 @@ class LibgpiodConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "enable_bindings_cxx": [True, False],
-               "enable_bindings_python": [True, False],
                "enable_tools": [True, False]}
     default_options = {"shared": False,
                        "enable_bindings_cxx": False,
-                       "enable_bindings_python": False,
                        "enable_tools": True}
     
     _autotools = None
@@ -47,8 +45,6 @@ class LibgpiodConan(ConanFile):
                 args.extend(["--disable-shared", "--enable-static"])
             if self.options.enable_bindings_cxx:
                 args.extend(["--enable-bindings-cxx"])
-            if self.options.enable_bindings_python:
-                args.extend(["--enable-bindings-python"])
             if self.options.enable_tools:
                 args.extend(["--enable-tools"])
             self._autotools = AutoToolsBuildEnvironment(self)
