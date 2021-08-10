@@ -60,7 +60,7 @@ class AprConan(ConanFile):
         return self._cmake
 
     def validate(self):
-        if tools.cross_building(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("apr cannot be cross compiled due to runtime checks")
 
     def _configure_autotools(self):
