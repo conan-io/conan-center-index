@@ -26,11 +26,11 @@ class LibgpiodConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("only Linux is supported")
-        if tools.Version(platform.release()) < "5.0":
-            raise ConanInvalidConfiguration("only Linux kernel versions >= 5.0 are supported")
+        if tools.Version(platform.release()) < "4.8":
+            raise ConanInvalidConfiguration("only Linux kernel versions >= 4.8 are supported")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
