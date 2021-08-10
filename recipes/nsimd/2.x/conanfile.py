@@ -16,8 +16,18 @@ class NsimdConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        # This used only when building the library.
+        # Most functionality is header only.
+        "simd": [None, "cpu", "sse2", "sse42", "avx", "avx2", "avx512_knl", "avx512_skylake", "neon128", "aarch64", "sve", "sve128", "sve256", "sve512", "sve1024", "sve2048", "cuda", "rocm"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "simd": None
+    }
 
     _cmake = None
 
@@ -41,12 +51,15 @@ class NsimdConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
-        python_cmd = sys.executable
-        self.run("%s egg/hatch.py -ltf" % python_cmd, cwd=self._source_subfolder)
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        defs = {}
+        if self.options.simd:
+            defs["simd"] = self.options.simd
+        if self.settings.arch == "armv7hf":
+            defs["NSIMD_ARM32_IS_ARMEL"] = "OFF"
+        self._cmake.configure(build_folder=self._build_subfolder, defs=defs)
         return self._cmake
 
     def build(self):
