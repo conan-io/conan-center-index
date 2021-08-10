@@ -53,6 +53,9 @@ sources:
   "7.5.2":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.5.2.tar.gz"
     sha256: "62e140667fb1bc9b61fa01cbf46f8ff73236eba6f3f7fbcf98108ce6bbc18dcd"
+  "7.6.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.6.0.tar.gz"
+    sha256: "8194ce4eff3fee5325963ccc28d3542cfaa54ba1400833d0df6948de3573c118"
 patches:
   "7.0.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
@@ -119,4 +122,9 @@ patches:
       base_path: "source_subfolder"
   "7.5.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.6.0":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-inline-constexpr-local-variable-problem-7.6.0.patch"
       base_path: "source_subfolder"
