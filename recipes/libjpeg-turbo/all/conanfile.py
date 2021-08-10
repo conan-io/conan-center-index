@@ -114,7 +114,8 @@ class LibjpegTurboConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
-        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
+        if tools.Version(self.version) <= "2.1.0":
+            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
 
         if tools.cross_building(self.settings):
             # TODO: too specific and error prone, should be delegated to a conan helper function
