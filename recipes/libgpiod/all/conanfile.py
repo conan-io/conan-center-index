@@ -16,7 +16,7 @@ class LibgpiodConan(ConanFile):
                "enable_tools": [True, False]}
     default_options = {"shared": False,
                        "enable_bindings_cxx": False,
-                       "enable_tools": True}
+                       "enable_tools": False}
     
     _autotools = None
 
@@ -66,4 +66,4 @@ class LibgpiodConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["gpiodcxx", "gpiod"]
