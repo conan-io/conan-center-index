@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class IntelIpSecMbConan(ConanFile):
     name = "intel-ipsec-mb"
     description = "Intel(R) Multi-Buffer Crypto for IPSec"
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     homepage = "https://github.com/intel/intel-ipsec-mb"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("intel", "IPSec", "IPSec_MB")
