@@ -228,4 +228,4 @@ class LibspatialiteConan(ConanFile):
         suffix = "_i" if self.settings.compiler == "Visual Studio" and self.options.shared else ""
         self.cpp_info.libs = ["spatialite{}".format(suffix)]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
