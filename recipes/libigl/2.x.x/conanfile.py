@@ -72,7 +72,7 @@ class LibiglConan(ConanFile):
 
     def _configure_cmake(self):
         if not self._cmake:
-            self._cmake = CMake(self)
+            self._cmake = CMake(self, parallel=False)
             self._cmake.definitions["LIBIGL_EXPORT_TARGETS"] = True
             self._cmake.definitions["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
 
