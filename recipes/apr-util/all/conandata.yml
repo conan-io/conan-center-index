@@ -10,3 +10,7 @@ patches:
       patch_file: "patches/0002-apu-config-prefix-env.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0003-disable-check-APR_LIBRARIES.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-clang12-apple.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0005-apr-build-files.patch"

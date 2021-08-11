@@ -106,6 +106,10 @@ class AprUtilConan(ConanFile):
         if self.options.with_postgresql:
             self.requires("libpq/13.2")
 
+    def build_requirements(self):
+        if self.settings.os == "Macos":
+            self.build_requires("libtool/2.4.6")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -132,6 +136,15 @@ class AprUtilConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+
+        if (self.settings.compiler == "apple-clang" and
+            tools.Version(self.settings.compiler.version) == "12" and
+            self.version == "1.6.1"):
+
+            with tools.chdir( self._source_subfolder ):
+                os.remove( "configure" )
+                self.run("./buildconf --with-apr={}".format(tools.unix_path(self.deps_cpp_info["apr"].rootpath)))
+
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.libs = []
         self._autotools.include_paths = []
