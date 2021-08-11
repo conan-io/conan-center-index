@@ -47,10 +47,6 @@ class JsonnetConan(ConanFile):
         if tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("jsonnet does not support cross building")
 
-        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.libcxx != "libstdc++":
-            raise ConanInvalidConfiguration("jsonnet {} package requires libstdc++".
-                                            format(self.settings.compiler))
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
