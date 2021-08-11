@@ -30,10 +30,6 @@ class M4Conan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
-    @property
-    def _is_clang(self):
-        return str(self.settings.compiler).endswith("clang")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -70,10 +66,9 @@ class M4Conan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                env.update({
+                env = {
                     "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -82,14 +77,11 @@ class M4Conan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
-            if self._is_clang:
-                env["CFLAGS"] = "-rtlib=compiler-rt"
-            with tools.environment_append(env):
-                yield
+            yield
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
