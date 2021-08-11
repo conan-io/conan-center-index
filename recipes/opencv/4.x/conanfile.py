@@ -34,6 +34,10 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_v4l": [True, False],
+        "with_imgcodec_hdr": [True, False],
+        "with_imgcodec_pfm": [True, False],
+        "with_imgcodec_pxm": [True, False],
+        "with_imgcodec_sunraster": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
         "detect_cpu_baseline": [True, False]
@@ -58,6 +62,10 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
+        "with_imgcodec_hdr": False,
+        "with_imgcodec_pfm": False,
+        "with_imgcodec_pxm": False,
+        "with_imgcodec_sunraster": False,
         "neon": True,
         "dnn": True,
         "detect_cpu_baseline": False
@@ -265,10 +273,10 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
         self._cmake.definitions["WITH_HPX"] = False
-        self._cmake.definitions["WITH_IMGCODEC_HDR"] = False
-        self._cmake.definitions["WITH_IMGCODEC_PFM"] = False
-        self._cmake.definitions["WITH_IMGCODEC_PXM"] = False
-        self._cmake.definitions["WITH_IMGCODEC_SUNRASTER"] = False
+        self._cmake.definitions["WITH_IMGCODEC_HDR"] = self.options.with_imgcodec_hdr
+        self._cmake.definitions["WITH_IMGCODEC_PFM"] = self.options.with_imgcodec_pfm
+        self._cmake.definitions["WITH_IMGCODEC_PXM"] = self.options.with_imgcodec_pxm
+        self._cmake.definitions["WITH_IMGCODEC_SUNRASTER"] = self.options.with_imgcodec_sunraster
         self._cmake.definitions["WITH_INF_ENGINE"] = False
         self._cmake.definitions["WITH_IPP"] = False
         self._cmake.definitions["WITH_ITT"] = False
