@@ -33,7 +33,7 @@ class MsixConan(ConanFile):
         "skip_bundles": False,
         "use_external_zlib": True,
         "use_validation_parser": False,
-        "xml_parser": "xerces"
+        "xml_parser": "msxml6"
     }
 
     generators = "cmake"
@@ -75,9 +75,6 @@ class MsixConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.xml_parser == "xerces":
-            self.options["xerces-c"].char_type = "char16_t"
-            self.options["xerces-c"].shared = False
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
 
@@ -96,6 +93,9 @@ class MsixConan(ConanFile):
             raise ConanInvalidConfiguration("javaxml is supported only for Android")
         if self.settings.os == "Linux" and self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Only clang is supported on Linux")
+        # openssl/1.0.2t is not available for Macos+armv8 at the moment
+        if self.settings.os == "Macos" and self.options.crypto_lib == "openssl":
+            raise ConanInvalidConfiguration("openssl is not supported for MacOS at the moment")
         if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
             raise ConanInvalidConfiguration("applexml is supported only for MacOS")
         if self.settings.os != "Windows" and self.options.crypto_lib == "crypt32":
@@ -110,6 +110,10 @@ class MsixConan(ConanFile):
                     raise ConanInvalidConfiguration("Xerces is the only supported parser for MacOS pack")
             if not self.options.use_validation_parser:
                 raise ConanInvalidConfiguration("Packaging requires validation parser")
+        # the current CCI xerces-c recipe is not supported
+        if (self.options.xml_parser == "xerces" and
+            self.options["xerces-c"].char_type != "char16_t"):
+                raise ConanInvalidConfiguration("Only char16_t is supported for xerces-c")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
