@@ -76,7 +76,7 @@ class GPGErrorConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             env_build = self._configure()
             env_build.install()
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
         shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
         shutil.rmtree(os.path.join(self.package_folder, "share"))
