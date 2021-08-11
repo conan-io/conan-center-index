@@ -128,10 +128,9 @@ class GslConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "bin", "gsl-config"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "gsl.dll.lib"),
-                         os.path.join(self.package_folder, "lib", "gsl.lib"))
-            tools.rename(os.path.join(self.package_folder, "lib", "gslcblas.dll.lib"),
-                         os.path.join(self.package_folder, "lib", "gslcblas.lib"))
+            pjoin = lambda p: os.path.join(self.package_folder, "lib", p)
+            conan.tools.rename(self, pjoin("gsl.dll.lib"), pjoin("gsl.lib"))
+            conan.tools.rename(self, pjoin("gslcblas.dll.lib"), pjoin("gslcblas.lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "gsl"
