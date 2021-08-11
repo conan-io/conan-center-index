@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -78,8 +77,8 @@ class GPGErrorConan(ConanFile):
             env_build.install()
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.rmtree(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gpg-error"]
