@@ -12,10 +12,6 @@ class TestPackageConan(ConanFile):
     def _m4_input_path(self):
         return os.path.join(self.build_folder, "input.m4")
 
-    def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.build_requires(str(self.requires["m4"]))
-
     def build(self):
         tools.save(self._m4_input_path, textwrap.dedent("""\
             m4_define(NAME1, `Harry, Jr.')
