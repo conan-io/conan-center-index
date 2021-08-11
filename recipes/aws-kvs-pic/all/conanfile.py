@@ -35,8 +35,8 @@ class awskvspicConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        #del self.settings.compiler.cppstd
+        #del self.settings.compiler.libcxx
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
