@@ -1,6 +1,6 @@
+import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-import os
 import shutil
 
 required_conan_version = ">=1.33.0"
@@ -14,8 +14,14 @@ class GPGErrorConan(ConanFile):
                   "components."
     license = "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False
+    }
 
     exports_sources = "patches/**"
 
@@ -28,6 +34,8 @@ class GPGErrorConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux is supported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -40,14 +48,12 @@ class GPGErrorConan(ConanFile):
         # os.unlink(os.path.join(self._source_subfolder, "po", "ro.po"))
         build = None
         host = None
-        rc = None
-        env = dict()
         args = ["--disable-dependency-tracking",
                 "--disable-nls",
                 "--disable-languages",
                 "--disable-doc",
                 "--disable-tests"]
-        if self.options.shared:
+        if 'fPIC' in self.options and self.options.fPIC:
             args.append("--with-pic")
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
@@ -57,19 +63,21 @@ class GPGErrorConan(ConanFile):
             host = "i686-linux-gnu"
 
         with tools.chdir(self._source_subfolder):
-            with tools.environment_append(env):
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.configure(args=args, build=build, host=host)
-                env_build.make()
-                env_build.install()
+            env_build = AutoToolsBuildEnvironment(self)
+            env_build.configure(args=args, build=build, host=host)
+            env_build.make()
+            env_build.install()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        la = os.path.join(self.package_folder, "lib", "libgpg-error.la")
-        if os.path.isfile(la):
-            os.unlink(la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
         shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
         shutil.rmtree(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gpg-error"]
+
+    def test(self):
+        if not tools.cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
