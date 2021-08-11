@@ -84,8 +84,3 @@ class GPGErrorConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["gpg-error"]
         # FIXME: missing names for pkg_config generator
-
-    def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
