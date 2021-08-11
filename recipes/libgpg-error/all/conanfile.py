@@ -41,11 +41,7 @@ class GPGErrorConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        # the previous step might hang when converting from ISO-8859-2 to UTF-8 late in the build process
-        # os.unlink(os.path.join(self._source_subfolder, "po", "ro.po"))
+    def _configure(self):
         build = None
         host = None
         args = ["--disable-dependency-tracking",
@@ -62,13 +58,24 @@ class GPGErrorConan(ConanFile):
         if self.settings.os == "Linux" and self.settings.arch == "x86":
             host = "i686-linux-gnu"
 
+        env_build = AutoToolsBuildEnvironment(self)
+        env_build.configure(args=args, build=build, host=host)
+
+        return env_build
+
+    def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        # the previous step might hang when converting from ISO-8859-2 to UTF-8 late in the build process
+        # os.unlink(os.path.join(self._source_subfolder, "po", "ro.po"))
         with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args, build=build, host=host)
+            env_build = self._configure()
             env_build.make()
-            env_build.install()
 
     def package(self):
+        with tools.chdir(self._source_subfolder):
+            env_build = self._configure()
+            env_build.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
         shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
