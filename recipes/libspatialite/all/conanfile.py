@@ -148,9 +148,15 @@ class LibspatialiteConan(ConanFile):
                                                                                                  " ".join(system_libs)))
 
     def _build_autotools(self):
+        # fix MinGW
         tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
                               "AC_CHECK_LIB(z,",
                               "AC_CHECK_LIB({},".format(self.deps_cpp_info["zlib"].libs[0]))
+        # Disable tests
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
+                              "SUBDIRS = src test $(EXAMPLES)",
+                              "SUBDIRS = src $(EXAMPLES)")
+
         with tools.chdir(self._source_subfolder):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
             with tools.run_environment(self):
