@@ -16,11 +16,11 @@ class GPGErrorConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": False
+        "fPIC": False,
     }
 
     exports_sources = "patches/**"
