@@ -8,7 +8,7 @@ class GPGErrorConan(ConanFile):
     name = "libgpg-error"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gnupg.org/software/libgpg-error/index.html"
-    topics = ("conan", "gpg", "gnupg")
+    topics = ("gpg", "gnupg", "encrypt", "pgp", "openpgp")
     description = "Libgpg-error is a small library that originally defined common error values for all GnuPG " \
                   "components."
     license = "GPL-2.0-or-later"
@@ -21,8 +21,8 @@ class GPGErrorConan(ConanFile):
         "shared": False,
         "fPIC": False,
     }
-
     exports_sources = "patches/**"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -41,14 +41,15 @@ class GPGErrorConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _configure(self):
-        build = None
+        if self._autotools:
+            return self._autotools
         host = None
         args = ["--disable-dependency-tracking",
                 "--disable-nls",
                 "--disable-languages",
                 "--disable-doc",
                 "--disable-tests"]
-        if 'fPIC' in self.options and self.options.fPIC:
+        if self.options.get_safe("fPIC", True):
             args.append("--with-pic")
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
@@ -57,24 +58,19 @@ class GPGErrorConan(ConanFile):
         if self.settings.os == "Linux" and self.settings.arch == "x86":
             host = "i686-linux-gnu"
 
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.configure(args=args, build=build, host=host)
-
-        return env_build
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.configure(args=args, host=host, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        # the previous step might hang when converting from ISO-8859-2 to UTF-8 late in the build process
-        # os.unlink(os.path.join(self._source_subfolder, "po", "ro.po"))
-        with tools.chdir(self._source_subfolder):
-            env_build = self._configure()
-            env_build.make()
+        env_build = self._configure()
+        env_build.make()
 
     def package(self):
-        with tools.chdir(self._source_subfolder):
-            env_build = self._configure()
-            env_build.install()
+        env_build = self._configure()
+        env_build.install()
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -82,4 +78,6 @@ class GPGErrorConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["gpg-error"]
-        # FIXME: missing names for pkg_config generator
+        self.cpp_info.names["pkg_config"] = "gpg-error"
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
