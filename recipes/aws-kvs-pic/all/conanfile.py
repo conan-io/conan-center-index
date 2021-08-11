@@ -56,9 +56,8 @@ class awskvspicConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["kvspic"].libs = ["kvspic"]
         self.cpp_info.components["kvspic"].names["pkg_config"] = "libkvspic"
-        self.cpp_info.components["kvspic"].system_libs = ["dl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["kvspic"].system_libs.extend(["rt", "pthread"])
+            self.cpp_info.components["kvspic"].system_libs = ["dl", "rt", "pthread"]
 
         self.cpp_info.components["kvspicClient"].libs = ["kvspicClient"]
         self.cpp_info.components["kvspicClient"].names["pkg_config"] = "libkvspicClient"
@@ -68,6 +67,5 @@ class awskvspicConan(ConanFile):
 
         self.cpp_info.components["kvspicUtils"].libs = ["kvspicUtils"]
         self.cpp_info.components["kvspicUtils"].names["pkg_config"] = "libkvspicUtils"
-        self.cpp_info.components["kvspicUtils"].system_libs = ["dl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["kvspicUtils"].system_libs.extend(["rt", "pthread"])
+            self.cpp_info.components["kvspicUtils"].system_libs = ["dl", "rt", "pthread"]
