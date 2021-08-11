@@ -9,16 +9,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _m4_input_path(self):
         return os.path.join(self.build_folder, "input.m4")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
         if hasattr(self, "settings_build"):
             self.build_requires(str(self.requires["m4"]))
 
@@ -31,11 +25,15 @@ class TestPackageConan(ConanFile):
         """))
 
     def test(self):
-        m4_bin = tools.get_env("M4")
-        if m4_bin is None or not m4_bin.startswith(self.deps_cpp_info["m4"].rootpath):
-            raise ConanException("M4 environment variable not set")
+        if hasattr(self, "settings_build"):
+            exe_suffix = ".exe" if self.settings.os == "Windows" else ""
+            m4_bin = os.path.join(self.deps_cpp_info["m4"].rootpath, "bin", "m4" + exe_suffix)
+        else:
+            m4_bin = tools.get_env("M4")
+            if m4_bin is None or not m4_bin.startswith(self.deps_cpp_info["m4"].rootpath):
+                raise ConanException("M4 environment variable not set")
 
-        if not tools.cross_building(self):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self.run("{} --version".format(m4_bin), run_environment=True)
             self.run("{} -P {}".format(m4_bin, self._m4_input_path))
 
