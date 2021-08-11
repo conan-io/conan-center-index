@@ -141,9 +141,9 @@ class AprUtilConan(ConanFile):
             tools.Version(self.settings.compiler.version) == "12" and
             self.version == "1.6.1"):
 
-            with tools.chdir( self._source_subfolder ):
-                os.remove( "configure" )
-                self.run("./buildconf --with-apr={}".format(tools.unix_path(self.deps_cpp_info["apr"].rootpath)))
+            with tools.chdir(self._source_subfolder):
+                os.remove("configure")
+                self.run("./buildconf")
 
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.libs = []
