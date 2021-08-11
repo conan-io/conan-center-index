@@ -45,9 +45,6 @@ class JsonnetConan(ConanFile):
             raise ConanInvalidConfiguration("jsonnet {} package requires libstdc++".
                                             format(self.settings.compiler))
 
-        if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("7"):
-            raise ConanInvalidConfiguration("jsonnet requires clang 7.0 or higher")
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
