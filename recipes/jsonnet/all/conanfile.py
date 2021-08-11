@@ -12,8 +12,14 @@ class JsonnetConan(ConanFile):
     description = "Jsonnet - The data templating language"
     topics = ("config", "json", "functional", "configuration")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
@@ -85,4 +91,3 @@ class JsonnetConan(ConanFile):
 
         self.cpp_info.components["libjsonnetpp"].libs = ["jsonnet++"]
         self.cpp_info.components["libjsonnetpp"].requires = ["libjsonnet"]
-
