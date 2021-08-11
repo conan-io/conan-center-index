@@ -4,7 +4,6 @@ import os
 
 required_conan_version = ">=1.33.0"
 
-
 class GslConan(ConanFile):
     name = "gsl"
     description = "GNU Scientific Library"
@@ -12,17 +11,15 @@ class GslConan(ConanFile):
     topics = ("numerical", "math", "random", "scientific")
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
+
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
+
+    options = {"shared": [True, False], "fPIC": [True, False]}
+
+    default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "patches/*"
+
     _autotools = None
 
     @property
@@ -49,7 +46,7 @@ class GslConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     @contextmanager
@@ -80,6 +77,7 @@ class GslConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+
         self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
@@ -93,17 +91,21 @@ class GslConan(ConanFile):
         elif tools.is_apple_os(self.settings.os):
             self._autotools.defines.append("HAVE_DARWIN_IEEE_INTERFACE")
         elif self.settings.os == "Linux":
-            self._autotools.defins.append("HAVE_GNUX86_IEEE_INTERFACE")
+            self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
         elif self.settings.os == "FreeBSD":
             self._autotools.defines.append("HAVE_FREEBSD_IEEE_INTERFACE")
+
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")
-            args.extend([
-                "ac_cv_func_memcpy=yes",
-                "ac_cv_func_memmove=yes",
-                "ac_cv_c_c99inline=no",
-            ])
+        args = [
+            "--enable-shared" if self.options.shared else "--disable-shared",
+            "--enable-static" if not self.options.shared else "--disable-static",
+            "ac_cv_func_memcpy=yes",
+            "ac_cv_func_memmove=yes",
+            "ac_cv_c_c99inline=no",
+        ]
+        self._autotools.flags.append("-lm")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -118,11 +120,11 @@ class GslConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "include", "gsl"), "*.c")
+
         os.unlink(os.path.join(self.package_folder, "bin", "gsl-config"))
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
@@ -133,19 +135,21 @@ class GslConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "gsl"
+
         self.cpp_info.filenames["cmake_find_package"] = "GSL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GSL"
+
         self.cpp_info.names["cmake_find_package"] = "GSL"
         self.cpp_info.names["cmake_find_package_multi"] = "GSL"
-
-        self.cpp_info.components["libgslcblas"].names["cmake_find_package"] = "gslcblas"
-        self.cpp_info.components["libgslcblas"].names["cmake_find_package_multi"] = "gslcblas"
-        self.cpp_info.components["libgslcblas"].libs = ["gslcblas"]
 
         self.cpp_info.components["libgsl"].names["cmake_find_package"] = "gsl"
         self.cpp_info.components["libgsl"].names["cmake_find_package_multi"] = "gsl"
         self.cpp_info.components["libgsl"].libs = ["gsl"]
         self.cpp_info.components["libgsl"].requires = ["libgslcblas"]
+
+        self.cpp_info.components["libgslcblas"].names["cmake_find_package"] = "gslcblas"
+        self.cpp_info.components["libgslcblas"].names["cmake_find_package_multi"] = "gslcblas"
+        self.cpp_info.components["libgslcblas"].libs = ["gslcblas"]
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["libgsl"].system_libs = ["m"]
