@@ -83,6 +83,8 @@ class JsonnetConan(ConanFile):
         self.cpp_info.components["libjsonnet"].requires = ["nlohmann_json::nlohmann_json"]
         if tools.stdcpp_library(self):
             self.cpp_info.components["libjsonnet"].system_libs.append(tools.stdcpp_library(self))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libjsonnet"].system_libs.append("m")
 
         self.cpp_info.components["libjsonnetpp"].libs = ["jsonnet++"]
         self.cpp_info.components["libjsonnetpp"].requires = ["libjsonnet"]
