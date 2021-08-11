@@ -159,13 +159,6 @@ class SDLConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # ensure sdl2-config is created for MinGW
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(NOT WINDOWS OR CYGWIN)",
-                              "if(NOT WINDOWS OR CYGWIN OR MINGW)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(NOT (WINDOWS OR CYGWIN))",
-                              "if(NOT (WINDOWS OR CYGWIN OR MINGW))")
         if self.version >= "2.0.14":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
