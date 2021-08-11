@@ -19,7 +19,7 @@ class GslConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "patches/*"
-        
+
     _autotools = None
 
     @property
@@ -91,7 +91,7 @@ class GslConan(ConanFile):
         elif tools.is_apple_os(self.settings.os):
             self._autotools.defines.append("HAVE_DARWIN_IEEE_INTERFACE")
         elif self.settings.os == "Linux":
-            self._autotools.defins.append("HAVE_GNUX86_IEEE_INTERFACE")
+            self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
         elif self.settings.os == "FreeBSD":
             self._autotools.defines.append("HAVE_FREEBSD_IEEE_INTERFACE")
 
