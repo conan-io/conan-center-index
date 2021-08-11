@@ -26,8 +26,8 @@ class LinuxHeadersGenericConan(ConanFile):
 
     def build(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
-            self.run("{} headers_install".format(tools.get_env("CONAN_MAKE_PROGRAM")))
+            self.run("{} headers".format(tools.get_env("CONAN_MAKE_PROGRAM")))
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("include/*", src=os.path.join(self._source_subfolder, "usr"))
+        self.copy("include/*.h", src=os.path.join(self._source_subfolder, "usr"))
