@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -20,6 +21,8 @@ class LinuxHeadersGenericConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("linux-headers-generic supports only Linux")
+        if tools.cross_building(self):
+            raise ConanInvalidConfiguration("linux-headers-generic can not be cross-compiled")
 
     def build_requirements(self):
         self.build_requires("make/4.3")
