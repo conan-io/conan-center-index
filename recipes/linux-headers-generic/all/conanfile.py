@@ -18,6 +18,9 @@ class LinuxHeadersGenericConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        del self.info.settings.os
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("linux-headers-generic supports only Linux")
