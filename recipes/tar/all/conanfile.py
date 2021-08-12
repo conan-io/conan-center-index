@@ -67,7 +67,7 @@ class TarConan(ConanFile):
             "--with-lzma={}".format(lzma_exe),
             # "--without-lzop",  # FIXME: this will use sytem lzop
             "--with-xz={}".format(xz_exe),
-            "--without-zstd",  # FIXME: zstd does not build programs
+            # "--without-zstd",  # FIXME: this will use system zstd (current zstd recipe does not build programs)
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
