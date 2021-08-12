@@ -4,7 +4,7 @@ required_conan_version = ">=1.33.0"
 
 
 class VoroppConan(ConanFile):
-    name = "voro++"
+    name = "voropp"
     description = (
         "Voro++ is a open source software library for the computation of the "
         "Voronoi diagram, a widely-used tessellation that has applications in "
