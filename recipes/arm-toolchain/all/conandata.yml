@@ -3,6 +3,10 @@ sources:
   "2021.07":
     armv7:
       Arduino:
+        x86_64:
+          Linux:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-arm-none-eabi.tar.xz"
+            sha256: "45225813f74e0c3f76af2715d30d1fbebb873c1abe7098f9c694e5567cc2279c"
         x86:
           Windows:
             url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-arm-none-eabi.tar.xz"
@@ -19,6 +23,10 @@ sources:
             sha256: "fdba7b7f526e4d3cffbd5e60a14dedbce7f474080b35b5b6601973ecf5951a6d"
     armv8:
       Arduino:
+        x86_64:
+          Linux:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf.tar.xz"
+            sha256: "6f74b1ee370caeb716688d2e467e5b44727fdc0ed56023fe5c72c0620019ecef"
         x86:
           Windows:
             url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf.tar.xz"
