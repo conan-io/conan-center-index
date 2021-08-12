@@ -96,8 +96,10 @@ class CddlibConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
         ]
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) >= "12":
-            self._autotools.flags.append("-FS")
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
+            if tools.Version(self.settings.compiler.version) >= "12":
+                self._autotools.flags.append("-FS")
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
