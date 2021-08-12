@@ -11,11 +11,15 @@ class LinuxHeadersGenericConan(ConanFile):
     license = "GPL-2.0-only"
     description = "Generic Linux kernel headers"
     topics = ("linux", "headers", "generic")
-    settings = "arch"
+    settings = "os", "arch"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("linux-headers-generic supports only Linux")
 
     def build_requirements(self):
         self.build_requires("make/4.3")
