@@ -1,0 +1,8 @@
+sources:
+  "1.36":
+    url: "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.36.tar.gz"
+    sha256: "493a3a5e0ac0eb4df8501039f351459d8901d213a834d8c5a453a8ed94858ba5"
+patches:
+  "1.36":
+    - patch_file: "patches/0001-gawk-namespace.patch"
+      base_path: "source_subfolder"
