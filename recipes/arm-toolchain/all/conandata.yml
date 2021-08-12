@@ -40,3 +40,7 @@ sources:
           Windows:
             url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz"
             sha256: "30cd231bf2dd224ae8b14e7ce147033093b7f9813dabb89bce8ab0ae79f586af"
+patches:
+  "2021.07":
+    - patch_file: "patches/2021.07-0001-eula.patch"
+      base_path: "source_subfolder"

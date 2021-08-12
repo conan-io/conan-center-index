@@ -12,7 +12,7 @@ class ArmToolchainConan(ConanFile):
     homepage = "https://developer.arm.com/"
     description = "The GNU Toolchain for the Cortex-A Family is a ready-to-use, open source suite of tools for C, C++ and Assembly programming."
     url = "https://github.com/conan-io/conan-center-index"
-    license = ("GPL-3-or-later",)
+    license = ("GPL-3-or-later", "GPL-2-or-later", "LPGL-2.1-or-later", "MIT", "ZLIB", "BSD-3-Clause", "EULA")
     topics = ("arm", "gcc", "binutils", "toolchain")
     options = {
         "target_arch": ["armv8", "armv7hf", "armv7"],
@@ -23,6 +23,8 @@ class ArmToolchainConan(ConanFile):
         "target_os": "Linux",
     }
     settings = "os", "arch"
+
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -84,6 +86,9 @@ class ArmToolchainConan(ConanFile):
         self.run("tar xf archive.tar.xz", run_environment=True, win_bash=self._settings_build.os == "Windows")
         os.unlink("archive.tar.xz")
         tools.rename(glob.glob("gcc-*")[0], self._source_subfolder)
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=self.package_folder)
