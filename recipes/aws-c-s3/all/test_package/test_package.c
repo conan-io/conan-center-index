@@ -1,4 +1,5 @@
 #include <aws/s3/s3.h>
+#include <stdlib.h>
 
 int main() {
     struct aws_allocator *allocator = aws_default_allocator();
