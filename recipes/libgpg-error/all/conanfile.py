@@ -19,7 +19,7 @@ class GPGErrorConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
     }
     exports_sources = "patches/**"
     _autotools = None
