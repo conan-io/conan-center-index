@@ -141,7 +141,7 @@ class LibspatialiteConan(ConanFile):
         if self.options.shared:
             optflags.append("-DDLL_EXPORT")
         with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     self.run("nmake -f makefile.vc {} OPTFLAGS=\"{}\" SYSTEM_LIBS=\"{}\"".format(target,
                                                                                                  " ".join(optflags),
