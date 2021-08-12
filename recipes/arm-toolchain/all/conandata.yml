@@ -1,12 +1,23 @@
 sources:
+  # version -> target_arch -> target_os -> host_arch -> host_os
   "2021.07":
     armv7hf:
       Linux:
-        Linux :
-          url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf.tar.asc"
-          sha256: "aa074fa8371a4f73fecbd16bd62c8b1945f23289e26414794f130d6ccdf8e39c"
+        x86_64:
+          Linux:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf.tar.xz"
+            sha256: "aa074fa8371a4f73fecbd16bd62c8b1945f23289e26414794f130d6ccdf8e39c"
+        x86:
+          Windows:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-arm-none-linux-gnueabihf.tar.xz"
+            sha256: "fdba7b7f526e4d3cffbd5e60a14dedbce7f474080b35b5b6601973ecf5951a6d"
     armv8:
       Linux:
-        Linux :
-          url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz"
-          sha256: "1e33d53dea59c8de823bbdfe0798280bdcd138636c7060da9d77a97ded095a84"
+        x86_64:
+          Linux:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz"
+            sha256: "1e33d53dea59c8de823bbdfe0798280bdcd138636c7060da9d77a97ded095a84"
+        x86:
+          Windows:
+            url: "https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz"
+            sha256: "30cd231bf2dd224ae8b14e7ce147033093b7f9813dabb89bce8ab0ae79f586af"

@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans import __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 import os
 import glob
@@ -21,16 +22,23 @@ class ArmToolchainConan(ConanFile):
         "target_arch": "armv8",
         "target_os": "Linux",
     }
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _sources_dict(self):
+        arch = self.settings.arch
+        if (self.settings.os, self.settings.arch) == ("Windows", "x86_64"):
+            arch = "x86"
         try:
-            return self.conan_data["sources"][self.version][self._target_arch][self._target_os][str(self.settings.os)]
+            return self.conan_data["sources"][self.version][self._target_arch][self._target_os][str(arch)][str(self.settings.os)]
         except KeyError:
             return None
 
@@ -43,16 +51,21 @@ class ArmToolchainConan(ConanFile):
             self.options.target_os = "Linux"
 
     def build_requirements(self):
-        self.build_requires("tar/1.32.90")
+        if self._settings_build.os == "Windows":
+            self.build_requires("msys2/cci.latest")
+        else:
+            self.build_requires("tar/1.32.90")
 
     def validate(self):
         if hasattr(self, "settings_target"):
             if (self.options.target_arch, self.options.target_os) != (str(self.settings_target.arch), str(self.settings_target.os)):
                 raise ConanInvalidConfiguration("arm-toolchain:{target_arch={} target_os={}} does not match settings_target.{arch={} os={}}".format(
-                    self.options.target_arch, self.options.target_os, self.settings_target.arch, self.settings_target.os))
+                    self.options.target_arch, self.options.target_os, self.settings_target.arch, self.settings_target.os, "gcc"))
+            if self.settings_target.compiler != "gcc":
+                raise ConanInvalidConfiguration("arm-toolchain only provides a gcc compiler")
 
         if self._sources_dict is None:
-            raise ConanInvalidConfiguration("No arm toolchain available for this system or profile does not support it yet.")
+            raise ConanInvalidConfiguration("No arm toolchain available for this host/target system combination.")
 
     @property
     def _target_arch(self):
@@ -65,12 +78,11 @@ class ArmToolchainConan(ConanFile):
     def build(self):
         # FIXME: downloads.arm.com returns 403 (https://github.com/conan-io/conan/issues/9036)
         # FIXME: tools.get cannot extract the tarball (KeyError: "linkname 'gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/bin/getconf' not found")
-        tools.get(**self._sources_dict, filename="archive.tar.gz", destination=self._source_subfolder, strip_root=True)
-        tools.download(**self._sources_dict, filename="archive.tar.gz",
-                       headers={"User-Agent": "conan client"})
+        tools.download(**self._sources_dict, filename="archive.tar.xz",
+                       headers={"User-Agent": "conan vv{}".format(conan_version)})
 
-        self.run("tar xf archive.tar.gz", run_environment=True)
-        os.unlink("archive.tar.gz")
+        self.run("tar xf archive.tar.xz", run_environment=True, win_bash=self._settings_build.os == "Windows")
+        os.unlink("archive.tar.xz")
         tools.rename(glob.glob("gcc-*")[0], self._source_subfolder)
 
     def package(self):

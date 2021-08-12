@@ -6,6 +6,10 @@ import os
 class TestPackage(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
+    def build_requirements(self):
+        if self.settings.os == "Windows":
+            self.build_requires("make/4.3")
+
     def build(self):
         arm_64bit = self.options["arm-toolchain"].target_arch == "armv8"
 
@@ -24,9 +28,9 @@ class TestPackage(ConanFile):
                 cxx=self.deps_env_info["arm-toolchain"].CXX,
             ))
             cmake = CMake(self)
+            cmake.generator = "Unix Makefiles"
             cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = os.path.join(self.build_folder, "toolchain.cmake").replace("\\", "/")
             cmake.definitions["ARM_64BIT"] = arm_64bit
-            cmake.verbose = True
             cmake.configure()
             cmake.build()
 
