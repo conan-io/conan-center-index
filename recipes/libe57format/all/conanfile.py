@@ -51,8 +51,7 @@ class LibE57FormatConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["USING_STATIC_XERCES"] = not self.options["xerces-c"].shared
-        self._cmake.configure(build_folder=self._build_subfolder,
-                              source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
