@@ -1,4 +1,4 @@
-from conans import AutotoolsBuildEnvironment, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -30,7 +30,7 @@ class LinuxHeadersGenericConan(ConanFile):
 
     def build(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
-            autotools = AutotoolsBuildEnvironment(self)
+            autotools = AutoToolsBuildEnvironment(self)
             autotools.make(target="headers")
 
     def package(self):
