@@ -37,3 +37,4 @@ class CLI11Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CLI11"
         self.cpp_info.names["cmake_find_package_multi"] = "CLI11"
+        self.cpp_info.names["pkg_config"] = "CLI11"
