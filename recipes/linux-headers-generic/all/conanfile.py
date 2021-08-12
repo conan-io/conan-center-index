@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import AutotoolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -24,16 +24,14 @@ class LinuxHeadersGenericConan(ConanFile):
         if tools.cross_building(self):
             raise ConanInvalidConfiguration("linux-headers-generic can not be cross-compiled")
 
-    def build_requirements(self):
-        self.build_requires("make/4.3")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
-            self.run("{} headers".format(tools.get_env("CONAN_MAKE_PROGRAM")))
+            autotools = AutotoolsBuildEnvironment(self)
+            autotools.make(target="headers")
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
