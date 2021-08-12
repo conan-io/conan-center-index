@@ -14,9 +14,15 @@ class GslConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
 
-    options = {"shared": [True, False], "fPIC": [True, False]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
 
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
 
     exports_sources = "patches/*"
 
@@ -92,20 +98,15 @@ class GslConan(ConanFile):
             self._autotools.defines.append("HAVE_DARWIN_IEEE_INTERFACE")
         elif self.settings.os == "Linux":
             self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
-        elif self.settings.os == "FreeBSD":
-            self._autotools.defines.append("HAVE_FREEBSD_IEEE_INTERFACE")
 
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")
-        args = [
-            "--enable-shared" if self.options.shared else "--disable-shared",
-            "--enable-static" if not self.options.shared else "--disable-static",
+        args.extend([
             "ac_cv_func_memcpy=yes",
             "ac_cv_func_memmove=yes",
             "ac_cv_c_c99inline=no",
-        ]
-        self._autotools.flags.append("-lm")
+        ])
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
