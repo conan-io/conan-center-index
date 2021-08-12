@@ -65,7 +65,7 @@ class ReadosmConan(ConanFile):
         optflags = ["-DDLL_EXPORT"] if self.options.shared else []
         system_libs = [lib + ".lib" for lib in self.deps_cpp_info.system_libs]
         with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     self.run("nmake -f makefile.vc {} OPTFLAGS=\"{}\" SYSTEM_LIBS=\"{}\"".format(target,
                                                                                                  " ".join(optflags),
