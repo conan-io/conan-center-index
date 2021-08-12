@@ -15,8 +15,8 @@ class ArmToolchainConan(ConanFile):
     license = ("GPL-3-or-later",)
     topics = ("arm", "gcc", "binutils", "toolchain")
     options = {
-        "target_arch": ["armv8", "armv7hf"],
-        "target_os": ["Linux", ],
+        "target_arch": ["armv8", "armv7hf", "armv7"],
+        "target_os": ["Arduino", "Linux", ],
     }
     default_options = {
         "target_arch": "armv8",
@@ -79,7 +79,7 @@ class ArmToolchainConan(ConanFile):
         # FIXME: downloads.arm.com returns 403 (https://github.com/conan-io/conan/issues/9036)
         # FIXME: tools.get cannot extract the tarball (KeyError: "linkname 'gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/bin/getconf' not found")
         tools.download(**self._sources_dict, filename="archive.tar.xz",
-                       headers={"User-Agent": "conan vv{}".format(conan_version)})
+                       headers={"User-Agent": "Conan v{}".format(conan_version)})
 
         self.run("tar xf archive.tar.xz", run_environment=True, win_bash=self._settings_build.os == "Windows")
         os.unlink("archive.tar.xz")
@@ -97,18 +97,23 @@ class ArmToolchainConan(ConanFile):
 
         target_gnu_arch = {
             "armv8": "aarch64",
+            "armv7": "arm",
             "armv7hf": "arm",
         }[self._target_arch]
-        target_gnu_os = {
-            "Linux": "linux",
+        target_gnu_os = "none" + {
+            "Arduino": "",
+            "Linux": "-linux",
         }[self._target_os]
         target_gnu_abi = {
-            "armv8": "gnu",
-            "armv7hf": "gnueabihf",
-        }[self._target_arch]
-        prefix = "{}-none-{}-{}-".format(target_gnu_arch, target_gnu_os, target_gnu_abi)
+            ("armv8", "Arduino"): "elf",
+            ("armv8", "Linux"): "gnu",
+            ("armv7", "Arduino"): "eabi",
+            ("armv7hf", "Linux"): "gnueabihf",
+        }[(self._target_arch, self._target_os)]
+        prefix = "{}-{}-{}-".format(target_gnu_arch, target_gnu_os, target_gnu_abi)
 
         cmake_system_os = {
+            "Arduino": "Generic",
             "Linux": "Linux",
         }[self._target_os]
 
