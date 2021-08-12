@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
+import requests
 
 required_conan_version = ">=1.33.0"
 
@@ -42,9 +44,26 @@ class LibnovaConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @staticmethod
+    def _generate_git_tag_archive_sourceforge(url, timeout=10, retry=2):
+        def try_post(retry_count):
+            try:
+                requests.post(url, timeout=timeout)
+            except:
+                if retry_count < retry:
+                    try_post(retry_count + 1)
+                else:
+                    raise ConanException("All the attempt to generate archive url have failed.")
+        try_post(0)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        # Generate the archive download link
+        self._generate_git_tag_archive_sourceforge(self.conan_data["sources"][self.version]["url"]["post"])
+
+        # Download archive
+        archive_url = self.conan_data["sources"][self.version]["url"]["archive"]
+        sha256 = self.conan_data["sources"][self.version]["sha256"]
+        tools.get(url=archive_url, sha256=sha256, destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
