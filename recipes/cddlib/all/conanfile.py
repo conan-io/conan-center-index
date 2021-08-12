@@ -39,6 +39,8 @@ class CddlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "apple-clang":
+            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
@@ -52,6 +54,8 @@ class CddlibConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("cddlib does not support shared with Visual Studio")
+        if self.settings.compiler == "apple-clang" and not self.options.shared:
+            raise ConanInvalidConfiguration("cddlib static is broken with apple-clang")
 
     @property
     def _settings_build(self):
