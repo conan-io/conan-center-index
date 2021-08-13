@@ -29,6 +29,7 @@ class LibexifConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.build_requires("automake/1.16.3")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
@@ -52,6 +53,8 @@ class LibexifConan(ConanFile):
         return self._autotools
 
     def build(self):
+        with tools.chdir(os.path.join(self._source_subfolder)):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
         autotools = self._configure_autotools()
         autotools.make()
 
