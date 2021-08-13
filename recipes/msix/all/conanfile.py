@@ -110,7 +110,6 @@ class MsixConan(ConanFile):
                     raise ConanInvalidConfiguration("Xerces is the only supported parser for MacOS pack")
             if not self.options.use_validation_parser:
                 raise ConanInvalidConfiguration("Packaging requires validation parser")
-        # the current CCI xerces-c recipe is not supported
         if (self.options.xml_parser == "xerces" and
             self.options["xerces-c"].char_type != "char16_t"):
                 raise ConanInvalidConfiguration("Only char16_t is supported for xerces-c")
