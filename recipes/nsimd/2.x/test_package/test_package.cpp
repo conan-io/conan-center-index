@@ -6,7 +6,6 @@
 #include <vector>
 #include <iostream>
 
-#include <assert.h>
 #include <string.h>
 
 template <typename T>
@@ -42,7 +41,7 @@ void uppercase_simd(T *dst, const T *src, int n) {
   mask_storeu(mask, dst + i, TEXT);
 }
 
-int main() {
+int test_uppercase_simd() {
   std::string input("The quick brown fox jumps over the lazy dog");
 
   std::cout << "Original text         : " << input << std::endl;
@@ -55,7 +54,49 @@ int main() {
   uppercase_simd(&dst_simd[0], (i8 *)input.c_str(), (int)input.size());
   std::cout << "NSIMD uppercase text : " << &dst_simd[0] << std::endl;
 
-  assert(memcmp(&dst_scalar[0], &dst_simd[0], dst_simd.size()) == 0);
+  if (memcmp(&dst_scalar[0], &dst_simd[0], dst_simd.size()) != 0) {
+    std::cerr << "ERROR: SIMD results don't match!" << std::endl;
+    return 1;
+  }
+
+  return 0;
+}
+
+// From nsimd-all.cpp
+
+int test_unroll() {
+  using namespace nsimd;
+  const int unroll = 3;
+  typedef pack<float, unroll> upack;
+
+  const int n_max = unroll * NSIMD_MAX_LEN(f32);
+  const int n = len(upack());
+  float buf[n_max];
+
+  for(int i = 0; i < n; i++) {
+    buf[i] = float(i);
+  }
+
+  upack p = loadu<upack>(buf);
+  p = -(p * p) + 1.0f;
+  storeu(buf, p);
+
+  for (int i = 0; i < n; i++) {
+    fprintf(stdout, "%f vs %f\n", double(buf[i]), double(-i * i));
+  }
+
+  for (int i = 0; i < n; i++) {
+    if (buf[i] != float(-(i * i) + 1)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int main() {
+  if (test_uppercase_simd() || test_unroll())
+    return 1;
 
   return 0;
 }
