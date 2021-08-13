@@ -25,11 +25,11 @@ class SQLiteCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "lint": "deprecated",
-        "sqlcipher" : False
+        "sqlcipher": False
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     @property
@@ -60,7 +60,8 @@ class SQLiteCppConan(ConanFile):
         if tools.Version(self.version) >= "3.0.0" and self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
+            raise ConanInvalidConfiguration(
+                "SQLiteCpp can not be built as shared lib on Windows")
 
     def package_id(self):
         del self.info.options.lint

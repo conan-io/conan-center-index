@@ -40,3 +40,5 @@ patches:
       base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.4.3.patch
       base_path: source_subfolder
+    - patch_file: patches/fix_stdcall-v4.4.3.patch
+      base_path: source_subfolder
