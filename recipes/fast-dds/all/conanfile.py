@@ -117,6 +117,7 @@ class FastDDSConan(ConanFile):
         self.requires("asio/1.18.2")
         self.requires("fast-cdr/1.0.21")
         self.requires("foonathan-memory/0.7.0")
+        self.options["foonathan-memory"].with_sizecheck = False
         self.requires("boost/1.73.0")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1k")
