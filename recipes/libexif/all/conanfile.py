@@ -43,7 +43,7 @@ class LibexifConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -53,8 +53,8 @@ class LibexifConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
         autotools = self._configure_autotools()
         autotools.make()
 
