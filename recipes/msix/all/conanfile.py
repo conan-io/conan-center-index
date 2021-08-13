@@ -93,9 +93,6 @@ class MsixConan(ConanFile):
             raise ConanInvalidConfiguration("javaxml is supported only for Android")
         if self.settings.os == "Linux" and self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Only clang is supported on Linux")
-        # openssl/1.0.2t is not available for Macos+armv8 at the moment
-        if self.settings.os == "Macos" and self.options.crypto_lib == "openssl":
-            raise ConanInvalidConfiguration("openssl is not supported for MacOS at the moment")
         if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
             raise ConanInvalidConfiguration("applexml is supported only for MacOS")
         if self.settings.os != "Windows" and self.options.crypto_lib == "crypt32":
