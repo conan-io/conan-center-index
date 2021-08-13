@@ -80,10 +80,10 @@ class GetTextConan(ConanFile):
             self._autotools.flags.append("-FS")
             # INSTALL.windows: Native binaries, built using the MS Visual C/C++ tool chain.
             build = False
-            if self.settings.arch_build == "x86":
+            if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
                 rc = "windres --target=pe-i386"
-            elif self.settings.arch_build == "x86_64":
+            elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
             args.extend([
