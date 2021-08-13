@@ -1,8 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
-import platform
-import re
 
 required_conan_version = ">=1.33.0"
 
@@ -12,17 +10,17 @@ class LibgpiodConan(ConanFile):
     homepage = "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/"
     license = "LGPL-2.1-or-later"
     description = "C library and tools for interacting with the linux GPIO character device"
-    topics = ("conan", "gpio", "libgpiod", "libgpiodcxx", "linux")
+    topics = ("gpio", "libgpiod", "libgpiodcxx", "linux")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "enable_bindings_cxx": [True, False],
-        "enable_tools": [True, False]
+        "enable_tools": [True, False],
     }
     default_options = {
         "shared": False,
         "enable_bindings_cxx": False,
-        "enable_tools": False
+        "enable_tools": False,
     }
     
     _autotools = None
@@ -34,14 +32,14 @@ class LibgpiodConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libgpiod supports only Linux")
-        linux_kernel_version = re.match("([0-9.]+)", platform.release()).group(1)
-        if tools.Version(linux_kernel_version) < "4.8":
-            raise ConanInvalidConfiguration("only Linux kernel versions >= 4.8 are supported")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("autoconf-archive/2021.02.19")
+
+    def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
