@@ -94,8 +94,6 @@ class GslConan(ConanFile):
             self._autotools.defines.extend(["HAVE_WIN_IEEE_INTERFACE", "WIN32"])
             if self.options.shared:
                 self._autotools.defines.append("GSL_DLL")
-        elif tools.is_apple_os(self.settings.os):
-            self._autotools.defines.append("HAVE_DARWIN_IEEE_INTERFACE")
         elif self.settings.os == "Linux":
             self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
 
