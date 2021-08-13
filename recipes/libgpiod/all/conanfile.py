@@ -37,9 +37,7 @@ class LibgpiodConan(ConanFile):
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.4")
         self.build_requires("autoconf-archive/2021.02.19")
-
-    def requirements(self):
-        self.requires("linux-headers-generic/5.13.9")
+        self.build_requires("linux-headers-generic/5.13.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -72,6 +70,8 @@ class LibgpiodConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["gpiod"]
+        self.cpp_info.components["gpiod"].libs = ["gpiod"]
+        self.cpp_info.components["gpiod"].names["pkg_config"] = "gpiod"
         if self.options.enable_bindings_cxx:
-            self.cpp_info.libs = ["gpiodcxx"] + self.cpp_info.libs
+            self.cpp_info.components["gpiodcxx"].libs = ["gpiodcxx"]
+            self.cpp_info.components["gpiodcxx"].names["pkg_config"] = "gpiodcxx"
