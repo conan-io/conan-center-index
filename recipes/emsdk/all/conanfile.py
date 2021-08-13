@@ -19,9 +19,6 @@ class EmSDKConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def package_id(self):
-        del self.info.settings.os
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
