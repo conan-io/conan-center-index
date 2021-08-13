@@ -85,7 +85,7 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.9.1")
+            self.requires("robin-hood-hashing/3.11.3")
 
     @property
     def _source_subfolder(self):
@@ -124,6 +124,7 @@ class RmluiConan(ConanFile):
             "FREETYPE_INCLUDE_DIRS": "Freetype_INCLUDE_DIRS",
             "FREETYPE_LINK_DIRS": "Freetype_LINK_DIRS",
             "FREETYPE_LIBRARY": "Freetype_LIBRARIES",
+            "FREETYPE_LIBRARIES": "Freetype_LIBRARIES",
             "LUA_FOUND": "lua_FOUND",
             "LUA_INCLUDE_DIR": "lua_INCLUDE_DIR",
             "LUA_LIBRARIES": "lua_LIBRARIES",
@@ -134,7 +135,7 @@ class RmluiConan(ConanFile):
         cmakelists_path = os.path.join(
             self._source_subfolder, "CMakeLists.txt")
         for key, value in replace_mapping.items():
-            tools.replace_in_file(cmakelists_path, key, value)
+            tools.replace_in_file(cmakelists_path, key, value, strict=False)
 
         if self.options.with_thirdparty_containers:
             config_path = os.path.join(self._source_subfolder,

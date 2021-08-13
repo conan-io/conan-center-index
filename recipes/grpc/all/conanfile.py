@@ -55,10 +55,10 @@ class grpcConan(ConanFile):
     def requirements(self):
         self.requires('zlib/1.2.11')
         self.requires('openssl/1.1.1k')
-        self.requires('protobuf/3.15.5')
+        self.requires('protobuf/3.17.1')
         self.requires('c-ares/1.17.1')
-        self.requires('abseil/20210324.0')
-        self.requires('re2/20210202')
+        self.requires('abseil/20210324.1')
+        self.requires('re2/20210401')
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -236,6 +236,7 @@ class grpcConan(ConanFile):
         # gRPC::grpc_cpp_plugin
         if self.options.cpp_plugin:
             module_target_rel_path = os.path.join("lib", "cmake", "grpc_cpp_plugin.cmake")
+            self.cpp_info.components["execs"].builddirs.append(os.path.join("lib", "cmake"))
             self.cpp_info.components["execs"].build_modules["cmake_find_package"] = [module_target_rel_path]
             self.cpp_info.components["execs"].build_modules["cmake_find_package_multi"] = [module_target_rel_path]
         # gRPC::grpc_csharp_plugin

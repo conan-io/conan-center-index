@@ -5,3 +5,6 @@ sources:
   "8.44":
     url: "https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz"
     sha256: "aecafd4af3bd0f3935721af77b889d9024b2e01d96b58471bd91a3063fb47728"
+  "8.45":
+    url: "https://ftp.pcre.org/pub/pcre/pcre-8.45.tar.gz"
+    sha256: "4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09"

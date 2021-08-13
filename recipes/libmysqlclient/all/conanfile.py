@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
-import glob
 
 
 class LibMysqlClientCConan(ConanFile):
@@ -21,35 +20,82 @@ class LibMysqlClientCConan(ConanFile):
     _cmake = None
 
     @property
+    def _with_zstd(self):
+        return tools.Version(self.version) > "8.0.17"
+
+    @property
+    def _with_lz4(self):
+        return tools.Version(self.version) > "8.0.17"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+        if self._with_zstd:
+            self.requires("zstd/1.5.0")
+        if self._with_lz4:
+            self.requires("lz4/1.9.3")
 
     def source(self):
-        archive_name = "mysql-" + self.version
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(archive_name, self._source_subfolder)
-        for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf", "libedit"]:
-            tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
-        for folder in ['client', 'man', 'mysql-test']:
-            tools.rmdir(os.path.join(self._source_subfolder, folder))
-        tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_files(self):
-        for patch in self.conan_data["patches"][self.version]:
+        libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
+        if not self._with_lz4:
+            libs_to_remove.append("lz4")
+        for lib in libs_to_remove:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "MYSQL_CHECK_%s()\n" % lib.upper(),
+                "",
+                strict=False)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "INCLUDE(%s)\n" % lib,
+                "",
+                strict=False)
+        tools.rmdir(os.path.join(self._source_subfolder, "extra"))
+        for folder in ['client', 'man', 'mysql-test', "libbinlogstandalone"]:
+            tools.rmdir(os.path.join(self._source_subfolder, folder))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "ADD_SUBDIRECTORY(%s)\n" % folder,
+                "",
+                strict=False)
+        tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
+        for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                t,
+                "",
+                strict=False)
+        if self._with_zstd:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "zstd.cmake"),
+                "NAMES zstd",
+                "NAMES zstd %s" % self.deps_cpp_info["zstd"].libs[0])
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+            "NAMES ssl",
+            "NAMES ssl %s" % self.deps_cpp_info["openssl"].components["ssl"].libs[0])
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ssl.cmake"),
+            "NAMES crypto",
+            "NAMES crypto %s" % self.deps_cpp_info["openssl"].components["crypto"].libs[0])
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        os.rename(sources_cmake, sources_cmake_orig)
-        os.rename("CMakeLists.txt", sources_cmake)
+        tools.rename(sources_cmake, sources_cmake_orig)
+        tools.rename("CMakeLists.txt", sources_cmake)
         if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"),
+                "COMMAND %s" % ("$<TARGET_FILE:libmysql_api_test>" if tools.Version(self.version) < "8.0.25" else "libmysql_api_test"),
+                "COMMAND DYLD_LIBRARY_PATH=%s %s" %(os.path.join(self.build_folder, "library_output_directory"), os.path.join(self.build_folder, "runtime_output_directory", "libmysql_api_test")))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "install_macros.cmake"),
+            "  INSTALL_DEBUG_SYMBOLS(",
+            "  # INSTALL_DEBUG_SYMBOLS(")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,11 +104,21 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) < "15":
-                raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
+            if tools.Version(self.version) > "8.0.17":
+                if Version(self.settings.compiler.version) < "16":
+                    raise ConanInvalidConfiguration("Visual Studio 16 2019 or newer is required")
+            else:
+                if Version(self.settings.compiler.version) < "15":
+                    raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("clang 6 or newer is required")
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -74,6 +130,12 @@ class LibMysqlClientCConan(ConanFile):
         self._cmake.definitions["WITH_UNIT_TESTS"] = False
         self._cmake.definitions["ENABLED_PROFILING"] = False
         self._cmake.definitions["WIX_DIR"] = False
+        if self._with_lz4:
+            self._cmake.definitions["WITH_LZ4"] = "system"
+
+        if self._with_zstd:
+            self._cmake.definitions["WITH_ZSTD"] = "system"
+            self._cmake.definitions["ZSTD_INCLUDE_DIR"] = self.deps_cpp_info["zstd"].include_paths[0]
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in str(self.settings.compiler.runtime)
@@ -83,7 +145,6 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIB"] = "system"
-
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
@@ -96,15 +157,20 @@ class LibMysqlClientCConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         os.mkdir(os.path.join(self.package_folder, "licenses"))
-        os.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
+        tools.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(f)
-        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-            os.remove(f)
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Windows" and self.options.shared:
+            self.copy("*.dll", "bin", keep_path=False)
+        if self.options.shared:
+            tools.remove_files_by_mask(self.package_folder, "*.a")
+        else:
+            tools.remove_files_by_mask(self.package_folder, "*.dll")
+            tools.remove_files_by_mask(self.package_folder, "*.dylib")
+            tools.remove_files_by_mask(self.package_folder, "*.so*")
 
     def package_info(self):
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]

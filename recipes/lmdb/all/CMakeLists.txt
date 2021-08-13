@@ -21,7 +21,11 @@ set_target_properties(lmdb PROPERTIES
 include(FindThreads)
 target_link_libraries(lmdb PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-install(TARGETS lmdb)
+install(TARGETS lmdb
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # LMDB utilities:
 
@@ -29,6 +33,6 @@ if(NOT WIN32)
     foreach(TOOL mdb_stat mdb_copy mdb_dump mdb_load)
         add_executable(${TOOL} source_subfolder/${TOOL}.c)
         target_link_libraries(${TOOL} lmdb)
-        install(TARGETS ${TOOL})
+        install(TARGETS ${TOOL} DESTINATION ${CMAKE_INSTALL_BINDIR})
     endforeach()
 endif()

@@ -8,6 +8,9 @@ sources:
   "cci.20210126":
     url: "https://github.com/google/googletest/archive/273f8cb059a4e7b089731036392422b5ef489791.tar.gz"
     sha256: "2937e96827aa44b291d42c4f0ffaa6a7637445822cf873d0fa6a889df84b8628"
+  "1.11.0":
+    url: "https://github.com/google/googletest/archive/release-1.11.0.tar.gz"
+    sha256: "b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5"
 patches:
   "1.8.1":
     - patch_file: "patches/gtest-1.8.1.patch"

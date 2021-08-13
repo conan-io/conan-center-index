@@ -1,0 +1,22 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/v1.0.1.tar.gz"
+    sha256: "c47f2e1e6cb7660a2d1c2666fa3b640a2f57275d2e524d0c80160a51a781e0dc"
+  "1.0.0":
+    url: "https://github.com/eclipse-iceoryx/iceoryx/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "3D7BABCF92974F6D22E8A497E31198DE1D88DF8B20C942992DBBEC5DFB06C4BB"
+patches:
+  "1.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0003-no-hardcoded-libcxx.patch"
+  "1.0.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0001-fix-find-toml.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0002-fix-install-bundle.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0003-no-hardcoded-libcxx.patch"

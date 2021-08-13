@@ -37,14 +37,12 @@ class DbusConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        tools.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def requirements(self):
-        self.requires("expat/2.2.10")
+        self.requires("expat/2.4.1")
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.68.2")
 
         if self.options.with_x11:
             self.requires("xorg/system")
@@ -62,6 +60,9 @@ class DbusConan(ConanFile):
             args.append("--disable-asserts")
             args.append("--disable-checks")
 
+            args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
+            args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
+
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -75,11 +76,13 @@ class DbusConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
         for i in ["var", "share", "etc"]:
             shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "systemd"))
         tools.remove_files_by_mask(self.package_folder, "*.la")
 
     def package_info(self):

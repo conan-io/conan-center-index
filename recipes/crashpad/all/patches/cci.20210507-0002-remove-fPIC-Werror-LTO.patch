@@ -1,0 +1,70 @@
+--- third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
++++ third_party/mini_chromium/mini_chromium/build/config/BUILD.gn
+@@ -103,7 +103,7 @@
+     }
+   } else if (mini_chromium_is_win) {
+     cflags = [
+-      "/GL",  # LTCG.
++        # LTCG.
+       "/O2",
+       "/Ob2",  # Both explicit and auto inlining.
+       "/Oy-",  # Disable omitting frame pointers, must be after /O2.
+@@ -113,9 +113,9 @@
+     ldflags = [
+       "/OPT:ICF",
+       "/OPT:REF",
+-      "/LTCG",
++
+     ]
+-    arflags = [ "/LTCG" ]
++    arflags = [  ]
+   }
+ }
+ 
+@@ -128,7 +128,7 @@
+     cflags = [
+       "-Wall",
+       "-Wendif-labels",
+-      "-Werror",
++
+       "-Wextra",
+       "-Wextra-semi",
+       "-Wheader-hygiene",
+@@ -239,7 +239,7 @@
+       "/D_UNICODE",
+       "/FS",
+       "/W4",
+-      "/WX",
++      
+       "/Zi",
+       "/bigobj",  # Support larger number of sections in obj file.
+       "/wd4100",  # Unreferenced formal parameter.
+@@ -319,7 +319,7 @@
+ 
+   if ((mini_chromium_is_posix && !mini_chromium_is_mac &&
+        !mini_chromium_is_ios) || mini_chromium_is_fuchsia) {
+-    cflags += [ "-fPIC" ]
++
+     ldflags += [
+       # This must follow Fuchsia’s fdio library above.
+       "-Wl,--as-needed",
+--- third_party/mini_chromium/mini_chromium/build/common.gypi
++++ third_party/mini_chromium/mini_chromium/build/common.gypi
+@@ -124,7 +124,7 @@
+ 
+       ['OS=="linux" or OS=="android"', {
+         'cflags': [
+-          '-fPIC',
++
+           '-fno-exceptions',
+           '-fno-strict-aliasing',  # See http://crbug.com/32204
+           '-fstack-protector-all',  # Implies -fstack-protector
+@@ -148,7 +148,7 @@
+           '_FILE_OFFSET_BITS=64',
+         ],
+         'ldflags': [
+-          '-fPIC',
++
+           '-pthread',
+           '-Wl,--as-needed',
+           '-Wl,-z,noexecstack',

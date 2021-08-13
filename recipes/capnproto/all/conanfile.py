@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -52,6 +53,8 @@ class CapnprotoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "0.8.0":
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -65,11 +68,13 @@ class CapnprotoConan(ConanFile):
             raise ConanInvalidConfiguration("Cap'n Proto requires C++14, which your compiler does not support.")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
+        if self.settings.os == "Windows" and tools.Version(self.version) < "0.8.0" and self.options.with_openssl:
+            raise ConanInvalidConfiguration("Cap'n Proto doesn't support OpenSSL on Windows pre 0.8.0")
 
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1k")
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
     def build_requirements(self):
@@ -98,9 +103,10 @@ class CapnprotoConan(ConanFile):
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--disable-static" if self.options.shared else "--enable-static",
             "--with-openssl" if self.options.with_openssl else "--without-openssl",
-            "--with-zlib" if self.options.with_zlib else "--without-zlib",
             "--enable-reflection"
         ]
+        if tools.Version(self.version) >= "0.8.0":
+            args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.configure(args=args, configure_dir=os.path.join(self._source_subfolder, "c++"))
         return self._autotools
@@ -136,12 +142,23 @@ class CapnprotoConan(ConanFile):
                 os.remove(cmake_file)
         # inject mandatory variables so that CAPNP_GENERATE_CPP function can
         # work in a robust way (build from source or from pre build package)
+        find_execs = textwrap.dedent("""\
+            if(CMAKE_CROSSCOMPILING)
+                find_program(CAPNP_EXECUTABLE capnp PATHS ENV PATH NO_DEFAULT_PATH)
+                find_program(CAPNPC_CXX_EXECUTABLE capnpc-c++ PATHS ENV PATH NO_DEFAULT_PATH)
+            endif()
+            if(NOT CAPNP_EXECUTABLE)
+                set(CAPNP_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            if(NOT CAPNPC_CXX_EXECUTABLE)
+                set(CAPNPC_CXX_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+            endif()
+            set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
+            function(CAPNP_GENERATE_CPP SOURCES HEADERS)
+        """)
         tools.replace_in_file(os.path.join(self.package_folder, self._cmake_folder, "CapnProtoMacros.cmake"),
                               "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
-                              """set(CAPNP_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnp${CMAKE_EXECUTABLE_SUFFIX}")
-set(CAPNPC_CXX_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../../../bin/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
-set(CAPNP_INCLUDE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../../../include")
-function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
+                              find_execs)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CapnProto"
@@ -157,7 +174,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             {"name": "kj-http", "requires": ["kj", "kj-async"]},
             {"name": "kj-test", "requires": ["kj"]},
         ]
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})

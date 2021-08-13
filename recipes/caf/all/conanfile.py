@@ -3,6 +3,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
+required_conan_version = ">=1.33.0"
+
 
 class CAFConan(ConanFile):
     name = "caf"
@@ -18,12 +20,24 @@ class CAFConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "log_level": ["error", "warning", "info", "debug", "trace", "quiet"],
-        "with_openssl": [True, False]
+        "with_openssl": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "log_level": "quiet", "with_openssl": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "log_level": "quiet",
+        "with_openssl": True,
+    }
+
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,13 +47,9 @@ class CAFConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("actor-framework-" + self.version, self._source_subfolder)
-
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1j")
+            self.requires("openssl/1.1.1k")
 
     def _minimum_compilers_version(self, cppstd):
         standards = {
@@ -81,6 +91,10 @@ class CAFConan(ConanFile):
         if self.options.with_openssl and self.settings.os == "Windows" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("OpenSSL is not supported for Windows x86")
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
     def _cmake_configure(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -103,6 +117,9 @@ class CAFConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/cmake\")",
+                              "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/cmake\")")
         cmake = self._cmake_configure()
         cmake.build()
 

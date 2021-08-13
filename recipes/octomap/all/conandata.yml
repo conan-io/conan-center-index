@@ -1,4 +1,7 @@
 sources:
+  "1.9.7":
+    url: "https://github.com/OctoMap/octomap/archive/v1.9.7.tar.gz"
+    sha256: "3e9ac020686ceb4e17e161bffc5a0dafd9cccab33adeb9adee59a61c418ea1c1"
   "1.9.6":
     url: "https://github.com/OctoMap/octomap/archive/v1.9.6.tar.gz"
     sha256: "0f88c1c024f0d29ab74c7fb9f6ebfdddc8be725087372c6c4d8878be95831eb6"
@@ -9,6 +12,9 @@ sources:
     url: "https://github.com/OctoMap/octomap/archive/v1.9.3.tar.gz"
     sha256: "8488de97ed2c8f4757bfbaf3225e82a9e36783dce1f573b3bde1cf968aa89696"
 patches:
+  "1.9.7":
+    - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
+      base_path: "source_subfolder"
   "1.9.6":
     - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
       base_path: "source_subfolder"

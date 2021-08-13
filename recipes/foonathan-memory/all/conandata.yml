@@ -1,0 +1,8 @@
+sources:
+  "0.7.0":
+    url: "https://github.com/foonathan/memory/archive/refs/tags/v0.7.tar.gz"
+    sha256: "01A7CC5A5EBDDBD71BEC69C89562A4A2ECD7C29334C0A29D38D83E7F7F66EB53"
+patches:
+  "0.7.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0.7.0-0001-fix-virtualAllocFromApp.patch"

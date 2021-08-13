@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class ZopfliConan(ConanFile):
@@ -8,26 +10,29 @@ class ZopfliConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/zopfli/"
     description = "Zopfli Compression Algorithm is a compression library programmed in C to perform very good, but slow, deflate or zlib compression."
-    topics = ("conan", )
+    topics = ("zopfli", "compression", "deflate", "gzip", "zlib")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake",
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -35,15 +40,15 @@ class ZopfliConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         cmake = CMake(self)
-        cmake.definitions['ZOPFLI_BUILD_INSTALL'] = True
+        cmake.definitions["ZOPFLI_BUILD_INSTALL"] = True
+        cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         cmake.configure()
         self._cmake = cmake
         return self._cmake
@@ -58,7 +63,6 @@ class ZopfliConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ZopFli"
@@ -73,4 +77,8 @@ class ZopfliConan(ConanFile):
         self.cpp_info.components["libzopflipng"].names["cmake_find_package"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].names["cmake_find_package_multi"] = "libzopflipng"
         self.cpp_info.components["libzopflipng"].libs = ["zopflipng"]
-        self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]        
+        self.cpp_info.components["libzopflipng"].requires = ["libzopfli"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

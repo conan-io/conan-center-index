@@ -5,3 +5,7 @@ versions:
     folder: all
   1.5.4:
     folder: all
+  "cci.20210414":
+    folder: all
+  "cci.20210616":
+    folder: all

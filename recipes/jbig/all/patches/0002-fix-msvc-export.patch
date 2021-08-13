@@ -10,7 +10,7 @@ index 214105a..a4f7781 100644
 -#if defined(_MT) && defined(_DLL) && !defined(_JBIGDLL_) && !defined(_LIB)
 -#   define _JBIGDLL_
 +
-+#if defined(WIN32)
++#if defined(_MSC_VER)
 +#   if defined(jbig_EXPORTS)
 +#       define SHARED_EXPORT_PREFIX __declspec(dllexport)
 +#   else
@@ -21,7 +21,7 @@ index 214105a..a4f7781 100644
  #endif
  #if defined(_JBIGDLL_)
 -#   if defined(_VISUALC_)
-+#   if defined(WIN32)
++#   if defined(_MSC_VER)
  #       pragma warning( disable : 4273 )
  #   endif
 -#   if !defined(_JBIGLIB_)
@@ -35,7 +35,7 @@ index 214105a..a4f7781 100644
  #endif
  
 -#if defined(_VISUALC_)
-+#if defined(WIN32)
++#if defined(_MSC_VER)
  #   pragma warning( disable : 4018 )
  #   pragma warning( disable : 4244 )
  #   pragma warning( disable : 4142 )

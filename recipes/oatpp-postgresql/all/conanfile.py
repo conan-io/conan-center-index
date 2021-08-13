@@ -1,6 +1,10 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches
 import os
+
+required_conan_version = ">=1.35.0"
+
 
 class OatppPostgresqlConan(ConanFile):
     name = "oatpp-postgresql"
@@ -13,7 +17,7 @@ class OatppPostgresqlConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
 
     _cmake = None
 
@@ -42,12 +46,11 @@ class OatppPostgresqlConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp-postgresql requires GCC >=5")
 
     def requirements(self):
-        self.requires("oatpp/" + self.version)
-        self.requires("libpq/13.0")
+        self.requires("oatpp/{}".format(self.version))
+        self.requires("libpq/13.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("oatpp-postgresql-{0}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -60,6 +63,7 @@ class OatppPostgresqlConan(ConanFile):
         return self._cmake
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = self._configure_cmake()
         cmake.build()
 

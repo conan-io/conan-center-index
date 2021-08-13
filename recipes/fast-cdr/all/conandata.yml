@@ -1,0 +1,4 @@
+sources:
+  "1.0.21":
+    url: "https://github.com/eProsima/Fast-CDR/archive/refs/tags/v1.0.21.tar.gz"
+    sha256: "C1F32BDD76910ADA00D551EB8828DE7561AD2B2846D063CB4316F9262C03C77D"

@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class PrometheusCppConan(ConanFile):
     name = "prometheus-cpp"
@@ -43,20 +45,24 @@ class PrometheusCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        tools.check_min_cppstd(self, 11)
+        if not self.options.with_pull:
+            del self.options.with_compression
 
     def requirements(self):
         if self.options.with_pull:
-            self.requires("civetweb/1.13")
+            self.requires("civetweb/1.14")
         if self.options.with_push:
-            self.requires("libcurl/7.74.0")
-        if self.options.with_compression:
+            self.requires("libcurl/7.77.0")
+        if self.options.get_safe("with_compression"):
             self.requires("zlib/1.2.11")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -64,12 +70,12 @@ class PrometheusCppConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["USE_THIRDPARTY_LIBRARIES"] = False
         self._cmake.definitions["ENABLE_TESTING"] = False
-        self._cmake.definitions["OVERRIDE_CXX_STANDARD_FLAGS"] = False
+        self._cmake.definitions["OVERRIDE_CXX_STANDARD_FLAGS"] = not tools.valid_min_cppstd(self, 11)
 
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["ENABLE_PULL"] = self.options.with_pull
         self._cmake.definitions["ENABLE_PUSH"] = self.options.with_push
-        self._cmake.definitions["ENABLE_COMPRESSION"] = self.options.with_compression
+        if self.options.with_pull:
+            self._cmake.definitions["ENABLE_COMPRESSION"] = self.options.with_compression
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -83,6 +89,7 @@ class PrometheusCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "prometheus-cpp"
@@ -90,6 +97,7 @@ class PrometheusCppConan(ConanFile):
 
         self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package"] = "core"
         self.cpp_info.components["prometheus-cpp-core"].names["cmake_find_package_multi"] = "core"
+        self.cpp_info.components["prometheus-cpp-core"].names["pkg_config"] = "prometheus-cpp-core"
         self.cpp_info.components["prometheus-cpp-core"].libs = ["prometheus-cpp-core"]
         if self.settings.os == "Linux":
             self.cpp_info.components["prometheus-cpp-core"].system_libs = ["pthread", "rt"]
@@ -97,6 +105,7 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_push:
             self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package"] = "push"
             self.cpp_info.components["prometheus-cpp-push"].names["cmake_find_package_multi"] = "push"
+            self.cpp_info.components["prometheus-cpp-push"].names["pkg_config"] = "prometheus-cpp-push"
             self.cpp_info.components["prometheus-cpp-push"].libs = ["prometheus-cpp-push"]
             self.cpp_info.components["prometheus-cpp-push"].requires = [
                 "prometheus-cpp-core",
@@ -108,6 +117,7 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_pull:
             self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package"] = "pull"
             self.cpp_info.components["prometheus-cpp-pull"].names["cmake_find_package_multi"] = "pull"
+            self.cpp_info.components["prometheus-cpp-pull"].names["pkg_config"] = "prometheus-cpp-pull"
             self.cpp_info.components["prometheus-cpp-pull"].libs = ["prometheus-cpp-pull"]
             self.cpp_info.components["prometheus-cpp-pull"].requires = [
                 "prometheus-cpp-core",
