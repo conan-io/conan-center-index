@@ -1,0 +1,4 @@
+sources:
+  "0.6.22":
+    url: "https://github.com/libexif/libexif/releases/download/libexif-0_6_22-release/libexif-0.6.22.tar.gz"
+    sha256: "75dc5c135c61b5e0b15f3911b4de4b3070dd1a1683b9fc08d9ce3518d54d758d"
