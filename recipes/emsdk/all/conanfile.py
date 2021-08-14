@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 import os
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -14,6 +15,11 @@ class EmSDKConan(ConanFile):
     settings = "os", "arch"
 
     short_paths = True
+
+    def validate(self):
+        if self.settings.arch != "wasm":
+            raise ConanInvalidConfiguration(
+                "host arch should be wasm")
 
     @ property
     def _source_subfolder(self):
