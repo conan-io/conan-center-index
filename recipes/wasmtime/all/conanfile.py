@@ -66,7 +66,7 @@ class WasmtimeConan(ConanFile):
             self.output.warn(msg)
 
         try:
-            self.conan_data["sources"][self.version][self._sources_key]
+            self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)]
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
