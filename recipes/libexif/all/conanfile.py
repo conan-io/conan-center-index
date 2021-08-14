@@ -3,6 +3,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class LibexifConan(ConanFile):
     name = "libexif"
     url = "https://github.com/conan-io/conan-center-index"
@@ -13,9 +14,11 @@ class LibexifConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
     }
     
     _autotools = None
@@ -28,18 +31,24 @@ class LibexifConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def build_requirements(self):
         self.build_requires("gettext/0.20.1")
-        self.build_requires("automake/1.16.3")
+        self.build_requires("libtool/2.4.6")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def _configure_autotools(self):
         if self._autotools:
@@ -70,4 +79,5 @@ class LibexifConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["exif"]
         self.cpp_info.names["pkg_config"] = "libexif"
-        self.cpp_info.system_libs = ["m"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
