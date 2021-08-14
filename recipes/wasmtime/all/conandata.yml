@@ -4,6 +4,10 @@ sources:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.28.0/wasmtime-v0.28.0-x86_64-windows-c-api.zip"
         sha256: "9bc1c2dad2a281efb3b4c577c12b02f15b80e1c95e9f7cf1512895b469ca3ce4"
+    MinGW:
+      "x86_64":
+        url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.28.0/wasmtime-v0.28.0-x86_64-mingw-c-api.zip"
+        sha256: "477719cf2de83121c3f3b05b9fbe6eca322ba56b9508e86322ecf73ed8085479"
     Linux:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.28.0/wasmtime-v0.28.0-x86_64-linux-c-api.tar.xz"

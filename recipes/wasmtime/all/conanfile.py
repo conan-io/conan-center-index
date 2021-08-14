@@ -13,14 +13,8 @@ class WasmtimeConan(ConanFile):
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi")
     settings = "os", "compiler", "arch"
-    options = {
-        "shared": [True, False],
-        'fPIC': [True],
-    }
-    default_options = {
-        'shared': False,
-        'fPIC': True,
-    }
+    options = { "shared": [True, False] }
+    default_options = { 'shared': False }
     no_copy_source = True
 
     @property
@@ -33,8 +27,16 @@ class WasmtimeConan(ConanFile):
             "Visual Studio": "15",
             "apple-clang": "9.4",
             "clang": "3.3",
-            "gcc": "4.9.4"
+            "gcc": "5.1"
         }
+
+    @property
+    def _sources_key(self):
+        if self.settings.compiler == "Visual Studio":
+            return "Windows"
+        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            return "MinGW"
+        return str(self.settings.os)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -43,6 +45,7 @@ class WasmtimeConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        del self.settings.compiler.runtime
         if self.options.shared:
             del self.options.fPIC
 
@@ -63,19 +66,23 @@ class WasmtimeConan(ConanFile):
             self.output.warn(msg)
 
         try:
-            self.conan_data["sources"][self.version][str(self.settings.os)]
+            self.conan_data["sources"][self.version][self._sources_key]
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
+        if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
+            # https://github.com/bytecodealliance/wasmtime/issues/3168
+            raise ConanInvalidConfiguration("Shared mingw is currently not possible")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)], destination=self.source_folder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)], destination=self.source_folder, strip_root=True)
 
     def package(self):
         shutil.copytree(os.path.join(self.source_folder, "include"),
                         os.path.join(self.package_folder, "include"))
 
-        self.copy('*.lib', dst='lib', keep_path=False)
         self.copy('*.dll', dst='bin', keep_path=False)
+        self.copy('*.lib', dst='lib', keep_path=False)
         self.copy('*.so', dst='lib', keep_path=False)
         self.copy('*.dylib', dst='lib', keep_path=False)
         self.copy('*.a', dst='lib', keep_path=False)
