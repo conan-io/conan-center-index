@@ -17,9 +17,10 @@ class EmSDKConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if self.settings.arch != "wasm":
-            raise ConanInvalidConfiguration(
-                "host arch should be wasm")
+        if hasattr(self, "settings_target"):
+            if ['wasm', 'asm.js'].count(self.settings.arch) == 0:
+                raise ConanInvalidConfiguration(
+                    "Emscripten targets only arch=wasm or arch=asm.js, not {}.".format(self.settings_target.arch))
 
     @ property
     def _source_subfolder(self):
