@@ -79,6 +79,7 @@ class ICUBase(ConanFile):
             ("Windows", "gcc"): "MinGW",
             ("AIX", "gcc"): "AIX/GCC",
             ("AIX", "xlc"): "AIX",
+            ("Android", "clang"): "Linux",
             ("SunOS", "gcc"): "Solaris/GCC",
             ("Linux", "gcc"): "Linux/gcc",
             ("Linux", "clang"): "Linux",
