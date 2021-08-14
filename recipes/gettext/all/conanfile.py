@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
@@ -47,6 +48,10 @@ class GetTextConan(ConanFile):
         if self._is_msvc:
             self.build_requires("automake/1.16.3")
 
+    def validate(self):
+        if tools.Version(self.version) < "0.21" and self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
+
     def package_id(self):
         del self.info.settings.compiler
 
@@ -76,6 +81,7 @@ class GetTextConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         libiconv_prefix = tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)
         args = [
             "HELP2MAN=/bin/true",
@@ -116,6 +122,7 @@ class GetTextConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "gettext-tools", "misc", "autopoint.in"), "@prefix@", "$GETTEXT_ROOT_UNIX")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -139,6 +146,12 @@ class GetTextConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        aclocal = os.path.join(self.package_folder, "share", "aclocal").replace("\\", "/")
+        aclocal = tools.unix_path(os.path.join(self.package_folder, "share", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
+
+        autopoint = tools.unix_path(os.path.join(self.package_folder, "bin", "autopoint"))
+        self.output.info("Setting AUTOPOINT environment var: {}".format(autopoint))
+        self.env_info.AUTOPOINT = autopoint
+
+        self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)

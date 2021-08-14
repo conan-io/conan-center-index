@@ -34,9 +34,10 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
 
-        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+        self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            autotools.libs = []
             autotools.configure()
 
     def test(self):
