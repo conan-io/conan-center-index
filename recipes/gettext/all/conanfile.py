@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
@@ -27,7 +28,7 @@ class GetTextConan(ConanFile):
 
     @property
     def _user_info_build(self):
-        return getattr(self, "user_info_build", self.user_info)
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     @property
     def _is_msvc(self):
@@ -53,12 +54,32 @@ class GetTextConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            env = {
+                "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                "LD": "link -nologo",
+                "NM": "dumpbin -symbols",
+                "STRIP": ":",
+                "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
+                "RANLIB": ":",
+            }
+            with tools.vcvars(self):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    with tools.environment_append(env):
+                        yield
+        else:
+            yield
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         libiconv_prefix = tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)
         args = [
+            "HELP2MAN=/bin/true",
+            "EMACS=no",
             "--with-libiconv-prefix={}".format(libiconv_prefix),
             "--disable-shared",
             "--disable-static",
@@ -70,8 +91,6 @@ class GetTextConan(ConanFile):
             "--disable-csharp",
             "--disable-libasprintf",
             "--disable-curses",
-            "HELP2MAN=/bin/true",
-            "EMACS=no",
         ]
         build = None
         host = None
@@ -86,14 +105,6 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            args.extend([
-                "CC={} cl -nologo".format(self._user_info_build["automake"].compiler),
-                "LD=link",
-                "NM=dumpbin -symbols",
-                "STRIP=:",
-                "AR={} lib".format(self._user_info_build["automake"].ar_lib),
-                "RANLIB=:",
-            ])
             if rc:
                 args.extend([
                     "RC={}".format(rc),
@@ -105,17 +116,15 @@ class GetTextConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
-            with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                autotools = self._configure_autotools()
-                autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.vcvars(self) if self._is_msvc else tools.no_op():
-            with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                autotools = self._configure_autotools()
-                autotools.install()
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "include"))
         tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
@@ -124,6 +133,7 @@ class GetTextConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.resdirs = ["share"]
+        self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
