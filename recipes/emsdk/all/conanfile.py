@@ -17,14 +17,14 @@ class EmSDKConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if hasattr(self, "settings_target.arch"):
+        if hasattr(self, "settings_target"):
             if ['wasm', 'asm.js'].count(self.settings.arch) == 0:
                 raise ConanInvalidConfiguration(
                     "Emscripten targets only arch=wasm or arch=asm.js, not {}.".format(self.settings_target.arch))
-        if hasattr(self, "settings_build"):
-            if self.settings.arch == "armv8" and self.settings.settings_build.arch == "x86_64":
-                raise ConanInvalidConfiguration(
-                    "Apple M1 currently not supported")
+        # if hasattr(self, "settings_build"):
+        #     if self.settings.arch == "armv8" and self.settings_build.arch == "x86_64":
+        #         raise ConanInvalidConfiguration(
+        #             "Apple M1 currently not supported")
 
     @ property
     def _source_subfolder(self):
