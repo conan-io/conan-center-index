@@ -20,13 +20,13 @@ class XmlSecConan(ConanFile):
         "fPIC": [True, False],
         "with_openssl": [True, False],
         "with_xslt": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
-        "with_xslt": False
-        }
+        "with_xslt": False,
+    }
 
     generators = "pkg_config"
     _autotools = None
