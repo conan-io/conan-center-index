@@ -38,16 +38,10 @@ class WasmtimeConan(ConanFile):
             return "MinGW"
         return str(self.settings.os)
 
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         del self.settings.compiler.runtime
-        if self.options.shared:
-            del self.options.fPIC
 
     def validate(self):
         compiler = self.settings.compiler
@@ -71,7 +65,7 @@ class WasmtimeConan(ConanFile):
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
-            # https://github.com/bytecodealliance/wasmtime/issues/3168
+            # FIXME: https://github.com/bytecodealliance/wasmtime/issues/3168
             raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
     def source(self):
