@@ -77,7 +77,7 @@ class XmlSecConan(ConanFile):
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
             with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
