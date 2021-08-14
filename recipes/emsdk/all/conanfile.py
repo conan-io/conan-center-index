@@ -57,7 +57,7 @@ class EmSDKConan(ConanFile):
         self.copy(pattern='*', dst='bin',
                   src=self._source_subfolder, excludes=('*.pc', '*Find*.cmake', '*Box2DConfig.cmake', '*CTestConfig.cmake',
                                                         '*concrt140.dll', '*msvcr100.dll', '*concrt140d.dll', '*msvcp140.dll', '*msvcp140d.dll', '*vcruntime140.dll',
-                                                        '*vcruntime140_1.dll', '*vcruntime140_1d.dll', '*vcruntime140d.dl'))
+                                                        '*vcruntime140_1.dll', '*vcruntime140_1d.dll', '*vcruntime140d.dl', '*vcruntime140d.dll'))
         emsdk = self.package_folder
         emscripten = os.path.join(emsdk, 'bin', 'upstream', 'emscripten')
         toolchain = os.path.join(
