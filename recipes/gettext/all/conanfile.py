@@ -151,7 +151,7 @@ class GetTextConan(ConanFile):
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
 
         autopoint = tools.unix_path(os.path.join(self.package_folder, "bin", "autopoint"))
-        self.output.info("Setting AUTOPOINT environment var: {}".format(autopoint))
+        self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = autopoint
 
         self.env_info.GETTEXT_ROOT_UNIX = tools.unix_path(self.package_folder)
