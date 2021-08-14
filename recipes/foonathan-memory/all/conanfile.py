@@ -15,12 +15,14 @@ class FoonathanMemory(ConanFile):
     options = {
         "shared":          [True, False],
         "fPIC":            [True, False],
-        "with_tools":      [True, False]
+        "with_tools":      [True, False],
+        "with_sizecheck":  [True, False]
     }
     default_options = {
         "shared":            False,
         "fPIC":              True,
-        "with_tools":        False
+        "with_tools":        False,
+        "with_sizecheck":    True
     }
     generators = "cmake"
     exports_sources =  ["patches/**","CMakeLists.txt"]
@@ -70,6 +72,7 @@ class FoonathanMemory(ConanFile):
             self._cmake.definitions["FOONATHAN_MEMORY_BUILD_EXAMPLES"] = False
             self._cmake.definitions["FOONATHAN_MEMORY_BUILD_TESTS"] = False
             self._cmake.definitions["FOONATHAN_MEMORY_BUILD_TOOLS"] = self.options.with_tools
+            self._cmake.definitions["FOONATHAN_MEMORY_CHECK_ALLOCATION_SIZE"] = self.options.with_sizecheck
             self._cmake.configure()
         return self._cmake
 

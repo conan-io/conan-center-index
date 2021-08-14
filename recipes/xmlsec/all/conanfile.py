@@ -32,9 +32,9 @@ class XmlSecConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("libxml2/2.9.10")
+        self.requires("libxml2/2.9.12")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
 
@@ -54,9 +54,9 @@ class XmlSecConan(ConanFile):
 
     def build_requirements(self):
         if not self._is_msvc and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
 
     @property
     def _is_msvc(self):

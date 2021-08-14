@@ -1,5 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class XxHash(ConanFile):
@@ -40,15 +42,15 @@ class XxHash(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "xxHash-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake is None:
             self._cmake = CMake(self)
             self._cmake.definitions["XXHASH_BUNDLED_MODE"] = False
             self._cmake.definitions["XXHASH_BUILD_XXHSUM"] = self.options.utility
+            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
             self._cmake.configure()
         return self._cmake
 

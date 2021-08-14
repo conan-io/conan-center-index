@@ -74,6 +74,7 @@ class OpenSSLConan(ConanFile):
                "shared": [True, False],
                "fPIC": [True, False],
                "no_asm": [True, False],
+               "enable_weak_ssl_ciphers": [True, False],
                "386": [True, False],
                "no_sse2": [True, False],
                "no_bf": [True, False],
@@ -292,6 +293,7 @@ class OpenSSLConan(ConanFile):
     def _targets(self):
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         is_1_0 = self._full_version < "1.1.0"
+        has_darwin_arm = self._full_version >= "1.1.1i" or is_1_0
         return {
             "Linux-x86-clang": ("%slinux-generic32" % self._target_prefix) if is_1_0 else "linux-x86-clang",
             "Linux-x86_64-clang": ("%slinux-x86_64" % self._target_prefix) if is_1_0 else "linux-x86_64-clang",
@@ -328,6 +330,7 @@ class OpenSSLConan(ConanFile):
             "Macos-ppc32be-*": "%sdarwin-ppc-cc" % self._target_prefix,
             "Macos-ppc64-*": "darwin64-ppc-cc",
             "Macos-ppc64be-*": "darwin64-ppc-cc",
+            "Macos-armv8-*": "darwin64-arm64-cc" if has_darwin_arm else "darwin-common",
             "Macos-*-*": "darwin-common",
             "iOS-x86_64-*": "darwin64-x86_64-cc",
             "iOS-*-*": "iphoneos-cross",
@@ -627,7 +630,10 @@ class OpenSSLConan(ConanFile):
     def _perl(self):
         if tools.os_info.is_windows and not self._win_bash:
             # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
-            return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
+            if "strawberryperl" in self.deps_cpp_info.deps:
+                return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
+            elif hasattr(self, "user_info_build") and "strawberryperl" in self.user_info_build:
+                return self.user_info_build["strawberryperl"].perl
         return "perl"
 
     @property
@@ -721,6 +727,9 @@ class OpenSSLConan(ConanFile):
                                     base_path=self._source_subfolder)
                     self._create_targets()
                 else:
+                    if self.settings.os == "Macos":
+                        tools.patch(patch_file=os.path.join("patches", "1.0.2u-darwin-arm64.patch"),
+                                    base_path=self._source_subfolder)
                     self._patch_configure()
                     self._patch_makefile_org()
                 with self._make_context():

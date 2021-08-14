@@ -59,11 +59,10 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHAREDR} m)
-@@ -393,16 +393,11 @@ endif(UNIX)
- add_library(${qhull_SHARED} SHARED 
+@@ -394,15 +394,11 @@ add_library(${qhull_SHARED} SHARED
          ${libqhull_SOURCES}
          src/libqhull/qhull-exports.def)
--        
+         
 -if(qhull_SHARED MATCHES "libqhull")
 -   set(qhull_OUTPUT_NAME qhull)
 -   set_target_properties(${qhull_SHARED} PROPERTIES
@@ -78,7 +77,7 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHARED} m)
-@@ -427,7 +422,8 @@ add_library(${qhull_SHAREDP} SHARED
+@@ -427,7 +423,8 @@ add_library(${qhull_SHAREDP} SHARED
  set_target_properties(${qhull_SHAREDP} PROPERTIES
      COMPILE_DEFINITIONS "qh_QHpointer"
      SOVERSION ${qhull_SOVERSION}
@@ -88,7 +87,7 @@
  
  if(UNIX)
      target_link_libraries(${qhull_SHAREDP} m)
-@@ -448,11 +444,13 @@ endif(UNIX)
+@@ -448,11 +445,13 @@ endif(UNIX)
  
  add_library(${qhull_STATIC} STATIC ${libqhull_SOURCES})
  set_target_properties(${qhull_STATIC} PROPERTIES
@@ -104,7 +103,7 @@
  
  if(UNIX)
      target_link_libraries(${qhull_STATIC} m)
-@@ -466,7 +464,8 @@ endif(UNIX)
+@@ -466,7 +465,8 @@ endif(UNIX)
  
  add_library(${qhull_CPP} STATIC ${libqhullcpp_SOURCES})
  set_target_properties(${qhull_CPP} PROPERTIES
@@ -114,7 +113,15 @@
  
  # ---------------------------------------
  # Define qhull executables linked to qhullstatic library
-@@ -661,10 +660,7 @@ install(
+@@ -619,6 +619,7 @@ add_test(NAME user_eg3
+ 
+ install(TARGETS ${qhull_TARGETS_INSTALL} EXPORT QhullTargets
+         RUNTIME DESTINATION ${BIN_INSTALL_DIR}
++        BUNDLE DESTINATION ${BIN_INSTALL_DIR}
+         LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+         ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+         INCLUDES DESTINATION include)
+@@ -661,10 +662,7 @@ install(
  )
  
  install(FILES ${libqhull_HEADERS}    DESTINATION ${INCLUDE_INSTALL_DIR}/libqhull)

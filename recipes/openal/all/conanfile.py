@@ -35,40 +35,6 @@ class OpenALConan(ConanFile):
             del self.options.fPIC
 
     @property
-    def _supports_cxx14(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
-                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
-        min_version = {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "5",
-        }.get(str(self.settings.compiler))
-        if min_version:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                return False, "This compiler version does not support c++14"
-            else:
-                return True, "Unknown compiler. Assuming your compiler supports c++14"
-        return True, None
-
-    @property
-    def _supports_cxx11(self):
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
-            if tools.Version(self.settings.compiler.version) < "9":
-                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
-        min_version = {
-            "Visual Studio": "13",
-            "gcc": "5",
-            "clang": "5",
-        }.get(str(self.settings.compiler))
-        if min_version:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                return False, "This compiler version does not support c++11"
-            else:
-                return True, "Unknown compiler. Assuming your compiler supports c++11"
-        return True, None
-
-    @property
     def _openal_cxx_backend(self):
         return tools.Version(self.version) >= "1.20"
 
@@ -81,6 +47,39 @@ class OpenALConan(ConanFile):
         if not self._openal_cxx_backend:
             del self.settings.compiler.libcxx
 
+    def requirements(self):
+        if self.settings.os == "Linux":
+            self.requires("libalsa/1.2.4")
+
+    @property
+    def _supports_cxx14(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
+        min_version = {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+            return False, "This compiler version does not support c++14"
+        return True, None
+
+    @property
+    def _supports_cxx11(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
+        min_version = {
+            "Visual Studio": "13",
+            "gcc": "5",
+            "clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_version and tools.Version(self.settings.compiler.version) < min_version:
+            return False, "This compiler version does not support c++11"
+        return True, None
+
+    def validate(self):
         if tools.Version(self.version) >= "1.21":
             ok, msg = self._supports_cxx14
             if not ok:
@@ -93,10 +92,6 @@ class OpenALConan(ConanFile):
                 raise ConanInvalidConfiguration(msg)
             if msg:
                 self.output.warn(msg)
-
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("libalsa/1.2.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -169,7 +164,7 @@ class OpenALConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])

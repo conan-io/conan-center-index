@@ -1,0 +1,11 @@
+--- a/contrib/minizip/miniunz.c
++++ b/contrib/minizip/miniunz.c
+@@ -52,6 +52,8 @@
+ #else
+ # include <unistd.h>
+ # include <utime.h>
++#include <sys/stat.h>
++#include <sys/types.h>
+ #endif
+ 
+ 

@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,7 +61,7 @@ configure_package_config_file(mdnsdConfig.cmake.in mdnsdConfig.cmake
+ install(
+     TARGETS mdnsd mquery
+     EXPORT mdnsd
+-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    DESTINATION "${CMAKE_INSTALL_BINDIR}"
+ )
+ install(
+     FILES "${PROJECT_SOURCE_DIR}/LICENSE"

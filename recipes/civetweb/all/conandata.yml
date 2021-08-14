@@ -5,3 +5,10 @@ sources:
   "1.14":
     url: "https://github.com/civetweb/civetweb/archive/v1.14.tar.gz"
     sha256: "d02d7ab091c8b4edf21fc13a03c6db08a8a8b8605e35e0073251b9d88443c653"
+patches:
+  "1.13":
+    - patch_file: "patches/0001-fix-install-bundle.patch"
+      base_path: "source_subfolder"
+  "1.14":
+    - patch_file: "patches/0001-fix-install-bundle.patch"
+      base_path: "source_subfolder"

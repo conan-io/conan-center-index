@@ -1,4 +1,7 @@
 sources:
+  "4.4.23":
+    url: "https://github.com/besser82/libxcrypt/archive/v4.4.23.tar.gz"
+    sha256: "9cbbcb795ed5d121a1613eb0e40c77173b53e15a746796fc7cd7bd71cfd64533"
   "4.4.22":
     url: "https://github.com/besser82/libxcrypt/archive/v4.4.22.tar.gz"
     sha256: "8d67c33837b8e5e930ca878c88f1856913b749cc95844fb11e7f1b4c8aab4f8e"

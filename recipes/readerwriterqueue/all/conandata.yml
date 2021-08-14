@@ -1,4 +1,7 @@
 sources:
+  "1.0.5":
+    url: "https://github.com/cameron314/readerwriterqueue/archive/v1.0.5.tar.gz"
+    sha256: "7c88aac9924885d733355c72e3b3d2de30665a64e10bf079af85c95f8419ecb9"
   "1.0.3":
     url: https://github.com/cameron314/readerwriterqueue/archive/v1.0.3.zip
     sha256: a7dd85427ea50f76978f488d1de13b249f24385303deb2c480c225fec084a1b5

@@ -29,3 +29,5 @@ versions:
     folder: all
   "3.35.5":
     folder: all
+  "3.36.0":
+    folder: all

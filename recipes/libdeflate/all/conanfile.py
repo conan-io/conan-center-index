@@ -1,6 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibdeflateConan(ConanFile):
     name = "libdeflate"
@@ -31,11 +33,11 @@ class LibdeflateConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
            not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_msvc(self):
         makefile_msc_file = os.path.join(self._source_subfolder, "Makefile.msc")

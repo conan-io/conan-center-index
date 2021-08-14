@@ -1,0 +1,39 @@
+--- a/configure.in
++++ b/configure.in
+@@ -421,6 +421,7 @@
+ AC_CHECK_LIB(termcap, initscr, HAVE_TERMCAP="termcap")
+ AC_CHECK_LIB(curses, initscr, HAVE_TERMCAP="curses")
+ AC_CHECK_LIB(ncurses, initscr, HAVE_TERMCAP="ncurses")
++AC_CHECK_HEADERS(langinfo.h, AC_CHECK_FUNCS(nl_langinfo))
+ 
+ AM_ICONV
+
+--- a/frontend/parse.c
++++ b/frontend/parse.c
+@@ -70,7 +70,7 @@
+ #ifdef HAVE_ICONV
+ #include <iconv.h>
+ #include <errno.h>
+-#ifdef HAVE_LANGINFO
++#ifdef HAVE_LANGINFO_H
+ #include <locale.h>
+ #include <langinfo.h>
+ #endif
+@@ -151,7 +151,7 @@
+ static char*
+ currentCharacterEncoding()
+ {
+-#ifdef HAVE_LANGINFO
++#ifdef HAVE_LANGINFO_H
+     char* cur_code = nl_langinfo(CODESET);
+ #else
+     char* env_lang = getenv("LANG");
+@@ -1527,7 +1527,7 @@
+     enum TextEncoding id3_tenc = TENC_LATIN1;
+ #endif
+ 
+-#ifdef HAVE_ICONV
++#ifdef HAVE_LANGINFO_H
+     setlocale(LC_CTYPE, "");
+ #endif
+     inPath[0] = '\0';

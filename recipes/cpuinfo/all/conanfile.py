@@ -1,7 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CpuinfoConan(ConanFile):
@@ -43,13 +44,14 @@ class CpuinfoConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("shared cpuinfo not supported on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("cpuinfo-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -72,6 +74,14 @@ class CpuinfoConan(ConanFile):
         self._cmake.definitions["CLOG_RUNTIME_TYPE"] = "default"
         self._cmake.definitions["CLOG_BUILD_TESTS"] = False
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+
+        # CMAKE_SYSTEM_PROCESSOR must be manually set if cross-building
+        if tools.cross_building(self.settings):
+            cmake_system_processor = {
+                "armv8": "arm64",
+                "armv8.3": "arm64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake

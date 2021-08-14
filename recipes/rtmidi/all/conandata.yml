@@ -1,0 +1,10 @@
+sources:
+  "4.0.0":
+    url: "http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-4.0.0.tar.gz"
+    sha256: "370cfe710f43fbeba8d2b8c8bc310f314338c519c2cf2865e2d2737b251526cd"
+patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-add-a-separate-licence-file-0b5d67c.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/4.0.0-0002-rtmidiconfig-install-location-da51f21.patch"
+      base_path: "source_subfolder"
