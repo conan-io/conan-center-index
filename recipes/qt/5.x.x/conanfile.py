@@ -1077,6 +1077,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtwinextras:
             _create_module("WinExtras")
+            self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")
 
         if self.options.qtxmlpatterns:
              _create_module("XmlPatterns", ["Network"])
