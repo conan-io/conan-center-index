@@ -17,7 +17,7 @@ class EmSDKConan(ConanFile):
     short_paths = True
 
     def validate(self):
-        if hasattr(self, "settings_target"):
+        if hasattr(self, "settings_target.arch"):
             if ['wasm', 'asm.js'].count(self.settings.arch) == 0:
                 raise ConanInvalidConfiguration(
                     "Emscripten targets only arch=wasm or arch=asm.js, not {}.".format(self.settings_target.arch))
