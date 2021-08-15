@@ -6,5 +6,5 @@ patches:
   "0.5.0":
     - patch_file: "patches/0001-disable-tools.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-cmake-use-conan-targets.patch"
+    - patch_file: "patches/0002-cmake-fix-targets.patch"
       base_path: "source_subfolder"
