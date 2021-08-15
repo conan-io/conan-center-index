@@ -45,7 +45,6 @@ class LibgcryptConan(ConanFile):
     def _configure(self):
         if self._autotools:
             return self._autotools
-        host = None
         args = ["--disable-doc"]
         args.append("--with-libgpg-error-prefix={}".format(self.deps_cpp_info["libgpg-error"].rootpath))
         if self.options.get_safe("fPIC", True):
