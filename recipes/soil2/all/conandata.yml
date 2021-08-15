@@ -1,0 +1,4 @@
+sources:
+  "1.20":
+    url: "https://github.com/SpartanJ/SOIL2/archive/release-1.20.tar.gz"
+    sha256: "abf32ed4dc3c713992d87a4fa8c9f0cce83c41f9b5dbf3a6fd0815659a3eee5e"
