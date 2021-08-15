@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class LibjxlConan(ConanFile):
     name = "libjxl"
     description = "JPEG XL image format reference implementation"
-    license = "Apache-2.0"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
