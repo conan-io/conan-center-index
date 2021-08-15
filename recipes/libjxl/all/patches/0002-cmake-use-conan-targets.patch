@@ -1,19 +1,27 @@
 --- a/lib/jxl.cmake
 +++ b/lib/jxl.cmake
-@@ -288,10 +288,8 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
+@@ -300,9 +300,8 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
  )
  
- set(JPEGXL_INTERNAL_LIBS
--  brotlicommon-static
--  brotlienc-static
+ set(JPEGXL_DEC_INTERNAL_LIBS
 -  brotlidec-static
+-  brotlicommon-static
 -  hwy
 +  CONAN_PKG::brotli
 +  CONAN_PKG::highway
-   Threads::Threads
-   ${CMAKE_DL_LIBS}
  )
-@@ -300,7 +298,7 @@ if (JPEGXL_ENABLE_SKCMS)
+ 
+ if(JPEGXL_ENABLE_PROFILER)
+@@ -311,7 +310,7 @@ endif()
+ 
+ set(JPEGXL_INTERNAL_LIBS
+   ${JPEGXL_DEC_INTERNAL_LIBS}
+-  brotlienc-static
++  CONAN_PKG::brotli
+   Threads::Threads
+ )
+ 
+@@ -328,7 +327,7 @@ if (JPEGXL_ENABLE_SKCMS)
    list(APPEND JPEGXL_INTERNAL_FLAGS -DJPEGXL_ENABLE_SKCMS=1)
    list(APPEND JPEGXL_INTERNAL_LIBS skcms)
  else ()
@@ -21,8 +29,8 @@
 +  list(APPEND JPEGXL_INTERNAL_LIBS CONAN_PKG::lcms)
  endif ()
  
- set(OBJ_COMPILE_DEFINITIONS
-@@ -321,8 +319,9 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ if (NOT JPEGXL_ENABLE_TRANSCODE_JPEG)
+@@ -353,8 +352,9 @@ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_dec-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -34,7 +42,7 @@
  )
  target_compile_definitions(jxl_dec-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -336,8 +335,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+@@ -371,8 +371,9 @@ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_include_directories(jxl_enc-obj PUBLIC
    ${PROJECT_SOURCE_DIR}
    ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -46,7 +54,7 @@
  )
  target_compile_definitions(jxl_enc-obj PUBLIC
    ${OBJ_COMPILE_DEFINITIONS}
-@@ -353,10 +353,10 @@ if (JPEGXL_ENABLE_SKCMS)
+@@ -391,10 +392,10 @@ if (JPEGXL_ENABLE_SKCMS)
    )
  else ()
    target_include_directories(jxl_enc-obj PRIVATE
@@ -59,16 +67,16 @@
    )
  endif ()
  
-@@ -392,7 +392,7 @@ add_library(jxl_dec-static STATIC
+@@ -430,7 +431,7 @@ add_library(jxl_dec-static STATIC
    $<TARGET_OBJECTS:jxl_dec-obj>
  )
  target_link_libraries(jxl_dec-static
--  PUBLIC ${JPEGXL_COVERAGE_FLAGS} ${JPEGXL_INTERNAL_LIBS} hwy)
-+  PUBLIC ${JPEGXL_COVERAGE_FLAGS} ${JPEGXL_INTERNAL_LIBS})
+-  PUBLIC ${JPEGXL_COVERAGE_FLAGS} ${JPEGXL_DEC_INTERNAL_LIBS} hwy)
++  PUBLIC ${JPEGXL_COVERAGE_FLAGS} ${JPEGXL_DEC_INTERNAL_LIBS})
  target_include_directories(jxl_dec-static PUBLIC
    "${PROJECT_SOURCE_DIR}"
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-@@ -407,7 +407,7 @@ add_library(jxl-static STATIC
+@@ -445,7 +446,7 @@ add_library(jxl-static STATIC
    $<TARGET_OBJECTS:jxl_dec-obj>
  )
  target_link_libraries(jxl-static
@@ -77,3 +85,15 @@
  target_include_directories(jxl-static PUBLIC
    "${PROJECT_SOURCE_DIR}"
    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+
+--- a/lib/jxl_profiler.cmake
++++ b/lib/jxl_profiler.cmake
+@@ -11,7 +11,7 @@ set(JPEGXL_PROFILER_SOURCES
+ 
+ ### Static library.
+ add_library(jxl_profiler STATIC ${JPEGXL_PROFILER_SOURCES})
+-target_link_libraries(jxl_profiler PUBLIC hwy)
++target_link_libraries(jxl_profiler PUBLIC CONAN_PKG::highway)
+ 
+ target_compile_options(jxl_profiler PRIVATE ${JPEGXL_INTERNAL_FLAGS})
+ target_compile_options(jxl_profiler PUBLIC ${JPEGXL_COVERAGE_FLAGS})

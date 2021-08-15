@@ -1,9 +1,9 @@
 sources:
-  "0.3.7":
-    url: "https://github.com/libjxl/libjxl/archive/v0.3.7.zip"
-    sha256: "671284bf97465cf969926594ce2dc5110919a0ea91b4a32df27227042ea64f2e"
+  "0.5.0":
+    url: "https://github.com/libjxl/libjxl/archive/v0.5.zip"
+    sha256: "a208be41542c6f81f10a82c6bb4bc75d3eceb9d4f7ecb6ea0ad2f2d236694c4b"
 patches:
-  "0.3.7":
+  "0.5.0":
     - patch_file: "patches/0001-disable-tools.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-cmake-use-conan-targets.patch"

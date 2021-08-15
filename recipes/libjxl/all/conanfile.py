@@ -11,7 +11,7 @@ class LibjxlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
-    requires = "brotli/1.0.9", "highway/0.11.1", "lcms/2.11"
+    requires = "brotli/1.0.9", "highway/0.12.2", "lcms/2.11"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}

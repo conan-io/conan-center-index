@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -149,8 +149,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+@@ -150,8 +150,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  if(JPEGXL_STATIC)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
    set(BUILD_SHARED_LIBS 0)
@@ -9,7 +9,7 @@
    if (MINGW)
      # In MINGW libstdc++ uses pthreads directly. When building statically a
      # program (regardless of whether the source code uses pthread or not) the
-@@ -322,6 +320,3 @@ endif ()
+@@ -331,6 +329,3 @@ endif ()
  if (${JPEGXL_ENABLE_PLUGINS})
  add_subdirectory(plugins)
  endif ()
@@ -19,7 +19,7 @@
 
 --- a/lib/CMakeLists.txt
 +++ b/lib/CMakeLists.txt
-@@ -128,7 +128,6 @@ endif()  #!MSVC
+@@ -119,7 +119,6 @@ endif()  #!MSVC
  include(jxl.cmake)
  
  # Other libraries outside the core jxl library.
