@@ -54,11 +54,9 @@ class LibgcryptConan(ConanFile):
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--disable-shared", "--enable-static"])
-        if self.settings.os == "Linux" and self.settings.arch == "x86":
-            host = "i686-linux-gnu"
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(args=args, host=host, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
