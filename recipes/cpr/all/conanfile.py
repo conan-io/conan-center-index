@@ -223,12 +223,14 @@ class CprConan(ConanFile):
                 else "Invalid value of ssl option, {}".format(ssl_library)
             )
 
-        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL) and ssl_library != self.options["libcurl"].with_ssl:
+        if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('with_ssl')))
+            
+        if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
 
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-
 
     def build(self):
         self._patch_sources()

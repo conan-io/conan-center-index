@@ -1,5 +1,14 @@
 # Changelog
 
+### 3-August-2021 - 13:29 CEST
+
+- [feature] BuildSingleReference: Create packages for apple-clang armv8 (Apple M1) in pull-requests' builds.
+- [feature] BuildSingleReference: Enforce empty workspace for Windows and MacOS nodes.
+- [feature] Different approach to work with configuration files for profiles (internal modularibility).
+- [feature] Allow jobs to use multiple configuration files for profiles.
+- [fix] ValidateInfrastructure: Minor fixes to the automatic generation of "Supported platforms and configurations" documentation page.
+- [fix] PromotePackages: Fix promotion of references that contain symbols.
+
 ### 13-July-2021 - 10:24 CEST
 
 - [fix] DeleteRepo: Fix JFrog CLI commands.

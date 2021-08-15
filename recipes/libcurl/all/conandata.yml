@@ -48,12 +48,24 @@ patches:
   "7.72.0":
     - patch_file: "patches/002-add-missing-file-FindZstd.patch"
       base_path: "source_subfolder"
+  "7.69.1":
+    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
+      base_path: "source_subfolder"
+  "7.68.0":
+    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
+      base_path: "source_subfolder"
   "7.67.0":
     - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
       base_path: "source_subfolder"
   "7.66.0":
     - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/003-cross-build-run-ifelse-7.66.0.patch"
+      base_path: "source_subfolder"
   "7.64.1":
     - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-cross-build-run-ifelse-7.64.1.patch"
       base_path: "source_subfolder"

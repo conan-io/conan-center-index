@@ -1,13 +1,15 @@
 versions:
   "2.8.1":
-    folder: "all"
+    folder: "2.x.x"
   "2.8.2":
-    folder: "all"
+    folder: "2.x.x"
   "2.8.3":
-    folder: "all"
+    folder: "2.x.x"
   "3.0.0":
     folder: "3.x.x"
   "3.1.0":
     folder: "3.x.x"
   "3.2.0":
+    folder: "3.x.x"
+  "3.2.1":
     folder: "3.x.x"
