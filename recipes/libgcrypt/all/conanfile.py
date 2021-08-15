@@ -9,7 +9,7 @@ class LibgcryptConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnupg.org/download/index.html#libgcrypt"
     description = "Libgcrypt is a general purpose cryptographic library originally based on code from GnuPG"
-    topics = ("conan", "libgcrypt", "gcrypt", "gnupg", "gpg", "crypto", "cryptography")
+    topics = ("libgcrypt", "gcrypt", "gnupg", "gpg", "crypto", "cryptography")
     license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -20,7 +20,7 @@ class LibgcryptConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    requires = 'libgpg-error/1.36'
+
     _autotools = None
 
     @property
@@ -38,6 +38,9 @@ class LibgcryptConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def requirements(self):
+        self.requires("libgpg-error/1.36")
 
     def _configure(self):
         if self._autotools:
