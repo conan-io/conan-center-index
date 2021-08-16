@@ -75,6 +75,9 @@ class ConanFile(ConanFile):
         # Remove cmake targets
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
+        # Remove pkgconfig files
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
         # Remove documentation
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
