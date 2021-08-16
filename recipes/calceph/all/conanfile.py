@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
 import os
 
 required_conan_version = ">=1.33.0"
@@ -61,15 +62,20 @@ class CalcephConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @contextmanager
+    def _msvc_build_environment(self):
+        with tools.chdir(self._source_subfolder):
+            with tools.vcvars(self.settings):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    yield
+
     def build(self):
         if self.settings.compiler == "Visual Studio":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.vc"),
                                   "CFLAGS = /O2 /GR- /MD /nologo /EHs",
                                   "CFLAGS = /nologo /EHs")
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f Makefile.vc {}".format(" ".join(self._get_nmake_args())))
+            with self._msvc_build_environment():
+                self.run("nmake -f Makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
             autotools = self._configure_autotools()
             autotools.make()
@@ -102,10 +108,8 @@ class CalcephConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f Makefile.vc install {}".format(" ".join(self._get_nmake_args())))
+            with self._msvc_build_environment():
+                self.run("nmake -f Makefile.vc install {}".format(" ".join(self._get_nmake_args())))
             tools.rmdir(os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
