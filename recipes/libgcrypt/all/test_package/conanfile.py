@@ -11,9 +11,6 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def requirements(self):
-        self.requires("libcap/2.50")
-
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")

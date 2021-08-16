@@ -43,6 +43,7 @@ class LibgcryptConan(ConanFile):
 
     def requirements(self):
         self.requires("libgpg-error/1.36")
+        self.requires("libcap/2.50")
 
     def _configure(self):
         if self._autotools:
