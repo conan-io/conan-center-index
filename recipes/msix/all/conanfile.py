@@ -42,6 +42,12 @@ class MsixConan(ConanFile):
     _cmake = None
 
     @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15"
+        }
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -67,6 +73,19 @@ class MsixConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def _validate_compiler_settings(self):
+        compiler = self.settings.compiler
+        if compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        elif tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires C++17 support. The current compiler {} {} does not support it.".format(
+                    self.name, self.settings.compiler, self.settings.compiler.version))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -75,8 +94,6 @@ class MsixConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
 
     def requirements(self):
         if self.settings.os == "Linux" and not self.options.skip_bundles:
@@ -110,6 +127,8 @@ class MsixConan(ConanFile):
         if (self.options.xml_parser == "xerces" and
             self.options["xerces-c"].char_type != "char16_t"):
                 raise ConanInvalidConfiguration("Only char16_t is supported for xerces-c")
+        
+        self._validate_compiler_settings()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
