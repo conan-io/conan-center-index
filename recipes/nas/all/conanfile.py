@@ -63,11 +63,10 @@ class NasRecipe(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
             self.run("imake -DUseInstalled -I{} -DUsrLibDir={}".format(os.path.join(self._user_info_build["xorg-cf-files"].CONFIG_PATH), os.path.join(self.package_folder, "lib")), run_environment=True)
             autotools = self._configure_autotools()
             with tools.environment_append(autotools.vars):
-                env_build.make(target="World")
+                autotools.make(target="World")
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
