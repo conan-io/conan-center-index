@@ -1,7 +1,6 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -11,8 +10,8 @@ class PlatformInterfacesConan(ConanFile):
     license = "LGPL-3.0-or-later"
     homepage = "https://github.com/linksplatform/Equality"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """platform.delegates is one of the libraries of the LinksPlatform modular framework,
-    which uses innovations from the C++20 standard, for slow parody any typing dictionary and others."""
+    description = "platform.delegates is one of the libraries of the LinksPlatform modular framework, " \
+        "which uses innovations from the C++20 standard, for slow parody any typing dictionary and others."
     topics = ("linksplatform", "cpp20", "equality", "ranges", "any", "header-only")
     settings = "compiler"
     no_copy_source = True
