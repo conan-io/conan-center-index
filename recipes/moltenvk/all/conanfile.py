@@ -155,6 +155,11 @@ class MoltenVKConan(ConanFile):
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
 
+        if self.options.shared:
+            moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
+            self.output.info("Appending VK_ICD_FILENAMES environment variable: {}".format(moltenvk_icd_path))
+            self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
+
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
