@@ -13,11 +13,18 @@ class LibjpegConan(ConanFile):
     topics = ("conan", "image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
     license = "http://ijg.org/files/README"
     homepage = "http://ijg.org"
-    exports_sources = ["Win32.Mak", "patches/**"]
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
 
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    exports_sources = ["Win32.Mak", "patches/**"]
     _autotools = None
 
     @property
