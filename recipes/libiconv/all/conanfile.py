@@ -107,7 +107,7 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if self._is_msvc:
+        if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-FS")
 
         self._autotools.configure(args=configure_args, host=host, build=build)
