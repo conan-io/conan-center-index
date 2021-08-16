@@ -711,6 +711,7 @@ class QtConan(ConanFile):
             core_reqs.append("icu::icu")
 
         _create_module("Core", core_reqs)
+        _create_module("Platform")
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
