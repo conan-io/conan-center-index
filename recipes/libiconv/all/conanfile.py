@@ -127,8 +127,7 @@ class LibiconvConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcharset.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libiconv.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         if self._is_msvc and self.options.shared:
