@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(example test_package.c)
-target_link_libraries(example ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
