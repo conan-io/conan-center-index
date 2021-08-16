@@ -33,6 +33,7 @@ and have future-proof scalability."""
             del self.options.fPIC
         if tools.Version(self.version) < "2021.2.0":
             del self.options.shared
+            del self.options.fPIC
 
     def configure(self):
         if self.options.get_safe("shared", True):
