@@ -150,6 +150,7 @@ class LibjpegConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "JPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
+        self.cpp_info.names["pkg_config"] = "libjpeg"
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["libjpeg"]
         else:
