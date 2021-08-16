@@ -33,7 +33,7 @@ class MingwConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
 
-    def source(self):
+    def _download_sources(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
 
         if self.settings.os == "Windows":
@@ -52,6 +52,8 @@ class MingwConan(ConanFile):
         return "x86_64-w64-mingw32"
 
     def build(self):
+        self._download_sources()
+
         if self.settings.os == "Windows":
             return
 
@@ -203,6 +205,19 @@ class MingwConan(ConanFile):
                     autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-crt"),
                                         args=conf_args, target=False, host=target_tag, build=False,
                                         use_default_install_dirs=False)
+                    autotools.make()
+                    autotools.install()
+
+                self.output.info("Building mingw-w64-libraries-winpthread ...")
+                os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread"))
+                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread")):
+                    autotools = AutoToolsBuildEnvironment(self)
+                    conf_args = [
+                        "--disable-shared",
+                        "--enable-static",
+                    ]
+                    autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
+                                        args=conf_args, target=False, host=target_tag, build=False)
                     autotools.make()
                     autotools.install()
 
