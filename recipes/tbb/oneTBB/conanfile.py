@@ -29,7 +29,7 @@ and have future-proof scalability."""
     }
 
     def config_options(self):
-        if self.setting.os == "Windows":
+        if self.settings.os == "Windows":
             del self.options.fPIC
         if tools.Version(self.version) < "2021.2.0":
             del self.options.shared
