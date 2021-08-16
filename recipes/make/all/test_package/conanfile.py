@@ -1,11 +1,22 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-import os
+import contextlib
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        if hasattr(self, "settings_build"):
+            # Environments are not inherited when cross building, so manually set the `CONANMAKE_PROGRAM' environment variable
+            with tools.environment_append({"CONAN_MAKE_PROGRAM": self.deps_user_info["make"].make}):
+                yield
+        else:
+            yield
+
     def test(self):
-        with tools.chdir(self.source_folder), tools.remove_from_path("make"):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.make(args=["love"])
+        if not tools.cross_building(self):
+            with tools.chdir(self.source_folder):
+                with self._build_context():
+                    env_build = AutoToolsBuildEnvironment(self)
+                    env_build.make(args=["love"])

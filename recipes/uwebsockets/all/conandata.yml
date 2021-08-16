@@ -9,3 +9,6 @@ sources:
     url: "https://github.com/uNetworking/uWebSockets/archive/v19.2.0.tar.gz"
     sha256: "2956075293090754bc2431c53634f93a1e74739c61392be6040cb3ed29430ec2"
 
+  "19.3.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v19.3.0.tar.gz"
+    sha256: "6f709b4e5fe053a94a952da93c07c919b36bcb8c838c69067560ae85f97c5621"

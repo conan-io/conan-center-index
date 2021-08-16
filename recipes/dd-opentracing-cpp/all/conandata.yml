@@ -1,0 +1,8 @@
+sources:
+  "1.3.0":
+    url: https://github.com/DataDog/dd-opentracing-cpp/archive/refs/tags/v1.3.0.tar.gz
+    sha256: 16aad0c0daed054d4bcdf68cf069956e8d3b0c60a33c2162ad655a17b33b65e4
+patches:
+  "1.3.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-Find-packages-setup.patch"

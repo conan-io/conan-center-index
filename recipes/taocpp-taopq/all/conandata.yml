@@ -1,4 +1,7 @@
 sources:
-  "20200222":
-    sha256: 97bff32a3cd17c86d71a974f3a3d2bcd37b7f49647853ee6e7b196ae9dc0f575
-    url: https://github.com/taocpp/taopq/archive/b7f66c8dbe993cba250c8e9f0878128b1ad74ff9.zip
+  "cci.20210727":
+    sha256: 7d5b801984f71140a8579989e29b746d56167eccb710d821b2336eac723b51a3
+    url: https://github.com/taocpp/taopq/archive/3212b6eb74637277b40095d2ab2db872a76c6d9f.tar.gz
+  "cci.20200222":
+    sha256: d10d29dace4d752484c3174bf07903b471c8746d06e9ca0e3e85c4bed676edaa
+    url: https://github.com/taocpp/taopq/archive/b7f66c8dbe993cba250c8e9f0878128b1ad74ff9.tar.gz

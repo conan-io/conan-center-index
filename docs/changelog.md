@@ -1,11 +1,41 @@
 # Changelog
 
+### 3-August-2021 - 13:29 CEST
+
+- [feature] BuildSingleReference: Create packages for apple-clang armv8 (Apple M1) in pull-requests' builds.
+- [feature] BuildSingleReference: Enforce empty workspace for Windows and MacOS nodes.
+- [feature] Different approach to work with configuration files for profiles (internal modularibility).
+- [feature] Allow jobs to use multiple configuration files for profiles.
+- [fix] ValidateInfrastructure: Minor fixes to the automatic generation of "Supported platforms and configurations" documentation page.
+- [fix] PromotePackages: Fix promotion of references that contain symbols.
+
+### 13-July-2021 - 10:24 CEST
+
+- [fix] DeleteRepo: Fix JFrog CLI commands.
+
+### 07-July-2021 - 08:36 CEST
+
+- [feature] UpgradeConan: Upgrade pip before installing Conan.
+- [feature] Upgrade Conan client to the 1.37.2 version.
+
+### 02-July-2021 - 16:45 CEST
+
+- [feature] Do not run the CI for branches starting with `bot/...` (branches intended for automations).
+- [feature] Remove all remotes when configuring the Conan client.
+- [feature] ValidateInfrastructure: Update "Supported platforms and configurations" doc automatically.
+- [fix] UpdateSearchIndex: Fix parsing of package data.
+- [feature] BuildSingleReference: Add `MSBUILDDISABLENODEREUSE` environment variable for MSBuild to avoid errors when compiling in parallel.
+
 ### 01-June-2021 - 08:59 CEST
 
- - [request_reviews] Add column to enable/disable review requests (any user)
- - [testing] Use declared Conan version to run tests
- - [internal] Pay some technical debt
- - [internal] Simplify workflow, all packages already have properties
+ - [feature] RequestReviews: Add column to enable/disable review requests (any user).
+ - [testing] Use declared Conan version to run tests.
+ - [internal] Pay some technical debt.
+ - [internal] Simplify workflow, all packages already have properties.
+
+### 25-May-2021 - 13:42 CEST
+
+- [feature] AutomaticMerge: Skip pull-requests that fail to merge.
 
 ### 24-May-2021 - 15:59 CEST
 
@@ -14,7 +44,7 @@
 - [feature] Upgrade Conan version to 1.35.2.
 - [feature] Use only one Artifactory repository per pull request.
 
-### 13-May-2021 - 17:20 CEST
+### 14-May-2021 - 17:24 CEST
 
 - [fix] Add `--dry-build` to `conan info` commands, it will expand also the build-requires that would have
   failed during the build stage.

@@ -1,0 +1,10 @@
+sources:
+  "0.17.0":
+    sha256: "076b52edf888c01097010ad4299e3b2e7a72b60a41abbc65af364af1ed3c8dbe"
+    url: "https://github.com/google/jsonnet/archive/v0.17.0.tar.gz"
+patches:
+  "0.17.0":
+    - patch_file: "patches/0001-fix-nlohmann-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-fixes.patch"
+      base_path: "source_subfolder"

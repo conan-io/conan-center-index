@@ -1,0 +1,4 @@
+sources:
+  "4.17.6.0":
+    url: "https://github.com/procxx/boost.simd/archive/refs/tags/v4.17.6.0.tar.gz"
+    sha256: "31E9847BAE2FD38C86AF891EA17223E1F5EB385F327FABED4B40DA3B37C8218A"

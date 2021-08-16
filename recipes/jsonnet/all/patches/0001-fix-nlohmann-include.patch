@@ -1,0 +1,11 @@
+--- a/core/vm.cpp
++++ b/core/vm.cpp
+@@ -23,7 +23,7 @@ limitations under the License.
+ 
+ #include "desugarer.h"
+ #include "json.h"
+-#include "json.hpp"
++#include <nlohmann/json.hpp>
+ #include "md5.h"
+ #include "parser.h"
+ #include "state.h"

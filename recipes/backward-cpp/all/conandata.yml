@@ -23,3 +23,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/backward-cpp-1.5-add-iterator-include.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/backward-cpp-1.5-mingw.patch"
+      base_path: "source_subfolder"
