@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
-import glob
 import os
 import textwrap
 
@@ -130,8 +129,7 @@ class XZUtils(ConanFile):
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
