@@ -95,7 +95,6 @@ class TestPackageConan(ConanFile):
         install_prefix = os.path.join(autotools_folder, "prefix")
 
         # Build static library using CMake
-        cmake_build_folder = os.path.join(autotools_folder, "cmake_build")
         cmake = CMake(self)
         cmake.definitions["CMAKE_INSTALL_PREFIX"] = install_prefix
         cmake.configure(source_folder=autotools_folder, build_folder=os.path.join(autotools_folder, "cmake_build"))
