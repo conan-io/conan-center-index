@@ -59,7 +59,6 @@ class LibjxlConan(ConanFile):
         self._cmake.definitions["JPEGXL_ENABLE_OPENEXR"] = False
         self._cmake.definitions["JPEGXL_ENABLE_SKCMS"] = False
         self._cmake.definitions["JPEGXL_ENABLE_TCMALLOC"] = False
-        # This part is unreliable.
         if tools.cross_building(self):
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
