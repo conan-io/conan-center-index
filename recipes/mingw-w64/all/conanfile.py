@@ -15,6 +15,10 @@ class MingwConan(ConanFile):
     default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
     no_copy_source = True
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def validate(self):
         valid_os = self.conan_data["sources"][self.version]["url"].keys()
         if str(self.settings.os) not in valid_os:
@@ -24,14 +28,12 @@ class MingwConan(ConanFile):
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
-        valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
-        if str(self.options.gcc) not in valid_gcc:
-            raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
-                                            .format(str(self.options.gcc), valid_gcc))
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+        if self._settings_build.os == "Linux" and \
+                "gcc" in self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]:
+            valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
+            if str(self.options.gcc) not in valid_gcc:
+                raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
+                                                .format(str(self.options.gcc), valid_gcc))
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -119,9 +121,9 @@ class MingwConan(ConanFile):
                 autotools.make()
                 autotools.install()
             with_gmp_mpfc_mpc = [
-                 "--with-gmp={}".format(self.package_folder),
-                 "--with-mpfr={}".format(self.package_folder),
-                 "--with-mpc={}".format(self.package_folder)
+                "--with-gmp={}".format(self.package_folder),
+                "--with-mpfr={}".format(self.package_folder),
+                "--with-mpc={}".format(self.package_folder)
             ]
             # with_gmp_mpfc_mpc = [
             #    "--with-gmp=system",
