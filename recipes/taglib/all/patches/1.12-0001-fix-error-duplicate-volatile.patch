@@ -1,0 +1,22 @@
+From eecfd3eeed5c98c0e0c85d7e0d093d3253ae43fe Mon Sep 17 00:00:00 2001
+From: Oleg Antonyan <oleg.b.antonyan@gmail.com>
+Date: Sat, 8 May 2021 21:16:58 +0200
+Subject: [PATCH] fix error: duplicate volatile
+
+---
+ taglib/toolkit/trefcounter.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/taglib/toolkit/trefcounter.cpp b/taglib/toolkit/trefcounter.cpp
+index 18cb596c0..ae9f30935 100644
+--- a/taglib/toolkit/trefcounter.cpp
++++ b/taglib/toolkit/trefcounter.cpp
+@@ -66,7 +66,7 @@ namespace TagLib
+     RefCounterPrivate() :
+       refCount(1) {}
+ 
+-    volatile ATOMIC_INT refCount;
++    ATOMIC_INT refCount;
+   };
+ 
+   RefCounter::RefCounter() :
