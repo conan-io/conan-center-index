@@ -1,7 +1,7 @@
 from conan.tools.cmake import CMake, CMakeToolchain
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os
+import os, re
 
 required_conan_version = ">=1.39.0"
 
@@ -84,6 +84,15 @@ class ConanFile(ConanFile):
         self.cpp_info.components["libtbb"].names["cmake_find_package"] = "tbb"
         self.cpp_info.components["libtbb"].names["cmake_find_package_multi"] = "tbb"
         self.cpp_info.components["libtbb"].libs = [self._lib_name("tbb")]
+        if self.settings.os == "Windows":
+            version_info = tools.load(os.path.join(self.package_folder, "include", "oneapi", "tbb", "version.h"))
+            binary_version = re.sub(
+                r".*" + re.escape("#define __TBB_BINARY_VERSION ") + r"(\d+).*",
+                r"\1",
+                version_info,
+                flags=re.MULTILINE | re.DOTALL
+            )
+            self.cpp_info.components["libtbb"].libs.append(self._lib_name("tbb{}".format(binary_version)))
         if self.settings.os == "Linux":
             self.cpp_info.components["libtbb"].system_libs = ["dl", "rt", "pthread"]
         # tbbmalloc
