@@ -132,11 +132,13 @@ class TestPackageConan(ConanFile):
                 assert len(list(glob.glob(os.path.join("lib", "*.so")))) > 0
 
     def build(self):
-        self._build_autotools()
         self._build_ltdl()
-        self._build_static_lib_in_shared()
+        if not tools.cross_building(self):
+            self._build_autotools()
+            self._build_static_lib_in_shared()
 
     def test(self):
-        self._test_autotools()
         self._test_ltdl()
-        self._test_static_lib_in_shared()
+        if not tools.cross_building(self):
+            self._test_autotools()
+            self._test_static_lib_in_shared()
