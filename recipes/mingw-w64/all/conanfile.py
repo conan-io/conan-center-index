@@ -11,8 +11,8 @@ class MingwConan(ConanFile):
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
     settings = "os", "arch"
-    options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"]}
-    default_options = {"threads": "posix", "exception": "seh"}
+    options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"], "gcc": ["10.3.0"]}
+    default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
     no_copy_source = True
 
     def validate(self):
@@ -24,6 +24,10 @@ class MingwConan(ConanFile):
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
+        valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
+        if str(self.options.gcc) not in valid_gcc:
+            raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
+                                            .format(str(self.options.gcc), valid_gcc))
 
     @property
     def _settings_build(self):
@@ -44,8 +48,14 @@ class MingwConan(ConanFile):
             os.remove('file.7z')
         else:
             for package in arch_data:
+                if package == "gcc":
+                    continue
                 self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
                 tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.source_folder, package))
+            # Download gcc version
+            gcc_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"][str(self.options.gcc)]
+            tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.source_folder, "gcc"))
+
 
     @property
     def _target_tag(self):
