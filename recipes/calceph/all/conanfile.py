@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
 
 required_conan_version = ">=1.33.0"
@@ -112,8 +111,7 @@ class CalcephConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
