@@ -121,15 +121,13 @@ class LibjpegConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-            os.unlink(os.path.join(self.package_folder, "lib", "libjpeg.la"))
-
+            if self.settings.os == "Windows" and self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*[!.dll]")
+            else:
+                tools.rmdir(os.path.join(self.package_folder, "bin"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-
-            bindir = os.path.join(self.package_folder, "bin")
-            for file in os.listdir(bindir):
-                if file.endswith(".exe"):
-                    os.unlink(os.path.join(bindir, file))
 
         for fn in ("jpegint.h", "transupp.h",):
             self.copy(fn, src=self._source_subfolder, dst="include")
