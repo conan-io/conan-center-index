@@ -59,25 +59,43 @@ class NasRecipe(ConanFile):
 
     def _configure_autotools(self):
         autotools = AutoToolsBuildEnvironment(self)
+        autotools.libs = []
         return autotools
 
+    @property
+    def _imake_irulesrc(self):
+        return self._user_info_build["xorg-cf-files"].CONFIG_PATH
+
+    @property
+    def _imake_defines(self):
+        return "-DUsrLibDir={}".format(os.path.join(self.package_folder, "lib"))
+
+    @property
+    def _imake_make_args(self):
+        return ["IRULESRC={}".format(self._imake_irulesrc), "IMAKE_DEFINES={}".format(self._imake_defines)]
+
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "server", "dia", "main.c"),
+                              "\nFILE *yyin", "\nextern FILE *yyin")
         with tools.chdir(self._source_subfolder):
-            self.run("imake -DUseInstalled -I{} -DUsrLibDir={}".format(os.path.join(self._user_info_build["xorg-cf-files"].CONFIG_PATH), os.path.join(self.package_folder, "lib")), run_environment=True)
+            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
             autotools = self._configure_autotools()
-            with tools.environment_append(autotools.vars):
-                autotools.make(target="World")
+            autotools.make(target="World",args=["-j1"] + self._imake_make_args)
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
 
-        tmp_install = os.path.join(self.build_folder, "prefix")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            env_build_vars = autotools.vars
-            with tools.environment_append(env_build_vars):
-                autotools.install(args=[
-                    "DESTDIR={}".format(tmp_install), "INCDIR=/include", "ETCDIR=/etc", "USRLIBDIR=/lib", "BINDIR=/bin"])
+            tmp_install = os.path.join(self.build_folder, "prefix")
+            install_args = [
+                "DESTDIR={}".format(tmp_install),
+                "INCDIR=/include",
+                "ETCDIR=/etc",
+                "USRLIBDIR=/lib",
+                "BINDIR=/bin",
+            ] + self._imake_make_args
+            autotools.install(args=["-j1"] + install_args)
 
         self.copy("*", src=os.path.join(tmp_install, "bin"), dst="bin")
         self.copy("*", src=os.path.join(tmp_install, "include"), dst=os.path.join("include", "audio"))
