@@ -1,9 +1,9 @@
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanException
 from contextlib import contextmanager
 import os
 import re
 import shutil
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanException
 
 required_conan_version = ">=1.33.0"
 
@@ -15,7 +15,6 @@ class LibtoolConan(ConanFile):
     description = "GNU libtool is a generic library support script. "
     topics = ("conan", "libtool", "configure", "library", "shared", "static")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    exports_sources = "patches/**"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +25,8 @@ class LibtoolConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    exports_sources = "patches/**"
     _autotools = None
 
     @property
@@ -35,16 +36,12 @@ class LibtoolConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("automake/1.16.3")
@@ -53,6 +50,10 @@ class LibtoolConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
         self.build_requires("gnu-config/cci.20201022")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
