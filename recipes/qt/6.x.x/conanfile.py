@@ -712,6 +712,8 @@ class QtConan(ConanFile):
 
         _create_module("Core", core_reqs)
         _create_module("Platform")
+        self.cpp_info.components["qtPlatform"].libs = [] # this is a collection of abstract classes, so this is header-only
+        self.cpp_info.components["qtPlatform"].libdirs = []
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
