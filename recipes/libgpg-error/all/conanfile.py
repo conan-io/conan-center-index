@@ -29,12 +29,14 @@ class GPGErrorConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This recipe only support Linux. You can contribute Windows and/or Macos support.")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("This recipe only support Linux. You can contribute Windows and/or Macos support.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
