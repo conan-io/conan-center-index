@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NasRecipe(ConanFile):
     name = "nas"
@@ -108,6 +110,7 @@ class NasRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["audio"]
+        self.cpp_info.requires = ["xorg::xau"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
