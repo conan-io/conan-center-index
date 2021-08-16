@@ -42,12 +42,6 @@ class MoltenVKConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
-            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
-        if self.settings.compiler != "apple-clang":
-            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
 
     def requirements(self):
         self.requires("cereal/1.3.0")
@@ -118,6 +112,12 @@ class MoltenVKConan(ConanFile):
                 self.compatible_packages.append(compatible_pkg)
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
+            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
+        if self.settings.compiler != "apple-clang":
+            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
         if tools.Version(self.version) >= "1.0.42":
             if tools.Version(self.settings.compiler.version) < "12.0":
                 raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
