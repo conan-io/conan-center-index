@@ -37,7 +37,7 @@ class MingwConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
 
-    def _download_sources(self):
+    def source(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
 
         if self.settings.os == "Windows":
@@ -62,8 +62,6 @@ class MingwConan(ConanFile):
         return "x86_64-w64-mingw32"
 
     def build(self):
-        self._download_sources()
-
         if self.settings.os == "Windows":
             return
 
