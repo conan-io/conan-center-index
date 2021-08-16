@@ -44,8 +44,10 @@ class CalcephConan(ConanFile):
         del self.settings.compiler.libcxx
         if self.settings.compiler == "Visual Studio":
             del self.options.threadsafe
-            if self.options.shared:
-                raise ConanInvalidConfiguration("calceph doesn't support shared builds with Visual Studio yet")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("calceph doesn't support shared builds with Visual Studio yet")
 
     @property
     def _settings_build(self):
