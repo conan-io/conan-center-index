@@ -120,7 +120,7 @@ class CalcephConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["calceph"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
