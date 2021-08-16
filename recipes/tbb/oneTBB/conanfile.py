@@ -13,8 +13,8 @@ class ConanFile(ConanFile):
     homepage = "https://github.com/oneapi-src/oneTBB"
     description = (
         "oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel C++"
-        "programs that take full advantage of multicore performance, that are portable, composable"
-        "and have future-proof scalability."
+        " programs that take full advantage of multicore performance, that are portable, composable"
+        " and have future-proof scalability."
     )
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
     settings = "os", "compiler", "build_type", "arch"
