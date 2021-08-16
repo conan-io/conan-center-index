@@ -37,6 +37,12 @@ class MingwConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
 
+    # def requirements(self):
+    #     if self._settings_build.os == "Linux":
+    #         self.requires("gmp/6.2.1")
+    #         self.requires("mpfr/4.1.0")
+    #         self.requires("mpc/1.2.0")
+
     def source(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
 
@@ -56,7 +62,6 @@ class MingwConan(ConanFile):
             gcc_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"][str(self.options.gcc)]
             tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.source_folder, "gcc"))
 
-
     @property
     def _target_tag(self):
         return "x86_64-w64-mingw32"
@@ -73,10 +78,9 @@ class MingwConan(ConanFile):
         # also good to see specific commands:
         # https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/+/lollipop-dev/build-mingw64-toolchain.sh
 
-        env = {}
-
         # add binutils to path. Required for gcc build
-        env["PATH"] = os.environ["PATH"] + ":" + os.path.join(self.package_folder, "bin")
+        env = {"PATH": os.environ["PATH"] + ":" + os.path.join(self.package_folder, "bin")}
+
         with tools.environment_append(env):
             self.output.info("Building gmp ...")
             os.mkdir(os.path.join(self.build_folder, "gmp"))
@@ -116,6 +120,19 @@ class MingwConan(ConanFile):
                                     args=conf_args, target=False, host=False, build=False)
                 autotools.make()
                 autotools.install()
+            # with_gmp_mpfc_mpc = [
+            #    "--with-gmp=system",
+            #    "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
+            #    "--with-mpfr=system",
+            #    "--with-mpfr-prefix={}".format(self.deps_cpp_info["mpfr"].rootpath.replace("\\", "/")),
+            #    "--with-mpc=system",
+            #    "--with-mpc-prefix={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
+            # ]
+            with_gmp_mpfc_mpc = [
+                "--with-gmp={}".format(self.package_folder),
+                "--with-mpfr={}".format(self.package_folder),
+                "--with-mpc={}".format(self.package_folder)
+            ]
 
             self.output.info("Building binutils ...")
             os.mkdir(os.path.join(self.build_folder, "binutils"))
@@ -125,11 +142,9 @@ class MingwConan(ConanFile):
                     "--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-nls",
-                    "--disable-shared",
-                    "--with-gmp={}".format(self.package_folder),
-                    "--with-mpfr={}".format(self.package_folder),
-                    "--with-mpc={}".format(self.package_folder)
+                    "--disable-shared"
                 ]
+                conf_args.extend(with_gmp_mpfc_mpc)
                 autotools.configure(configure_dir=os.path.join(self.source_folder, "binutils"),
                                     args=conf_args, target=target_tag, host=False, build=False)
                 autotools.make()
@@ -181,17 +196,20 @@ class MingwConan(ConanFile):
                     "--enable-targets=all",
                     "--enable-languages=c,c++",
                     "--with-sysroot={}".format(self.package_folder),
-                    "--disable-shared",
-                    # With zlib is required, otherwise we get configure error:
-                    # Link tests are not allowed after GCC_NO_EXECUTABLES
-                    "--with-system-zlib",
-                    "--with-gmp={}".format(self.package_folder),
-                    "--with-mpfr={}".format(self.package_folder),
-                    "--with-mpc={}".format(self.package_folder),
-                    "--enable-threads={}".format(str(self.options.threads)),
+                    "--disable-shared"
                 ]
+                conf_args.extend(with_gmp_mpfc_mpc)
                 if self.options.exception == "sjlj":
                     conf_args.append("--enable-sjlj-exceptions")
+                # FIXME this does not yet work. Currently getting make error for libstd++-v3 or libatomic
+                # if self.options.threads == "posix":
+                #     # Some specific options which need to be set for posix thread. Otherwise it fails compiling.
+                #     conf_args.extend([
+                #         "--enable-threads=posix",
+                #         # With zlib is required, otherwise we get configure error:
+                #         # Link tests are not allowed after GCC_NO_EXECUTABLES
+                #         "--with-system-zlib"
+                #     ])
                 autotools_gcc.configure(configure_dir=os.path.join(self.source_folder, "gcc"),
                                         args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")
@@ -219,18 +237,21 @@ class MingwConan(ConanFile):
                     autotools.make()
                     autotools.install()
 
-            self.output.info("Building mingw-w64-libraries-winpthread ...")
-            os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread"))
-            with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--disable-shared",
-                    "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
-                ]
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                                    args=conf_args, target=False, host=target_tag, build=False)
-                autotools.make()
-                autotools.install()
+                # FIXME this does not yet work. Currently getting make error for libstd++-v3
+                # if self.options.threads == "posix":
+                #     self.output.info("Building mingw-w64-libraries-winpthreads ...")
+                #     os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
+                #     with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
+                #         autotools = AutoToolsBuildEnvironment(self)
+                #         conf_args = [
+                #             "--disable-shared",
+                #             "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
+                #             "--with-sysroot={}".format(self.package_folder)
+                #         ]
+                #         autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
+                #                             args=conf_args, target=False, host=target_tag, build=False)
+                #         autotools.make()
+                #         autotools.install()
 
             self.output.info("Building libgcc ...")
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
