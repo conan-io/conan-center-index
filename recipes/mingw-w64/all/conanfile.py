@@ -57,7 +57,6 @@ class MingwConan(ConanFile):
 
         target_tag = self._target_tag
         host_tag = "x86_64-linux-gnu"
-        build_tag = "x86_64-pc-linux-gnu"
 
         # Instructions see:
         # https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-doc/howto-build/mingw-w64-howto-build.txt
@@ -175,8 +174,11 @@ class MingwConan(ConanFile):
                     "--disable-shared",
                     "--with-gmp={}".format(self.package_folder),
                     "--with-mpfr={}".format(self.package_folder),
-                    "--with-mpc={}".format(self.package_folder)
+                    "--with-mpc={}".format(self.package_folder),
+                    "--enable-threads={}".format(str(self.options.threads)),
                 ]
+                if self.options.exception == "sjlj":
+                    conf_args.append("--enable-sjlj-exceptions")
                 autotools_gcc.configure(configure_dir=os.path.join(self.source_folder, "gcc"),
                                         args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")
