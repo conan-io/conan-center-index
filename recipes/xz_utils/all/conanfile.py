@@ -46,8 +46,8 @@ class XZUtils(ConanFile):
             self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("xz-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _apply_patches(self):
         if tools.Version(self.version) == "5.2.4" and self.settings.compiler == "Visual Studio":
@@ -119,8 +119,8 @@ class XZUtils(ConanFile):
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
-            os.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
-                      os.path.join(self.package_folder, "lib", "lzma.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
+                         os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
