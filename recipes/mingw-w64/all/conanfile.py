@@ -33,15 +33,13 @@ class MingwConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def build_requiremenents(self):
+    def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
-
-    # def requirements(self):
-    #     if self._settings_build.os == "Linux":
-    #         self.requires("gmp/6.2.1")
-    #         self.requires("mpfr/4.1.0")
-    #         self.requires("mpc/1.2.0")
+        # else:
+        #     self.requires("gmp/6.2.1")
+        #     self.requires("mpfr/4.1.0")
+        #     self.requires("mpc/1.2.0")
 
     def source(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
@@ -120,6 +118,11 @@ class MingwConan(ConanFile):
                                     args=conf_args, target=False, host=False, build=False)
                 autotools.make()
                 autotools.install()
+            with_gmp_mpfc_mpc = [
+                 "--with-gmp={}".format(self.package_folder),
+                 "--with-mpfr={}".format(self.package_folder),
+                 "--with-mpc={}".format(self.package_folder)
+            ]
             # with_gmp_mpfc_mpc = [
             #    "--with-gmp=system",
             #    "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
@@ -128,11 +131,6 @@ class MingwConan(ConanFile):
             #    "--with-mpc=system",
             #    "--with-mpc-prefix={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
             # ]
-            with_gmp_mpfc_mpc = [
-                "--with-gmp={}".format(self.package_folder),
-                "--with-mpfr={}".format(self.package_folder),
-                "--with-mpc={}".format(self.package_folder)
-            ]
 
             self.output.info("Building binutils ...")
             os.mkdir(os.path.join(self.build_folder, "binutils"))
