@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import re
 
-required_conan_version = ">=1.39.0"
+required_conan_version = ">=1.37.0"
 
 class ConanFile(ConanFile):
     name = "tbb"
