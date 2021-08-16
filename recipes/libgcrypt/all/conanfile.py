@@ -74,6 +74,9 @@ class LibgcryptConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["gcrypt"]
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
         self.cpp_info.names["pkg_config"] = "gcrypt"
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
