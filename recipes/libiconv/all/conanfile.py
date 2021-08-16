@@ -23,7 +23,7 @@ class LibiconvConan(ConanFile):
 
     @property
     def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self))
 
     @property
     def _is_msvc(self):
@@ -68,7 +68,7 @@ class LibiconvConan(ConanFile):
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self.settings) or self._is_msvc:
+        if not tools.cross_building(self) or self._is_msvc:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
