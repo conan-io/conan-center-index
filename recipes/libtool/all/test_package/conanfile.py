@@ -62,7 +62,7 @@ class TestPackageConan(ConanFile):
         assert os.path.isfile(os.path.join(self._package_folder, "include", "lib.h"))
         assert os.path.isdir(os.path.join(self._package_folder, "lib"))
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join(self._package_folder, "bin", "test_package"), run_environment=True)
 
     def _build_ltdl(self):
@@ -79,7 +79,7 @@ class TestPackageConan(ConanFile):
             "Windows": "dll",
         }[str(self.settings.os)]
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             libdir = "bin" if self.settings.os == "Windows" else "lib"
             lib_path = os.path.join(libdir, "liba.{}".format(lib_suffix))
