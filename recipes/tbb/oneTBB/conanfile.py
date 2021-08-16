@@ -56,6 +56,7 @@ and have future-proof scalability."""
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
+        toolchain.variables["CMAKE_INSTALL_LIBDIR"] = "lib"
         toolchain.generate()
 
     def build(self):
