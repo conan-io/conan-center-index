@@ -119,7 +119,7 @@ class CalcephConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["calceph"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
