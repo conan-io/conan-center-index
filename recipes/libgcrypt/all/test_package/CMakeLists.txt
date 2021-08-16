@@ -8,7 +8,3 @@ find_library(CAP_LIBRARY NAMES libcap.a libcap.so)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
-if (CAP_LIBRARY)
-    target_link_libraries(${PROJECT_NAME} ${CAP_LIBRARY})
-endif()
