@@ -1,7 +1,7 @@
-import os, shutil
 from conan.tools.cmake import CMake, CMakeToolchain
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.39.0"
 
@@ -10,10 +10,12 @@ class ConanFile(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneTBB"
-    description = """oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel C++
-programs that take full advantage of multicore performance, that are portable, composable
-and have future-proof scalability."""
-    topics = ("conan", "tbb", "threading", "parallelism", "tbbmalloc")
+    description = (
+        "oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel C++"
+        "programs that take full advantage of multicore performance, that are portable, composable"
+        "and have future-proof scalability."
+    )
+    topics = ("tbb", "threading", "parallelism", "tbbmalloc")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -52,7 +54,7 @@ and have future-proof scalability."""
         del self.info.options.tbbproxy
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination="src")
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -62,19 +64,18 @@ and have future-proof scalability."""
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(source_folder="src")
         cmake.build()
 
     def package(self):
         CMake(self).install()
-        self.copy("LICENSE.txt", dst="licenses")
+        self.copy(os.path.join("src", "LICENSE.txt"), dst="licenses")
 
         # Remove cmake targets
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-        if tools.Version(self.version) >= "2021.2.0":
-            # Remove documentation
-            shutil.rmtree(os.path.join(self.package_folder, "share"))
+        # Remove documentation
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "TBB"
