@@ -1,16 +1,19 @@
 sources:
   "2.4.0":
-    url: "https://github.com/openexr/openexr/archive/v2.4.0.tar.gz"
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.4.0.tar.gz"
     sha256: "4904c5ea7914a58f60a5e2fbc397be67e7a25c380d7d07c1c31a3eefff1c92f1"
   "2.5.2":
-    url: "https://github.com/openexr/openexr/archive/v2.5.2.tar.gz"
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.2.tar.gz"
     sha256: "5da8dff448d0c4a529e52c97daf238a461d01cd233944f75095668d6d7528761"
   "2.5.3":
-    url: "https://github.com/openexr/openexr/archive/v2.5.3.tar.gz"
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.3.tar.gz"
     sha256: "6a6525e6e3907715c6a55887716d7e42d09b54d2457323fcee35a0376960bebf"
   "2.5.4":
-    url: "https://github.com/openexr/openexr/archive/v2.5.4.tar.gz"
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.4.tar.gz"
     sha256: "dba19e9c6720c6f64fbc8b9d1867eaa75da6438109b941eefdc75ed141b6576d"
   "2.5.5":
-    url: "https://github.com/openexr/openexr/archive/v2.5.5.tar.gz"
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.5.tar.gz"
     sha256: "59e98361cb31456a9634378d0f653a2b9554b8900f233450f2396ff495ea76b3"
+  "2.5.7":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.7.tar.gz"
+    sha256: "36ecb2290cba6fc92b2ec9357f8dc0e364b4f9a90d727bf9a57c84760695272d"

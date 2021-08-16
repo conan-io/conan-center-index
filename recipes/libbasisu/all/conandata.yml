@@ -1,0 +1,8 @@
+sources:
+  "1.15.0":
+    url: "https://github.com/BinomialLLC/basis_universal/archive/refs/tags/v1_15.tar.gz"
+    sha256: "1f8de889beb2b8d899320693b651a6b8b62a954a9b86962aaa41007ee2dbe02b"
+patches:
+  "1.15.0":
+    - patch_file: "patches/cmakelist_build_lib.patch"
+      base_path: "source_subfolder"

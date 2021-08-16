@@ -1,0 +1,24 @@
+diff --git a/src/H5Oint.c b/src/H5Oint.c
+index 543637c127..c8a6131a34 100644
+--- a/src/H5Oint.c
++++ b/src/H5Oint.c
+@@ -82,6 +82,7 @@ static herr_t H5O__free_visit_visited(void *item, void *key,
+ static herr_t H5O__visit_cb(hid_t group, const char *name, const H5L_info_t *linfo,
+     void *_udata);
+ static const H5O_obj_class_t *H5O__obj_class_real(const H5O_t *oh);
++H5_DLL herr_t H5CX_get_ohdr_flags(uint8_t *ohdr_flags);
+ 
+ 
+ /*********************/
+diff --git a/src/H5Rint.c b/src/H5Rint.c
+index 159bccac34..b48d2a706d 100644
+--- a/src/H5Rint.c
++++ b/src/H5Rint.c
+@@ -46,6 +46,7 @@
+ /********************/
+ /* Local Prototypes */
+ /********************/
++H5_DLL herr_t H5CX_set_libver_bounds(H5F_t *f);
+ 
+ /*********************/
+ /* Package Variables */

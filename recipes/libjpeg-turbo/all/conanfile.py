@@ -1,7 +1,8 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibjpegTurboConan(ConanFile):
@@ -12,41 +13,42 @@ class LibjpegTurboConan(ConanFile):
     homepage = "https://libjpeg-turbo.org"
     license = "BSD-3-Clause, Zlib"
     provides = "libjpeg"
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "SIMD": [True, False],
+        "arithmetic_encoder": [True, False],
+        "arithmetic_decoder": [True, False],
+        "libjpeg7_compatibility": [True, False],
+        "libjpeg8_compatibility": [True, False],
+        "mem_src_dst": [True, False],
+        "turbojpeg": [True, False],
+        "java": [True, False],
+        "enable12bit": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "SIMD": True,
+        "arithmetic_encoder": True,
+        "arithmetic_decoder": True,
+        "libjpeg7_compatibility": True,
+        "libjpeg8_compatibility": True,
+        "mem_src_dst": True,
+        "turbojpeg": True,
+        "java": False,
+        "enable12bit": False,
+    }
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "SIMD": [True, False],
-               "arithmetic_encoder": [True, False],
-               "arithmetic_decoder": [True, False],
-               "libjpeg7_compatibility": [True, False],
-               "libjpeg8_compatibility": [True, False],
-               "mem_src_dst": [True, False],
-               "turbojpeg": [True, False],
-               "java": [True, False],
-               "enable12bit": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "SIMD": True,
-                       "arithmetic_encoder": True,
-                       "arithmetic_decoder": True,
-                       "libjpeg7_compatibility": True,
-                       "libjpeg8_compatibility": True,
-                       "mem_src_dst": True,
-                       "turbojpeg": True,
-                       "java": False,
-                       "enable12bit": False}
-
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-    
-    def _simd_extensions_available(self):
-        macos_silicon = self.settings.os == "Macos" and self.settings.arch == "armv8"
-        return not (self.settings.os == "Emscripten" or macos_silicon)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,7 +63,7 @@ class LibjpegTurboConan(ConanFile):
         if self.options.enable12bit:
             del self.options.java
             del self.options.turbojpeg
-        if self.options.enable12bit or not self._simd_extensions_available():
+        if self.options.enable12bit or self.settings.os == "Emscripten":
             del self.options.SIMD
         if self.options.enable12bit or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
             del self.options.arithmetic_encoder
@@ -87,12 +89,12 @@ class LibjpegTurboConan(ConanFile):
                self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility
 
     def build_requirements(self):
-        if self.options.get_safe("SIMD"):
+        if self.options.get_safe("SIMD") and self.settings.arch in ["x86", "x86_64"]:
             self.build_requires("nasm/2.14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -112,10 +114,16 @@ class LibjpegTurboConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
 
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            # FIXME: Toolchain file should provide valid value here
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
+        if tools.Version(self.version) <= "2.1.0":
+            self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
+
+        if tools.cross_building(self.settings):
+            # TODO: too specific and error prone, should be delegated to a conan helper function
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
 
         self._cmake.configure()
         return self._cmake
@@ -146,8 +154,7 @@ class LibjpegTurboConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         # remove binaries and pdb files
         for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
-            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
-                os.remove(bin_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), pattern_to_remove)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "libjpeg-turbo"

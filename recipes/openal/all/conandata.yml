@@ -17,6 +17,6 @@ patches:
       patch_file: "patches/1.21.0-c++14-does-not-have-std-aligned_alloc.patch"
   "1.19.1":
     - base_path: "source_subfolder"
-      patch_file: "patches/1.19.1/patch.diff"
+      patch_file: "patches/1.19.1/aligned-alloc.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1.19.1/gcc-10-fnocommon.patch"

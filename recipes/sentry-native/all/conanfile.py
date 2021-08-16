@@ -16,7 +16,7 @@ class SentryNativeConan(ConanFile):
     topics = ("conan", "breakpad", "crashpad",
               "error-reporting", "crash-reporting")
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

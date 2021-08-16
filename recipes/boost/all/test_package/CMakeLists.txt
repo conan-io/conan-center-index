@@ -4,6 +4,10 @@ project(test_package)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
+if(BOOST_NAMESPACE)
+    add_definitions("-DBOOST_NAMESPACE=${BOOST_NAMESPACE}")
+endif()
+
 if(NOT HEADER_ONLY)
     if(WITH_RANDOM)
         find_package(Boost COMPONENTS random REQUIRED)

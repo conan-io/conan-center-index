@@ -2,16 +2,16 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NngConan(ConanFile):
     name = "nng"
     description = "nanomsg-next-generation: light-weight brokerless messaging"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
     homepage = "https://github.com/nanomsg/nng"
     license = "MIT"
     topics = ("nanomsg", "communication", "messaging", "protocols")
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,15 +27,16 @@ class NngConan(ConanFile):
         "http": True,
     }
 
-    _source_subfolder = "source_subfolder"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -44,9 +45,14 @@ class NngConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
         if self.settings.compiler == "Visual Studio" and \
                 tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("MSVC < 14 is not supported")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -62,6 +68,8 @@ class NngConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -74,11 +82,13 @@ class NngConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "nng"
+        self.cpp_info.names["cmake_find_package_multi"] = "nng"
+        self.cpp_info.libs = ["nng"]
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs.extend(['mswsock', 'ws2_32'])
+            self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(['pthread'])
+            self.cpp_info.system_libs.extend(["pthread"])
 
         if self.options.shared:
             self.cpp_info.defines.append("NNG_SHARED_LIB")

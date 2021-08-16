@@ -1,9 +1,8 @@
 from conans import ConanFile, tools, CMake
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-
 import os
-import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class OpusConan(ConanFile):
@@ -32,21 +31,24 @@ class OpusConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
-            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
-                                            "Visual Studio 2015 or higher.")
-
     def config_options(self):
         if self.settings.os == "Windows":
              del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
+                                            "Visual Studio 2015 or higher.")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)

@@ -3,6 +3,8 @@ import glob
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class SundialsConan(ConanFile):
     name = "sundials"
@@ -14,23 +16,29 @@ class SundialsConan(ConanFile):
     topics = ("sundials", "integrators", "ode", "non-linear solvers")
     homepage = "https://github.com/LLNL/sundials"
     url = "https://github.com/conan-io/conan-center-index"
+
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "build_arkode": [True, False],
-               "build_cvode": [True, False],
-               "build_cvodes": [True, False],
-               "build_ida": [True, False],
-               "build_idas": [True, False],
-               "build_kinsol": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "build_arkode": True,
-                       "build_cvode": True,
-                       "build_cvodes": True,
-                       "build_ida": True,
-                       "build_idas": True,
-                       "build_kinsol": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_arkode": [True, False],
+        "build_cvode": [True, False],
+        "build_cvodes": [True, False],
+        "build_ida": [True, False],
+        "build_idas": [True, False],
+        "build_kinsol": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_arkode": True,
+        "build_cvode": True,
+        "build_cvodes": True,
+        "build_ida": True,
+        "build_idas": True,
+        "build_kinsol": True,
+    }
+
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     short_paths = True
@@ -51,9 +59,8 @@ class SundialsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
