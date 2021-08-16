@@ -1,7 +1,9 @@
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import re
 import shutil
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class LibjpegConan(ConanFile):
@@ -38,8 +40,8 @@ class LibjpegConan(ConanFile):
             self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("jpeg-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_nmake(self):
         shutil.copy("Win32.Mak", os.path.join(self._source_subfolder, "Win32.Mak"))
