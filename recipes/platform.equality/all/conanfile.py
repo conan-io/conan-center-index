@@ -45,7 +45,7 @@ class PlatformInterfacesConan(ConanFile):
                 self.name, self.settings.compiler))
 
         if tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("platform.Equality/{} "
+            raise ConanInvalidConfiguration("platform.equality/{} "
                                             "requires C++{} with {}, "
                                             "which is not supported "
                                             "by {} {}.".format(
