@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
+import shutil
+import glob
 
 required_conan_version = ">=1.33.0"
 
@@ -44,8 +46,6 @@ class LibjxlConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "add_subdirectory(third_party)", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -77,28 +77,44 @@ class LibjxlConan(ConanFile):
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
         if self.options.shared:
-            self.copy("libjxl_dec*", src="lib", dst="lib")
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "lib"), "*.a")
+            libs_dir = os.path.join(self.package_folder, "lib")
+            tools.remove_files_by_mask(libs_dir, "*.a")
+            tools.remove_files_by_mask(libs_dir, "*-static.lib")
+
+            if self.settings.os == "Windows":
+                self.copy("jxl_dec.dll", src="bin", dst="bin")
+                self.copy("jxl_dec.lib", src="lib", dst="lib")
+                for dll_path in glob.glob(os.path.join(libs_dir, "*.dll")):
+                    shutil.move(dll_path, os.path.join(self.package_folder,
+                                "bin", os.path.basename(dll_path)))
+            else:
+                self.copy("libjxl_dec.*", src="lib", dst="lib")
+
+    def _lib_name(self, name):
+        if not self.options.shared and self.settings.os == "Windows":
+            return name + "-static"
+        return name
 
     def package_info(self):
         # jxl
         self.cpp_info.components["jxl"].names["pkg_config"] = "libjxl"
-        self.cpp_info.components["jxl"].libs = ["jxl"]
+        self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli",
                                                     "highway::highway",
                                                     "lcms::lcms"]
         # jxl_dec
         self.cpp_info.components["jxl_dec"].names["pkg_config"] = "libjxl_dec"
-        self.cpp_info.components["jxl_dec"].libs = ["jxl_dec"]
+        self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
         self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
                                                         "highway::highway",
                                                         "lcms::lcms"]
         # jxl_threads
         self.cpp_info.components["jxl_threads"].names["pkg_config"] = \
             "libjxl_threads"
-        self.cpp_info.components["jxl_threads"].libs = ["jxl_threads"]
+        self.cpp_info.components["jxl_threads"].libs = \
+            [self._lib_name("jxl_threads")]
         if self.settings.os == "Linux":
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 

@@ -4,7 +4,7 @@ sources:
     sha256: "a208be41542c6f81f10a82c6bb4bc75d3eceb9d4f7ecb6ea0ad2f2d236694c4b"
 patches:
   "0.5.0":
-    - patch_file: "patches/0001-disable-tools.patch"
+    - patch_file: "patches/0001-clean-targets.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-cmake-fix-targets.patch"
+    - patch_file: "patches/0002-fix-dependencies.patch"
       base_path: "source_subfolder"

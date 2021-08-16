@@ -9,7 +9,16 @@
    if (MINGW)
      # In MINGW libstdc++ uses pthreads directly. When building statically a
      # program (regardless of whether the source code uses pthread or not) the
-@@ -331,6 +329,3 @@ endif ()
+@@ -247,8 +245,6 @@ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_STANDARD_REQUIRED YES)
+ 
+-add_subdirectory(third_party)
+-
+ set(THREADS_PREFER_PTHREAD_FLAG YES)
+ find_package(Threads REQUIRED)
+ 
+@@ -331,6 +327,3 @@ endif ()
  if (${JPEGXL_ENABLE_PLUGINS})
  add_subdirectory(plugins)
  endif ()
