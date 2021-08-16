@@ -77,31 +77,16 @@ class LibjpegConan(ConanFile):
                 self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
 
     def _configure_autotools(self):
-        """For unix and mingw environments"""
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.defines.append("LIBJPEG_BUILDING")
-        config_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            config_args.extend(["--enable-shared=yes", "--enable-static=no"])
-        else:
-            config_args.extend(["--enable-shared=no", "--enable-static=yes"])
-
-        if self.settings.os == "Windows":
-            mingw_arch = {
-                "x86_64": "x86_64",
-                "x86": "i686",
-            }
-            build_triplet = host_triplet = "{}-w64-mingw32".format(mingw_arch[str(self.settings.arch)])
-            config_args.extend([
-                "--build={}".format(build_triplet),
-                "--host={}".format(host_triplet),
-            ])
-
-        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def _patch_sources(self):
