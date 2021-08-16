@@ -17,12 +17,12 @@ class CalcephConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "threadsafe": [True, False]
+        "threadsafe": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "threadsafe": False
+        "threadsafe": False,
     }
 
     _autotools= None
@@ -94,7 +94,7 @@ class CalcephConan(ConanFile):
             "--disable-python",
             "--disable-python-package-system",
             "--disable-python-package-user",
-            "--disable-mex-octave"
+            "--disable-mex-octave",
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
