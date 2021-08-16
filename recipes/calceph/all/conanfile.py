@@ -1,8 +1,10 @@
+from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
-from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+required_conan_version = ">=1.33.0"
+
 
 class CalcephConan(ConanFile):
     name = "calceph"
@@ -51,8 +53,8 @@ class CalcephConan(ConanFile):
             self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
