@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibiconvConan(ConanFile):
     name = "libiconv"
