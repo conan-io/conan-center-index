@@ -11,7 +11,6 @@ class LibjxlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
-    requires = "brotli/1.0.9", "highway/0.12.2", "lcms/2.11"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -32,6 +31,11 @@ class LibjxlConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("brotli/1.0.9")
+        self.requires("highway/0.12.2")
+        self.requires("lcms/2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -55,6 +59,7 @@ class LibjxlConan(ConanFile):
         self._cmake.definitions["JPEGXL_ENABLE_OPENEXR"] = False
         self._cmake.definitions["JPEGXL_ENABLE_SKCMS"] = False
         self._cmake.definitions["JPEGXL_ENABLE_TCMALLOC"] = False
+        # This part is unreliable.
         if tools.cross_building(self):
             self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = \
                 str(self.settings.arch)
