@@ -182,6 +182,9 @@ class MingwConan(ConanFile):
                     "--enable-languages=c,c++",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-shared",
+                    # With zlib is required, otherwise we get configure error:
+                    # Link tests are not allowed after GCC_NO_EXECUTABLES
+                    "--with-system-zlib",
                     "--with-gmp={}".format(self.package_folder),
                     "--with-mpfr={}".format(self.package_folder),
                     "--with-mpc={}".format(self.package_folder),
@@ -216,18 +219,18 @@ class MingwConan(ConanFile):
                     autotools.make()
                     autotools.install()
 
-                self.output.info("Building mingw-w64-libraries-winpthread ...")
-                os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread"))
-                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread")):
-                    autotools = AutoToolsBuildEnvironment(self)
-                    conf_args = [
-                        "--disable-shared",
-                        "--enable-static",
-                    ]
-                    autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                                        args=conf_args, target=False, host=target_tag, build=False)
-                    autotools.make()
-                    autotools.install()
+            self.output.info("Building mingw-w64-libraries-winpthread ...")
+            os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread"))
+            with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthread")):
+                autotools = AutoToolsBuildEnvironment(self)
+                conf_args = [
+                    "--disable-shared",
+                    "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
+                ]
+                autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
+                                    args=conf_args, target=False, host=target_tag, build=False)
+                autotools.make()
+                autotools.install()
 
             self.output.info("Building libgcc ...")
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
