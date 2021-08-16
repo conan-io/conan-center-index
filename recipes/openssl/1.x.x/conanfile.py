@@ -177,11 +177,11 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Emscripten":
             self.options.no_asm = True
-            self.options.no_ssl = True
-            self.options.no_ssl3 = True
-            self.options.no_comp = True
-            self.options.no_hw = True
-            self.options.no_engine = True
+#            self.options.no_ssl = True
+#            self.options.no_ssl3 = True
+#            self.options.no_comp = True
+#            self.options.no_hw = True
+#            self.options.no_engine = True
             self.options.no_deprecated = True
             self.options.no_dso = True
             self.options.no_threads = True
