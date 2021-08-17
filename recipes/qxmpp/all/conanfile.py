@@ -14,7 +14,7 @@ class QxmppConan(ConanFile):
     exports_sources = ["patches/*"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "withGstreamer": [True, False]}
+               "with_gstreamer": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "withGstreamer": False}
