@@ -1,0 +1,22 @@
+We can't use geos-config file in conan because it's a non-relocatable file,
+therefore not packaged by geos recipe of conan-center-index.
+Instead we rely on AutoToolsBuildEnvironment helper to inject proper flags.
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -311,6 +311,7 @@ AC_ARG_ENABLE(geos, [AS_HELP_STRING(
+   [--enable-geos], [enables GEOS inclusion [default=yes]])],
+   [], [enable_geos=yes])
+ if test x"$enable_geos" != "xno"; then
++  if false; then
+   #-----------------------------------------------------------------------
+   #   --with-geosconfig
+   #
+@@ -352,6 +353,7 @@ if test x"$enable_geos" != "xno"; then
+   AC_SEARCH_LIBS(GEOSCoveredBy,geos_c,,AC_MSG_ERROR([could not find libgeos_c (or obsolete 'libgeos_c' < v.3.3.0 found) - you may need to specify the directory of a geos-config file using --with-geosconfig]))
+   LIBS="$LIBS_SAVE"
+   LIBS="$LIBS $GEOS_LDFLAGS -lgeos_c"
++  fi
+ 
+   #-----------------------------------------------------------------------
+   #   --enable-controlpoints
