@@ -55,7 +55,7 @@ class QxmppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=join(self.name, "LICENSE.LGPL"))
+        self.copy("LICENSE.LGPL", dst="licenses", src=self.name)
         self.copy("*.h", dst="include/base", src=join(self.name, "base"))
         self.copy("*.h", dst="include/client", src=join(self.name, "client"))
         self.copy("*.h", dst="include/server", src=join(self.name, "server"))
