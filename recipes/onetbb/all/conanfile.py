@@ -6,16 +6,16 @@ import re
 
 required_conan_version = ">=1.37.0"
 
+
 class ConanFile(ConanFile):
-    name = "tbb"
+    name = "onetbb"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneTBB"
     description = (
         "oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel C++"
         " programs that take full advantage of multicore performance, that are portable, composable"
-        " and have future-proof scalability."
-    )
+        " and have future-proof scalability.")
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -41,21 +41,35 @@ class ConanFile(ConanFile):
     def configure(self):
         if self.options.get_safe("shared", True):
             del self.options.fPIC
-        if (self.settings.os == "Macos" and
-           self.settings.compiler == "apple-clang" and
-           tools.Version(self.settings.compiler.version) < "8.0"):
-            raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
+
+    def validate(self):
+        if (self.settings.os == "Macos"
+                and self.settings.compiler == "apple-clang"
+                and tools.Version(self.settings.compiler.version) < "8.0"):
+            raise ConanInvalidConfiguration(
+                "{} {} couldn't be built by apple-clang < 8.0".format(
+                    self.name,
+                    self.version,
+                ))
         if not self.options.get_safe("shared", True):
-            self.output.warn("oneTBB strongly discourages usage of static linkage")
-        if self.options.tbbproxy and not (self.options.tbbmalloc and self.options.get_safe("shared", True)):
-            raise ConanInvalidConfiguration("tbbproxy needs tbbmalloc and shared options")
+            self.output.warn(
+                "oneTBB strongly discourages usage of static linkage")
+        if (self.options.tbbproxy
+                and not (self.options.tbbmalloc
+                         and self.options.get_safe("shared", True))):
+            raise ConanInvalidConfiguration(
+                "tbbproxy needs tbbmalloc and shared options")
 
     def package_id(self):
         del self.info.options.tbbmalloc
         del self.info.options.tbbproxy
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination="src")
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination="src",
+        )
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -84,36 +98,48 @@ class ConanFile(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "TBB"
         self.cpp_info.names["cmake_find_package_multi"] = "TBB"
+
+        def lib_name(name):
+            if self.settings.build_type == "Debug":
+                return name + "_debug"
+            return name
+
         # tbb
-        self.cpp_info.components["libtbb"].names["cmake_find_package"] = "tbb"
-        self.cpp_info.components["libtbb"].names["cmake_find_package_multi"] = "tbb"
-        self.cpp_info.components["libtbb"].libs = [self._lib_name("tbb")]
+        tbb = self.cpp_info.components["libtbb"]
+        tbb.names["cmake_find_package"] = "tbb"
+        tbb.names["cmake_find_package_multi"] = "tbb"
+
+        tbb.libs = [lib_name("tbb")]
         if self.settings.os == "Windows":
-            version_info = tools.load(os.path.join(self.package_folder, "include", "oneapi", "tbb", "version.h"))
+            version_info = tools.load(
+                os.path.join(self.package_folder, "include", "oneapi", "tbb",
+                             "version.h"))
             binary_version = re.sub(
-                r".*" + re.escape("#define __TBB_BINARY_VERSION ") + r"(\d+).*",
+                r".*" + re.escape("#define __TBB_BINARY_VERSION ") +
+                r"(\d+).*",
                 r"\1",
                 version_info,
-                flags=re.MULTILINE | re.DOTALL
+                flags=re.MULTILINE | re.DOTALL,
             )
-            self.cpp_info.components["libtbb"].libs.append(self._lib_name("tbb{}".format(binary_version)))
+            tbb.libs.append(lib_name("tbb{}".format(binary_version)))
         if self.settings.os == "Linux":
-            self.cpp_info.components["libtbb"].system_libs = ["dl", "rt", "pthread"]
+            tbb.system_libs = ["dl", "rt", "pthread"]
+
         # tbbmalloc
         if self.options.tbbmalloc:
-            self.cpp_info.components["tbbmalloc"].names["cmake_find_package"] = "tbbmalloc"
-            self.cpp_info.components["tbbmalloc"].names["cmake_find_package_multi"] = "tbbmalloc"
-            self.cpp_info.components["tbbmalloc"].libs = [self._lib_name("tbbmalloc")]
+            tbbmalloc = self.cpp_info.components["tbbmalloc"]
+
+            tbbmalloc.names["cmake_find_package"] = "tbbmalloc"
+            tbbmalloc.names["cmake_find_package_multi"] = "tbbmalloc"
+            tbbmalloc.libs = [lib_name("tbbmalloc")]
             if self.settings.os == "Linux":
-                self.cpp_info.components["tbbmalloc"].system_libs = ["dl", "pthread"]
+                tbbmalloc.system_libs = ["dl", "pthread"]
+
             # tbbmalloc_proxy
             if self.options.tbbproxy:
-                self.cpp_info.components["tbbmalloc_proxy"].names["cmake_find_package"] = "tbbmalloc_proxy"
-                self.cpp_info.components["tbbmalloc_proxy"].names["cmake_find_package_multi"] = "tbbmalloc_proxy"
-                self.cpp_info.components["tbbmalloc_proxy"].libs = [self._lib_name("tbbmalloc_proxy")]
-                self.cpp_info.components["tbbmalloc_proxy"].requires = ["tbbmalloc"]
+                tbbproxy = self.cpp_info.components["tbbmalloc_proxy"]
 
-    def _lib_name(self, name):
-        if self.settings.build_type == "Debug":
-            return name + "_debug"
-        return name
+                tbbproxy.names["cmake_find_package"] = "tbbmalloc_proxy"
+                tbbproxy.names["cmake_find_package_multi"] = "tbbmalloc_proxy"
+                tbbproxy.libs = [lib_name("tbbmalloc_proxy")]
+                tbbproxy.requires = ["tbbmalloc"]
