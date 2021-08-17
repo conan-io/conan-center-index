@@ -57,10 +57,10 @@ class MingwConan(ConanFile):
                 if package == "gcc":
                     continue
                 self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
-                tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.source_folder, package))
+                tools.get(**arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, package))
             # Download gcc version
             gcc_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"][str(self.options.gcc)]
-            tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.source_folder, "gcc"))
+            tools.get(**gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "gcc"))
 
     @property
     def _target_tag(self):
@@ -91,32 +91,27 @@ class MingwConan(ConanFile):
 
         with tools.environment_append(env):
             self.output.info("Building gmp ...")
-            os.mkdir(os.path.join(self.build_folder, "gmp"))
             with tools.chdir(os.path.join(self.build_folder, "gmp")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
                     "--disable-shared"
                 ]
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "gmp"),
-                                    args=conf_args, target=False, host=False, build=False)
+                autotools.configure(args=conf_args, target=False, host=False, build=False)
                 autotools.make()
                 autotools.install()
 
             self.output.info("Building mpfr ...")
-            os.mkdir(os.path.join(self.build_folder, "mpfr"))
             with tools.chdir(os.path.join(self.build_folder, "mpfr")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
                     "--disable-shared",
                     "--with-gmp={}".format(self.package_folder)
                 ]
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "mpfr"),
-                                    args=conf_args, target=False, host=False, build=False)
+                autotools.configure(args=conf_args, target=False, host=False, build=False)
                 autotools.make()
                 autotools.install()
 
             self.output.info("Building mpc ...")
-            os.mkdir(os.path.join(self.build_folder, "mpc"))
             with tools.chdir(os.path.join(self.build_folder, "mpc")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
@@ -124,8 +119,7 @@ class MingwConan(ConanFile):
                     "--with-gmp={}".format(self.package_folder),
                     "--with-mpfr={}".format(self.package_folder)
                 ]
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "mpc"),
-                                    args=conf_args, target=False, host=False, build=False)
+                autotools.configure(args=conf_args, target=False, host=False, build=False)
                 autotools.make()
                 autotools.install()
             with_gmp_mpfc_mpc = [
@@ -143,7 +137,6 @@ class MingwConan(ConanFile):
             # ]
 
             self.output.info("Building binutils ...")
-            os.mkdir(os.path.join(self.build_folder, "binutils"))
             with tools.chdir(os.path.join(self.build_folder, "binutils")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
@@ -154,32 +147,27 @@ class MingwConan(ConanFile):
                 if build_multilib:
                     conf_args.append("--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32")
                 conf_args.extend(with_gmp_mpfc_mpc)
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "binutils"),
-                                    args=conf_args, target=target_tag, host=False, build=False)
+                autotools.configure(args=conf_args, target=target_tag, host=False, build=False)
                 autotools.make()
                 autotools.install()
 
             self.output.info("Building mingw-w64-tools ...")
-            os.mkdir(os.path.join(self.build_folder, "mingw-w64-tools"))
-            with tools.chdir(os.path.join(self.build_folder, "mingw-w64-tools")):
+            with tools.chdir(os.path.join(self.build_folder, "mingw-w64", "mingw-w64-tools", "widl")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = []
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-tools", "widl"),
-                                    args=conf_args, target=target_tag, host=False, build=False)
+                autotools.configure(args=conf_args, target=target_tag, host=False, build=False)
                 autotools.make()
                 autotools.install()
 
             self.output.info("Building mingw-w64-headers ...")
-            os.mkdir(os.path.join(self.build_folder, "mingw-w64-headers"))
-            with tools.chdir(os.path.join(self.build_folder, "mingw-w64-headers")):
+            with tools.chdir(os.path.join(self.build_folder, "mingw-w64", "mingw-w64-headers")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
                     "--with-widl={}".format(os.path.join(self.package_folder, "bin")),
                     "--enable-sdk=all",
                     "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
                 ]
-                autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-headers"),
-                                    args=conf_args, target=False, host=target_tag, build=host_tag)
+                autotools.configure(args=conf_args, target=False, host=target_tag, build=host_tag)
                 autotools.make()
                 autotools.install()
                 # Step 3) GCC requires the x86_64-w64-mingw32 directory be mirrored as a
@@ -198,7 +186,6 @@ class MingwConan(ConanFile):
                                               os.path.join(self.package_folder, target_tag, 'lib64')))
 
             self.output.info("Building core gcc ...")
-            os.mkdir(os.path.join(self.build_folder, "gcc"))
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
                 autotools_gcc = AutoToolsBuildEnvironment(self)
                 conf_args = [
@@ -221,8 +208,7 @@ class MingwConan(ConanFile):
                         # Not 100% sure why, but the following options are required, otherwise
                         # gcc fails to build with posix threads
                     ])
-                autotools_gcc.configure(configure_dir=os.path.join(self.source_folder, "gcc"),
-                                        args=conf_args, target=target_tag, host=False, build=False)
+                autotools_gcc.configure(args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")
                 autotools_gcc.make(target="install-gcc")
 
@@ -234,8 +220,7 @@ class MingwConan(ConanFile):
             env_compiler["CXX"] = target_tag + "-g++"
             with tools.environment_append(env_compiler):
                 self.output.info("Building mingw-w64-crt ...")
-                os.mkdir(os.path.join(self.build_folder, "mingw-w64-crt"))
-                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-crt")):
+                with tools.chdir(os.path.join(self.build_folder, "mingw-w64", "mingw-w64-crt")):
                     autotools = AutoToolsBuildEnvironment(self)
                     conf_args = [
                         "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
@@ -243,24 +228,21 @@ class MingwConan(ConanFile):
                     ]
                     if build_multilib:
                         conf_args.append("--enable-lib32")
-                    autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-crt"),
-                                        args=conf_args, target=False, host=target_tag, build=False,
+                    autotools.configure(args=conf_args, target=False, host=target_tag, build=False,
                                         use_default_install_dirs=False)
                     autotools.make()
                     autotools.install()
 
             if self.options.threads == "posix":
                 self.output.info("Building mingw-w64-libraries-winpthreads ...")
-                os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
-                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
+                with tools.chdir(os.path.join(self.build_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads")):
                     autotools = AutoToolsBuildEnvironment(self)
                     conf_args = [
                         "--disable-shared",
                         "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
                         "--with-sysroot={}".format(self.package_folder)
                     ]
-                    autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                                        args=conf_args, target=False, host=target_tag, build=False)
+                    autotools.configure(args=conf_args, target=False, host=target_tag, build=False)
                     autotools.make()
                     autotools.install()
 
@@ -278,7 +260,7 @@ class MingwConan(ConanFile):
             tools.rmdir(target)
             tools.rmdir(os.path.join(self.package_folder, "share"))
         else:
-            self.copy("COPYING", src=os.path.join(self.source_folder, "mingw-w64"), dst="licenses")
+            self.copy("COPYING", src=os.path.join(self.build_folder, "mingw-w64"), dst="licenses")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib"), "*.la")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "x86_64-w64-mingw32", "lib32"), "*.la")
