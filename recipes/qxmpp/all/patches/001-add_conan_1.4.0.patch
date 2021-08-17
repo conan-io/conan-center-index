@@ -13,9 +13,6 @@ index 550ea39a..9ed4d825 100644
 +list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 +list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 +
-+add_definitions("-std=c++11")
-+
-+
 +find_package(Qt6 COMPONENTS Core Network Xml REQUIRED)
 +set(QT_VERSION_MAJOR 6)
  
