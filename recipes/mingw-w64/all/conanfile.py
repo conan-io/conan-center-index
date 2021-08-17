@@ -177,6 +177,7 @@ class MingwConan(ConanFile):
                     "--with-widl={}".format(os.path.join(self.package_folder, "bin")),
                     "--enable-sdk=all",
                     "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
+                    "--with-sysroot={}".format(self.package_folder)
                 ]
                 autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-headers"),
                                     args=conf_args, target=False, host=target_tag, build=host_tag)
