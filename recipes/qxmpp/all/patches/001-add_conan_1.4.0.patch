@@ -2,7 +2,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 550ea39a..9ed4d825 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -8,10 +8,15 @@ set(CMAKE_CXX_STANDARD 17)
+@@ -8,10 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
  
