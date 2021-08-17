@@ -1,5 +1,8 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class CwalkConan(ConanFile):
@@ -13,12 +16,14 @@ class CwalkConan(ConanFile):
     topics = ("cwalk", "cross-platform", "windows", "macos", "osx", "linux",
               "path-manipulation", "path", "directory", "file", "file-system",
               "unc", "path-parsing", "file-path")
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -33,32 +38,67 @@ class CwalkConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared and self.settings.os == "Windows"
-        cmake.configure(build_folder=self._build_subfolder)
-        cmake.build(target="cwalk")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        include_dir = os.path.join(self._source_subfolder, 'include')
-        lib_dir = os.path.join(self._build_subfolder, "lib")
-        bin_dir = os.path.join(self._build_subfolder, "bin")
-
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        self.copy("cwalk.h", dst="include", src=include_dir)
-        self.copy(pattern="*.a", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=lib_dir, keep_path=False,
-                  symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"cwalk": "cwalk::cwalk"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "Cwalk"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Cwalk"
+        self.cpp_info.names["cmake_find_package"] = "cwalk"
+        self.cpp_info.names["cmake_find_package_multi"] = "cwalk"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.libs = ["cwalk"]
+        if self.options.shared and tools.Version(self.version) >= "1.2.5":
+            self.cpp_info.defines.append("CWK_SHARED")

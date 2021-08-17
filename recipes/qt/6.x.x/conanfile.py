@@ -709,6 +709,8 @@ class QtConan(ConanFile):
             core_reqs.append("double-conversion::double-conversion")
         if self.options.get_safe("with_icu", False):
             core_reqs.append("icu::icu")
+        if self.options.with_zstd:
+            core_reqs.append("zstd::zstd")
 
         _create_module("Core", core_reqs)
         if tools.Version(self.version) < "6.1.0":
@@ -727,6 +729,8 @@ class QtConan(ConanFile):
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.get_safe("with_vulkan", False):
+                gui_reqs.append("vulkan-loader::vulkan-loader")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":

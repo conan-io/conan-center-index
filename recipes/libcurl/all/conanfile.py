@@ -154,6 +154,8 @@ class LibcurlConan(ConanFile):
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
+            if tools.Version(self.version) < "7.75.0":
+                del self.options.with_libidn
             del self.options.with_libpsl
 
     def requirements(self):
@@ -170,7 +172,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.4.9")
+            self.requires("zstd/1.5.0")
         if self.options.with_c_ares:
             self.requires("c-ares/1.17.1")
 
@@ -181,15 +183,19 @@ class LibcurlConan(ConanFile):
         del self.info.options.darwin_ssl
         del self.info.options.with_wolfssl
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
                 self.build_requires("ninja/1.10.2")
         else:
             self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.3")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+            self.build_requires("pkgconf/1.7.4")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -218,7 +224,7 @@ class LibcurlConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         self._patch_misc_files()
-        self._patch_mingw_files()
+        self._patch_autotools()
         self._patch_cmake()
 
     def _patch_misc_files(self):
@@ -235,42 +241,46 @@ class LibcurlConan(ConanFile):
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
-    def _patch_mingw_files(self):
-        if not self._is_mingw:
+    def _patch_autotools(self):
+        if self._is_using_cmake_build:
             return
-        # patch for zlib naming in mingw
-        if self.options.with_zlib:
-            configure_ac = os.path.join(self._source_subfolder, "configure.ac")
-            zlib_name = self.deps_cpp_info["zlib"].libs[0]
-            tools.replace_in_file(configure_ac,
-                                  "AC_CHECK_LIB(z,",
-                                  "AC_CHECK_LIB({},".format(zlib_name))
-            tools.replace_in_file(configure_ac,
-                                  "-lz ",
-                                  "-l{} ".format(zlib_name))
 
-        if self.options.shared:
-            # for mingw builds - do not compile curl tool, just library
-            # linking errors are much harder to fix than to exclude curl tool
-            top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
-            tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
-            tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
-            # patch for shared mingw build
-            lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
-            tools.replace_in_file(lib_makefile,
-                                  "noinst_LTLIBRARIES = libcurlu.la",
-                                  "")
-            tools.replace_in_file(lib_makefile,
-                                  "noinst_LTLIBRARIES =",
-                                  "")
-            tools.replace_in_file(lib_makefile,
-                                  "lib_LTLIBRARIES = libcurl.la",
-                                  "noinst_LTLIBRARIES = libcurl.la")
-            # add directives to build dll
-            # used only for native mingw-make
-            if not tools.cross_building(self.settings):
-                added_content = tools.load("lib_Makefile_add.am")
-                tools.save(lib_makefile, added_content, append=True)
+        # Disable curl tool for these reasons:
+        # - link errors if mingw shared or iOS/tvOS/watchOS
+        # - it makes recipe consistent with CMake build where we don't build curl tool
+        top_makefile = os.path.join(self._source_subfolder, "Makefile.am")
+        tools.replace_in_file(top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        tools.replace_in_file(top_makefile, "include src/Makefile.inc", "")
+
+        if self._is_mingw:
+            # patch for zlib naming in mingw
+            if self.options.with_zlib:
+                configure_ac = os.path.join(self._source_subfolder, "configure.ac")
+                zlib_name = self.deps_cpp_info["zlib"].libs[0]
+                tools.replace_in_file(configure_ac,
+                                      "AC_CHECK_LIB(z,",
+                                      "AC_CHECK_LIB({},".format(zlib_name))
+                tools.replace_in_file(configure_ac,
+                                      "-lz ",
+                                      "-l{} ".format(zlib_name))
+
+            if self.options.shared:
+                # patch for shared mingw build
+                lib_makefile = os.path.join(self._source_subfolder, "lib", "Makefile.am")
+                tools.replace_in_file(lib_makefile,
+                                      "noinst_LTLIBRARIES = libcurlu.la",
+                                      "")
+                tools.replace_in_file(lib_makefile,
+                                      "noinst_LTLIBRARIES =",
+                                      "")
+                tools.replace_in_file(lib_makefile,
+                                      "lib_LTLIBRARIES = libcurl.la",
+                                      "noinst_LTLIBRARIES = libcurl.la")
+                # add directives to build dll
+                # used only for native mingw-make
+                if not tools.cross_building(self.settings):
+                    added_content = tools.load("lib_Makefile_add.am")
+                    tools.save(lib_makefile, added_content, append=True)
 
     def _patch_cmake(self):
         if not self._is_using_cmake_build:
@@ -298,8 +308,6 @@ class LibcurlConan(ConanFile):
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
             "--enable-threaded-resolver={}".format(yes_no(self.options.with_c_ares)),
-            "--disable-proxy={}".format(yes_no(self.options.with_proxy)),
-            "--disable-rtsp={}".format(yes_no(self.options.with_rtsp)),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
@@ -330,6 +338,12 @@ class LibcurlConan(ConanFile):
 
         if self._has_metalink_option:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
+        
+        if not self.options.with_proxy:
+            params.append("--disable-proxy")
+       
+        if not self.options.with_rtsp:
+            params.append("--disable-rtsp")
 
         if not self.options.with_crypto_auth:
             params.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
@@ -341,7 +355,7 @@ class LibcurlConan(ConanFile):
             else:
                 params.append("--disable-ntlm")
 
-        if not self.options.with_ntlm_nb:
+        if not self.options.with_ntlm_wb:
             params.append("--disable-ntlm-wb")
 
         # Cross building flags
@@ -462,7 +476,8 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
         self._cmake.definitions["CURL_DISABLE_PROXY"] = not self.options.with_proxy
         self._cmake.definitions["USE_LIBRTMP"] = self.options.with_librtmp
-        self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
+        if tools.Version(self.version) >= "7.75.0":
+            self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
         self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
 

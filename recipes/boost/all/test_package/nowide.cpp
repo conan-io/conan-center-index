@@ -5,6 +5,11 @@
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/iostream.hpp>
+
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 int main(int argc,char **argv)
 {
     boost::nowide::args a(argc,argv); // Fix arguments - make them UTF-8
