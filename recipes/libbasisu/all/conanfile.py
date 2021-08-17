@@ -20,7 +20,7 @@ class LibBasisUniversalConan(ConanFile):
         "shared": [True, False],
         "use_sse4": [True, False],
         "with_zstd": [True, False],
-        "transcoder_only": [True, False],
+        "enable_encoder": [True, False],
         "custom_iterator_debug_level": [True, False]
     }
     default_options = {
@@ -28,7 +28,7 @@ class LibBasisUniversalConan(ConanFile):
         "shared": False,
         "use_sse4": False,
         "with_zstd": True,
-        "transcoder_only": False,
+        "enable_encoder": True,
         "custom_iterator_debug_level": False
     }
 
@@ -79,7 +79,7 @@ class LibBasisUniversalConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SSE4"] = self.options.use_sse4
         self._cmake.definitions["ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["TRANSCODER_ONLY"] = self.options.transcoder_only
+        self._cmake.definitions["ENABLE_ENCODER"] = self.options.enable_encoder
         self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = not self.options.get_safe("custom_iterator_debug_level", default=self.default_options["custom_iterator_debug_level"])
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
