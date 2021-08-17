@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from os import rename
 from os.path import join
-import glob
 
 
 class QxmppConan(ConanFile):
