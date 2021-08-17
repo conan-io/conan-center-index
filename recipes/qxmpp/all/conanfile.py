@@ -17,7 +17,7 @@ class QxmppConan(ConanFile):
                "with_gstreamer": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "withGstreamer": False}
+                       "with_gstreamer": False}
     generators = "cmake"
 
     def requirements(self):
