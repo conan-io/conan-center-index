@@ -55,6 +55,7 @@ class LibjxlConan(ConanFile):
         self._cmake.definitions["JPEGXL_STATIC"] = not self.options.shared
         self._cmake.definitions["JPEGXL_ENABLE_BENCHMARK"] = False
         self._cmake.definitions["JPEGXL_ENABLE_EXAMPLES"] = False
+        self._cmake.definitions["JPEGXL_ENABLE_MANPAGES"] = False
         self._cmake.definitions["JPEGXL_ENABLE_SJPEG"] = False
         self._cmake.definitions["JPEGXL_ENABLE_OPENEXR"] = False
         self._cmake.definitions["JPEGXL_ENABLE_SKCMS"] = False
