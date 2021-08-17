@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibiconvConan(ConanFile):
     name = "libiconv"
@@ -23,7 +25,7 @@ class LibiconvConan(ConanFile):
 
     @property
     def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self))
 
     @property
     def _is_msvc(self):
@@ -39,9 +41,13 @@ class LibiconvConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -64,7 +70,7 @@ class LibiconvConan(ConanFile):
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self.settings) or self._is_msvc:
+        if not tools.cross_building(self) or self._is_msvc:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
@@ -101,7 +107,7 @@ class LibiconvConan(ConanFile):
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
-        if self._is_msvc:
+        if self._is_msvc and tools.Version(self.settings.compiler.version) >= "12":
             self._autotools.flags.append("-FS")
 
         self._autotools.configure(args=configure_args, host=host, build=build)
@@ -123,8 +129,7 @@ class LibiconvConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcharset.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libiconv.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
         if self._is_msvc and self.options.shared:
