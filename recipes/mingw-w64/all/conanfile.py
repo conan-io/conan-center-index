@@ -43,7 +43,7 @@ class MingwConan(ConanFile):
         #     self.requires("mpfr/4.1.0")
         #     self.requires("mpc/1.2.0")
 
-    def source(self):
+    def _download_source(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
 
         if self.settings.os == "Windows":
@@ -67,6 +67,9 @@ class MingwConan(ConanFile):
         return "x86_64-w64-mingw32"
 
     def build(self):
+        # Source should be downloaded in the build step since it depends on specific options
+        self._download_source()
+
         if self.settings.os == "Windows":
             return
 
