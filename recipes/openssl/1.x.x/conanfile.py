@@ -859,7 +859,7 @@ class OpenSSLConan(ConanFile):
     def validate(self):
         if self.settings.os == "Emscripten":
             if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio, self.options.no_tests)):
-                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,,no_threads,no_stdio,no_tests}=True")
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio,no_tests}=True")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
