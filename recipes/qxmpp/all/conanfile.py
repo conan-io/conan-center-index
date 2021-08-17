@@ -37,9 +37,6 @@ class QxmppConan(ConanFile):
             
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self.name)
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
-            tools.patch(**patch)
 
     def __get_option_str(self, b: bool) -> str:
         if b:
