@@ -24,7 +24,7 @@ class LibxsltConan(ConanFile):
     exports_sources = "patches/**"
 
     def requirements(self):
-        self.requires("libxml2/2.9.10")
+        self.requires("libxml2/2.9.12")
 
     @property
     def _is_msvc(self):
