@@ -22,7 +22,7 @@ class QxmppConan(ConanFile):
 
     def requirements(self):
         self.requires("qt/6.1.2")
-        if self.options.withGstreamer:
+        if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.1")
             self.requires("glib/2.68.3")
 
