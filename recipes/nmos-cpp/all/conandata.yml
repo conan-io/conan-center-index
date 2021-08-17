@@ -1,0 +1,8 @@
+sources:
+  # see https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-version-should-packages-use-for-libraries-without-official-releases
+  "cci.YYYYMMDD":
+    url: https://github.com/sony/nmos-cpp/archive/<last-commit-id-on-YYYYMMDD>.tar.gz
+  "sony.master":
+    url: https://github.com/sony/nmos-cpp/archive/master.tar.gz
+  "garethsb.library-cmake":
+    url: https://github.com/garethsb/nmos-cpp/archive/library-cmake.tar.gz
