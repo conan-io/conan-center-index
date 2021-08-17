@@ -73,6 +73,11 @@ class MingwConan(ConanFile):
         target_tag = self._target_tag
         host_tag = "x86_64-linux-gnu"
 
+        # We currently cannot build with multilib and threads=posix. Otherwise we get the gcc compile error:
+        # checking for ld that supports -Wl,--gc-sections... configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES.
+        # Makefile:11275: recipe for target 'configure-target-libstdc++-v3' failed
+        build_multilib = False
+
         # Instructions see:
         # https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-doc/howto-build/mingw-w64-howto-build.txt
         # also good to see specific commands:
@@ -139,11 +144,12 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "binutils")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
-                    "--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-nls",
                     "--disable-shared"
                 ]
+                if build_multilib:
+                    conf_args.append("--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32")
                 conf_args.extend(with_gmp_mpfc_mpc)
                 autotools.configure(configure_dir=os.path.join(self.source_folder, "binutils"),
                                     args=conf_args, target=target_tag, host=False, build=False)
@@ -193,23 +199,25 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
                 autotools_gcc = AutoToolsBuildEnvironment(self)
                 conf_args = [
-                    "--enable-targets=all",
                     "--enable-languages=c,c++",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-shared"
                 ]
+                if build_multilib:
+                    conf_args.append("--enable-targets=all")
+                    conf_args.append("--enable-multilib")
+                else:
+                    conf_args.append("--disable-multilib")
                 conf_args.extend(with_gmp_mpfc_mpc)
                 if self.options.exception == "sjlj":
                     conf_args.append("--enable-sjlj-exceptions")
-                # FIXME this does not yet work. Currently getting make error for libstd++-v3 or libatomic
-                # if self.options.threads == "posix":
-                #     # Some specific options which need to be set for posix thread. Otherwise it fails compiling.
-                #     conf_args.extend([
-                #         "--enable-threads=posix",
-                #         # With zlib is required, otherwise we get configure error:
-                #         # Link tests are not allowed after GCC_NO_EXECUTABLES
-                #         "--with-system-zlib"
-                #     ])
+                if self.options.threads == "posix":
+                    # Some specific options which need to be set for posix thread. Otherwise it fails compiling.
+                    conf_args.extend([
+                        "--enable-threads=posix",
+                        # Not 100% sure why, but the following options are required, otherwise
+                        # gcc fails to build with posix threads
+                    ])
                 autotools_gcc.configure(configure_dir=os.path.join(self.source_folder, "gcc"),
                                         args=conf_args, target=target_tag, host=False, build=False)
                 autotools_gcc.make(target="all-gcc")
@@ -227,31 +235,31 @@ class MingwConan(ConanFile):
                 with tools.chdir(os.path.join(self.build_folder, "mingw-w64-crt")):
                     autotools = AutoToolsBuildEnvironment(self)
                     conf_args = [
-                        "--enable-lib32",
                         "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
                         "--with-sysroot={}".format(self.package_folder)
                     ]
+                    if build_multilib:
+                        conf_args.append("--enable-lib32")
                     autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-crt"),
                                         args=conf_args, target=False, host=target_tag, build=False,
                                         use_default_install_dirs=False)
                     autotools.make()
                     autotools.install()
 
-                # FIXME this does not yet work. Currently getting make error for libstd++-v3
-                # if self.options.threads == "posix":
-                #     self.output.info("Building mingw-w64-libraries-winpthreads ...")
-                #     os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
-                #     with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
-                #         autotools = AutoToolsBuildEnvironment(self)
-                #         conf_args = [
-                #             "--disable-shared",
-                #             "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
-                #             "--with-sysroot={}".format(self.package_folder)
-                #         ]
-                #         autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                #                             args=conf_args, target=False, host=target_tag, build=False)
-                #         autotools.make()
-                #         autotools.install()
+            if self.options.threads == "posix":
+                self.output.info("Building mingw-w64-libraries-winpthreads ...")
+                os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
+                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
+                    autotools = AutoToolsBuildEnvironment(self)
+                    conf_args = [
+                        "--disable-shared",
+                        "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
+                        "--with-sysroot={}".format(self.package_folder)
+                    ]
+                    autotools.configure(configure_dir=os.path.join(self.source_folder, "mingw-w64", "mingw-w64-libraries", "winpthreads"),
+                                        args=conf_args, target=False, host=target_tag, build=False)
+                    autotools.make()
+                    autotools.install()
 
             self.output.info("Building libgcc ...")
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
