@@ -239,7 +239,7 @@ class QtConan(ConanFile):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.1")
+            self.requires("glib/2.68.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -247,7 +247,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -270,7 +270,7 @@ class QtConan(ConanFile):
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.2.1")
+                self.requires("xkbcommon/1.3.0")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -283,7 +283,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.2")
+        self.build_requires("cmake/3.20.4")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
