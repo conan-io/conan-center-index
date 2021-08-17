@@ -45,6 +45,8 @@ class QxmppConan(ConanFile):
             return "OFF"
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = CMake(self)
         cmake.definitions["BUILD_DOCUMENTATION"] = "OFF"
         cmake.definitions["BUILD_TESTS"] = "OFF"
