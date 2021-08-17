@@ -61,7 +61,7 @@ class CorradeConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build_requirements(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self.settings, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             self.build_requires("corrade/{}".format(self.version))
 
     def _configure_cmake(self):
