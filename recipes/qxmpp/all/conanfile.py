@@ -36,9 +36,7 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
             
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("qxmpp-*")[0]
-        rename(extracted_dir, self.name)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self.name)
         patches = self.conan_data["patches"][self.version]
         for patch in patches:
             tools.patch(**patch)
