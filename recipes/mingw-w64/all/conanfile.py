@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conans.model.version import Version
 
 
 class MingwConan(ConanFile):
@@ -10,7 +11,7 @@ class MingwConan(ConanFile):
     homepage = "http://mingw-w64.org/doku.php"
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"], "gcc": ["10.3.0"]}
     default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
     no_copy_source = True
@@ -28,12 +29,15 @@ class MingwConan(ConanFile):
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
                                             .format(self.version, str(self.settings.os), valid_arch))
-        if self._settings_build.os == "Linux" and \
-                "gcc" in self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]:
-            valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
-            if str(self.options.gcc) not in valid_gcc:
-                raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
-                                                .format(str(self.options.gcc), valid_gcc))
+        if self._settings_build.os == "Linux":
+            if "gcc" in self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]:
+                valid_gcc = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]["gcc"].keys()
+                if str(self.options.gcc) not in valid_gcc:
+                    raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
+                                                    .format(str(self.options.gcc), valid_gcc))
+            v = Version(str(self._settings_build.compiler.version))
+            if self._settings_build.compiler != "gcc" or self._settings_build.compiler == "gcc" and v < "7.0":
+                raise ConanInvalidConfiguration("mingw-w64 cross compile toolchain can only be build with a host compiler GCC >= 7")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -288,8 +292,8 @@ class MingwConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    # def package_id(self):
-    #    del self.info.settings.compiler
+    def package_id(self):
+       del self.info.settings.compiler
 
     def package_info(self):
         if getattr(self, "settings_target", None):
