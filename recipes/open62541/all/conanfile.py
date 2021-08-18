@@ -221,10 +221,9 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         if self.options.subscription != False:
             self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
-            # lower() is used to support deprecated "With Events"
-            if "events" in str(self.options.subscription).lower():
+            if "events" in str(self.options.subscription):
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
-            if "alarms+conditions" in str(self.options.subscription):
+            if "alarms" in str(self.options.subscription) and "conditions" in str(self.options.subscription):
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS"] = True
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
