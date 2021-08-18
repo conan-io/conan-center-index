@@ -32,7 +32,7 @@ class Open62541Conan(ConanFile):
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
         # "With Events" is deprecated
-        "subscription": [True, False, "With Events", "events", "events+alarms+conditions"],
+        "subscription": [True, False, "With Events", "events", "alarms,conditions,events"],
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
@@ -104,6 +104,7 @@ class Open62541Conan(ConanFile):
 
         if self.options.subscription == "With Events":
             self.output.warning("`{name}:subscription=With Events` is deprecated. Use `{name}:subscription=events` instead".format(name=self.name))  # Deprecated in 1.2.2
+            self.options.subscription = "events"
 
         if self.options.web_socket:
             self.options["libwebsockets"].with_ssl = self.options.encryption
