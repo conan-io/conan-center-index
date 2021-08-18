@@ -57,12 +57,7 @@ class QxmppConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        cmake = CMake(self)
-        cmake.definitions["BUILD_DOCUMENTATION"] = "OFF"
-        cmake.definitions["BUILD_TESTS"] = "OFF"
-        cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        cmake.definitions["WITH_GSTREAMER"] = self.__get_option_str(self.options.with_gstreamer)
-        cmake.configure(source_folder="qxmpp")
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
