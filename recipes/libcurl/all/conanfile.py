@@ -41,6 +41,9 @@ class LibcurlConan(ConanFile):
         "with_c_ares": [True, False],
         "with_proxy": [True, False],
         "with_rtsp": [True, False],
+        "with_crypto_auth": [True, False],
+        "with_ntlm": [True, False],
+        "with_ntlm_wb": [True, False],
     }
     default_options = {
         "shared": False,
@@ -64,6 +67,9 @@ class LibcurlConan(ConanFile):
         "with_c_ares": False,
         "with_proxy": True,
         "with_rtsp": True,
+        "with_crypto_auth": True,
+        "with_ntlm": True,
+        "with_ntlm_wb": True,
     }
 
     _autotools = None
@@ -339,6 +345,19 @@ class LibcurlConan(ConanFile):
         if not self.options.with_rtsp:
             params.append("--disable-rtsp")
 
+        if not self.options.with_crypto_auth:
+            params.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
+
+        # ntlm will default to enabled if any SSL options are enabled
+        if not self.options.with_ntlm:
+            if tools.Version(self.version) <= "7.77.0":
+                params.append("--disable-crypto-auth")
+            else:
+                params.append("--disable-ntlm")
+
+        if not self.options.with_ntlm_wb:
+            params.append("--disable-ntlm-wb")
+
         # Cross building flags
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -460,6 +479,15 @@ class LibcurlConan(ConanFile):
         if tools.Version(self.version) >= "7.75.0":
             self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
         self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
+        self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
+
+        # Also disables NTLM_WB if set to false
+        if not self.options.with_ntlm:
+            if tools.Version(self.version) <= "7.77.0":
+                self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = True
+            else:
+                self._cmake.definitions["CURL_DISABLE_NTLM"] = True
+        self._cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -550,3 +578,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("zstd::zstd")
         if self.options.with_c_ares:
             self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
+
+    def validate(self):
+        if self.options.with_ssl == "openssl":
+            if self.options.with_ntlm and self.options["openssl"].no_des:
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
