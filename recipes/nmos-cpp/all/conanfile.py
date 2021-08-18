@@ -42,6 +42,24 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/1.1.1k")
         self.requires("json-schema-validator/2.1.0")
 
+    def system_requirements(self):
+        packages = []
+        if self.settings.os == "Windows":
+            self.output.warn("Bonjour must be installed on Windows, see https://developer.apple.com/bonjour/")
+        elif self.settings.os == "Macos":
+            pass
+        elif self.settings.os == "Linux" and tools.os_info.is_linux:
+            if tools.os_info.with_apt:
+                packages = ["libavahi-compat-libdnssd-dev", "libnss-mdns", "avahi-utils"]
+            else:
+                self.output.warn("Do not know how to install Avahi Apple Bonjour compatibility library for {}.".format(tools.os_info.linux_distro))
+        else:
+            self.output.warn("Do not know how to install Avahi Apple Bonjour compatibility library for {}.".format(self.settings.os))
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
+            for package in packages:
+                package_tool.install(update=True, packages=package)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
