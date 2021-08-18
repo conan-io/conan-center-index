@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
 
 
 class MingwConan(ConanFile):
@@ -35,7 +34,7 @@ class MingwConan(ConanFile):
                 if str(self.options.gcc) not in valid_gcc:
                     raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
                                                     .format(str(self.options.gcc), valid_gcc))
-            v = Version(str(self._settings_build.compiler.version))
+            v = tools.Version(str(self._settings_build.compiler.version))
             if self._settings_build.compiler != "gcc" or self._settings_build.compiler == "gcc" and v < "7.0":
                 raise ConanInvalidConfiguration("mingw-w64 cross compile toolchain can only be build with a host compiler GCC >= 7")
 
