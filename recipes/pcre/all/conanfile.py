@@ -38,8 +38,8 @@ class PCREConan(ConanFile):
         "with_bzip2": True,
         "with_zlib": True,
         "with_jit": False,
-        "with_utf": False,
-        "with_unicode_properties": False,
+        "with_utf": True,
+        "with_unicode_properties": True,
         "with_stack_for_recursion": True
     }
 
