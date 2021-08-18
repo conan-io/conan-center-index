@@ -66,7 +66,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/69.1")
         if self.options.with_glib:
-            self.requires("glib/2.68.3")
+            self.requires("glib/2.69.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
