@@ -10,7 +10,7 @@ class MingwConan(ConanFile):
     homepage = "http://mingw-w64.org/doku.php"
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch"
     options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"], "gcc": ["10.3.0"]}
     default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
     no_copy_source = True
@@ -34,9 +34,6 @@ class MingwConan(ConanFile):
                 if str(self.options.gcc) not in valid_gcc:
                     raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
                                                     .format(str(self.options.gcc), valid_gcc))
-            v = tools.Version(str(self._settings_build.compiler.version))
-            if self._settings_build.compiler != "gcc" or self._settings_build.compiler == "gcc" and v < "7.0":
-                raise ConanInvalidConfiguration("mingw-w64 cross compile toolchain can only be build with a host compiler GCC >= 7")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -100,6 +97,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "gmp")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--disable-shared"
                 ]
                 autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "gmp"),
@@ -112,6 +110,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "mpfr")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--disable-shared",
                     "--with-gmp={}".format(self.package_folder)
                 ]
@@ -125,6 +124,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "mpc")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--disable-shared",
                     "--with-gmp={}".format(self.package_folder),
                     "--with-mpfr={}".format(self.package_folder)
@@ -152,6 +152,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "binutils")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-nls",
                     "--disable-shared"
@@ -179,6 +180,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "mingw-w64-headers")):
                 autotools = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--with-widl={}".format(os.path.join(self.package_folder, "bin")),
                     "--enable-sdk=all",
                     "--prefix={}".format(os.path.join(self.package_folder, target_tag))
@@ -207,6 +209,7 @@ class MingwConan(ConanFile):
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
                 autotools_gcc = AutoToolsBuildEnvironment(self)
                 conf_args = [
+                    "--enable-silent-rules",
                     "--enable-languages=c,c++",
                     "--with-sysroot={}".format(self.package_folder),
                     "--disable-shared"
@@ -222,6 +225,7 @@ class MingwConan(ConanFile):
                 if self.options.threads == "posix":
                     # Some specific options which need to be set for posix thread. Otherwise it fails compiling.
                     conf_args.extend([
+                        "--enable-silent-rules",
                         "--enable-threads=posix",
                         # Not 100% sure why, but the following options are required, otherwise
                         # gcc fails to build with posix threads
@@ -243,6 +247,7 @@ class MingwConan(ConanFile):
                 with tools.chdir(os.path.join(self.build_folder, "mingw-w64-crt")):
                     autotools = AutoToolsBuildEnvironment(self)
                     conf_args = [
+                        "--enable-silent-rules",
                         "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
                         "--with-sysroot={}".format(self.package_folder)
                     ]
@@ -260,6 +265,7 @@ class MingwConan(ConanFile):
                     with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
                         autotools = AutoToolsBuildEnvironment(self)
                         conf_args = [
+                            "--enable-silent-rules",
                             "--disable-shared",
                             "--prefix={}".format(os.path.join(self.package_folder, target_tag))
                         ]
@@ -291,11 +297,8 @@ class MingwConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             # Remove symlinks, we need to create them in the package_info step
-            tools.remove(os.path.join(self.package_folder, 'mingw'))
-            tools.remove(os.path.join(self.package_folder, self._target_tag, 'lib64'))
-
-    def package_id(self):
-        del self.info.settings.compiler
+            os.unlink(os.path.join(self.package_folder, 'mingw'))
+            os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))
 
     def package_info(self):
         if getattr(self, "settings_target", None):
