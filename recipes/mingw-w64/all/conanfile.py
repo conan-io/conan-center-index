@@ -254,19 +254,19 @@ class MingwConan(ConanFile):
                     autotools.make()
                     autotools.install()
 
-            if self.options.threads == "posix":
-                self.output.info("Building mingw-w64-libraries-winpthreads ...")
-                os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
-                with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
-                    autotools = AutoToolsBuildEnvironment(self)
-                    conf_args = [
-                        "--disable-shared",
-                        "--prefix={}".format(os.path.join(self.package_folder, target_tag))
-                    ]
-                    autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                                        args=conf_args, target=False, host=target_tag, build=False)
-                    autotools.make()
-                    autotools.install()
+                if self.options.threads == "posix":
+                    self.output.info("Building mingw-w64-libraries-winpthreads ...")
+                    os.mkdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
+                    with tools.chdir(os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
+                        autotools = AutoToolsBuildEnvironment(self)
+                        conf_args = [
+                            "--disable-shared",
+                            "--prefix={}".format(os.path.join(self.package_folder, target_tag))
+                        ]
+                        autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-libraries", "winpthreads"),
+                                            args=conf_args, target=False, host=target_tag, build=False)
+                        autotools.make()
+                        autotools.install()
 
             self.output.info("Building libgcc ...")
             with tools.chdir(os.path.join(self.build_folder, "gcc")):
@@ -290,9 +290,12 @@ class MingwConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share", "man"))
             tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            # Remove symlinks, we need to create them in the package_info step
+            tools.remove(os.path.join(self.package_folder, 'mingw'))
+            tools.remove(os.path.join(self.package_folder, self._target_tag, 'lib64'))
 
     def package_id(self):
-       del self.info.settings.compiler
+        del self.info.settings.compiler
 
     def package_info(self):
         if getattr(self, "settings_target", None):
@@ -346,3 +349,10 @@ class MingwConan(ConanFile):
             self.env_info.STRINGS = prefix + "strings"
             self.env_info.STRIP = prefix + "strip"
             self.env_info.GCOV = prefix + "gcov"
+            # Symlinks cannot be created in package step, otherwise the link target is wrong.
+            if not os.path.exists(os.path.join(self.package_folder, 'mingw')):
+                self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag),
+                                              os.path.join(self.package_folder, 'mingw')))
+            if not os.path.exists(os.path.join(self.package_folder, self._target_tag, 'lib64')):
+                self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag, 'lib'),
+                                              os.path.join(self.package_folder, self._target_tag, 'lib64')))
