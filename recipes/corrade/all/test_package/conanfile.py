@@ -9,6 +9,8 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["WITH_UTILITY"] = self.options["corrade"].with_utility
+        if self.deps_cpp_info["corrade"].version == "2019.10":
+            cmake.definitions["VERSION_2019_10"] = True
         cmake.configure()
         cmake.build()
 
