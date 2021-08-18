@@ -220,6 +220,8 @@ class SDLConan(ConanFile):
                 if self.options.xvm:
                     self._cmake.definitions["HAVE_XF86VM_H"] = True
                 self._cmake.definitions["VIDEO_WAYLAND"] = self.options.wayland
+                if self.options.wayland:
+                    self._cmake.definitions["WAYLAND_SHARED"] = self.options["wayland"].shared
                 self._cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
             elif self.settings.os == "Windows":
@@ -252,17 +254,6 @@ class SDLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "libdata"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def _add_libraries_from_pc(self, library, static=None):
-        if static is None:
-            static = not self.options.shared
-        pkg_config = tools.PkgConfig(library, static=static)
-        libs = [lib[2:] for lib in pkg_config.libs_only_l]  # cut -l prefix
-        lib_paths = [lib[2:] for lib in pkg_config.libs_only_L]  # cut -L prefix
-        self.cpp_info.components["libsdl2"].libs.extend(libs)
-        self.cpp_info.components["libsdl2"].libdirs.extend(lib_paths)
-        self.cpp_info.components["libsdl2"].sharedlinkflags.extend(pkg_config.libs_only_other)
-        self.cpp_info.components["libsdl2"].exelinkflags.extend(pkg_config.libs_only_other)
-
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SDL2"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2"
@@ -287,15 +278,15 @@ class SDLConan(ConanFile):
             if self.options.opengl:
                 self.cpp_info.components["libsdl2"].requires.append("opengl::opengl")
             if self.options.jack:
-                self._add_libraries_from_pc("jack")
+                self.cpp_info.components["libsdl2"].requires.append("jack::jack")
             if self.options.sndio:
-                self._add_libraries_from_pc("sndio")
+                self.cpp_info.components["libsdl2"].requires.append("sndio::sndio")
             if self.options.nas:
                 self.cpp_info.components["libsdl2"].requires.append("nas::nas")
             if self.options.esd:
-                self._add_libraries_from_pc("esound")
+                self.cpp_info.components["libsdl2"].requires.append("esd::esd")
             if self.options.directfb:
-                self._add_libraries_from_pc("directfb")
+                self.cpp_info.components["libsdl2"].requires.append("directfb::directfb")
             if self.options.video_rpi:
                 self.cpp_info.components["libsdl2"].libs.append("bcm_host")
                 self.cpp_info.components["libsdl2"].includedirs.extend([
@@ -306,6 +297,8 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].libdirs.append("/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].sharedlinkflags.append("-Wl,-rpath,/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].exelinkflags.append("-Wl,-rpath,/opt/vc/lib")
+            if self.options.wayland:
+                self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",
