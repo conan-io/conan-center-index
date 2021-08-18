@@ -40,7 +40,7 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
             
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self.name)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def __get_option_str(self, b: bool) -> str:
         if b:
