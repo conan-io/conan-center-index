@@ -1,10 +1,9 @@
-from conans import ConanFile, CMake, tools
 import os
+from conans import ConanFile, CMake, tools
 
-
-class TestPackageConan(ConanFile):
+class NasTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
 
     def build(self):
         cmake = CMake(self)
