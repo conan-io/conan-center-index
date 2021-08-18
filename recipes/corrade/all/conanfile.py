@@ -103,7 +103,7 @@ class CorradeConan(ConanFile):
         share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
         self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake"))
         self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy(pattern="*.cmake", dst=os.path.join("lib", "cmake"), src=os.path.join(self.source_folder, "cmake"))
+        self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
