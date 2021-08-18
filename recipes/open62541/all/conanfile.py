@@ -31,7 +31,7 @@ class Open62541Conan(ConanFile):
         "shared": [True, False],
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
-        "subscription": [True, False, "With Events"],
+        "subscription": [True, False, "With Events", "With Events, Alarms, Conditions"],
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
@@ -116,9 +116,8 @@ class Open62541Conan(ConanFile):
 
     def validate(self):
         if not self.options.subscription:
-            if self.options.subscription_events:
-                raise ConanInvalidConfiguration(
-                    "Open62541 requires subscription option")
+            raise ConanInvalidConfiguration(
+                "Open62541 requires subscription option")
 
         if not self.options.discovery:
             if self.options.discovery_semaphore:
@@ -217,8 +216,10 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         if self.options.subscription != False:
             self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
-            if self.options.subscription == "With Events":
+            if self.options.subscription == "With Events" or self.options.subscription == "With Events, Alarms, Conditions":
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
+            if self.options.subscription == "With Events, Alarms, Conditions":
+                self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS"] = True
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
