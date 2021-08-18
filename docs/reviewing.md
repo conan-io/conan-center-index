@@ -27,7 +27,7 @@ Avoid trailing white-space characters, if possible
 
 If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency is preferred.
 
-## Subfolder Properties 
+## Subfolder Properties
 
 When extracting sources or performing out-of-source builds, it is preferable to use a _subfolder_ attribute, `_source_subfolder` and `_build_subfolder` respectively.
 
@@ -105,15 +105,20 @@ def _configure_cmake(self):
 
 ### Minimalistic Source Code
 
-The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instatiation of objects to ensure linkage
+The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instantiation of objects to ensure linkage
 and dependencies are correct.
 
 ### Verifying Components
 
 When components are defined in the `package_info` in `conanfile.py` the following conditions are desired
 
-- use the `cmake_find_package` or `cmake_find_package_multi` generators in `test_package/conanfile.py`
-- corresponding call to `find_package()` with the components _explicitly_ used in `target_link_libraries`
+* use `cmake_find_package` if library has an [official](cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) CMake module emulated in the recipe.
+* use `cmake_find_package_multi` if library provides an official cmake config file emulated in the recipe. If there are more than one target, try to use all of them, or add another executable linking to the global (usually unofficial) target. There may additionally be variables that are emulated by the recipe which should be used as well. There are some ways to identify when to use it:
+    * Usually, project installs its cmake files into `package_folder/lib/cmake`. The folder is removed from package folder by calling `tools.rmdir(os.path.join(self.package_folder), "lib", "cmake")`
+    * Also, the library's CMake scripts can use [install(EXPORT ..)](https://cmake.org/cmake/help/latest/command/install.html#export) and/or may install [package configuration helpers](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html)
+      to indicate an exported CMake config file.
+    * When `self.cpp_info.filenames["cmake_find_package_multi"]`, `self.cpp_info.names["cmake_find_package_multi"]` are declared
+* otherwise, use [cmake generator](https://docs.conan.io/en/latest/reference/generators/cmake.html) to not suggest an unofficial cmake target in test package.
 
 ### Recommended feature options names
 

@@ -55,7 +55,7 @@ class SysConfigGLUConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def package_info(self):
-        self.cpp_info.include_dirs = []
+        self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
         if self.settings.os == "Windows":

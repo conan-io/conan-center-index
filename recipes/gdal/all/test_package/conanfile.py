@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             if self.options["gdal"].tools:
                 self.run("gdal_translate --formats", run_environment=True)
             bin_path = os.path.join("bin", "test_package")

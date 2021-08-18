@@ -3,13 +3,20 @@ from contextlib import contextmanager
 import os
 import shutil
 
+required_conan_version = ">=1.36.0"
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp",
+    test_type = "build_requires"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     @contextmanager
@@ -32,5 +39,5 @@ class TestPackageConan(ConanFile):
             autotools.make()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join(".", "test_package"), run_environment=True)

@@ -4,6 +4,9 @@ from contextlib import contextmanager
 import os
 
 
+required_conan_version = ">=1.33.0"
+
+
 class WolfSSLConan(ConanFile):
     name = "wolfssl"
     license = "GPL-2.0-or-later"
@@ -65,12 +68,12 @@ class WolfSSLConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}-stable".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
 
     @contextmanager
     def _build_context(self):
@@ -125,7 +128,7 @@ class WolfSSLConan(ConanFile):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
-            if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler == "Visual Studio" and tools.Version(self.version) < "4.7":
                 tools.replace_in_file("libtool",
                                       "AR_FLAGS=\"Ucru\"", "AR_FLAGS=\"cru\"")
             autotools.make()
@@ -139,12 +142,13 @@ class WolfSSLConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libwolfssl.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
+                os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "wolfssl"
         libname = "wolfssl"
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            libname += ".dll.lib"
         self.cpp_info.libs = [libname]
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")

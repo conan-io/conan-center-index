@@ -709,8 +709,13 @@ class QtConan(ConanFile):
             core_reqs.append("double-conversion::double-conversion")
         if self.options.get_safe("with_icu", False):
             core_reqs.append("icu::icu")
+        if self.options.with_zstd:
+            core_reqs.append("zstd::zstd")
 
         _create_module("Core", core_reqs)
+        _create_module("Platform")
+        self.cpp_info.components["qtPlatform"].libs = [] # this is a collection of abstract classes, so this is header-only
+        self.cpp_info.components["qtPlatform"].libdirs = []
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
@@ -727,6 +732,8 @@ class QtConan(ConanFile):
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.get_safe("with_vulkan", False):
+                gui_reqs.append("vulkan-loader::vulkan-loader")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
@@ -781,6 +788,7 @@ class QtConan(ConanFile):
             _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
+            _create_module("LinguistTools", ["Gui", "Widgets"])
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
