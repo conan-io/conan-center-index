@@ -352,6 +352,7 @@ class MingwConan(ConanFile):
             self.env_info.STRINGS = prefix + "strings"
             self.env_info.STRIP = prefix + "strip"
             self.env_info.GCOV = prefix + "gcov"
+            self.env_info.RC = prefix + "windres"
             # Symlinks cannot be created in package step, otherwise the link target is wrong.
             if not os.path.exists(os.path.join(self.package_folder, 'mingw')):
                 self.run("ln -s {} {}".format(os.path.join(self.package_folder, self._target_tag),
