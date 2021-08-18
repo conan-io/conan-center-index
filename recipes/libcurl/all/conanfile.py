@@ -150,7 +150,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
-            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"") 
+            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
 
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
