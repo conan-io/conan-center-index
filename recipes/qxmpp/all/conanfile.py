@@ -21,6 +21,10 @@ class QxmppConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def requirements(self):
         self.requires("qt/6.1.2")
         if self.options.with_gstreamer:
