@@ -39,9 +39,9 @@ class MingwConan(ConanFile):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
         # else:
-        #     self.requires("gmp/6.2.1")
-        #     self.requires("mpfr/4.1.0")
-        #     self.requires("mpc/1.2.0")
+        #     self.build_requires("gmp/6.2.1")
+        #     self.build_requires("mpfr/4.1.0")
+        #     self.build_requires("mpc/1.2.0")
 
     def _download_source(self):
         arch_data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
@@ -83,6 +83,8 @@ class MingwConan(ConanFile):
 
         # Instructions see:
         # https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-doc/howto-build/mingw-w64-howto-build.txt
+        # and
+        # https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-doc/howto-build/mingw-w64-howto-build-adv.txt
         # also good to see specific commands:
         # https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/+/lollipop-dev/build-mingw64-toolchain.sh
 
@@ -176,8 +178,7 @@ class MingwConan(ConanFile):
                 conf_args = [
                     "--with-widl={}".format(os.path.join(self.package_folder, "bin")),
                     "--enable-sdk=all",
-                    "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
-                    "--with-sysroot={}".format(self.package_folder)
+                    "--prefix={}".format(os.path.join(self.package_folder, target_tag))
                 ]
                 autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-headers"),
                                     args=conf_args, target=False, host=target_tag, build=host_tag)
@@ -257,8 +258,7 @@ class MingwConan(ConanFile):
                     autotools = AutoToolsBuildEnvironment(self)
                     conf_args = [
                         "--disable-shared",
-                        "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
-                        "--with-sysroot={}".format(self.package_folder)
+                        "--prefix={}".format(os.path.join(self.package_folder, target_tag))
                     ]
                     autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-libraries", "winpthreads"),
                                         args=conf_args, target=False, host=target_tag, build=False)
