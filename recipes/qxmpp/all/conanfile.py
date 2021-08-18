@@ -55,7 +55,7 @@ class QxmppConan(ConanFile):
         self._cmake.definitions["BUILD_DOCUMENTATION"] = "OFF"
         self._cmake.definitions["BUILD_TESTS"] = "OFF"
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["WITH_GSTREAMER"] = self.__get_option_str(self.options.with_gstreamer)
+        self._cmake.definitions["WITH_GSTREAMER"] = self.options.with_gstreamer
         self._cmake.configure(source_folder="qxmpp")
         return self._cmake
 
