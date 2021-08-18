@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["WITH_UTILITY"] = self.options["corrade"].with_utility
         cmake.configure()
         cmake.build()
 
@@ -16,5 +17,6 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
 
-            # Run corrade-rc
-            self.run("corrade-rc --help", run_environment=True)
+            if self.options["corrade"].with_utility:
+                # Run corrade-rc
+                self.run("corrade-rc --help", run_environment=True)

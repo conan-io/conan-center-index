@@ -7,7 +7,11 @@ conan_basic_setup(TARGETS)
 find_package(Corrade REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} Corrade::Utility)
+target_link_libraries(${PROJECT_NAME} Corrade::Main)
+if(WITH_UTILITY)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_UTILITY)
+	target_link_libraries(${PROJECT_NAME} Corrade::Utility)
+endif()
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
