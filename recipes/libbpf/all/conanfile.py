@@ -33,6 +33,7 @@ class LibbpfConan(ConanFile):
         self.build_requires("make/4.2.1")
 
     def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
         self.requires("libelf/0.8.13")
         self.requires("zlib/1.2.11")
 
@@ -53,9 +54,6 @@ class LibbpfConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This library is only available on Linux")
-
-        if tools.Version(platform.release()) < "5.7":
-            raise ConanInvalidConfiguration("This library needs at least kernel version 5.7")
 
     def configure(self):
         if self.options.shared:
