@@ -61,7 +61,7 @@ class SDLConan(ConanFile):
         "xscrnsaver": True,
         "xshape": True,
         "xvm": True,
-        "wayland": False,
+        "wayland": True,
         "directfb": False,
         "iconv": True,
         "video_rpi": False,
@@ -131,22 +131,18 @@ class SDLConan(ConanFile):
                 self.requires("opengl/system")
             if self.options.nas:
                 self.requires("nas/1.9.4")
-
-    def _check_pkg_config(self, option, package_name):
-        if option:
-            pkg_config = tools.PkgConfig(package_name)
-            if not pkg_config.provides:
-                raise ConanInvalidConfiguration("package %s is not available" % package_name)
+            if self.options.jack:
+                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
+            if self.options.esd:
+                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
+            if self.options.wayland:
+                self.requires("wayland/1.19.0")
+            if self.options.directfb:
+                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
     def validate(self):
         if self.settings.os == "Macos" and not self.options.iconv:
             raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-        if self.settings.os == "Linux":
-            self._check_pkg_config(self.options.jack, "jack")
-            self._check_pkg_config(self.options.esd, "esound")
-            self._check_pkg_config(self.options.wayland, "wayland-client")
-            self._check_pkg_config(self.options.wayland, "wayland-protocols")
-            self._check_pkg_config(self.options.directfb, "directfb")
 
     def package_id(self):
         del self.info.options.sdl2main
@@ -171,6 +167,7 @@ class SDLConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
             # FIXME: self.install_folder not defined? Neccessary?
             self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
             if self.settings.os != "Windows":
@@ -195,6 +192,9 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["PULSEAUDIO"] = self.options.pulse
                 self._cmake.definitions["SNDIO"] = self.options.sndio
                 self._cmake.definitions["NAS"] = self.options.nas
+                if self.options.nas:
+                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
+                    self._cmake.definitions["NAS_SHARED"] = self.options["nas"].shared
                 self._cmake.definitions["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
                     self._cmake.definitions["HAVE_XEXT_H"] = True
@@ -225,6 +225,7 @@ class SDLConan(ConanFile):
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
+            self._cmake.definitions["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
             self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
