@@ -19,6 +19,7 @@ class QxmppConan(ConanFile):
                        "fPIC": True,
                        "with_gstreamer": False}
     generators = "cmake", "cmake_find_package_multi"
+    _cmake = None
 
     def requirements(self):
         self.requires("qt/6.1.2")
