@@ -31,7 +31,8 @@ class Open62541Conan(ConanFile):
         "shared": [True, False],
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
-        "subscription": [True, False, "With Events", "With Events, Alarms, Conditions"],
+        # "With Events" is deprecated
+        "subscription": [True, False, "With Events", "events", "events+alarms+conditions"],
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
@@ -100,6 +101,9 @@ class Open62541Conan(ConanFile):
         if not self.options.cpp_compatible:
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
+
+        if self.options.subscription == "With Events":
+            self.output.warning("`{name}:subscription=With Events` is deprecated. Use `{name}:subscription=events` instead".format(name=self.name))  # Deprecated in 1.2.2
 
         if self.options.web_socket:
             self.options["libwebsockets"].with_ssl = self.options.encryption
@@ -216,9 +220,10 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         if self.options.subscription != False:
             self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
-            if self.options.subscription == "With Events" or self.options.subscription == "With Events, Alarms, Conditions":
+            # lower() is used to support deprecated "With Events"
+            if "events" in str(self.options.subscription).lower():
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
-            if self.options.subscription == "With Events, Alarms, Conditions":
+            if "alarms+conditions" in str(self.options.subscription):
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS"] = True
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
