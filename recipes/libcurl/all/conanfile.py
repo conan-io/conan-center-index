@@ -582,4 +582,4 @@ class LibcurlConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "openssl":
             if self.options.with_ntlm and self.options["openssl"].no_des:
-                raise ConanInvalidConfiguration("Disabling DES with NTLM enabled not valid")
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
