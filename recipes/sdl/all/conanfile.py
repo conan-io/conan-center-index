@@ -142,7 +142,6 @@ class SDLConan(ConanFile):
         if self.settings.os == "Macos" and not self.options.iconv:
             raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
         if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
             self._check_pkg_config(self.options.jack, "jack")
             self._check_pkg_config(self.options.esd, "esound")
             self._check_pkg_config(self.options.wayland, "wayland-client")
