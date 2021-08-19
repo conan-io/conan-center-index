@@ -1,4 +1,15 @@
 sources:
+  "r23":
+    url:
+      "Windows":
+        url: "https://dl.google.com/android/repository/android-ndk-r23-windows.zip"
+        sha256: "40325b5bfdb7f6de016ea3efee0468a7d306eda55a6f80966a501645ba01fbfa"
+      "Linux":
+        url: "https://dl.google.com/android/repository/android-ndk-r23-linux.zip"
+        sha256: "e3eacf80016b91d4cd2c8ca9f34eebd32df912bb799c859cc5450b6b19277b4f"
+      "Macos":
+        url: " https://dl.google.com/android/repository/android-ndk-r23-darwin.zip"
+        sha256: "163ff3bb72306ffa814de35c49819bccae9df10855a4e3fbba52ad4111fcccae"
   "r22b":
     url:
       "Windows":
