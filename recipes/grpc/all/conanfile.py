@@ -65,7 +65,10 @@ class grpcConan(ConanFile):
 
         #when cross compiling we need pre compiled grpc plugins for protoc
         if tools.cross_building(self):
-            self.build_requires('grpc/{}'.format(self.version))
+            if not hasattr(self, "settings_build"):
+                return
+            else:
+                self.build_requires('grpc/{}'.format(self.version))
 
     def config_options(self):
         if self.settings.os == "Windows":
