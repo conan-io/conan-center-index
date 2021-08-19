@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -26,24 +26,37 @@ class MdnsResponderConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     @property
-    def _make(self):
-        make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make"))
-        if not make:
-            raise ConanInvalidConfiguration("This package needs 'make' in the path to build")
-        return "{} CFLAGS=-std=gnu99".format(make)
+    def _posix_folder(self):
+        return os.path.join(self._source_subfolder, "mDNSPosix")
+
+    @property
+    def _make_args(self):
+        return [
+            "os=linux",
+        ]
+
+    @property
+    def _make_env(self):
+        return {
+            "CFLAGS": "-std=gnu99",
+        }
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if self.settings.os == "Linux":
-            with tools.chdir(os.path.join(self._source_subfolder, "mDNSPosix")):
-                self.run("{} os=linux".format(self._make))
+            with tools.chdir(self._posix_folder):
+                autotools = AutoToolsBuildEnvironment(self)
+                autotools.make(args=self._make_args, vars=self._make_env)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.os == "Linux":
-            with tools.chdir(os.path.join(self._source_subfolder, "mDNSPosix")):
-                self.run("{} install os=linux".format(self._make))
+            with tools.chdir(self._posix_folder):
+                autotools = AutoToolsBuildEnvironment(self)
+                args = self._make_args
+                args.append("INSTBASE={}".format(self.package_folder))
+                autotools.install(args=args, vars=self._make_env)
 
     def package_info(self):
         pass
