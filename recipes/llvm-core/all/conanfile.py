@@ -7,6 +7,8 @@ import re
 import os.path
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LLVMCoreConan(ConanFile):
     name = 'llvm-core'
@@ -15,7 +17,7 @@ class LLVMCoreConan(ConanFile):
         'optimizers, and runtime environments.'
     )
     license = 'Apache-2.0 WITH LLVM-exception'
-    topics = ('conan', 'llvm')
+    topics = ('llvm', 'compiler')
     homepage = 'https://llvm.org'
     url = 'https://github.com/conan-io/conan-center-index'
 
@@ -69,7 +71,7 @@ class LLVMCoreConan(ConanFile):
     # Older cmake versions may have issues generating the graphviz output used
     # to model the components
     build_requires = [
-        'cmake/3.20.4'
+        'cmake/3.20.5'
     ]
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
@@ -211,8 +213,7 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration('Cross-building not implemented')
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        os.rename('llvm-{}.src'.format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
         self._patch_sources()
 
     def build(self):
