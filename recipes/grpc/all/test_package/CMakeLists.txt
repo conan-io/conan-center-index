@@ -17,7 +17,7 @@ message(STATUS "Using protobuf ${protobuf_VERSION}")
 if (CMAKE_CROSSCOMPILING)
   find_program(Protoc_Executable protoc PATHS ENV PATH NO_DEFAULT_PATH)
 else()
-  set(Protoc_Executable Protobuf_PROTOC_EXECUTABLE)
+  set(Protoc_Executable ${Protobuf_PROTOC_EXECUTABLE})
 endif()
 
 # Find gRPC installation
