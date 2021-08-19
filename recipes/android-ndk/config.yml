@@ -1,4 +1,6 @@
 versions:
+  "r23":
+    folder: all
   "r22b":
     folder: all
   "r22":
