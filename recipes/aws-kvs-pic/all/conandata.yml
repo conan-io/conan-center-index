@@ -1,8 +1,8 @@
 sources:
-  "cci.20210705":
-    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/b82fd00f116f837f2ceb0f3587fd5fc0e371c994.zip"
-    sha256: "b6783d670d26c4396e70140c17681183e852fe04c3de7b53ebaaef1293464c07"
+  "cci.20210812":
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/bbf0e4ba749a6c045fc3958951c1c3a61a808dd0.zip"
+    sha256: "230249627eea345a5156471a104352eeb984e9de03e8a5f8a363d6a209517ade"
 patches:
-  "cci.20210705":
+  "cci.20210812":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-do-not-enforce-fpic.patch"
