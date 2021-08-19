@@ -69,7 +69,7 @@ class LLVMCoreConan(ConanFile):
     # Older cmake versions may have issues generating the graphviz output used
     # to model the components
     build_requires = [
-        'cmake/3.20.3'
+        'cmake/3.20.4'
     ]
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
