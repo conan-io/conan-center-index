@@ -30,8 +30,8 @@ class awskvspicConan(ConanFile):
         return self._cmake
 
     def validate(self):
-        if (self.settings.os == "Macos" and self.options.shared):
-            raise ConanInvalidConfiguration("This library can't be built shared on MacOS")
+        if (self.settings.os != "Linux" and self.options.shared):
+            raise ConanInvalidConfiguration("This library can only be built shared on Linux")
 
     def config_options(self):
         if self.settings.os == "Windows":
