@@ -75,7 +75,13 @@ class ConanFile(ConanFile):
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
+        toolchain.variables["CMAKE_INSTALL_BINDIR"] = "bin"
+        toolchain.variables["CMAKE_INSTALL_SBINDIR"] = "bin"
+        toolchain.variables["CMAKE_INSTALL_LIBEXECDIR"] = "bin"
         toolchain.variables["CMAKE_INSTALL_LIBDIR"] = "lib"
+        toolchain.variables["CMAKE_INSTALL_INCLUDEDIR"] = "include"
+        toolchain.variables["CMAKE_INSTALL_OLDINCLUDEDIR"] = "include"
+        toolchain.variables["CMAKE_INSTALL_DATAROOTDIR"] = "share"
         toolchain.generate()
 
     def build(self):
