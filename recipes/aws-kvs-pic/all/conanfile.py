@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -27,6 +28,10 @@ class awskvspicConan(ConanFile):
             self._cmake.definitions["BUILD_DEPENDENCIES"] = False
             self._cmake.configure()
         return self._cmake
+
+    def validate(self):
+        if (self.settings.os == "Macos" and self.options.shared):
+            raise ConanInvalidConfiguration("This library can't be built shared on MacOS")
 
     def config_options(self):
         if self.settings.os == "Windows":
