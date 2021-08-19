@@ -1,0 +1,60 @@
+--- a/microprofile.cpp
++++ b/microprofile.cpp
+@@ -4835,6 +4835,7 @@ void MicroProfileWriteSocket(void* Handle, size_t nSize, const char* pData)
+ }
+ 
+ #if MICROPROFILE_MINIZ
++#include <miniz/miniz.h>
+ #ifndef MICROPROFILE_COMPRESS_BUFFER_SIZE
+ #define MICROPROFILE_COMPRESS_BUFFER_SIZE (256<<10)
+ #endif
+@@ -8716,8 +8717,22 @@ int MicroProfileGetGpuTickReference(int64_t* pOutCPU, int64_t* pOutGpu)
+ 	return 1;
+ }
+ #elif MICROPROFILE_GPU_TIMERS_GL
++#include <glad/glad.h>
+ void MicroProfileGpuInitGL()
+ {
++	MicroProfileGpuInitGLWithLoader(nullptr);
++}
++
++void MicroProfileGpuInitGLWithLoader(MicroProfileGLLoaderFunction pGlLoaderFunc)
++{
++	if (pGlLoaderFunc)
++	{
++		gladLoadGLLoader(pGlLoaderFunc);
++	}
++	else
++	{
++		gladLoadGL();
++	}
+ 	S.pGPU = MP_ALLOC_OBJECT(MicroProfileGpuTimerState);
+ 	S.pGPU->GLTimerPos = 0;
+ 	glGenQueries(MICROPROFILE_GL_MAX_QUERIES, &S.pGPU->GLTimers[0]);		
+--- a/microprofile.h
++++ b/microprofile.h
+@@ -193,8 +193,14 @@ typedef uint16_t MicroProfileGroupId;
+ #include <stdint.h>
+ 
+ #ifndef MICROPROFILE_API
++#if defined(_WIN32) && defined(_MICROPROFILE_SHARED)
++#define MICROPROFILE_API __declspec(dllexport)
++#elif defined(_WIN32) && !defined(_MICROPROFILE_STATIC)
++#define MICROPROFILE_API __declspec(dllimport)
++#else
+ #define MICROPROFILE_API
+ #endif
++#endif
+ 
+ #ifdef MICROPROFILE_PS4
+ #include "microprofile_ps4.h"
+@@ -681,7 +687,9 @@ MICROPROFILE_API void MicroProfileGpuShutdown();
+ 
+ #if MICROPROFILE_GPU_TIMERS_GL
+ #define MICROPROFILE_GL_MAX_QUERIES (8<<10)
++typedef void* (* MicroProfileGLLoaderFunction)(const char *name);
+ MICROPROFILE_API void MicroProfileGpuInitGL();
++MICROPROFILE_API void MicroProfileGpuInitGLWithLoader(MicroProfileGLLoaderFunction pGlLoaderFunc);
+ #endif
+ 
+ 
