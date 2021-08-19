@@ -1,0 +1,4 @@
+sources:
+  "1.8.2":
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.2.tar.gz"
+    sha256: "3f1c466ee1600578689b32b1f2587066d3259704ec7ed1fcf80c324d01274f48"
