@@ -507,7 +507,7 @@ class QtConan(ConanFile):
             args += ["-opengl dynamic"]
 
         if self.options.get_safe("with_vulkan", False):
-            args.append("-feature-vulkan")
+            args.append("-vulkan")
         else:
             args.append("-no-vulkan")
 
