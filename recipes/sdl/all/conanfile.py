@@ -193,7 +193,8 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["SNDIO"] = self.options.sndio
                 self._cmake.definitions["NAS"] = self.options.nas
                 if self.options.nas:
-                    self._cmake.definitions["EXTRA_LDFLAGS"] = "-lXau"  # Library files don't propagate transitive deps!
+                    libs = ["-l{}".format(name) for name in (self.deps_cpp_info["nas"].libs + self.deps_cpp_info["nas"].system_libs)]
+                    self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(libs)  # Build files don't propagate transitive deps!
                     cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
                     self._cmake.definitions["NAS_SHARED"] = self.options["nas"].shared
                 self._cmake.definitions["VIDEO_X11"] = self.options.x11
