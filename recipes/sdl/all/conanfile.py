@@ -130,7 +130,6 @@ class SDLConan(ConanFile):
                 self.requires("opengl/system")
             if self.options.nas:
                 self.requires("nas/1.9.4")
-                self.requires("xorg/system")
             if self.options.jack:
                 raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
             if self.options.esd:
@@ -288,7 +287,6 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("sndio::sndio")
             if self.options.nas:
                 self.cpp_info.components["libsdl2"].requires.append("nas::nas")
-                self.cpp_info.components["libsdl2"].requires.append("xorg::xorg")
             if self.options.esd:
                 self.cpp_info.components["libsdl2"].requires.append("esd::esd")
             if self.options.directfb:
