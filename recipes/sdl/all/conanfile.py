@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -162,7 +161,10 @@ class SDLConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-       
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
         self._build_cmake()
 
     def _configure_cmake(self):
