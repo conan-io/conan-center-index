@@ -212,4 +212,4 @@ The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requi
 system packages at same recipe.
 However, there are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
 in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, the
-[GTk](https://github.com/conan-io/conan-center-index/blob/master/recipes/gtk/system/conanfile.py) is a good example.
+[OpenCL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opencl/system/conanfile.py) is a good example.
