@@ -13,7 +13,7 @@ class SysConfigAvahiSystemConan(ConanFile):
     settings = "os"
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os != "Linux" or tools.cross_building(self):
             raise ConanInvalidConfiguration("Only Linux is supported for this package.")
 
     def system_requirements(self):
