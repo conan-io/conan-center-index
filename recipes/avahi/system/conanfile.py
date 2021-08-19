@@ -3,9 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class SysConfigAvahiSystemConan(ConanFile):
-    name = "avahi-system"
+    name = "avahi"
     version = "system"
-    description = "Conan package for system-installed Avahi - Service Discovery for Linux using mDNS/DNS-SD - compatible with Bonjour"
+    description = "Conan package for Avahi - Service Discovery for Linux using mDNS/DNS-SD - compatible with Bonjour"
     topics = ("Avahi", "Bonjour", "DNS-SD", "mDNS")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lathiat/avahi"
