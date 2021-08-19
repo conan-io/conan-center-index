@@ -33,6 +33,7 @@ class MdnsResponderConan(ConanFile):
     def _make_args(self):
         return [
             "os=linux",
+            "-j1",
         ]
 
     @property
