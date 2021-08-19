@@ -11,7 +11,7 @@ class QxmppConan(ConanFile):
     description = "Cross-platform C++ XMPP client and server library. It is written in C++ and uses Qt framework."
     topics = ("qt", "qt6", "xmpp", "xmpp-library", "xmpp-server", "xmpp-client")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["patches/*"]
+    exports_sources = ["patches/*", "CMakeLists.txt"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_gstreamer": [True, False]}
