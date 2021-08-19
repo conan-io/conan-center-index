@@ -30,7 +30,7 @@ class MdnsResponderConan(ConanFile):
         make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make"))
         if not make:
             raise ConanInvalidConfiguration("This package needs 'make' in the path to build")
-        return make
+        return "{} CFLAGS=-std=gnu99".format(make)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
