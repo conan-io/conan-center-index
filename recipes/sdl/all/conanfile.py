@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -122,7 +123,6 @@ class SDLConan(ConanFile):
         if self.options.get_safe("iconv", False):
             self.requires("libiconv/1.16")
         if self.settings.os == "Linux":
-            self.requires("xorg/system")
             if self.options.alsa:
                 self.requires("libalsa/1.2.4")
             if self.options.pulse:
@@ -131,12 +131,15 @@ class SDLConan(ConanFile):
                 self.requires("opengl/system")
             if self.options.nas:
                 self.requires("nas/1.9.4")
+                self.requires("xorg/system")
             if self.options.jack:
                 raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
             if self.options.esd:
                 raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
             if self.options.wayland:
                 self.requires("wayland/1.19.0")
+                self.requires("xkbcommon/1.3.0")
+                self.requires("egl/system")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
@@ -150,6 +153,8 @@ class SDLConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Linux":
             self.build_requires("pkgconf/1.7.4")
+        if self.options.get_safe("wayland", False):
+            self.build_requires("wayland/1.19.0")  # Provides wayland-scanner
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -157,17 +162,14 @@ class SDLConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
-        if self.version >= "2.0.14":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                                  '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+       
         self._build_cmake()
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
             cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
+            cmake_extra_ldflags = []
             # FIXME: self.install_folder not defined? Neccessary?
             self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
             if self.settings.os != "Windows":
@@ -193,8 +195,7 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["SNDIO"] = self.options.sndio
                 self._cmake.definitions["NAS"] = self.options.nas
                 if self.options.nas:
-                    libs = ["-l{}".format(name) for name in (self.deps_cpp_info["xorg"].libs + self.deps_cpp_info["xorg"].system_libs)]
-                    self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(libs)  # SDL is not populating transitive deps!
+                    cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
                     cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
                     self._cmake.definitions["NAS_SHARED"] = self.options["nas"].shared
                 self._cmake.definitions["VIDEO_X11"] = self.options.x11
@@ -224,11 +225,15 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
                     self._cmake.definitions["WAYLAND_SHARED"] = self.options["wayland"].shared
+                    self._cmake.definitions["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
+
                 self._cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
+            # Add extra information collected from the deps
+            self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
             self._cmake.definitions["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
             self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
@@ -269,7 +274,6 @@ class SDLConan(ConanFile):
             self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
             self.cpp_info.components["libsdl2"].system_libs = ["dl", "rt", "pthread"]
-            self.cpp_info.components["libsdl2"].requires.append("xorg::xorg")
             if self.options.alsa:
                 self.cpp_info.components["libsdl2"].requires.append("libalsa::libalsa")
             if self.options.pulse:
@@ -282,6 +286,7 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("sndio::sndio")
             if self.options.nas:
                 self.cpp_info.components["libsdl2"].requires.append("nas::nas")
+                self.cpp_info.components["libsdl2"].requires.append("xorg::xorg")
             if self.options.esd:
                 self.cpp_info.components["libsdl2"].requires.append("esd::esd")
             if self.options.directfb:
@@ -298,6 +303,8 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].exelinkflags.append("-Wl,-rpath,/opt/vc/lib")
             if self.options.wayland:
                 self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
+                self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
+                self.cpp_info.components["libsdl2"].requires.append("egl::egl")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",
