@@ -17,6 +17,7 @@ class ConanFile(ConanFile):
         " programs that take full advantage of multicore performance, that are portable, composable"
         " and have future-proof scalability.")
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
+    provides = "tbb",
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
