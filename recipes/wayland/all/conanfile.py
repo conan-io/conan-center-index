@@ -118,3 +118,7 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].names["pkg_config"] = "wayland-egl-backend"
             self.cpp_info.components["wayland-egl-backend"].version = "3"
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
