@@ -108,7 +108,7 @@ class MagnumConan(ConanFile):
         if self.options.with_gl:
             self.requires("opengl/system")
         if self.options.sdl2_application:
-            self.requires("sdl/2.0.14")
+            self.requires("sdl/2.0.16")
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
@@ -118,7 +118,7 @@ class MagnumConan(ConanFile):
     def validate(self):
         if self.options.shared and not self.options["corrade"].shared:
             # To fix issue with resource management, see here: https://github.com/mosra/magnum/issues/304#issuecomment-451768389
-            raise ConanInvalidConfiguration("If using 'shared=True', corrado should be shared as well")
+            raise ConanInvalidConfiguration("If using 'shared=True', corrade should be shared as well")
 
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
