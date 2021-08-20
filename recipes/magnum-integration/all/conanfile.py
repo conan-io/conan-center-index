@@ -44,11 +44,18 @@ class MagnumIntegrationConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
+                              "find_package(GLM REQUIRED)",
+                              "find_package(glm REQUIRED)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
                               "GLM::GLM",
                               "glm::glm")
@@ -56,10 +63,11 @@ class MagnumIntegrationConan(ConanFile):
                               "ImGui::ImGui",
                               "imgui::imgui")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+                              "find_package(ImGui REQUIRED Sources)",
+                              "find_package(imgui REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
                               "ImGui::Sources",
-                              "") 
-
-                              
+                              "")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -103,10 +111,6 @@ class MagnumIntegrationConan(ConanFile):
         
         self._cmake.configure()
         return self._cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
