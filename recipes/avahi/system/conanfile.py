@@ -20,19 +20,18 @@ class SysConfigAvahiSystemConan(ConanFile):
         packages = []
         if self.settings.os == "Linux" and tools.os_info.is_linux:
             # for building against Avahi Apple Bonjour compatibility library, libdns_sd and dns_sd.h are required
-            # the Name Service Switch integration and command-line utilities are useful
             if tools.os_info.with_apt:
                 # Debian/Ubuntu
-                packages = ["libavahi-compat-libdnssd-dev", "libnss-mdns", "avahi-utils"]
+                packages = ["libavahi-compat-libdnssd-dev"]
             elif tools.os_info.with_yum:
                 # RHEL/CentOS/Fedora
-                packages = ["avahi-compat-libdns_sd-devel", "nss-mdns", "avahi-tools"]
+                packages = ["avahi-compat-libdns_sd-devel"]
             elif tools.os_info.with_pacman:
                 # Arch Linux
-                packages = ["avahi", "nss-mdns"]
+                packages = ["avahi"]
             elif tools.os_info.with_zypper:
                 # openSUSE
-                packages = ["libdns_sd", "nss-mdns", "avahi-utils"]
+                packages = ["avahi-compat-mDNSResponder-devel"]
             else:
                 self.output.warn("Do not know how to install Avahi Apple Bonjour compatibility library for {}.".format(tools.os_info.linux_distro))
         if packages:
