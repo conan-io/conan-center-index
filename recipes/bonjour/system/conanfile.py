@@ -21,7 +21,7 @@ class BonjourSystemConan(ConanFile):
         # extract and install Bonjour64.msi from downloaded BonjourPSSetup.exe
         # see https://community.chocolatey.org/packages/bonjour#files
         package_tool = tools.SystemPackageTool(tool=tools.ChocolateyTool())
-        package_tool.install(packages=["bonjour"])
+        package_tool.install(update=True, packages="bonjour")
 
     def package_info(self):
         self.cpp_info.system_libs = ["dns_sd"]
