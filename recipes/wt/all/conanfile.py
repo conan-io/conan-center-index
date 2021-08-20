@@ -13,7 +13,7 @@ class WtConan(ConanFile):
     homepage = "https://github.com/emweb/wt"
     topics = ("conan", "wt", "web", "webapp")
     license = "GPL-2.0-only"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["patches/*", "CMakeLists.txt"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -203,6 +203,11 @@ class WtConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
         if self.settings.os != "Windows":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
