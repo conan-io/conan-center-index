@@ -12,12 +12,6 @@ file(GLOB NOISE_SRC_FILES
     ${NOISE_SRC_DIR}/module/*.cpp
 )
 
-file(GLOB NOISE_HDR_FILES
-    ${NOISE_SRC_DIR}/*.h
-    ${NOISE_SRC_DIR}/model/*.h
-    ${NOISE_SRC_DIR}/module/*.h
-)
-
 add_library(${PROJECT_NAME} ${NOISE_SRC_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -33,4 +27,7 @@ install(TARGETS ${PROJECT_NAME}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(FILES ${NOISE_HDR_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/noise)
+foreach(SRC_SUBDIR "." "model" "module")
+    file(GLOB NOISE_HDR_FILES ${NOISE_SRC_DIR}/${SRC_SUBDIR}/*.h)
+    install(FILES ${NOISE_HDR_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/noise/${SRC_SUBDIR})
+endforeach()
