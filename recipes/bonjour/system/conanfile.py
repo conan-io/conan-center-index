@@ -4,6 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class BonjourSystemConan(ConanFile):
     name = "bonjour"
+    provides = "mdnsresponder"
     version = "system"
     description = "Conan package for Apple's Bonjour"
     topics = ("Bonjour", "DNS-SD", "mDNS")
