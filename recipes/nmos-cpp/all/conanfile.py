@@ -15,9 +15,15 @@ class NmosCppConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     # for now, no "shared" option support
-    options = {"fPIC": [True, False]}
+    options = {
+        "fPIC": [True, False],
+        "with_dnssd": ["mdnsresponder", "avahi", "bonjour"],
+    }
     # "fPIC" is handled automatically by Conan, injecting CMAKE_POSITION_INDEPENDENT_CODE
-    default_options = {"fPIC": True}
+    default_options = {
+        "fPIC": True,
+        "with_dnssd": "mdnsresponder",
+    }
 
     # wrapper CMakeLists.txt to call conan_basic_setup()
     exports_sources = ["CMakeLists.txt"]
@@ -34,6 +40,13 @@ class NmosCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.os == "Linux":
+            self.options.with_dnssd = "avahi"
+        elif self.settings.os == "Windows":
+            self.options.with_dnssd = "bonjour"
+        elif self.settings.os == "Macos":
+            del self.options.with_dnssd
+
     def requirements(self):
         # for now, consistent with project's conanfile.txt
         self.requires("boost/1.76.0")
@@ -42,23 +55,12 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/1.1.1k")
         self.requires("json-schema-validator/2.1.0")
 
-    def system_requirements(self):
-        packages = []
-        if self.settings.os == "Windows":
-            self.output.warn("Bonjour must be installed on Windows, see https://developer.apple.com/bonjour/")
-        elif self.settings.os == "Macos":
-            pass
-        elif self.settings.os == "Linux" and tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                packages = ["libavahi-compat-libdnssd-dev", "libnss-mdns", "avahi-utils"]
-            else:
-                self.output.warn("Do not know how to install Avahi Apple Bonjour compatibility library for {}.".format(tools.os_info.linux_distro))
-        else:
-            self.output.warn("Do not know how to install Avahi Apple Bonjour compatibility library for {}.".format(self.settings.os))
-        if packages:
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            for package in packages:
-                package_tool.install(update=True, packages=package)
+        if self.options.with_dnssd == "avahi":
+            self.requires("avahi-mdnsresponder/system")
+        elif self.options.with_dnssd == "bonjour":
+            self.requires("bonjour/system")
+        elif self.options.with_dnssd == "mdnsresponder":
+            self.requires("mdnsresponder/878.200.35")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -123,6 +125,17 @@ class NmosCppConan(ConanFile):
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
                     components[component_name]["libs"] = [lib_name]
+                # inject the DNS-SD dependency as the CMake isn't currently using find_package for this
+                if component_name == "DNSSD":
+                    dependency = None
+                    if self.options.with_dnssd == "avahi":
+                        dependency = "avahi-mdnsresponder::avahi-mdnsresponder"
+                    elif self.options.with_dnssd == "bonjour":
+                        dependency = "bonjour::bonjour"
+                    elif self.options.with_dnssd == "mdnsresponder":
+                        dependency = "mdnsresponder::mdnsresponder"
+                    if dependency:
+                        components[component_name].setdefault("requires", []).append(dependency.lower())
             elif cmake_function_name == "set_target_properties":
                 target_properties = re.findall(r"(?P<property>INTERFACE_[A-Z_]+)[\n|\s]+\"(?P<values>.+)\"", cmake_function_args[2])
                 for target_property in target_properties:
