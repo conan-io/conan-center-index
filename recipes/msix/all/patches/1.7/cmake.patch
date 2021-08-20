@@ -1,138 +1,68 @@
- CMakeLists.txt              | 102 +++---------------------------------
- cmake/msix_options.cmake    |  24 ++-------
- src/CMakeLists.txt          |   1 -
- src/makemsix/CMakeLists.txt |   3 ++
- src/msix/CMakeLists.txt     | 124 +++++++++++++++-----------------------------
- 5 files changed, 59 insertions(+), 195 deletions(-)
+ CMakeLists.txt              | 18 ++++++-----
+ cmake/msix_options.cmake    | 10 +++----
+ src/CMakeLists.txt          |  1 -
+ src/makemsix/CMakeLists.txt |  3 ++
+ src/msix/CMakeLists.txt     | 73 ++++++++++++++++-----------------------------
+ 5 files changed, 45 insertions(+), 60 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dc5908cd..c65cbf0f 100644
+index dc5908cd..447bd44b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -5,6 +5,9 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
- project(msix-sdk)
- set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
- 
-+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-+conan_basic_setup(TARGETS)
-+
- message(STATUS "--------------------------------")
- message(STATUS "MSIX Packaging SDK")
- message(STATUS "--------------------------------")
-@@ -21,12 +24,6 @@ if(POLICY CMP0077)
+@@ -21,11 +21,13 @@ if(POLICY CMP0077)
      cmake_policy(SET CMP0077 NEW)
  endif()
  
--# Default version is 0.0.0
--set(VERSION_MAJOR "0")
--set(VERSION_MINOR "0")
--set(VERSION_PATCH "0")
--set(GIT_BRANCH_NAME "master")
--
++if(CALCULATE_VERSION)
+ # Default version is 0.0.0
+ set(VERSION_MAJOR "0")
+ set(VERSION_MINOR "0")
+ set(VERSION_PATCH "0")
+ set(GIT_BRANCH_NAME "master")
++endif()
+ 
  # CMake useful variables
  set(MSIX_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
- set(MSIX_BINARY_ROOT ${CMAKE_CURRENT_BINARY_DIR})
-@@ -35,97 +32,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+@@ -35,6 +37,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
  
--## Git (and its revision)
--find_package(Git) # QUIET) # if we don't find git or FindGit.cmake is not on the system we ignore it.
--
--## GetGitRevisionDescription module to retreive branch and revision information from Git
--## Starting with Git 1.9 the module will be part of official cMake distribution, until then it has to be
--## part of the application
--## The Git module will trigger a reconfiguration for each pull that will bring a new revision on the local repository
--set(VCS_REVISION "-1")
--if(GIT_FOUND)
--    include(GetGitRevisionDescription)
--    get_git_head_revision(GIT_REFSPEC GIT_SHA1)
--    message(STATUS "GIT refspec ${GIT_REFSPEC}")
--    message(STATUS "GIT revision ${GIT_SHA1}")
--    set(VCS_REVISION ${GIT_SHA1})
--
--    git_describe(GIT_DESCRIPTION)
--    message(STATUS "GIT Description '${GIT_DESCRIPTION}'" )
--    string(REGEX MATCH "v([0-9]+)\\.([0-9]+)\\-([0-9]+)" _dummy1 "${GIT_DESCRIPTION}")
--    set(VERSION_MAJOR ${CMAKE_MATCH_1})
--    set(VERSION_MINOR ${CMAKE_MATCH_2})
--    set(VERSION_PATCH ${CMAKE_MATCH_3})
--
--    if(NOT VERSION_PATCH)
--    message(STATUS "GIT Description is from NEW tag")
--        string(REGEX MATCH "v([0-9]+)\\.([0-9]+)" _dummy2 "${GIT_DESCRIPTION}")
--        set(VERSION_MAJOR ${CMAKE_MATCH_1})
--        set(VERSION_MINOR ${CMAKE_MATCH_2})
--        set(VERSION_PATCH "0")
--    endif()
--
--    if(NOT ${GIT_REFSPEC})
--        string(REGEX MATCH "refs/heads/([a-zA-Z0-9_/]+)" _dummy3 ${GIT_REFSPEC})
--        set(GIT_BRANCH_NAME ${CMAKE_MATCH_1})
--    else()
--        # VSO doesn't checkout a branch do a pull, it checks out a hash and does a pull
--        set(GIT_BRANCH_NAME "master")
--    endif()
--
--    message(STATUS "GIT branch name '${GIT_BRANCH_NAME}'" )
--else()
--    message("git not found.")
--endif()
--
++if(CALCULATE_VERSION)
+ ## Git (and its revision)
+ find_package(Git) # QUIET) # if we don't find git or FindGit.cmake is not on the system we ignore it.
+ 
+@@ -77,15 +80,22 @@ if(GIT_FOUND)
+ else()
+     message("git not found.")
+ endif()
++endif()
+ 
++if(CALCULATE_VERSION)
  # Set the version number of your project here (format is MAJOR.MINOR.PATCHLEVEL - e.g. 1.0.0)
--set(MSIX_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
--message(STATUS "MSIX Packaging SDK version ${MSIX_VERSION}")
--message(STATUS "MSIX Packaging SDK branch name ${GIT_BRANCH_NAME}")
--add_definitions(-DSDK_VERSION="${MSIX_VERSION}")
+ set(MSIX_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+ message(STATUS "MSIX Packaging SDK version ${MSIX_VERSION}")
+ message(STATUS "MSIX Packaging SDK branch name ${GIT_BRANCH_NAME}")
+ add_definitions(-DSDK_VERSION="${MSIX_VERSION}")
++else()
 +message(STATUS "MSIX Packaging SDK version ${PROJECT_VERSION}")
 +add_definitions(-DSDK_VERSION="${PROJECT_VERSION}")
++endif()
  # Validates CMake options.
  include(msix_options)
  
--# Configure Package.nuspec
--if(WIN32)
--    set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.Windows")
--elseif(MACOS)
--    set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.MacOS")
--elseif(IOS)
--    set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.iOS")
--elseif(AOSP)
--    set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.AOSP")
--else()
--    set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.Linux")
--endif()
--
--configure_file(${MSIX_PROJECT_ROOT}/Package.nuspec.cmakein ${MSIX_BINARY_ROOT}/Package.nuspec CRLF)
--configure_file(${MSIX_PROJECT_ROOT}/Microsoft.MSIX.Packaging.targets ${MSIX_BINARY_ROOT}/build/native/${MSIX_NUGET_NAME}.targets)
--message(STATUS "Package.Nuspec created")
--message(STATUS "--------------------------------")
--
++if(ENABLE_NUGET_PACKAGING)
+ # Configure Package.nuspec
+ if(WIN32)
+     set(MSIX_NUGET_NAME "Microsoft.MSIX.Packaging.Windows")
+@@ -103,6 +113,7 @@ configure_file(${MSIX_PROJECT_ROOT}/Package.nuspec.cmakein ${MSIX_BINARY_ROOT}/P
+ configure_file(${MSIX_PROJECT_ROOT}/Microsoft.MSIX.Packaging.targets ${MSIX_BINARY_ROOT}/build/native/${MSIX_NUGET_NAME}.targets)
+ message(STATUS "Package.Nuspec created")
+ message(STATUS "--------------------------------")
++endif()
+ 
  # Configure license txt
  configure_file(${MSIX_PROJECT_ROOT}/LICENSE ${MSIX_BINARY_ROOT}/build/LICENSE)
- configure_file(${MSIX_PROJECT_ROOT}/THIRD\ PARTY\ CODE\ NOTICE ${MSIX_BINARY_ROOT}/build/THIRD\ PARTY\ CODE\ NOTICE)
- message(STATUS "LICENSE created")
- message(STATUS "--------------------------------")
- 
--# Configure certificates
--# list each certificate by name that is to be published in the nuget package
--list(APPEND CERTS_TO_PUBLISH
--    base64_MSFT_RCA_2010.cer
--    base64_MSFT_RCA_2011.cer
--    base64_STORE_PCA_2011.cer
--    base64_Windows_Production_PCA_2011.cer
--    base64_Windows_Production.cer
--    Microsoft_MarketPlace_PCA_2011.cer
--)
--foreach(CERT_TO_PUBLISH ${CERTS_TO_PUBLISH})
--    configure_file(${MSIX_PROJECT_ROOT}/resources/certs/${CERT_TO_PUBLISH} ${MSIX_BINARY_ROOT}/build/certs/${CERT_TO_PUBLISH})
--endforeach()
--message(STATUS "Certificates published")
--message(STATUS "--------------------------------")
--
- message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
- 
- if((CMAKE_BUILD_TYPE MATCHES RelWithDebInfo) OR (CMAKE_BUILD_TYPE MATCHES Release) OR (CMAKE_BUILD_TYPE MATCHES MinSizeRel))
-@@ -170,9 +88,6 @@ if((MACOS) OR (IOS))
+@@ -170,9 +181,6 @@ if((MACOS) OR (IOS))
              message(FATAL_ERROR "Unsupported iOS version: ${IOS_DEPLOYMENT_TARGET}, this project requires at least iOS version 10.0")
          endif()
      endif()
@@ -142,7 +72,7 @@ index dc5908cd..c65cbf0f 100644
  endif()
  
  # Mac needed variables
-@@ -183,10 +98,9 @@ set(CMAKE_MACOSX_RPATH ON)
+@@ -183,10 +191,6 @@ set(CMAKE_MACOSX_RPATH ON)
  #set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
  #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
  
@@ -152,19 +82,13 @@ index dc5908cd..c65cbf0f 100644
  message(STATUS "src processed")
 -add_subdirectory(sample)
 -message(STATUS "sample processed")
-+
-+install(FILES "LICENSE" DESTINATION licenses)
-+
  message(STATUS "DONE!")
 diff --git a/cmake/msix_options.cmake b/cmake/msix_options.cmake
-index faba2fbe..df115885 100644
+index faba2fbe..5ccdb087 100644
 --- a/cmake/msix_options.cmake
 +++ b/cmake/msix_options.cmake
-@@ -10,10 +10,9 @@ option(LINUX "Build for Linux"   OFF)
- 
- option(USE_VALIDATION_PARSER "Turn on to validates using the resouce schemas. Default (OFF) validates XML files are just valid XML" OFF)
- option(USE_SHARED_ZLIB "Choose the type of dependency for zlib, Use the -DUSE_SHARED_ZLIB=on to have a shared dependency. Default is 'off' (static)" OFF)
--option(USE_STATIC_MSVC "Windows only. Pass /MT as a compiler flag to use the staic version of the run-time library. Default is 'off' (dynamic)" OFF)
+@@ -13,7 +13,7 @@ option(USE_SHARED_ZLIB "Choose the type of dependency for zlib, Use the -DUSE_SH
+ option(USE_STATIC_MSVC "Windows only. Pass /MT as a compiler flag to use the staic version of the run-time library. Default is 'off' (dynamic)" OFF)
  option(SKIP_BUNDLES "Removes bundle functionality from the MSIX SDK. Default is 'off'" OFF)
  option(MSIX_PACK "Include packaging features for the MSIX SDK. Not supported for mobile. Default is 'off'" OFF)
 -option(USE_MSIX_SDK_ZLIB "Use zlib implementation under lib/zlib. If off, uses inbox compression library. For Windows and Linux this is no-opt." OFF)
@@ -172,27 +96,7 @@ index faba2fbe..df115885 100644
  
  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel. Use the -DCMAKE_BUILD_TYPE=[option] to specify.")
  set(XML_PARSER "" CACHE STRING "Choose the type of parser, options are: [xerces, msxml6, javaxml].  Use the -DXML_PARSER=[option] to specify.")
-@@ -24,19 +23,6 @@ if((NOT WIN32) AND (NOT MACOS) AND (NOT IOS) AND (NOT AOSP) AND (NOT LINUX))
-     message(FATAL_ERROR "You must specify one of: -D[WIN32|MACOS|IOS|AOSP|LINUX]=on")
- endif()
- 
--if(USE_STATIC_MSVC)
--    if(NOT WIN32)
--        message(FATAL_ERROR "-DUSE_STATIC_MSVC=on can only be used for Windows")
--    endif()
--    # By default these flags have /MD set. Modified it to use /MT instead.
--    foreach(buildType RELEASE MINSIZEREL RELWITHDEBINFO)
--        set(cxxFlag "CMAKE_CXX_FLAGS_${buildType}")
--        string(REPLACE "/MD" "/MT" ${cxxFlag} "${${cxxFlag}}")
--    endforeach()
--    set(cxxFlagDebug "CMAKE_CXX_FLAGS_DEBUG")
--    string(REPLACE "/MDd" "/MTd" ${cxxFlagDebug} "${${cxxFlagDebug}}")
--endif()
--
- # Set xml parser if not set
- if(NOT XML_PARSER)
-     if(WIN32)
-@@ -70,8 +56,8 @@ if(MSIX_PACK)
+@@ -70,8 +70,8 @@ if(MSIX_PACK)
      if(AOSP OR IOS)
          message(FATAL_ERROR "Packaging is not supported for mobile devices.")
      elseif(MAC)
@@ -203,7 +107,7 @@ index faba2fbe..df115885 100644
          endif()
          if(NOT (XML_PARSER MATCHES xerces))
              message(FATAL_ERROR "Xerces is the only supported parser for MacOS pack. Use -DXML_PARSER=xerces")
-@@ -84,9 +70,9 @@ endif()
+@@ -84,9 +84,9 @@ endif()
  
  # Compression
  set(COMPRESSION_LIB "zlib")
@@ -236,7 +140,7 @@ index 92b082e6..ebae9789 100644
 +# define installing rules for target files
 +install(TARGETS ${PROJECT_NAME})
 diff --git a/src/msix/CMakeLists.txt b/src/msix/CMakeLists.txt
-index 75d3afdf..c8ddb23e 100644
+index 75d3afdf..17f313be 100644
 --- a/src/msix/CMakeLists.txt
 +++ b/src/msix/CMakeLists.txt
 @@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
@@ -251,112 +155,25 @@ index 75d3afdf..c8ddb23e 100644
  # Handle exports and flags we need to set
  list(APPEND MSIX_UNPACK_EXPORTS
      "UnpackPackage"
-@@ -92,10 +97,8 @@ set(LIB_PUBLIC_HEADERS
-     ../inc/MsixErrors.hpp
- )
- 
--set(MsixSrc) # list with all the files we are going to use
--
- # Common for pack and unpack
--list(APPEND MsixSrc
-+target_sources(${PROJECT_NAME} PRIVATE
-     common/AppxFactory.cpp
-     common/MSIXResource.cpp
-     common/Log.cpp
-@@ -111,7 +114,7 @@ list(APPEND MsixSrc
- )
- 
- # Unpack. Always add
--list(APPEND MsixSrc
-+target_sources(${PROJECT_NAME} PRIVATE
-     unpack/AppxBlockMapObject.cpp
-     unpack/AppxPackageObject.cpp
-     unpack/AppxSignature.cpp
-@@ -122,7 +125,7 @@ list(APPEND MsixSrc
- # Pack
- if(MSIX_PACK)
-     add_definitions(-DMSIX_PACK=1)
--    list(APPEND MsixSrc
-+    target_sources(${PROJECT_NAME} PRIVATE
-         pack/AppxPackageWriter.cpp
-         pack/XmlWriter.cpp
-         pack/AppxBlockMapWriter.cpp
-@@ -136,47 +139,47 @@ endif()
- # Bundle specific files
- if(NOT SKIP_BUNDLES)
-     add_definitions(-DBUNDLE_SUPPORT=1)
--    list(APPEND MsixSrc
-+    target_sources(${PROJECT_NAME} PRIVATE
-         unpack/AppxBundleManifest.cpp
-         unpack/ApplicabilityCommon.cpp
-     )
-     # Applicability.
+@@ -144,7 +149,7 @@ if(NOT SKIP_BUNDLES)
      if (WIN32)
--        list(APPEND MsixSrc PAL/Applicability/Win32/Applicability.cpp)
-+        target_sources(${PROJECT_NAME} PRIVATE PAL/Applicability/Win32/Applicability.cpp)
+         list(APPEND MsixSrc PAL/Applicability/Win32/Applicability.cpp)
      elseif(LINUX)
 -        find_package(ICU REQUIRED COMPONENTS uc)
--        list(APPEND MsixSrc PAL/Applicability/Linux/Applicability.cpp)
-+        target_sources(${PROJECT_NAME} PRIVATE PAL/Applicability/Linux/Applicability.cpp)
 +        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::icu)
+         list(APPEND MsixSrc PAL/Applicability/Linux/Applicability.cpp)
      elseif(AOSP)
--        list(APPEND MsixSrc PAL/Applicability/AOSP/Applicability.cpp)
-+        target_sources(${PROJECT_NAME} PRIVATE PAL/Applicability/AOSP/Applicability.cpp)
-     else() # iOS and MACOS
--        list(APPEND MsixSrc PAL/Applicability/Apple/Applicability.cpp)
-+        target_sources(${PROJECT_NAME} PRIVATE PAL/Applicability/Apple/Applicability.cpp)
-     endif()
+         list(APPEND MsixSrc PAL/Applicability/AOSP/Applicability.cpp)
+@@ -154,7 +159,7 @@ if(NOT SKIP_BUNDLES)
  endif()
  
  # Compression option
 -if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
--    list(APPEND MsixSrc PAL/DataCompression/Apple/CompressionObject.cpp)
 +if(((IOS) OR (MACOS)) AND (NOT USE_EXTERNAL_ZLIB))
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/DataCompression/Apple/CompressionObject.cpp)
+     list(APPEND MsixSrc PAL/DataCompression/Apple/CompressionObject.cpp)
  else()
--    list(APPEND MsixSrc PAL/DataCompression/Zlib/CompressionObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/DataCompression/Zlib/CompressionObject.cpp)
- endif()
- 
- # Directory object
- if(WIN32)
--    list(APPEND MsixSrc PAL/FileSystem/Win32/DirectoryObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/FileSystem/Win32/DirectoryObject.cpp)
- else()
--    list(APPEND MsixSrc PAL/FileSystem/POSIX/DirectoryObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/FileSystem/POSIX/DirectoryObject.cpp)
- endif()
- 
- # Xml Parser
- if(XML_PARSER MATCHES xerces)
--    list(APPEND MsixSrc PAL/XML/xerces-c/XmlObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/XML/xerces-c/XmlObject.cpp)
-     add_definitions(-DUSING_XERCES=1)
- elseif(XML_PARSER MATCHES javaxml)
--    list(APPEND MsixSrc PAL/XML/AOSP/XmlObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/XML/AOSP/XmlObject.cpp)
-     add_definitions(-DUSING_JAVAXML=1)
- elseif(XML_PARSER MATCHES applexml)
-     set(XmlParser)
--    list(APPEND MsixSrc
-+    target_sources(${PROJECT_NAME} PRIVATE 
-         "PAL/XML/APPLE/XmlObject.cpp"
-         "PAL/XML/APPLE/NSXmlParserDelegateWrapper.mm"
-         "PAL/XML/APPLE/NSXmlParserWrapper.mm"
-@@ -184,51 +187,38 @@ elseif(XML_PARSER MATCHES applexml)
-     )
-     add_definitions(-DUSING_APPLE_XML=1)
- elseif(XML_PARSER MATCHES msxml6)
--    list(APPEND MsixSrc PAL/XML/msxml6/XmlObject.cpp)
-+    target_sources(${PROJECT_NAME} PRIVATE PAL/XML/msxml6/XmlObject.cpp)
-     add_definitions(-DUSING_MSXML=1)
- endif()
- 
- # Crypto
- if(CRYPTO_LIB MATCHES crypt32)
--    list(APPEND MsixSrc
-+    target_sources(${PROJECT_NAME} PRIVATE
-         PAL/Crypto/Win32/Crypto.cpp
+     list(APPEND MsixSrc PAL/DataCompression/Zlib/CompressionObject.cpp)
+@@ -195,14 +200,16 @@ if(CRYPTO_LIB MATCHES crypt32)
          PAL/Signature/Win32/SignatureValidator.cpp
      )
  elseif(CRYPTO_LIB MATCHES openssl)
@@ -365,7 +182,7 @@ index 75d3afdf..c8ddb23e 100644
 -            PAL/Crypto/OpenSSL/Crypto.cpp
 -            PAL/Signature/OpenSSL/SignatureValidator.cpp
 -        )
-+    target_sources(${PROJECT_NAME} PRIVATE
++    list(APPEND MsixSrc
 +        PAL/Crypto/OpenSSL/Crypto.cpp
 +        PAL/Signature/OpenSSL/SignatureValidator.cpp
 +    )
@@ -380,21 +197,10 @@ index 75d3afdf..c8ddb23e 100644
      endif()
  endif()
  
- # Interop
- if(AOSP)
--    list(APPEND MsixSrc
-+    target_sources(${PROJECT_NAME} PRIVATE
-         PAL/Interop/AOSP/JniHelper.hpp
-         PAL/Interop/AOSP/JniHelper.cpp
-     )
- endif()
+@@ -220,14 +227,7 @@ foreach(FILE ${MsixSrc})
+     message(STATUS "\t${FILE}")
+ endforeach()
  
--message(STATUS "Source files:")
--message(STATUS "\tmsix.cpp")
--foreach(FILE ${MsixSrc})
--    message(STATUS "\t${FILE}")
--endforeach()
--
 -# Define the library
 -add_library(${PROJECT_NAME} SHARED 
 -    msix.cpp
@@ -403,27 +209,20 @@ index 75d3afdf..c8ddb23e 100644
 -
 -# Adding dependency to the third party libs directory
 -add_dependencies(${PROJECT_NAME} LIBS)
--
++target_sources(${PROJECT_NAME} PRIVATE ${MsixSrc})
+ 
  # Copy out public headers to <binary dir>/src/unpack
  configure_file(../inc/MSIXWindows.hpp   ${CMAKE_CURRENT_BINARY_DIR}/MSIXWindows.hpp  )
- configure_file(../inc/AppxPackaging.hpp ${CMAKE_CURRENT_BINARY_DIR}/AppxPackaging.hpp)
-@@ -260,14 +250,7 @@ if(WIN32)
+@@ -260,7 +260,7 @@ if(WIN32)
              "/DELAYLOAD:api-ms-win-core-winrt-l1-1-0.dll")
      string(REPLACE ";" " " DELAYFLAGS "${DELAYFLAGS}")
      set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS "${DELAYFLAGS} /LTCG")
 -    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /DEF:windowsexports.def")
--    if(USE_STATIC_MSVC)
--        if(CMAKE_BUILD_TYPE MATCHES Debug)
--            set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRTD")
--        else()
--            set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRT")
--        endif()
--    endif()
 +    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /DEF:${CMAKE_CURRENT_BINARY_DIR}/windowsexports.def")
-     target_link_libraries(${PROJECT_NAME} PRIVATE bcrypt crypt32 wintrust runtimeobject.lib delayimp.lib)
- endif()
- 
-@@ -279,35 +262,26 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
+     if(USE_STATIC_MSVC)
+         if(CMAKE_BUILD_TYPE MATCHES Debug)
+             set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRTD")
+@@ -279,35 +279,26 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
  )
  
  # Compression
@@ -465,7 +264,7 @@ index 75d3afdf..c8ddb23e 100644
  endif()
  
  if(XML_PARSER MATCHES applexml)
-@@ -363,18 +337,6 @@ endif()
+@@ -363,18 +354,6 @@ endif()
  if((IOS) OR (MACOS))
      target_link_libraries(${PROJECT_NAME} PRIVATE ${COREFOUNDATION_LIBRARY} ${FOUNDATION_LIBRARY})
  endif()

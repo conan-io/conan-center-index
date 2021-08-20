@@ -70,6 +70,8 @@ class MsixConan(ConanFile):
         self._cmake.definitions["USE_SHARED_ZLIB"] = self.options["zlib"].shared
         self._cmake.definitions["USE_VALIDATION_PARSER"] = self.options.use_validation_parser
         self._cmake.definitions["XML_PARSER"] = self.options.xml_parser
+        self._cmake.definitions["CALCULATE_VERSION"] = False
+        self._cmake.definitions["ENABLE_NUGET_PACKAGING"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -142,6 +144,7 @@ class MsixConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
