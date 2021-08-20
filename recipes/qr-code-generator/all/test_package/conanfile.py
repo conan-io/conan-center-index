@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["QRCODEGEN_VERSION"] = tools.Version(self.requires["qr-code-generator"].ref.version)
         cmake.configure()
         cmake.build()
 

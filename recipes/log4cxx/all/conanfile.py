@@ -65,7 +65,7 @@ class Log4cxxConan(ConanFile):
     def _validate_compiler_settings(self):
         compiler = self.settings.compiler
         if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, "17")
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
 
         if not minimum_version:

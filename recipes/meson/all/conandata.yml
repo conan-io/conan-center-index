@@ -68,3 +68,9 @@ sources:
   "0.58.1":
     url: "https://github.com/mesonbuild/meson/archive/0.58.1.tar.gz"
     sha256: "78e0f553dd3bc632d5f96ab943b1bbccb599c2c84ff27c5fb7f7fff9c8a3f6b4"
+  "0.59.0":
+    url: "https://github.com/mesonbuild/meson/archive/0.59.0.tar.gz"
+    sha256: "fdbbe8ea8a47f9e21cf4f578f85be8ec3d9c030df3d8cb17df1ae59d8683813a"
+  "0.59.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.59.1.tar.gz"
+    sha256: "f256eb15329a6064f8cc1f23b29de1fa8d21e324f939041e1a4efe77cf1362ef"

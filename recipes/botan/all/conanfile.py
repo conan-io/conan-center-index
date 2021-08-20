@@ -226,11 +226,17 @@ class BotanConan(ConanFile):
         if self._is_linux_clang_libcxx:
             botan_abi_flags.extend(['-stdlib=libc++', '-lc++abi'])
 
-        if botan_compiler in ['clang', 'apple-clang', 'gcc']:
+        if self.settings.compiler in ['clang', 'apple-clang', 'gcc']:
             if self.settings.arch == 'x86':
                 botan_abi_flags.append('-m32')
             elif self.settings.arch == 'x86_64':
                 botan_abi_flags.append('-m64')
+
+        if self.settings.compiler in ['apple-clang']:
+            if self.settings.arch in ['armv7']:
+                botan_abi_flags.append('-arch armv7')
+            elif self.settings.arch in ['armv8']:
+                botan_abi_flags.append('-arch arm64')
 
         if self.options.get_safe('fPIC', True):
             botan_extra_cxx_flags.append('-fPIC')

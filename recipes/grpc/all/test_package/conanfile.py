@@ -7,8 +7,8 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):
-        if tools.cross_building(self.settings):
-            self.build_requires(str(self.requires['protobuf']))
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires(str(self.requires['grpc']))
             
     def build(self):
         cmake = CMake(self)

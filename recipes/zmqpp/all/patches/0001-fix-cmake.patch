@@ -1,0 +1,84 @@
+Patch from https://github.com/zeromq/zmqpp/commit/05ad2f3255e5d74febbd1e17663bbfc2ded46c18
+It also allows more robust injection of zeromq and C++11
+
+--- a/CMakeLists.txt
++++ b/CMakeLists_new.txt
+@@ -11,14 +11,17 @@
+ #
+ 
+ 
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.8)
++project(zmqpp)
+ enable_testing()
+ 
+ # prepare C++11
++if(0)
+ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+ 
+ # show all warnings
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
++endif()
+ 
+ # Set compiler flags that don't work on Windows
+ if(NOT MSVC)
+@@ -63,7 +66,6 @@ set( ZEROMQ_INCLUDE_DIR   ""      CACHE PATH "The include directory for ZMQ" )
+ set( IS_TRAVIS_CI_BUILD   true    CACHE bool "Defines TRAVIS_CI_BUILD - Should the tests avoid running cases where memory is scarce." )
+ 
+ # Find zmq.h and add its dir to the includes
+-find_path(ZEROMQ_INCLUDE zmq.h PATHS ${ZEROMQ_INCLUDE_DIR})
+ include_directories(${ZEROMQ_INCLUDE_DIR} ${ZEROMQ_INCLUDE} ${CMAKE_CURRENT_SOURCE_DIR}/src )
+ 
+ # Do not run some tests when building on travis-ci (this cause oom error and kill the test
+@@ -108,13 +110,12 @@ set( LIBZMQPP_SOURCES
+ if (ZMQPP_BUILD_STATIC)
+   add_library( zmqpp-static STATIC ${LIBZMQPP_SOURCES})
+   target_compile_definitions(zmqpp-static PUBLIC ZMQ_STATIC ZMQPP_STATIC_DEFINE)
++  target_compile_features(zmqpp-static PRIVATE cxx_std_11)
+   if (NOT ZMQPP_LIBZMQ_CMAKE)
+-    find_library(ZEROMQ_LIBRARY_STATIC ${ZMQPP_LIBZMQ_NAME_STATIC} PATHS ${ZEROMQ_LIB_DIR})
+     if (NOT ZEROMQ_LIBRARY_STATIC)
+       # If libzmq was not installed through CMake, the static binary is libzmq.a not libzmq-static.a
+-      find_library(ZEROMQ_LIBRARY_STATIC libzmq.a PATHS ${ZEROMQ_LIB_DIR})
+     endif()
+-    target_link_libraries( zmqpp-static ${ZEROMQ_LIBRARY_STATIC})
++    target_link_libraries( zmqpp-static CONAN_PKG::zeromq)
+   else()
+     # libzmq-static is the name of the target from
+     # libzmq's CMake
+@@ -127,9 +128,9 @@ endif() # ZMQPP_BUILD_STATIC
+ # Shared lib
+ if (ZMQPP_BUILD_SHARED)
+   add_library( zmqpp SHARED ${LIBZMQPP_SOURCES})
++  target_compile_features(zmqpp PRIVATE cxx_std_11)
+   if (NOT ZMQPP_LIBZMQ_CMAKE)
+-    find_library(ZEROMQ_LIBRARY_SHARED ${ZMQPP_LIBZMQ_NAME_SHARED} PATHS ${ZEROMQ_LIB_DIR})
+-    target_link_libraries( zmqpp ${ZEROMQ_LIBRARY_SHARED} )
++    target_link_libraries( zmqpp CONAN_PKG::zeromq )
+   else()
+     # libzmq is the name of the target from
+     # libzmq's CMake
+@@ -141,11 +142,22 @@ endif() # ZMQPP_BUILD_SHARED
+ 
+ # We need to link zmqpp to ws2_32 on windows for the implementation of winsock2.h
+ if(WIN32)
++  if(ZMQPP_BUILD_STATIC)
++    target_link_libraries(zmqpp-static ws2_32)
++    target_compile_definitions(zmqpp-static PRIVATE NOMINMAX)
++  endif()
++  if(ZMQPP_BUILD_SHARED)
+ 	target_link_libraries(zmqpp ws2_32)
++  target_compile_definitions(zmqpp PRIVATE NOMINMAX)
++  endif()
+ endif() # WIN32
+ 
+ include(GenerateExportHeader)
+-generate_export_header(zmqpp)
++if(ZMQPP_BUILD_SHARED)
++  generate_export_header(zmqpp)
++elseif(ZMQPP_BUILD_STATIC)
++  generate_export_header(zmqpp-static BASE_NAME zmqpp)
++endif()
+ include_directories(${CMAKE_CURRENT_BINARY_DIR})
+ 
+ # Examples

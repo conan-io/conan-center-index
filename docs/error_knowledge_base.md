@@ -287,7 +287,7 @@ Since the entire community is maintaining all CCI recipes, putting just one name
 
 #### **<a name="KB-H040">#KB-H040</a>: "NO TARGET NAME"**
 
-According the Conan issue [#6269](https://github.com/conan-io/conan/issues/6269), the attribute `cpp_info.name` should be avoided for Conan Center Index in favor of `cpp_info.names["cmake_find_package"]` and `cpp_info.names["cmake_find_multi_package"]`.
+According the Conan issue [#6269](https://github.com/conan-io/conan/issues/6269), the attribute `cpp_info.name` should be avoided for Conan Center Index in favor of `cpp_info.names["cmake_find_package"]` and `cpp_info.names["cmake_find_package_multi"]`.
 
 #### **<a name="KB-H041">#KB-H041</a>: "NO FINAL ENDLINE"**
 

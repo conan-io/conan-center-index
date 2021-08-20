@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class VulkanValidationLayersConan(ConanFile):
@@ -49,9 +49,18 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
+    @property
+    def _get_compatible_spirv_tools_version(self):
+        return {
+            "1.2.182": "2021.2",
+            "1.2.154.0": "2020.5",
+        }.get(str(self.version), False)
+
     def requirements(self):
-        self.requires("spirv-tools/2020.5", private=True)
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=True)
         self.requires("vulkan-headers/{}".format(self.version))
+        if tools.Version(self.version) >= "1.2.173":
+            self.requires("robin-hood-hashing/3.11.1")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
@@ -62,9 +71,7 @@ class VulkanValidationLayersConan(ConanFile):
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("Vulkan-ValidationLayers-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patch_sources()

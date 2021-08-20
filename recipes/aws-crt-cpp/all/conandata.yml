@@ -1,0 +1,4 @@
+sources:
+  "0.14.3":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.14.3.tar.gz"
+    sha256: "3ea16c43e691bab0c373ba1ad072f6535390c516ebda658dfaf4d074d920e0fb"

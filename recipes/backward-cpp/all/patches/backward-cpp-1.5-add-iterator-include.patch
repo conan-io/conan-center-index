@@ -1,10 +1,10 @@
 --- backward.hpp.old	2020-05-05 20:37:23.473359490 +0200
 +++ backward.hpp	2020-05-05 20:38:57.019308525 +0200
-@@ -309,6 +309,7 @@
+@@ -309,6 +309,6 @@
  #include <condition_variable>
  #include <mutex>
  #include <thread>
 +#include <iterator>
- 
+-
  #include <BaseTsd.h>
  typedef SSIZE_T ssize_t;

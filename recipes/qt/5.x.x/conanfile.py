@@ -73,6 +73,8 @@ class QtConan(ConanFile):
         "with_libalsa": [True, False],
         "with_openal": [True, False],
         "with_zstd": [True, False],
+        "with_gstreamer": [True, False],
+        "with_dbus": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -109,6 +111,8 @@ class QtConan(ConanFile):
         "with_libalsa": False,
         "with_openal": True,
         "with_zstd": True,
+        "with_gstreamer": False,
+        "with_dbus": False,
 
         "gui": True,
         "widgets": True,
@@ -190,7 +194,7 @@ class QtConan(ConanFile):
             self.options.opengl = "dynamic"
 
     def configure(self):
-        #if self.settings.os != "Linux":
+        # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.gui:
@@ -205,6 +209,7 @@ class QtConan(ConanFile):
         if not self.options.qtmultimedia:
             del self.options.with_libalsa
             del self.options.with_openal
+            del self.options.with_gstreamer
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
@@ -319,7 +324,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.25")
@@ -343,6 +348,11 @@ class QtConan(ConanFile):
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
+        if self.options.get_safe("with_gstreamer", False):
+            raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
+            self.requires("gst-plugins-base/1.19.1")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -523,6 +533,12 @@ class QtConan(ConanFile):
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
+            args.append("--gstreamer" if self.options.with_gstreamer else "--no-gstreamer")
+
+        if self.options.with_dbus:
+            args.append("-dbus-linked")
+        else:
+            args.append("-no-dbus")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -666,6 +682,9 @@ class QtConan(ConanFile):
     def _cmake_executables_file(self):
         return os.path.join("lib", "cmake", "Qt5Core", "conan_qt_executables_variables.cmake")
 
+    def _cmake_qt5_private_file(self, module):
+        return os.path.join("lib", "cmake", "Qt5{0}".format(module), "conan_qt_qt5_{0}private.cmake".format(module.lower()))
+
     def package(self):
         with tools.chdir("build_folder"):
             self.run("%s install" % self._make_program())
@@ -703,7 +722,6 @@ Examples = bin/datadir/examples""")
             if not os.path.isfile(module):
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
-
         extension = ""
         if self.settings.os == "Windows":
             extension = ".exe"
@@ -737,6 +755,33 @@ Examples = bin/datadir/examples""")
                     """.format(target=target, ext=extension, namespace=namespace, uppercase_target=target.upper()))
 
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+
+        def _create_private_module(module, dependencies=[]):
+            dependencies_string = ';'.join('Qt5::%s' % dependency for dependency in dependencies)
+            contents = textwrap.dedent("""\
+            if(NOT TARGET Qt5::{0}Private)
+                add_library(Qt5::{0}Private INTERFACE IMPORTED)
+                set_target_properties(Qt5::{0}Private PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{0}/{1}/Qt{0}"
+                    INTERFACE_LINK_LIBRARIES "{2}"
+                )
+
+                add_library(Qt::{0}Private INTERFACE IMPORTED)
+                set_target_properties(Qt::{0}Private PROPERTIES
+                    INTERFACE_LINK_LIBRARIES "Qt5::{0}Private"
+                    _qt_is_versionless_target "TRUE"
+                )
+            endif()""".format(module, self.version, dependencies_string))
+
+            tools.save(os.path.join(self.package_folder, self._cmake_qt5_private_file(module)), contents)
+
+        _create_private_module("Core", ["Core"])
+
+        if self.options.gui:
+            _create_private_module("Gui", ["CorePrivate", "Gui"])
+
+        if self.options.qtdeclarative:
+            _create_private_module("Qml", ["CorePrivate", "Qml"])
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -802,8 +847,13 @@ Examples = bin/datadir/examples""")
             core_reqs.append("glib::glib-2.0")
 
         _create_module("Core", core_reqs)
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
+
         if self.options.gui:
-            gui_reqs = ["DBus"]
+            gui_reqs = []
+            if self.options.with_dbus:
+                gui_reqs.append("DBus")
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -846,12 +896,15 @@ Examples = bin/datadir/examples""")
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
-        _create_module("DBus")
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
         if self.options.qtdeclarative:
             _create_module("Qml", ["Network"])
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Qml"))
+            self.cpp_info.components["qtQml"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Qml"))
             _create_module("QmlModels", ["Qml"])
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package"] = "QmlImportScanner" # this is an alias for Qml and there to integrate with existing consumers
             self.cpp_info.components["qtQmlImportScanner"].names["cmake_find_package_multi"] = "QmlImportScanner"
@@ -884,8 +937,6 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
-            if self.options.widgets:
-                _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
@@ -975,7 +1026,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtmultimedia:
             multimedia_reqs = ["Network", "Gui"]
-            if self.options.with_libalsa:
+            if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
                 multimedia_reqs.append("openal::openal")
@@ -984,13 +1035,14 @@ Examples = bin/datadir/examples""")
             if self.options.qtdeclarative and self.options.gui:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
-            if self.settings.os == "Linux":
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui"])
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+            if self.options.with_gstreamer:
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
                 _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
+            if self.settings.os == "Linux":
+                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
@@ -1013,12 +1065,21 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtnetworkauth:
             _create_module("NetworkAuth", ["Network"])
-            
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
         if self.options.get_safe("qtx11extras"):
             _create_module("X11Extras")
+
+        if self.options.qtremoteobjects:
+            _create_module("RemoteObjects")
+
+        if self.options.qtwinextras:
+            _create_module("WinExtras")
+
+        if self.options.qtxmlpatterns:
+             _create_module("XmlPatterns", ["Network"])
 
         if not self.options.shared:
             if self.settings.os == "Windows":
@@ -1040,12 +1101,18 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
+        self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
+
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
+        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt5", "qt")
-            self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
-            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+            if os.path.isfile(module):
+                self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
+                self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
@@ -1058,7 +1125,6 @@ Examples = bin/datadir/examples""")
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
-
 
     @staticmethod
     def _remove_duplicate(l):

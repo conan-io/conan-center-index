@@ -1,4 +1,7 @@
 sources:
+  "1.4.0":
+    url: "https://github.com/astro-informatics/ssht/archive/v1.4.0.tar.gz"
+    sha256: "b33f1b763a240df773a1900139aad6f6b5c676bb2b64a8c1062077fd95c08769"
   "1.3.7":
     url: "https://github.com/astro-informatics/ssht/archive/v1.3.7.zip"
     sha256: "14172ddc4152ce5057fdb2798ed1eacbac8042d288e954e37724580cb5e88f8b"
