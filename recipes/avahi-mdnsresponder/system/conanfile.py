@@ -6,7 +6,7 @@ class AvahiMdnsResponderSystemConan(ConanFile):
     name = "avahi-mdnsresponder"
     provides = "mdnsresponder"
     version = "system"
-    description = "Conan package for Avahi - Service Discovery for Linux using mDNS/DNS-SD - compatible with Bonjour"
+    description = "Avahi - Service Discovery for Linux using mDNS/DNS-SD - compatible with Bonjour"
     topics = ("Avahi", "Bonjour", "DNS-SD", "mDNS")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lathiat/avahi"
