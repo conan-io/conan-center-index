@@ -2,8 +2,9 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class SysConfigAvahiSystemConan(ConanFile):
-    name = "avahi"
+class AvahiMdnsResponderSystemConan(ConanFile):
+    name = "avahi-mdnsresponder"
+    provides = "mdnsresponder"
     version = "system"
     description = "Conan package for Avahi - Service Discovery for Linux using mDNS/DNS-SD - compatible with Bonjour"
     topics = ("Avahi", "Bonjour", "DNS-SD", "mDNS")
