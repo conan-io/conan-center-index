@@ -91,3 +91,8 @@ class MdnsResponderConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["dns_sd"]
+
+        # add path for daemon (mdnsd) and client (dns-sd)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
