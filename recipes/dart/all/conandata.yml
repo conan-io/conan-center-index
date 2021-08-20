@@ -1,0 +1,4 @@
+sources:
+  "6.11.0":
+    sha256: 41d783d7f99d7b5ad1874336646f1bdfa33e146e0652a6c32d12eaa21505bd51
+    url: https://github.com/dartsim/dart/archive/refs/tags/v6.11.0.tar.gz
