@@ -18,8 +18,9 @@ class MdnsResponderConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        if self.settings.os not in ["Linux", "Windows"]:
-            raise ConanInvalidConfiguration("Only Linux and Windows are supported for this package.")
+        # recent tarballs are missing mDNSWindows, so for now, Linux only
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux is supported for this package.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -37,6 +38,15 @@ class MdnsResponderConan(ConanFile):
         ]
 
     @property
+    def _build_targets(self):
+        return " ".join(["setup", "Daemon", "libdns_sd", "Clients"])
+
+    @property
+    def _install_targets(self):
+        # not installing startup script, man pages, NSS plugin
+        return " ".join(["setup", "InstalledDaemon", "InstalledLib", "InstalledClients"])
+
+    @property
     def _make_env(self):
         return {
             "CFLAGS": "-std=gnu99",
@@ -48,16 +58,18 @@ class MdnsResponderConan(ConanFile):
         if self.settings.os == "Linux":
             with tools.chdir(self._posix_folder):
                 autotools = AutoToolsBuildEnvironment(self)
-                autotools.make(args=self._make_args, vars=self._make_env)
+                autotools.make(args=self._make_args, target=self._build_targets, vars=self._make_env)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.os == "Linux":
+            for dir in ["bin", "include", "lib", "sbin"]:
+                tools.mkdir(os.path.join(self.package_folder, dir))
             with tools.chdir(self._posix_folder):
                 autotools = AutoToolsBuildEnvironment(self)
                 args = self._make_args
                 args.append("INSTBASE={}".format(self.package_folder))
-                autotools.install(args=args, vars=self._make_env)
+                autotools.make(args=args, target=self._install_targets, vars=self._make_env)
 
     def package_info(self):
-        pass
+        self.cpp_info.libs = ["dns_sd"]
