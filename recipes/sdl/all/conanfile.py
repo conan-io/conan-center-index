@@ -169,6 +169,7 @@ class SDLConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_VERBOSE_MAKEFILE"] = 1
             cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
             cmake_extra_ldflags = []
             # FIXME: self.install_folder not defined? Neccessary?
@@ -225,6 +226,8 @@ class SDLConan(ConanFile):
                     self._cmake.definitions["HAVE_XF86VM_H"] = True
                 self._cmake.definitions["VIDEO_WAYLAND"] = self.options.wayland
                 if self.options.wayland:
+                    # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
                     self._cmake.definitions["WAYLAND_SHARED"] = self.options["wayland"].shared
                     self._cmake.definitions["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
 
