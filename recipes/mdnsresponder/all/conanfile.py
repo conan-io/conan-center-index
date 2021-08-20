@@ -18,9 +18,14 @@ class MdnsResponderConan(ConanFile):
         return "source_subfolder"
 
     def validate(self):
-        # recent tarballs are missing mDNSWindows, so for now, Linux only
+        # recent tarballs (since 1096.0.2) are missing mDNSWindows, so for now, Linux only
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux is supported for this package.")
+        if tools.Version(self.version) >= "1096.0.2":
+            # TCP_NOTSENT_LOWAT is causing build failures for packages built with gcc 4.9
+            # the best check would probably be for Linux kernel v3.12, but for now...
+            if tools.Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration("Only gcc 5 or higher is supported for this package.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
