@@ -80,10 +80,10 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("Default backend({}) must be available".format(self.options.default))
 
         count = lambda iterable: sum(1 if it else 0 for it in iterable)
-        count_builtins = count(opt == "builtin" for opt in self._backend_dict.values())
-        count_externals = count(opt == "external" for opt in self._backend_dict.values())
-        # if count_builtins > 1:
-        #     raise ConanInvalidConfiguration("Cannot have more then one builtin backend")
+        count_builtins = count(str(opt) == "builtin" for opt in self._backend_dict.values())
+        count_externals = count(str(opt) == "external" for opt in self._backend_dict.values())
+        if count_builtins > 1:
+            raise ConanInvalidConfiguration("Cannot have more then one builtin backend")
         if not self.options.shared:
             if count_externals > 0:
                 raise ConanInvalidConfiguration("Cannot have a non-builtin backend when building a static libverto")
@@ -198,9 +198,7 @@ class LibVertoConan(ConanFile):
             self.cpp_info.components["verto-libevent"].names["pkg_config"] = "libverto-libevent"
             self.cpp_info.components["verto-libevent"].requires = ["verto", "libevent::libevent"]
 
-        if self.options.with_tevent == "builtin":
-            self.cpp_info.components["verto"].requires.append("tevent::tevent")
-        elif self.options.with_tevent:
+        if self.options.with_tevent:
             self.cpp_info.components["verto-tevent"].libs = ["verto-tevent"]
             self.cpp_info.components["verto-tevent"].names["pkg_config"] = "libverto-tevent"
             self.cpp_info.components["verto-tevent"].requires = ["verto", "tevent::tevent"]
