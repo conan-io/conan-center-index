@@ -18,8 +18,7 @@ class MicroprofileConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enabled": [True, False],
-        "debug": [True, False],
+        "microprofile_enabled": [True, False],
         "use_miniz": [True, False],
         "thread_buffer_size": "ANY",
         "thread_gpu_buffer_size": "ANY",
@@ -45,8 +44,7 @@ class MicroprofileConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enabled": True,
-        "debug": False,
+        "microprofile_enabled": True,
         "use_miniz": False,
         "thread_buffer_size": 2048 << 10,
         "thread_gpu_buffer_size": 128 << 10,
@@ -142,8 +140,8 @@ class MicroprofileConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["MP_ENABLED"] = self.options.enabled
-        self._cmake.definitions["MP_DEBUG"] = self.options.debug
+        self._cmake.definitions["MP_ENABLED"] = self.options.microprofile_enabled
+        self._cmake.definitions["MP_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["MP_MINIZ"] = self.options.use_miniz
         self._cmake.definitions["MP_THREAD_BUFFER_SIZE"] = self.options.thread_buffer_size
         self._cmake.definitions["MP_THREAD_GPU_BUFFER_SIZE"] = self.options.thread_gpu_buffer_size
@@ -181,8 +179,8 @@ class MicroprofileConan(ConanFile):
         defines = []
         if not self.options.shared:
             defines.append("_MICROPROFILE_STATIC")
-        defines.append("MICROPROFILE_ENABLED=" + ("1" if self.options.enabled else "0"))
-        defines.append("MICROPROFILE_DEBUG=" + ("1" if self.options.debug else "0"))
+        defines.append("MICROPROFILE_ENABLED=" + ("1" if self.options.microprofile_enabled else "0"))
+        defines.append("MICROPROFILE_DEBUG=" + ("1" if self.settings.build_type == "Debug" else "0"))
         defines.append("MICROPROFILE_MINIZ=" + ("1" if self.options.use_miniz else "0"))
         defines.append("MICROPROFILE_BIG_ENDIAN=" + ("1" if self.options.use_big_endian else "0"))
         defines.append("MICROPROFILE_GPU_TIMERS=" + ("1" if (self.options.enable_gl_timers or
