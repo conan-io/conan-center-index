@@ -12,8 +12,7 @@ int main() {
 
     Magnum::Math::StrictWeakOrdering o;
     if (o(v2a, v2b)) {
-        std::cout << "Magnum working";
+        std::cout << "Magnum working\n";
     }
     return 0;
 }
-

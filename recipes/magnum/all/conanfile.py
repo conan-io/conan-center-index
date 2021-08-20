@@ -291,7 +291,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["vk"].libs = ["MagnumVk"]
             self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
-        if self.options.with_cglcontext:
+        if self.options.get_safe("with_cglcontext", False):
             self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
             self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
             self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext"]
