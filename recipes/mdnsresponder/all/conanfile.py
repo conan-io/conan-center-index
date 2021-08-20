@@ -45,14 +45,14 @@ class MdnsResponderConan(ConanFile):
     def _install_args(self):
         return self._build_args + [
             "INSTBASE={}".format(self.package_folder),
-            "STARTUPSCRIPTDIR={}/etc/init.d".format(self.package_folder),
+            "STARTUPSCRIPTDIR={}/bin".format(self.package_folder),
             "RUNLEVELSCRIPTSDIR=",
         ]
 
     @property
     def _install_targets(self):
         # not installing man pages, NSS plugin
-        return " ".join(["setup", "InstalledStartup", "InstalledDaemon", "InstalledLib", "InstalledClients"])
+        return " ".join(["setup", "InstalledDaemon", "InstalledLib", "InstalledClients"])
 
     @property
     def _make_env(self):
@@ -71,11 +71,15 @@ class MdnsResponderConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         if self.settings.os == "Linux":
-            for dir in [["bin"], ["etc", "init.d"], ["include"], ["lib"], ["sbin"]]:
-                tools.mkdir(os.path.join(self.package_folder, *dir))
+            for dir in ["bin", "include", "lib", "sbin"]:
+                tools.mkdir(os.path.join(self.package_folder, dir))
             with tools.chdir(self._posix_folder):
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.make(args=self._install_args, target=self._install_targets, vars=self._make_env)
+            # package the daemon in bin too
+            tools.rename(os.path.join(self.package_folder, "sbin", "mdnsd"),
+                         os.path.join(self.package_folder, "bin", "mdnsd"))
+            tools.rmdir(os.path.join(self.package_folder, "sbin"))
 
     def package_info(self):
         self.cpp_info.libs = ["dns_sd"]
