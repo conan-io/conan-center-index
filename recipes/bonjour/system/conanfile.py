@@ -14,7 +14,7 @@ class BonjourSystemConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def validate(self):
-        if self.settings.os != "Windows" or tools.cross_building(self):
+        if self.settings.os != "Windows" or (hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True)):
             raise ConanInvalidConfiguration("Only Windows is supported for this package.")
 
     def system_requirements(self):
