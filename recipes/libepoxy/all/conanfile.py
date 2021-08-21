@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
+required_conan_version = ">=1.36.0"
 
 class EpoxyConan(ConanFile):
     name = "libepoxy"
@@ -28,8 +29,6 @@ class EpoxyConan(ConanFile):
         "egl": True,
         "x11": True
     }
-    
-    required_conan_version = ">=1.33.0"
 
     _meson = None
     
@@ -46,9 +45,13 @@ class EpoxyConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.os == "Windows":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds on Windows are not supported")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("meson build helper cannot cross-compile. It has to be migrated to conan.tools.meson")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,7 +63,7 @@ class EpoxyConan(ConanFile):
             del self.options.x11
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
+        self.build_requires("meson/0.59.0")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -108,3 +111,12 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl"]
         self.cpp_info.names["pkg_config"] = "epoxy"
+        
+        pkgconfig_variables = {
+            'epoxy_has_glx': '1' if self.options.get_safe("glx") else '0',
+            'epoxy_has_egl': '1' if self.options.get_safe("egl") else '0',
+            'epoxy_has_wgl': '1' if self.settings.os == "Windows" else '0',
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join("%s=%s" % (key, value) for key,value in pkgconfig_variables.items()))

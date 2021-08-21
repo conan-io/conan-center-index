@@ -5,6 +5,11 @@
 #include "greeter.h"
 #include <QFile>
 
+#include <QNetworkAccessManager>
+#include <QtConcurrent>
+#include <QDomText>
+#include <QSqlDatabase>
+
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Application Example");
@@ -24,6 +29,14 @@ int main(int argc, char *argv[]){
         qFatal("Could not open resource file");
     qDebug() << "Resource content:" << f.readAll();
     f.close();
+
+    QNetworkAccessManager networkTester;
+
+    QSqlDatabase sqlTester;
+
+    QFuture<void> future = QtConcurrent::run([](){});
+
+    QDomText xmlTester;
 
     return app.exec();
 }

@@ -35,6 +35,8 @@ that have future-proof scalability"""
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Macos" and \
            self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) < "8.0":
@@ -48,7 +50,7 @@ that have future-proof scalability"""
 
     def package_id(self):
         del self.info.options.tbbmalloc
-        del self.info.options.tbbmalloc_proxy
+        del self.info.options.tbbproxy
 
     def build_requirements(self):
         if tools.os_info.is_windows:

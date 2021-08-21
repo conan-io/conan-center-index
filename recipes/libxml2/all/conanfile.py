@@ -1,10 +1,9 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from contextlib import contextmanager
-import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class Libxml2Conan(ConanFile):
@@ -89,18 +88,20 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
 
     def build_requirements(self):
         if not self._is_msvc:
             if self.options.zlib or self.options.lzma or self.options.icu:
-                self.build_requires("pkgconf/1.7.3")
+                self.build_requires("pkgconf/1.7.4")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
+        # can't use strip_root here because if fails since 2.9.10 with:
+        # KeyError: "linkname 'libxml2-2.9.1x/test/relaxng/ambig_name-class.xml' not found"
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
+        tools.rename("libxml2-{}".format(self.version), self._source_subfolder)
 
     @contextmanager
     def _msvc_build_environment(self):
@@ -240,7 +241,7 @@ class Libxml2Conan(ConanFile):
                       dst=os.path.join("include", "libxml2"), keep_path=False)
 
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+            os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
     @staticmethod
@@ -272,8 +273,9 @@ class Libxml2Conan(ConanFile):
         return os.path.join("lib", "cmake")
 
     @property
-    def _module_file(self):
-        return "conan-official-{}-variables.cmake".format(self.name)
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         if self._is_msvc:
@@ -299,4 +301,4 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

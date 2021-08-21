@@ -115,7 +115,8 @@ class Bullet3Conan(ConanFile):
                         "GIMPACTUtils"
                     ]
         if self.settings.os == "Windows" and self.settings.build_type in ("Debug", "MinSizeRel", "RelWithDebInfo"):
-            libs = [lib + "_{}".format(self.settings.build_type) for lib in libs]
+            lib_suffix = "RelWithDebugInfo" if self.settings.build_type == "RelWithDebInfo" else self.settings.build_type
+            libs = [lib + "_{}".format(lib_suffix) for lib in libs]
 
         self.cpp_info.names["cmake_find_package"] = "Bullet"
         self.cpp_info.names["cmake_find_package_multi"] = "Bullet"

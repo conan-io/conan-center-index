@@ -1,0 +1,4 @@
+sources:
+  "0.10.5":
+    url: "https://github.com/awslabs/aws-c-io/archive/v0.10.5.tar.gz"
+    sha256: "59abd4606661790cc0b777807938f3134cce77c03383015781498cfbfd191811"

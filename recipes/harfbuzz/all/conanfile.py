@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class HarfbuzzConan(ConanFile):
     name = "harfbuzz"
@@ -35,7 +37,7 @@ class HarfbuzzConan(ConanFile):
     short_paths = True
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -62,13 +64,13 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
         if self.options.with_icu:
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
         if self.options.with_glib:
-            self.requires("glib/2.68.0")
+            self.requires("glib/2.68.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -127,7 +129,7 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if self.settings.os == "Macos":
+        if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = tools.stdcpp_library(self)
