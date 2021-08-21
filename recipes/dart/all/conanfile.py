@@ -155,7 +155,7 @@ class DartConan(ConanFile):
                         
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
+        self.requires("eigen/3.3.9")  # <3.4.0
         self.requires("libccd/2.1")
         self.requires("fcl/0.6.1")
         self.requires("assimp/5.0.1")
@@ -167,7 +167,7 @@ class DartConan(ConanFile):
             self.requires("opengl/system")
             self.requires("freeglut/3.2.1")
         if self.options.with_gui_osg:
-            self.requires("openscenegraph/3.6.5")
+            self.requires("openscenegraph/3.5.9")  # <3.5.10
         if self.options.with_optimizer_nlopt:
             self.requires("nlopt/2.7.0")
         if self.options.with_optimizer_pagmo:
