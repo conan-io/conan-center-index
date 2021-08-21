@@ -63,7 +63,7 @@ class WaylandProtocolsConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "share", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "res", "pkgconfig"))
 
     def package_info(self):
         pkgconfig_variables = {
