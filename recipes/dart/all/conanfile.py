@@ -13,7 +13,7 @@ class DartConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake", "pkg_config", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -67,6 +67,24 @@ class DartConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+        # Do not build directories with tests, examples and tutorials
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                        "add_subdirectory(unittest",
+                        "# add_subdirectory(unittest")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                        "add_subdirectory(examples",
+                        "# add_subdirectory(examples")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                        "add_subdirectory(tutorials",
+                        "# add_subdirectory(tutorials")
+
+        # Do not try to find clang-format
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                        "find_program(\n  CLANG_FORMAT_EXECUTABLE\n  NAMES clang-format-6.0\n)",
+                        "")
+
         # FIXME: Conan generator doesn't populate required vars to support COMPONENTS?!
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "DARTFindBoost.cmake"),
                         "COMPONENTS ${BOOST_REQUIRED_COMPONENTS}",
@@ -88,6 +106,11 @@ class DartConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["DART_VERBOSE"] = True
         self._cmake.definitions["EIGEN3_VERSION_STRING"] = self.deps_cpp_info["eigen"].version
+        self._cmake.definitions["DART_BUILD_GUI_OSG"] = False
+        self._cmake.definitions["DART_BUILD_DARTPY"] = False
+        self._cmake.definitions["DART_BUILD_EXTRAS"] = False
+        self._cmake.definitions["DART_BUILD_DARTPY"] = False
+        self._cmake.definitions["DART_SKIP_DOXYGEN"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
