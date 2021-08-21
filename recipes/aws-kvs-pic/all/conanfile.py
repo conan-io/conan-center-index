@@ -14,7 +14,7 @@ class awskvspicConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, "fPIC": True}
     generators = "cmake"
-    topics = ("conan", "aws", "kvs", "stream")
+    topics = ("aws", "kvs", "kinesis", "video", "stream")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
