@@ -18,10 +18,12 @@ class DartConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        #"with_imgui": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        #"with_imgui": True,
     }
 
     _cmake = None
@@ -42,16 +44,15 @@ class DartConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    #def validate(self):
-    #    if self.options.get_safe("shared") and self.settings.compiler == "Visual Studio" and \
-    #       "MT" in self.settings.compiler.runtime:
-    #        raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
+    def validate(self):
+        # TODO: Check for C++14 (double-check)
+        pass
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-        # FIXME: Conan generator doesn't populate required vars to support COMPONENTS
+        # FIXME: Conan generator doesn't populate required vars to support COMPONENTS?!
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "DARTFindBoost.cmake"),
                         "COMPONENTS ${BOOST_REQUIRED_COMPONENTS}",
                         "")
@@ -63,6 +64,8 @@ class DartConan(ConanFile):
         self.requires("assimp/5.0.1")
         self.requires("boost/1.76.0")
         self.requires("octomap/1.9.7")
+        #if self.options.with_imgui:
+        #    self.requires("imgui/1.83")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -84,9 +87,17 @@ class DartConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         # tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         # tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        pass
+        # Steal component name 'dart'
+        self.cpp_info.components["dart-core"].names["cmake_find_package"] = "dart"
+        self.cpp_info.components["dart-core"].names["cmake_find_package_multi"] = "dart"
+        self.cpp_info.components["dart-core"].libs = ["dart"]
+        self.cpp_info.components["dart-core"].requires = ["eigen::eigen", "libccd::libccd", "fcl::fcl",
+                                                          "assimp::assimp", "boost::boost", "octomap::octomap"]
+
+        self.cpp_info.components["dart-external-imgui"].libs = ["dart-external-imgui"]
+        self.cpp_info.components["dart-external-lodepng"].libs = ["dart-external-lodepng"]
+        self.cpp_info.components["dart-external-odelcpsolver"].libs = ["dart-external-odelcpsolver"]
