@@ -1,0 +1,4 @@
+sources:
+  "1.21":
+    url: "https://github.com/wayland-project/wayland-protocols/archive/refs/tags/1.21.tar.gz"
+    sha256: "4cb4cd8c94534faf95243be957cd6b739b1a2d068218dc8f0762eac3d4707c04"
