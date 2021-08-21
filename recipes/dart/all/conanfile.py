@@ -18,11 +18,13 @@ class DartConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_utils": [True, False],
         #"with_imgui": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_utils": True,
         #"with_imgui": True,
     }
 
@@ -67,6 +69,11 @@ class DartConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+        tools.replace_in_file(os.path.join(self._source_subfolder, "dart", "utils", "CMakeLists.txt"),
+                        'set(CMAKE_REQUIRED_INCLUDES "${Boost_INCLUDE_DIRS}")',
+                        'set(CMAKE_REQUIRED_INCLUDES "${Boost_INCLUDE_DIRS}")\nmessage(">>>> Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")')
+
+
         # Do not build directories with tests, examples and tutorials
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                         "add_subdirectory(unittest",
@@ -97,6 +104,8 @@ class DartConan(ConanFile):
         self.requires("assimp/5.0.1")
         self.requires("boost/1.76.0")
         self.requires("octomap/1.9.7")
+        if self.options.with_utils:
+            self.requires("tinyxml2/8.0.0")
         #if self.options.with_imgui:
         #    self.requires("imgui/1.83")
 
@@ -104,6 +113,7 @@ class DartConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        #self._cmake.definitions["CMAKE_VERBOSE_MAKEFILE"] = True
         self._cmake.definitions["DART_VERBOSE"] = True
         self._cmake.definitions["EIGEN3_VERSION_STRING"] = self.deps_cpp_info["eigen"].version
         self._cmake.definitions["DART_BUILD_GUI_OSG"] = False
@@ -117,6 +127,9 @@ class DartConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        os.unlink("BoostConfig.cmake")  # Boost - force FindBoost, because I need INCLUDE_DIRS without gen-expressions
+        os.unlink("Findassimp.cmake")  # Library provides Findassimp with some convenient logic
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -141,3 +154,7 @@ class DartConan(ConanFile):
                                                      "assimp::assimp", "boost::headers", "boost::system", 
                                                      "boost::filesystem", "octomap::octomap",
                                                      "external-odelcpsolver"]
+
+        if self.options.with_utils:
+            self.cpp_info.components["utils"].libs = ["dart-utils"]
+            self.cpp_info.components["utils"].requires = ["core", "tinyxml2::tinyxml2"]
