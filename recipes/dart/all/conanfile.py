@@ -44,9 +44,24 @@ class DartConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5.1",
+        }
+    
     def validate(self):
-        # TODO: Check for C++14 (double-check)
-        pass
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "14")
+        
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++14 required. Your compiler is unknown, assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("Requires C++14, which your compiler does not support.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -87,17 +102,19 @@ class DartConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        # tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.components["external-imgui"].libs = ["dart-external-imgui"]
+        self.cpp_info.components["external-lodepng"].libs = ["dart-external-lodepng"]
+        self.cpp_info.components["external-odelcpsolver"].libs = ["dart-external-odelcpsolver"]
+        
         # Steal component name 'dart'
-        self.cpp_info.components["dart-core"].names["cmake_find_package"] = "dart"
-        self.cpp_info.components["dart-core"].names["cmake_find_package_multi"] = "dart"
-        self.cpp_info.components["dart-core"].libs = ["dart"]
-        self.cpp_info.components["dart-core"].requires = ["eigen::eigen", "libccd::libccd", "fcl::fcl",
-                                                          "assimp::assimp", "boost::boost", "octomap::octomap"]
-
-        self.cpp_info.components["dart-external-imgui"].libs = ["dart-external-imgui"]
-        self.cpp_info.components["dart-external-lodepng"].libs = ["dart-external-lodepng"]
-        self.cpp_info.components["dart-external-odelcpsolver"].libs = ["dart-external-odelcpsolver"]
+        self.cpp_info.components["core"].names["cmake_find_package"] = "dart"
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "dart"
+        self.cpp_info.components["core"].libs = ["dart"]
+        self.cpp_info.components["core"].requires = ["eigen::eigen", "libccd::libccd", "fcl::fcl",
+                                                     "assimp::assimp", "boost::headers", "boost::system", 
+                                                     "boost::filesystem", "octomap::octomap",
+                                                     "external-odelcpsolver"]
