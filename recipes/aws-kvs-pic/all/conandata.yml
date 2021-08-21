@@ -1,7 +1,7 @@
 sources:
   "cci.20210812":
-    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/bbf0e4ba749a6c045fc3958951c1c3a61a808dd0.zip"
-    sha256: "230249627eea345a5156471a104352eeb984e9de03e8a5f8a363d6a209517ade"
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/bbf0e4ba749a6c045fc3958951c1c3a61a808dd0.tar.gz"
+    sha256: "5a6d8da62af766ec86423ead2a45d9ff00cd80ddea679ce228ff9696a490fae5"
 patches:
   "cci.20210812":
     - base_path: "source_subfolder"
