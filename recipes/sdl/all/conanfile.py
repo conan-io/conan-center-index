@@ -115,8 +115,6 @@ class SDLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
@@ -169,7 +167,6 @@ class SDLConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["CMAKE_VERBOSE_MAKEFILE"] = 1
             cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
             cmake_extra_ldflags = []
             # FIXME: self.install_folder not defined? Neccessary?
