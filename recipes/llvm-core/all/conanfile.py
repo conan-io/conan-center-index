@@ -236,7 +236,7 @@ class LLVMCoreConan(ConanFile):
                 lib = '*LLVMTableGenGlobalISel{}'.format(ext)
                 self.copy(lib, dst='lib', src='lib')
 
-            self.run('cmake --graphviz=graph/llvm.dot .')
+            CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
             with tools.chdir('graph'):
                 dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
 
