@@ -2,11 +2,13 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class XkbcommonConan(ConanFile):
     name = "xkbcommon"
     description = "keymap handling library for toolkits and window systems"
-    topics = ("conan", "xkbcommon", "keyboard")
+    topics = ("xkbcommon", "keyboard")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xkbcommon/libxkbcommon"
     license = "MIT"
@@ -17,15 +19,13 @@ class XkbcommonConan(ConanFile):
         "with_x11": [True, False],
         "with_wayland": [True, False],
         "xkbregistry": [True, False],
-        "docs": [True, False, "deprecated"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_x11": True,
-        "with_wayland": False,
+        "with_wayland": True,
         "xkbregistry": True,
-        "docs": "deprecated"
     }
 
     generators = "pkg_config"
@@ -49,29 +49,33 @@ class XkbcommonConan(ConanFile):
             del self.options.xkbregistry
 
     def configure(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
-        if self.options.docs != "deprecated":
-            self.output.warn("'docs' option is deprecated. Do not use.")
-
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
+
     def requirements(self):
         self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
+        if self.options.with_wayland:
+            # FIXME: In cross-compiling scenarios this library requires 'wayland' in _host_ to use and link some
+            # FIXME:    sources, but it requires tools like 'wayland-scanner' in the _build_ context. Probably
+            # FIXME:    'wayland-protocols' should also be a build-requires as it is providing just some files
+            # FIXME:    used during the build process.
+            self.requires("wayland/1.19.0")
+            self.requires("wayland-protocols/1.21")
 
     def build_requirements(self):
-        self.build_requires("meson/0.56.2")
+        self.build_requires("meson/0.59.1")
         self.build_requires("bison/3.7.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "libxkbcommon-" + self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_meson(self):
         if self._meson:
@@ -111,9 +115,6 @@ class XkbcommonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        del self.info.options.docs
-
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xkbcommon_full_package" # unofficial, but required to avoid side effects (libxkbcommon component "steals" the default global pkg_config name)
         self.cpp_info.components["libxkbcommon"].names["pkg_config"] = "xkbcommon"
@@ -127,6 +128,10 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["libxkbregistry"].names["pkg_config"] = "xkbregistry"
             self.cpp_info.components["libxkbregistry"].libs = ["xkbregistry"]
             self.cpp_info.components["libxkbregistry"].requires = ["libxml2::libxml2"]
+        if self.options.with_wayland:
+            # FIXME: This generates just executable, but I need to use the requirements to pass Conan checks
+            self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
+            self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland", "wayland-protocols::wayland-protocols"]
 
         if tools.Version(self.version) >= "1.0.0":
             bin_path = os.path.join(self.package_folder, "bin")
