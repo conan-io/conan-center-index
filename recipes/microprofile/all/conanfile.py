@@ -76,13 +76,30 @@ class MicroprofileConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _validate_max_groups(self):
-        try:
-            _max_groups = int(self.options.max_groups)
-            if _max_groups % 32 != 0:
-                raise ConanInvalidConfiguration("max_groups must be multiple of 32.")
-        except ValueError:
-            raise ConanInvalidConfiguration("max_groups must be a number and multiple of 32.")
+    def _validate_int_options(self):
+        positive_int_options = [
+            "thread_buffer_size",
+            "thread_gpu_buffer_size",
+            "max_frame_history",
+            "webserver_port",
+            "webserver_maxframes",
+            "webserver_socket_buffer_size",
+            "gpu_frame_delay",
+            "name_max_length",
+            "max_timers",
+            "max_threads",
+            "max_string_length",
+            "timeline_max_tokens",
+            "thread_log_frames_reuse",
+            "max_groups"
+        ]
+        for opt in positive_int_options:
+            try:
+                value = int(getattr(self.options, opt))
+                if value < 0:
+                    raise ValueError
+            except ValueError:
+                raise ConanInvalidConfiguration("microprofile:{} must be a positive integer".format(opt))
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -91,7 +108,13 @@ class MicroprofileConan(ConanFile):
             raise ConanInvalidConfiguration("DirectX timers can only be used in Windows.")
         if self.options.enable_timer is not None and self.options.enable_gpu_timer_callbacks:
             raise ConanInvalidConfiguration("Cannot mix GPU callbacks and GPU timers.")
-        self._validate_max_groups()
+
+        self._validate_int_options()
+
+        if int(self.options.max_groups) % 32 != 0:
+            raise ConanInvalidConfiguration("microprofile:max_groups must be multiple of 32.")
+        if int(self.options.webserver_port) > 2 ** 16 - 1:
+            raise ConanInvalidConfiguration("microprofile:webserver_port must be between 0 and 65535.")
 
     def configure(self):
         if self.options.shared:
