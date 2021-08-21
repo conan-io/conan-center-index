@@ -15,7 +15,6 @@ class WaylandProtocolsConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    generators = "pkg_config"
     _meson = None
 
     def package_id(self):
@@ -51,6 +50,7 @@ class WaylandProtocolsConan(ConanFile):
                 source_folder=self._source_subfolder,
                 build_folder=self._build_subfolder,
                 defs=defs,
+                args=['--datadir=%s' % os.path.join(self.package_folder, "res")],
             )
         return self._meson
 
@@ -67,7 +67,7 @@ class WaylandProtocolsConan(ConanFile):
 
     def package_info(self):
         pkgconfig_variables = {
-            'datarootdir': '${prefix}/share',
+            'datarootdir': '${prefix}/res',
             'pkgdatadir': '${datarootdir}/wayland-protocols',
         }
         self.cpp_info.set_property(
