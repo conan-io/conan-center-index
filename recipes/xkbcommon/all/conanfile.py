@@ -63,19 +63,30 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/2.9.12")
         if self.options.with_wayland:
-            # FIXME: In cross-compiling scenarios this library requires 'wayland' in _host_ to use and link some
-            # FIXME:    sources, but it requires tools like 'wayland-scanner' in the _build_ context. Probably
-            # FIXME:    'wayland-protocols' should also be a build-requires as it is providing just some files
-            # FIXME:    used during the build process.
             self.requires("wayland/1.19.0")
-            self.requires("wayland-protocols/1.21")
+            self.requires("wayland-protocols/1.21")  # FIXME: This should be a build-requires
 
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
         self.build_requires("bison/3.7.1")
+        if self.options.with_wayland:
+            self.build_requires("wayland/1.19.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+        # Conan doesn't provide a `wayland-scanner.pc` file for the package in the _build_ context
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
+                              "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
+                              "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "wayland_scanner = find_program(wayland_scanner_dep.get_pkgconfig_variable('wayland_scanner'))",
+                              "wayland_scanner = find_program('wayland-scanner')")
 
     def _configure_meson(self):
         if self._meson:
