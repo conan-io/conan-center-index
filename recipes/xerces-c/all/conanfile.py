@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+from typing import Union, Tuple
 
 
 class XercesCConan(ConanFile):
@@ -18,9 +19,13 @@ class XercesCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        # https://xerces.apache.org/xerces-c/build-3.html
         "char_type": ["uint16_t", "char16_t", "wchar_t"],
+        "network_accessor": ["curl", "socket", "cfurl", "winsock"],
+        "transcoder": ["gnuiconv", "iconv", "icu", "macosunicodeconverter", "windows"],
+        "message_loader": ["inmemory", "icu", "iconv"],
+        "mutex_manager": ["standard", "posix", "windows"],
     }
-    default_options = {"shared": False, "fPIC": True, "char_type": "uint16_t"}
 
     _cmake = None
 
@@ -32,15 +37,57 @@ class XercesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
-        if self.options.char_type == "wchar_t" and self.settings.os != "Windows":
+    def _validate(self, option: str, value: str, os: Union[str, Tuple[str]]):
+        """
+        Validate that the given `option` has the required `value` for the given `os`
+        If not raises a ConanInvalidConfiguration error
+
+        :param option: the name of the option to validate
+        :param value: the value that the `option` should have
+        :param os: either a single string or a tuple of strings containing the
+                   OS(es) that `value` is valid on
+        """
+        if ((isinstance(os, str) and self.settings.os != os) or \
+            (isinstance(os, tuple) and self.settings.os not in os)) \
+             and getattr(self.options, option) == value:
             raise ConanInvalidConfiguration(
-                "Option 'char_type=wchar_t' is only supported in Windows"
+                f"Option '{option}={value}' is only supported on {os}"
             )
 
+    def validate(self):
+        self._validate("char_type", "wchar_t", "Windows")
+        self._validate("network_accessor", "winsock", "Windows")
+        self._validate("network_accessor", "cfurl", "Macos")
+        self._validate("network_accessor", "socket", ("Linux", "Macos"))
+        self._validate("network_accessor", "curl", ("Linux", "Macos"))
+        self._validate("transcoder", "macosunicodeconverter", "Macos")
+        self._validate("transcoder", "windows", "Windows")
+        self._validate("mutex_manager", "posix", ("Linux", "Macos"))
+        self._validate("mutex_manager", "windows", "Windows")
+
+    def requirements(self):
+        if "icu" in (self.options.transcoder, self.options.message_loader):
+            self.requires("icu/69.1")
+
     def config_options(self):
+        self.options.shared = False
+        self.options.fPIC = True
+        self.options.char_type = "uint16_t"
+        self.options.message_loader = "inmemory"
+
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.network_accessor = "winsock"
+            self.options.transcoder = "windows"
+            self.options.mutex_manager = "windows"
+        elif self.settings.os == "Macos":
+            self.options.network_accessor = "cfurl"
+            self.options.transcoder = "macosunicodeconverter"
+            self.options.mutex_manager = "posix"
+        elif self.settings.os == "Linux":
+            self.options.network_accessor = "socket"
+            self.options.transcoder = "gnuiconv"
+            self.options.mutex_manager = "posix"
 
     def configure(self):
         if self.settings.os not in ("Windows", "Macos", "Linux"):
@@ -58,27 +105,13 @@ class XercesCConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         # https://xerces.apache.org/xerces-c/build-3.html
-        self._cmake.definitions["network-accessor"] = {
-            "Windows": "winsock",
-            "Macos": "cfurl",
-            "Linux": "socket",
-        }.get(str(self.settings.os))
-        self._cmake.definitions["transcoder"] = {
-            "Windows": "windows",
-            "Macos": "macosunicodeconverter",
-            "Linux": "gnuiconv",
-        }.get(str(self.settings.os))
+        self._cmake.definitions["network-accessor"] = self.options.network_accessor
+        self._cmake.definitions["transcoder"] = self.options.transcoder
         self._cmake.definitions["message-loader"] = "inmemory"
-
         self._cmake.definitions["xmlch-type"] = self.options.char_type
-
-        self._cmake.definitions["mutex-manager"] = {
-            "Windows": "windows",
-            "Macos": "posix",
-            "Linux": "posix",
-        }.get(str(self.settings.os))
+        self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
         # avoid picking up system dependency
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -103,5 +136,7 @@ class XercesCConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+        if self.options.network_accessor == "curl":
+            self.cpp_info.system_libs.append("curl")
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
