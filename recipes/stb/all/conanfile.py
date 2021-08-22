@@ -24,6 +24,11 @@ class StbConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        print(self.version, self.version < "20210713")
+        if self.version < "20210713":
+            del self.options.with_deprecated
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -32,8 +37,9 @@ class StbConan(ConanFile):
         self.copy("*.h", src=self._source_subfolder, dst="include")
         self.copy("stb_vorbis.c", src=self._source_subfolder, dst="include")
         tools.rmdir(os.path.join(self.package_folder, "include", "tests"))
-        tools.rmdir(os.path.join(self.package_folder, "include", "deprecated"))
-        if self.options.with_deprecated:
+        if self.version >= "20210713":
+            tools.rmdir(os.path.join(self.package_folder, "include", "deprecated"))
+        if self.options.get_safe("with_deprecated", False):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "deprecated"), dst="include")
             self.copy("stb_image.c", src=os.path.join(self._source_subfolder, "deprecated"), dst="include")
 
