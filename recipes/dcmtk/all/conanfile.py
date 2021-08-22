@@ -72,7 +72,7 @@ class DCMTKConan(ConanFile):
             del self.options.with_tcpwrappers
 
     def validate(self):
-        if hasattr("settings_build") and tools.cross_building(self) and self.settings.arch == "armv8":
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to 'arm' is not supported (yet)")
 
