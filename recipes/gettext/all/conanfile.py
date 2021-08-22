@@ -86,6 +86,7 @@ class GetTextConan(ConanFile):
         args = [
             "HELP2MAN=/bin/true",
             "EMACS=no",
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--with-libiconv-prefix={}".format(libiconv_prefix),
             "--disable-shared",
             "--disable-static",
@@ -139,14 +140,13 @@ class GetTextConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
 
     def package_info(self):
-        self.cpp_info.resdirs = ["share"]
         self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        aclocal = tools.unix_path(os.path.join(self.package_folder, "share", "aclocal"))
+        aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
 
