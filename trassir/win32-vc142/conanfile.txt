@@ -1,5 +1,5 @@
 [generators]
-cmake
+cmake_find_package
 virtualrunenv
 virtualenv
 
@@ -32,7 +32,6 @@ jsoncpp/1.8.3
 leveldb/1.22
 libcurl/7.64.1.dssl1
 libjpeg/9d.dssl1
-libjpeg-turbo/2.0.4.dssl1
 libpng/1.6.37
 libpq/11.5.dssl1
 libwebp/1.1.0
@@ -50,8 +49,8 @@ openssl/1.1.1d.dssl1
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
 signalr-qt/0.1.dssl1
-qt/5.14.1.dssl1
-qtwebkit/5.212.0-alpha4.dssl1
+qt/5.14.1.dssl2
+qtwebkit/5.212.0-alpha4.dssl2
 sqlite3/3.31.0.dssl1
 sip/4.19.3.dssl1
 snappy/1.1.8.dssl1
@@ -98,6 +97,7 @@ opencv:with_tiff=False
 openssl:shared=True
 pjsip:shared=False
 protobuf:shared=False
+qt:shared=True
 signalr-qt:shared=True
 zlib:shared=True
 libxml2:iconv=False
@@ -114,18 +114,16 @@ qt:qtsvg=True
 qt:qtquickcontrols=True
 qt:qtquickcontrols2=True
 qt:qttools=True
-qt:qtx11extras=True
 
 qt:with_glib=False
-qt:with_harfbuzz=not_used
+qt:with_harfbuzz=False
 qt:with_doubleconversion=qt
-qt:with_icu=False
-qt:with_sqlite3=system
+qt:with_freetype=True
+qt:with_sqlite3=True
 qt:with_mysql=False
 qt:with_pcre2=False
-qt:with_sdl2=False
 qt:with_zstd=False
 qt:with_pq=True
 qt:with_odbc=False
 qt:with_openal=False
-qt:with_libalsa=False
+qt:with_libpng=True

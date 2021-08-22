@@ -1,5 +1,5 @@
 [generators]
-cmake
+cmake_find_package
 virtualrunenv
 
 [build_requires]
@@ -72,8 +72,8 @@ openssl/1.1.1d.dssl1
 #pjsip/2.8@dssl/stable
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
-qt/5.14.1.dssl1
-qtwebkit/5.212.0-alpha4.dssl1
+qt/5.14.1.dssl2
+qtwebkit/5.212.0-alpha4.dssl2
 signalr-qt/0.1.dssl1
 #sip/4.19.3
 sqlite3/3.31.0.dssl1
@@ -111,21 +111,19 @@ qt:qttools=True
 qt:qtx11extras=True
 
 qt:with_glib=False
-qt:with_harfbuzz=not_used
+qt:with_harfbuzz=False
 qt:with_doubleconversion=qt
 qt:with_fontconfig=False
-qt:with_freetype=system
+qt:with_freetype=True
 qt:with_libalsa=False
 qt:with_icu=False
 qt:with_mysql=False
 qt:with_mesa=True
 qt:with_pq=True
 qt:with_pcre2=False
-qt:with_sdl2=False
 qt:with_zstd=False
-qt:with_sqlite3=system
-qt:with_libjpeg=system
-qt:with_libpng=system
+qt:with_sqlite3=True
+qt:with_libpng=True
 
 freetype:fPIC=True
 freetype:with_bzip2=True
@@ -167,6 +165,7 @@ opencv:shared=True
 openssl:shared=True
 pjsip:shared=True
 protobuf:shared=True
+qt:shared=True
 signalr-qt:shared=True
 zlib:shared=True
 
