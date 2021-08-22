@@ -60,5 +60,5 @@ class Rectpack2dConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "rectpack2d"))
-        self.cpp_info.names["cmake_find_package"] = "rectpack2d"
-        self.cpp_info.names["cmake_find_package_multi"] = "rectpack2d"
+        self.cpp_info.names["cmake_find_package"] = "rectpack2D"
+        self.cpp_info.names["cmake_find_package_multi"] = "rectpack2D"
