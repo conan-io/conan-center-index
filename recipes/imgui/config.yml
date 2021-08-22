@@ -19,3 +19,5 @@ versions:
     folder: all
   "1.83":
     folder: all
+  "1.84.1":
+    folder: all
