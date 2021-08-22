@@ -25,7 +25,6 @@ class StbConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        print(self.version, self.version < "20210713")
         if self.version < "20210713":
             del self.options.with_deprecated
 
