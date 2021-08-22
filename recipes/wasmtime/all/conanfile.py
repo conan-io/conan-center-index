@@ -75,11 +75,16 @@ class WasmtimeConan(ConanFile):
         shutil.copytree(os.path.join(self.source_folder, "include"),
                         os.path.join(self.package_folder, "include"))
 
-        self.copy('*.dll', dst='bin', keep_path=False)
-        self.copy('*.lib', dst='lib', keep_path=False)
-        self.copy('*.so', dst='lib', keep_path=False)
-        self.copy('*.dylib', dst='lib', keep_path=False)
-        self.copy('*.a', dst='lib', keep_path=False)
+        srclibdir = os.path.join(self.source_folder, "lib")
+        if self.options.shared:
+            self.copy("wasmtime.dll.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmtime.dll", src=srclibdir, dst="bin", keep_path=False)
+            self.copy("libwasmtime.dll.a", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmtime.so*", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmtime.dylib", src=srclibdir,  dst="lib", keep_path=False)
+        else:
+            self.copy("wasmtime.lib", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("libwasmtime.a", src=srclibdir, dst="lib", keep_path=False)
 
         self.copy('LICENSE', dst='licenses', src=self.source_folder)
 
