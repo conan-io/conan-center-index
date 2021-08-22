@@ -1,7 +1,6 @@
-import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -11,7 +10,11 @@ class PlatformInterfacesConan(ConanFile):
     license = "LGPL-3.0-only"
     homepage = "https://github.com/linksplatform/Hashing"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """lol"""
+    description = "platform.hashing is one of the libraries of the LinksPlatform modular framework," \
+                  "which contains std::hash specializations for:" \
+                  "trivial and standard-layout types" \
+                  "types constrained by std::ranges::range" \
+                  "std::any"
     topics = ("linksplatform", "cpp20", "hashing", "any", "ranges", "header-only")
     settings = "compiler", "arch"
     no_copy_source = True
