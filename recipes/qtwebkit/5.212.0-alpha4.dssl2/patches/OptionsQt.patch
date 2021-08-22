@@ -1,0 +1,156 @@
+Standard CMake X11 finder doesn't update INCLUDE_DIRECTORIES variable, so we have to do it by yourselves
+diff -nru a/Source/cmake/OptionsQt.cmake b/Source/cmake/OptionsQt.cmake
+--- a/Source/cmake/OptionsQt.cmake
++++ b/Source/cmake/OptionsQt.cmake
+@@ -61,18 +61,13 @@
+     endif ()
+ endmacro()
+ 
++include(CheckIncludeFileCXX)
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/..")
+ macro(CHECK_QT5_PRIVATE_INCLUDE_DIRS _qt_component _header)
+-    set(INCLUDE_TEST_SOURCE
+-    "
+-        #include <${_header}>
+-        int main() { return 0; }
+-    "
+-    )
+     set(CMAKE_REQUIRED_INCLUDES ${Qt5${_qt_component}_PRIVATE_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES Qt5::${_qt_component})
+ 
+-    # Avoid check_include_file_cxx() because it performs linking but doesn't support CMAKE_REQUIRED_LIBRARIES (doh!)
+-    check_cxx_source_compiles("${INCLUDE_TEST_SOURCE}" Qt5${_qt_component}_PRIVATE_HEADER_FOUND)
++    check_include_file_cxx("${_header}" Qt5${_qt_component}_PRIVATE_HEADER_FOUND)
+ 
+     unset(INCLUDE_TEST_SOURCE)
+     unset(CMAKE_REQUIRED_INCLUDES)
+@@ -471,7 +466,7 @@
+     set(SQLITE_LIBRARIES qtsqlite)
+     set(SQLITE_FOUND 1)
+ else ()
+-    find_package(Sqlite REQUIRED)
++    find_package(SQLite3 REQUIRED)
+ endif ()
+ 
+ find_package(Threads REQUIRED)
+@@ -532,7 +527,7 @@
+ else ()
+     find_package(LibXml2 2.8.0 REQUIRED)
+     if (ENABLE_XSLT)
+-        find_package(LibXslt 1.1.7 REQUIRED)
++        find_package(libxslt 1.1.7 REQUIRED)
+     endif ()
+ endif ()
+ 
+@@ -562,7 +557,8 @@
+ list(APPEND QT_REQUIRED_COMPONENTS
+     Widgets
+ )
+-set(QT_OPTIONAL_COMPONENTS OpenGL)
++
++list(APPEND QT_REQUIRED_COMPONENTS OpenGL)
+ 
+ if (ENABLE_API_TESTS OR ENABLE_TEST_SUPPORT)
+     list(APPEND QT_REQUIRED_COMPONENTS
+@@ -606,6 +602,10 @@
+         unset(CMAKE_REQUIRED_INCLUDES)
+         unset(CMAKE_REQUIRED_FLAGS)
+     endif ()
++    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
++        find_package(OpenGL REQUIRED)
++        include_directories(${OPENGL_INCLUDE_DIRS})
++    endif()
+ 
+     message(STATUS "Qt OpenGL implementation: ${Qt5Gui_OPENGL_IMPLEMENTATION}")
+     message(STATUS "Qt OpenGL libraries: ${Qt5Gui_OPENGL_LIBRARIES}")
+@@ -776,6 +776,9 @@
+     elseif (NOT X11_Xrender_FOUND)
+         message(FATAL_ERROR "libXrender is required for ENABLE_X11_TARGET")
+     endif ()
++    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
++        include_directories(${X11_INCLUDE_DIR})
++    endif()
+ endif ()
+ 
+ if (NOT ENABLE_VIDEO)
+@@ -974,10 +977,6 @@
+             string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+         endforeach ()
+     endif ()
+-
+-    if (NOT QT_CONAN_DIR)
+-        set(ICU_LIBRARIES ${ICU_LIBRARY_PREFIX}icuuc${CMAKE_DEBUG_POSTFIX} ${ICU_LIBRARY_PREFIX}icuin${CMAKE_DEBUG_POSTFIX} ${ICU_LIBRARY_PREFIX}icudt${CMAKE_DEBUG_POSTFIX})
+-    endif ()
+ endif ()
+ 
+ if (NOT RUBY_FOUND AND RUBY_EXECUTABLE AND NOT RUBY_VERSION VERSION_LESS 1.9)
+ diff -nru a/Source/WebCore/PlatformQt.cmake b/Source/WebCore/PlatformQt.cmake
+--- a/Source/WebCore/PlatformQt.cmake
++++ b/Source/WebCore/PlatformQt.cmake
+@@ -278,26 +278,26 @@
+ # Note: Qt5Network_INCLUDE_DIRS includes Qt5Core_INCLUDE_DIRS
+ list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
+     ${HYPHEN_INCLUDE_DIR}
+-    ${LIBXML2_INCLUDE_DIR}
+-    ${LIBXSLT_INCLUDE_DIR}
++    ${LibXml2_INCLUDE_DIR}
++    ${libxslt_INCLUDE_DIR}
+     ${Qt5Gui_INCLUDE_DIRS}
+     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+     ${Qt5Network_INCLUDE_DIRS}
+     ${Qt5Network_PRIVATE_INCLUDE_DIRS}
+     ${Qt5Sensors_INCLUDE_DIRS}
+-    ${SQLITE_INCLUDE_DIR}
++    ${SQLite_INCLUDE_DIR}
+     ${ZLIB_INCLUDE_DIRS}
+ )
+ 
+ list(APPEND WebCore_LIBRARIES
+     ${HYPHEN_LIBRARIES}
+-    ${LIBXML2_LIBRARIES}
+-    ${LIBXSLT_LIBRARIES}
++    ${LibXml2_LIBRARIES}
++    ${libxslt_LIBRARIES}
+     ${Qt5Core_LIBRARIES}
+     ${Qt5Gui_LIBRARIES}
+     ${Qt5Network_LIBRARIES}
+     ${Qt5Sensors_LIBRARIES}
+-    ${SQLITE_LIBRARIES}
++    ${SQLite_LIBRARIES}
+     ${X11_X11_LIB}
+     ${ZLIB_LIBRARIES}
+ )
+
+diff -nru a/Source/WebKit/PlatformQt.cmake b/Source/WebKit/PlatformQt.cmake
+--- a/Source/WebKit/PlatformQt.cmake
++++ b/Source/WebKit/PlatformQt.cmake
+@@ -243,7 +243,7 @@
+     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+     ${Qt5Network_INCLUDE_DIRS}
+     ${Qt5Positioning_INCLUDE_DIRS}
+-    ${SQLITE_INCLUDE_DIR}
++    ${SQLite_INCLUDE_DIR}
+ )
+ # Build the include path with duplicates removed
+ list(REMOVE_DUPLICATES WebKit_SYSTEM_INCLUDE_DIRECTORIES)
+@@ -877,7 +877,7 @@
+ if (USE_LINKER_VERSION_SCRIPT)
+     set(VERSION_SCRIPT "${CMAKE_BINARY_DIR}/QtWebKitWidgets.version")
+     add_custom_command(TARGET WebKitWidgets PRE_LINK
+-        COMMAND ${PERL_EXECUTABLE} ${TOOLS_DIR}/qt/generate-version-script.pl ${Qt5_VERSION} > ${VERSION_SCRIPT}
++        COMMAND ${PERL_EXECUTABLE} ${TOOLS_DIR}/qt/generate-version-script.pl ${Qt5_ORIGINAL_VERSION} > ${VERSION_SCRIPT}
+         VERBATIM
+     )
+     set_target_properties(WebKitWidgets PROPERTIES LINK_FLAGS -Wl,--version-script,${VERSION_SCRIPT})
+diff -nru a/Source/WebKit/CMakeLists.cmake b/Source/WebKit/CMakeLists.cmake
+--- a/Source/WebKit/CMakeLists.txt
++++ b/Source/WebKit/CMakeLists.txt
+@@ -84,7 +84,7 @@
+     if (USE_LINKER_VERSION_SCRIPT)
+         set(VERSION_SCRIPT "${CMAKE_BINARY_DIR}/QtWebKit.version")
+         add_custom_command(TARGET WebKit PRE_LINK
+-            COMMAND ${PERL_EXECUTABLE} ${TOOLS_DIR}/qt/generate-version-script.pl ${Qt5_VERSION} > ${VERSION_SCRIPT}
++            COMMAND ${PERL_EXECUTABLE} ${TOOLS_DIR}/qt/generate-version-script.pl ${Qt5_ORIGINAL_VERSION} > ${VERSION_SCRIPT}
+             VERBATIM
+         )
+         set_target_properties(WebKit PROPERTIES LINK_FLAGS -Wl,--version-script,${VERSION_SCRIPT})
