@@ -18,10 +18,10 @@ class SpirvCrossConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "exceptions": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
         "build_executable": [True, False],
+        "exceptions": [True, False],
         "glsl": [True, False],
         "hlsl": [True, False],
         "msl": [True, False],
@@ -32,10 +32,10 @@ class SpirvCrossConan(ConanFile):
         "namespace": "ANY",
     }
     default_options = {
-        "exceptions": False,
         "shared": False,
         "fPIC": True,
         "build_executable": True,
+        "exceptions": True,
         "glsl": True,
         "hlsl": True,
         "msl": True,
