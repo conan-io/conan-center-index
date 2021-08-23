@@ -87,3 +87,5 @@ class PlatformInterfacesConan(ConanFile):
                 self.output.warn("Consider adding it in your profile `crypto` and/or `crc` for more performance "
                                  "if your architecture does support cryptographic and/or CRC32 extensions")
                 check_mfpu_flag("-march=armv8-a+fp+simd")
+        else:
+            check_mfpu_flag("-march=native")
