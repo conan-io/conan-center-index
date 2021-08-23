@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
-import fnmatch
+
+required_conan_version = ">=1.33.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -8,7 +9,7 @@ class OpenH264Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openh264.org/"
     description = "Open Source H.264 Codec"
-    topics = ("conan", "h264", "codec", "video", "compression", )
+    topics = ("h264", "codec", "video", "compression", )
     license = "BSD-2-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -20,11 +21,16 @@ class OpenH264Conan(ConanFile):
         "shared": "False",
         "fPIC": True,
     }
-    exports_sources = "patches/**"
+
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,14 +41,14 @@ class OpenH264Conan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("nasm/2.14")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self.settings.arch in ("x86", "x86_64"):
+            self.build_requires("nasm/2.15.05")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -139,14 +145,14 @@ class OpenH264Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target=self._library_filename)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=self._make_args, target="install-" + ("shared" if self.options.shared else "static-lib"))
