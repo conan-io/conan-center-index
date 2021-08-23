@@ -27,7 +27,14 @@ int main(int argc, char* argv[])
     auto node_server = nmos::experimental::make_node_server(node_model, node_implementation, log_model, gate);
     nmos::insert_resource(node_model.node_resources, nmos::make_node(nmos::make_id(), node_model.settings));
 
-    nmos::server_guard node_server_guard(node_server);
-    std::this_thread::sleep_for(std::chrono::milliseconds(how_long(node_model.settings)));
+    try
+    {
+        nmos::server_guard node_server_guard(node_server);
+        std::this_thread::sleep_for(std::chrono::milliseconds(how_long(node_model.settings)));
+    }
+    catch (const web::http::http_exception& e)
+    {
+        slog::log<slog::severities::error>(gate, SLOG_FLF) << "HTTP error: " << e.what() << " [" << e.error_code() << "]";
+    }
     return 0;
 }
