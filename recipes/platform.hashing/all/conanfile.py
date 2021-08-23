@@ -65,6 +65,8 @@ class PlatformInterfacesConan(ConanFile):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
+    def package_id(self):
+        self.info.header_only()
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
             return
