@@ -92,7 +92,8 @@ class LibE57FormatConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.libs = ["E57Format-d" if self.settings.build_type == "Debug" else "E57Format"]
+        suffix = "-d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["E57Format{}".format(suffix)]
         self.cpp_info.filenames["cmake_find_package"] = "e57format"
         self.cpp_info.filenames["cmake_find_package_multi"] = "e57format"
         self.cpp_info.names["cmake_find_package"] = "E57Format"
