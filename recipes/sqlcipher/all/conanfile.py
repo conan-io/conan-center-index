@@ -115,7 +115,7 @@ class SqlcipherConan(ConanFile):
         nmake_flags.append("FOR_WIN10=1")
         platforms = {"x86": "x86", "x86_64": "x64", "armv8": "arm64"}
         nmake_flags.append("PLATFORM=%s" % platforms[self.settings.arch.value])
-        with tools.vcvars(self.settings_build):
+        with tools.vcvars(getattr(self, 'settings_build', self.settings)):
             self.run("nmake /f Makefile.msc sqlite3.c %s" % (" ".join(nmake_flags)), cwd=self._source_subfolder)
         with tools.vcvars(self.settings):
             self.run("nmake /f Makefile.msc %s %s" % (main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
