@@ -7,7 +7,6 @@ required_conan_version = ">=1.33.0"
 
 class LibevConan(ConanFile):
     name = "libev"
-
     description = "A full-featured and high-performance event loop that is loosely modelled after libevent"
     topics = ("conan", "event", "libev", "event-loop", "periodic-timer", "notify")
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,6 +28,10 @@ class LibevConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,7 +50,7 @@ class LibevConan(ConanFile):
             raise ConanInvalidConfiguration("libev can't be built as shared on Windows")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -58,12 +61,12 @@ class LibevConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = []
-        if self.options.shared:
-            args.extend(['--disable-static', '--enable-shared'])
-        else:
-            args.extend(['--disable-shared', '--enable-static'])
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
@@ -75,8 +78,8 @@ class LibevConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        os.unlink(os.path.join(self.package_folder, "lib", "libev.la"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["ev"]
