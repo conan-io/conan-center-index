@@ -76,6 +76,7 @@ class QtConan(ConanFile):
         "with_odbc": [True, False],
         "with_zstd": [True, False],
         "with_brotli": [True, False],
+        "with_dbus": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -110,6 +111,7 @@ class QtConan(ConanFile):
         "with_odbc": True,
         "with_zstd": False,
         "with_brotli": True,
+        "with_dbus": False,
 
         "gui": True,
         "widgets": True,
@@ -237,7 +239,7 @@ class QtConan(ConanFile):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.1")
+            self.requires("glib/2.68.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -245,7 +247,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.8.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -268,7 +270,7 @@ class QtConan(ConanFile):
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.2.1")
+                self.requires("xkbcommon/1.3.0")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -277,9 +279,11 @@ class QtConan(ConanFile):
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.2")
+        self.build_requires("cmake/3.20.4")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
@@ -437,6 +441,11 @@ class QtConan(ConanFile):
             else:
                 self._cmake.definitions["INPUT_openssl"] = "linked"
 
+        if self.options.with_dbus:
+           self._cmake.definitions["INPUT_dbus"] = "linked"
+        else:
+           self._cmake.definitions["FEATURE_dbus"] = "OFF"
+
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -593,7 +602,8 @@ class QtConan(ConanFile):
         filecontents += "set(QT_VERSION_MINOR %s)\n" % ver.minor
         filecontents += "set(QT_VERSION_PATCH %s)\n" % ver.patch
         targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
-        targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
+        if self.options.with_dbus:
+            targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
             targets.append("qvkgen")
         if self.options.widgets:
@@ -719,7 +729,9 @@ class QtConan(ConanFile):
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
-            gui_reqs = ["DBus"]
+            gui_reqs = []
+            if self.options.with_dbus:
+                gui_reqs.append("DBus")
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -764,7 +776,8 @@ class QtConan(ConanFile):
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
-        _create_module("DBus")
+        if self.options.with_dbus:
+            _create_module("DBus")
         _create_module("Concurrent")
         _create_module("Xml")
 
