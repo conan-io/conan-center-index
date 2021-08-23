@@ -3,7 +3,7 @@ import os
 
 class CAresTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
