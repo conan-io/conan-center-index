@@ -74,6 +74,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_zstd": [True, False],
         "with_gstreamer": [True, False],
+        "with_pulseaudio": [True, False],
         "with_dbus": [True, False],
 
         "gui": [True, False],
@@ -112,6 +113,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_zstd": True,
         "with_gstreamer": False,
+        "with_pulseaudio": False,
         "with_dbus": False,
 
         "gui": True,
@@ -210,6 +212,7 @@ class QtConan(ConanFile):
             del self.options.with_libalsa
             del self.options.with_openal
             del self.options.with_gstreamer
+            del self.options.with_pulseaudio
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
@@ -293,6 +296,10 @@ class QtConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
 
+        if self.options.get_safe("with_pulseaudio", default=False) and not self.options["pulseaudio"].with_glib:
+            # https://bugreports.qt.io/browse/QTBUG-95952
+            raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
@@ -303,7 +310,7 @@ class QtConan(ConanFile):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.3")
+            self.requires("glib/2.69.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -351,6 +358,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_gstreamer", False):
             raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
+        if self.options.get_safe("with_pulseaudio", False):
+            self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
@@ -533,7 +542,8 @@ class QtConan(ConanFile):
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
-            args.append("--gstreamer" if self.options.with_gstreamer else "--no-gstreamer")
+            args.append("--gstreamer" if self.options.get_safe("with_gstreamer", False) else "--no-gstreamer")
+            args.append("--pulseaudio" if self.options.get_safe("with_pulseaudio", False) else "--no-pulseaudio")
 
         if self.options.with_dbus:
             args.append("-dbus-linked")
@@ -1030,6 +1040,8 @@ Examples = bin/datadir/examples""")
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
                 multimedia_reqs.append("openal::openal")
+            if self.options.get_safe("with_pulseaudio", False):
+                multimedia_reqs.append("pulseaudio::pulse")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and self.options.gui:
