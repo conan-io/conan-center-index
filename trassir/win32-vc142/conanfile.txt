@@ -43,7 +43,7 @@ miniupnpc/2.1
 nasm/2.14
 onnxruntime/1.7.2
 openal/1.20.1
-openblas/0.3.7
+openblas/0.3.7.dssl1
 opencv/2.4.13.5
 openh264/1.7.0
 openssl/1.1.1d.dssl1
