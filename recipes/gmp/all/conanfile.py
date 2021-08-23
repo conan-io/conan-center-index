@@ -57,7 +57,7 @@ class GmpConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("yasm/1.3.0")
-            self.build_requires("automake/1.16.4")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
