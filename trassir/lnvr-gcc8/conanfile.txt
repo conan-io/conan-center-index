@@ -66,7 +66,7 @@ openal/1.20.1
 openh264/1.7.0
 openssl/1.1.1d
 #pjsip/2.8@dssl/stable
-protobuf/3.9.1.dssl1_components
+protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
 qt/5.14.1.dssl1
 qtwebkit/5.212.0-alpha4.dssl1

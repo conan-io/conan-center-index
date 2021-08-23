@@ -1,7 +1,7 @@
 versions:
   "3.9.1":
     folder: all
-  "3.9.1.dssl1_components":
+  "3.9.1.dssl1":
     folder: all
   "3.11.3":
     folder: all
