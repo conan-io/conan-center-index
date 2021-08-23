@@ -19,7 +19,7 @@ ruby/2.3.7
 
 [requires]
 axtls/1.5.3.dssl2
-boost/1.69.0
+boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
 etcd-grpc/4.0.0
@@ -136,6 +136,8 @@ opencv:openexr=False
 opencv:tiff=False
 
 dlib:shared=header_only
+
+boost:with_stacktrace_backtrace=False
 
 axtls:shared=True
 boost:shared=True
