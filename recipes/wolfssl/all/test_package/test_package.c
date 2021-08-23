@@ -1,6 +1,6 @@
 #include "wolfssl/ssl.h"
 
-int main(void)
+int main()
 {
     wolfSSL_Init();
     wolfSSL_Cleanup();
