@@ -55,12 +55,6 @@ class PlatformInterfacesConan(ConanFile):
                 self.version, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler,
                 self.settings.compiler.version))
 
-        else:
-            libcxx = self.settings.compiler.get_safe("libcxx")
-            if libcxx and libcxx == "libstdc++":
-                raise ConanInvalidConfiguration("Supported only libstdc++11")
-
-
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
