@@ -44,7 +44,7 @@ class JsonnetConan(ConanFile):
         self.requires("nlohmann_json/3.9.1")
 
     def validate(self):
-        if tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("jsonnet does not support cross building")
 
         if self.settings.compiler.cppstd:
