@@ -86,7 +86,7 @@ class LibVertoConan(ConanFile):
             raise ConanInvalidConfiguration("Cannot have more then one builtin backend")
         if not self.options.shared:
             if count_externals > 0:
-                raise ConanInvalidConfiguration("Cannot have a non-builtin backend when building a static libverto")
+                raise ConanInvalidConfiguration("Cannot have an external backend when building a static libverto")
         if count_builtins > 0 and count_externals > 0:
             raise ConanInvalidConfiguration("Cannot combine builtin and external backends")
 
@@ -131,9 +131,6 @@ class LibVertoConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-            self._autotools.link_flags.extend("-L{}".format(p.replace("\\", "/")) for p in self.deps_cpp_info.lib_paths)
         yes_no = lambda v: "yes" if v else "no"
         yes_no_builtin = lambda v: {"external": "yes", "False": "no", "builtin": "builtin"}[str(v)]
         args = [

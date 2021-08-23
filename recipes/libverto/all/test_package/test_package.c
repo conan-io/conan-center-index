@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     verto_ev *ev;
 
     if (argc < 2) {
-        fprintf(stderr, "Need an argument\n");
+        fprintf(stderr, "Need to pass the backend as an argument\n");
         return 1;
     }
 
