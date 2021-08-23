@@ -40,12 +40,20 @@ class NmosCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os == "Linux":
+        if self.settings.os == "Macos":
+            del self.options.with_dnssd
+        elif self.settings.os == "Linux":
             self.options.with_dnssd = "avahi"
         elif self.settings.os == "Windows":
             self.options.with_dnssd = "bonjour"
-        elif self.settings.os == "Macos":
-            del self.options.with_dnssd
+
+    @property
+    def _with_dnssd_requires(self):
+        return {
+            "mdnsresponder": "mdnsresponder/878.200.35",
+            "avahi": "avahi-mdnsresponder/system",
+            "bonjour": "bonjour/system",
+        }[str(self.options.with_dnssd)]
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
@@ -55,12 +63,8 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/1.1.1k")
         self.requires("json-schema-validator/2.1.0")
 
-        if self.options.with_dnssd == "avahi":
-            self.requires("avahi-mdnsresponder/system")
-        elif self.options.with_dnssd == "bonjour":
-            self.requires("bonjour/system")
-        elif self.options.with_dnssd == "mdnsresponder":
-            self.requires("mdnsresponder/878.200.35")
+        if self.options.with_dnssd:
+            self.requires(self._with_dnssd_requires)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -127,15 +131,9 @@ class NmosCppConan(ConanFile):
                     components[component_name]["libs"] = [lib_name]
                 # inject the DNS-SD dependency as the CMake isn't currently using find_package for this
                 if cmake_target_nonamespace == "DNSSD":
-                    dependency = None
-                    if self.options.with_dnssd == "avahi":
-                        dependency = "avahi-mdnsresponder::avahi-mdnsresponder"
-                    elif self.options.with_dnssd == "bonjour":
-                        dependency = "bonjour::bonjour"
-                    elif self.options.with_dnssd == "mdnsresponder":
-                        dependency = "mdnsresponder::mdnsresponder"
-                    if dependency:
-                        components[component_name].setdefault("requires", []).append(dependency.lower())
+                    if self.options.with_dnssd:
+                        dependency = self._with_dnssd_requires.split("/")[0]
+                        components[component_name].setdefault("requires", []).append("{}::{}".format(dependency, dependency))
             elif cmake_function_name == "set_target_properties":
                 target_properties = re.findall(r"(?P<property>INTERFACE_[A-Z_]+)[\n|\s]+\"(?P<values>.+)\"", cmake_function_args[2])
                 for target_property in target_properties:
