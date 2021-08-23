@@ -15,7 +15,7 @@ class PlatformInterfacesConan(ConanFile):
                   "trivial and standard-layout types" \
                   "types constrained by std::ranges::range" \
                   "std::any"
-    topics = ("linksplatform", "cpp20", "hashing", "any", "ranges", "header-only")
+    topics = ("linksplatform", "cpp20", "hashing", "any", "ranges", "native")
     settings = "compiler", "arch"
     no_copy_source = True
 
@@ -58,25 +58,6 @@ class PlatformInterfacesConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
-        if self.settings.compiler != "Visual Studio":
-            def check_mfpu_flag(flag, safe=False):
-                tabulation = ' ' * 24
-                cxxflags = tools.get_env("CXXFLAGS", "")
-                if not safe and flag not in cxxflags:
-                    self.output.warn("`{}` not detected in cxxflags.\n "
-                                     "{tab}Consider adding it in your profile for more performance.\n "
-                                     "{tab}Missing a flag can cause undefined behavior. "
-                                     .format(flag, tab=tabulation))
-                return flag in cxxflags
-
-            if "armv7" in self.settings.arch:
-                check_mfpu_flag("-mfpu=neon")
-            elif "armv8" in self.settings.arch:
-                if not check_mfpu_flag("-march=armv8-a+fp+simd+crypto+crc", safe=True):
-                    self.output.warn("Remove `crypto` and/or `crc` if your architecture does not support cryptographic "
-                                     "and/or CRC32 extensions")
-                    check_mfpu_flag("-march=armv8-a+fp+simd")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
@@ -84,5 +65,25 @@ class PlatformInterfacesConan(ConanFile):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        if self.settings.compiler == "Visual Studio":
+            return
+
+        def check_mfpu_flag(flag, safe=False):
+            tabulation = ' ' * 24
+            cxxflags = tools.get_env("CXXFLAGS", "")
+            if not safe and flag not in cxxflags:
+                self.output.warn("`{flag}` not detected in cxxflags.\n "
+                                 "{tab}Missing a flag can cause undefined behavior.\n "
+                                 "{tab}Flag automatically added: `{flag}`"
+                                 .format(flag=flag, tab=tabulation))
+                self.cpp_info.cxxflags.append(flag)
+            return flag in cxxflags
+
+        if "armv7" in self.settings.arch:
+            check_mfpu_flag("-mfpu=neon")
+        elif "armv8" in self.settings.arch :
+            if not check_mfpu_flag("-march=armv8-a+fp+simd+crypto+crc", safe=True):
+                self.output.warn("Consider adding it in your profile `crypto` and/or `crc` for more performance "
+                                 "if your architecture does support cryptographic and/or CRC32 extensions")
+                check_mfpu_flag("-march=armv8-a+fp+simd")
