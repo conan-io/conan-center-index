@@ -9,6 +9,7 @@ b2/4.2.0
 bison/3.5.3
 flex/2.6.4
 gperf/3.1
+gtk/system
 libtool/2.4.6
 ninja/1.9.0
 meson/0.53.2
@@ -65,7 +66,7 @@ miniupnpc/2.1
 odbc/2.3.7
 onnxruntime/1.7.2
 openal/1.20.1
-#opencv/2.4.13.5
+opencv/2.4.13.7
 openh264/1.7.0
 openssl/1.1.1d.dssl1
 #pjsip/2.8@dssl/stable
@@ -131,9 +132,10 @@ freetype:with_bzip2=True
 freetype:with_png=True
 freetype:with_zlib=True
 
-opencv:jasper=False
-opencv:openexr=False
-opencv:tiff=False
+opencv:with_jasper=False
+opencv:with_eigen=False
+opencv:with_openexr=False
+opencv:with_tiff=False
 
 dlib:shared=header_only
 
