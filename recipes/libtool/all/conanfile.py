@@ -228,7 +228,7 @@ class LibtoolConan(ConanFile):
             self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
 
-        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
+        libtool_aclocal = tools.unix_path(os.path.join(self._datarootdir, "aclocal"))
         self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal))
