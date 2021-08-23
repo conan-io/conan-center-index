@@ -126,7 +126,7 @@ class NmosCppConan(ConanFile):
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
                     components[component_name]["libs"] = [lib_name]
                 # inject the DNS-SD dependency as the CMake isn't currently using find_package for this
-                if component_name == "DNSSD":
+                if cmake_target_nonamespace == "DNSSD":
                     dependency = None
                     if self.options.with_dnssd == "avahi":
                         dependency = "avahi-mdnsresponder::avahi-mdnsresponder"
