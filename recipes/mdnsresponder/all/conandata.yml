@@ -6,6 +6,9 @@ sources:
     sha256: "040f6495c18b9f0557bcf9e00cbcfc82b03405f5ba6963dc147730ca0ca90d6f"
     url: "https://opensource.apple.com/tarballs/mDNSResponder/mDNSResponder-1310.140.1.tar.gz"
 patches:
+  "878.200.35":
+    - base_path: "source_subfolder"
+      patch_file: "patches/878.200.35-DLLStub.c.patch"
   "1310.140.1":
     - base_path: "source_subfolder"
       patch_file: "patches/1310.140.1-dns_sd.c.patch"
