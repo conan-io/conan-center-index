@@ -8,7 +8,7 @@ sources:
   "3.31.0":
     sha256: "75836c58be49e9aba539d36e80e72f432e9dedff46618ad2a3adfe5730400bed"
     url: "https://sqlite.org/2020/sqlite-amalgamation-3310000.zip"
-  "3.31.0.dssl1_components":
+  "3.31.0.dssl1":
     sha256: "75836c58be49e9aba539d36e80e72f432e9dedff46618ad2a3adfe5730400bed"
     url: "https://sqlite.org/2020/sqlite-amalgamation-3310000.zip"
   "3.31.1":
