@@ -35,8 +35,8 @@ libcurl/7.64.1.dssl1
 libdrm/2.4.100
 libelf/0.8.13
 libiconv/1.15
-libjpeg-turbo/2.0.4
 libjpeg/9d.dssl1
+libjpeg-turbo/2.0.4.dssl1
 libpciaccess/0.16 # GHA: noexport
 libpng/1.6.37
 libpq/11.5
