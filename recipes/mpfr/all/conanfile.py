@@ -1,16 +1,18 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanException
-from contextlib import contextmanager
+import contextlib
 import os
 import re
 import shlex
+
+required_conan_version = ">=1.33.0"
 
 
 class MpfrConan(ConanFile):
     name = "mpfr"
     description = "The MPFR library is a C library for multiple-precision floating-point computations with " \
                   "correct rounding"
-    topics = ("conan", "mpfr", "multiprecision", "math", "mathematics")
+    topics = ("mpfr", "multiprecision", "math", "mathematics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mpfr.org/"
     license = "LGPL-3.0-or-later"
@@ -25,6 +27,7 @@ class MpfrConan(ConanFile):
         "fPIC": True,
         "exact_int": "gmp",
     }
+
     exports_sources = "CMakeLists.txt.in", "patches/**"
     generators = "cmake"
 
@@ -34,6 +37,10 @@ class MpfrConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,13 +57,12 @@ class MpfrConan(ConanFile):
             self.requires("mpir/3.0.0")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PAH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PAH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -107,12 +113,11 @@ class MpfrConan(ConanFile):
         defs = self._extract_makefile_variable(makefile, "DEFS")
         return sources, headers, defs
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
+            with tools.vcvars(self):
+                env = {
                     "AR": "lib",
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -121,7 +126,7 @@ class MpfrConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
