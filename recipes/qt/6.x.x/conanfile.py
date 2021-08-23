@@ -232,7 +232,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.36")
+            self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.172")
 
@@ -268,7 +268,7 @@ class QtConan(ConanFile):
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.2.1")
+                self.requires("xkbcommon/1.3.0")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
