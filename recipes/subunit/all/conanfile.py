@@ -1,14 +1,16 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class SubunitConan(ConanFile):
     name = "subunit"
     description = "A streaming protocol for test results"
-    topics = "conan", "subunit", "streaming", "protocol", "test", "results"
+    topics = "subunit", "streaming", "protocol", "test", "results"
     license = "Apache-2.0", "BSD-3-Clause"
     homepage = "https://launchpad.net/subunit"
     url = "https://github.com/conan-io/conan-center-index"
@@ -21,6 +23,7 @@ class SubunitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     exports_sources = "patches/**"
 
     _autotools = None
@@ -29,6 +32,10 @@ class SubunitConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -36,32 +43,33 @@ class SubunitConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Cannot build shared subunit libraries on Windows")
-        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10":
-            # Complete error is:
-            # make[2]: *** No rule to make target `/Applications/Xcode-9.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Perl/5.18/darwin-thread-multi-2level/CORE/config.h', needed by `Makefile'.  Stop.
-            raise ConanInvalidConfiguration("Due to weird make error involving missing config.h file in sysroot")
 
     def requirements(self):
         self.requires("cppunit/1.15.1")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Cannot build shared subunit libraries on Windows")
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10":
+            # Complete error is:
+            # make[2]: *** No rule to make target `/Applications/Xcode-9.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Perl/5.18/darwin-thread-multi-2level/CORE/config.h', needed by `Makefile'.  Stop.
+            raise ConanInvalidConfiguration("Due to weird make error involving missing config.h file in sysroot")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
+            with tools.vcvars(self):
+                env = {
                     "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -69,12 +77,11 @@ class SubunitConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
-            with tools.environment_append(env):
-                yield
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -107,8 +114,7 @@ class SubunitConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcppunit_subunit.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libsubunit.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
             tools.rmdir(d)
         for d in glob.glob(os.path.join(self.package_folder, "lib", "*")):
