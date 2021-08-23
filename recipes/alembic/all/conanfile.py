@@ -22,7 +22,7 @@ class AlembicConan(ConanFile):
         "with_hdf5": False
     }
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "AlembicIlmBase.cmake"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
 
@@ -73,38 +73,8 @@ class AlembicConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "./cmake/AlembicIlmBase.cmake",
-            "../AlembicIlmBase.cmake")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "CMAKE_CXX_STANDARD 14",
-            "CMAKE_CXX_STANDARD 11")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "-Werror",
-            "")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "CMAKE_SOURCE_DIR",
-            "CMAKE_CURRENT_SOURCE_DIR")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "lib", "Alembic", "CMakeLists.txt"),
-            "${CMAKE_SOURCE_DIR}/lib",
-            "${CMAKE_CURRENT_SOURCE_DIR}/..")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "lib", "Alembic", "CMakeLists.txt"),
-            "LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}",
-            "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "lib", "Alembic", "CMakeLists.txt"),
-            "ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}",
-            "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "lib", "Alembic", "CMakeLists.txt"),
-            "RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}",
-            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
