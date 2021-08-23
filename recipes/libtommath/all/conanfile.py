@@ -1,12 +1,13 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibTomMathConan(ConanFile):
     name = "libtommath"
     description = "LibTomMath is a free open source portable number theoretic multiple-precision integer library written entirely in C."
-    topics = "conan", "libtommath", "math", "multiple", "precision"
+    topics = "libtommath", "math", "multiple", "precision"
     license = "Unlicense"
     homepage = "https://www.libtom.net/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -19,11 +20,16 @@ class LibTomMathConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
+
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,14 +42,14 @@ class LibTomMathConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
-            self.build_requires("make/4.2.1")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio":
+            self.build_requires("make/4.3")
         if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
             self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libtommath-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _run_makefile(self, target=None):
         target = target or ""
@@ -73,7 +79,7 @@ class LibTomMathConan(ConanFile):
                         target = "tommath.dll"
                     else:
                         target = "tommath.lib"
-                    with tools.vcvars(self.settings):
+                    with tools.vcvars(self):
                         self.run("nmake -f makefile.msvc {} {}".format(
                             target,
                             arg_str,
