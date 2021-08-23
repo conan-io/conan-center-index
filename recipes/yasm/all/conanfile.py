@@ -2,13 +2,15 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class YASMConan(ConanFile):
     name = "yasm"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
     description = "Yasm is a complete rewrite of the NASM assembler under the 'new' BSD License"
-    topics = ("conan", "yasm", "installer", "assembler")
+    topics = ("yasm", "installer", "assembler")
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -26,11 +28,10 @@ class YASMConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "yasm-%s" % self.version
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.download("https://raw.githubusercontent.com/yasm/yasm/bcc01c59d8196f857989e6ae718458c296ca20e3/YASM-VERSION-GEN.bat",
-                       os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
+        tools.get(**self.conan_data["sources"][self.version][0],
+                  destination=self._source_subfolder, strip_root=True)
+        tools.download(**self.conan_data["sources"][self.version][1],
+                       filename=os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
 
     @property
     def _msvc_subfolder(self):
