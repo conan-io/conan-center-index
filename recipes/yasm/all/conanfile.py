@@ -39,14 +39,13 @@ class YASMConan(ConanFile):
 
     def _build_vs(self):
         with tools.chdir(self._msvc_subfolder):
-            with tools.vcvars(self.settings, force=True):
-                msbuild = MSBuild(self)
-                if self.settings.arch == "x86":
-                    msbuild.build_env.link_flags.append("/MACHINE:X86")
-                elif self.settings.arch == "x86_64":
-                    msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
-                msbuild.build(project_file="yasm.sln",
-                              targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
+            msbuild = MSBuild(self)
+            if self.settings.arch == "x86":
+                msbuild.build_env.link_flags.append("/MACHINE:X86")
+            elif self.settings.arch == "x86_64":
+                msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
+            msbuild.build(project_file="yasm.sln",
+                          targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
 
     def _configure_autotools(self):
         if self._autotools:
