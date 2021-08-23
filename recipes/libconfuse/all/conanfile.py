@@ -1,11 +1,11 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from contextlib import contextmanager
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
 
 
-class LibConfuse(ConanFile):
+class LibConfuseConan(ConanFile):
     name = "libconfuse"
     description = "Small configuration file parser library for C"
     topics = ("conan", "libconfuse", "configuration", "parser")
@@ -28,6 +28,10 @@ class LibConfuse(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,7 +43,7 @@ class LibConfuse(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -60,10 +64,10 @@ class LibConfuse(ConanFile):
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl -nologo",
                                                "CXX": "cl -nologo",
                                                "LD": "link"}):
