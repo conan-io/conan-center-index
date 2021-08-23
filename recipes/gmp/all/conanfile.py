@@ -11,7 +11,7 @@ class GmpConan(ConanFile):
     name = "gmp"
     description = "GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating-point numbers."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "gmp", "math")
+    topics = ("gmp", "math", "arbitrary", "precision", "integer")
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,6 +26,10 @@ class GmpConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,11 +53,11 @@ class GmpConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("m4/1.4.18")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("yasm/1.3.0")
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
