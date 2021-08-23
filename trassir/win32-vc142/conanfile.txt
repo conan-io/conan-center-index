@@ -32,7 +32,7 @@ jsoncpp/1.8.3
 leveldb/1.22
 libcurl/7.64.1
 libjpeg/9d.dssl1
-libjpeg-turbo/2.0.4.dssl1_components
+libjpeg-turbo/2.0.4.dssl1
 libpng/1.6.37
 libpq/11.5
 libwebp/1.1.0
