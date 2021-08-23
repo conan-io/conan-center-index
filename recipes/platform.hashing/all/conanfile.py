@@ -67,6 +67,7 @@ class PlatformInterfacesConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
             return
