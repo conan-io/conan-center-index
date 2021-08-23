@@ -19,7 +19,7 @@ class MicroprofileConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "microprofile_enabled": [True, False],
-        "use_miniz": [True, False],
+        "with_miniz": [True, False],
         "thread_buffer_size": "ANY",
         "thread_gpu_buffer_size": "ANY",
         "max_frame_history": "ANY",
@@ -42,7 +42,7 @@ class MicroprofileConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "microprofile_enabled": True,
-        "use_miniz": False,
+        "with_miniz": False,
         "thread_buffer_size": 2048 << 10,
         "thread_gpu_buffer_size": 128 << 10,
         "max_frame_history": 512,
@@ -121,7 +121,7 @@ class MicroprofileConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.use_miniz:
+        if self.options.with_miniz:
             self.requires("miniz/2.2.0")
         if self.options.enable_timer == "gl":
             self.requires("glad/0.1.34")
@@ -144,7 +144,7 @@ class MicroprofileConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["MP_ENABLED"] = self.options.microprofile_enabled
         self._cmake.definitions["MP_DEBUG"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["MP_MINIZ"] = self.options.use_miniz
+        self._cmake.definitions["MP_MINIZ"] = self.options.with_miniz
         self._cmake.definitions["MP_THREAD_BUFFER_SIZE"] = self.options.thread_buffer_size
         self._cmake.definitions["MP_THREAD_GPU_BUFFER_SIZE"] = self.options.thread_gpu_buffer_size
         self._cmake.definitions["MP_MAX_FRAME_HISTORY"] = self.options.max_frame_history
@@ -183,7 +183,7 @@ class MicroprofileConan(ConanFile):
             defines.append("_MICROPROFILE_STATIC")
         defines.append("MICROPROFILE_ENABLED=" + ("1" if self.options.microprofile_enabled else "0"))
         defines.append("MICROPROFILE_DEBUG=" + ("1" if self.settings.build_type == "Debug" else "0"))
-        defines.append("MICROPROFILE_MINIZ=" + ("1" if self.options.use_miniz else "0"))
+        defines.append("MICROPROFILE_MINIZ=" + ("1" if self.options.with_miniz else "0"))
         defines.append("MICROPROFILE_BIG_ENDIAN=" + ("1" if self.options.use_big_endian else "0"))
         defines.append("MICROPROFILE_GPU_TIMERS=" + ("1" if self.options.enable_timer is not None else "0"))
         defines.append("MICROPROFILE_GPU_TIMER_CALLBACKS=" + ("1" if self.options.enable_gpu_timer_callbacks else "0"))
