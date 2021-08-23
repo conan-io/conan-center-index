@@ -27,9 +27,9 @@ class LibE57FormatConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -42,9 +42,9 @@ class LibE57FormatConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
