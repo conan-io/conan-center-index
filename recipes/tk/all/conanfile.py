@@ -2,7 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanException, ConanInvalidConfiguration, ConanExceptionInUserConanfileMethod
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
+
 
 class TkConan(ConanFile):
     name = "tk"
@@ -27,6 +28,10 @@ class TkConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,16 +50,16 @@ class TkConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def validate(self):
         if self.options["tcl"].shared != self.options.shared:
-            raise ConanInvalidConfiguration("The shared option of tcl and tk must have the same value")
+            raise ConanInvalidConfiguration("tcl:shared must be the same as tk:shared")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("tk{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for build_system in ("unix", "win", ):
@@ -146,7 +151,7 @@ class TkConan(ConanFile):
 
         if tclimplib is None or tclstublib is None:
             raise ConanException("tcl dependency misses tcl and/or tclstub library")
-        with tools.vcvars(self.settings):
+        with tools.vcvars(self):
             tcldir = self.deps_cpp_info["tcl"].rootpath.replace("/", "\\\\")
             self.run(
                 """nmake -nologo -f "{cfgdir}/makefile.vc" INSTALLDIR="{pkgdir}" OPTS={opts} TCLDIR="{tcldir}" TCL_LIBRARY="{tcl_library}" TCLIMPLIB="{tclimplib}" TCLSTUBLIB="{tclstublib}" {target}""".format(
@@ -156,7 +161,7 @@ class TkConan(ConanFile):
                     tcldir=tcldir,
                     tclstublib=tclstublib,
                     tclimplib=tclimplib,
-                    tcl_library=self.deps_env_info['tcl'].TCL_LIBRARY.replace("\\", "/"),
+                    tcl_library=self.deps_env_info["tcl"].TCL_LIBRARY.replace("\\", "/"),
                     target=target,
                 ), cwd=self._get_configure_folder("win"),
             )
@@ -212,7 +217,7 @@ class TkConan(ConanFile):
         # FIXME: move to patch
         tkConfigShPath = os.path.join(self.package_folder, "lib", "tkConfig.sh")
         if os.path.exists(tkConfigShPath):
-            pkg_path = os.path.join(self.package_folder).replace('\\', '/')
+            pkg_path = os.path.join(self.package_folder).replace("\\", "/")
             tools.replace_in_file(tkConfigShPath,
                                   pkg_path,
                                   "${TK_ROOT}")
@@ -224,6 +229,7 @@ class TkConan(ConanFile):
                                   "\n#TK_SRC_DIR")
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "tk"
         if self.settings.compiler == "Visual Studio":
             tk_version = tools.Version(self.version)
             lib_infix = "{}{}".format(tk_version.major, tk_version.minor)
