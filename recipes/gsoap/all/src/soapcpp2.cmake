@@ -1,6 +1,7 @@
 
 # Generate project for soapcpp2 executable
 
+
 set(STDCPP2_PATH ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/src)
 
 set(SRC_CPP
@@ -33,15 +34,18 @@ if(WIN32)
     )
 
 else()
+    find_program(_Flex_EXECUTABLE flex PATHS ENV PATH NO_DEFAULT_PATH)
+    find_program(_Yacc_EXECUTABLE yacc PATHS ENV PATH NO_DEFAULT_PATH)
+
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
-        COMMAND ${CONAN_BISON_ROOT}/bin/yacc -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
+        COMMAND ${_Yacc_EXECUTABLE} -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
         COMMENT "Run YACC on soapcpp2"
     )
 
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
-        COMMAND ${CONAN_FLEX_ROOT}/bin/flex -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
+        COMMAND ${_Flex_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
         COMMENT "Run FLEX on soapcpp2"
     )
 endif()

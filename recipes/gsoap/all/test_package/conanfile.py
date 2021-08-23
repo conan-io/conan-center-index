@@ -5,6 +5,10 @@ class TestGsoapConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires(str(self.requires['gsoap']))
+
     def build(self):
         calc_wsdl = os.path.join(os.path.dirname(__file__), 'calc.wsdl')
         self.run("wsdl2h -o calc.h {}".format(calc_wsdl), run_environment=True)

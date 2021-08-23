@@ -35,7 +35,6 @@ class ConanFileDefault(ConanFile):
         'with_cookies': True,
         'with_c_locale': True}
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -49,6 +48,8 @@ class ConanFileDefault(ConanFile):
         else:
             self.build_requires("bison/3.5.3")
             self.build_requires("flex/2.6.4")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires("gsoap/{}".format(self.version))
 
     def requirements(self):
         if self.options.with_openssl:
@@ -59,8 +60,10 @@ class ConanFileDefault(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
         self._cmake.definitions["GSOAP_PATH"] = self._source_subfolder
         self._cmake.definitions["BUILD_TOOLS"] = True
+        # not self._cross_building()
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["WITH_IPV6"] = self.options.with_ipv6
         self._cmake.definitions["WITH_COOKIES"] = self.options.with_cookies

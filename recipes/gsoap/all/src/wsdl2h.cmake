@@ -29,9 +29,14 @@ endif()
 set_source_files_properties(${SRC_CPP} PROPERTIES LANGUAGE CXX)
 set_source_files_properties(${CMAKE_BINARY_DIR}/generated/wsdlC.cpp PROPERTIES GENERATED TRUE)
 
+if (CMAKE_CROSSCOMPILING)
+    find_program(_soapCPP2_EXECUTABLE soapcpp2 PATHS ENV PATH NO_DEFAULT_PATH)
+else()
+    set(_soapCPP2_EXECUTABLE $<TARGET_FILE:soapcpp2>)
+endif()
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/generated/wsdlC.cpp
-    COMMAND $<TARGET_FILE:soapcpp2> -I${GSOAP_PATH}/gsoap/import -SC -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
+    COMMAND ${_soapCPP2_EXECUTABLE} -I${GSOAP_PATH}/gsoap/import -SC -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
     COMMENT "Parsing WSDL and Schema definitions"
     WORKING_DIRECTORY ${WSDL2H_PATH}
     )
