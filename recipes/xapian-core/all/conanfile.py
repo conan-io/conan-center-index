@@ -18,12 +18,12 @@ class XapianCoreConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-
     }
     default_options = {
         "shared": False,
         "fPIC": True,
     }
+
     exports_sources = "patches/**"
 
     _autotools = None
@@ -31,6 +31,10 @@ class XapianCoreConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,7 +52,7 @@ class XapianCoreConan(ConanFile):
         self.requires("zlib/1.2.11")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
