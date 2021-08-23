@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
