@@ -31,7 +31,7 @@ icu/64.2
 jansson/2.12
 jsoncpp/1.8.3
 libalsa/1.1.9
-libcurl/7.64.1.dssl1_components
+libcurl/7.64.1.dssl1
 libdrm/2.4.100
 libelf/0.8.13
 libiconv/1.15
