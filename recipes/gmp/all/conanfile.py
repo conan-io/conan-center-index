@@ -95,7 +95,7 @@ class GmpConan(ConanFile):
     @contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 yasm_machine = {
                     "x86": "x86",
                     "x86_64": "amd64",
