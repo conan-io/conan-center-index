@@ -42,10 +42,10 @@ class NmosCppConan(ConanFile):
 
         if self.settings.os == "Macos":
             del self.options.with_dnssd
-        elif self.settings.os == "Linux":
-            self.options.with_dnssd = "avahi"
-        elif self.settings.os == "Windows":
-            self.options.with_dnssd = "bonjour"
+        #elif self.settings.os == "Linux":
+        #    self.options.with_dnssd = "avahi"
+        #elif self.settings.os == "Windows":
+        #    self.options.with_dnssd = "bonjour"
 
     @property
     def _with_dnssd_requires(self):
