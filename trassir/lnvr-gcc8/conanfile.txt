@@ -64,7 +64,7 @@ onnxruntime/1.7.2
 openal/1.20.1
 #opencv/2.4.13.5
 openh264/1.7.0
-openssl/1.1.1d.dssl1_components
+openssl/1.1.1d.dssl1
 #pjsip/2.8@dssl/stable
 protobuf/3.9.1
 protoc/3.9.1.dssl1
