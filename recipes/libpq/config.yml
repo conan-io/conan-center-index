@@ -23,7 +23,7 @@ versions:
     folder: all
   "11.5":
     folder: all
-  "11.5.dssl1_components":
+  "11.5.dssl1":
     folder: all
   "10.14":
     folder: all
