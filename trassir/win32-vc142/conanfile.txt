@@ -14,7 +14,7 @@ winflexbison/2.5.22
 
 [requires]
 axtls/1.5.3.dssl2
-boost/1.69.0.dssl1_component
+boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0
 caffe/1.0.windows

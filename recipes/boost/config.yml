@@ -1,7 +1,7 @@
 versions:
     1.69.0:
       folder: all
-    1.69.0.dssl1_components:
+    1.69.0.dssl1:
       folder: all
     1.70.0:
       folder: all
