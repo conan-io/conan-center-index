@@ -93,6 +93,16 @@ class MdnsResponderConan(ConanFile):
 
     def _build_msvc(self):
         sln = os.path.join(self._source_subfolder, "mDNSResponder.sln")
+        if "MD" in self.settings.compiler.runtime:
+            # could use glob and replace_in_file(strict=False, ...)
+            dll_vcxproj = os.path.join(self._source_subfolder, "mDNSWindows", "DLL", "dnssd.vcxproj")
+            dllstub_vcxproj = os.path.join(self._source_subfolder, "mDNSWindows", "DLLStub", "DLLStub.vcxproj")
+            dns_sd_vcxproj = os.path.join(self._source_subfolder, "Clients", "DNS-SD.VisualStudio", "dns-sd.vcxproj")
+            for vcxproj in [dll_vcxproj, dllstub_vcxproj, dns_sd_vcxproj]:
+                tools.replace_in_file(vcxproj, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')
+                tools.replace_in_file(vcxproj, '<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>')
+
+        # could use glob and replace_in_file(strict=False, ...)
         dll_rc = os.path.join(self._source_subfolder, "mDNSWindows", "DLL", "dll.rc")
         dns_sd_rc = os.path.join(self._source_subfolder, "Clients", "DNS-SD.VisualStudio", "dns-sd.rc")
         for rc in [dll_rc, dns_sd_rc]:
