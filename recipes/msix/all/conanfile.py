@@ -66,7 +66,7 @@ class MsixConan(ConanFile):
         self._cmake.definitions["MSIX_SAMPLES"] = False
         self._cmake.definitions["MSIX_TESTS"] = False
         self._cmake.definitions["SKIP_BUNDLES"] = self.options.skip_bundles
-        self._cmake.definitions["USE_EXTERNAL_ZLIB"] = self.options.use_external_zlib
+        self._cmake.definitions["USE_MSIX_SDK_ZLIB"] = self.options.use_external_zlib
         self._cmake.definitions["USE_SHARED_ZLIB"] = self.options["zlib"].shared
         self._cmake.definitions["USE_VALIDATION_PARSER"] = self.options.use_validation_parser
         self._cmake.definitions["XML_PARSER"] = self.options.xml_parser

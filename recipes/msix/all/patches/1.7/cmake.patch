@@ -1,12 +1,11 @@
- CMakeLists.txt              | 18 ++++++-----
- cmake/msix_options.cmake    | 10 +++----
+ CMakeLists.txt              | 18 +++++++-----
  src/CMakeLists.txt          |  1 -
  src/makemsix/CMakeLists.txt |  3 ++
- src/msix/CMakeLists.txt     | 73 ++++++++++++++++-----------------------------
- 5 files changed, 45 insertions(+), 60 deletions(-)
+ src/msix/CMakeLists.txt     | 67 ++++++++++++++++-----------------------------
+ 4 files changed, 37 insertions(+), 52 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dc5908cd..447bd44b 100644
+index dc5908cd..b2e857a5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -21,11 +21,13 @@ if(POLICY CMP0077)
@@ -83,42 +82,6 @@ index dc5908cd..447bd44b 100644
 -add_subdirectory(sample)
 -message(STATUS "sample processed")
  message(STATUS "DONE!")
-diff --git a/cmake/msix_options.cmake b/cmake/msix_options.cmake
-index faba2fbe..5ccdb087 100644
---- a/cmake/msix_options.cmake
-+++ b/cmake/msix_options.cmake
-@@ -13,7 +13,7 @@ option(USE_SHARED_ZLIB "Choose the type of dependency for zlib, Use the -DUSE_SH
- option(USE_STATIC_MSVC "Windows only. Pass /MT as a compiler flag to use the staic version of the run-time library. Default is 'off' (dynamic)" OFF)
- option(SKIP_BUNDLES "Removes bundle functionality from the MSIX SDK. Default is 'off'" OFF)
- option(MSIX_PACK "Include packaging features for the MSIX SDK. Not supported for mobile. Default is 'off'" OFF)
--option(USE_MSIX_SDK_ZLIB "Use zlib implementation under lib/zlib. If off, uses inbox compression library. For Windows and Linux this is no-opt." OFF)
-+option(USE_EXTERNAL_ZLIB "Use an external zlib package. If off, uses inbox compression library. For Windows and Linux this is no-opt." OFF)
- 
- set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel. Use the -DCMAKE_BUILD_TYPE=[option] to specify.")
- set(XML_PARSER "" CACHE STRING "Choose the type of parser, options are: [xerces, msxml6, javaxml].  Use the -DXML_PARSER=[option] to specify.")
-@@ -70,8 +70,8 @@ if(MSIX_PACK)
-     if(AOSP OR IOS)
-         message(FATAL_ERROR "Packaging is not supported for mobile devices.")
-     elseif(MAC)
--        if(NOT USE_MSIX_SDK_ZLIB)
--            message(FATAL_ERROR "Using libCompression APIs and packaging features is not supported. Use -DUSE_MSIX_SDK_ZLIB=on")
-+        if(NOT USE_EXTERNAL_ZLIB)
-+            message(FATAL_ERROR "Using libCompression APIs and packaging features is not supported. Use -DUSE_EXTERNAL_ZLIB=on")
-         endif()
-         if(NOT (XML_PARSER MATCHES xerces))
-             message(FATAL_ERROR "Xerces is the only supported parser for MacOS pack. Use -DXML_PARSER=xerces")
-@@ -84,9 +84,9 @@ endif()
- 
- # Compression
- set(COMPRESSION_LIB "zlib")
--if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
-+if(((IOS) OR (MACOS)) AND (NOT USE_EXTERNAL_ZLIB))
-     set(COMPRESSION_LIB "libCompression")
--elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
-+elseif((AOSP) AND (NOT USE_EXTERNAL_ZLIB))
-     set(COMPRESSION_LIB "inbox zlib")
- endif()
- 
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index a2655a7b..5d224b64 100644
 --- a/src/CMakeLists.txt
@@ -140,7 +103,7 @@ index 92b082e6..ebae9789 100644
 +# define installing rules for target files
 +install(TARGETS ${PROJECT_NAME})
 diff --git a/src/msix/CMakeLists.txt b/src/msix/CMakeLists.txt
-index 75d3afdf..17f313be 100644
+index 75d3afdf..e1fb2984 100644
 --- a/src/msix/CMakeLists.txt
 +++ b/src/msix/CMakeLists.txt
 @@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
@@ -164,15 +127,6 @@ index 75d3afdf..17f313be 100644
          list(APPEND MsixSrc PAL/Applicability/Linux/Applicability.cpp)
      elseif(AOSP)
          list(APPEND MsixSrc PAL/Applicability/AOSP/Applicability.cpp)
-@@ -154,7 +159,7 @@ if(NOT SKIP_BUNDLES)
- endif()
- 
- # Compression option
--if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
-+if(((IOS) OR (MACOS)) AND (NOT USE_EXTERNAL_ZLIB))
-     list(APPEND MsixSrc PAL/DataCompression/Apple/CompressionObject.cpp)
- else()
-     list(APPEND MsixSrc PAL/DataCompression/Zlib/CompressionObject.cpp)
 @@ -195,14 +200,16 @@ if(CRYPTO_LIB MATCHES crypt32)
          PAL/Signature/Win32/SignatureValidator.cpp
      )
@@ -222,17 +176,9 @@ index 75d3afdf..17f313be 100644
      if(USE_STATIC_MSVC)
          if(CMAKE_BUILD_TYPE MATCHES Debug)
              set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRTD")
-@@ -279,35 +279,26 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
- )
- 
- # Compression
--if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
-+if(((IOS) OR (MACOS)) AND (NOT USE_EXTERNAL_ZLIB))
-     # for macos and ios use the inbox libcompression zlib apis instead of zlib, unless zlib is explicitly requested.
-     target_include_directories(${PROJECT_NAME} PRIVATE ${MSIX_PROJECT_ROOT}/src/msix/PAL/DataCompression/Apple)
+@@ -285,29 +285,20 @@ if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
      target_link_libraries(${PROJECT_NAME} PRIVATE libcompression.dylib)
--elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
-+elseif((AOSP) AND (NOT USE_EXTERNAL_ZLIB))
+ elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
      # for AOSP, use the libz.so from the android ndk.
 -    find_package(ZLIB REQUIRED)
      target_link_libraries(${PROJECT_NAME} PRIVATE -lz)
