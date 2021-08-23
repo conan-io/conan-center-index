@@ -1,10 +1,10 @@
 #include <zimg.h>
-#include <iostream>
+#include <stdio.h>
 
 int main()
 {
     unsigned major, minor;
     zimg_get_api_version(&major, &minor);
-    std::cout << "zimg version " << major << "." << minor << "\n";
+    printf("zimg version: %u.%u\n", major, minor);
     return 0;
 }
