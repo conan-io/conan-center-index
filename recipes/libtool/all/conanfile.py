@@ -32,6 +32,10 @@ class LibtoolConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,15 +54,15 @@ class LibtoolConan(ConanFile):
         self.requires("automake/1.16.3")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         self.build_requires("gnu-config/cci.20201022")
 
     @contextmanager
     def _build_context(self):
         with tools.environment_append(self._libtool_relocatable_env):
             if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
+                with tools.vcvars(self):
                     with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
                         yield
             else:
@@ -66,7 +70,7 @@ class LibtoolConan(ConanFile):
 
     @property
     def _datarootdir(self):
-        return os.path.join(self.package_folder, "bin", "share")
+        return os.path.join(self.package_folder, "res")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -181,7 +185,7 @@ class LibtoolConan(ConanFile):
                          os.path.join(self.package_folder, "lib", "ltdl.lib"))
 
         # allow libtool to link static libs into shared for more platforms
-        libtool_m4 = os.path.join(self.package_folder, "bin", "share", "aclocal", "libtool.m4")
+        libtool_m4 = os.path.join(self._datarootdir, "aclocal", "libtool.m4")
         method_pass_all = "lt_cv_deplibs_check_method=pass_all"
         tools.replace_in_file(libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
@@ -224,7 +228,7 @@ class LibtoolConan(ConanFile):
             self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
 
-        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal"))
+        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(libtool_aclocal))
