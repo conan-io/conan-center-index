@@ -39,7 +39,7 @@ libjpeg/9d.dssl1
 libjpeg-turbo/2.0.4.dssl1
 libpciaccess/0.16 # GHA: noexport
 libpng/1.6.37
-libpq/11.5
+libpq/11.5.dssl1
 libpthread-stubs/0.1 # GHA: noexport
 libunwind/1.3.1
 libuuid/1.0.3
