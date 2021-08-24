@@ -1,0 +1,12 @@
+--- /dev/null
++++ b/imgui_user_config.h
+@@ -0,0 +1,9 @@
++#pragma once
++
++#ifndef IMGUI_API
++#if defined(_WIN32) && defined(_IMGUI_SHARED)
++#define IMGUI_API __declspec(dllexport)
++#elif defined(_WIN32) && !defined(_IMGUI_STATIC)
++#define IMGUI_API __declspec(dllimport)
++#endif
++#endif

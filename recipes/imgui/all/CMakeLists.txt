@@ -4,13 +4,16 @@ project(imgui CXX)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif(WIN32 AND MSVC AND BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
+    set(IMGUI_API _IMGUI_SHARED)
+else()
+    set(IMGUI_API _IMGUI_STATIC)
+endif()
 
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 set(MISC_DIR ${SOURCE_DIR}/misc)
 set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
+set(IMGUI_USER_CONFIG imgui_user_config.h)
 
 file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
@@ -25,6 +28,9 @@ add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compress
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+                           ${IMGUI_API}
+                           IMGUI_USER_CONFIG=\"${IMGUI_USER_CONFIG}\")
 
 include(GNUInstallDirs)
 

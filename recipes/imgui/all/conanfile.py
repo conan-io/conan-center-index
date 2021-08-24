@@ -12,13 +12,13 @@ class IMGUIConan(ConanFile):
     topics = ("conan", "imgui", "gui", "graphical")
     license = "MIT"
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-         "fPIC": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
@@ -51,12 +51,14 @@ class IMGUIConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        backends_folder = src=os.path.join(
+        backends_folder = os.path.join(
             self._source_subfolder,
             "backends" if tools.Version(self.version) >= "1.80" else "examples"
         )
@@ -71,6 +73,10 @@ class IMGUIConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         self.cpp_info.srcdirs = [os.path.join("res", "bindings")]
+
+        self.cpp_info.defines.append('IMGUI_USER_CONFIG="imgui_user_config.h"')
+        if not self.options.shared:
+            self.cpp_info.defines.append("_IMGUI_STATIC")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
