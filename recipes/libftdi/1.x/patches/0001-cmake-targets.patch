@@ -1,6 +1,32 @@
+From 6337e1d7b762209ca87ac429d41cfbec385ce2ec Mon Sep 17 00:00:00 2001
+From: Philipp von den Hoff <Philipp.von-den-Hoff@rohde-schwarz.com>
+Date: Mon, 23 Aug 2021 11:15:35 +0200
+Subject: [PATCH] libftdi_vs
+
+---
+ CMakeLists.txt                        | 96 ++++++++++++++++-----------
+ CMakeOptions.txt                      |  3 +-
+ cmake/FindConfuse.cmake               | 74 ---------------------
+ cmake/FindLibConfuse.cmake            | 21 ++++++
+ cmake/FindLibintl.cmake               | 47 -------------
+ cmake/FindUSB1.cmake                  | 37 -----------
+ examples/CMakeLists.txt               | 51 ++++++--------
+ examples/bitbang_cbus.c               |  5 +-
+ examples/cmake_example/CMakeLists.txt | 11 ++-
+ ftdi_eeprom/CMakeLists.txt            | 32 +++++----
+ ftdipp/CMakeLists.txt                 | 35 ++++------
+ src/CMakeLists.txt                    | 52 +++++++++------
+ src/ftdi.c                            | 10 ++-
+ src/ftdi.h                            | 20 +++---
+ test/CMakeLists.txt                   |  8 +--
+ 15 files changed, 187 insertions(+), 315 deletions(-)
+ delete mode 100644 cmake/FindConfuse.cmake
+ create mode 100644 cmake/FindLibConfuse.cmake
+ delete mode 100644 cmake/FindLibintl.cmake
+ delete mode 100644 cmake/FindUSB1.cmake
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5aecafc..aa69995 100644
+index 5aecafc..abb133f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,36 +1,54 @@
@@ -54,7 +80,7 @@ index 5aecafc..aa69995 100644
 -# find libusb
 -find_package ( USB1 REQUIRED )
 -include_directories ( ${LIBUSB_INCLUDE_DIR} )
-+find_package (LibUSB REQUIRED)
++find_package (libusb REQUIRED)
 +
 +if (FTDIPP)
 +  find_package(Boost REQUIRED)
@@ -493,7 +519,7 @@ index fe203ed..99571a0 100644
 +install ( TARGETS example DESTINATION bin )
            
 diff --git a/ftdi_eeprom/CMakeLists.txt b/ftdi_eeprom/CMakeLists.txt
-index 8737c4b..45db010 100644
+index 8737c4b..e83a0fc 100644
 --- a/ftdi_eeprom/CMakeLists.txt
 +++ b/ftdi_eeprom/CMakeLists.txt
 @@ -1,5 +1,5 @@
@@ -539,7 +565,7 @@ index 8737c4b..45db010 100644
 +        PRIVATE
 +        LibFTDI::ftdi1
 +        LibConfuse::LibConfuse
-+        LibUSB::LibUSB
++        libusb::libusb
 +        )
 +target_include_directories(ftdi_eeprom PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 +
@@ -551,7 +577,7 @@ index 8737c4b..45db010 100644
  install ( TARGETS ftdi_eeprom DESTINATION bin )
  install ( FILES example.conf DESTINATION ${CMAKE_INSTALL_DOCDIR} )
 diff --git a/ftdipp/CMakeLists.txt b/ftdipp/CMakeLists.txt
-index fac5bcc..e93b553 100644
+index fac5bcc..cde211b 100644
 --- a/ftdipp/CMakeLists.txt
 +++ b/ftdipp/CMakeLists.txt
 @@ -4,24 +4,29 @@
@@ -581,7 +607,7 @@ index fac5bcc..e93b553 100644
 -target_link_libraries(ftdipp1 ftdi1 ${LIBUSB_LIBRARIES} ${BOOST_LIBRARIES})
 +target_link_libraries(ftdipp1
 +	PRIVATE
-+		LibUSB::LibUSB
++		libusb::libusb
 +	PUBLIC
 +		LibFTDI::ftdi1
 +		Boost::headers
@@ -613,7 +639,7 @@ index fac5bcc..e93b553 100644
  					DESTINATION include/${PROJECT_NAME}
  					COMPONENT headers
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 17b3617..26c801b 100644
+index 17b3617..3148e02 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,36 +1,57 @@
@@ -671,7 +697,7 @@ index 17b3617..26c801b 100644
  set_target_properties ( ftdi1 PROPERTIES CLEAN_DIRECT_OUTPUT 1 )
 +set_target_properties ( ftdi1 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
  
-+target_link_libraries(ftdi1 PRIVATE LibUSB::LibUSB)
++target_link_libraries(ftdi1 PRIVATE libusb::libusb)
 +if (APPLE)
 +    target_link_libraries(ftdi1 PRIVATE ${APPLE_CF} ${APPLE_IOK})
 +endif()
