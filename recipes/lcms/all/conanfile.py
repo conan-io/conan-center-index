@@ -65,7 +65,11 @@ class LcmsConan(ConanFile):
                                   "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
 
     def _build_visual_studio(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "Projects", "VC2013")):
+        if tools.Version(self.version) <= "2.11":
+            vc_sln_subdir = "VC2013"
+        else:
+            vc_sln_subdir = "VC2015"
+        with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "12"
             # run build
