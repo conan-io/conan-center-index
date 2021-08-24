@@ -154,6 +154,9 @@ class NCursesConan(ConanFile):
             self._autotools.cxx_flags.append("-EHsc")
             if tools.Version(self.settings.compiler.version) >= 12:
                 self._autotools.flags.append("-FS")
+        if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
+            # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
+            self._autotools.libs.append("ssp")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
         return self._autotools
 
@@ -238,7 +241,7 @@ class NCursesConan(ConanFile):
                 if self.settings.compiler == "Visual Studio":
                     res += ".dll.lib"
                 else:
-                    res += ".dll.a"
+                    res += ".dll"
         return res
 
     def package_id(self):
