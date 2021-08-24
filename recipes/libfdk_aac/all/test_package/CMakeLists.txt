@@ -8,3 +8,4 @@ find_package(fdk-aac REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} FDK-AAC::fdk-aac)
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
