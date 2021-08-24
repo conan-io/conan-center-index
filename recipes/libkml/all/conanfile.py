@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -49,6 +50,10 @@ class LibkmlConan(ConanFile):
         self.requires("minizip/1.2.11")
         self.requires("uriparser/0.9.5")
         self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("libkml shared with Visual Studio and MT runtime is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
