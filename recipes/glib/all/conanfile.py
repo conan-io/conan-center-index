@@ -82,7 +82,7 @@ class GLibConan(ConanFile):
             self.requires("libselinux/3.2")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("gettext/0.20.1")
+            self.requires("libgettext/0.20.1")
 
         if tools.is_apple_os(self.settings.os):
             self.requires("libiconv/1.16")
