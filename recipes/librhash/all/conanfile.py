@@ -26,7 +26,7 @@ class LibRHashConan(ConanFile):
         "with_openssl": True,
     }
 
-    patches = "patches/*"
+    exports_sources = "patches/*"
     _autotools = None
 
     @property
