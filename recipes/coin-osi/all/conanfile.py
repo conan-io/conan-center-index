@@ -33,6 +33,10 @@ class CoinOsiConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,9 +49,10 @@ class CoinOsiConan(ConanFile):
         self.requires("coin-utils/2.11.4")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
+            
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
