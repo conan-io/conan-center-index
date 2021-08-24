@@ -11,7 +11,7 @@ class PlatformInterfacesConan(ConanFile):
     homepage = "https://github.com/linksplatform/Hashing"
     url = "https://github.com/conan-io/conan-center-index"
     description = "platform.hashing is one of the libraries of the LinksPlatform modular framework, " \
-                  " - which contains std::hash specializations for:\n" \
+                  "which contains std::hash specializations for:\n" \
                   " - trivial and standard-layout types\n" \
                   " - types constrained by std::ranges::range\n" \
                   " - std::any"
