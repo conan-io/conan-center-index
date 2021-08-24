@@ -1,13 +1,13 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
 
 
 class CoinOsiConan(ConanFile):
     name = "coin-osi"
     description = "COIN-OR Linear Programming Solver"
-    topics = ("conan", "clp", "simplex", "solver", "linear", "programming")
+    topics = ("clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Osi"
     license = ("EPL-2.0",)
@@ -38,8 +38,6 @@ class CoinOsiConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
         if self.options.shared:
             del self.options.fPIC
 
@@ -48,17 +46,20 @@ class CoinOsiConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Osi-releases-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
@@ -100,8 +101,7 @@ class CoinOsiConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libOsi.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libOsiCommonTests.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
         if self.settings.compiler == "Visual Studio":
             for l in ("Osi", "OsiCommonTests"):
