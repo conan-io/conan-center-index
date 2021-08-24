@@ -147,7 +147,7 @@ class TclConan(ConanFile):
             tools.patch(**patch)
 
         if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
-            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#define HAVE_CPUID 0")
+            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_nmake(["release"])
