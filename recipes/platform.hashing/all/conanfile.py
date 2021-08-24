@@ -48,22 +48,39 @@ class PlatformInterfacesConan(ConanFile):
                 self.name, self.settings.compiler))
 
         elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("platform.Hashing/{} "
-                                            "requires C++{} with {}, "
-                                            "which is not supported "
-                                            "by {} {}.".format(
-                self.version, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler,
+            raise ConanInvalidConfiguration("{}/{} requires c++{}, "
+                                            "which is not supported by {} {}.".format(
+                self.name, self.version, self._minimum_cpp_standard, self.settings.compiler,
                 self.settings.compiler.version))
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
+        if self.settings.arch in ("x86", ):
+            raise ConanInvalidConfiguration("{} does not support arch={}".format(self.name, self.settings.arch))
+
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*.h", dst="include", src=self._internal_cpp_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.libdirs = []
+        suggested_flags = ""
+        if self.settings.compiler != "Visual Studio":
+            suggested_flags = {
+                "x86_64": "-march=haswell",
+                "armv7": "-march=armv7",
+                "armv8": "-march=armv8-a",
+            }.get(str(self.settings.arch), "")
+        self.user_info.suggested_flags = suggested_flags
+
+        if "-march" not in "{} {}".format(tools.get_env("CPPFLAGS", ""), tools.get_env("CXXFLAGS", "")):
+            self.output.warn("platform.hashing needs to have `-march=ARCH` added to CPPFLAGS/CXXFLAGS."
+                             "A suggestion is available in deps_user_info[{name}].suggested_flags.".format(name=self.name))

@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
 
 
@@ -6,8 +7,19 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    @property
+    def _extra_flags(self):
+        return self.deps_user_info["platform.hashing"].suggested_flags
+
     def build(self):
+        if self.settings.compiler != "Visual Studio":
+            if not self._extra_flags:
+                raise ConanException("Suggested flags are not available for os={}/arch={}".format(self.settings.os, self.settings.arch))
+
         cmake = CMake(self)
+        if self.settings.compiler != "Visual Studio":
+            cmake.definitions["EXTRA_FLAGS"] = self._extra_flags
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
