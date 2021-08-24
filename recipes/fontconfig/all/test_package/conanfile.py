@@ -1,5 +1,6 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
+
 
 class FontconfigTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

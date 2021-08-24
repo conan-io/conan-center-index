@@ -75,10 +75,10 @@ class FontconfigConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-docs",
             "--disable-nls",
-            "--sysconfdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "etc"))),
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
-            "--localstatedir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "var"))),
+            "--sysconfdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res", "etc"))),
+            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res", "share"))),
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res", "share"))),
+            "--localstatedir={}".format(tools.unix_path(os.path.join(self.package_folder, "res", "var"))),
         ]
         self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         tools.replace_in_file("Makefile", "po-conf test", "po-conf")
@@ -95,7 +95,6 @@ class FontconfigConan(ConanFile):
         )
 
     def build(self):
-        # Patch files from dependencies
         self._patch_files()
         with tools.run_environment(self):
             autotools = self._configure_autotools()
@@ -108,7 +107,7 @@ class FontconfigConan(ConanFile):
             autotools.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d", "*.conf")):
+        for f in glob.glob(os.path.join(self.package_folder, "res", "etc", "fonts", "conf.d", "*.conf")):
             if os.path.islink(f):
                 os.unlink(f)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
@@ -120,9 +119,9 @@ class FontconfigConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
 
-        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
+        fontconfig_file = os.path.join(self.package_folder, "res", "etc", "fonts", "fonts.conf")
         self.output.info("Creating FONTCONFIG_FILE environment variable: {}".format(fontconfig_file))
         self.env_info.FONTCONFIG_FILE = fontconfig_file
-        fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
+        fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
         self.output.info("Creating FONTCONFIG_PATH environment variable: {}".format(fontconfig_path))
         self.env_info.FONTCONFIG_PATH = fontconfig_path
