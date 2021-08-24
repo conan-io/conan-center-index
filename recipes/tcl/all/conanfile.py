@@ -140,14 +140,14 @@ class TclConan(ConanFile):
         for root, _, files in os.walk(self.build_folder):
             if "Makefile" in files:
                 tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
-
-        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
-            tools.replace_in_file("confdefs.h", "#define HAVE_CPUID 1", "#define HAVE_CPUID 0")
         return self._autotools
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+
+        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
+            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#define HAVE_CPUID 0")
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_nmake(["release"])
