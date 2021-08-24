@@ -1,8 +1,8 @@
+#include <zlib.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <zlib.h>
 
 int main(void) {
     char buffer_in [32] = {"Conan Package Manager"};
