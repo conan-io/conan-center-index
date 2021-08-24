@@ -82,7 +82,10 @@ class LibRHashConan(ConanFile):
         else:
             conf_args.extend(["--disable-lib-shared", "--enable-lib-static"])
 
-        self._autotools.configure(args=conf_args, use_default_install_dirs=False)
+        with tools.environment_append({
+            "BUILD_TARGET": tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)),
+        }):
+            self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
         return self._autotools
 
     def build(self):
