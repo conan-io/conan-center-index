@@ -1,8 +1,6 @@
-diff --git a/build/cmake/aom_install.cmake b/build/cmake/aom_install.cmake
-index 2c0e7a5bf..e42b11203 100644
---- a/build/cmake/aom_install.cmake
-+++ b/build/cmake/aom_install.cmake
-@@ -96,4 +96,20 @@ macro(setup_aom_install_targets)
+--- build/cmake/aom_install.cmake
++++ build/cmake/aom_install.cmake
+@@ -96,4 +96,20 @@
                        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
      endif()
    endif()
