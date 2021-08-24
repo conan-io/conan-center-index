@@ -125,7 +125,7 @@ class SubunitConan(ConanFile):
 
         # FIXME: DEBUG
         for root, folder, files in os.walk(self.package_folder):
-            print("{}:{} [}".format(root, folder, files))
+            print("{}:{} {}".format(root, folder, files))
 
     def package_info(self):
         self.cpp_info.components["libsubunit"].libs = ["subunit"]
