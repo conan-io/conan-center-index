@@ -90,7 +90,15 @@ class LibRHashConan(ConanFile):
         with tools.environment_append({
             "BUILD_TARGET": tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)),
         }):
-            self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
+            # FIXME: DEBUG
+            try:
+                self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
+                config_log = tools.load("config.log")
+                self.output.info(config_log)
+            except:
+                config_log = tools.load("config.log")
+                self.output.info(config_log)
+                raise
         return self._autotools
 
     def build(self):
