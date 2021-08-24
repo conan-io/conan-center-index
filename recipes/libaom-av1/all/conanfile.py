@@ -51,7 +51,7 @@ class LibaomAv1Conan(ConanFile):
             del self.options.assembly
 
     def build_requirements(self):
-        if self.options.get_safe("assembly"):
+        if self.options.get_safe("assembly", False):
             self.build_requires("nasm/2.15.05")
         if self._settings_build.os == "Windows":
             self.build_requires("strawberryperl/5.30.0.1")
@@ -91,7 +91,7 @@ class LibaomAv1Conan(ConanFile):
         self._cmake.definitions["ENABLE_TESTS"] = False
         self._cmake.definitions["ENABLE_DOCS"] = False
         self._cmake.definitions["ENABLE_TOOLS"] = False
-        if not self.options.assembly:
+        if not self.options.get_safe("assembly", False):
             # make non-assembly build
             self._cmake.definitions["AOM_TARGET_CPU"] = "generic"
         # libyuv is used for examples, tests and non-essential 'dump_obu' tool so it is disabled
