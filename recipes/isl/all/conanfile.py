@@ -103,6 +103,9 @@ class IslConan(ConanFile):
             ])
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: should be handled by helper
+            self._autotools.link_flags.append("-arch arm64")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
