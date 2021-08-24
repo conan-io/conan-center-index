@@ -32,7 +32,13 @@
 #include <libdaemon/dpid.h>
 #include <libdaemon/dexec.h>
 
+const char *daemon_pid_file_proc_tmp(void) {
+    return "/tmp/test_package.pid";
+}
+
 int main(int argc, char *argv[]) {
+    daemon_pid_file_proc = daemon_pid_file_proc_tmp;
+
     pid_t pid;
 
     /* Reset signal handlers */
