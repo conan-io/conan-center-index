@@ -22,7 +22,7 @@ class LibCheckConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package"
 
     _cmake = None
 
@@ -33,10 +33,6 @@ class LibCheckConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,12 +47,6 @@ class LibCheckConan(ConanFile):
     def requirements(self):
         if self.options.with_subunit:
             self.requires("subunit/1.4.0")
-
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
