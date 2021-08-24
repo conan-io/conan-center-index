@@ -92,7 +92,11 @@ class LibRHashConan(ConanFile):
         }):
             # FIXME: DEBUG
             try:
-                self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
+                # the configure script does not use CPPFLAGS, so add it to CFLAGS/CXXFLAGS
+                vars = self._autotools.vars
+                vars["CFLAGS"] += " {}".format(vars["CPPFLAGS"])
+                vars["CXXFLAGS"] += " {}".format(vars["CPPFLAGS"])
+                self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False, vars=vars)
                 config_log = tools.load("config.log")
                 self.output.info(config_log)
             except:
