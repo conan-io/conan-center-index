@@ -98,10 +98,11 @@ class Argtable3Conan(ConanFile):
 
     def package_info(self):
         suffix = ""
-        if tools.Version(self.version) >= "3.2.1":
-            if self.settings.build_type == "Debug":
-                suffix = "d"
-        self.cpp_info.libs = [("argtable3" if self.options.shared else "argtable3_static") + suffix]
+        if not self.options.shared:
+            suffix += "_static"
+        if tools.Version(self.version) >= "3.2.1" and self.settings.build_type == "Debug":
+            suffix += "d"
+        self.cpp_info.libs = ["argtable3{}".format(suffix)]
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs.append("m")
