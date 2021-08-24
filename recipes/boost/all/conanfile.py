@@ -815,9 +815,9 @@ class BoostConan(ConanFile):
         full_command += ' --debug-configuration --build-dir="%s"' % self.build_folder
         self.output.warn(full_command)
 
-        # If sending a toolset to B2, setting the vcvars interferes with the compiler
-        # selection.
-        use_vcvars = self._is_msvc and not self._msvc_toolset
+        # If sending a user-specified toolset to B2, setting the vcvars
+        # interferes with the compiler selection.
+        use_vcvars = self._is_msvc and not self.settings.compiler.get_safe("toolset", default="")
         with tools.vcvars(self.settings) if use_vcvars else tools.no_op():
             with tools.chdir(sources):
                 # To show the libraries *1
