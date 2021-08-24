@@ -1,13 +1,15 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class IslConan(ConanFile):
     name = "isl"
     description = "isl is a library for manipulating sets and relations of integer points bounded by linear constraints."
-    topics = ("conan", "isl", "integer", "set", "library")
+    topics = ("isl", "integer", "set", "library")
     license = "MIT"
     homepage = "http://isl.gforge.inria.fr/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,6 +31,10 @@ class IslConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,9 +45,6 @@ class IslConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
-
     def requirements(self):
         if self.options.with_int == "gmp":
             self.requires("gmp/6.2.1")
@@ -50,19 +53,23 @@ class IslConan(ConanFile):
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.3")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
 
-    @contextmanager
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                     "CC": "{} cl -nologo -{}".format(tools.unix_path(self.deps_user_info["automake"].compile), self.settings.compiler.runtime),
