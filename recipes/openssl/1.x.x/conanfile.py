@@ -180,7 +180,7 @@ class OpenSSLConan(ConanFile):
                 self.build_requires("nasm/2.15.05")
         if self._win_bash:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     @property
     def _is_msvc(self):
