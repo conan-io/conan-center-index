@@ -15,10 +15,23 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "disable_assembly": [True, False], "enable_fat": [True, False],
-               "run_checks": [True, False], "enable_cxx": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "enable_fat": False, "run_checks": False, "enable_cxx": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "disable_assembly": [True, False],
+        "enable_fat": [True, False],
+        "run_checks": [True, False],
+        "enable_cxx": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "disable_assembly": True,
+        "enable_fat": False,
+        "run_checks": False,
+        "enable_cxx": True,
+    }
+
     exports_sources = "patches/*"
 
     _autotools = None
@@ -106,7 +119,7 @@ class GmpConan(ConanFile):
                     "CXX": "cl -nologo",
                     "AR": "{} lib".format(self.deps_user_info["automake"].ar_lib.replace("\\", "/")),
                     "LD": "link -nologo",
-                    "NM": "python {}/{}".format(self.build_folder.replace("\\", "/"), "dumpbin_nm.py"),
+                    "NM": "python {}".format(os.path.join(self.build_folder, "dumpbin_nm.py").replace("\\", "/")),
                 }
                 with tools.environment_append(env):
                     yield
