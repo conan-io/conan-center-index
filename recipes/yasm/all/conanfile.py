@@ -20,9 +20,17 @@ class YASMConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.compiler
