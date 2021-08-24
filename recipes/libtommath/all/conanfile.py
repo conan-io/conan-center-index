@@ -57,6 +57,9 @@ class LibTomMathConan(ConanFile):
         autotools.libs = []
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             autotools.link_flags.append("-lcrypt32")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: should be handled by helper
+            autotools.link_flags.append("-arch arm64")
         args = autotools.vars
         args.update({
             "PREFIX": self.package_folder,
