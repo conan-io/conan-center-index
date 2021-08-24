@@ -74,19 +74,11 @@ class NCursesConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio":
-                if "MT" in str(self.settings.compiler.runtime):
-                    raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if not self.options.with_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
         if not self.options.with_widec:
             del self.options.with_extended_colors
-        if self.settings.os == "Windows":
-            if self._with_tinfo:
-                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
-            if self.options.shared and self._with_ticlib:
-                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def requirements(self):
         if self.options.with_pcre2:
@@ -99,7 +91,16 @@ class NCursesConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
+
+    def validate(self):
+        if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
+        if self.settings.os == "Windows":
+            if self._with_tinfo:
+                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
+            if self.options.shared and self._with_ticlib:
+                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
