@@ -48,6 +48,7 @@ class SubunitConan(ConanFile):
         self.requires("cppunit/1.15.1")
 
     def build_requirements(self):
+        self.build_requires("make/4.3")  # FIXME: DEBUG
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
@@ -121,7 +122,7 @@ class SubunitConan(ConanFile):
                 "INSTALLVENDORARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
                 "SITEPREFIX={}".format(os.path.join(self.package_folder).replace("\\", "/")),
                 "VENDORPREFIX={}".format(os.path.join(self.package_folder).replace("\\", "/")),
-                "--trace",  # FIXME: DEBUG
+                "--trace", "-j1" # FIXME: DEBUG
             ]
             autotools.install(args=install_args)
 
@@ -138,7 +139,12 @@ class SubunitConan(ConanFile):
         # FIXME: DEBUG
         for root, folder, files in os.walk(self.package_folder):
             print("{}:{} {}".format(root, folder, files))
+        print("====== config.log ========")
         print(tools.load("config.log"))
+        print("======= Makefile =========")
+        print(tools.load("Makefile"))
+        print("===== perl/Makefile ======")
+        print(tools.load("perl/Makefile"))
 
     def package_info(self):
         self.cpp_info.components["libsubunit"].libs = ["subunit"]
