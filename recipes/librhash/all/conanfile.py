@@ -82,6 +82,12 @@ class LibRHashConan(ConanFile):
         else:
             conf_args.extend(["--disable-lib-shared", "--enable-lib-static"])
 
+        if self.settings.compiler in ("apple-clang", ):
+            if self.settings.arch in ("armv7", ):
+                self._autotools.link_flags.append("-arch armv7")
+            elif self.settings.arch in ("armv8", ):
+                self._autotools.link_flags.append("-arch arm64")
+
         with tools.environment_append({
             "BUILD_TARGET": tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)),
         }):
