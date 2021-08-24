@@ -4,12 +4,6 @@ project(imgui CXX)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-if (BUILD_SHARED_LIBS)
-    set(IMGUI_API _IMGUI_SHARED)
-else()
-    set(IMGUI_API _IMGUI_STATIC)
-endif()
-
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 set(MISC_DIR ${SOURCE_DIR}/misc)
 set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
@@ -27,10 +21,21 @@ set(BINARY_TO_COMPRESSED_BIN binary_to_compressed_c)
 add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compressed_c.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-                           ${IMGUI_API}
-                           IMGUI_USER_CONFIG=\"${IMGUI_USER_CONFIG}\")
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME}
+    EXPORT_MACRO_NAME IMGUI_API
+    EXPORT_FILE_NAME ${IMGUI_USER_CONFIG}
+)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+target_compile_definitions(${PROJECT_NAME} PUBLIC "IMGUI_USER_CONFIG=\"${IMGUI_USER_CONFIG}\"")
 
 include(GNUInstallDirs)
 
@@ -40,7 +45,7 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS ${BINARY_TO_COMPRESSED_BIN}
         DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${HEADER_FILES}
+install(FILES ${HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${IMGUI_USER_CONFIG}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 install(FILES ${EXTRA_FONTS_FILES}
