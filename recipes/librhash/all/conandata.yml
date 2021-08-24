@@ -7,5 +7,5 @@ sources:
     sha256: "42b1006f998adb189b1f316bf1a60e3171da047a85c4aaded2d0d26c1476c9f6"
 patches:
   "1.4.2":
-    - patch_file: "patches/0001-1.4.2-macosx-does-not-know-test--n.patch"
+    - patch_file: "patches/0001-1.4.2-fix-compiler-detection.patch"
       base_path: "source_subfolder"

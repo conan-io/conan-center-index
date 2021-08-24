@@ -12,8 +12,6 @@ class LibRHashConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://rhash.sourceforge.net/"
     license = "MIT"
-    exports_sources = "CMakeLists.txt",
-    generators = "cmake",
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
