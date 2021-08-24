@@ -1,17 +1,17 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, VisualStudioBuildEnvironment, tools
-from contextlib import contextmanager
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
 
 
-class FDKAACConan(ConanFile):
+class LibFDKAACConan(ConanFile):
     name = "libfdk_aac"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A standalone library of the Fraunhofer FDK AAC code from Android"
     license = "https://github.com/mstorsjo/fdk-aac/blob/master/NOTICE"
     homepage = "https://sourceforge.net/projects/opencore-amr/"
-    topics = ("conan", "libfdk_aac", "multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
+    topics = ("libfdk_aac", "multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,12 +25,17 @@ class FDKAACConan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
+
     _cmake = None
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _use_cmake(self):
@@ -47,7 +52,7 @@ class FDKAACConan(ConanFile):
     def build_requirements(self):
         if not self._use_cmake and self.settings.compiler != "Visual Studio":
             self.build_requires("libtool/2.4.6")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -64,10 +69,10 @@ class FDKAACConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    @contextmanager
+    @contextlib.contextmanager
     def _msvc_build_environment(self):
         with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
 
@@ -109,12 +114,12 @@ class FDKAACConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        args = []
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -155,3 +160,6 @@ class FDKAACConan(ConanFile):
         self.cpp_info.components["fdk-aac"].libs = ["fdk-aac"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["fdk-aac"].system_libs.append("m")
+        # stdcpp = tools.stdcpp_library(self)
+        # if stdcpp:
+        #     self.cpp_info.components["fdk-aac"].system_libs.append(stdcpp)
