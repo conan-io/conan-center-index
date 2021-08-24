@@ -120,6 +120,7 @@ class SubunitConan(ConanFile):
                 "INSTALLARCHLIB={}".format(os.path.join(self.package_folder, "lib").replace("\\", "/")),
                 "INSTALLSITEARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
                 "INSTALLVENDORARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
+                "PERLPREFIX={}".format(os.path.join(self.package_folder).replace("\\", "/")),
                 "SITEPREFIX={}".format(os.path.join(self.package_folder).replace("\\", "/")),
                 "VENDORPREFIX={}".format(os.path.join(self.package_folder).replace("\\", "/")),
                 "--trace", "-j1" # FIXME: DEBUG
