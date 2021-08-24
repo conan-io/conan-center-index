@@ -26,6 +26,7 @@ class LibRHashConan(ConanFile):
         "with_openssl": True,
     }
 
+    patches = "patches/*"
     _autotools = None
 
     @property
@@ -104,6 +105,8 @@ class LibRHashConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
