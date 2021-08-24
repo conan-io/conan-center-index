@@ -71,6 +71,7 @@ class LibRHashConan(ConanFile):
                 self._autotools.link_flags.append("-arch armv7")
             elif self.settings.arch in ("armv8", ):
                 self._autotools.link_flags.append("-arch arm64")
+        vars = self._autotools.vars
         conf_args = [
             # librhash's configure script does not understand `--enable-opt1=yes`
             "--enable-openssl" if self.options.with_openssl else "--disable-openssl",
@@ -79,8 +80,9 @@ class LibRHashConan(ConanFile):
             "--prefix={}".format(tools.unix_path(self.package_folder)),
             "--bindir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
             "--libdir={}".format(tools.unix_path(os.path.join(self.package_folder, "lib"))),
-            "--extra-cflags={}".format(" ".join(self._autotools.flags)),
-            "--extra-ldflags={}".format(" ".join(self._autotools.link_flags)),
+            # the configure script does not use CPPFLAGS, so add it to CFLAGS/CXXFLAGS
+            "--extra-cflags={}".format("{} {}".format(vars["CFLAGS"], vars["CPPFLAGS"])),
+            "--extra-ldflags={}".format(vars["LDFLAGS"]),
         ]
         if self.options.shared:
             conf_args.extend(["--enable-lib-shared", "--disable-lib-static"])
@@ -92,11 +94,7 @@ class LibRHashConan(ConanFile):
         }):
             # FIXME: DEBUG
             try:
-                # the configure script does not use CPPFLAGS, so add it to CFLAGS/CXXFLAGS
-                vars = self._autotools.vars
-                vars["CFLAGS"] += " {}".format(vars["CPPFLAGS"])
-                vars["CXXFLAGS"] += " {}".format(vars["CPPFLAGS"])
-                self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False, vars=vars)
+                self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
                 config_log = tools.load("config.log")
                 self.output.info(config_log)
             except:
