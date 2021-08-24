@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
 
 required_conan_version = ">=1.33.0"
@@ -73,8 +73,9 @@ class LzmaSdkConan(ConanFile):
     def _build_msvc(self):
         for make_dir, _ in self._msvc_build_dirs:
             with tools.vcvars(self):
-                with tools.chdir(make_dir):
-                    self.run("nmake /f makefile NEW_COMPILER=1 CPU={}".format(self._msvc_cpu))
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    with tools.chdir(make_dir):
+                        self.run("nmake /f makefile NEW_COMPILER=1 CPU={}".format(self._msvc_cpu))
 
     def _build_autotools(self):
         env_build = AutoToolsBuildEnvironment(self)
