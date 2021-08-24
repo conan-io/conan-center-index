@@ -66,29 +66,3 @@ class PlatformInterfacesConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
-        self.info.header_only()
-
-    def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            return
-
-        def check_mfpu_flag(flag, safe=False):
-            tabulation = ' ' * 24
-            cxxflags = tools.get_env("CXXFLAGS", "")
-            if not safe and flag not in cxxflags:
-                self.output.warn("`{flag}` not detected in cxxflags.\n "
-                                 "{tab}Missing a flag can cause undefined behavior.\n "
-                                 "{tab}Flag automatically added: `{flag}`"
-                                 .format(flag=flag, tab=tabulation))
-                self.cpp_info.cxxflags.append(flag)
-            return flag in cxxflags
-
-        #if "armv7" in self.settings.arch:
-        #    check_mfpu_flag("-mfpu=neon")
-        #elif "armv8" in self.settings.arch :
-        #    if not check_mfpu_flag("-march=armv8-a+fp+simd+crypto+crc", safe=True):
-        #        self.output.warn("Consider adding it in your profile `crypto` and/or `crc` for more performance "
-        #                         "if your architecture does support cryptographic and/or CRC32 extensions")
-        #        check_mfpu_flag("-march=armv8-a+fp+simd")
-        #else:
-        check_mfpu_flag("-march=native")
