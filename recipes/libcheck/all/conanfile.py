@@ -10,7 +10,6 @@ class LibCheckConan(ConanFile):
     homepage = "https://github.com/libcheck/check"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,6 +20,8 @@ class LibCheckConan(ConanFile):
         "fPIC": True,
         "with_subunit": True,
     }
+
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package", "pkg_config"
 
     _cmake = None
@@ -32,6 +33,10 @@ class LibCheckConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,14 +53,14 @@ class LibCheckConan(ConanFile):
             self.requires("subunit/1.4.0")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("check-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
