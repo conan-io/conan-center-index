@@ -140,6 +140,9 @@ class TclConan(ConanFile):
         for root, _, files in os.walk(self.build_folder):
             if "Makefile" in files:
                 tools.replace_in_file(os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
+
+        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
+            tools.replace_in_file("confdefs.h", "#define HAVE_CPUID 1", "#define HAVE_CPUID 0")
         return self._autotools
 
     def build(self):
