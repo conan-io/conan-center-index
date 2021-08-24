@@ -66,4 +66,4 @@ class PlatformInterfacesConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
-        self.info.header_info()
+        self.info.header_only()
