@@ -94,6 +94,10 @@ class NCursesConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def validate(self):
+        if any("arm" in arch for arch in (self.settings.arch, self._settings_build.arch)) and tools.cross_building(self):
+            # FIXME: Cannot buid ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
+            # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
+            raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
         if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if self.settings.os == "Windows":
