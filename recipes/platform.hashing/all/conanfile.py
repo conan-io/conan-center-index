@@ -10,11 +10,11 @@ class PlatformInterfacesConan(ConanFile):
     license = "LGPL-3.0-only"
     homepage = "https://github.com/linksplatform/Hashing"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "platform.hashing is one of the libraries of the LinksPlatform modular framework," \
-                  "which contains std::hash specializations for:" \
-                  "trivial and standard-layout types" \
-                  "types constrained by std::ranges::range" \
-                  "std::any"
+    description = "platform.hashing is one of the libraries of the LinksPlatform modular framework, " \
+                  " - which contains std::hash specializations for:\n" \
+                  " - trivial and standard-layout types\n" \
+                  " - types constrained by std::ranges::range\n" \
+                  " - std::any"
     topics = ("linksplatform", "cpp20", "hashing", "any", "ranges", "native")
     settings = "compiler", "arch"
     no_copy_source = True
