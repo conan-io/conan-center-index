@@ -51,7 +51,7 @@ class MpdecimalConan(ConanFile):
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("automake/1.16.3")
-            if self._settings_build.os == "Windows":
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def validate(self):
