@@ -1,5 +1,7 @@
 versions:
-  7.0.4:
-    folder: 7.x.x
-  7.0.5:
-    folder: 7.x.x
+  "7.0.4":
+    folder: all
+  "7.0.5":
+    folder: all
+  "7.1.0":
+    folder: all
