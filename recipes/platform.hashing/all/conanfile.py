@@ -83,12 +83,12 @@ class PlatformInterfacesConan(ConanFile):
                 self.cpp_info.cxxflags.append(flag)
             return flag in cxxflags
 
-        if "armv7" in self.settings.arch:
-            check_mfpu_flag("-mfpu=neon")
-        elif "armv8" in self.settings.arch :
-            if not check_mfpu_flag("-march=armv8-a+fp+simd+crypto+crc", safe=True):
-                self.output.warn("Consider adding it in your profile `crypto` and/or `crc` for more performance "
-                                 "if your architecture does support cryptographic and/or CRC32 extensions")
-                check_mfpu_flag("-march=armv8-a+fp+simd")
-        else:
-            check_mfpu_flag("-march=native")
+        #if "armv7" in self.settings.arch:
+        #    check_mfpu_flag("-mfpu=neon")
+        #elif "armv8" in self.settings.arch :
+        #    if not check_mfpu_flag("-march=armv8-a+fp+simd+crypto+crc", safe=True):
+        #        self.output.warn("Consider adding it in your profile `crypto` and/or `crc` for more performance "
+        #                         "if your architecture does support cryptographic and/or CRC32 extensions")
+        #        check_mfpu_flag("-march=armv8-a+fp+simd")
+        #else:
+        check_mfpu_flag("-march=native")
