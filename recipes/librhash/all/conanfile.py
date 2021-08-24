@@ -66,6 +66,11 @@ class LibRHashConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler in ("apple-clang", ):
+            if self.settings.arch in ("armv7", ):
+                self._autotools.link_flags.append("-arch armv7")
+            elif self.settings.arch in ("armv8", ):
+                self._autotools.link_flags.append("-arch arm64")
         conf_args = [
             # librhash's configure script does not understand `--enable-opt1=yes`
             "--enable-openssl" if self.options.with_openssl else "--disable-openssl",
@@ -74,19 +79,13 @@ class LibRHashConan(ConanFile):
             "--prefix={}".format(tools.unix_path(self.package_folder)),
             "--bindir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
             "--libdir={}".format(tools.unix_path(os.path.join(self.package_folder, "lib"))),
-            "--extra-cflags={}".format(self._autotools.vars["CPPFLAGS"]),
-            "--extra-ldflags={}".format(self._autotools.vars["LDFLAGS"]),
+            "--extra-cflags={}".format(" ".join(self._autotools.flags)),
+            "--extra-ldflags={}".format(" ".join(self._autotools.link_flags)),
         ]
         if self.options.shared:
             conf_args.extend(["--enable-lib-shared", "--disable-lib-static"])
         else:
             conf_args.extend(["--disable-lib-shared", "--enable-lib-static"])
-
-        if self.settings.compiler in ("apple-clang", ):
-            if self.settings.arch in ("armv7", ):
-                self._autotools.link_flags.append("-arch armv7")
-            elif self.settings.arch in ("armv8", ):
-                self._autotools.link_flags.append("-arch arm64")
 
         with tools.environment_append({
             "BUILD_TARGET": tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)),
