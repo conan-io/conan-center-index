@@ -3,6 +3,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class StbConan(ConanFile):
     name = "stb"
     description = "single-file public domain libraries for C/C++"
