@@ -119,6 +119,7 @@ class SubunitConan(ConanFile):
                 "INSTALLARCHLIB={}".format(os.path.join(self.package_folder, "lib").replace("\\", "/")),
                 "INSTALLSITEARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
                 "INSTALLVENDORARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
+                "VENDORPREFIX={}".format(os.path.join(self.build_folder).replace("\\", "/")),
             ]
             autotools.install(args=install_args)
 
