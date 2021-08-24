@@ -19,7 +19,6 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         if self.settings.compiler != "Visual Studio":
             cmake.definitions["EXTRA_FLAGS"] = self._extra_flags
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
