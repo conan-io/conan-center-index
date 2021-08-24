@@ -24,7 +24,7 @@ class SubunitConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
+    exports_sources = "patches/*"
 
     _autotools = None
 
@@ -104,6 +104,8 @@ class SubunitConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -112,9 +114,16 @@ class SubunitConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            # Avoid installing i18n + perl things in arch-dependent folders
+            install_args = [
+                "INSTALLARCHLIB={}".format(os.path.join(self.package_folder, "lib").replace("\\", "/")),
+                "INSTALLSITEARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
+                "INSTALLVENDORARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
+            ]
+            autotools.install(args=install_args)
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pod")
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
             tools.rmdir(d)
         for d in glob.glob(os.path.join(self.package_folder, "lib", "*")):
