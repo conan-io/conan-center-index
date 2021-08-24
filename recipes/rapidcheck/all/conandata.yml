@@ -5,3 +5,6 @@ sources:
   "20210107":
     url: "https://github.com/emil-e/rapidcheck/archive/37bcab858dfc398634d409c973363088703ba96e.zip"
     sha256: "35433d0417fb945abe2b56b720b03d6d92da1188e760c50662c243dac42a6717"
+  "20210702":
+    url: "https://github.com/emil-e/rapidcheck/archive/33d15a858e3125f5af61a655f390f1cbc2f272ba.zip"
+    sha256: "521c9b163f0018ea6379513e0c674d520b9da66fdb8df73a7a98b04ea2358e69"
