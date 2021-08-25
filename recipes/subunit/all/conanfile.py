@@ -48,7 +48,6 @@ class SubunitConan(ConanFile):
         self.requires("cppunit/1.15.1")
 
     def build_requirements(self):
-        self.build_requires("make/4.3")  # FIXME: DEBUG
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
@@ -115,7 +114,7 @@ class SubunitConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            # Avoid installing i18n + perl things in arch-dependent folders
+            # Avoid installing i18n + perl things in arch-dependent folders or in a `local` subfolder
             install_args = [
                 "INSTALLARCHLIB={}".format(os.path.join(self.package_folder, "lib").replace("\\", "/")),
                 "INSTALLSITEARCH={}".format(os.path.join(self.build_folder, "archlib").replace("\\", "/")),
@@ -124,7 +123,6 @@ class SubunitConan(ConanFile):
                 "INSTALLSITESCRIPT={}".format(os.path.join(self.package_folder, "bin").replace("\\", "/")),
                 "INSTALLSITEMAN1DIR={}".format(os.path.join(self.build_folder, "share", "man", "man1").replace("\\", "/")),
                 "INSTALLSITEMAN3DIR={}".format(os.path.join(self.build_folder, "share", "man", "man3").replace("\\", "/")),
-                "--trace", "-j1" # FIXME: DEBUG
             ]
             autotools.install(args=install_args)
 
@@ -137,16 +135,6 @@ class SubunitConan(ConanFile):
                 tools.rmdir(d)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "Library"))
-
-        # FIXME: DEBUG
-        for root, folder, files in os.walk(self.package_folder):
-            print("{}:{} {}".format(root, folder, files))
-        print("====== config.log ========")
-        print(tools.load("config.log"))
-        print("======= Makefile =========")
-        print(tools.load("Makefile"))
-        print("===== perl/Makefile ======")
-        print(tools.load("perl/Makefile"))
 
     def package_info(self):
         self.cpp_info.components["libsubunit"].libs = ["subunit"]
