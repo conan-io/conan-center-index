@@ -372,7 +372,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["swscale"].system_libs = ["m"]
             if self.options.postproc:
                 self.cpp_info.components["postproc"].system_libs = ["m"]
-            if self.options.fPIC:
+            if self.options.get_safe("fPIC"):
                 if self.settings.compiler in ("gcc", ):
                     # https://trac.ffmpeg.org/ticket/1713
                     # https://ffmpeg.org/platform.html#Advanced-linking-configuration
