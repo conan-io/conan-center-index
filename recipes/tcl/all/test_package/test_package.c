@@ -1,7 +1,7 @@
+#include <tcl.h>
+
 #include <stdlib.h>
 #include <string.h>
-
-#include <tcl.h>
 
 // from https://wiki.tcl-lang.org/page/How+to+embed+Tcl+in+C+applications
 
