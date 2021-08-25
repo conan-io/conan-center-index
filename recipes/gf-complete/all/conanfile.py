@@ -1,6 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
@@ -37,6 +37,10 @@ class GfCompleteConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -65,7 +69,7 @@ class GfCompleteConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -87,10 +91,10 @@ class GfCompleteConan(ConanFile):
                 tools.replace_in_file(os.path.join(self._source_subfolder, subdir, "Makefile.am"),
                                       flag, "")
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -106,37 +110,31 @@ class GfCompleteConan(ConanFile):
         if self._autotools:
             return self._autotools
 
-        self._autotools = AutoToolsBuildEnvironment(
-            self, win_bash=tools.os_info.is_windows)
-
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
         elif "x86" in self.settings.arch:
             self._autotools.flags.append("-mstackrealign")
 
-        configure_args = [
-            "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-            "--enable-static=%s" % ("no" if self.options.shared else "yes")
+        yes_no = lambda v: "yes" if v else "no"
+        conf_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
 
         if "arm" in self.settings.arch:
             if self.options.neon != "auto":
-                configure_args.append("--{}-neon".format(
-                    "enable" if self.options.neon else "disable"))
+                conf_args.append("--enable-neon={}".format(yes_no(self.options.neon)))
 
         if self.settings.arch in ["x86", "x86_64"]:
             if self.options.sse != "auto":
-                configure_args.append("--{}-sse".format(
-                    "enable" if self.options.sse else "disable"))
+                conf_args.append("--enable-sse={}".format(yes_no(self.options.sse)))
 
             if self.options.avx != "auto":
-                configure_args.append("--{}-avx".format(
-                    "enable" if self.options.avx else "disable"))
+                conf_args.append("--enable-avx={}".format(yes_no(self.options.avx)))
 
-        self._autotools.configure(args=configure_args,
-                                  configure_dir=self._source_subfolder)
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
 
         return self._autotools
 
