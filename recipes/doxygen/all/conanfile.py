@@ -93,7 +93,6 @@ class DoxygenConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
         self._cmake.definitions["build_parse"] = self.options.enable_parse
         self._cmake.definitions["build_search"] = self.options.enable_search
         self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
