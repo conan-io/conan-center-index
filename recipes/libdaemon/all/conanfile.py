@@ -30,6 +30,11 @@ class LibDaemonConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+
+    @property
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
@@ -40,11 +45,13 @@ class LibDaemonConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio not supported")
 
     def build_requirements(self):
         self.build_requires("gnu-config/cci.20201022")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -53,7 +60,7 @@ class LibDaemonConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
