@@ -64,9 +64,11 @@ class PExportsConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        host = build = None
         if self.settings.compiler == "Visual Studio":
             self._autotools.defines.append("YY_NO_UNISTD_H")
-        self._autotools.configure(configure_dir=self._source_subfolder, host=False, build=False)
+            host = build = False
+        self._autotools.configure(configure_dir=self._source_subfolder, host=host, build=build)
         return self._autotools
 
     def build(self):
