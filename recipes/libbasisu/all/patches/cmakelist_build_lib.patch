@@ -1,36 +1,29 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,14 +1,14 @@
+@@ -1,39 +1,11 @@
 -project(basisu)
 -
  cmake_minimum_required(VERSION 3.0)
 -option(BUILD_X64 "build 64-bit" TRUE)
 -option(STATIC "static linking" FALSE)
 -option(SSE "SSE 4.1 support" FALSE)
-+
-+project(libbasisu VERSION 1.15.0 LANGUAGES CXX)
-+
-+option(SSE4 "SSE4 4.1 support" FALSE)
- option(ZSTD "ZSTD support for KTX2 transcoding/encoding" TRUE)
-+option(BASISU_NO_ITERATOR_DEBUG_LEVEL "Change Iterator debug level" FALSE)
-+option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
+-option(ZSTD "ZSTD support for KTX2 transcoding/encoding" TRUE)
  
 -message("Initial BUILD_X64=${BUILD_X64}")
- message("Initial CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+-message("Initial CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 -message("Initial SSE=${SSE}")
-+message("Initial SSE4=${SSE4}")
- message("Initial ZSTD=${ZSTD}")
+-message("Initial ZSTD=${ZSTD}")
+-
+-if( NOT CMAKE_BUILD_TYPE )
+-  set( CMAKE_BUILD_TYPE Release )
+-endif()
++project(basisu VERSION 1.15.0 LANGUAGES CXX)
  
- if( NOT CMAKE_BUILD_TYPE )
-@@ -17,16 +17,10 @@ endif()
- 
- message( ${PROJECT_NAME} " build type: " ${CMAKE_BUILD_TYPE} )
- 
+-message( ${PROJECT_NAME} " build type: " ${CMAKE_BUILD_TYPE} )
+-
 -if (BUILD_X64)
 -	message("Building 64-bit")
-+if (SSE4)
-+	message("SSE4.1 enabled")
- else()
+-else()
 -	message("Building 32-bit")
 -endif()
 -
@@ -38,11 +31,21 @@
 -	message("SSE enabled")
 -else()
 -	message("SSE disabled")
-+	message("SSE4.1 disabled")
- endif()
+-endif()
+-
+-if (ZSTD)
+-	message("Zstandard enabled")
+-else()
+-	message("Zstandard disabled")
+-endif()
++option(SSE4 "SSE4 4.1 support" FALSE)
++option(ZSTD "ZSTD support for KTX2 transcoding/encoding" TRUE)
++option(NO_ITERATOR_DEBUG_LEVEL "Change Iterator debug level" FALSE)
++option(ENABLE_ENCODER "Build also encoder part of basisu library" TRUE)
  
- if (ZSTD)
-@@ -42,38 +36,24 @@ if (NOT MSVC)
+ if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+@@ -42,38 +14,24 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
  
@@ -52,12 +55,12 @@
 -   if (NOT BUILD_X64)
 -	  set(GCC_COMPILE_FLAGS "${GCC_COMPILE_FLAGS} -m32")
 -   endif()
--
++   set(GCC_COMPILE_FLAGS "-fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
+ 
 -   if (EMSCRIPTEN)
 -	  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
 -	  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
-+   set(GCC_COMPILE_FLAGS "-fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
- 
+-
 -	  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_LINK_FLAGS}")
 -   elseif (STATIC)
 -      if (SSE)
@@ -87,7 +90,7 @@
     endif()
  
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${GCC_COMPILE_FLAGS}")
-@@ -84,7 +64,7 @@ if (NOT MSVC)
+@@ -84,7 +42,7 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE  "${CMAKE_CXX_FLAGS_RELEASE} ${GCC_COMPILE_FLAGS}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_COMPILE_FLAGS} -D_DEBUG")
  else()
@@ -96,20 +99,57 @@
  		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1")
  		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=1")
  	else()
-@@ -94,7 +74,6 @@ else()
+@@ -93,64 +51,57 @@ else()
+ 	endif()
  endif()
  
- set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
+-set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
 -	basisu_tool.cpp
- 	encoder/basisu_backend.cpp
- 	encoder/basisu_basis_file.cpp
- 	encoder/basisu_comp.cpp
-@@ -115,42 +94,27 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
- 	encoder/jpgd.cpp
- 	encoder/basisu_kernels_sse.cpp
- 	transcoder/basisu_transcoder.cpp
--	)
-+)
+-	encoder/basisu_backend.cpp
+-	encoder/basisu_basis_file.cpp
+-	encoder/basisu_comp.cpp
+-	encoder/basisu_enc.cpp
+-	encoder/basisu_etc.cpp
+-	encoder/basisu_frontend.cpp
+-	encoder/basisu_global_selector_palette_helpers.cpp
+-	encoder/basisu_gpu_texture.cpp
+-	encoder/basisu_pvrtc1_4.cpp
+-	encoder/basisu_resampler.cpp
+-	encoder/basisu_resample_filters.cpp
+-	encoder/basisu_ssim.cpp
+-	encoder/basisu_astc_decomp.cpp
+-	encoder/basisu_uastc_enc.cpp
+-	encoder/basisu_bc7enc.cpp
+-	encoder/lodepng.cpp
+-	encoder/apg_bmp.c
+-	encoder/jpgd.cpp
+-	encoder/basisu_kernels_sse.cpp
+-	transcoder/basisu_transcoder.cpp
++set(BASISU_SRC_LIST ${COMMON_SRC_LIST} transcoder/basisu_transcoder.cpp)
++
++if (ENABLE_ENCODER)
++	set(BASISU_SRC_LIST ${BASISU_SRC_LIST}
++		encoder/basisu_backend.cpp
++		encoder/basisu_basis_file.cpp
++		encoder/basisu_comp.cpp
++		encoder/basisu_enc.cpp
++		encoder/basisu_etc.cpp
++		encoder/basisu_frontend.cpp
++		encoder/basisu_global_selector_palette_helpers.cpp
++		encoder/basisu_gpu_texture.cpp
++		encoder/basisu_pvrtc1_4.cpp
++		encoder/basisu_resampler.cpp
++		encoder/basisu_resample_filters.cpp
++		encoder/basisu_ssim.cpp
++		encoder/basisu_astc_decomp.cpp
++		encoder/basisu_uastc_enc.cpp
++		encoder/basisu_bc7enc.cpp
++		encoder/lodepng.cpp
++		encoder/apg_bmp.c
++		encoder/jpgd.cpp
++		encoder/basisu_kernels_sse.cpp
+ 	)
++endif()
  
  if (ZSTD)
  	set(BASISU_SRC_LIST ${BASISU_SRC_LIST} zstd/zstd.c)
@@ -117,15 +157,19 @@
  
 -if (APPLE)
 -   set(BIN_DIRECTORY "bin_osx")
--else()
++add_library(${PROJECT_NAME} ${BASISU_SRC_LIST})
++
++if (NO_ITERATOR_DEBUG_LEVEL)
++	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISU_NO_ITERATOR_DEBUG_LEVEL=1)
+ else()
 -   set(BIN_DIRECTORY "bin")
--endif()
--
++	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISU_NO_ITERATOR_DEBUG_LEVEL=0)
+ endif()
+ 
 -set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${BIN_DIRECTORY})
 -
 -add_executable(basisu ${BASISU_SRC_LIST})
-+add_library(${PROJECT_NAME} ${BASISU_SRC_LIST})
- 
+-
  if (ZSTD)
 -	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
 +	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
