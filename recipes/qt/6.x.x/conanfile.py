@@ -234,7 +234,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/1.1.1k")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.36")
+            self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.172")
 
@@ -723,9 +723,8 @@ class QtConan(ConanFile):
             core_reqs.append("zstd::zstd")
 
         _create_module("Core", core_reqs)
-        _create_module("Platform")
-        self.cpp_info.components["qtPlatform"].libs = [] # this is a collection of abstract classes, so this is header-only
-        self.cpp_info.components["qtPlatform"].libdirs = []
+        self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
+        self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         if tools.Version(self.version) < "6.1.0":
             self.cpp_info.components["qtCore"].libs.append("Qt6Core_qobject%s" % libsuffix)
         if self.options.gui:
@@ -801,7 +800,8 @@ class QtConan(ConanFile):
             _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
-            _create_module("LinguistTools", ["Gui", "Widgets"])
+            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package"] = "LinguistTools"
+            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package_multi"] = "LinguistTools"
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
