@@ -1,6 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
 import shutil
 
@@ -10,7 +10,7 @@ required_conan_version = ">=1.33.0"
 class CoinUtilsConan(ConanFile):
     name = "coin-utils"
     description = "CoinUtils is an open-source collection of classes and helper functions that are generally useful to multiple COIN-OR projects."
-    topics = ("conan", "coin-utils", "sparse", "matrix", "helper", "parsing", "representation")
+    topics = ("coin-utils", "sparse", "matrix", "helper", "parsing", "representation")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/CoinUtils"
     license = ("EPL-2.0",)
@@ -23,6 +23,7 @@ class CoinUtilsConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     exports_sources = "patches/**"
 
     _autotools = None
@@ -34,6 +35,10 @@ class CoinUtilsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,23 +63,23 @@ class CoinUtilsConan(ConanFile):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("gnu-config/cci.20201022")
 
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    @property 
-    def _user_info_build(self): 
-        return getattr(self, "user_info_build", None) or self.deps_user_info 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -89,7 +94,7 @@ class CoinUtilsConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        
+
         if self.settings.compiler != "Visual Studio":
             shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
                 os.path.join(self._source_subfolder, "config.sub"))
@@ -125,18 +130,17 @@ class CoinUtilsConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libCoinUtils.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
         if self.settings.compiler == "Visual Studio":
             os.rename(os.path.join(self.package_folder, "lib", "libCoinUtils.a"),
                       os.path.join(self.package_folder, "lib", "CoinUtils.lib"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-
     def package_info(self):
         self.cpp_info.libs = ["CoinUtils"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.names["pkg_config"] = "coinutils"
