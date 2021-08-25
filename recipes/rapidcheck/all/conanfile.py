@@ -110,7 +110,10 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.libs = ["rapidcheck"]
-        if tools.Version(self.version) < "20201218":
+        version = self.version
+        if version.startswith("cci."):
+            version = version[4:]
+        if version < "20201218":
             if self.options.enable_rtti:
                 self.cpp_info.defines.append("RC_USE_RTTI")
         else:
