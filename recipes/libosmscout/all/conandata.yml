@@ -1,0 +1,9 @@
+sources:
+  "1.1.1-201107":
+    sha256: 911c27ad8e25e05a0d669d0357d0571a9acf4fc622878ce2fb9aaabcbcb011fd
+    url: https://github.com/Framstag/libosmscout/archive/c81e1d9a0f69cc5b93588dbe330b2af587162c5f.tar.gz
+
+patches:
+  "1.1.1-201107":
+    - base_path: "source_subfolder"
+      patch_file: "patches/build-201107.patch"

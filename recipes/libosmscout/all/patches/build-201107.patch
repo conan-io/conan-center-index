@@ -1,0 +1,96 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cf9135fa8..9859c3b3f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -646,7 +646,7 @@ if(CCACHE_PROGRAM)
+   message(STATUS "Using ccache:                    ${CCACHE_PROGRAM}")
+ endif()
+ 
+-install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/stylesheets DESTINATION share)
+ if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+ 	install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
+ endif()
+diff --git a/cmake/ProjectConfig.cmake b/cmake/ProjectConfig.cmake
+index 3e32239ef..a30b39f2a 100644
+--- a/cmake/ProjectConfig.cmake
++++ b/cmake/ProjectConfig.cmake
+@@ -92,7 +92,11 @@ macro(osmscout_library_project)
+ 	configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/Config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h")
+ 	target_include_directories(${_name} PRIVATE ${_includes})
+ 	target_include_directories(${_name} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
+-	target_link_libraries(${_name} ${_targets})
++	if(${_name} STREQUAL OSMScoutMapCairo)
++		target_link_libraries(${_name} PRIVATE ${_targets})
++	else()
++		target_link_libraries(${_name} ${_targets})
++	endif()
+ 	if(WIN32 AND BUILD_SHARED_LIBS)
+ 		create_win32_dll_resource(${_name} "${_output}")
+ 	endif()
+@@ -127,8 +127,6 @@ macro(osmscout_library_project)
+ 	if(MSVC)
+ 		if(BUILD_SHARED_LIBS)
+ 			install(FILES $<TARGET_PDB_FILE:${_name}> DESTINATION ${CMAKE_INSTALL_PREFIX}/bin CONFIGURATIONS Debug)
+-		else()
+-			install(FILES $<TARGET_PDB_FILE:${_name}> DESTINATION ${CMAKE_INSTALL_PREFIX}/lib CONFIGURATIONS Debug)
+ 		endif()
+ 	endif()
+ endmacro(osmscout_library_project)
+diff --git a/libosmscout-import/CMakeLists.txt b/libosmscout-import/CMakeLists.txt
+index 36fa3585c..30180c85d 100644
+--- a/libosmscout-import/CMakeLists.txt
++++ b/libosmscout-import/CMakeLists.txt
+@@ -145,11 +145,8 @@ if(LIBXML2_FOUND)
+ endif()
+
+ if (PROTOBUF_FOUND)
+-	target_include_directories(OSMScoutImport PRIVATE ${Protobuf_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
++	target_include_directories(OSMScoutImport PRIVATE ${Protobuf_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/src/protobuf)
+ 	target_link_libraries(OSMScoutImport ${Protobuf_LIBRARIES})
+-	if(WIN32)
+-		target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
+-	endif()
+ 	target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_CMAKE_BUILD)
+ endif()
+
+diff --git a/libosmscout-map-cairo/CMakeLists.txt b/libosmscout-map-cairo/CMakeLists.txt
+index fa0b7d386..d7b9c1429 100644
+--- a/libosmscout-map-cairo/CMakeLists.txt
++++ b/libosmscout-map-cairo/CMakeLists.txt
+@@ -17,18 +17,19 @@ osmscout_library_project(
+ 	HEADER ${HEADER_FILES}
+ 	INCLUDES ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
+ 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake
+-	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES}
++	TARGET OSMScout::OSMScout OSMScout::Map
+ )
+ target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})
++target_link_libraries(OSMScoutMapCairo PRIVATE ${CAIRO_LIBRARIES} ${PNG_LIBRARIES})
+
+ if(PANGOCAIRO_FOUND)
+   target_include_directories(OSMScoutMapCairo PUBLIC ${PANGO_INCLUDE_DIRS})
+-  target_link_libraries(OSMScoutMapCairo ${PANGO_LIBRARIES})
++  target_link_libraries(OSMScoutMapCairo PRIVATE ${PANGO_LIBRARIES})
+   target_include_directories(OSMScoutMapCairo INTERFACE ${PANGO_INCLUDE_DIRS})
+
+   if(HARFBUZZ_FOUND)
+ 	  target_include_directories(OSMScoutMapCairo PUBLIC ${HARFBUZZ_INCLUDE_DIRS})
+-	  target_link_libraries(OSMScoutMapCairo ${HARFBUZZ_LIBRARIES})
++	  target_link_libraries(OSMScoutMapCairo PRIVATE ${HARFBUZZ_LIBRARIES})
+ 	  target_include_directories(OSMScoutMapCairo INTERFACE ${HARFBUZZ_INCLUDE_DIRS})
+   endif()
+ endif()
+diff --git a/libosmscout-map-cairo/src/osmscout/LoaderPNG.cpp b/libosmscout-map-cairo/src/osmscout/LoaderPNG.cpp
+index 34ab7b50b..d18903853 100644
+--- a/libosmscout-map-cairo/src/osmscout/LoaderPNG.cpp
++++ b/libosmscout-map-cairo/src/osmscout/LoaderPNG.cpp
+@@ -240,3 +240,8 @@ namespace osmscout {
+     return image;
+   }
+ }
++
++void _force_link()
++{
++    cairo_surface_write_to_png(nullptr, 0);
++}
