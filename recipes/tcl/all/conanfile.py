@@ -5,7 +5,6 @@ import os
 
 class TclConan(ConanFile):
     name = "tcl"
-    version = "8.6.10"
     description = "Tcl is a very powerful but easy to learn dynamic programming language."
     topics = ("conan", "tcl", "scripting", "programming")
     url = "https://github.com/conan-io/conan-center-index"
@@ -14,14 +13,14 @@ class TclConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
-        "shared": [True, False]
+        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
     }
+
     exports_sources = ("patches/*")
-    requires = ("zlib/1.2.11")
 
     _autotools = None
 
@@ -29,27 +28,34 @@ class TclConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os not in ("Linux", "Macos", "Windows"):
-            raise ConanInvalidConfiguration("Unsupported os")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-                "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def validate(self):
+        if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
+            raise ConanInvalidConfiguration("Unsupported os")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _get_default_build_system_subdir(self):
             return {
@@ -121,11 +127,12 @@ class TclConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-threads",
-            "--enable-shared" if self.options.shared else "--disable-shared",
-            "--enable-symbols" if self.settings.build_type == "Debug" else "--disable-symbols",
-            "--enable-64bit" if self.settings.arch == "x86_64" else "--disable-64bit",
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
         ]
         self._autotools.configure(configure_dir=self._get_configure_dir(), args=conf_args, vars={"PKG_CFG_ARGS": " ".join(conf_args)})
 
@@ -138,6 +145,9 @@ class TclConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+
+        if tools.is_apple_os(self.settings.os) and self.settings.arch not in ("x86", "x86_64"):
+            tools.replace_in_file(os.path.join(self._get_configure_dir(), "configure"), "#define HAVE_CPUID 1", "#undef HAVE_CPUID")
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_nmake(["release"])
@@ -191,8 +201,8 @@ class TclConan(ConanFile):
                 libdirs.append(root)
         if self.settings.os == "Windows":
             systemlibs.extend(["ws2_32", "netapi32", "userenv"])
-        else:
-            systemlibs.extend(["m", "pthread", "dl"])
+        elif self.settings.os in ("FreeBSD", "Linux"):
+            systemlibs.extend(["dl", "m", "pthread"])
 
         defines = []
         if not self.options.shared:
