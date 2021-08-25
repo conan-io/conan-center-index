@@ -227,7 +227,7 @@ class FFMpegConan(ConanFile):
             "--pkg-config-flags=--static",  # FIXME: needed?
             "--disable-doc",
             "--disable-programs",
-            "--pkg-config={}".format(tools.get_env("PKG_CONFIG")),
+#            "--pkg-config={}".format(tools.get_env("PKG_CONFIG")),
             opt_enable_disable("cross-compile", tools.cross_building(self, skip_x64_x86=True)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
