@@ -51,6 +51,9 @@ class RapidcheckConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
 
+        if 'cci' not in self.version:
+            raise ConanInvalidConfiguration("This version has been deprecated in favor of '{}/cci.{}'".format(self.name, self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
