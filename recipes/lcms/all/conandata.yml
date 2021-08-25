@@ -1,10 +1,13 @@
 sources:
-  "2.9":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz"
-    sha256: "8e23a09dc81af856db37941a4ea26acdf6a45b0281ec5b7ee94b5a4e9f7afbf7"
-  "2.10":
-    url: "https://github.com/mm2/Little-CMS/archive/lcms2.10.tar.gz"
-    sha256: "f7529f90f0a9c7529c561a2c681043c10f2d30b78e6728fb44132828f89b666a"
+  "2.12":
+    url: "https://github.com/mm2/Little-CMS/archive/2.12.tar.gz"
+    sha256: "e501f1482fc424550ef3abbf86bf1c66090e1661249e89552d39ed5bf935df66"
   "2.11":
     url: "https://github.com/mm2/Little-CMS/archive/2.11.tar.gz"
     sha256: "478c9c3938d7a91b1171de4616f8b04308a8676d73eadc19505b7ace41327f28"
+  "2.10":
+    url: "https://github.com/mm2/Little-CMS/archive/lcms2.10.tar.gz"
+    sha256: "f7529f90f0a9c7529c561a2c681043c10f2d30b78e6728fb44132828f89b666a"
+  "2.9":
+    url: "https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz"
+    sha256: "8e23a09dc81af856db37941a4ea26acdf6a45b0281ec5b7ee94b5a4e9f7afbf7"
