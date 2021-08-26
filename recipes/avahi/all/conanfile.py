@@ -83,15 +83,36 @@ class AvahiConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = [
-            "avahi-client",
-            "avahi-common",
-            "avahi-core",
-            "avahi-glib",
-            "avahi-gobject",
-            "avahi-libevent",
-            "dns_sd"
-        ]
+        self.cpp_info.names["cmake_find_package"] = "Avahi"
+        self.cpp_info.names["cmake_find_package_multi"] = "Avahi"
+
+        for lib in ("client", "common", "core", "glib", "gobject", "libevent", "compat-libdns_sd"):
+            self.cpp_info.components[lib].names["cmake_find_package"] = lib
+            self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
+            self.cpp_info.components[lib].names["pkg_config"] = "avahi-{}".format(lib)
+            self.cpp_info.components[lib].libs = ["avahi-{}".format(lib)]
+        self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
+
+        self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]
+        self.cpp_info.components["common"].system_libs = ["pthread"]
+        self.cpp_info.components["core"].requires = ["common"]
+        self.cpp_info.components["glib"].requires = ["common", "glib::glib"]
+        self.cpp_info.components["gobject"].requires = ["client", "glib"]
+        self.cpp_info.components["libevent"].requires = ["common", "libevent::libevent"]
+        self.cpp_info.components["compat-libdns_sd"].requires = ["client"]
+
+        for app in ("autoipd", "browse", "daemon", "dnsconfd", "publish", "resolve", "set-host-name"):
+            self.cpp_info.components[app].names["cmake_find_package"] = app
+            self.cpp_info.components[app].names["cmake_find_package_multi"] = app
+            self.cpp_info.components[app].names["pkg_config"] = "avahi-{}".format(app)
+
+        self.cpp_info.components["autoipd"].requires = ["libdaemon::libdaemon"]
+        self.cpp_info.components["browse"].requires = ["client", "gdbm::gdbm"]
+        self.cpp_info.components["daemon"].requires = ["core", "expat::expat", "libdaemon::libdaemon"]
+        self.cpp_info.components["dnsconfd"].requires = ["common", "libdaemon::libdaemon"]
+        self.cpp_info.components["publish"].requires = ["client"]
+        self.cpp_info.components["resolve"].requires = ["client"]
+        self.cpp_info.components["set-host-name"].requires = ["client"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
