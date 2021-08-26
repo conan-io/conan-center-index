@@ -153,6 +153,10 @@ class MdnsResponderConan(ConanFile):
             self._install_msvc()
 
     def package_info(self):
+        # although not one of the find-modules in the CMake distribution, FindDNSSD.cmake is commonly used for this package
+        self.cpp_info.names["cmake_find_package"] = "DNSSD"
+        self.cpp_info.names["cmake_find_package_multi"] = "DNSSD"
+
         if self.settings.os == "Linux":
             self.cpp_info.libs = ["dns_sd"]
         elif self.settings.os == "Windows":
