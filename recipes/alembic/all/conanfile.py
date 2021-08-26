@@ -69,6 +69,9 @@ class AlembicConan(ConanFile):
         self._cmake.definitions["ALEMBIC_BUILD_LIBS"] = True
         self._cmake.definitions["ALEMBIC_ILMBASE_LINK_STATIC"] = True # for -DOPENEXR_DLL, handled by OpenEXR package
         self._cmake.definitions["ALEMBIC_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["ALEMBIC_USING_IMATH_3"] = False
+        self._cmake.definitions["ALEMBIC_ILMBASE_FOUND"] = 1
+        self._cmake.definitions["ALEMBIC_ILMBASE_LIBS"] = "OpenEXR::OpenEXR"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
