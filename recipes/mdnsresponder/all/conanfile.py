@@ -11,6 +11,12 @@ class MdnsResponderConan(ConanFile):
     homepage = "https://opensource.apple.com/tarballs/mDNSResponder/"
     license = "Apache-2.0", "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_opt_patches": [True, False],
+    }
+    default_options = {
+        "with_opt_patches": False,
+    }
     exports_sources = ["patches/**"]
 
     @property
@@ -116,6 +122,9 @@ class MdnsResponderConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if self.options.with_opt_patches:
+            for patch in self.conan_data.get("patches", {}).get("{}-opt".format(self.version), []):
+                tools.patch(**patch)
         if self.settings.os == "Linux":
             self._build_make()
         elif self.settings.os == "Windows":
