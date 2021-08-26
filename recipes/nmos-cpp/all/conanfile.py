@@ -17,7 +17,7 @@ class NmosCppConan(ConanFile):
     # for now, no "shared" option support
     options = {
         "fPIC": [True, False],
-        "with_dnssd": ["mdnsresponder", "avahi", "bonjour"],
+        "with_dnssd": ["mdnsresponder", "avahi"],
     }
     # "fPIC" is handled automatically by Conan, injecting CMAKE_POSITION_INDEPENDENT_CODE
     default_options = {
@@ -42,18 +42,10 @@ class NmosCppConan(ConanFile):
 
         if self.settings.os == "Macos":
             del self.options.with_dnssd
-        #elif self.settings.os == "Linux":
-        #    self.options.with_dnssd = "avahi"
-        #elif self.settings.os == "Windows":
-        #    self.options.with_dnssd = "bonjour"
-
-    @property
-    def _with_dnssd_requires(self):
-        return {
-            "mdnsresponder": "mdnsresponder/878.200.35",
-            "avahi": "avahi-mdnsresponder/system",
-            "bonjour": "bonjour/system",
-        }[str(self.options.with_dnssd)]
+        elif self.settings.os == "Linux":
+            self.options.with_dnssd = "avahi"
+        elif self.settings.os == "Windows":
+            self.options.with_dnssd = "mdnsresponder"
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
@@ -62,9 +54,11 @@ class NmosCppConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/1.1.1k")
         self.requires("json-schema-validator/2.1.0")
-
-        if self.options.with_dnssd:
-            self.requires(self._with_dnssd_requires)
+        if self.options.with_dnssd == "mdnsresponder":
+            self.requires("mdnsresponder/878.200.35")
+            self.options["mdnsresponder"].with_opt_patches = True
+        elif self.options.with_dnssd == "avahi":
+            self.requires("avahi/0.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -77,6 +71,10 @@ class NmosCppConan(ConanFile):
         # prefer config-file packages created by cmake_find_package_multi
         # over any system-installed find-module packages
         self._cmake.definitions["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
+        # (on Linux) select Avahi or mDNSResponder
+        self._cmake.definitions["NMOS_CPP_USE_AVAHI"] = self.options.with_dnssd == "avahi"
+        # (on Windows) use the Conan package for DNSSD (mdnsresponder), not the project's own DLL stub library
+        self._cmake.definitions["NMOS_CPP_USE_BONJOUR_SDK"] = True
         # no need to build unit tests
         self._cmake.definitions["NMOS_CPP_BUILD_TESTS"] = False
         # the examples (nmos-cpp-registry and nmos-cpp-node) are useful utilities for users
@@ -129,11 +127,6 @@ class NmosCppConan(ConanFile):
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
                     components[component_name]["libs"] = [lib_name]
-                # inject the DNS-SD dependency as the CMake isn't currently using find_package for this
-                if cmake_target_nonamespace == "DNSSD":
-                    if self.options.with_dnssd:
-                        dependency = self._with_dnssd_requires.split("/")[0]
-                        components[component_name].setdefault("requires", []).append("{}::{}".format(dependency, dependency))
             elif cmake_function_name == "set_target_properties":
                 target_properties = re.findall(r"(?P<property>INTERFACE_[A-Z_]+)[\n|\s]+\"(?P<values>.+)\"", cmake_function_args[2])
                 for target_property in target_properties:
@@ -151,10 +144,13 @@ class NmosCppConan(ConanFile):
                                 # Conan component name cannot be the same as the package name
                                 if dependency == "nmos-cpp":
                                     dependency = "nmos-cpp-lib"
-                                # Conan packages for Boost, cpprestsdk, websocketpp and OpenSSL have component names that match the CMake targets
+                                # Conan packages for Boost, cpprestsdk, websocketpp, OpenSSL and Avahi have component names that (except for being lowercase) match the CMake targets
                                 # json-schema-validator overrides cmake_find_package[_multi] names
                                 elif dependency == "nlohmann_json_schema_validator::nlohmann_json_schema_validator":
                                     dependency = "json-schema-validator::json-schema-validator"
+                                # mdnsresponder overrides cmake_find_package[_multi] names
+                                elif dependency == "DNSSD::DNSSD":
+                                    dependency = "mdnsresponder::mdnsresponder"
                                 components[component_name].setdefault("requires" if not match_private else "requires_private", []).append(dependency.lower())
                             else:
                                 components[component_name].setdefault("system_libs", []).append(dependency)
