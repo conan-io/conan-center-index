@@ -123,18 +123,15 @@ class LibTomMathConan(ConanFile):
         else:
             self._run_makefile("install")
 
-        # FIXME: use tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        la = os.path.join(self.package_folder, "lib", "libtommath.la")
-        if os.path.isfile(la):
-            os.unlink(la)
-
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "tommath.lib"))
+
     def package_info(self):
-        suffix = ""
-        if self.settings.os == "Windows":
-            suffix = ".dll" if self.options.shared else ""
-        self.cpp_info.libs = ["tommath" + suffix]
+        self.cpp_info.libs = ["tommath"]
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
