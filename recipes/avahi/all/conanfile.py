@@ -53,7 +53,10 @@ class AvahiConan(ConanFile):
 
     @property
     def _configure_args(self):
+        yes_no = lambda v: "yes" if v else "no"
         return [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-gtk3",
             "--disable-mono",
             "--disable-python",
@@ -87,10 +90,12 @@ class AvahiConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Avahi"
 
         for lib in ("client", "common", "core", "glib", "gobject", "libevent", "compat-libdns_sd"):
+            avahi_lib = "avahi-{}".format(lib)
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
-            self.cpp_info.components[lib].names["pkg_config"] = "avahi-{}".format(lib)
-            self.cpp_info.components[lib].libs = ["avahi-{}".format(lib)]
+            self.cpp_info.components[lib].names["pkg_config"] = avahi_lib
+            self.cpp_info.components[lib].libs = [avahi_lib]
+            self.cpp_info.components[lib].includedirs = [os.path.join("include", avahi_lib)]
         self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
 
         self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]
@@ -102,9 +107,10 @@ class AvahiConan(ConanFile):
         self.cpp_info.components["compat-libdns_sd"].requires = ["client"]
 
         for app in ("autoipd", "browse", "daemon", "dnsconfd", "publish", "resolve", "set-host-name"):
+            avahi_app = "avahi-{}".format(app)
             self.cpp_info.components[app].names["cmake_find_package"] = app
             self.cpp_info.components[app].names["cmake_find_package_multi"] = app
-            self.cpp_info.components[app].names["pkg_config"] = "avahi-{}".format(app)
+            self.cpp_info.components[app].names["pkg_config"] = avahi_app
 
         self.cpp_info.components["autoipd"].requires = ["libdaemon::libdaemon"]
         self.cpp_info.components["browse"].requires = ["client", "gdbm::gdbm"]
