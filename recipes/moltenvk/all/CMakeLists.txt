@@ -13,10 +13,6 @@ endif()
 option(MVK_WITH_SPIRV_TOOLS "Build MoltenVK without the MVK_EXCLUDE_SPIRV_TOOLS build setting" ON)
 option(MVK_BUILD_SHADERCONVERTER_TOOL "Build MoltenVKShaderConverter" ON)
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11)
-endif()
-
 set(MVK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 set(MVK_INSTALL_TARGETS "")
 
@@ -78,6 +74,7 @@ if(MVK_VERSION VERSION_LESS "1.1.4")
     list(APPEND MVK_SC_CONVERTERS_SOURCES ${MVK_SC_COMMON_SOURCES})
 endif()
 add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_CONVERTERS_SOURCES})
+target_compile_features(MoltenVKShaderConverter PUBLIC cxx_std_11)
 target_include_directories(MoltenVKShaderConverter
     PRIVATE ${MVK_DIR}/MoltenVKShaderConverter/common
     INTERFACE ${MVK_DIR}/MoltenVKShaderConverter
@@ -111,6 +108,7 @@ if(MVK_BUILD_SHADERCONVERTER_TOOL)
         ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.mm
     )
     add_executable(MoltenVKShaderConverterTool ${MVK_SCT_SOURCES})
+    target_compile_features(MoltenVKShaderConverterTool PRIVATE cxx_std_11)
     set_property(TARGET MoltenVKShaderConverterTool PROPERTY OUTPUT_NAME "MoltenVKShaderConverter")
     target_include_directories(MoltenVKShaderConverterTool PRIVATE
         ${MVK_DIR}/MoltenVKShaderConverter/common
@@ -145,6 +143,7 @@ file(GLOB_RECURSE MVK_SOURCES
     ${MVK_DIR}/MoltenVK/*.cpp
 )
 add_library(MoltenVK ${MVK_SOURCES})
+target_compile_features(MoltenVK PUBLIC cxx_std_11)
 target_include_directories(MoltenVK PRIVATE
     ${MVK_DIR}/MoltenVK/MoltenVK/API
     ${MVK_DIR}/MoltenVK/MoltenVK/Commands
