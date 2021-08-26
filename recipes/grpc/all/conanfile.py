@@ -7,7 +7,7 @@ import os
 class grpcConan(ConanFile):
     name = "grpc"
     description = "Google's RPC (remote procedure call) library and framework."
-    topics = ("conan", "grpc", "rpc")
+    topics = ("grpc", "rpc")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
@@ -54,11 +54,11 @@ class grpcConan(ConanFile):
 
     def requirements(self):
         self.requires('zlib/1.2.11')
-        self.requires('openssl/1.1.1k')
+        self.requires('openssl/1.1.1l')
         self.requires('protobuf/3.17.1')
         self.requires('c-ares/1.17.1')
-        self.requires('abseil/20210324.1')
-        self.requires('re2/20210401')
+        self.requires('abseil/20210324.2')
+        self.requires('re2/20210601')
 
     def build_requirements(self):
         self.build_requires('protobuf/3.17.1')
@@ -71,7 +71,7 @@ class grpcConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
             compiler_version = tools.Version(self.settings.compiler.version)
             if compiler_version < 14:
