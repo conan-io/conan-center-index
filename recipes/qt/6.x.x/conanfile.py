@@ -833,7 +833,7 @@ class QtConan(ConanFile):
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
-        if self.options.get_safe("qtactiveqt"):
+        if self.options.get_safe("qtactiveqt") and self.settings.os == "Windows":
             _create_module("AxBase", ["Gui", "Widgets"])
             _create_module("AxServer", ["AxBase"])
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
