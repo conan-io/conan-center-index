@@ -45,7 +45,7 @@ class TkConan(ConanFile):
     def requirements(self):
         self.requires("tcl/{}".format(self.version))
         if self.settings.os == "Linux":
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
 
     def build_requirements(self):
