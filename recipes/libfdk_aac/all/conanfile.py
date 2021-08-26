@@ -160,6 +160,3 @@ class LibFDKAACConan(ConanFile):
         self.cpp_info.components["fdk-aac"].libs = ["fdk-aac"]
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["fdk-aac"].system_libs.append("m")
-        # stdcpp = tools.stdcpp_library(self)
-        # if stdcpp:
-        #     self.cpp_info.components["fdk-aac"].system_libs.append(stdcpp)
