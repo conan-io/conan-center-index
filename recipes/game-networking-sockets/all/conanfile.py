@@ -53,7 +53,7 @@ class GameNetworkingSocketsConan(ConanFile):
     def requirements(self):
         self.requires("protobuf/3.17.1")
         if self.options.encryption == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1k") # >=1.1.1
         elif self.options.encryption == "libsodium":
             self.requires("libsodium/1.0.18")
         elif self.options.encryption == "bcrypt":
@@ -78,6 +78,9 @@ class GameNetworkingSocketsConan(ConanFile):
         self._cmake.definitions["USE_CRYPTO"] = crypto[str(self.options.encryption)]
         crypto25519 = {"openssl": "OpenSSL", "libsodium": "libsodium", "bcrypt": "Reference"}
         self._cmake.definitions["USE_CRYPTO25519"] = crypto25519[str(self.options.encryption)]
+        if self.options.encryption == "openssl":
+            self._cmake.definitions["OPENSSL_NEW_ENOUGH"] = True
+            self._cmake.definitions["OPENSSL_HAS_25519_RAW"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
