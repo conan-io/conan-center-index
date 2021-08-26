@@ -254,7 +254,3 @@ class TkConan(ConanFile):
         tk_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2]))).replace("\\", "/")
         self.output.info("Setting TK_LIBRARY environment variable: {}".format(tk_library))
         self.env_info.TK_LIBRARY = tk_library
-
-        tcl_root = self.package_folder.replace("\\", "/")
-        self.output.info("Setting TCL_ROOT environment variable: {}".format(tcl_root))
-        self.env_info.TCL_ROOT = tcl_root
