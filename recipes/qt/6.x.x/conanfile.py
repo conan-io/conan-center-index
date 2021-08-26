@@ -239,7 +239,7 @@ class QtConan(ConanFile):
             self.requires("vulkan-loader/1.2.172")
 
         if self.options.with_glib:
-            self.requires("glib/2.68.3")
+            self.requires("glib/2.69.2")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -258,7 +258,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.35.5")
+            self.requires("sqlite3/3.36.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
@@ -723,6 +723,8 @@ class QtConan(ConanFile):
             core_reqs.append("zstd::zstd")
 
         _create_module("Core", core_reqs)
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         if tools.Version(self.version) < "6.1.0":
