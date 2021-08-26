@@ -92,7 +92,10 @@ class GameNetworkingSocketsConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "GameNetworkingSockets"
         self.cpp_info.names["pkg_config"] = "GameNetworkingSockets"
         self.cpp_info.includedirs.append(os.path.join("include", "GameNetworkingSockets"))
-        self.cpp_info.libs = ["GameNetworkingSockets"]
+        if self.options.shared:
+            self.cpp_info.libs = ["GameNetworkingSockets"]
+        else:
+            self.cpp_info.libs = ["GameNetworkingSockets_s"]
         self.cpp_info.requires = ["protobuf::libprotobuf"]
         if self.options.encryption == "openssl":
             self.cpp_info.requires += ["openssl::crypto"]
