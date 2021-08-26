@@ -175,6 +175,7 @@ target_compile_options(MoltenVK PRIVATE
     -Wno-unguarded-availability-new
     -Wno-deprecated-declarations
     -Wno-nonportable-include-path
+    -Wno-tautological-pointer-compare
 )
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
