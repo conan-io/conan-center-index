@@ -63,6 +63,7 @@ class AvahiConan(ConanFile):
             "--disable-qt5",
             "--disable-monodoc",
             "--enable-compat-libdns_sd",
+            "--with-systemdsystemunitdir={}/lib/systemd/system".format(self.package_folder),
         ]
 
     def _configure_autotools(self):
