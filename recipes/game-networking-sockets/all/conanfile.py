@@ -63,8 +63,12 @@ class GameNetworkingSocketsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-
     def build(self):
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "configure_msvc_runtime()",
+            "# configure_msvc_runtime()"
+        )
         cmake = self._configure_cmake()
         cmake.build()
 
