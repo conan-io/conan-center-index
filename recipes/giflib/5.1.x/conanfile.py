@@ -2,7 +2,8 @@ from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
-import platform
+
+required_conan_version = ">=1.33.0"
 
 
 class GiflibConan(ConanFile):
@@ -11,15 +12,33 @@ class GiflibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "http://giflib.sourceforge.net"
-    topics = ("conan", "giflib", "image", "multimedia", "format", "graphics")
-    exports_sources = ["unistd.h", "gif_lib.h"]
+    topics = ("giflib", "image", "multimedia", "format", "graphics")
+
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
     # The exported files I took them from https://github.com/bjornblissing/osg-3rdparty-cmake/tree/master/giflib
     # refactored a little
+    exports_sources = ["unistd.h", "gif_lib.h"]
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,14 +51,14 @@ class GiflibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-           tools.os_info.detect_windows_subsystem() not in ("cygwin", "msys2"):
-            self.build_requires("msys2/20190524")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("gnu-config/cci.20201022")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        zip_name = "%s-%s" % (self.name, self.version)
-        os.rename(zip_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         # disable util build - tools and internal libs
@@ -101,18 +120,16 @@ class GiflibConan(ConanFile):
                 self.run("make install", win_bash=True)
 
     def build_configure(self):
-        env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os == "Windows" and
-                                              platform.system() == "Windows")
-
-        prefix = os.path.abspath(self.package_folder)
-        if self.settings.os == "Windows":
-            prefix = tools.unix_path(prefix)
-        args = ["--prefix=%s" % prefix]
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--enable-static", "--disable-shared"])
-
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
         with tools.chdir(self._source_subfolder):
             if self.settings.os == "Macos":
                 tools.replace_in_file("configure", r"-install_name \$rpath/\$soname", r"-install_name \$soname")
@@ -124,19 +141,15 @@ class GiflibConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder, ignore_case=True, keep_path=False)
-        # remove la files
-        la_file = os.path.join(self.package_folder, "lib", "libgif.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "gif.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "gif.lib"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GIF"
         self.cpp_info.names["cmake_find_package_multi"] = "GIF"
         self.cpp_info.libs = ["gif"]
         if self.settings.compiler == "Visual Studio":
-            if self.options.shared:
-                self.cpp_info.libs = [lib + ".dll.lib" for lib in self.cpp_info.libs]
-                self.cpp_info.defines.append("USE_GIF_DLL")
-            else:
-                self.cpp_info.defines.append("USE_GIF_LIB")
+            self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
