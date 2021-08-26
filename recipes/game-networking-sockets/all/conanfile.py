@@ -76,6 +76,8 @@ class GameNetworkingSocketsConan(ConanFile):
         self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = "OFF"
         crypto = {"openssl": "OpenSSL", "libsodium": "libsodium", "bcrypt": "BCrypt"}
         self._cmake.definitions["USE_CRYPTO"] = crypto[str(self.options.encryption)]
+        crypto25519 = {"openssl": "OpenSSL", "libsodium": "libsodium", "bcrypt": "Reference"}
+        self._cmake.definitions["USE_CRYPTO25519"] = crypto25519[str(self.options.encryption)]
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
