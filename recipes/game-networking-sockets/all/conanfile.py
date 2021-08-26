@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -44,8 +45,10 @@ class GameNetworkingSocketsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
-            raise Invalid()
+            raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
 
     def requirements(self):
         self.requires("protobuf/3.17.1")
