@@ -57,6 +57,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _spirv_cross_version(self):
         return {
+            "1.1.2": "cci.20210601", # can't compile with spirv-cross < 20210115
             "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
             "1.1.0": "20200917", # compiles only with spirv-cross 20200917
             "1.0.44": "20200917", # compiles only with spirv-cross 20200917
@@ -70,6 +71,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _vulkan_headers_version(self):
         return {
+            "1.1.2": "1.2.172",
             "1.1.1": "1.2.162.0",
             "1.1.0": "1.2.154.0",
             "1.0.44": "1.2.148.0",
