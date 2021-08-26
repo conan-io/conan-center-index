@@ -60,7 +60,6 @@ target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
 #   - external: spirv-cross, glslang, and spirv-tools (optional)
 #   - internal: MoltenVKCommon
 #   - frameworks: Foundation
-file(GLOB MVK_SC_COMMON_SOURCES ${MVK_DIR}/MoltenVKShaderConverter/common/*.cpp)
 if(MVK_VERSION VERSION_LESS "1.1.0")
     file(GLOB MVK_SC_CONVERTERS_SOURCES
         ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*.cpp
@@ -74,7 +73,11 @@ else()
         ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverter/*.mm
     )
 endif()
-add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_COMMON_SOURCES} ${MVK_SC_CONVERTERS_SOURCES})
+if(MVK_VERSION VERSION_LESS "1.1.4")
+    file(GLOB MVK_SC_COMMON_SOURCES ${MVK_DIR}/MoltenVKShaderConverter/common/*.cpp)
+    list(APPEND MVK_SC_CONVERTERS_SOURCES ${MVK_SC_COMMON_SOURCES})
+endif()
+add_library(MoltenVKShaderConverter OBJECT ${MVK_SC_CONVERTERS_SOURCES})
 target_include_directories(MoltenVKShaderConverter
     PRIVATE ${MVK_DIR}/MoltenVKShaderConverter/common
     INTERFACE ${MVK_DIR}/MoltenVKShaderConverter
