@@ -95,6 +95,8 @@ class BackwardCppConan(ConanFile):
         if self.settings.os not in self._supported_os():
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not"
                 " supported in {1}.".format(self.version, self.settings.os))
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
 
         if self.settings.os == "Macos" and \
                 not self._has_stack_details("backtrace_symbol"):
