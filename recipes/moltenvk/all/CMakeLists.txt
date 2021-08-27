@@ -92,9 +92,10 @@ target_link_libraries(MoltenVKShaderConverter
     PUBLIC
         CONAN_PKG::spirv-cross
 )
-if(NOT MVK_WITH_SPIRV_TOOLS)
-    target_compile_definitions(MoltenVKShaderConverter PRIVATE MVK_EXCLUDE_SPIRV_TOOLS)
+if(MVK_WITH_SPIRV_TOOLS)
     target_link_libraries(MoltenVKShaderConverter PRIVATE CONAN_PKG::spirv-tools)
+else()
+    target_compile_definitions(MoltenVKShaderConverter PRIVATE MVK_EXCLUDE_SPIRV_TOOLS)
 endif()
 
 # MoltenVKShaderConverterTool
