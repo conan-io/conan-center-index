@@ -115,17 +115,20 @@ class NmosCppConan(ConanFile):
             # Conan component name cannot be the same as the package name
             if component_name == "nmos-cpp":
                 component_name = "nmos-cpp-lib"
-            lib_name = cmake_target_nonamespace
-            # hmm, where is this info?
-            # set_property(TARGET Bonjour PROPERTY OUTPUT_NAME dnssd)
-            if lib_name == "Bonjour":
-                lib_name = "dnssd"
 
             components.setdefault(component_name, {"cmake_target": cmake_target_nonamespace})
 
             if cmake_function_name == "add_library":
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
+                    # library filenames are based on the target name by default
+                    lib_name = cmake_target_nonamespace
+                    # the filename may be changed by a straightforward command:
+                    # set_property(TARGET Bonjour PROPERTY OUTPUT_NAME dnssd)
+                    # but we'd have to read the nmos-cpp-targets-<config>.cmake files
+                    # and parse the IMPORTED_LOCATION_<CONFIG> values
+                    if lib_name == "Bonjour":
+                        lib_name = "dnssd"
                     components[component_name]["libs"] = [lib_name]
             elif cmake_function_name == "set_target_properties":
                 target_properties = re.findall(r"(?P<property>INTERFACE_[A-Z_]+)[\n|\s]+\"(?P<values>.+)\"", cmake_function_args[2])
