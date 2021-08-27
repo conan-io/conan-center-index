@@ -1,12 +1,13 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import os
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
+
 class AvahiConan(ConanFile):
     name = "avahi"
-    # --enable-compat-libdns_sd
+    # --enable-compat-libdns_sd means that this recipe provides the mdnsresponder compile interface
     provides = "mdnsresponder"
     description = "Avahi - Service Discovery for Linux using mDNS/DNS-SD -- compatible with Bonjour"
     topics = ("avahi", "Bonjour", "DNS-SD", "mDNS")
