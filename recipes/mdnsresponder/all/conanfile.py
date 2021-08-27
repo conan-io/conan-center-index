@@ -21,6 +21,8 @@ class MdnsResponderConan(ConanFile):
     }
     exports_sources = ["patches/**"]
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -54,6 +56,7 @@ class MdnsResponderConan(ConanFile):
 
     @property
     def _make_build_args(self):
+        # the Makefile does not support parallel builds
         return [
             "os=linux",
             "-j1",
@@ -76,16 +79,18 @@ class MdnsResponderConan(ConanFile):
         # not installing man pages, NSS plugin
         return " ".join(["setup", "InstalledDaemon", "InstalledLib", "InstalledClients"])
 
-    @property
-    def _make_env(self):
-        return {
-            "CFLAGS": "-std=gnu99",
-        }
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        # fix for error: 'for' loop initial declarations are only allowed in C99 or C11 mode
+        self._autotools.flags.append("-std=gnu99")
+        return self._autotools
 
     def _build_make(self):
         with tools.chdir(self._posix_folder):
-            autotools = AutoToolsBuildEnvironment(self)
-            autotools.make(args=self._make_build_args, target=self._make_build_targets, vars=self._make_env)
+            autotools = self._configure_autotools()
+            autotools.make(args=self._make_build_args, target=self._make_build_targets)
 
     @property
     def _msvc_targets(self):
@@ -137,8 +142,8 @@ class MdnsResponderConan(ConanFile):
         for dir in ["bin", "include", "lib", "sbin"]:
             tools.mkdir(os.path.join(self.package_folder, dir))
         with tools.chdir(self._posix_folder):
-            autotools = AutoToolsBuildEnvironment(self)
-            autotools.make(args=self._make_install_args, target=self._make_install_targets, vars=self._make_env)
+            autotools = self._configure_autotools()
+            autotools.make(args=self._make_install_args, target=self._make_install_targets)
         # package the daemon in bin too
         tools.rename(os.path.join(self.package_folder, "sbin", "mdnsd"),
                      os.path.join(self.package_folder, "bin", "mdnsd"))
