@@ -104,7 +104,7 @@ class CoinUtilsConan(ConanFile):
         ]
         if self.settings.compiler == "Visual Studio":
             configure_args.append("--enable-msvc={}".format(self.settings.compiler.runtime))
-        self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder), args=configure_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
@@ -123,7 +123,7 @@ class CoinUtilsConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1"])
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
