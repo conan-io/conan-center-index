@@ -6,6 +6,8 @@ required_conan_version = ">=1.33.0"
 
 class AvahiConan(ConanFile):
     name = "avahi"
+    # --enable-compat-libdns_sd
+    provides = "mdnsresponder"
     description = "Avahi - Service Discovery for Linux using mDNS/DNS-SD -- compatible with Bonjour"
     topics = ("avahi", "Bonjour", "DNS-SD", "mDNS")
     url = "https://github.com/conan-io/conan-center-index"
