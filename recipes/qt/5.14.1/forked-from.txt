@@ -1,1 +1,0 @@
-https://github.com/trassir/conan-qt/commit/7c4b61e8879f93f6fcba14ac0eaa9385983bf4e9

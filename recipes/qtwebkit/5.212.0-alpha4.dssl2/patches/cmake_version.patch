@@ -1,0 +1,55 @@
+diff -ur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ project(WebKit)
+ 
+ # This should be removed once we require CMake 3.3.
+diff -ur a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
+--- a/Source/JavaScriptCore/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/JavaScriptCore/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(JavaScriptCore_INCLUDE_DIRECTORIES
+diff -ur a/Source/WebCore/CMakeLists.txt b/Source/WebCore/CMakeLists.txt
+--- a/Source/WebCore/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WebCore/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(WebCore_INCLUDE_DIRECTORIES
+diff -ur a/Source/WebKit/CMakeLists.txt b/Source/WebKit/CMakeLists.txt
+--- a/Source/WebKit/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WebKit/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ set(WebKit_SOURCES
+diff -ur a/Source/WTF/CMakeLists.txt b/Source/WTF/CMakeLists.txt
+--- a/Source/WTF/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/Source/WTF/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.12)
+ include(WebKitCommon)
+ 
+ add_subdirectory(wtf)
+diff -ur a/tests/webkitwidgets/cmake/CMakeLists.txt b/tests/webkitwidgets/cmake/CMakeLists.txt
+--- a/tests/webkitwidgets/cmake/CMakeLists.txt	2020-03-04 20:16:37.000000000 +0300
++++ b/tests/webkitwidgets/cmake/CMakeLists.txt	2020-06-03 17:06:43.665963598 +0300
+@@ -1,5 +1,5 @@
+ 
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.12)
+ 
+ project(qmake_cmake_files)
+ 
