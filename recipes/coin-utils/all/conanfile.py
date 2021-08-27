@@ -40,6 +40,10 @@ class CoinUtilsConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -69,19 +73,15 @@ class CoinUtilsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
-
     @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
                     "LD": "link -nologo",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
@@ -91,13 +91,6 @@ class CoinUtilsConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-
-        if self.settings.compiler != "Visual Studio":
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                os.path.join(self._source_subfolder, "config.sub"))
-            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
@@ -116,7 +109,11 @@ class CoinUtilsConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-
+        if self.settings.compiler != "Visual Studio":
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                        os.path.join(self._source_subfolder, "config.sub"))
+            shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                        os.path.join(self._source_subfolder, "config.guess"))
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
