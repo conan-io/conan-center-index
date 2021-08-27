@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class CoinOsiConan(ConanFile):
     name = "coin-osi"
