@@ -20,3 +20,6 @@ sources:
   3.1.0:
     url: "https://github.com/taskflow/taskflow/archive/v3.1.0.tar.gz"
     sha256: "B83E9A78C254D831B8401D0F8A766E3C5B60D8D20BE5AF6E2D2FAD4AA4A8B980"
+  "3.2.0":
+    url: "https://github.com/taskflow/taskflow/archive/v3.2.0.tar.gz"
+    sha256: "26c37a494789fedc5de8d1f8452dc8a7774a220d02c14d5b19efe0dfe0359c0c"

@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class Hdf4Conan(ConanFile):
     name = "hdf4"
@@ -60,6 +61,11 @@ class Hdf4Conan(ConanFile):
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
 
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.shared:
+            # FIXME: Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
+            raise ConanInvalidConfiguration("shared M1 builds aren't supported right away!")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hdf-" + self.version, self._source_subfolder)
@@ -93,6 +99,9 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_BUILD_TOOLS"] = False
         self._cmake.definitions["HDF4_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF4_BUILD_JAVA"] = False
+        if tools.cross_building(self):
+            self._cmake.definitions["H4_PRINTF_LL_TEST_RUN"] = "0"
+            self._cmake.definitions["H4_PRINTF_LL_TEST_RUN__TRYRUN_OUTPUT"] = ""
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

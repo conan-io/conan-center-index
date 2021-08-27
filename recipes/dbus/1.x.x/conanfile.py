@@ -60,6 +60,9 @@ class DbusConan(ConanFile):
             args.append("--disable-asserts")
             args.append("--disable-checks")
 
+            args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
+            args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
+
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -73,11 +76,13 @@ class DbusConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "share", "doc"))
         for i in ["var", "share", "etc"]:
             shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "systemd"))
         tools.remove_files_by_mask(self.package_folder, "*.la")
 
     def package_info(self):

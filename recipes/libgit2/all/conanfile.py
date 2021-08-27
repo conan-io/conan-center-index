@@ -2,6 +2,8 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibGit2Conan(ConanFile):
     name = "libgit2"
@@ -10,8 +12,7 @@ class LibGit2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libgit2.org/"
     license = ("GPL-2.0-linking-exception",)
-    exports_sources = "CMakeLists.txt",
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -22,7 +23,7 @@ class LibGit2Conan(ConanFile):
         "with_https": [False, "openssl", "mbedtls", "winhttp", "security"],
         "with_sha1": ["collisiondetection", "commoncrypto", "openssl", "mbedtls", "generic", "win32"],
         "with_ntlmclient": [True, False],
-        "with_regex": ["auto", "builtin", "pcre", "pcre2", "regcomp_l", "regcomp"],
+        "with_regex": ["builtin", "pcre", "pcre2", "regcomp_l", "regcomp"],
     }
     default_options = {
         "shared": False,
@@ -33,15 +34,19 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
         "with_ntlmclient": True,
-        "with_regex": "auto",
+        "with_regex": "builtin",
     }
+
+    exports_sources = "CMakeLists.txt",
+    generators = "cmake", "cmake_find_package"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
         if not tools.is_apple_os(self.settings.os):
@@ -50,12 +55,40 @@ class LibGit2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.with_ntlmclient
 
+        if self.settings.os == "Macos":
+            self.options.with_regex = "regcomp_l"
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("http_parser/2.9.4")
+        if self.options.with_libssh2:
+            self.requires("libssh2/1.9.0")
+        if self._need_openssl:
+            self.requires("openssl/1.1.1k")
+        if self._need_mbedtls:
+            self.requires("mbedtls/2.25.0")
+        if self.options.get_safe("with_iconv"):
+            self.requires("libiconv/1.16")
+        if self.options.with_regex == "pcre":
+            self.requires("pcre/8.45")
+        elif self.options.with_regex == "pcre2":
+            self.requires("pcre2/10.37")
+
+    @property
+    def _need_openssl(self):
+        return "openssl" in (self.options.with_https, self.options.with_sha1)
+
+    @property
+    def _need_mbedtls(self):
+        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
+
+    def validate(self):
         if self.options.with_https == "security":
             if not tools.is_apple_os(self.settings.os):
                 raise ConanInvalidConfiguration("security is only valid for Apple products")
@@ -67,48 +100,16 @@ class LibGit2Conan(ConanFile):
             if self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("win32 is only valid on Windows")
 
-        self.options.with_regex = self._with_regex
         if self.options.with_regex == "regcomp" or self.options.with_regex == "regcomp_l":
             if self.settings.compiler == "Visual Studio":
                 raise ConanInvalidConfiguration("{} isn't supported by Visual Studio".format(self.options.with_regex))
 
-    @property
-    def _need_openssl(self):
-        return "openssl" in (self.options.with_https, self.options.with_sha1)
-
-    @property
-    def _need_mbedtls(self):
-        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
-
-    @property
-    def _with_regex(self):
-        if self.options.with_regex == "auto":
-            if tools.is_apple_os(self.settings.os):
-                return "regcomp_l"
-            else:
-                return "builtin"
-        return self.options.with_regex
-
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-        self.requires("http_parser/2.9.4")
-        if self.options.with_libssh2:
-            self.requires("libssh2/1.9.0")
-        if self._need_openssl:
-            self.requires("openssl/1.1.1j")
-        if self._need_mbedtls:
-            self.requires("mbedtls/2.24.0")
-        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
-            self.requires("libiconv/1.16")
-        if self.options.with_regex == "pcre":
-            self.requires("pcre/8.44")
-        elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.36")
+        if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.options.with_regex == "regcomp_l":
+            raise ConanInvalidConfiguration("regcomp_l isn't supported on {}".format(self.settings.os))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     _cmake_https = {
         "openssl": "OpenSSL",
@@ -128,30 +129,29 @@ class LibGit2Conan(ConanFile):
     }
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        cmake.definitions["USE_SSH"] = self.options.with_libssh2
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
+        self._cmake.definitions["USE_SSH"] = self.options.with_libssh2
 
-        if tools.is_apple_os(self.settings.os):
-            cmake.definitions["USE_ICONV"] = self.options.with_iconv
-        else:
-            cmake.definitions["USE_ICONV"] = False
+        self._cmake.definitions["USE_ICONV"] = self.options.get_safe("with_iconv", False)
 
-        cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
-        cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
+        self._cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
+        self._cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        cmake.definitions["BUILD_CLAR"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["USE_HTTP_PARSER"] = "system"
+        self._cmake.definitions["BUILD_CLAR"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["USE_HTTP_PARSER"] = "system"
 
-        cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
+        self._cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
 
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+            self._cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
-        cmake.configure()
+        self._cmake.configure()
 
-        return cmake
+        return self._cmake
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
@@ -184,8 +184,9 @@ class LibGit2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libgit2"
         self.cpp_info.libs = ["git2"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
-        if self.settings.os == "Linux" and self.options.threadsafe:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.threadsafe:
             self.cpp_info.system_libs.append("pthread")

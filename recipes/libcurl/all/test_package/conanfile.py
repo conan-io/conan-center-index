@@ -9,8 +9,6 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def build(self):
-        if tools.cross_building(self.settings) and self.settings.os in ["iOS"]:
-            return  # on iOS I do not even need to build, it will just give am a and error about unsigned binaries       
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

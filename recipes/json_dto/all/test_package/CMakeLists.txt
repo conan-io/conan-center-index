@@ -1,15 +1,11 @@
-cmake_minimum_required(VERSION 3.8)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
+cmake_minimum_required(VERSION 3.1)
 project(PackageTest CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(json_dto REQUIRED)
+find_package(json-dto REQUIRED CONFIG)
 
 add_executable(example example.cpp)
-target_link_libraries(example json_dto::json_dto)
+target_link_libraries(example json-dto::json-dto)
+set_property(TARGET example PROPERTY CXX_STANDARD 14)

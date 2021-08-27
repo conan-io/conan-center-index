@@ -1,0 +1,26 @@
+--- a/image/decode/segdec.c
++++ b/image/decode/segdec.c
+@@ -52,6 +52,13 @@ static Int DecodeSignificantAbsLevel (struct CAdaptiveHuffman *pAHexpt, BitIOInf
+ //================================================================
+ // Memory access functions
+ //================================================================
++#ifndef _BIG__ENDIAN_
++#if (defined(WIN32) && !defined(UNDER_CE)) || (defined(UNDER_CE) && defined(_ARM_))
++// WinCE ARM and Desktop x86
++#else
++U32 _byteswap_ulong(U32 bits);
++#endif
++#endif
+ static U32 _FORCEINLINE _load4(void* pv)
+ {
+ #ifdef _BIG__ENDIAN_
+--- a/jxrgluelib/JXRGlueJxr.c
++++ b/jxrgluelib/JXRGlueJxr.c
+@@ -27,6 +27,7 @@
+ //
+ //*@@@---@@@@******************************************************************
+ #include <limits.h>
++#include <wchar.h>
+ #include <JXRGlue.h>
+ 
+ 

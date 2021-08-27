@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 43ac22ea..3002c869 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -167,7 +167,6 @@ endmacro()
+ macro(jerry_add_compile_warnings)
+   foreach(_warning ${ARGV})
+     jerry_add_compile_flags(-W${_warning})
+-    jerry_add_compile_flags(-Werror=${_warning})
+   endforeach()
+ endmacro()
+ 
+@@ -212,7 +211,7 @@ if(USING_GCC OR USING_CLANG)
+     jerry_add_compile_flags(-fno-builtin)
+   endif()
+   jerry_add_compile_warnings(all extra format-nonliteral init-self conversion sign-conversion format-security missing-declarations shadow strict-prototypes undef old-style-definition)
+-  jerry_add_compile_flags(-Wno-stack-protector -Wno-attributes -Werror)
++  jerry_add_compile_flags(-Wno-stack-protector -Wno-attributes)
+ endif()
+ 
+ if(USING_GCC)

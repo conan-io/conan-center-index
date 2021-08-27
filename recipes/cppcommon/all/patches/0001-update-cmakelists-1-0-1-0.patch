@@ -1,0 +1,139 @@
+From 85122652b618951f1b8fe91d8804d92a74d971be Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alx.manpages@gmail.com>
+Date: Mon, 7 Jun 2021 10:27:46 +0200
+Subject: [PATCH] update cmakelists
+
+---
+ CMakeLists.txt | 42 +++++++++++++++++++-----------------------
+ 1 file changed, 19 insertions(+), 23 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aa5447a8..10a0065b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,49 +17,36 @@ if(DOXYGEN_FOUND)
+   endif()
+ endif()
+ 
+-# CMake module path
+-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+-
+-# Compiler features
+-include(SetCompilerFeatures)
+-include(SetCompilerWarnings)
+-include(SetPlatformFeatures)
+-include(SystemInformation)
+-
+ # External packages
+ find_package(Threads REQUIRED)
+ if(UNIX AND NOT APPLE AND NOT MSYS)
+   find_package(LibBFD)
+   find_package(LibDL)
+   find_package(LibRT)
+-  find_package(LibUUID)
++  find_package(libuuid)
+ endif()
+ if(WIN32 OR MSYS)
+   find_package(DbgHelp)
+   find_package(RPC)
+-  find_package(Userenv)
+ endif()
+ 
+-# Modules
+-add_subdirectory("modules")
+-
+ # Link libraries
+ list(APPEND LINKLIBS Threads::Threads)
+ if(UNIX AND NOT APPLE AND NOT MSYS)
+   list(APPEND LINKLIBS ${LIBBFD_LIBRARIES})
+   list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
+   list(APPEND LINKLIBS ${LIBRT_LIBRARIES})
+-  list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
++  list(APPEND LINKLIBS CONAN_PKG::libuuid)
+ endif()
+ if(WIN32 OR MSYS)
+   list(APPEND LINKLIBS ${DBGHELP_LIBRARIES})
+   list(APPEND LINKLIBS ${RPC_LIBRARIES})
+-  list(APPEND LINKLIBS ${USERENV_LIBRARIES})
++  list(APPEND LINKLIBS userenv)
++  list(APPEND LINKLIBS rpcrt4)
+   list(APPEND LINKLIBS ${LIBVLD_LIBRARIES})
+ endif()
+ 
+ # System directories
+-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+ include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+ 
+ # Library
+@@ -68,8 +55,9 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
+ file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+ add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
+ set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
+-target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
+-target_link_libraries(cppcommon ${LINKLIBS} fmt)
++target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
++target_compile_features(cppcommon PUBLIC cxx_std_17)
++target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
+ list(APPEND INSTALL_TARGETS cppcommon)
+ list(APPEND LINKLIBS cppcommon)
+ 
+@@ -92,6 +80,7 @@ if(NOT CPPCOMMON_MODULE)
+   endforeach()
+ 
+   # Examples
++  if(FALSE)
+   file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
+   file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
+   file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
+@@ -105,8 +94,10 @@ if(NOT CPPCOMMON_MODULE)
+     list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
+     list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
+   endforeach()
++  endif()
+ 
+   # Benchmarks
++  if(FALSE)
+   file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
+   file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
+   file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
+@@ -120,8 +111,10 @@ if(NOT CPPCOMMON_MODULE)
+     list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
+     list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
+   endforeach()
++  endif()
+ 
+   # Tests
++  if(FALSE)
+   file(GLOB TESTS_HEADER_FILES "tests/*.h")
+   file(GLOB TESTS_INLINE_FILES "tests/*.inl")
+   file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
+@@ -132,19 +125,22 @@ if(NOT CPPCOMMON_MODULE)
+   target_link_libraries(cppcommon-tests ${LINKLIBS})
+   list(APPEND INSTALL_TARGETS cppcommon-tests)
+   list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
++  endif()
+ 
+   # CTest
++  if(FALSE)
+   enable_testing()
+   add_test(cppcommon-tests cppcommon-tests --durations yes --order lex)
++  endif()
+ 
+   # Install
+   install(TARGETS ${INSTALL_TARGETS}
+-    RUNTIME DESTINATION "${PROJECT_SOURCE_DIR}/bin"
+-    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/bin"
+-    ARCHIVE DESTINATION "${PROJECT_SOURCE_DIR}/bin")
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib)
+ 
+   # Install *.pdb files
+-  if(MSVC)
++  if(FALSE)
+     foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
+       install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
+     endforeach()
+-- 
+2.31.1.498.g6c1eba8ee3d
+

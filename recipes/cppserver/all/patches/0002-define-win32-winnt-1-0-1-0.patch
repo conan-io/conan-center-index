@@ -1,0 +1,33 @@
+From 7e22e6744924bf00bcb01bc1efe552446a389915 Mon Sep 17 00:00:00 2001
+From: Alejandro Colomar <alx.manpages@gmail.com>
+Date: Mon, 7 Jun 2021 11:45:37 +0200
+Subject: [PATCH] define win32 winnt
+
+The change present here is handled upstream by this CMake module:
+
+https://github.com/chronoxor/CppCMakeScripts/blob/1.0.0.0/SetPlatformFeatures.cmake
+
+Even if it sets _WIN32_WINNT to _WIN32_WINNT_WIN10, here a less strict
+definiton is chosen (_WIN32_WINNT_VISTA).
+---
+ CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2183c531..29fe1a3c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,6 +43,10 @@ target_compile_features(cppserver PUBLIC cxx_std_17)
+ list(APPEND INSTALL_TARGETS cppserver)
+ list(APPEND LINKLIBS cppserver)
+ 
++if(WIN32 AND NOT MSVC)
++  target_compile_definitions(cppserver PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_VISTA)
++endif()
++
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPSERVER_MODULE)
+ 
+-- 
+2.31.1.498.g6c1eba8ee3d
+

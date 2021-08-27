@@ -1,6 +1,9 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class CrowConan(ConanFile):
     name = "crowcpp-crow"
     homepage = "https://github.com/CrowCpp/crow"
@@ -16,22 +19,30 @@ class CrowConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
-        '''To be removed in next released versions'''
-        self.requires("openssl/1.1.1i")
+        if self.version == "0.2":
+            self.requires("openssl/1.1.1k")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "crow-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder
+        )
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_TESTING"] = False
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build(target="amalgamation")
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst=os.path.join("include", "crow"), src=os.path.join(self._source_subfolder, "include"))
+        self.copy(
+            "*.h",
+            dst=os.path.join("include", "crow"),
+            src=os.path.join(self._source_subfolder, "include"),
+        )
         self.copy("crow_all.h", dst=os.path.join("include", "crow"))
 
     def package_id(self):

@@ -1,0 +1,13 @@
+diff --git a/flint.h b/flint.h
+index f4e98b2e9..62ac39222 100644
+--- a/flint.h
++++ b/flint.h
+@@ -26,7 +26,7 @@
+ /* MinGW and FreeBSD have alloca, but not alloca.h */
+ #include <alloca.h>
+ #endif
+-#if defined(__MINGW32__)
++#if defined(__MINGW32__) || defined(_MSC_VER)
+ #include <malloc.h> /* for alloca on MinGW */
+ #endif
+ #include "limits.h"

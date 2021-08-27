@@ -1,4 +1,11 @@
 sources:
+  "1.9.1":
+    url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.9.1.tar.gz"
+    sha256: "0d2cf3113eea97776731888c711ff836b2be7ff35966a2aa86f3dc57103d0740"
   "1.9":
     url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.9.tar.gz"
     sha256: "909eb88c71268dc00cdda244a1fa40a0feefae45f68a779fbfddd5463559fa40"
+patches:
+  "1.9":
+    - patch_file: "patches/0001-fix-install-bundle.patch"
+      base_path: "source_subfolder"

@@ -2,3 +2,9 @@ sources:
   "2.3":
     url: "https://github.com/google/cctz/archive/v2.3.tar.gz"
     sha256: "8615b20d4e33e02a271c3b93a3b208e3d7d5d66880f5f6208b03426e448f32db"
+patches:
+  "2.3":
+    - patch_file: "patches/0001-fix-installation.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-frameworks-apple.patch"
+      base_path: "source_subfolder"

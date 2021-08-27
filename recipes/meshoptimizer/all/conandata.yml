@@ -10,5 +10,5 @@ sources:
     sha256: "5a6e429ecf72325131b439a46297a690f0cab833c7563efdadab26c0a6cf8490"
 patches:
   "0.14":
-    - patch_file: "patches/0.14/001_Fix build_on_old_AppleClang_versions.patch"
+    - patch_file: "patches/0.14/0001-fix-build-on-old-AppleClang-versions.patch"
       base_path: "source_subfolder"

@@ -18,7 +18,7 @@ class CppServer(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["asio/1.18.2", "openssl/1.1.1k", "cppcommon/cci.20201104"]
+    requires = ["asio/1.19.1", "openssl/1.1.1k", "cppcommon/1.0.2.0"]
     generators = "cmake", "cmake_find_package"
     exports_sources = ["patches/**", "CMakeLists.txt"]
     _cmake = None

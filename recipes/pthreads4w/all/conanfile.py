@@ -11,7 +11,7 @@ class Pthreads4WConan(ConanFile):
     homepage = "https://sourceforge.net/projects/pthreads4w/"
     description = "POSIX Threads for Windows"
     license = "Apache-2.0"
-    topics = "pthreads"
+    topics = ("pthreads", "windows", "posix")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,17 +28,23 @@ class Pthreads4WConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
-        if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("pthreads4w can only target Windows")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            self.build_requires("autoconf/2.69")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("autoconf/2.71")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
+
+    def validate(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("pthreads4w can only target os=Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -72,7 +78,7 @@ class Pthreads4WConan(ConanFile):
                     target += "-static"
                 if self.settings.build_type == "Debug":
                     target += "-debug"
-                with tools.vcvars(self.settings):
+                with tools.vcvars(self):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                         self.run("nmake {}".format(target))
             else:
@@ -92,7 +98,7 @@ class Pthreads4WConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         with tools.chdir(self._source_subfolder):
             if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
+                with tools.vcvars(self):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                         self.run("nmake install DESTROOT={}".format(self.package_folder))
             else:

@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c41d902..4793e9b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,10 @@ if(NOT CMAKE_C_STANDARD)
+   set(CMAKE_C_STANDARD 11)
+ endif()
+ 
++if(NOT CMAKE_CXX_STANDARD)
++  set(CMAKE_CXX_STANDARD 14)
++endif()
++
+ include(GNUInstallDirs)
+ set(CMAKE_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/sentry")
+ 

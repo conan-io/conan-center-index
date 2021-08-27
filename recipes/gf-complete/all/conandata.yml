@@ -1,7 +1,11 @@
 sources:
-  "1.03":
-    url: "https://github.com/ceph/gf-complete/archive/58eebabd204998364355eee293402929502bf1a9.tar.gz"
-    sha256: "ba9d90b5818b8356073fdc21704bdd8b70e80aceb51700374386393f39cb1b0e"
   "cci.20170410":
     url: "https://github.com/ceph/gf-complete/archive/a6862d10c9db467148f20eef2c6445ac9afd94d8.tar.gz"
     sha256: "f7a8f61eb3c6718b4d8011c75b75a1bedd820e6851d71a65e491af805e8749aa"
+  "1.03":  # 20141225
+    url: "https://github.com/ceph/gf-complete/archive/58eebabd204998364355eee293402929502bf1a9.tar.gz"
+    sha256: "ba9d90b5818b8356073fdc21704bdd8b70e80aceb51700374386393f39cb1b0e"
+patches:
+  "cci.20170410":
+    - patch_file: "patches/0001-fix-msvc-cci.20170410.patch"
+      base_path: "source_subfolder"

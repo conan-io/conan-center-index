@@ -1,8 +1,7 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
-import os
+from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class ImaglConan(ConanFile):
@@ -14,21 +13,21 @@ class ImaglConan(ConanFile):
     topics = ("opengl", "texture", "image")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False], 
-        "fPIC": [True, False], 
-        "with_png": [True, False], 
-        "with_jpeg": [True, False], 
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_png": [True, False],
+        "with_jpeg": [True, False],
         "allow_clang_11": [None, True, False]
     }
     default_options = {
-        "shared": False, 
-        "fPIC": True, 
-        "with_png": True, 
-        "with_jpeg": True, 
+        "shared": False,
+        "fPIC": True,
+        "with_png": True,
+        "with_jpeg": True,
         "allow_clang_11": None
     }
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     _cmake = None
 
     @property
@@ -57,9 +56,25 @@ class ImaglConan(ConanFile):
     def _supports_jpeg(self):
         return tools.Version(self.version) >= "0.2.0"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-v" + self.version, self._source_subfolder)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if not self._supports_jpeg:
+            del self.options.with_jpeg
+        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
+            del self.options.allow_clang_11
+        else:
+            self.output.warn("allow_clang_11 option will be removed in the future when conan center index will support clang 11.")
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self._supports_jpeg and self.options.with_jpeg:
+            self.requires("libjpeg/9d")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -87,25 +102,9 @@ class ImaglConan(ConanFile):
         else:
             print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if not self._supports_jpeg:
-            del self.options.with_jpeg
-        if not str(self.settings.compiler) == "clang" or not str(self.settings.compiler.version) == "11":
-            del self.options.allow_clang_11
-        else:
-            self.output.warn("allow_clang_11 option will be removed in the future when conan center index will support clang 11.")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        if self.options.with_png:
-            self.requires("libpng/1.6.37")
-        if self._supports_jpeg and self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -121,6 +120,8 @@ class ImaglConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

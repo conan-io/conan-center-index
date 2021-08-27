@@ -58,6 +58,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "source_subfolder"
@@ -73,6 +75,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.71.0:
     - patch_file: "patches/bcp_namespace_issues_1_71.patch"
       base_path: "source_subfolder"
@@ -85,6 +89,8 @@ patches:
     - patch_file: "patches/solaris_pthread_data.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
       base_path: "source_subfolder"
   1.72.0:
     - patch_file: "patches/bcp_namespace_issues_1_72.patch"
@@ -103,12 +109,16 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.73.0:
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/python_base_prefix.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
       base_path: "source_subfolder"
   1.74.0:
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter_since_1_74.patch"
@@ -117,6 +127,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.75.0:
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter_since_1_74.patch"
       base_path: "source_subfolder"
@@ -124,6 +136,10 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.76.0:
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
       base_path: "source_subfolder"

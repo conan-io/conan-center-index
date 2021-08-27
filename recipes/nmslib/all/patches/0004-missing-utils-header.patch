@@ -1,0 +1,12 @@
+diff --git a/similarity_search/src/distcomp_scalar.cc b/similarity_search/src/distcomp_scalar.cc
+index 0aed6eb..245075f 100644
+--- a/similarity_search/src/distcomp_scalar.cc
++++ b/similarity_search/src/distcomp_scalar.cc
+@@ -15,6 +15,7 @@
+ #include "portable_intrinsics.h"
+ #include "distcomp.h"
+ #include "string.h"
++#include "utils.h"
+ 
+ #include <cstdlib>
+ #include <limits>

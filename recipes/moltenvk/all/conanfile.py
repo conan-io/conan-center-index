@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class MoltenVKConan(ConanFile):
@@ -42,12 +42,6 @@ class MoltenVKConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
-            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
-        if self.settings.compiler != "apple-clang":
-            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
 
     def requirements(self):
         self.requires("cereal/1.3.0")
@@ -118,13 +112,19 @@ class MoltenVKConan(ConanFile):
                 self.compatible_packages.append(compatible_pkg)
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
+            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
+        if self.settings.compiler != "apple-clang":
+            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
         if tools.Version(self.version) >= "1.0.42":
             if tools.Version(self.settings.compiler.version) < "12.0":
                 raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("MoltenVK-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -154,6 +154,11 @@ class MoltenVKConan(ConanFile):
             self.cpp_info.frameworks.append("IOKit")
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
+
+        if self.options.shared:
+            moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
+            self.output.info("Appending VK_ICD_FILENAMES environment variable: {}".format(moltenvk_icd_path))
+            self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")

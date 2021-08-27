@@ -1,0 +1,11 @@
+--- Makefile.in
++++ Makefile.in
+@@ -517,7 +517,7 @@
+ target_os = @target_os@
+ target_vendor = @target_vendor@
+ toolexecdir = @toolexecdir@
+-toolexeclibdir = @toolexeclibdir@
++toolexeclibdir = @libdir@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@

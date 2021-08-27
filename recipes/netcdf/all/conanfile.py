@@ -2,6 +2,8 @@ from conans import CMake, ConanFile, tools
 import glob
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class NetcdfConan(ConanFile):
     name = "netcdf"
@@ -58,11 +60,11 @@ class NetcdfConan(ConanFile):
         if self._with_hdf5:
             self.requires("hdf5/1.12.0")
         if self.options.dap:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.77.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("netcdf-c-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -106,13 +108,14 @@ class NetcdfConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "netCDF"
         self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
+        self.cpp_info.components["libnetcdf"].names["pkg_config"] = "netcdf"
         self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
         self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap:
             self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:

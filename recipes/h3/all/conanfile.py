@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class H3Conan(ConanFile):
     name = "h3"
@@ -46,8 +48,8 @@ class H3Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -78,7 +80,9 @@ class H3Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "h3"
+        self.cpp_info.names["cmake_find_package_multi"] = "h3"
+        self.cpp_info.libs = ["h3"]
         self.cpp_info.defines.append("H3_PREFIX={}".format(self.options.h3_prefix))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

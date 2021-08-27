@@ -1,0 +1,8 @@
+sources:
+  "cci.20200622":
+    url: "https://github.com/troldal/Zippy/archive/a838de8522f9051df0d1b202473bb6befe648702.tar.gz"
+    sha256: "8be803861b69c51179ade1f2ce62f07fb1f2d301a084d705c8ec2374db22071a"
+patches:
+  "cci.20200622":
+    - patch_file: "patches/zippy-archive-mkdir.patch"
+      base_path: "source_subfolder"

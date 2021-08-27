@@ -1,0 +1,111 @@
+diff --git a/ActiveRecord/Compiler/CMakeLists.txt b/ActiveRecord/Compiler/CMakeLists.txt
+index 06749c1..40a8b23 100644
+--- a/ActiveRecord/Compiler/CMakeLists.txt
++++ b/ActiveRecord/Compiler/CMakeLists.txt
+@@ -21,5 +21,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+diff --git a/Encodings/Compiler/CMakeLists.txt b/Encodings/Compiler/CMakeLists.txt
+index 97eecfe..fa4e85b 100644
+--- a/Encodings/Compiler/CMakeLists.txt
++++ b/Encodings/Compiler/CMakeLists.txt
+@@ -15,5 +15,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
+index 6b276be..81cb8b7 100644
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -101,7 +101,7 @@ set_target_properties(Foundation
+ )
+ 
+ if(POCO_UNBUNDLED)
+-	target_link_libraries(Foundation PUBLIC Pcre::Pcre ZLIB::ZLIB)
++	target_link_libraries(Foundation PUBLIC PCRE::PCRE ZLIB::ZLIB)
+ 	target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
+ endif(POCO_UNBUNDLED)
+ 
+diff --git a/NetSSL_Win/CMakeLists.txt b/NetSSL_Win/CMakeLists.txt
+index 3e2b5ff..2ab7590 100644
+--- a/NetSSL_Win/CMakeLists.txt
++++ b/NetSSL_Win/CMakeLists.txt
+@@ -21,7 +21,7 @@ set_target_properties(NetSSLWin
+ 	DEFINE_SYMBOL NetSSL_Win_EXPORTS
+ )
+ 
+-target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util crypt32 ws2_32)
+ target_include_directories(NetSSLWin
+ 	PUBLIC
+ 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+diff --git a/PageCompiler/CMakeLists.txt b/PageCompiler/CMakeLists.txt
+index d80fe73..48379eb 100644
+--- a/PageCompiler/CMakeLists.txt
++++ b/PageCompiler/CMakeLists.txt
+@@ -23,5 +23,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+diff --git a/PocoDoc/CMakeLists.txt b/PocoDoc/CMakeLists.txt
+index 92f37a9..49ad7b4 100644
+--- a/PocoDoc/CMakeLists.txt
++++ b/PocoDoc/CMakeLists.txt
+@@ -11,5 +11,6 @@ install(
+ 	LIBRARY DESTINATION lib${LIB_SUFFIX}
+ 	ARCHIVE DESTINATION lib${LIB_SUFFIX}
+ 	RUNTIME DESTINATION bin
++	BUNDLE DESTINATION bin
+ 	INCLUDES DESTINATION include
+ )
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4e0527296..f6ceb699d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -204,6 +204,15 @@ endif()
+ 
+ include(DefinePlatformSpecifc)
+ 
++# Disable fork exec
++option(POCO_NO_FORK_EXEC
++	"Set to OFF|ON (default is OFF) to control disable fork exec" OFF)
++
++if(POCO_NO_FORK_EXEC)
++	add_definitions(-DPOCO_NO_FORK_EXEC=1)
++	message(STATUS "Building with fork exec disabled")
++endif()
++
+ # Collect the built libraries and include dirs, the will be used to create the PocoConfig.cmake file
+ set(Poco_COMPONENTS "")
+ 
+diff --git a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
+index 038779ec9..fa7afdb1b 100644
+--- a/cmake/PocoMacros.cmake
++++ b/cmake/PocoMacros.cmake
+@@ -40,7 +40,7 @@ if(WIN32)
+ 			endforeach()
+ 		endif(X64)
+ 	endif()
+-	find_program(CMAKE_MC_COMPILER mc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
++	find_program(CMAKE_MC_COMPILER NAMES mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
+ 		DOC "path to message compiler")
+ 	if(NOT CMAKE_MC_COMPILER)
+ 		message(FATAL_ERROR "message compiler not found: required to build")
+@@ -274,6 +274,7 @@ install(
+     LIBRARY DESTINATION lib${LIB_SUFFIX}
+     ARCHIVE DESTINATION lib${LIB_SUFFIX}
+     RUNTIME DESTINATION bin
++    BUNDLE DESTINATION bin
+     INCLUDES DESTINATION include
+ )
+ 

@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, tools, ConanFile
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibPcapConan(ConanFile):
     name = "libpcap"
@@ -34,9 +36,21 @@ class LibPcapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def requirements(self):
         if self.options.enable_libusb:
-            self.requires("libusb/1.0.23")
+            self.requires("libusb/1.0.24")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
+        if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
 
     def build_requirements(self):
         if self.settings.os == "Linux":
@@ -44,17 +58,8 @@ class LibPcapConan(ConanFile):
             self.build_requires("flex/2.6.4")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
-
-    def configure(self):
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("libpcap can not be built as shared on OSX.")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -88,7 +93,8 @@ class LibPcapConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
-            os.remove(os.path.join(self.package_folder, "lib", "libpcap.a"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"]= "libpcap"
+        self.cpp_info.libs = ["pcap"]

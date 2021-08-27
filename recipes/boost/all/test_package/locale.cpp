@@ -9,6 +9,11 @@
 #include <iostream>
 #include <iomanip>
 #include <ctime>
+
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 int main()
 {
     using namespace boost::locale;

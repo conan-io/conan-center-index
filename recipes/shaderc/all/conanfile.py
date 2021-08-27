@@ -2,6 +2,8 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 class ShadercConan(ConanFile):
     name = "shaderc"
     description = "A collection of tools, libraries and tests for shader compilation."
@@ -34,6 +36,8 @@ class ShadercConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
+        if tools.Version(self.version) >= "2020.4":
+            del self.options.spvc
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -43,15 +47,28 @@ class ShadercConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
+    @property
+    def _get_compatible_spirv_tools_version(self):
+        return {
+            "2021.1": "2021.2",
+            "2019.0": "2020.5"
+        }.get(str(self.version), False)
+
+    @property
+    def _get_compatible_glslang_version(self):
+        return {
+            "2021.1": "11.5.0",
+            "2019.0": "8.13.3559"
+        }.get(str(self.version), False)
+
     def requirements(self):
-        self.requires("glslang/8.13.3559")
-        self.requires("spirv-tools/2020.5")
-        if self.options.spvc:
+        self.requires("glslang/{}".format(self._get_compatible_glslang_version))
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
+        if self.options.get_safe("spvc", False):
            self.requires("spirv-cross/20210115")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -64,7 +81,7 @@ class ShadercConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        self._cmake.definitions["SHADERC_ENABLE_SPVC"] = self.options.spvc
+        self._cmake.definitions["SHADERC_ENABLE_SPVC"] = self.options.get_safe("spvc", False)
         self._cmake.definitions["SHADERC_SKIP_INSTALL"] = False
         self._cmake.definitions["SHADERC_SKIP_TESTS"] = True
         self._cmake.definitions["SHADERC_SPVC_ENABLE_DIRECT_LOGGING"] = False
@@ -100,6 +117,6 @@ class ShadercConan(ConanFile):
         libs = ["shaderc_shared" if self.options.shared else "shaderc"]
         if not self.options.shared:
             libs.append("shaderc_util")
-        if self.options.spvc:
+        if self.options.get_safe("spvc", False):
             libs.append("shaderc_spvc_shared" if self.options.shared else "shaderc_spvc")
         return libs

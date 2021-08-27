@@ -3,3 +3,5 @@ versions:
     folder: "all"
   "5.80.0":
     folder: "all"
+  "5.84.0":
+    folder: "all"

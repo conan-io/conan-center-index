@@ -3,20 +3,27 @@ from contextlib import contextmanager
 import os
 import shutil
 
+required_conan_version = ">=1.36.0"
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
     # DON'T COPY extra.m4 TO BUILD FOLDER!!!
+    test_type = "build_requires"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
                     yield
         else:
@@ -44,7 +51,7 @@ class TestPackageConan(ConanFile):
         assert os.path.isfile(compile_script)
 
         if self._system_cc:
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 self.run("{} {} test_package_1.c -o script_test".format(tools.unix_path(compile_script), self._system_cc), win_bash=tools.os_info.is_windows)
 
     def _build_autotools(self):
@@ -66,8 +73,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if self._system_cc:
-            if not tools.cross_building(self.settings):
+            if not tools.cross_building(self):
                 self.run(os.path.join(".", "script_test"), run_environment=True)
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             self.run(os.path.join(".", "test_package"), run_environment=True)

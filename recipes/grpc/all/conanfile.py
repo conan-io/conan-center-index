@@ -60,6 +60,13 @@ class grpcConan(ConanFile):
         self.requires('abseil/20210324.1')
         self.requires('re2/20210401')
 
+    def build_requirements(self):
+        self.build_requires('protobuf/3.17.1')
+
+        #when cross compiling we need pre compiled grpc plugins for protoc
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            self.build_requires('grpc/{}'.format(self.version))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -72,6 +79,11 @@ class grpcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        #fix the protoc search path for cross compiling
+        tools.replace_in_file("{}/cmake/protobuf.cmake".format(self._source_subfolder),
+                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
+                "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
+        )
 
     def _configure_cmake(self):
         if self._cmake is not None:

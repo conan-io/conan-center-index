@@ -30,7 +30,7 @@ class LibSELinuxConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux is supported")
 
     def requirements(self):
-        self.requires("pcre2/10.36")
+        self.requires("pcre2/10.37")
 
     def build_requirements(self):
         self.build_requires("flex/2.6.4")

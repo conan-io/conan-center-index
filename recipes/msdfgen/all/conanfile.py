@@ -29,7 +29,7 @@ class MsdfgenConan(ConanFile):
         "utility": True,
     }
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
@@ -63,6 +63,8 @@ class MsdfgenConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # unvendor lodepng & tinyxml2
         tools.rmdir(os.path.join(self._source_subfolder, "lib"))
@@ -103,13 +105,17 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "msdfgen"
         self.cpp_info.names["cmake_find_package_multi"] = "msdfgen"
 
+        includedir = os.path.join("include", "msdfgen")
+
         self.cpp_info.components["_msdfgen"].names["cmake_find_package"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].names["cmake_find_package_multi"] = "msdfgen"
+        self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
         self.cpp_info.components["_msdfgen"].libs = ["msdfgen"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
 
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package"] = "msdfgen-ext"
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package_multi"] = "msdfgen-ext"
+        self.cpp_info.components["msdfgen-ext"].includedirs.append(includedir)
         self.cpp_info.components["msdfgen-ext"].libs = ["msdfgen-ext"]
         self.cpp_info.components["msdfgen-ext"].requires = [
             "_msdfgen", "freetype::freetype",

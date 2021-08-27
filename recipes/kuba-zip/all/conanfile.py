@@ -44,6 +44,9 @@ class ZipConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "-Werror", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -56,6 +59,7 @@ class ZipConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 

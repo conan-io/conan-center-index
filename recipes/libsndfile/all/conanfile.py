@@ -95,6 +95,9 @@ class LibsndfileConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "RUNTIME DESTINATION			${CMAKE_INSTALL_BINDIR}",
+                              "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -123,6 +126,7 @@ class LibsndfileConan(ConanFile):
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.programs:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

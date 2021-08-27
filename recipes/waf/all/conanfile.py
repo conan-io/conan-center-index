@@ -9,7 +9,7 @@ class WafConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://waf.io"
     license = "BSD-3-Clause"
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
 
     @property
     def _source_subfolder(self):
@@ -40,7 +40,7 @@ class WafConan(ConanFile):
         self.copy("waf-light", src=self._source_subfolder, dst=binpath)
         self.copy("waflib/*", src=self._source_subfolder, dst=libpath)
 
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             self.copy("waf.bat", src=os.path.join(self._source_subfolder, "utils"), dst=binpath)
 
         os.chmod(os.path.join(binpath, "waf"), 0o755)

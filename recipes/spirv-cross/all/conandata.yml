@@ -14,3 +14,19 @@ sources:
   "20200403":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
     sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
+patches:
+  "20210115":
+    - patch_file: "patches/0001-fix-bundle-install-20210115.patch"
+      base_path: "source_subfolder"
+  "20200917":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200629":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200519":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"
+  "20200403":
+    - patch_file: "patches/0001-fix-bundle-install-20200403.patch"
+      base_path: "source_subfolder"

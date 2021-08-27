@@ -120,6 +120,8 @@ class MimallocConan(ConanFile):
         self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        if tools.Version(self.version) >= "1.7.0":
+            self._cmake.definitions["MI_INSTALL_TOPLEVEL"] = "ON"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -156,6 +158,8 @@ class MimallocConan(ConanFile):
             elif self.settings.arch == "x86":
                 self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
                           dst="bin")
+
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     @property
     def _obj_name(self):

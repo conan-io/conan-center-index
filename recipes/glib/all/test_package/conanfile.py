@@ -8,7 +8,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if self.settings.os != "Windows":
-            self.run("gdbus-codegen -h", run_environment=True)
+            with tools.environment_append({'PKG_CONFIG_PATH': "."}):
+                pkg_config = tools.PkgConfig("gio-2.0")
+                self.run("%s -h" % pkg_config.variables["gdbus_codegen"], run_environment=True)
 
         cmake = CMake(self)
         cmake.configure()

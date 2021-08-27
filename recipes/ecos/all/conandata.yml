@@ -1,0 +1,10 @@
+sources:
+  "2.0.8":
+    url: "https://github.com/embotech/ecos/archive/refs/tags/v2.0.8.tar.gz"
+    sha256: "d905d16599efd927a75b29852c3476ff1ffd0b97ab27d5b8ad63bb4ff2ad8130"
+patches:
+  "2.0.8":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-missing-include.patch"
+      base_path: "source_subfolder"

@@ -1,22 +1,34 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibdeflateConan(ConanFile):
     name = "libdeflate"
     description = "Heavily optimized library for DEFLATE/zlib/gzip compression and decompression."
     license = "MIT"
-    topics = ("conan", "libdeflate", "compression", "decompression", "deflate", "zlib", "gzip")
+    topics = ("libdeflate", "compression", "decompression", "deflate", "zlib", "gzip")
     homepage = "https://github.com/ebiggers/libdeflate"
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,20 +41,20 @@ class LibdeflateConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+                not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_msvc(self):
         makefile_msc_file = os.path.join(self._source_subfolder, "Makefile.msc")
         tools.replace_in_file(makefile_msc_file, "CFLAGS = /MD /O2 -I.", "CFLAGS = /nologo $(CFLAGS) -I.")
         tools.replace_in_file(makefile_msc_file, "LDFLAGS =", "")
         with tools.chdir(self._source_subfolder):
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     target = "libdeflate.dll" if self.options.shared else "libdeflatestatic.lib"
                     self.run("nmake /f Makefile.msc {}".format(target))
@@ -71,13 +83,13 @@ class LibdeflateConan(ConanFile):
             self._build_make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("libdeflate.h", dst="include", src=self._source_subfolder)
-        self.copy("*.lib", dst="lib", src=self._source_subfolder)
-        self.copy("*.dll", dst="bin", src=self._source_subfolder)
-        self.copy("*.a", dst="lib", src=self._source_subfolder)
-        self.copy("*.so*", dst="lib", src=self._source_subfolder, symlinks=True)
-        self.copy("*.dylib", dst="lib", src=self._source_subfolder, symlinks=True)
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy("libdeflate.h", src=self._source_subfolder, dst="include")
+        self.copy("*.lib", src=self._source_subfolder, dst="lib")
+        self.copy("*.dll", src=self._source_subfolder, dst="bin")
+        self.copy("*.a", src=self._source_subfolder, dst="lib")
+        self.copy("*.so*", src=self._source_subfolder, dst="lib", symlinks=True)
+        self.copy("*.dylib", src=self._source_subfolder, dst="lib", symlinks=True)
 
     def package_info(self):
         prefix = "lib" if self.settings.os == "Windows" else ""

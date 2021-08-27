@@ -1,0 +1,23 @@
+From 79aa6d53e5718ca44bc01ef05fdda7a849d353e0 Mon Sep 17 00:00:00 2001
+From: mjvankampen <markjanvankampen@gmail.com>
+Date: Thu, 15 Jul 2021 22:09:05 +0100
+Subject: [PATCH] Add assert to enable compilation with libcxx + gcc (#947)
+
+---
+ include/yaml-cpp/node/iterator.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/yaml-cpp/node/iterator.h b/include/yaml-cpp/node/iterator.h
+index b44723817..1fcf6e400 100644
+--- a/include/yaml-cpp/node/iterator.h
++++ b/include/yaml-cpp/node/iterator.h
+@@ -15,6 +15,9 @@
+ #include <utility>
+ #include <vector>
+ 
++// Assert in place so gcc + libc++ combination properly builds
++static_assert(std::is_constructible<YAML::Node, const YAML::Node&>::value, "Node must be copy constructable");
++
+ namespace YAML {
+ namespace detail {
+ struct iterator_value : public Node, std::pair<Node, Node> {

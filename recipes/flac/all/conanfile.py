@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class FlacConan(ConanFile):
     name = "flac"
@@ -11,7 +13,7 @@ class FlacConan(ConanFile):
     license = ("BSD-3-Clause", "GPL-2.0-or-later", "LPGL-2.1-or-later", "GFDL-1.2")
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
-    generators = "cmake",
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -43,9 +45,8 @@ class FlacConan(ConanFile):
         self.build_requires("nasm/2.14")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -93,3 +94,7 @@ class FlacConan(ConanFile):
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libflac"].system_libs += ["m"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

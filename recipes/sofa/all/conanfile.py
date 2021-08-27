@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
+required_conan_version = ">=1.33.0"
+
 
 class SofaConan(ConanFile):
     name = "sofa"
@@ -36,8 +38,8 @@ class SofaConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -62,6 +64,6 @@ class SofaConan(ConanFile):
         return sofa_header[begin:]
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["sofa_c"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

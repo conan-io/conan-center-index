@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class GeographiclibConan(ConanFile):
@@ -43,6 +43,10 @@ class GeographiclibConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having C++11 math functions
@@ -53,12 +57,9 @@ class GeographiclibConan(ConanFile):
             "Visual Studio": "14",  # guess
         }.get(str(self.settings.compiler), False)
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
+    def validate(self):
         if tools.Version(self.version) >= "1.51":
-            if self.settings.compiler.cppstd:
+            if self.settings.compiler.get_safe("cppstd"):
                 tools.check_min_cppstd(self, 11)
 
             def lazy_lt_semver(v1, v2):
@@ -79,9 +80,8 @@ class GeographiclibConan(ConanFile):
             raise ConanInvalidConfiguration("extended, quadruple and variable precisions not yet supported in this recipe")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "GeographicLib-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")

@@ -117,6 +117,8 @@ class LibMysqlClientCConan(ConanFile):
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("clang 6 or newer is required")
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. contributions are welcome.")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -143,7 +145,6 @@ class LibMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self._cmake.definitions["WITH_ZLIB"] = "system"
-
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 

@@ -27,6 +27,10 @@ class LibpqxxRecipe(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _mac_os_minimum_required_version(self):
+        return "10.15"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -35,24 +39,35 @@ class LibpqxxRecipe(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def validate(self):
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
-        minimal_version = {
-            "Visual Studio": "15",
-            "gcc": "7",
+        lib_version = Version(self.version)
+        minimum_compiler_version = {
+            "Visual Studio": "16" if lib_version >= "7.6.0" else "15",
+            "gcc": "8" if lib_version >= "7.5.0" else "7",
             "clang": "6",
             "apple-clang": "10"
         }
 
-        if compiler in minimal_version and \
-           compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not"
-                                            " supported." % (self.name, compiler, compiler_version))
+        minimum_cpp_standard = 17
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+        if compiler in minimum_compiler_version and \
+           compiler_version < minimum_compiler_version[compiler]:
+            raise ConanInvalidConfiguration("{} requires a compiler that supports"
+                                            " at least C++{}. {} {} is not"
+                                            " supported."
+                                            .format(self.name, minimum_cpp_standard, compiler, compiler_version))
+
+        if self.settings.os == "Macos":
+            os_version = self.settings.get_safe("os.version")
+            if os_version and Version(os_version) < self._mac_os_minimum_required_version:
+                raise ConanInvalidConfiguration(
+                    "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, minimum_cpp_standard)
 
     def requirements(self):
         self.requires("libpq/12.2")
@@ -67,6 +82,8 @@ class LibpqxxRecipe(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_DOC"] = False
             self._cmake.definitions["BUILD_TEST"] = False
+            # Set `-mmacosx-version-min` to enable C++17 standard library support.
+            self._cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = self._mac_os_minimum_required_version
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

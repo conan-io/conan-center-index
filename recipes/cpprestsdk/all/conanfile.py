@@ -131,7 +131,7 @@ class CppRestSDKConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.components["cpprest"].frameworks.extend(["CoreFoundation", "Security"])
         if not self.options.shared:
-            self.cpp_info.components["cpprest"].defines.append("_NO_ASYNCRTIMP")
+            self.cpp_info.components["cpprest"].defines.extend(["_NO_ASYNCRTIMP", "_NO_PPLXIMP"])
         # cpprestsdk_zlib_internal
         if self.options.with_compression:
             self.cpp_info.components["cpprestsdk_zlib_internal"].includedirs = []

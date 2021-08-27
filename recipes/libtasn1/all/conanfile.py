@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibTasn1Conan(ConanFile):
     name = "libtasn1"
@@ -34,18 +36,25 @@ class LibTasn1Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is unsupported by libtasn1")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio is unsupported by libtasn1")
+
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = os.path.join("libtasn1-" + self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -77,10 +86,10 @@ class LibTasn1Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libtasn1.la"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libtasn1"
         self.cpp_info.libs = ["tasn1"]
         if not self.options.shared:
             self.cpp_info.defines = ["ASN1_STATIC"]
-
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
