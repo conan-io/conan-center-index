@@ -140,7 +140,7 @@ class TestPackageConan(ConanFile):
             return False
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self.run("{} -c \"print('hello world')\"".format(self.deps_user_info["cpython"].python), run_environment=True)
 
             buffer = StringIO()
@@ -177,5 +177,5 @@ class TestPackageConan(ConanFile):
                         self.output.info("Testing module (spam) using setup.py built module")
                         self._test_module("spam", True)
 
-        if self.options["cpython"].env_vars:
-            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            if self.options["cpython"].env_vars:
+                self.run(os.path.join("bin", "test_package"), run_environment=True)
