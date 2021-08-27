@@ -46,6 +46,10 @@ class GoogleCloudCppConan(ConanFile):
         if hasattr(self, "settings_build") and tools.cross_building(self):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
+        if tools.Version(self.version) >= "1.30.0":
+            if self.settings.compiler == 'clang' and tools.Version(self.settings.compiler.version) < "6.0":
+                raise ConanInvalidConfiguration("Clang version must be at least 6.0.")
+
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
