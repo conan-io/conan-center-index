@@ -2,10 +2,10 @@ from conans import ConanFile, tools, CMake
 import os
 
 
-class SDL2ImageConan(ConanFile):
-    name = "sdl2_image"
+class SDLImageConan(ConanFile):
+    name = "sdl_image"
     description = "SDL_image is an image file loading library"
-    topics = ("sdl2_image", "sdl_image", "sdl2", "sdl", "images", "opengl")
+    topics = ("sdl_image", "sdl_image", "sdl2", "sdl", "images", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org/projects/SDL_image/"
     license = "MIT"
@@ -61,6 +61,10 @@ class SDL2ImageConan(ConanFile):
             del self.options.fPIC
         if self.settings.os != "Macos":
             del self.options.imageio
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         self.requires("sdl/2.0.16")
