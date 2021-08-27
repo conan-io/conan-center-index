@@ -47,7 +47,7 @@ class SdlttfConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.10.4")
-        self.requires("sdl/2.0.14")
+        self.requires("sdl/2.0.16")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
