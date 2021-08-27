@@ -37,9 +37,10 @@ class MdnsResponderConan(ConanFile):
             # __has_c_attribute is not available in Clang 5
             if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "6":
                 raise ConanInvalidConfiguration("Only Clang 6 or higher is supported for this package.")
-        # Migration of the project files fails with VS 2017, though works OK with VS 2015 and VS 2019
+        # FIXME: Migration of the project files fails with VS 2017 on c3i (conan-center-index's infrastructure)
+        # though works OK with VS 2015 and VS 2019, and works with VS 2017 in my local environment
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) == "15":
-            raise ConanInvalidConfiguration("Visual Studio 2017 is not supported (yet).")
+            raise ConanInvalidConfiguration("Visual Studio 2017 is not supported in CCI (yet).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
