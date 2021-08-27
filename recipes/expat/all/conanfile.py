@@ -74,6 +74,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
             # EXPAT_CHAR_TYPE was added in 2.2.8
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtim
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -101,6 +103,9 @@ class ExpatConan(ConanFile):
                 postfix += "w"
             if self.settings.build_type == "Debug":
                 postfix += "d"
+        if self.settings.compiler == "Visual Studio":
+            if tools.Version(self.version) > "2.2.7":
+                postfix += "MT" if "MT" in self.settings.compiler.runtime else "MD"
         self.cpp_info.libs = ["expat" + postfix]
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
