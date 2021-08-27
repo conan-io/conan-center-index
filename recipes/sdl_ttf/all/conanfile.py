@@ -9,7 +9,7 @@ class SdlttfConan(ConanFile):
     name = "sdl_ttf"
     description = "A TrueType font library for SDL"
     license = "Zlib"
-    topics = ("conan", "sdl2", "sdl2_ttf", "sdl", "sdl_ttf", "ttf", "font")
+    topics = ("sdl2", "sdl2_ttf", "sdl", "sdl_ttf", "ttf", "font")
     homepage = "https://www.libsdl.org/projects/SDL_ttf"
     url = "https://github.com/conan-io/conan-center-index"
 
