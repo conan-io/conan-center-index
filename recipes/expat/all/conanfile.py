@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class ExpatConan(ConanFile):
     name = "expat"
     description = "Fast streaming XML parser written in C."
-    topics = ("conan", "expat", "xml", "parsing")
+    topics = ("expat", "xml", "parsing")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
     license = "MIT"
@@ -17,13 +17,24 @@ class ExpatConan(ConanFile):
         "fPIC": [True, False],
         "char_type": ["char", "wchar_t", "ushort"],
     }
-    default_options = {"shared": False, "fPIC": True, "char_type": "char"}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "char_type": "char",
+    }
+
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = "CMakeLists.txt", "patches/*"
 
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -84,10 +95,16 @@ class ExpatConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
-        self.cpp_info.libs = tools.collect_libs(self)
+        postfix = ""
+        if self.settings.os == "Windows":
+            if tools.Version(self.version) >= "2.2.10" and self.options.get_safe("char_type") != "char":
+                postfix += "w"
+            if self.settings.build_type == "Debug":
+                postfix += "d"
+        self.cpp_info.libs = ["expat" + postfix]
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
-        if self.options.get_safe("char_type") in ["wchar_t", "ushort"]:
+        if self.options.get_safe("char_type") in ("wchar_t", "ushort"):
             self.cpp_info.defines.append("XML_UNICODE")
-        if self.options.get_safe("char_type") == "wchar_t":
+        elif self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
