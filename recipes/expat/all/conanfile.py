@@ -94,26 +94,10 @@ class ExpatConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    @property
-    def _library_name(self):
-        prefix = ""
-        postfix = ""
-        if self.settings.os == "Windows":
-            if tools.Version(self.version) >= "2.2.10" and self.options.get_safe("char_type") != "char":
-                postfix += "w"
-            if self.settings.build_type == "Debug":
-                postfix += "d"
-        if self.settings.compiler == "Visual Studio":
-            if tools.Version(self.version) > "2.2.7":
-                postfix += "MT" if "MT" in self.settings.compiler.runtime else "MD"
-        if self.settings.compiler == "Visual Studio":
-            prefix = "lib"
-        return prefix + "expat" + postfix
-
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "EXPAT"
         self.cpp_info.names["cmake_find_package_multi"] = "expat"
-        self.cpp_info.libs = [self._library_name]
+        self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
         if self.options.get_safe("char_type") in ("wchar_t", "ushort"):
