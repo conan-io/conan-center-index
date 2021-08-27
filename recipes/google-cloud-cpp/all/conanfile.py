@@ -1,9 +1,10 @@
 import os
+import textwrap
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.33.0"
 
 class GoogleCloudCppConan(ConanFile):
     name = "google-cloud-cpp"
@@ -94,9 +95,24 @@ class GoogleCloudCppConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        # Do not override CMAKE_CXX_STANDARD if provided
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            textwrap.dedent("""\
+                set(CMAKE_CXX_STANDARD
+                    11
+                    CACHE STRING "Configure the C++ standard version for all targets.")"""),
+            textwrap.dedent("""\
+                if(NOT "${CMAKE_CXX_STANDARD}")
+                    set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
+                endif()
+                """))
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
