@@ -175,7 +175,7 @@ class CPythonConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self._supports_modules:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
             self.requires("expat/2.4.1")
             if self._with_libffi:
                 self.requires("libffi/3.2.1")
@@ -187,7 +187,7 @@ class CPythonConan(ConanFile):
                 self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
-            self.requires("libxcrypt/4.4.23")
+            self.requires("libxcrypt/4.4.25")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -221,6 +221,7 @@ class CPythonConan(ConanFile):
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "ac_cv_func_getrandom=no",  # FIXME: check
         ]
         if self._is_py2:
             conf_args.extend([
