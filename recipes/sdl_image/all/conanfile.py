@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class SDLImageConan(ConanFile):
     name = "sdl_image"
@@ -9,8 +11,6 @@ class SDLImageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org/projects/SDL_image/"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
-    generators = ["cmake", "cmake_find_package_multi"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,7 +29,8 @@ class SDLImageConan(ConanFile):
         "tif": [True, False],
         "png": [True, False],
         "webp": [True, False],
-        "imageio": [True, False]}
+        "imageio": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -47,16 +48,23 @@ class SDLImageConan(ConanFile):
         "tif": True,
         "png": True,
         "webp": True,
-        "imageio": False
+        "imageio": False,
     }
 
+    exports_sources = ["CMakeLists.txt"]
+    generators = ["cmake", "cmake_find_package_multi"]
+
     _cmake = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Macos":
@@ -65,21 +73,24 @@ class SDLImageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("sdl/2.0.16")
         if self.options.tif:
-            self.requires("libtiff/4.0.9")
+            self.requires("libtiff/4.3.0")
         if self.options.jpg:
             self.requires("libjpeg/9d")
         if self.options.png:
             self.requires("libpng/1.6.37")
         if self.options.webp:
-            self.requires("libwebp/1.0.3")
+            self.requires("libwebp/1.2.0")
         self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -127,3 +138,4 @@ class SDLImageConan(ConanFile):
         # The current dev version is the first version with official CMake support
         self.cpp_info.names["cmake_find_package"] = "SDL2_image"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_image"
+        self.cpp_info.names["pkg_config"] = "SDL2_image"
