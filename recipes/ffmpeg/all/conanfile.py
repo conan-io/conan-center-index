@@ -125,10 +125,10 @@ class FFMpegConan(ConanFile):
         self.build_requires("yasm/1.3.0")
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
         if self.settings.os == "Linux":
             if not tools.which("pkg-config"):
-                self.build_requires("pkgconf/1.7.3")
+                self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         if self.options.zlib:
@@ -162,11 +162,11 @@ class FFMpegConan(ConanFile):
         if self.options.mp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.fdk_aac:
-            self.requires("libfdk_aac/2.0.0")
+            self.requires("libfdk_aac/2.0.1")
         if self.options.webp:
             self.requires("libwebp/1.0.3")
         if self.options.openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
         if self.settings.os == "Windows":
             if self.options.qsv:
                 raise ConanInvalidConfiguration("intel_media_sdk package does not exist (yet)")
@@ -177,7 +177,7 @@ class FFMpegConan(ConanFile):
             if self.options.xcb:
                 self.requires("xorg/system")
             if self.options.pulse:
-                self.requires("pulseaudio/13.0")
+                self.requires("pulseaudio/14.2")
             if self.options.vaapi:
                 self.requires("vaapi/system")
             if self.options.vdpau:
