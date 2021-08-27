@@ -75,7 +75,7 @@ class ExpatConan(ConanFile):
             # EXPAT_CHAR_TYPE was added in 2.2.8
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
             if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtim
+                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
