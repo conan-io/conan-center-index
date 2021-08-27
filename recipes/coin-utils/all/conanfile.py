@@ -48,16 +48,13 @@ class CoinUtilsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
-
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not supported (tested M1)")
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("bzip2/1.0.8")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
