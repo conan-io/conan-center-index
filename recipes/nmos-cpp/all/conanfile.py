@@ -54,10 +54,10 @@ class NmosCppConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/1.1.1k")
         self.requires("json-schema-validator/2.1.0")
-        if self.options.with_dnssd == "mdnsresponder":
+        if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
             self.options["mdnsresponder"].with_opt_patches = True
-        elif self.options.with_dnssd == "avahi":
+        elif self.options.get_safe("with_dnssd") == "avahi":
             self.requires("avahi/0.8")
 
     def source(self):
@@ -72,7 +72,7 @@ class NmosCppConan(ConanFile):
         # over any system-installed find-module packages
         self._cmake.definitions["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = True
         # (on Linux) select Avahi or mDNSResponder
-        self._cmake.definitions["NMOS_CPP_USE_AVAHI"] = self.options.with_dnssd == "avahi"
+        self._cmake.definitions["NMOS_CPP_USE_AVAHI"] = self.options.get_safe("with_dnssd") == "avahi"
         # (on Windows) use the Conan package for DNSSD (mdnsresponder), not the project's own DLL stub library
         self._cmake.definitions["NMOS_CPP_USE_BONJOUR_SDK"] = True
         # no need to build unit tests
