@@ -60,6 +60,9 @@ class NmosCppConan(ConanFile):
         elif self.options.get_safe("with_dnssd") == "avahi":
             self.requires("avahi/0.8")
 
+    def build_requirements(self):
+        self.build_requires("cmake/[>3.17]")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
