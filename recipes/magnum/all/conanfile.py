@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 
 class MagnumConan(ConanFile):
     name = "magnum"
-    description = "Magnum — Lightweight and modular C++11/C++14 graphics middleware for games and data visualization"
+    description = "Lightweight and modular C++11/C++14 graphics middleware for games and data visualization"
     license = "MIT"
     topics = ("conan", "corrade", "graphics", "rendering", "3d", "2d", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
