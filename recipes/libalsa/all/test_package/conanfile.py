@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
-class LibalsaTestConan(ConanFile):
+class AlsaTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
@@ -11,6 +11,7 @@ class LibalsaTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        # TODO: Add test for plugins
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "example")
             self.run(bin_path, run_environment=True)

@@ -15,3 +15,16 @@ patches:
   "1.2.5.1":
     - patch_file: "patches/1.2.5.1-0001-control-empty-fix-the-static-build.patch"
       base_path: "source_subfolder"
+plugins:
+  "1.2.5.1":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.5.tar.gz"
+    sha256: "e1935e34766a461fd89e74743a83782d05db04242d9bbc7b60ea63f8451a41d1"
+  "1.2.4":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.2.tar.gz"
+    sha256: "1872622227c474db9db57bf5b6ec91bbef391f9750e9d64d00d05af29f579e1a"
+  "1.2.2":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.2.tar.gz"
+    sha256: "1872622227c474db9db57bf5b6ec91bbef391f9750e9d64d00d05af29f579e1a"
+  "1.1.9":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.1.9.tar.gz"
+    sha256: "4e16a5efddb57dba5b80b1abcbb49566c0949aab79422b83a429a396743b9e83"
