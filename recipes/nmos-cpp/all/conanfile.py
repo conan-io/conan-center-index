@@ -30,6 +30,8 @@ class NmosCppConan(ConanFile):
     # use cmake_find_package_multi and prefer config-file packages
     generators = "cmake", "cmake_find_package_multi"
 
+    short_paths = True
+
     _cmake = None
 
     # for out-of-source build, cf. wrapper CMakeLists.txt
