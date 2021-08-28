@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import platform
 
 class LibbpfConan(ConanFile):
     name = "libbpf"
