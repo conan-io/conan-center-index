@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(SDL2_image)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(SDL2 REQUIRED CONFIG)
 
@@ -52,16 +52,19 @@ set(SOURCES
     source_subfolder/IMG_svg.c
     source_subfolder/IMG_tga.c
     source_subfolder/IMG_tif.c
+    source_subfolder/IMG_webp.c
     source_subfolder/IMG_xcf.c
     source_subfolder/IMG_xpm.c
     source_subfolder/IMG_xv.c
-    source_subfolder/IMG_webp.c
     ${IMAGEIO_SOURCE}
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})
-
 target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    PUBLIC_HEADER source_subfolder/SDL_image.h
+    DEFINE_SYMBOL DLL_EXPORTS
+)
 
 if(SDL_IS_SHARED)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
@@ -87,12 +90,6 @@ endif()
 if(WEBP)
     find_package(WebP REQUIRED CONFIG)
     target_link_libraries(${PROJECT_NAME} PRIVATE WebP::webp)
-endif()
-
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/SDL_image.h)
-
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
 endif()
 
 install(TARGETS ${PROJECT_NAME}

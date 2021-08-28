@@ -25,10 +25,10 @@ class SDLImageConan(ConanFile):
         "xcf": [True, False],
         "xpm": [True, False],
         "xv": [True, False],
-        "jpg": [True, False],
-        "tif": [True, False],
-        "png": [True, False],
-        "webp": [True, False],
+        "with_libjpeg": [True, False],
+        "with_libtiff": [True, False],
+        "with_libpng": [True, False],
+        "with_libwebp": [True, False],
         "imageio": [True, False],
     }
     default_options = {
@@ -44,15 +44,15 @@ class SDLImageConan(ConanFile):
         "xcf": True,
         "xpm": True,
         "xv": True,
-        "jpg": True,
-        "tif": True,
-        "png": True,
-        "webp": True,
+        "with_libjpeg": True,
+        "with_libtiff": True,
+        "with_libpng": True,
+        "with_libwebp": True,
         "imageio": False,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = ["cmake", "cmake_find_package_multi"]
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
 
@@ -78,13 +78,13 @@ class SDLImageConan(ConanFile):
 
     def requirements(self):
         self.requires("sdl/2.0.16")
-        if self.options.tif:
+        if self.options.with_libtiff:
             self.requires("libtiff/4.3.0")
-        if self.options.jpg:
+        if self.options.with_libjpeg:
             self.requires("libjpeg/9d")
-        if self.options.png:
+        if self.options.with_libpng:
             self.requires("libpng/1.6.37")
-        if self.options.webp:
+        if self.options.with_libwebp:
             self.requires("libwebp/1.2.0")
         self.requires("zlib/1.2.11")
 
@@ -100,29 +100,30 @@ class SDLImageConan(ConanFile):
         self._cmake.definitions["BMP"] = self.options.bmp
         self._cmake.definitions["GIF"] = self.options.gif
         self._cmake.definitions["IMAGEIO"] = self.options.get_safe("imageio")
-        self._cmake.definitions["JPG"] = self.options.jpg
+        self._cmake.definitions["JPG"] = self.options.with_libjpeg
         self._cmake.definitions["LBM"] = self.options.lbm
         self._cmake.definitions["PCX"] = self.options.pcx
-        self._cmake.definitions["PNG"] = self.options.png
+        self._cmake.definitions["PNG"] = self.options.with_libpng
         self._cmake.definitions["PNM"] = self.options.pnm
         self._cmake.definitions["SVG"] = self.options.svg
         self._cmake.definitions["TGA"] = self.options.tga
-        self._cmake.definitions["TIF"] = self.options.tif
-        self._cmake.definitions["WEBP"] = self.options.webp
+        self._cmake.definitions["TIF"] = self.options.with_libtiff
+        self._cmake.definitions["WEBP"] = self.options.with_libwebp
         self._cmake.definitions["XCF"] = self.options.xcf
         self._cmake.definitions["XPM"] = self.options.xpm
         self._cmake.definitions["XV"] = self.options.xv
         # TODO: https://github.com/bincrafters/community/pull/1317#pullrequestreview-584847138
-        self._cmake.definitions["TIF_DYNAMIC"] = self.options["libtiff"].shared if self.options.tif else False
-        self._cmake.definitions["JPG_DYNAMIC"] = self.options["libjpeg"].shared if self.options.jpg else False
-        self._cmake.definitions["PNG_DYNAMIC"] = self.options["libpng"].shared if self.options.png else False
-        self._cmake.definitions["WEBP_DYNAMIC"] = self.options["libwebp"].shared if self.options.webp else False
+        self._cmake.definitions["TIF_DYNAMIC"] = self.options["libtiff"].shared if self.options.with_libtiff else False
+        self._cmake.definitions["JPG_DYNAMIC"] = self.options["libjpeg"].shared if self.options.with_libjpeg else False
+        self._cmake.definitions["PNG_DYNAMIC"] = self.options["libpng"].shared if self.options.with_libpng else False
+        self._cmake.definitions["WEBP_DYNAMIC"] = self.options["libwebp"].shared if self.options.with_libwebp else False
         self._cmake.definitions["SDL_IS_SHARED"] = self.options["sdl"].shared
 
         self._cmake.configure(build_dir="build")
         return self._cmake
 
     def build(self):
+        tools.rmdir(os.path.join(self._source_subfolder, "external"))
         cmake = self._configure_cmake()
         cmake.build()
 
