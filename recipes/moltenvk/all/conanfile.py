@@ -13,7 +13,7 @@ class MoltenVKConan(ConanFile):
                   "graphics framework, enabling Vulkan applications to run " \
                   "on iOS and macOS."
     license = "Apache-2.0"
-    topics = ("conan", "moltenvk", "khronos", "vulkan", "metal")
+    topics = ("moltenvk", "khronos", "vulkan", "metal")
     homepage = "https://github.com/KhronosGroup/MoltenVK"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -22,13 +22,13 @@ class MoltenVKConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_spirv_tools": [True, False],
-        "tools": [True, False]
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_spirv_tools": True,
-        "tools": True
+        "tools": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -45,11 +45,11 @@ class MoltenVKConan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.0")
-        self.requires("glslang/8.13.3559")
+        self.requires("glslang/11.5.0")
         self.requires("spirv-cross/{}".format(self._spirv_cross_version))
         self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2020.5")
+            self.requires("spirv-tools/2021.2")
         if tools.Version(self.version) < "1.1.0":
             raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
             self.requires("vulkan-portability/0.2")
@@ -57,6 +57,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _spirv_cross_version(self):
         return {
+            "1.1.4": "cci.20210621",
             "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
             "1.1.0": "20200917", # compiles only with spirv-cross 20200917
             "1.0.44": "20200917", # compiles only with spirv-cross 20200917
@@ -70,6 +71,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _vulkan_headers_version(self):
         return {
+            "1.1.4": "1.2.182",
             "1.1.1": "1.2.162.0",
             "1.1.0": "1.2.154.0",
             "1.0.44": "1.2.148.0",
