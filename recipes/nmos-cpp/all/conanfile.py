@@ -56,7 +56,7 @@ class NmosCppConan(ConanFile):
         self.requires("json-schema-validator/2.1.0")
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
-            self.options["mdnsresponder"].with_opt_patches = True
+            #self.options["mdnsresponder"].with_opt_patches = True
         elif self.options.get_safe("with_dnssd") == "avahi":
             self.requires("avahi/0.8")
 
