@@ -8,3 +8,4 @@ find_package(nmos-cpp REQUIRED)
 
 add_executable(test_package main.cpp)
 target_link_libraries(test_package nmos-cpp::compile-settings nmos-cpp::nmos-cpp)
+set_target_properties(test_package PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
