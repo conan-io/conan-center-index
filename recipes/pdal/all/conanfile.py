@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class PdalConan(ConanFile):
     name = "pdal"
     description = "PDAL is Point Data Abstraction Library. GDAL for point cloud data."
-    topics = ("conan", "pdal", "gdal", "point-cloud-data", "lidar")
+    topics = ("pdal", "gdal", "point-cloud-data", "lidar")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdal.io"
     license = "BSD-3-Clause"
@@ -37,13 +37,17 @@ class PdalConan(ConanFile):
         "with_zstd": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,10 +58,6 @@ class PdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
-            raise ConanInvalidConfiguration ("This compiler version is unsupported")
 
     def requirements(self):
         # TODO package improvements:
@@ -89,6 +89,10 @@ class PdalConan(ConanFile):
         return ["filesystem"]
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            raise ConanInvalidConfiguration ("This compiler version is unsupported")
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
