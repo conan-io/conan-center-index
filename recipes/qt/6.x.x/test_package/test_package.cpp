@@ -8,7 +8,6 @@
 #include <QSqlDatabase>
 #include <qtconcurrentfilter.h>
 #include <QDomText>
-#include <QDBusMessage>
 
 #include "greeter.h"
 
@@ -44,8 +43,6 @@ int main(int argc, char *argv[]){
     });
 
     QDomText xmlTester;
-
-    QDBusMessage dbusTester;
 
     return app.exec();
 }

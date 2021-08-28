@@ -76,6 +76,8 @@ class OpenSSLConan(ConanFile):
                "no_asm": [True, False],
                "enable_weak_ssl_ciphers": [True, False],
                "386": [True, False],
+               "no_stdio": [True, False],
+               "no_tests": [True, False],
                "no_sse2": [True, False],
                "no_bf": [True, False],
                "no_cast": [True, False],
@@ -172,6 +174,12 @@ class OpenSSLConan(ConanFile):
         else:
             del self.options.fPIC
 
+        if self.settings.os == "Emscripten":
+            self.options.no_asm = True
+            self.options.no_threads = True
+            self.options.no_stdio = True
+            self.options.no_tests = True
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             if not self._win_bash:
@@ -180,7 +188,7 @@ class OpenSSLConan(ConanFile):
                 self.build_requires("nasm/2.15.05")
         if self._win_bash:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     @property
     def _is_msvc(self):
@@ -847,6 +855,11 @@ class OpenSSLConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder,
                             "conan-official-{}-variables.cmake".format(self.name))
+
+    def validate(self):
+        if self.settings.os == "Emscripten":
+            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio, self.options.no_tests)):
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio,no_tests}=True")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
