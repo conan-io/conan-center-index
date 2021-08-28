@@ -238,7 +238,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.2.172")
             if tools.is_apple_os(self.settings.os):
-                self.requires("moltenvk/1.1.1")
+                self.requires("moltenvk/1.1.4")
                 self.requires("vulkan-headers/1.2.172", override=True)
         if self.options.with_glib:
             self.requires("glib/2.68.3")
