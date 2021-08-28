@@ -8,7 +8,7 @@
 #include "nmos/node_server.h"
 #include "nmos/server.h"
 
-const web::json::field_with_default<std::chrono::milliseconds::rep> how_long{ U("how_long"), 2000 };
+const web::json::field_with_default<int64_t> how_long{ U("how_long"), 2000 };
 
 int main(int argc, char* argv[])
 {
