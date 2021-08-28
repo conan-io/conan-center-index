@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -45,6 +46,9 @@ class NodesoupConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+        if self.settings.compiler == "clang":
+            if tools.Version(self.settings.compiler.version) < "5.0" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+                raise ConanInvalidConfiguration("The version of libstdc++(11) of the current compiler does not support building nodesoup")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
