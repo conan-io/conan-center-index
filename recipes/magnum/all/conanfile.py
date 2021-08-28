@@ -79,7 +79,7 @@ class MagnumConan(ConanFile):
         "with_tgaimporter": True,
     }
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["CMakeLists.txt", "cmake/*"]
 
     _cmake = None
 
@@ -181,21 +181,22 @@ class MagnumConan(ConanFile):
         cm = self._configure_cmake()
         cm.install()
 
-        #tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
-
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Magnum"
         self.cpp_info.names["cmake_find_package_multi"] = "Magnum"
 
+        # The FindMagnum.cmake file provided by the library populates some extra stuff
+        self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-vars.cmake"))
+
         # Magnum contains just the main library
         self.cpp_info.components["magnum_main"].names["cmake_find_package"] = "Magnum"
         self.cpp_info.components["magnum_main"].names["cmake_find_package_multi"] = "Magnum"
         self.cpp_info.components["magnum_main"].libs = ["Magnum"]
-        self.cpp_info.components["magnum_main"].requires = ["corrade::utility"]
+        self.cpp_info.components["magnum_main"].requires = ["_magnum", "corrade::utility"]
 
         # Animation
         # Math 
