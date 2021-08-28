@@ -119,7 +119,7 @@ class SDLImageConan(ConanFile):
         self._cmake.definitions["WEBP_DYNAMIC"] = self.options["libwebp"].shared if self.options.with_libwebp else False
         self._cmake.definitions["SDL_IS_SHARED"] = self.options["sdl"].shared
 
-        self._cmake.configure(build_dir="build")
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):

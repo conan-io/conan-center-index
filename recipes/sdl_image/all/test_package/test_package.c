@@ -1,8 +1,9 @@
+#define SDL_MAIN_HANDLED
 #include "SDL_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(int argc, char *argv[])
 {
     SDL_version compile_version;
     const SDL_version *link_version = IMG_Linked_Version();

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(SDL2_image)
+project(SDL2_image C)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
@@ -56,6 +56,7 @@ set(SOURCES
     source_subfolder/IMG_xcf.c
     source_subfolder/IMG_xpm.c
     source_subfolder/IMG_xv.c
+    source_subfolder/version.rc
     ${IMAGEIO_SOURCE}
 )
 
@@ -63,7 +64,7 @@ add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
 set_target_properties(${PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER source_subfolder/SDL_image.h
-    DEFINE_SYMBOL DLL_EXPORTS
+    DEFINE_SYMBOL DLL_EXPORT
 )
 
 if(SDL_IS_SHARED)
