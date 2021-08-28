@@ -1,0 +1,13 @@
+sources:
+  "1.2.5":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.5.tar.gz"
+    sha256: "e1935e34766a461fd89e74743a83782d05db04242d9bbc7b60ea63f8451a41d1"
+  "1.2.2":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.2.tar.gz"
+    sha256: "1872622227c474db9db57bf5b6ec91bbef391f9750e9d64d00d05af29f579e1a"
+  "1.2.1":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.2.1.tar.gz"
+    sha256: "8a2b94e18aea42bc69beebfcc343fc37100fadd3c11f91ba702b2fca30fac489"
+  "1.1.9":
+    url: "https://github.com/alsa-project/alsa-plugins/archive/v1.1.9.tar.gz"
+    sha256: "4e16a5efddb57dba5b80b1abcbb49566c0949aab79422b83a429a396743b9e83"
