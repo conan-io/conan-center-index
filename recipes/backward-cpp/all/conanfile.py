@@ -97,7 +97,8 @@ class BackwardCppConan(ConanFile):
                 " supported in {1}.".format(self.version, self.settings.os))
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 17)
-
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) <= 5:
+            raise ConanInvalidConfiguration("Compiler version is not supported")
         if self.settings.os == "Macos" and \
                 not self._has_stack_details("backtrace_symbol"):
             raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
