@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+import glob
 
 
 class AafConan(ConanFile):
@@ -78,6 +80,13 @@ class AafConan(ConanFile):
         self.copy("out/target/*/*/RefImpl/*.dylib", dst="lib", src=self._source_subfolder, keep_path=False)
         self.copy("out/target/*/*/RefImpl/*.a", dst="lib", src=self._source_subfolder, keep_path=False)
         self.copy("LEGAL/AAFSDKPSL.TXT", dst="licenses", src=self._source_subfolder, keep_path=False)
+
+        if tools.is_apple_os(self.settings.os):
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                for dylib in glob.glob("*.dylib"):
+                    command = "install_name_tool -d {0} {1}".format(os.path.basename(dylib), dylib)
+                    self.output.info(command)
+                    self.run(command)
 
     def package_info(self):
         if self.settings.os == "Windows":
