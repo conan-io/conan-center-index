@@ -165,9 +165,19 @@ class NmosCppConan(ConanFile):
                     elif property_type == "INTERFACE_COMPILE_DEFINITIONS":
                         for property_value in property_values:
                             components[component_name].setdefault("defines", []).append(property_value)
+                    elif property_type == "INTERFACE_COMPILE_FEATURES":
+                        for property_value in property_values:
+                            if property_value not in ["cxx_std_11"]:
+                                self.output.warn("{} recipe does not handle INTERFACE_COMPILE_FEATURE {}".format(self.name, property_value))
                     elif property_type == "INTERFACE_COMPILE_OPTIONS":
                         for property_value in property_values:
+                            # handle forced include (Visual Studio /FI, gcc -include) by relying on includedirs containing "include"
+                            property_value = property_value.replace("${_IMPORT_PREFIX}/include/", "")
                             components[component_name].setdefault("cxxflags", []).append(property_value)
+                    elif property_type == "INTERFACE_INCLUDE_DIRECTORIES":
+                        for property_value in property_values:
+                            if property_value not in ["${_IMPORT_PREFIX}/include"]:
+                                self.output.warn("{} recipe does not handle INTERFACE_INCLUDE_DIRECTORIES {}".format(self.name, property_value))
                     elif property_type == "INTERFACE_LINK_OPTIONS":
                         for property_value in property_values:
                             # workaround required because otherwise "/ignore:4099" gets converted to "\ignore:4099.obj"
@@ -178,6 +188,8 @@ class NmosCppConan(ConanFile):
                             # and https://docs.microsoft.com/en-us/cpp/build/reference/linking?view=msvc-160#command-line
                             property_value = re.sub(r"^/", r"-", property_value)
                             components[component_name].setdefault("linkflags", []).append(property_value)
+                    else:
+                        self.output.warn("{} recipe does not handle {}".format(self.name, property_type))
 
         # Save components informations in json file
         with open(self._components_helper_filepath, "w") as json_file:
