@@ -38,7 +38,7 @@ class EmSDKConan(ConanFile):
         if os.name == 'posix':
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
-    def build(self):
+    def package(self):
         with tools.chdir(self._source_subfolder):
             emsdk = 'emsdk.bat' if os.name == 'nt' else './emsdk'
             if os.path.isfile("python_selector"):
@@ -51,8 +51,6 @@ class EmSDKConan(ConanFile):
 
             self.run('%s install %s' % (emsdk, self.version))
             self.run('%s activate %s --embedded' % (emsdk, self.version))
-
-    def package(self):
         self.copy(pattern="LICENSE", dst="licenses",
                   src=self._source_subfolder)
         self.copy(pattern='*', dst='bin',
