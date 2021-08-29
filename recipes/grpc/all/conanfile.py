@@ -84,11 +84,12 @@ class grpcConan(ConanFile):
                 "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
                 "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
         )
-        # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
-        #   executable when cross-building
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
-                "if(gRPC_INSTALL)")
+        if tools.Version(self.version) >= "1.39.0":
+            # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
+            #   executable when cross-building
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
+                    "if(gRPC_INSTALL)")
 
     def _configure_cmake(self):
         if self._cmake is not None:
