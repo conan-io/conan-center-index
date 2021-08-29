@@ -2,13 +2,16 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
+
 class LibbpfConan(ConanFile):
     name = "libbpf"
     description = "eBPF helper library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libbpf/libbpf"
     license = "LGPL-2.1", "BSD-2-Clause"
-    topics = ("conan", "bpf", "ebpf", "libbpf", "berkeley-packet-filter")
+    topics = ("bpf", "ebpf", "libbpf", "berkeley-packet-filter")
     generators = "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -37,11 +40,12 @@ class LibbpfConan(ConanFile):
         self.requires("zlib/1.2.11")
 
     def _configure_autotools(self):
-        make_args = []
-        make_args.append("--directory={}".format("src"))
-        make_args.append("PREFIX={}".format(""))
-        make_args.append("DESTDIR={}".format(self.package_folder))
-        make_args.append("LIBSUBDIR={}".format("lib"))
+        make_args = [
+            "--directory={}".format("src"),
+            "PREFIX={}".format(""),
+            "DESTDIR={}".format(self.package_folder),
+            "LIBSUBDIR={}".format("lib"),
+        ]
         if not self.options.shared:
             make_args.append("BUILD_STATIC_ONLY={}".format(1))
 
@@ -83,4 +87,4 @@ class LibbpfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libbpf"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["bpf"]
