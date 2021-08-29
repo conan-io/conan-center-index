@@ -326,6 +326,11 @@ class AwsSdkCppConan(ConanFile):
             and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
+        if (tools.Version(self.version) < "1.9"
+            and self.settings.os == "Macos"
+            and self.settings.arch == "armv8"):
+            raise ConanInvalidConfiguration("""This version doesn't support arm8
+                See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
         if tools.Version(self.version) >= "1.9":
