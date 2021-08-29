@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e4f3119..1f7f77c 100644
+index e4f31196..b4f2f2f0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,11 +4,13 @@ set(OCIO_VERSION_MINOR 1)
@@ -31,28 +31,92 @@ index e4f3119..1f7f77c 100644
  set(EXTDIST_BINPATH ${EXTDIST_ROOT}/bin)
  if(PYTHON_OK)
      set(EXTDIST_PYTHONPATH ${EXTDIST_ROOT}/${PYTHON_VARIANT_PATH})
-@@ -189,9 +191,9 @@ else(USE_EXTERNAL_TINYXML)
-         set(TINYXML_CMAKE_ARGS ${TINYXML_CMAKE_ARGS} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
-     endif()
-     set(TINYXML_CMAKE_ARGS ${TINYXML_CMAKE_ARGS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+@@ -168,204 +170,20 @@ messageonce("Setting EXTDIST_PYTHONPATH: ${EXTDIST_PYTHONPATH}")
+ ### tinyxml ###
+ ##TODO: yaml and tinyxml : when there are not USE_EXTERNAL_TINYXML, use the same cmake schema/instructions => maybe refactorize in a cmake functions/macros ?
+ 
+-if(USE_EXTERNAL_TINYXML)
+-    set(TINYXML_VERSION_MIN "2.6.1")
+-    find_package(TinyXML)
+-    if(TINYXML_FOUND)
+-        if(TINYXML_VERSION VERSION_EQUAL ${TINYXML_VERSION_MIN} OR
+-           TINYXML_VERSION VERSION_GREATER ${TINYXML_VERSION_MIN})
+-            message(STATUS "External TinyXML will be used.")
+-        else()
+-            message(FATAL_ERROR "ERROR: ${TINYXML_VERSION} found, but ${TINYXML_VERSION_MIN} or newer is required.")
+-        endif()
+-    else(TINYXML_FOUND)
+-        message(STATUS "TinyXML was not found. Perhaps you forgot to install the development package?")
+-    endif(TINYXML_FOUND)
+-
+-else(USE_EXTERNAL_TINYXML)
+-    set(TINYXML_VERSION 2_6_1)
+-    set(TINYXML_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/ext/dist -DOCIO_INLINES_HIDDEN:BOOL=${OCIO_INLINES_HIDDEN})
+-    if(CMAKE_TOOLCHAIN_FILE)
+-        set(TINYXML_CMAKE_ARGS ${TINYXML_CMAKE_ARGS} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
+-    endif()
+-    set(TINYXML_CMAKE_ARGS ${TINYXML_CMAKE_ARGS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
 -    set(TINYXML_ZIPFILE     "${CMAKE_SOURCE_DIR}/ext/tinyxml_${TINYXML_VERSION}.tar.gz")
 -    set(TINYXML_PATCHFILE   "${CMAKE_SOURCE_DIR}/ext/tinyxml_${TINYXML_VERSION}.patch")
 -    set(TINYXML_SOURCE_DIR  "${CMAKE_BINARY_DIR}/ext")
-+    set(TINYXML_ZIPFILE     "${PROJECT_SOURCE_DIR}/ext/tinyxml_${TINYXML_VERSION}.tar.gz")
-+    set(TINYXML_PATCHFILE   "${PROJECT_SOURCE_DIR}/ext/tinyxml_${TINYXML_VERSION}.patch")
-+    set(TINYXML_SOURCE_DIR  "${PROJECT_BINARY_DIR}/ext")
-     ## Create our TINYXML_LIB target
-     if(CMAKE_VERSION VERSION_GREATER "2.8.7")
-         option(TINYXML_OBJECT_LIB_EMBEDDED ${OCIO_BUILD_STATIC} "directly embedded tinyxml 3rdParty object lib into our resulting static lib, no link needed anymore")
-@@ -204,6 +206,7 @@ else(USE_EXTERNAL_TINYXML)
-         set(tinyxml_sources ${TINYXML_SOURCE_DIR}/tinyxml/tinystr.cpp       ${TINYXML_SOURCE_DIR}/tinyxml/tinyxml.cpp 
-                             ${TINYXML_SOURCE_DIR}/tinyxml/tinyxmlerror.cpp  ${TINYXML_SOURCE_DIR}/tinyxml/tinyxmlparser.cpp )
-         set(tinyxml_headers ${TINYXML_SOURCE_DIR}/tinyxml/tinystr.h         ${TINYXML_SOURCE_DIR}/tinyxml/tinyxml.h )
-+        file(MAKE_DIRECTORY "${TINYXML_SOURCE_DIR}")
-         add_custom_command(                                 ## will be done at build time
-             OUTPUT ${tinyxml_sources} ${tinyxml_headers}    ## expected output files
-             COMMAND ${CMAKE_COMMAND} -E tar xzf ${TINYXML_ZIPFILE}
-@@ -248,124 +251,12 @@ endif(USE_EXTERNAL_TINYXML)
+-    ## Create our TINYXML_LIB target
+-    if(CMAKE_VERSION VERSION_GREATER "2.8.7")
+-        option(TINYXML_OBJECT_LIB_EMBEDDED ${OCIO_BUILD_STATIC} "directly embedded tinyxml 3rdParty object lib into our resulting static lib, no link needed anymore")
+-    else()
+-        set(TINYXML_OBJECT_LIB_EMBEDDED OFF CACHE BOOL "directly embedded tinyxml 3rdParty object lib into our resulting static lib, no link needed anymore" FORCE)
+-        message("Force disable TINYXML_OBJECT_LIB_EMBEDDED feature due to CMake Version less than 2.8.8")
+-    endif()
+-    mark_as_advanced(TINYXML_OBJECT_LIB_EMBEDDED) ## two way to build with tinyxml (objects embedded or static transitive link)
+-    if(TINYXML_OBJECT_LIB_EMBEDDED)
+-        set(tinyxml_sources ${TINYXML_SOURCE_DIR}/tinyxml/tinystr.cpp       ${TINYXML_SOURCE_DIR}/tinyxml/tinyxml.cpp 
+-                            ${TINYXML_SOURCE_DIR}/tinyxml/tinyxmlerror.cpp  ${TINYXML_SOURCE_DIR}/tinyxml/tinyxmlparser.cpp )
+-        set(tinyxml_headers ${TINYXML_SOURCE_DIR}/tinyxml/tinystr.h         ${TINYXML_SOURCE_DIR}/tinyxml/tinyxml.h )
+-        add_custom_command(                                 ## will be done at build time
+-            OUTPUT ${tinyxml_sources} ${tinyxml_headers}    ## expected output files
+-            COMMAND ${CMAKE_COMMAND} -E tar xzf ${TINYXML_ZIPFILE}
+-            DEPENDS ${TINYXML_ZIPFILE}
+-            WORKING_DIRECTORY ${TINYXML_SOURCE_DIR}
+-            COMMENT "Unpacking ${TINYXML_ZIPFILE} to ${TINYXML_SOURCE_DIR}"
+-            VERBATIM
+-        )
+-        include_directories(BEFORE ${TINYXML_SOURCE_DIR}/tinyxml) ## needed to build correctly
+-        add_library(TINYXML_LIB OBJECT ${tinyxml_sources})
+-        ## embedded tinyxml objects files (no static link needed anymore) 
+-        ## => great news when build staticaly since we do not want another client project have to link also with tinyxml when he want to use this project
+-        ## => could be problematic if the client project use another version of tinyxml... In this case build tinyxml as shared lib with all projects could be a solution
+-        ## => TODO: so maybe provide a simple cmake way to build 3rdParty as shared and auto install with this project ?
+-        set_target_properties(TINYXML_LIB PROPERTIES COMPILE_FLAGS "-DTIXML_USE_STL -fPIC -fvisibility-inlines-hidden -fvisibility=hidden")
+-        add_definitions(-DTIXML_USE_STL) ## needed to build correctly, and also need to be propagated in child projects (client projects)
+-        list(APPEND EXTERNAL_OBJECTS $<TARGET_OBJECTS:TINYXML_LIB>)
+-    else()
+-        find_package(Git REQUIRED) ## in order to apply patch (for crossplateform compatibility)
+-        ExternalProject_Add(tinyxml
+-            URL             ${TINYXML_ZIPFILE}
+-            SOURCE_DIR      ${TINYXML_SOURCE_DIR}/tinyxml
+-            PATCH_COMMAND   ${GIT_EXECUTABLE} apply --ignore-whitespace ${TINYXML_PATCHFILE}
+-            BINARY_DIR      ext/build/tinyxml
+-            INSTALL_DIR     ext/dist
+-            CMAKE_ARGS      ${TINYXML_CMAKE_ARGS}
+-        )
+-        if(WIN32)
+-            set(TINYXML_STATIC_LIBRARIES  ${PROJECT_BINARY_DIR}/ext/dist/lib/tinyxml.lib)
+-        else()
+-            set(TINYXML_STATIC_LIBRARIES ${PROJECT_BINARY_DIR}/ext/dist/lib/libtinyxml.a)
+-        endif()
+-        add_library(TINYXML_LIB STATIC IMPORTED)
+-        ## static is the .lib location, shared is the .dll/.so location (see IMPORTED_IMPLIB for the associated .lib archive location on windows)
+-        set_property(TARGET TINYXML_LIB PROPERTY IMPORTED_LOCATION ${TINYXML_STATIC_LIBRARIES})
+-        add_dependencies(TINYXML_LIB tinyxml)
+-        list(APPEND EXTERNAL_LIBRARIES TINYXML_LIB)
+-    endif()
+-    set_target_properties(TINYXML_LIB PROPERTIES FOLDER External)
+-endif(USE_EXTERNAL_TINYXML)
+-    
++find_package(TinyXML REQUIRED)
++
++set(TINYXML_LIBRARIES TinyXML::TinyXML)
++list(APPEND EXTERNAL_LIBRARIES ${TINYXML_LIBRARIES})
++
  ###############################################################################
  ### YAML ###
  
@@ -72,7 +136,8 @@ index e4f3119..1f7f77c 100644
 -    if(YAML_CPP_VERSION VERSION_LESS ${YAML_VERSION_MIN})
 -        message(FATAL_ERROR "ERROR: yaml-cpp ${YAML_VERSION_MIN} or greater is required.")
 -    endif()
--
++find_package(yaml-cpp)
+ 
 -    find_package_handle_standard_args(yaml-cpp
 -                                      REQUIRED_VARS YAML_CPP_LIBRARIES YAML_CPP_INCLUDE_DIRS )
 -    set(YAML_CPP_FOUND ${YAML-CPP_FOUND})
@@ -170,8 +235,7 @@ index e4f3119..1f7f77c 100644
 -    endif()
 -    set_target_properties(YAML_CPP_LIB PROPERTIES FOLDER External)
 -endif(USE_EXTERNAL_YAML)
-+find_package(yaml-cpp)
- 
+-
 -if(YAML_CPP_VERSION VERSION_LESS "0.5.0")
 -    set(YAML_CPP_COMPILE_FLAGS "-DOLDYAML")
 -endif()
@@ -182,7 +246,16 @@ index e4f3119..1f7f77c 100644
  
  ###############################################################################
  ### Externals ###
-@@ -528,7 +419,7 @@ endif()
+@@ -460,7 +278,7 @@ endif()
+ if(OCIO_BUILD_APPS AND (OCIO_BUILD_STATIC OR OCIO_BUILD_SHARED) )
+ 
+     # Try to find OpenImageIO (OIIO) and OpenGL stuff
+-    OCIOFindOpenImageIO()
++    #OCIOFindOpenImageIO()
+     
+     if(OIIO_FOUND)
+         add_subdirectory(src/apps/ocioconvert)
+@@ -528,7 +346,7 @@ endif()
  
  ###############################################################################
  ### Configure env script ###
@@ -191,7 +264,7 @@ index e4f3119..1f7f77c 100644
      ${CMAKE_CURRENT_BINARY_DIR}/share/ocio/setup_ocio.sh @ONLY)
  
  INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/share/ocio/setup_ocio.sh DESTINATION share/ocio/)
-@@ -597,7 +488,7 @@ if(TARGET OpenColorIO_STATIC)
+@@ -597,7 +415,7 @@ if(TARGET OpenColorIO_STATIC)
      endif()
  endif()
  install(EXPORT OpenColorIO DESTINATION cmake)
@@ -200,14 +273,14 @@ index e4f3119..1f7f77c 100644
      "
      get_filename_component(OpenColorIO_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)
      
-@@ -646,4 +537,4 @@ file(WRITE "${CMAKE_BINARY_DIR}/OpenColorIOConfig.cmake"
+@@ -646,4 +464,4 @@ file(WRITE "${CMAKE_BINARY_DIR}/OpenColorIOConfig.cmake"
      message(STATUS OPENCOLORIO_FOUND=\${OPENCOLORIO_FOUND})
      "
  )
 -install(FILES "${CMAKE_BINARY_DIR}/OpenColorIOConfig.cmake" DESTINATION .)
 +install(FILES "${PROJECT_BINARY_DIR}/OpenColorIOConfig.cmake" DESTINATION .)
 diff --git a/share/cmake/OCIOMacros.cmake b/share/cmake/OCIOMacros.cmake
-index b9fb239..b1a206e 100644
+index b9fb2393..b1a206e7 100644
 --- a/share/cmake/OCIOMacros.cmake
 +++ b/share/cmake/OCIOMacros.cmake
 @@ -356,9 +356,9 @@ ENDMACRO()
@@ -235,7 +308,7 @@ index b9fb239..b1a206e 100644
        COMMENT "Extracting reStructuredText from ${INFILE}"
     )
 diff --git a/src/apps/ociobakelut/CMakeLists.txt b/src/apps/ociobakelut/CMakeLists.txt
-index d31b4e3..efebda6 100644
+index d31b4e34..efebda66 100644
 --- a/src/apps/ociobakelut/CMakeLists.txt
 +++ b/src/apps/ociobakelut/CMakeLists.txt
 @@ -1,6 +1,10 @@
@@ -287,7 +360,7 @@ index d31b4e3..efebda6 100644
      ${Boost_INCLUDE_DIR}
  )
 diff --git a/src/apps/ociocheck/CMakeLists.txt b/src/apps/ociocheck/CMakeLists.txt
-index 4955f4d..14b5017 100644
+index 4955f4db..14b5017f 100644
 --- a/src/apps/ociocheck/CMakeLists.txt
 +++ b/src/apps/ociocheck/CMakeLists.txt
 @@ -1,9 +1,9 @@
@@ -305,7 +378,7 @@ index 4955f4d..14b5017 100644
      )
  
 diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
-index 1eb691b..a2f099a 100644
+index 1eb691b6..a2f099ab 100644
 --- a/src/core/CMakeLists.txt
 +++ b/src/core/CMakeLists.txt
 @@ -2,29 +2,29 @@
@@ -366,3 +439,16 @@ index 1eb691b..a2f099a 100644
      ${CMAKE_CURRENT_BINARY_DIR}/OpenColorIO.pc @ONLY)
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/OpenColorIO.pc
      DESTINATION ${CMAKE_INSTALL_EXEC_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/)
+diff --git a/src/core/OCIOYaml.cpp b/src/core/OCIOYaml.cpp
+index 68fcef60..a1c1c1d8 100644
+--- a/src/core/OCIOYaml.cpp
++++ b/src/core/OCIOYaml.cpp
+@@ -1442,7 +1442,7 @@ OCIO_NAMESPACE_ENTER
+ #ifdef OLDYAML
+             if(node.FindValue("ocio_profile_version") == NULL)
+ #else
+-            if(node["ocio_profile_version"] == NULL)
++            if(node["ocio_profile_version"].IsNull())
+ #endif
+             {
+                 std::ostringstream os;
