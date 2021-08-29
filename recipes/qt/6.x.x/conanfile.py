@@ -236,10 +236,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.36")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.172")
+            self.requires("vulkan-loader/1.2.182")
             if tools.is_apple_os(self.settings.os):
                 self.requires("moltenvk/1.1.4")
-                self.requires("vulkan-headers/1.2.172", override=True)
         if self.options.with_glib:
             self.requires("glib/2.68.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
