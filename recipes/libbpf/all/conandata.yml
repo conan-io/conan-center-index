@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/libbpf/libbpf/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "21cbee4df093e7fd29e76ed429650d3f3abe3a893f35e346ab9bc3484f6e68c0"
