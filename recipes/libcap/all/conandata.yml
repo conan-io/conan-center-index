@@ -11,3 +11,25 @@ sources:
   "2.50":
     url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.50.tar.xz"
     sha256: "47a57b8bd238b84c93c921a9b4ff82337551dbcb0cca071316aadf3e23b19261"
+
+patches:
+  "2.45":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+  "2.46":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+  "2.48":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
+  "2.50":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0001-Make.Rules-Remove-hardcoded-fPIC.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.45/0002-Make.Rules-Make-compile-tools-configurable.patch"
