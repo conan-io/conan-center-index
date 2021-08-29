@@ -42,3 +42,75 @@ index 17b4e46442..a15e30c980 100644
  
  # android logcat headers
  if(PLATFORM_ANDROID)
+diff --git a/aws-cpp-sdk-core/include/aws/core/utils/json/JsonSerializer.h b/aws-cpp-sdk-core/include/aws/core/utils/json/JsonSerializer.h
+index 657ee6eff4..d41bb814f9 100644
+--- a/aws-cpp-sdk-core/include/aws/core/utils/json/JsonSerializer.h
++++ b/aws-cpp-sdk-core/include/aws/core/utils/json/JsonSerializer.h
+@@ -11,7 +11,7 @@
+ #include <aws/core/utils/memory/stl/AWSStreamFwd.h>
+ #include <aws/core/utils/memory/stl/AWSString.h>
+ #include <aws/core/utils/memory/stl/AWSMap.h>
+-#include <aws/core/external/cjson/cJSON.h>
++#include <cjson/cJSON.h>
+ 
+ #include <utility>
+ 
+diff --git a/aws-cpp-sdk-core/source/Aws.cpp b/aws-cpp-sdk-core/source/Aws.cpp
+index b367feed6d..e8496b2277 100644
+--- a/aws-cpp-sdk-core/source/Aws.cpp
++++ b/aws-cpp-sdk-core/source/Aws.cpp
+@@ -10,7 +10,7 @@
+ #include <aws/core/utils/logging/CRTLogging.h>
+ #include <aws/core/utils/logging/DefaultLogSystem.h>
+ #include <aws/core/Globals.h>
+-#include <aws/core/external/cjson/cJSON.h>
++#include <cjson/cJSON.h>
+ #include <aws/core/monitoring/MonitoringManager.h>
+ #include <aws/core/net/Net.h>
+ #include <aws/core/config/AWSProfileConfigLoader.h>
+diff --git a/aws-cpp-sdk-core/source/external/cjson/cJSON.cpp b/aws-cpp-sdk-core/source/external/cjson/cJSON.cpp
+index cd51ae9745..a8cef01cfa 100644
+--- a/aws-cpp-sdk-core/source/external/cjson/cJSON.cpp
++++ b/aws-cpp-sdk-core/source/external/cjson/cJSON.cpp
+@@ -56,7 +56,7 @@
+ #pragma GCC visibility pop
+ #endif
+ 
+-#include <aws/core/external/cjson/cJSON.h>
++#include <cjson/cJSON.h>
+ 
+ /* define our own boolean type */
+ // #ifdef true
+diff --git a/aws-cpp-sdk-core/source/external/tinyxml2/tinyxml2.cpp b/aws-cpp-sdk-core/source/external/tinyxml2/tinyxml2.cpp
+index 151a368676..9ebdeffa40 100644
+--- a/aws-cpp-sdk-core/source/external/tinyxml2/tinyxml2.cpp
++++ b/aws-cpp-sdk-core/source/external/tinyxml2/tinyxml2.cpp
+@@ -27,7 +27,7 @@ This file has been modified from its original version by Amazon:
+   (2) #includes all use <>
+ */
+ 
+-#include <aws/core/external/tinyxml2/tinyxml2.h>
++#include <tinyxml2/tinyxml2.h>
+ 
+ #include <new>		// yes, this one new style header, is in the Android SDK.
+ #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
+@@ -2803,4 +2803,4 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
+ 
+ }   // namespace tinyxml2
+ }   // namespace External
+-}   // namespace Aws
+\ No newline at end of file
++}   // namespace Aws
+diff --git a/aws-cpp-sdk-core/source/utils/xml/XmlSerializer.cpp b/aws-cpp-sdk-core/source/utils/xml/XmlSerializer.cpp
+index 2d91f70000..10a468d95f 100644
+--- a/aws-cpp-sdk-core/source/utils/xml/XmlSerializer.cpp
++++ b/aws-cpp-sdk-core/source/utils/xml/XmlSerializer.cpp
+@@ -6,7 +6,7 @@
+ #include <aws/core/utils/xml/XmlSerializer.h>
+ 
+ #include <aws/core/utils/StringUtils.h>
+-#include <aws/core/external/tinyxml2/tinyxml2.h>
++#include <tinyxml2/tinyxml2.h>
+ 
+ #include <utility>
+ #include <algorithm>

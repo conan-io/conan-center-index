@@ -406,8 +406,8 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = [
             "aws-c-common::aws-c-common-lib",
-            "cJSON::_cjson",
-            "tinyxml2",
+            "cjson::_cjson",
+            "tinyxml2::tinyxml2",
         ]
         if tools.Version(self.version) >= "1.9":
             self.cpp_info.components["core"].requires.append("aws-crt-cpp::aws-crt-cpp-lib")
