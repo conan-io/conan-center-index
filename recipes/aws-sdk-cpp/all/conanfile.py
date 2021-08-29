@@ -332,13 +332,14 @@ class AwsSdkCppConan(ConanFile):
                 See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
+        self.requires("aws-c-common/0.6.7")
         if tools.Version(self.version) >= "1.9":
             self.requires("aws-crt-cpp/0.14.3")
         else:
             self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
             self.requires("libcurl/7.77.0")
-        if self.settings.os == "Linux":
+        if self.settings.os in["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
 
@@ -401,10 +402,11 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
+        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
         if tools.Version(self.version) >= "1.9":
-            self.cpp_info.components["core"].requires = ["aws-crt-cpp::aws-crt-cpp-lib"]
+            self.cpp_info.components["core"].requires.append("aws-crt-cpp::aws-crt-cpp-lib")
         else:
-            self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
+            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
 
         enabled_sdks = [sdk for sdk in self._sdks if getattr(self.options, sdk)]
         for hl_comp in self._internal_requirements.keys():
@@ -435,7 +437,7 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.cpp_info.components["core"].requires.append("libcurl::curl")
 
-        if self.settings.os == "Linux":
+        if self.settings.os in["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
