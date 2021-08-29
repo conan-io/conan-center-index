@@ -15,12 +15,12 @@ class AafConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "structuredstorage": [True, False],
+        "structured_storage": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "structuredstorage": False,
+        "structured_storage": False,
     }
 
     @property
