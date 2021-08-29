@@ -63,7 +63,8 @@ class NmosCppConan(ConanFile):
             self.requires("avahi/0.8")
 
     def build_requirements(self):
-        self.build_requires("cmake/[>3.17]")
+        # nmos-cpp needs CMake 3.17 or higher but CCI doesn't allow version ranges
+        self.build_requires("cmake/3.21.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
