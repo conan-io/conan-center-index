@@ -12,8 +12,20 @@ class LibRawConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
 
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_lcms": [True, False],
+        "with_jasper": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_jpeg": "libjpeg",
+        "with_lcms": True,
+        "with_jasper": True
+    }
 
     _cmake = None
 
@@ -26,9 +38,16 @@ class LibRawConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libjpeg/9d")
-        self.requires("lcms/2.11")
-        self.requires("jasper/2.0.16")
+        # TODO: RawSpeed dependency (-DUSE_RAWSPEED)
+        # TODO: DNG SDK dependency (-DUSE_DNGSDK)
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9d")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.1.1")
+        if self.options.with_lcms:
+            self.requires("lcms/2.12")
+        if self.options.with_jasper:
+            self.requires("jasper/2.0.33")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

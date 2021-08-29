@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project(LibRaw)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 file(GLOB_RECURSE headers "source_subfolder/libraw/*.h")
 
@@ -26,7 +26,15 @@ if(WIN32)
     endif()
 endif()
 
-add_definitions(-DUSE_JPEG -DUSE_JPEG8 -DUSE_JASPER)
+if (TARGET CONAN_PKG::libjpeg OR TARGET CONAN_PKG::libjpeg-turbo)
+    add_definitions(-DUSE_JPEG -DUSE_JPEG8)
+endif ()
+if (TARGET CONAN_PKG::lcms)
+    add_definitions(-DUSE_LCMS2)
+endif ()
+if (TARGET CONAN_PKG::jasper)
+    add_definitions(-DUSE_JASPER)
+endif ()
 
 add_library(raw ${headers} ${sources})
 set_property(TARGET raw PROPERTY CXX_STANDARD 11)
