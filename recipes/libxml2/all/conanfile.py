@@ -151,7 +151,7 @@ class Libxml2Conan(ConanFile):
                                           "LIBS = $(LIBS) %s" % ' '.join(libs))
 
             fix_library(self.options.zlib, 'zlib', 'zlib.lib')
-            fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
+            fix_library(self.options.lzma, "xz_utils", "liblzma.lib")
             fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
