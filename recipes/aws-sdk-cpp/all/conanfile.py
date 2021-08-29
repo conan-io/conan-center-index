@@ -332,6 +332,8 @@ class AwsSdkCppConan(ConanFile):
                 See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
+        self.requires("cjson/1.7.14")
+        self.requires("tinyxml2/8.0.0")
         self.requires("aws-c-common/0.6.7")
         if tools.Version(self.version) >= "1.9":
             self.requires("aws-crt-cpp/0.14.3")
@@ -402,7 +404,11 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["core"].requires = [
+            "aws-c-common::aws-c-common-lib",
+            "cJSON::_cjson",
+            "tinyxml2",
+        ]
         if tools.Version(self.version) >= "1.9":
             self.cpp_info.components["core"].requires.append("aws-crt-cpp::aws-crt-cpp-lib")
         else:
