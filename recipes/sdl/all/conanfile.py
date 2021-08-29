@@ -41,6 +41,7 @@ class SDLConan(ConanFile):
         "opengl": [True, False],
         "opengles": [True, False],
         "vulkan": [True, False],
+        "libunwind": [True, False],
     }
     default_options = {
         "shared": False,
@@ -69,6 +70,7 @@ class SDLConan(ConanFile):
         "opengl": True,
         "opengles": True,
         "vulkan": True,
+        "libunwind": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -107,6 +109,7 @@ class SDLConan(ConanFile):
             del self.options.wayland
             del self.options.directfb
             del self.options.video_rpi
+            del self.options.libunwind
         if self.settings.os != "Windows":
             del self.options.directx
 
@@ -138,6 +141,8 @@ class SDLConan(ConanFile):
                 self.requires("egl/system")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
+            if self.options.get_safe("libunwind", False):
+                self.requires("libunwind/1.5.0")
 
     def validate(self):
         if self.settings.os == "Macos" and not self.options.iconv:
@@ -233,6 +238,8 @@ class SDLConan(ConanFile):
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
+            self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.get_safe("libunwind")
+
             # Add extra information collected from the deps
             self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
             self._cmake.definitions["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
@@ -305,6 +312,8 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
                 self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
                 self.cpp_info.components["libsdl2"].requires.append("egl::egl")
+            if self.options.get_safe("libunwind"):
+                self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",
