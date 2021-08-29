@@ -63,12 +63,16 @@ class Libxml2Conan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     @property
-    def _is_mingw(self):
-        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
+    def _is_mingw_windows(self):
+        return self.self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,10 +95,10 @@ class Libxml2Conan(ConanFile):
             self.requires("icu/69.1")
 
     def build_requirements(self):
-        if not (self._is_msvc or self._is_mingw):
+        if not (self._is_msvc or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
                 self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -259,7 +263,7 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
-        elif self._is_mingw:
+        elif self._is_mingw_windows:
             self._build_mingw()
         else:
             autotools = self._configure_autotools()
@@ -279,7 +283,7 @@ class Libxml2Conan(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        elif self._is_mingw:
+        elif self._is_mingw_windows:
             self._package_mingw()
             if self.options.shared:
                 os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
