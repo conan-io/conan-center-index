@@ -79,11 +79,16 @@ class grpcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        #fix the protoc search path for cross compiling
-        tools.replace_in_file("{}/cmake/protobuf.cmake".format(self._source_subfolder),
+        # Fix the protoc search path for cross compiling
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "protobuf.cmake"),
                 "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc)",
                 "find_program(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protoc PATHS ENV PATH NO_DEFAULT_PATH)"
         )
+        # Follow https://github.com/grpc/grpc/issues/26857, there is no reason to skip installation of
+        #   executable when cross-building
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "if(gRPC_INSTALL AND NOT CMAKE_CROSSCOMPILING)",
+                "if(gRPC_INSTALL)")
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -219,14 +224,6 @@ class grpcConan(ConanFile):
         self.cpp_info.components["grpc++_unsecure"].system_libs = _system_libs
         self.cpp_info.components["grpc++_unsecure"].libs = ["grpc++_unsecure"]
 
-        # gRPC::grpc_plugin_support
-        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package"] = "grpc_plugin_support"
-        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package_multi"] = "grpc_plugin_support"
-        self.cpp_info.components["grpc_plugin_support"].requires = ["protobuf::libprotoc", "protobuf::libprotobuf"]
-        if self.settings.os in ['Macos', 'Linux']:
-            self.cpp_info.components["grpc_plugin_support"].system_libs = _system_libs
-        self.cpp_info.components["grpc_plugin_support"].libs = ["grpc_plugin_support"]
-
         # gRPC::grpcpp_channelz
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package"] = "grpcpp_channelz"
         self.cpp_info.components["grpcpp_channelz"].names["cmake_find_package_multi"] = "grpcpp_channelz"
@@ -245,6 +242,14 @@ class grpcConan(ConanFile):
         self.cpp_info.components["upb"].libs = ["upb"]
 
         # Executables
+        # gRPC::grpc_plugin_support
+        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package"] = "grpc_plugin_support"
+        self.cpp_info.components["grpc_plugin_support"].names["cmake_find_package_multi"] = "grpc_plugin_support"
+        self.cpp_info.components["grpc_plugin_support"].requires = ["protobuf::libprotoc", "protobuf::libprotobuf"]
+        if self.settings.os in ['Macos', 'Linux']:
+            self.cpp_info.components["grpc_plugin_support"].system_libs = _system_libs
+        self.cpp_info.components["grpc_plugin_support"].libs = ["grpc_plugin_support"]
+
         # gRPC::grpc_cpp_plugin
         if self.options.cpp_plugin:
             module_target_rel_path = os.path.join("lib", "cmake", "grpc_cpp_plugin.cmake")
