@@ -61,6 +61,12 @@ class GinkgoConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+            if self.settings.compiler == "Visual Studio":
+                static_crt = str(
+                    self.settings.compiler.runtime).startswith("MT")
+                if static_crt and self.options.shared:
+                    raise ConanInvalidConfiguration(
+                        "Ginkgo does not support mixing static CRT and shared library")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
