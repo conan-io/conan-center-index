@@ -6,7 +6,7 @@ class AafConan(ConanFile):
     name = "aaf"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/aaf/"
-    description = "A  cross-platform SDK for AAF. AAF is a metadata management system and file format for use in professional multimedia creation and authoring."
+    description = "A cross-platform SDK for AAF. AAF is a metadata management system and file format for use in professional multimedia creation and authoring."
     topics = ("aaf", "multimedia", "crossplatform")
     license = "AAFSDKPSL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -66,7 +66,7 @@ class AafConan(ConanFile):
             cmake.definitions["PLATFORM"] = self.settings.os
 
         cmake.definitions["ARCH"] = "x86_64"  # ARCH is used only for setting the output directory. So itsvalue does not matter here.
-        cmake.definitions["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structuredstorage
+        cmake.definitions["AAF_NO_STRUCTURED_STORAGE"] = not self.options.structured_storage
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
@@ -89,3 +89,5 @@ class AafConan(ConanFile):
             self.cpp_info.libs = ["aaflib", "aafiid", "com-api"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["dl"]
+        if self.settings.os == 'Macos':
+            self.cpp_info.frameworks = ['CoreServices', 'CoreFoundation']
