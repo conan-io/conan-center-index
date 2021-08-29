@@ -15,3 +15,6 @@ patches:
       patch_file: patches/0003-disable-cmake-install-rpath-use-link-path.patch
     - base_path: source_subfolder
       patch_file: patches/0004-improve-pulseaudio-detection.patch
+  "1.9.58":
+    - base_path: source_subfolder
+      patch_file: patches/0001-disable-sort-links.patch
