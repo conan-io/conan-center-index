@@ -37,6 +37,10 @@ class LibRawConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         # TODO: RawSpeed dependency (-DUSE_RAWSPEED)
         # TODO: DNG SDK dependency (-DUSE_DNGSDK)
