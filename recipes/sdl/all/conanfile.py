@@ -312,7 +312,7 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
                 self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
                 self.cpp_info.components["libsdl2"].requires.append("egl::egl")
-            if self.options.get_safe("libunwind"):
+            if self.options.libunwind:
                 self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
