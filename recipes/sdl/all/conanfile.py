@@ -141,7 +141,7 @@ class SDLConan(ConanFile):
                 self.requires("egl/system")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
-            if self.options.get_safe("libunwind", False):
+            if self.options.libunwind:
                 self.requires("libunwind/1.5.0")
 
     def validate(self):
@@ -235,10 +235,10 @@ class SDLConan(ConanFile):
 
                 self._cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
+                self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
-            self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.get_safe("libunwind")
 
             # Add extra information collected from the deps
             self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
