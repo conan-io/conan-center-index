@@ -84,7 +84,7 @@ class AafConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for dylib in glob.glob("*.dylib"):
-                    command = "install_name_tool -d {0} {1}".format(os.path.basename(dylib), dylib)
+                    command = "install_name_tool -id {0} {1}".format(os.path.basename(dylib), dylib)
                     self.output.info(command)
                     self.run(command)
 
