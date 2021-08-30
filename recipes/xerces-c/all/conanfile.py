@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-from typing import Union, Tuple
 
 
 class XercesCConan(ConanFile):
@@ -37,7 +36,7 @@ class XercesCConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _validate(self, option: str, value: str, os: Union[str, Tuple[str]]):
+    def _validate(self, option, value, os):
         """
         Validate that the given `option` has the required `value` for the given `os`
         If not raises a ConanInvalidConfiguration error
@@ -51,7 +50,9 @@ class XercesCConan(ConanFile):
             (isinstance(os, tuple) and self.settings.os not in os)) \
              and getattr(self.options, option) == value:
             raise ConanInvalidConfiguration(
-                f"Option '{option}={value}' is only supported on {os}"
+                "Option '{option}={value}' is only supported on {os}".format(
+                    option=option, value=value, os=os
+                )
             )
 
     def validate(self):
