@@ -1,5 +1,5 @@
 sources:
-  "0.28.0":
+  "0.29.0":
     Windows:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.29.0/wasmtime-v0.29.0-x86_64-windows-c-api.zip"
