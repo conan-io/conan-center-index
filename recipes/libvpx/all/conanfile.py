@@ -69,7 +69,7 @@ class LibVPXConan(ConanFile):
             args.extend(['--disable-static', '--enable-shared'])
         else:
             args.extend(['--disable-shared', '--enable-static'])
-        if self.settings.os != 'Windows' and self.options.fPIC:
+        if self.settings.os != 'Windows' and self.options.get_safe("fPIC"):
             args.append('--enable-pic')
         if self.settings.build_type == "Debug":
             args.append('--enable-debug')
