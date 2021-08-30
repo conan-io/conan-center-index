@@ -51,6 +51,9 @@ class RapidcheckConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
 
+        if 'cci' not in self.version:
+            self.output.warn("This version has been deprecated in favor of '{}/cci.{}'".format(self.name, self.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -107,7 +110,11 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.libs = ["rapidcheck"]
-        if tools.Version(self.version) < "20201218":
+        # Remove after 9473 is merged.
+        version = self.version
+        if version.startswith("cci."):
+            version = version[4:]
+        if version < "20201218":
             if self.options.enable_rtti:
                 self.cpp_info.defines.append("RC_USE_RTTI")
         else:
