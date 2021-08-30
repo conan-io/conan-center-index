@@ -78,6 +78,8 @@ class XercesCConan(ConanFile):
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
             self.requires("icu/69.1")
+        if self.options.network_accessor == "curl":
+            self.requires("libcurl/7.78.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -114,7 +116,7 @@ class XercesCConan(ConanFile):
         self._cmake.definitions["xmlch-type"] = self.options.char_type
         self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
         # avoid picking up system dependency
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -139,7 +141,5 @@ class XercesCConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-        if self.options.network_accessor == "curl":
-            self.cpp_info.system_libs.append("curl")
         self.cpp_info.names["cmake_find_package"] = "XercesC"
         self.cpp_info.names["cmake_find_package_multi"] = "XercesC"
