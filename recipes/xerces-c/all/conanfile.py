@@ -55,9 +55,7 @@ class XercesCConan(ConanFile):
         :param os: either a single string or a tuple of strings containing the
                    OS(es) that `value` is valid on
         """
-        if ((isinstance(os, str) and self.settings.os != os) or \
-            (isinstance(os, tuple) and self.settings.os not in os)) \
-             and getattr(self.options, option) == value:
+        if self.settings.os not in os and getattr(self.options, option) == value:
             raise ConanInvalidConfiguration(
                 "Option '{option}={value}' is only supported on {os}".format(
                     option=option, value=value, os=os
@@ -65,15 +63,15 @@ class XercesCConan(ConanFile):
             )
 
     def validate(self):
-        self._validate("char_type", "wchar_t", "Windows")
-        self._validate("network_accessor", "winsock", "Windows")
-        self._validate("network_accessor", "cfurl", "Macos")
+        self._validate("char_type", "wchar_t", ("Windows", ))
+        self._validate("network_accessor", "winsock", ("Windows", ))
+        self._validate("network_accessor", "cfurl", ("Macos", ))
         self._validate("network_accessor", "socket", ("Linux", "Macos"))
         self._validate("network_accessor", "curl", ("Linux", "Macos"))
-        self._validate("transcoder", "macosunicodeconverter", "Macos")
-        self._validate("transcoder", "windows", "Windows")
+        self._validate("transcoder", "macosunicodeconverter", ("Macos", ))
+        self._validate("transcoder", "windows", ("Windows", ))
         self._validate("mutex_manager", "posix", ("Linux", "Macos"))
-        self._validate("mutex_manager", "windows", "Windows")
+        self._validate("mutex_manager", "windows", ("Windows", ))
 
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
