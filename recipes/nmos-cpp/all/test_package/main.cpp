@@ -32,9 +32,9 @@ int main(int argc, char* argv[])
         nmos::server_guard node_server_guard(node_server);
         std::this_thread::sleep_for(std::chrono::milliseconds(how_long(node_model.settings)));
     }
-    catch (const web::http::http_exception& e)
+    catch (const std::exception& e)
     {
-        slog::log<slog::severities::error>(gate, SLOG_FLF) << "HTTP error: " << e.what() << " [" << e.error_code() << "]";
+        slog::log<slog::severities::error>(gate, SLOG_FLF) << "Exception: " << e.what();
     }
     return 0;
 }
