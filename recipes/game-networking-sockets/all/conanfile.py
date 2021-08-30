@@ -11,7 +11,7 @@ class GameNetworkingSocketsConan(ConanFile):
     topics = ("networking", "game-development")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ValveSoftware/GameNetworkingSockets"
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
