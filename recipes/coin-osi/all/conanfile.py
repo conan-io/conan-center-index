@@ -64,6 +64,9 @@ class CoinOsiConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
+        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.options.shared:
+            raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -118,7 +121,7 @@ class CoinOsiConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1"]) # due to configure generated with old autotools version
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
