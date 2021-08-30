@@ -143,7 +143,8 @@ class GinkgoConan(ConanFile):
         self.cpp_info.components["ginkgo_reference"].libs = [
             "ginkgo_reference" + debug_suffix]
 
-        if has_dpcpp_device:
+        if has_dpcpp_device: # Always add these components
+            # See https://github.com/conan-io/conan-center-index/pull/7044#discussion_r698181588
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_device"]
 
