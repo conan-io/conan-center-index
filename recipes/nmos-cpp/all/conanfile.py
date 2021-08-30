@@ -165,6 +165,8 @@ class NmosCppConan(ConanFile):
                                 elif dependency == "DNSSD::DNSSD":
                                     dependency = "mdnsresponder::mdnsresponder"
                                 components[component_name].setdefault("requires" if not match_private else "requires_private", []).append(dependency.lower())
+                            elif "${_IMPORT_PREFIX}/lib/" in dependency:
+                                self.output.warn("{} recipe does not handle {} {} (yet)".format(self.name, property_type, dependency))
                             else:
                                 components[component_name].setdefault("system_libs", []).append(dependency)
                     elif property_type == "INTERFACE_COMPILE_DEFINITIONS":
@@ -173,7 +175,7 @@ class NmosCppConan(ConanFile):
                     elif property_type == "INTERFACE_COMPILE_FEATURES":
                         for property_value in property_values:
                             if property_value not in ["cxx_std_11"]:
-                                self.output.warn("{} recipe does not handle INTERFACE_COMPILE_FEATURE {}".format(self.name, property_value))
+                                self.output.warn("{} recipe does not handle {} {} (yet)".format(self.name, property_type, property_value))
                     elif property_type == "INTERFACE_COMPILE_OPTIONS":
                         for property_value in property_values:
                             # handle forced include (Visual Studio /FI, gcc -include) by relying on includedirs containing "include"
@@ -182,7 +184,7 @@ class NmosCppConan(ConanFile):
                     elif property_type == "INTERFACE_INCLUDE_DIRECTORIES":
                         for property_value in property_values:
                             if property_value not in ["${_IMPORT_PREFIX}/include"]:
-                                self.output.warn("{} recipe does not handle INTERFACE_INCLUDE_DIRECTORIES {}".format(self.name, property_value))
+                                self.output.warn("{} recipe does not handle {} {} (yet)".format(self.name, property_type, property_value))
                     elif property_type == "INTERFACE_LINK_OPTIONS":
                         for property_value in property_values:
                             # workaround required because otherwise "/ignore:4099" gets converted to "\ignore:4099.obj"
@@ -194,7 +196,7 @@ class NmosCppConan(ConanFile):
                             property_value = re.sub(r"^/", r"-", property_value)
                             components[component_name].setdefault("linkflags", []).append(property_value)
                     else:
-                        self.output.warn("{} recipe does not handle {}".format(self.name, property_type))
+                        self.output.warn("{} recipe does not handle {} (yet)".format(self.name, property_type))
 
         # Save components informations in json file
         with open(self._components_helper_filepath, "w") as json_file:
