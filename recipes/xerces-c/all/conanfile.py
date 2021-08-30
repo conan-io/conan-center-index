@@ -25,6 +25,15 @@ class XercesCConan(ConanFile):
         "message_loader": ["inmemory", "icu", "iconv"],
         "mutex_manager": ["standard", "posix", "windows"],
     }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "char_type": "uint16_t",
+        "network_accessor": "socket",
+        "transcoder": "gnuiconv",
+        "message_loader": "inmemory",
+        "mutex_manager": "standard",
+    }
 
     _cmake = None
 
@@ -71,11 +80,6 @@ class XercesCConan(ConanFile):
             self.requires("icu/69.1")
 
     def config_options(self):
-        self.options.shared = False
-        self.options.fPIC = True
-        self.options.char_type = "uint16_t"
-        self.options.message_loader = "inmemory"
-
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.network_accessor = "winsock"
@@ -86,8 +90,6 @@ class XercesCConan(ConanFile):
             self.options.transcoder = "macosunicodeconverter"
             self.options.mutex_manager = "posix"
         elif self.settings.os == "Linux":
-            self.options.network_accessor = "socket"
-            self.options.transcoder = "gnuiconv"
             self.options.mutex_manager = "posix"
 
     def configure(self):
