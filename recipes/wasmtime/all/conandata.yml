@@ -11,7 +11,7 @@ sources:
     Linux:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.29.0/wasmtime-v0.29.0-x86_64-linux-c-api.tar.xz"
-        sha256: "b8ee53ddebfc60a0cf981ce225837b998b984ee94326e03cac135d9d78af57e5"
+        sha256: "e94a9a768270e86e7f7eac1a68575bb1f287702822e83b14c3b04bf7e865a84c"
       "armv8":
         url: "https://github.com/bytecodealliance/wasmtime/releases/download/v0.29.0/wasmtime-v0.29.0-aarch64-linux-c-api.tar.xz"
         sha256: "c13f906ca84c3321644cb9cd93fef4db431572e554a7527dc30a795994cbcc05"
