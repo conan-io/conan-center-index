@@ -189,13 +189,16 @@ class MagnumConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Magnum"
         self.cpp_info.names["cmake_find_package_multi"] = "Magnum"
 
+        magnum_plugin_libdir = "magnum-d" if self.settings.build_type == "Debug" else "magnum"
+        lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
+
         # The FindMagnum.cmake file provided by the library populates some extra stuff
         self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-vars.cmake"))
 
         # Magnum contains just the main library
         self.cpp_info.components["magnum_main"].names["cmake_find_package"] = "Magnum"
         self.cpp_info.components["magnum_main"].names["cmake_find_package_multi"] = "Magnum"
-        self.cpp_info.components["magnum_main"].libs = ["Magnum"]
+        self.cpp_info.components["magnum_main"].libs = ["Magnum{}".format(lib_suffix)]
         self.cpp_info.components["magnum_main"].requires = ["_magnum", "corrade::utility"]
 
         # Animation
@@ -204,7 +207,7 @@ class MagnumConan(ConanFile):
         if self.options.sdl2_application:
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
-            self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application"]
+            self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
             self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
             if self.options.with_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
@@ -222,7 +225,7 @@ class MagnumConan(ConanFile):
         if self.options.with_debugtools:
             self.cpp_info.components["debugtools"].names["cmake_find_package"] = "DebugTools"
             self.cpp_info.components["debugtools"].names["cmake_find_package_multi"] = "DebugTools"
-            self.cpp_info.components["debugtools"].libs = ["MagnumDebugTools"]
+            self.cpp_info.components["debugtools"].libs = ["MagnumDebugTools{}".format(lib_suffix)]
             self.cpp_info.components["debugtools"].requires = ["magnum_main"]
             if self.options["corrade"].with_testsuite and self.options.with_trade:
                 self.cpp_info.components["debugtools"].requires += ["corrade::test_suite", "trade"]
@@ -231,49 +234,49 @@ class MagnumConan(ConanFile):
         if self.options.with_gl:
             self.cpp_info.components["gl"].names["cmake_find_package"] = "GL"
             self.cpp_info.components["gl"].names["cmake_find_package_multi"] = "GL"
-            self.cpp_info.components["gl"].libs = ["MagnumGL"]
+            self.cpp_info.components["gl"].libs = ["MagnumGL{}".format(lib_suffix)]
             self.cpp_info.components["gl"].requires = ["magnum_main", "opengl::opengl"]
 
         # MeshTools
         if self.options.with_meshtools:
             self.cpp_info.components["meshtools"].names["cmake_find_package"] = "MeshTools"
             self.cpp_info.components["meshtools"].names["cmake_find_package_multi"] = "MeshTools"
-            self.cpp_info.components["meshtools"].libs = ["MagnumMeshTools"]
+            self.cpp_info.components["meshtools"].libs = ["MagnumMeshTools{}".format(lib_suffix)]
             self.cpp_info.components["meshtools"].requires = ["magnum_main", "trade", "gl"]
 
         # Primitives
         if self.options.with_primitives:
             self.cpp_info.components["primitives"].names["cmake_find_package"] = "Primitives"
             self.cpp_info.components["primitives"].names["cmake_find_package_multi"] = "Primitives"
-            self.cpp_info.components["primitives"].libs = ["MagnumPrimitives"]
+            self.cpp_info.components["primitives"].libs = ["MagnumPrimitives{}".format(lib_suffix)]
             self.cpp_info.components["primitives"].requires = ["magnum_main", "meshtools", "trade"]
 
         # SceneGraph
         if self.options.with_scenegraph:
             self.cpp_info.components["scenegraph"].names["cmake_find_package"] = "SceneGraph"
             self.cpp_info.components["scenegraph"].names["cmake_find_package_multi"] = "SceneGraph"
-            self.cpp_info.components["scenegraph"].libs = ["MagnumSceneGraph"]
+            self.cpp_info.components["scenegraph"].libs = ["MagnumSceneGraph{}".format(lib_suffix)]
             self.cpp_info.components["scenegraph"].requires = ["magnum_main"]
 
         # Shaders
         if self.options.with_scenegraph:
             self.cpp_info.components["shaders"].names["cmake_find_package"] = "Shaders"
             self.cpp_info.components["shaders"].names["cmake_find_package_multi"] = "Shaders"
-            self.cpp_info.components["shaders"].libs = ["MagnumShaders"]
+            self.cpp_info.components["shaders"].libs = ["MagnumShaders{}".format(lib_suffix)]
             self.cpp_info.components["shaders"].requires = ["magnum_main", "gl"]
 
         # Text
         if self.options.with_text:
             self.cpp_info.components["text"].names["cmake_find_package"] = "Text"
             self.cpp_info.components["text"].names["cmake_find_package_multi"] = "Text"
-            self.cpp_info.components["text"].libs = ["MagnumText"]
+            self.cpp_info.components["text"].libs = ["MagnumText{}".format(lib_suffix)]
             self.cpp_info.components["text"].requires = ["magnum_main", "texturetools", "corrade::plugin_manager", "gl"]
 
         # TextureTools
         if self.options.with_texturetools:
             self.cpp_info.components["texturetools"].names["cmake_find_package"] = "TextureTools"
             self.cpp_info.components["texturetools"].names["cmake_find_package_multi"] = "TextureTools"
-            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTools"]
+            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTools{}".format(lib_suffix)]
             self.cpp_info.components["texturetools"].requires = ["magnum_main"]
             if self.options.with_gl:
                 self.cpp_info.components["texturetools"].requires += ["gl"]
@@ -282,20 +285,20 @@ class MagnumConan(ConanFile):
         if self.options.with_trade:
             self.cpp_info.components["trade"].names["cmake_find_package"] = "Trade"
             self.cpp_info.components["trade"].names["cmake_find_package_multi"] = "Trade"
-            self.cpp_info.components["trade"].libs = ["MagnumTrade"]
+            self.cpp_info.components["trade"].libs = ["MagnumTrade{}".format(lib_suffix)]
             self.cpp_info.components["trade"].requires = ["magnum_main", "corrade::plugin_manager"]
 
         # VK
         if self.options.with_vk:
             self.cpp_info.components["vk"].names["cmake_find_package"] = "Vk"
             self.cpp_info.components["vk"].names["cmake_find_package_multi"] = "Vk"
-            self.cpp_info.components["vk"].libs = ["MagnumVk"]
+            self.cpp_info.components["vk"].libs = ["MagnumVk{}".format(lib_suffix)]
             self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
         if self.options.get_safe("with_cglcontext", False):
             self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
             self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
-            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext"]
+            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext{}".format(lib_suffix)]
             self.cpp_info.components["cglcontext"].requires = ["magnum_main", "gl"]
         
             # FIXME: If only one *context is provided, then it also gets the GLContext alias
@@ -310,7 +313,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
-                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
             self.cpp_info.components["anyimageimporter"].requires = ["trade"]
 
         if self.options.with_anyimageconverter:
@@ -318,7 +321,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["anyimageconverter"].names["cmake_find_package_multi"] = "AnyImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
-                self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+                self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
             self.cpp_info.components["anyimageconverter"].requires = ["trade"]
 
         if self.options.with_anysceneconverter:
@@ -326,7 +329,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["anysceneconverter"].names["cmake_find_package_multi"] = "AnySceneConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["anysceneconverter"].libs = ["AnySceneConverter"]
-                self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'sceneconverters')]
+                self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'sceneconverters')]
             self.cpp_info.components["anysceneconverter"].requires = ["trade"]
 
         if self.options.with_anysceneimporter:
@@ -334,7 +337,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["anysceneimporter"].names["cmake_find_package_multi"] = "AnySceneImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["anysceneimporter"].libs = ["AnySceneImporter"]
-                self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+                self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
             self.cpp_info.components["anysceneimporter"].requires = ["trade"]
 
         if self.options.with_magnumfont:
@@ -342,7 +345,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["magnumfont"].names["cmake_find_package_multi"] = "MagnumFont"
             if not self.options.shared_plugins:
                 self.cpp_info.components["magnumfont"].libs = ["MagnumFont"]
-                self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fonts')]
+                self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fonts')]
             self.cpp_info.components["magnumfont"].requires = ["magnum_main", "trade", "text"]
 
         if self.options.with_magnumfontconverter:
@@ -350,7 +353,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["magnumfontconverter"].names["cmake_find_package_multi"] = "MagnumFontConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["magnumfontconverter"].libs = ["MagnumFontConverter"]
-                self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'fontconverters')]
+                self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fontconverters')]
             self.cpp_info.components["magnumfontconverter"].requires = ["magnum_main", "trade", "text"]
             if not self.options.shared_plugins:
                 self.cpp_info.components["magnumfontconverter"].requires += ["tgaimageconverter"]
@@ -360,7 +363,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["objimporter"].names["cmake_find_package_multi"] = "ObjImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["objimporter"].libs = ["ObjImporter"]
-                self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+                self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
             self.cpp_info.components["objimporter"].requires = ["trade", "meshtools"]
 
         if self.options.with_tgaimageconverter:
@@ -368,7 +371,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["tgaimageconverter"].names["cmake_find_package_multi"] = "TgaImageConverter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["tgaimageconverter"].libs = ["TgaImageConverter"]
-                self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'imageconverters')]
+                self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
             self.cpp_info.components["tgaimageconverter"].requires = ["trade"]
 
         if self.options.with_tgaimporter:
@@ -376,5 +379,5 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
             if not self.options.shared_plugins:
                 self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
-                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', 'magnum', 'importers')]
+                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
             self.cpp_info.components["tgaimporter"].requires = ["trade"]
