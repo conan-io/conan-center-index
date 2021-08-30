@@ -1,0 +1,10 @@
+sources:
+  "cci.20210829":
+    - url: "https://github.com/juj/RectangleBinPack/archive/d503ea88f110396be948019288bec1f7a2123166.zip"
+      sha256: "3425a111fac110e58f21e588bf770a2d8bad23c2f01a426b5d3f4f77a0dcbe55"
+    - url: "https://unlicense.org/UNLICENSE"
+      sha256: "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+patches:
+  "cci.20210829":
+    - patch_file: "patches/0001_fix_win32_build.patch"
+      base_path: "source_subfolder"
