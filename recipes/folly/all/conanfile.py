@@ -69,14 +69,14 @@ class FollyConan(ConanFile):
         self.build_requires("cmake/3.16.2")
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.76.0")
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.1.5")
         self.requires("gflags/2.2.2")
         self.requires("glog/0.4.0")
         self.requires("libevent/2.1.12")
+        self.requires("openssl/1.1.1l")
         self.requires("lz4/1.9.3")
-        self.requires("openssl/1.1.1i")
         self.requires("snappy/1.1.8")
         self.requires("zlib/1.2.11")
         self.requires("zstd/1.4.8")
@@ -103,9 +103,7 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -119,7 +117,7 @@ class FollyConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()

@@ -5,6 +5,9 @@ sources:
   "2020.08.10.00":
     url: "https://github.com/facebook/folly/archive/v2020.08.10.00.tar.gz"
     sha256: "e81140d04a4e89e3f848e528466a9b3d3ae37d7eeb9e65467fca50d70918eef6"
+  "2021.08.30.00":
+    url: "https://github.com/facebook/folly/archive/v2021.08.30.00.tar.gz"
+    sha256: "73c8b65d0f137caf7b2ac328dc0b2c9a9b3d0e29c1c89f0346a846f6467cbeb5"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
