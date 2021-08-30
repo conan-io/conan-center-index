@@ -27,6 +27,8 @@ class LibVPXConan(ConanFile):
 
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration('Windows shared builds are not supported')
 
