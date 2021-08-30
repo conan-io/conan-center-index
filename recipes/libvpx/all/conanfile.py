@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 import shutil
 
@@ -35,6 +36,10 @@ class LibVPXConan(ConanFile):
         if str(self.settings.arch) not in ['x86', 'x86_64']:
             for name in self._arch_options:
                 delattr(self.options, name)
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
+            raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
 
     def build_requirements(self):
         self.build_requires('yasm/1.3.0')
@@ -88,8 +93,14 @@ class LibVPXConan(ConanFile):
         build_os = str(self.settings.os)
         if build_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif build_os in ['Macos', 'iOS', 'watchOS', 'tvOS']:
-            os_name = 'darwin11'
+        elif tools.is_apple_os(build_os):
+            if self.settings.arch in ["x86", "x86_64"]:
+                os_name = 'darwin11'
+            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
+                os_name = 'darwin20'
+            else:
+                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
+                os_name = 'darwin'
         elif build_os == 'Linux':
             os_name = 'linux'
         elif build_os == 'Solaris':
