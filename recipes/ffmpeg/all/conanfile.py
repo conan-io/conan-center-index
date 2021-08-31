@@ -224,7 +224,7 @@ class FFMpegConan(ConanFile):
         self._autotools.libs = []
         opt_enable_disable = lambda what, v: "--{}-{}".format("enable" if v else "disable", what)
         args = [
-            "--pkg-config-flags=--static",  # FIXME: needed?
+            "--pkg-config-flags=--static",
             "--disable-doc",
             "--disable-programs",
             opt_enable_disable("cross-compile", tools.cross_building(self, skip_x64_x86=True)),
