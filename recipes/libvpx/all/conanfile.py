@@ -63,6 +63,7 @@ class LibVPXConan(ConanFile):
                 '--disable-examples',
                 '--disable-unit-tests',
                 '--disable-tools',
+                '--disable-docs',
                 '--enable-vp9-highbitdepth',
                 '--as=yasm']
         if self.options.shared:
