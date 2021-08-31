@@ -1,5 +1,9 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 
+import os
+import glob
+import shutil
+
 required_conan_version = ">=1.29"
 
 class JsonGlibConan(ConanFile):
@@ -47,9 +51,11 @@ class JsonGlibConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        # tests option was added in 1.5
+        # `tests' option was added in 1.5
         if tools.Version(self.version) < '1.5':
             del self.options.tests
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os == 'Windows':
