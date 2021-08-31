@@ -18,8 +18,6 @@ class BehaviorTreeCPPConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt"
-    requires = "cppzmq/4.7.1", "boost/1.76.0", "ncurses/6.2"
-
     _cmake = None
 
     @property
@@ -29,6 +27,10 @@ class BehaviorTreeCPPConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _minimum_cppstd_required(self):
+        return 14
 
     @property
     def _minimum_compilers_version(self):
@@ -51,16 +53,23 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("cppzmq/4.7.1")
+        self.requires("boost/1.76.0")
+        self.requires("ncurses/6.2")
+        self.requires("zeromq/4.3.4")
+
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("BehaviorTree.CPP can not be built as shared on Windows.")
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, "14")
+            check_min_cppstd(self, self._minimum_cppstd_required)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn("BehaviorTree.CPP requires C++14. Your compiler is unknown. Assuming it supports C++14.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++14, which your compiler does not support.")
+            raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++{}, which your compiler does not support."
+                                            .format(self._minimum_cppstd_required))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -101,6 +110,6 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "BT"
         self.cpp_info.names["cmake_find_package_multi"] = "BT"
         self.cpp_info.components["behaviortree_cpp_v3"].libs = ["behaviortree_cpp_v3" + postfix]
-        self.cpp_info.components["behaviortree_cpp_v3"].requires = ["cppzmq::cppzmq", "boost::coroutine", "ncurses::ncurses"]
+        self.cpp_info.components["behaviortree_cpp_v3"].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "boost::coroutine", "ncurses::ncurses"]
         if self.settings.os == "Linux":
             self.cpp_info.components["behaviortree_cpp_v3"].system_libs.append("pthread")
