@@ -1,0 +1,10 @@
+sources:
+  "1.6.6":
+    sha256: "96ec98be7a91f6dde33636720e3da2ff6ecbb90e76ccaa49497f31a6855a490e"
+    url: "https://download.gnome.org/sources/json-glib/1.6/json-glib-1.6.6.tar.xz"
+  "1.5.2":
+    sha256: "ad08438327b6106dc040c0581477bdf1cd3daaa5d285920cc768b8627f746666"
+    url: "https://download-fallback.gnome.org/sources/json-glib/1.5/json-glib-1.5.2.tar.xz"
+  "1.4.4":
+    sha256: "720c5f4379513dc11fd97dc75336eb0c0d3338c53128044d9fabec4374f4bc47"
+    url: "https://download-fallback.gnome.org/sources/json-glib/1.4/json-glib-1.4.4.tar.xz"
