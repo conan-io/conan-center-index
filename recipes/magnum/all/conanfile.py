@@ -9,6 +9,7 @@ class MagnumConan(ConanFile):
     name = "magnum"
     description = "Lightweight and modular C++11/C++14 graphics middleware for games and data visualization"
     license = "MIT"
+    short_paths = True
     topics = ("conan", "corrade", "graphics", "rendering", "3d", "2d", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics"
