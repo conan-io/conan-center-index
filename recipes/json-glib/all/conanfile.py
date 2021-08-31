@@ -1,7 +1,4 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-import glob
-import os
-import shutil
 
 required_conan_version = ">=1.29"
 
