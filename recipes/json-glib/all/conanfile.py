@@ -10,7 +10,7 @@ class JsonGlibConan(ConanFile):
     name = "json-glib"
     description = "JSON-GLib implements a full JSON parser and generator using GLib and GObject, and integrates JSON with GLib data types."
     topics = ("json", "glib")
-    url = "https://gitlab.gnome.org/GNOME/json-glib"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wiki.gnome.org/Projects/JsonGlib"
     license = "GNU LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
@@ -68,7 +68,7 @@ class JsonGlibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
+        tools.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
 
     def _configure_meson(self):
         if self._meson:
