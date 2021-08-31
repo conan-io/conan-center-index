@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a390aed..aff91ec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -36,7 +36,6 @@ if(NOT DEFINED BT_COROUTINES)
+     add_definitions(-DBT_NO_COROUTINES)
+ endif()
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ #---- project configuration ----
+ option(BUILD_EXAMPLES   "Build tutorials and examples" ON)
