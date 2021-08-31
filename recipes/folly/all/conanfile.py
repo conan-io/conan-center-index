@@ -28,7 +28,7 @@ class FollyConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17 if tools.Version(self.version) >= "2021.08.30" else 14
+        return 17 if tools.Version(self.version) >= "2021.08.30.00" else 14
 
     @property
     def _minimum_compilers_version(self):
