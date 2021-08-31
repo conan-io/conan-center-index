@@ -33,12 +33,12 @@ class MagnumConan(ConanFile):
         "with_vk": [True, False],
         
         "with_gl_info": [True, False],
+        "with_glfw_application": [True, False],
         #"target_headless": [True, False],
         #"target_gl": [True, False],
         #"target_vk": [True, False],
 
         #"with_sdl2_application": [True, False],
-        #"with_glfw_application": [True, False],
         #"with_cglcontext": [True, False],
 
         # Options related to plugins
@@ -72,12 +72,12 @@ class MagnumConan(ConanFile):
         "with_vk": True,
 
         "with_gl_info": True,
+        "with_glfw_application": True,
         #"target_headless": True,
         #"target_gl": True,
         #"target_vk": True,
 
         #"with_sdl2_application": True,
-        #"with_glfw_application": False,
         
         #"with_cglcontext": True,
 
@@ -107,6 +107,16 @@ class MagnumConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
+        # GLFW naming
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "find_package(GLFW)",
+                              "find_package(glfw3)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "GLFW_FOUND",
+                              "glfw3_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "GLFW::GLFW",
+                              "glfw::glfw")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -131,6 +141,9 @@ class MagnumConan(ConanFile):
         #    self.requires("sdl/2.0.16")
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
+
+        if self.options.with_glfw_application:
+            self.requires("glfw/3.3.4")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -158,6 +171,10 @@ class MagnumConan(ConanFile):
         #if self.options.get_safe("with_cglcontext", False) and not self.options.with_gl:
         #    raise ConanInvalidConfiguration("Option 'with_cglcontext' requires option 'with_gl'")
 
+    @property
+    def _target_gl(self):
+        return bool(self.options.with_gl_info)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -180,9 +197,12 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
 
-        if self.options.with_gl_info:
-            self._cmake.definitions["WITH_GL_INFO"] = True
-            self._cmake.definitions["TARGET_GL"] = True
+        # gl-info
+        self._cmake.definitions["WITH_GL_INFO"] = self.options.with_gl_info
+        self._cmake.definitions["TARGET_GL"] = self._target_gl
+
+        # glfw_application
+        self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.with_glfw_application
 
         #self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
         #self._cmake.definitions["TARGET_GL"] = self.options.target_gl
@@ -247,6 +267,16 @@ class MagnumConan(ConanFile):
         # Platform
         if self.options.with_gl_info:
             self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-gl-info.cmake"))
+
+        if self.options.with_glfw_application:
+            self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
+            self.cpp_info.components["glfw_application"].names["cmake_find_package_multi"] = "GlfwApplication"
+            self.cpp_info.components["glfw_application"].libs = ["MagnumGlfwApplication{}".format(lib_suffix)]
+            self.cpp_info.components["glfw_application"].requires = ["magnum_main", "glfw::glfw"]
+            if self._target_gl:
+                self.cpp_info.components["glfw_application"].requires.append("gl")
+            # Require also GLX or EGL depending on other config
+
         """
         if self.options.sdl2_application:
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
