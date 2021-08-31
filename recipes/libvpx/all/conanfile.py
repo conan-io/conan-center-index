@@ -118,6 +118,10 @@ class LibVPXConan(ConanFile):
                     args.append('--disable-%s' % name)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
             env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
+            if self.settings.compiler == "Visual Studio":
+                # gen_msvs_vcxproj.sh doesn't like custom flags
+                env_build.cxxflags = []
+                env_build.flags = []
             env_build.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
         return env_build
 
