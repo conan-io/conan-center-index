@@ -53,7 +53,7 @@ index e0e02c0..2bd4940 100644
  endif()
  
 -find_package(LibDwarf)
-+find_package(lidwarf)
++find_package(libdwarf)
  list(APPEND FOLLY_LINK_LIBRARIES ${LIBDWARF_LIBRARIES})
  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBDWARF_INCLUDE_DIRS})
  
