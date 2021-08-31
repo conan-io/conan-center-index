@@ -31,7 +31,7 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
 
-    def configure(self):
+    def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
