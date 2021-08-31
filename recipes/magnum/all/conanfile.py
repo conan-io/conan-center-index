@@ -116,6 +116,12 @@ class MagnumConan(ConanFile):
         self.build_requires("corrade/{}".format(self.version))
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.0":
+            raise ConanInvalidConfiguration("GCC older than 5 is not supported (missing C++11 features)")
+
         if self.options.shared and not self.options["corrade"].shared:
             # To fix issue with resource management, see here: https://github.com/mosra/magnum/issues/304#issuecomment-451768389
             raise ConanInvalidConfiguration("If using 'shared=True', corrade should be shared as well")
