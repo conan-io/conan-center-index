@@ -77,8 +77,10 @@ class CMakeConan(ConanFile):
                 if self.options.with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
             if tools.cross_building(self):
-                cmake_system_processor = {"armv8": "arm64", "armv8.3": "arm64"}
-                                         .get(str(self.settings.arch), str(self.settings.arch))
+                cmake_system_processor = {
+                    "armv8": "arm64",
+                    "armv8.3": "arm64",
+                }.get(str(self.settings.arch), str(self.settings.arch))
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE"] = ''
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
                 self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
