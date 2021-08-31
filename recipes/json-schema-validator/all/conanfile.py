@@ -51,7 +51,7 @@ class JsonSchemaValidatorConan(ConanFile):
 
         compilers = {
             "Visual Studio": min_vs_version,
-            "gcc": "5",
+            "gcc": "5" if version < "2.1.0" else "4.9",
             "clang": "4",
             "apple-clang": "9"}
         min_version = compilers.get(str(self.settings.compiler))
