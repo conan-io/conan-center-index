@@ -19,7 +19,6 @@ class MagnumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "sdl2_application": [True, False],
 
         "with_audio": [True, False],
         "with_debugtools": [True, False],
@@ -32,8 +31,15 @@ class MagnumConan(ConanFile):
         "with_texturetools": [True, False],
         "with_trade": [True, False],
         "with_vk": [True, False],
+        
+        "with_gl_info": [True, False],
+        #"target_headless": [True, False],
+        #"target_gl": [True, False],
+        #"target_vk": [True, False],
 
-        "with_cglcontext": [True, False],
+        #"with_sdl2_application": [True, False],
+        #"with_glfw_application": [True, False],
+        #"with_cglcontext": [True, False],
 
         # Options related to plugins
         "shared_plugins": [True, False],
@@ -52,7 +58,6 @@ class MagnumConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "sdl2_application": True,
 
         "with_audio": False,
         "with_debugtools": True,
@@ -66,8 +71,17 @@ class MagnumConan(ConanFile):
         "with_trade": True,
         "with_vk": True,
 
-        "with_cglcontext": True,
+        "with_gl_info": True,
+        #"target_headless": True,
+        #"target_gl": True,
+        #"target_vk": True,
 
+        #"with_sdl2_application": True,
+        #"with_glfw_application": False,
+        
+        #"with_cglcontext": True,
+
+        # Related to plugins
         "shared_plugins": True,
         "with_anyimageimporter": True,
         "with_anyimageconverter": True,
@@ -97,8 +111,13 @@ class MagnumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Macos":
-            del self.options.with_cglcontext
+        
+        #if self.settings.os == "Android":
+        #    del self.options.with_sdl2_application
+        #    del self.options.with_glfw_application
+
+        #if self.settings.os != "Macos":
+        #    del self.options.with_cglcontext
 
     def configure(self):
         if self.options.shared:
@@ -108,8 +127,8 @@ class MagnumConan(ConanFile):
         self.requires("corrade/{}".format(self.version))
         if self.options.with_gl:
             self.requires("opengl/system")
-        if self.options.sdl2_application:
-            self.requires("sdl/2.0.16")
+        #if self.options.get_safe("sdl2_application", False):
+        #    self.requires("sdl/2.0.16")
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
@@ -130,8 +149,14 @@ class MagnumConan(ConanFile):
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
 
-        if self.options.get_safe("with_cglcontext", False) and not self.options.with_gl:
-            raise ConanInvalidConfiguration("Option 'with_cglcontext' requires option 'with_gl'")
+        #if (self.options.target_headless or self.options.target_gl) and not self.options.with_gl:
+        #    raise ConanInvalidConfiguration("Option 'target_headless' and 'target_gl' requires option 'with_gl=True'")
+
+        #if self.options.target_vk and not self.options.with_vk:
+        #    raise ConanInvalidConfiguration("Option 'target_vk' requires option 'with_vk=True'")
+
+        #if self.options.get_safe("with_cglcontext", False) and not self.options.with_gl:
+        #    raise ConanInvalidConfiguration("Option 'with_cglcontext' requires option 'with_gl'")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -142,8 +167,6 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
-
-        self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.sdl2_application
 
         self._cmake.definitions["WITH_AUDIO"] = self.options.with_audio
         self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.with_debugtools
@@ -157,7 +180,18 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
 
-        self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
+        if self.options.with_gl_info:
+            self._cmake.definitions["WITH_GL_INFO"] = True
+            self._cmake.definitions["TARGET_GL"] = True
+
+        #self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
+        #self._cmake.definitions["TARGET_GL"] = self.options.target_gl
+        #self._cmake.definitions["TARGET_VK"] = self.options.target_vk
+
+        #self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.get_safe("with_glfw_application", False)
+        #self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.get_safe("with_sdl2_application", False)
+
+        #self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
 
         ##### Plugins related #####
         self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
@@ -211,6 +245,9 @@ class MagnumConan(ConanFile):
         # Animation
         # Math 
         # Platform
+        if self.options.with_gl_info:
+            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-gl-info.cmake"))
+        """
         if self.options.sdl2_application:
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
@@ -223,7 +260,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
             self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
             self.cpp_info.components["application"].requires = ["sdl2_application"]
-
+        """
 
         # Audio
         # TODO: Here there is a target (false by default)
@@ -302,6 +339,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["vk"].libs = ["MagnumVk{}".format(lib_suffix)]
             self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
+        """
         if self.options.get_safe("with_cglcontext", False):
             self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
             self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
@@ -312,6 +350,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["glcontext"].names["cmake_find_package"] = "GLContext"
             self.cpp_info.components["glcontext"].names["cmake_find_package_multi"] = "GLContext"
             self.cpp_info.components["glcontext"].requires = ["cglcontext"]
+        """
 
         ######## PLUGINS ########
         # If shared, there are no libraries to link with

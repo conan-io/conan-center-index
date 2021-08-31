@@ -15,3 +15,10 @@ set_target_properties(${PROJECT_NAME}
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
 )
+
+# Run some executables
+add_custom_command(
+    TARGET ${PROJECT_NAME} PRE_BUILD
+    COMMAND Magnum::gl-info
+    COMMENT "Running magnum-gl-info"
+)
