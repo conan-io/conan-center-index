@@ -164,7 +164,7 @@ class Open62541Conan(ConanFile):
             self.requires("openssl/1.1.1k")
         if self.options.web_socket:
             self.requires("libwebsockets/4.2.0")
-        if self.options.discovery == "With Multicast" or "multicast" in self.options.discovery:
+        if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
             self.requires("pro-mdnsd/0.8.4")
 
     def validate(self):
@@ -288,9 +288,9 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
         if self.options.discovery != False:
             self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = \
-                self.options.discovery == "With Multicast" or "multicast" in self.options.discovery
+                self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery)
             self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
-                self.options.discovery_semaphore or "semaphore" in self.options.discovery
+                self.options.discovery_semaphore or "semaphore" in str(self.options.discovery)
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
         self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
         if self.options.encryption != False:
