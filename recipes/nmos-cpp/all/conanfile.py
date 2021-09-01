@@ -112,9 +112,7 @@ class NmosCppConan(ConanFile):
     def _create_components_file_from_cmake_target_file(self, target_file_path):
         components = {}
 
-        target_file = open(target_file_path, "r")
-        target_content = target_file.read()
-        target_file.close()
+        target_content = tools.load(target_file_path)
 
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
