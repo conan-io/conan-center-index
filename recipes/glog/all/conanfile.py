@@ -70,8 +70,8 @@ class GlogConan(ConanFile):
             self._cmake.definitions["WITH_PKGCONFIG"] = True
             if self.settings.os == "Emscripten":
                 self._cmake.definitions["WITH_SYMBOLIZE"] = False
-                self._cmake.definitions['HAVE_SYSCALL_H'] = "0"
-                self._cmake.definitions['HAVE_SYS_SYSCALL_H'] = "0"
+                self._cmake.definitions["HAVE_SYSCALL_H"] = False
+                self._cmake.definitions["HAVE_SYS_SYSCALL_H"] = False
             else:
                 self._cmake.definitions["WITH_SYMBOLIZE"] = True
             self._cmake.definitions["WITH_UNWIND"] = True
