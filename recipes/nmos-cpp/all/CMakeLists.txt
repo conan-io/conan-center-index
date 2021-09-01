@@ -2,12 +2,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(cmake_wrapper)
 
-if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-    include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-else()
-    # for out-of-source builds
-    include(conanbuildinfo.cmake)
-endif()
+include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 # conanfile.py source() method extracts to source_subfolder
