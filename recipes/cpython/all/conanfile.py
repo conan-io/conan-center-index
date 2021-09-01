@@ -12,7 +12,7 @@ class CPythonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.python.org"
     description = "Python is a programming language that lets you work quickly and integrate systems more effectively."
-    topics = ("conan", "python", "cpython", "language", "script")
+    topics = ("python", "cpython", "language", "script")
     license = ("Python-2.0",)
     exports_sources = "patches/**"
     settings = "os", "arch", "compiler", "build_type"
@@ -281,9 +281,10 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDLL", runtime_library)
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
                                   "MultiThreadedDebugDLL", runtime_library)
-            # Remove vendored packages
-            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
-            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
+
+        # Remove vendored packages
+        tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
+        tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
 
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
