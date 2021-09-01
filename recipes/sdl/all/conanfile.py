@@ -127,6 +127,8 @@ class SDLConan(ConanFile):
                 self.requires("libalsa/1.2.4")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
+            if self.options.sndio:
+                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
@@ -192,11 +194,21 @@ class SDLConan(ConanFile):
 
                 self._cmake.definitions["ALSA"] = self.options.alsa
                 if self.options.alsa:
+                    self._cmake.definitions["ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
                     self._cmake.definitions["HAVE_ASOUNDLIB_H"] = True
                     self._cmake.definitions["HAVE_LIBASOUND"] = True
                 self._cmake.definitions["JACK"] = self.options.jack
+                if self.options.jack:
+                    self._cmake.definitions["JACK_SHARED"] = self.deps_cpp_info["jack"].shared
+                self._cmake.definitions["ESD"] = self.options.esd
+                if self.options.esd:
+                    self._cmake.definitions["ESD_SHARED"] = self.deps_cpp_info["esd"].shared
                 self._cmake.definitions["PULSEAUDIO"] = self.options.pulse
+                if self.options.pulse:
+                    self._cmake.definitions["PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
                 self._cmake.definitions["SNDIO"] = self.options.sndio
+                if self.options.sndio:
+                    self._cmake.definitions["SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
                 self._cmake.definitions["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
@@ -238,7 +250,6 @@ class SDLConan(ConanFile):
                 self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
-
 
             # Add extra information collected from the deps
             self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
