@@ -161,7 +161,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.2.0")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
         if self.options.get_safe("with_xcb"):
