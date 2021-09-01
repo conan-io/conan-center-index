@@ -76,14 +76,13 @@ class LibfabricConan(ConanFile):
             self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
 
         yes_no_dl = lambda v: {"True": "yes", "False": "no", "shared": "dl"}[str(v)]
+        yes_no = lambda v: "yes" if v else "no"
         args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
             "--with-bgq-progress={}".format(self.options.bgq_progress),
             "--with-bgq-mr={}".format(self.options.bgq_mr),
         ]
-        if self.options.shared:
-            args.extend(['--disable-static', '--enable-shared'])
-        else:
-            args.extend(['--disable-shared', '--enable-static'])
         for p in self._providers:
             args.append("--enable-{}={}".format(p, yes_no_dl(getattr(self.options, p))))
         if self.options.with_libnl:
