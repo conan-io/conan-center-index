@@ -23,12 +23,7 @@ endif()
 # Find gRPC installation
 find_package(gRPC CONFIG REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
-
-if (CMAKE_CROSSCOMPILING)
-  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin PATHS ENV PATH NO_DEFAULT_PATH)
-else()
-  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
-endif()
+set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 
 
 # Proto file
