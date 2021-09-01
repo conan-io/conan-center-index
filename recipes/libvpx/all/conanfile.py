@@ -111,8 +111,7 @@ class LibVPXConan(ConanFile):
         elif build_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
-        if tools.cross_building(self) or self.settings.compiler == 'Visual Studio':
-            args.append('--target=%s' % target)
+        args.append('--target=%s' % target)
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
