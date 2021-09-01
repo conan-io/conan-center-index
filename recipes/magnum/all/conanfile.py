@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -19,50 +20,65 @@ class MagnumConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "shared_plugins": [True, False],
+
+        # Follow documented build-options in https://doc.magnum.graphics/magnum/building.html#building-features
+        
+        "target_gl": [True, False],
+        "target_gles": [True, False],
+        "target_gles2": [True, False],
+        "target_desktop_gles": [True, False],
+        "target_headless": [True, False],
+        "target_vk": [True, False],
 
         "with_audio": [True, False],
         "with_debugtools": [True, False],
-        "with_meshtools": [True, False],
         "with_gl": [True, False],
+        "with_meshtools": [True, False],
         "with_primitives": [True, False],
         "with_scenegraph": [True, False],
         "with_shaders": [True, False],
+        #"with_shaderstools": [True, False],  Option not available in sources!
         "with_text": [True, False],
         "with_texturetools": [True, False],
         "with_trade": [True, False],
         "with_vk": [True, False],
         
-        "with_gl_info": [True, False],
-        "with_glfw_application": [True, False],
-        #"target_headless": [True, False],
-        #"target_gl": [True, False],
-        #"target_vk": [True, False],
-
-        #"with_sdl2_application": [True, False],
-        #"with_cglcontext": [True, False],
+        "with_cglcontext": [True, False],
+        "with_eglcontext": [True, False],
+        "with_glxcontext": [True, False],
+        "with_wglcontext": [True, False],
 
         # Options related to plugins
-        "shared_plugins": [True, False],
-        # WITH_ANYAUDIOIMPORTER
-        "with_anyimageimporter": [True, False],
+        "with_anyaudioimporter": [True, False],
         "with_anyimageconverter": [True, False],
+        "with_anyimageimporter": [True, False],
         "with_anysceneconverter": [True, False],
         "with_anysceneimporter": [True, False],
+        #"with_anyshaderconverter": [True, False],  Not in sources
         "with_magnumfont": [True, False],
         "with_magnumfontconverter": [True, False],
         "with_objimporter": [True, False],
-        "with_tgaimageconverter": [True, False],
         "with_tgaimporter": [True, False],
-        #"with_wavaudioimporter": [True, False],
+        "with_tgaimageconverter": [True, False],
+        "with_wavaudioimporter": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "shared_plugins": True,
+
+        "target_gl": True,
+        "target_gles": True,
+        "target_gles2": True,
+        "target_desktop_gles": True,
+        "target_headless": True,
+        "target_vk": True,
 
         "with_audio": False,
         "with_debugtools": True,
-        "with_meshtools": True,
         "with_gl": True,
+        "with_meshtools": True,
         "with_primitives": True,
         "with_scenegraph": True,
         "with_shaders": True,
@@ -71,27 +87,23 @@ class MagnumConan(ConanFile):
         "with_trade": True,
         "with_vk": True,
 
-        "with_gl_info": True,
-        "with_glfw_application": True,
-        #"target_headless": True,
-        #"target_gl": True,
-        #"target_vk": True,
-
-        #"with_sdl2_application": True,
-        
-        #"with_cglcontext": True,
+        "with_cglcontext": True,
+        "with_eglcontext": False,
+        "with_glxcontext": False,
+        "with_wglcontext": False,
 
         # Related to plugins
-        "shared_plugins": True,
-        "with_anyimageimporter": True,
+        "with_anyaudioimporter": False,
         "with_anyimageconverter": True,
+        "with_anyimageimporter": True,
         "with_anysceneconverter": True,
         "with_anysceneimporter": True,
         "with_magnumfont": True,
         "with_magnumfontconverter": True,
         "with_objimporter": True,
-        "with_tgaimageconverter": True,
         "with_tgaimporter": True,
+        "with_tgaimageconverter": True,
+        "with_wavaudioimporter": False,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "cmake/*"]
@@ -107,6 +119,16 @@ class MagnumConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
+        # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
+        #   let the Conan user to decide what to use and what not.
+        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
+            text = f.read()
+            # cmake_dependent_option(BUILD_GL_TESTS "Build unit tests for OpenGL code" OFF "BUILD_TESTS;TARGET_GL" OFF)
+            text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
+            f.seek(0)
+            f.write(text)
+            f.truncate()
+
         # GLFW naming
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "find_package(GLFW)",
@@ -123,11 +145,11 @@ class MagnumConan(ConanFile):
             del self.options.fPIC
         
         #if self.settings.os == "Android":
-        #    del self.options.with_sdl2_application
         #    del self.options.with_glfw_application
+        #    del self.options.with_sdl2_application
 
-        #if self.settings.os != "Macos":
-        #    del self.options.with_cglcontext
+        if self.settings.os != "Macos":
+            del self.options.with_cglcontext
 
     def configure(self):
         if self.options.shared:
@@ -142,8 +164,8 @@ class MagnumConan(ConanFile):
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
-        if self.options.with_glfw_application:
-            self.requires("glfw/3.3.4")
+        #if self.options.get_safe("with_glfw_application", False):
+        #    self.requires("glfw/3.3.4")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -159,21 +181,20 @@ class MagnumConan(ConanFile):
             # To fix issue with resource management, see here: https://github.com/mosra/magnum/issues/304#issuecomment-451768389
             raise ConanInvalidConfiguration("If using 'shared=True', corrade should be shared as well")
 
+        if not self.options.with_gl and (self.options.target_gl or 
+                                         self.options.target_gles or
+                                         self.options.target_gles2 or
+                                         self.options.target_desktop_gles or
+                                         self.options.target_headless):
+            raise ConanInvalidConfiguration("Option 'with_gl=True' is required")
+        if not self.options.with_vk and self.options.target_vk:
+            raise ConanInvalidConfiguration("Option 'with_vk=True' is required")
+
+        if self.options.get_safe("with_cglcontext", False) and not self.options.target_gl:
+            raise ConanInvalidConfiguration("--")
+
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
-
-        #if (self.options.target_headless or self.options.target_gl) and not self.options.with_gl:
-        #    raise ConanInvalidConfiguration("Option 'target_headless' and 'target_gl' requires option 'with_gl=True'")
-
-        #if self.options.target_vk and not self.options.with_vk:
-        #    raise ConanInvalidConfiguration("Option 'target_vk' requires option 'with_vk=True'")
-
-        #if self.options.get_safe("with_cglcontext", False) and not self.options.with_gl:
-        #    raise ConanInvalidConfiguration("Option 'with_cglcontext' requires option 'with_gl'")
-
-    @property
-    def _target_gl(self):
-        return bool(self.options.with_gl_info)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -182,13 +203,26 @@ class MagnumConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+        # self._cmake.definitions["BUILD_STATIC_UNIQUE_GLOBALS"]
+        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_GL_TESTS"] = False
+        self._cmake.definitions["BUILD_AL_TESTS"] = False
+        self._cmake.definitions["WITH_OPENGLTESTER"] = False
+        self._cmake.definitions["WITH_VULKANTESTER"] = False
+
+        self._cmake.definitions["TARGET_GL"] = self.options.target_gl
+        self._cmake.definitions["TARGET_GLES"] = self.options.target_gles
+        self._cmake.definitions["TARGET_GLES2"] = self.options.target_gles2
+        self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_desktop_gles
+        self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
+        self._cmake.definitions["TARGET_VK"] = self.options.target_vk
 
         self._cmake.definitions["WITH_AUDIO"] = self.options.with_audio
         self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.with_debugtools
-        self._cmake.definitions["WITH_MESHTOOLS"] = self.options.with_meshtools
         self._cmake.definitions["WITH_GL"] = self.options.with_gl
+        self._cmake.definitions["WITH_MESHTOOLS"] = self.options.with_meshtools
         self._cmake.definitions["WITH_PRIMITIVES"] = self.options.with_primitives
         self._cmake.definitions["WITH_SCENEGRAPH"] = self.options.with_scenegraph
         self._cmake.definitions["WITH_SHADERS"] = self.options.with_shaders
@@ -197,34 +231,47 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
 
-        # gl-info
-        self._cmake.definitions["WITH_GL_INFO"] = self.options.with_gl_info
-        self._cmake.definitions["TARGET_GL"] = self._target_gl
+        self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = False
+        self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = False
+        self._cmake.definitions["WITH_GLFWAPPLICATION"] = False
+        self._cmake.definitions["WITH_GLXAPPLICATION"] = False
+        self._cmake.definitions["WITH_SDL2APPLICATION"] = False
+        self._cmake.definitions["WITH_XEGLAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSWGLAPPLICATION"] = False
+        self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = False
 
-        # glfw_application
-        self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.with_glfw_application
-
-        #self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
-        #self._cmake.definitions["TARGET_GL"] = self.options.target_gl
-        #self._cmake.definitions["TARGET_VK"] = self.options.target_vk
-
-        #self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.get_safe("with_glfw_application", False)
-        #self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.get_safe("with_sdl2_application", False)
-
-        #self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
+        self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
+        self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.with_eglcontext
+        self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.with_glxcontext
+        self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.with_wglcontext
 
         ##### Plugins related #####
-        self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
-        self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.with_anyimageimporter
+        self._cmake.definitions["WITH_ANYAUDIOIMPORTER"] = self.options.with_anyaudioimporter
         self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.with_anyimageconverter
+        self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.with_anyimageimporter
         self._cmake.definitions["WITH_ANYSCENECONVERTER"] = self.options.with_anysceneconverter
         self._cmake.definitions["WITH_ANYSCENEIMPORTER"] = self.options.with_anysceneconverter
         self._cmake.definitions["WITH_MAGNUMFONT"] = self.options.with_anysceneconverter
         self._cmake.definitions["WITH_MAGNUMFONTCONVERTER"] = self.options.with_anysceneconverter
         self._cmake.definitions["WITH_OBJIMPORTER"] = self.options.with_objimporter
-        self._cmake.definitions["WITH_TGAIMAGECONVERTER"] = self.options.with_tgaimageconverter
         self._cmake.definitions["WITH_TGAIMPORTER"] = self.options.with_tgaimporter
-        
+        self._cmake.definitions["WITH_TGAIMAGECONVERTER"] = self.options.with_tgaimageconverter
+        self._cmake.definitions["WITH_WAVAUDIOIMPORTER"] = self.options.with_wavaudioimporter
+
+        #### Command line utilities ####
+        self._cmake.definitions["WITH_GL_INFO"] = False
+        self._cmake.definitions["WITH_VK_INFO"] = False
+        self._cmake.definitions["WITH_AL_INFO"] = False
+        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = False
+        self._cmake.definitions["WITH_FONTCONVERTER"] = False
+        self._cmake.definitions["WITH_IMAGECONVERTER"] = False
+        self._cmake.definitions["WITH_SCENECONVERTER"] = False
+        self._cmake.definitions["WITH_SHADERCONVERTER"] = False
+
         self._cmake.configure()
         return self._cmake
 
@@ -262,38 +309,9 @@ class MagnumConan(ConanFile):
         self.cpp_info.components["magnum_main"].libs = ["Magnum{}".format(lib_suffix)]
         self.cpp_info.components["magnum_main"].requires = ["_magnum", "corrade::utility"]
 
-        # Animation
-        # Math 
-        # Platform
-        if self.options.with_gl_info:
-            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-gl-info.cmake"))
-
-        if self.options.with_glfw_application:
-            self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
-            self.cpp_info.components["glfw_application"].names["cmake_find_package_multi"] = "GlfwApplication"
-            self.cpp_info.components["glfw_application"].libs = ["MagnumGlfwApplication{}".format(lib_suffix)]
-            self.cpp_info.components["glfw_application"].requires = ["magnum_main", "glfw::glfw"]
-            if self._target_gl:
-                self.cpp_info.components["glfw_application"].requires.append("gl")
-            # Require also GLX or EGL depending on other config
-
-        """
-        if self.options.sdl2_application:
-            self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
-            self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
-            self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
-            self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
-            if self.options.with_gl:
-                self.cpp_info.components["sdl2_application"].requires += ["gl"]
-
-            # If there is only one application, here it is an alias
-            self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
-            self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
-            self.cpp_info.components["application"].requires = ["sdl2_application"]
-        """
-
         # Audio
-        # TODO: Here there is a target (false by default)
+        if self.options.with_audio:
+            raise Exception("Component not created")
         
         # DebugTools
         if self.options.with_debugtools:
@@ -369,28 +387,50 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["vk"].libs = ["MagnumVk{}".format(lib_suffix)]
             self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
+
         """
-        if self.options.get_safe("with_cglcontext", False):
-            self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
-            self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
-            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext{}".format(lib_suffix)]
-            self.cpp_info.components["cglcontext"].requires = ["magnum_main", "gl"]
-        
-            # FIXME: If only one *context is provided, then it also gets the GLContext alias
-            self.cpp_info.components["glcontext"].names["cmake_find_package"] = "GLContext"
-            self.cpp_info.components["glcontext"].names["cmake_find_package_multi"] = "GLContext"
-            self.cpp_info.components["glcontext"].requires = ["cglcontext"]
+        #### APPLICATIONS ####
+        if self.options.get_safe("with_glfw_application", False):
+            self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
+            self.cpp_info.components["glfw_application"].names["cmake_find_package_multi"] = "GlfwApplication"
+            self.cpp_info.components["glfw_application"].libs = ["MagnumGlfwApplication{}".format(lib_suffix)]
+            self.cpp_info.components["glfw_application"].requires = ["magnum_main", "glfw::glfw"]
+            if self._target_gl:
+                self.cpp_info.components["glfw_application"].requires.append("gl")
+            # Require also GLX or EGL depending on other config
+
+        if self.options.sdl2_application:
+            self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
+            self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
+            self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
+            self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
+            if self.options.with_gl:
+                self.cpp_info.components["sdl2_application"].requires += ["gl"]
+
+            # If there is only one application, here it is an alias
+            self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
+            self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
+            self.cpp_info.components["application"].requires = ["sdl2_application"]
         """
+
+        #### CONTEXTS ####
+        if self.options.with_cglcontext:
+            raise Exception()
+
+        if self.options.with_eglcontext:
+            raise Exception()
+
+        if self.options.with_glxcontext:
+            raise Exception()
+
+        if self.options.with_wglcontext:
+            raise Exception()
+
 
         ######## PLUGINS ########
         # If shared, there are no libraries to link with
-        if self.options.with_anyimageimporter:
-            self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
-            self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
-            if not self.options.shared_plugins:
-                self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
-                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["anyimageimporter"].requires = ["trade"]
+        if self.options.with_anyaudioimporter:
+            raise Exception("Create component here")
 
         if self.options.with_anyimageconverter:
             self.cpp_info.components["anyimageconverter"].names["cmake_find_package"] = "AnyImageConverter"
@@ -399,6 +439,14 @@ class MagnumConan(ConanFile):
                 self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
                 self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
             self.cpp_info.components["anyimageconverter"].requires = ["trade"]
+
+        if self.options.with_anyimageimporter:
+            self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
+            self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
+                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["anyimageimporter"].requires = ["trade"]
 
         if self.options.with_anysceneconverter:
             self.cpp_info.components["anysceneconverter"].names["cmake_find_package"] = "AnySceneConverter"
@@ -442,6 +490,14 @@ class MagnumConan(ConanFile):
                 self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
             self.cpp_info.components["objimporter"].requires = ["trade", "meshtools"]
 
+        if self.options.with_tgaimporter:
+            self.cpp_info.components["tgaimporter"].names["cmake_find_package"] = "TgaImporter"
+            self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
+                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["tgaimporter"].requires = ["trade"]
+
         if self.options.with_tgaimageconverter:
             self.cpp_info.components["tgaimageconverter"].names["cmake_find_package"] = "TgaImageConverter"
             self.cpp_info.components["tgaimageconverter"].names["cmake_find_package_multi"] = "TgaImageConverter"
@@ -450,10 +506,14 @@ class MagnumConan(ConanFile):
                 self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
             self.cpp_info.components["tgaimageconverter"].requires = ["trade"]
 
-        if self.options.with_tgaimporter:
-            self.cpp_info.components["tgaimporter"].names["cmake_find_package"] = "TgaImporter"
-            self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
-            if not self.options.shared_plugins:
-                self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
-                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["tgaimporter"].requires = ["trade"]
+        if self.options.with_wavaudioimporter:
+            raise Exception("Component required here")
+
+        """
+        #### EXECUTABLES ####
+        if self.options.with_gl_info:
+            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-gl-info.cmake"))
+
+        if self.options.with_distancefieldconverter:
+            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-distancefieldconverter.cmake"))
+        """

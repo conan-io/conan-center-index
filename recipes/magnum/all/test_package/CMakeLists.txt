@@ -17,8 +17,8 @@ set_target_properties(${PROJECT_NAME}
 )
 
 # Run some executables
-add_custom_command(
-    TARGET ${PROJECT_NAME} PRE_BUILD
-    COMMAND Magnum::gl-info
-    COMMENT "Running magnum-gl-info"
-)
+#add_custom_command(
+#    TARGET ${PROJECT_NAME} PRE_BUILD
+#    COMMAND Magnum::gl-info
+#    COMMENT "Running magnum-gl-info"
+#)
