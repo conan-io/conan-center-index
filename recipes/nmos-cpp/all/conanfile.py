@@ -59,7 +59,10 @@ class NmosCppConan(ConanFile):
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
-            #self.options["mdnsresponder"].with_opt_patches = True
+            # The option mdnsresponder:with_opt_patches=True is recommended in order to permit the
+            # over-long service type _nmos-registration._tcp used in IS-04 v1.2, and also to enable
+            # support for unicast DNS-SD on Linux, since NMOS recommends this in preference to mDNS.
+            # See https://specs.amwa.tv/is-04/releases/v1.3.1/docs/3.1._Discovery_-_Registered_Operation.html#dns-sd-advertisement
         elif self.options.get_safe("with_dnssd") == "avahi":
             self.requires("avahi/0.8")
 
