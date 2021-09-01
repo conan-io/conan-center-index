@@ -35,8 +35,13 @@ class NmosCppConan(ConanFile):
     _cmake = None
 
     # for out-of-source build, cf. wrapper CMakeLists.txt
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
