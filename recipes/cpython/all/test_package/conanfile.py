@@ -180,5 +180,6 @@ class TestPackageConan(ConanFile):
                         self.output.info("Testing module (spam) using setup.py built module")
                         self._test_module("spam", True)
 
-            if self.options["cpython"].env_vars:
+            # MSVC builds need PYTHONHOME set.
+            with tools.environment_append({"PYTHONHOME": self.deps_user_info["cpython"].pythonhome}):
                 self.run(os.path.join("bin", "test_package"), run_environment=True)
