@@ -159,6 +159,9 @@ class CPythonConan(ConanFile):
             if not self.options.shared and tools.Version(self._version_number_only) >= "3.10":
                 raise ConanInvalidConfiguration("Static msvc build disabled (>=3.10) due to \"AttributeError: module 'sys' has no attribute 'winver'\"")
 
+        if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
+            raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
+
     def package_id(self):
         del self.info.options.env_vars
 
@@ -408,6 +411,7 @@ class CPythonConan(ConanFile):
                               platforms=self._msvc_archs, properties=msbuild_properties)
 
     def build(self):
+        # FIXME: these checks belong in validate, but the versions of dependencies are not available there yet
         if self._supports_modules:
             if tools.Version(self._version_number_only) < "3.8.0":
                 if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
@@ -418,13 +422,9 @@ class CPythonConan(ConanFile):
 
         if self._with_libffi:
             if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd) ")
-
-        if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
-            raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
+                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
         self._patch_sources()
-
         if self.settings.compiler == "Visual Studio":
             self._msvc_build()
         else:
