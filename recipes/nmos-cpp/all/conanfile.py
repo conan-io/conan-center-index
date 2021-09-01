@@ -11,7 +11,7 @@ class NmosCppConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sony/nmos-cpp"
-    topics = ("NMOS")
+    topics = ("amwa", "nmos", "is-04", "is-05", "is-07", "is-08", "is-09", "broadcasting", "network", "media")
 
     settings = "os", "compiler", "build_type", "arch"
     # for now, no "shared" option support
