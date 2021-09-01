@@ -62,6 +62,9 @@ class DbusConan(ConanFile):
 
             args.append("--with-systemdsystemunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "system"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.package_folder, "lib", "systemd", "user"))
+            
+            args.append("--disable-launchd")
+            args.append("--disable-systemd")
 
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
