@@ -88,7 +88,7 @@ class MagnumConan(ConanFile):
         "with_vk": True,
 
         "with_cglcontext": True,
-        "with_eglcontext": False,
+        "with_eglcontext": True,
         "with_glxcontext": False,
         "with_wglcontext": False,
 
@@ -116,29 +116,6 @@ class MagnumConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
-                              "")
-        # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
-        #   let the Conan user to decide what to use and what not.
-        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
-            text = f.read()
-            # cmake_dependent_option(BUILD_GL_TESTS "Build unit tests for OpenGL code" OFF "BUILD_TESTS;TARGET_GL" OFF)
-            text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
-            f.seek(0)
-            f.write(text)
-            f.truncate()
-
-        # GLFW naming
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-                              "find_package(GLFW)",
-                              "find_package(glfw3)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-                              "GLFW_FOUND",
-                              "glfw3_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-                              "GLFW::GLFW",
-                              "glfw::glfw")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -164,6 +141,8 @@ class MagnumConan(ConanFile):
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
+        if self.options.with_eglcontext:
+            self.requires("egl/system")
         #if self.options.get_safe("with_glfw_application", False):
         #    self.requires("glfw/3.3.4")
 
@@ -278,6 +257,41 @@ class MagnumConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
+                              "")
+        # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
+        #   let the Conan user to decide what to use and what not.
+        with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
+            text = f.read()
+            # cmake_dependent_option(BUILD_GL_TESTS "Build unit tests for OpenGL code" OFF "BUILD_TESTS;TARGET_GL" OFF)
+            text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
+            f.seek(0)
+            f.write(text)
+            f.truncate()
+
+        # GLFW naming
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "find_package(GLFW)",
+                              "find_package(glfw3)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "GLFW_FOUND",
+                              "glfw3_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "GLFW::GLFW",
+                              "glfw::glfw")
+
+        # EGL naming
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "find_package(EGL)",
+                              "find_package(egl_system)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "EGL_FOUND",
+                              "egl_system_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+                              "EGL::EGL",
+                              "egl::egl")
 
     def build(self):
         self._patch_sources()
@@ -414,11 +428,14 @@ class MagnumConan(ConanFile):
         """
 
         #### CONTEXTS ####
-        if self.options.with_cglcontext:
+        if self.options.get_safe("with_cglcontext", False):
             raise Exception()
 
         if self.options.with_eglcontext:
-            raise Exception()
+            self.cpp_info.components["eglcontext"].names["cmake_find_package"] = "EglContext"
+            self.cpp_info.components["eglcontext"].names["cmake_find_package_multi"] = "EglContext"
+            self.cpp_info.components["eglcontext"].libs = ["MagnumEglContext{}".format(lib_suffix)]
+            self.cpp_info.components["eglcontext"].requires = ["gl", "egl::egl"]
 
         if self.options.with_glxcontext:
             raise Exception()
