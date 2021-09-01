@@ -188,7 +188,7 @@ class CPythonConan(ConanFile):
             elif tools.Version(self._version_number_only) < "3.10":
                 self.requires("mpdecimal/2.5.0")
             else:
-                self.requires("mpdecimal/2.5.1")
+                self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.25")
