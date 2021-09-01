@@ -39,6 +39,8 @@ class GStPluginsBaseConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         self.options['gstreamer'].shared = self.options.shared
