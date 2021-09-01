@@ -31,7 +31,7 @@ class DbusConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
-            raise ConanInvalidConfiguration("dbus is only supported on Linux and FreeBSD")
+            del self.options.with_x11
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -44,7 +44,7 @@ class DbusConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.68.2")
 
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
 
     def _configure_autotools(self):
@@ -56,7 +56,7 @@ class DbusConan(ConanFile):
             args.append("--disable-doxygen-docs")
             args.append("--disable-xml-docs")
 
-            args.append("--%s-x11-autolaunch" % ("enable" if self.options.with_x11 else "disable"))
+            args.append("--%s-x11-autolaunch" % ("enable" if self.options.get_safe("with_x11", False) else "disable"))
             args.append("--disable-asserts")
             args.append("--disable-checks")
 
