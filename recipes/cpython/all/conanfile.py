@@ -694,6 +694,9 @@ class CPythonConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             pythonhome = os.path.join(self.package_folder, "bin")
+            if self.options.env_vars:
+                self.output.info("Setting PYTHON environment variable: {}".format(pythonhome))
+                self.env_info.PYTHONHOME = pythonhome
         else:
             version = tools.Version(self._version_number_only)
             pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
