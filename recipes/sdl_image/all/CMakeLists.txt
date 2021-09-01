@@ -56,9 +56,14 @@ set(SOURCES
     source_subfolder/IMG_xcf.c
     source_subfolder/IMG_xpm.c
     source_subfolder/IMG_xv.c
-    source_subfolder/version.rc
     ${IMAGEIO_SOURCE}
 )
+
+if(BUILD_SHARED_LIBS)
+    list(APPEND SOURCES
+        source_subfolder/version.rc
+    )
+endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
