@@ -29,29 +29,77 @@ class Open62541Conan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
+        # False: UA_ENABLE_HISTORIZING=Off
+        # True: UA_ENABLE_HISTORIZING=On
+        # Experimental: UA_ENABLE_HISTORIZING=On and UA_ENABLE_EXPERIMENTAL_HISTORIZING=On
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
-        # "With Events" is deprecated
+        # False: UA_ENABLE_SUBSCRIPTIONS=Off
+        # True: UA_ENABLE_SUBSCRIPTIONS=On
+        # With Events: deprecated. Use 'events' instead
+        # events: UA_ENABLE_SUBSCRIPTIONS_EVENTS=On
+        # alarms,conditions,events: UA_ENABLE_SUBSCRIPTIONS_EVENTS=On and UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS=On
         "subscription": [True, False, "With Events", "events", "alarms,conditions,events"],
+        # False: UA_ENABLE_METHODCALLS=Off
+        # True: UA_ENABLE_METHODCALLS=Onn
         "methods": [True, False],
+        # False: UA_ENABLE_NODEMANAGEMENT=Off
+        # True: UA_ENABLE_NODEMANAGEMENT=On
         "dynamic_nodes": [True, False],
+        # False: UA_ENABLE_AMALGAMATION=Off
+        # True: UA_ENABLE_AMALGAMATION=On
         "single_header": [True, False],
+        # None: UA_MULTITHREADING=0
+        # Threadsafe: UA_MULTITHREADING=100
+        # Internal threads: UA_MULTITHREADING=200
         "multithreading": ["None", "Threadsafe", "Internal threads"],
+        # False: UA_ENABLE_IMMUTABLE_NODES=Off
+        # True: UA_ENABLE_IMMUTABLE_NODES=On
         "imutable_nodes": [True, False],
+        # False: UA_ENABLE_WEBSOCKET_SERVER=Off
+        # True: UA_ENABLE_WEBSOCKET_SERVER=On
         "web_socket": [True, False],
-        "discovery": [True, False, "With Multicast"],
+        # False: UA_ENABLE_DISCOVERY=Off
+        # True: UA_ENABLE_DISCOVERY=On
+        # With Multicast: Deprecated. Use 'multicast' instead
+        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On
+        # semaphore: UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On and UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
+        # Deprecated. Use discovery=semaphore instead
         "discovery_semaphore": [True, False],
+        # False: UA_ENABLE_QUERY=Off
+        # True: UA_ENABLE_QUERY=On
         "query": [True, False],
+        # False: UA_ENABLE_ENCRYPTION=Off
+        # openssl: UA_ENABLE_ENCRYPTION=On and UA_ENABLE_ENCRYPTION_OPENSSL=On
+        # mbedtls: UA_ENABLE_ENCRYPTION=On
         "encryption": [False, "openssl", "mbedtls"],
+        # False: UA_ENABLE_JSON_ENCODING=Off
+        # True: UA_ENABLE_JSON_ENCODING=On
         "json_support": [True, False],
+        # False: UA_ENABLE_PUBSUB=Off
+        # Simple: UA_ENABLE_PUBSUB=On
+        # Ethernet: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP=On
+        # Ethernet_XDP: UA_ENABLE_PUBSUB=On and UA_ENABLE_PUBSUB_ETH_UADP_XDP=On
         "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
+        # False: UA_ENABLE_DA=Off
+        # True: UA_ENABLE_DA=On
         "data_access": [True, False],
+        # False: UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS=Off and UA_NAMESPACE_ZERO=options.namespace_zero
+        # True: UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS=On and UA_NAMESPACE_ZERO=Full
         "compiled_nodeset_descriptions": [True, False],
+        # UA_NAMESPACE_ZERO=option.namespace_zero (only if compiled_nodeset_descriptions=False)
         "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
+        # UA_ENABLE_MICRO_EMB_DEV_PROFILE=embedded_profile
         "embedded_profile": [True, False],
+        # UA_ENABLE_TYPENAMES=typenames
         "typenames": [True, False],
+        # UA_ENABLE_HARDENING=hardening
         "hardening": [True, False],
+        # UA_COMPILE_AS_CXX=cpp_compatible
         "cpp_compatible": [True, False],
+        # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False]
     }
     default_options = {
@@ -66,7 +114,7 @@ class Open62541Conan(ConanFile):
         "multithreading": "None",
         "imutable_nodes": False,
         "web_socket": False,
-        "discovery": True,
+        "discovery": "semaphore",
         "discovery_semaphore": True,
         "query": False,
         "encryption": False,
@@ -116,7 +164,7 @@ class Open62541Conan(ConanFile):
             self.requires("openssl/1.1.1k")
         if self.options.web_socket:
             self.requires("libwebsockets/4.2.0")
-        if self.options.discovery == "With Multicast":
+        if self.options.discovery == "With Multicast" or "multicast" in self.options.discovery:
             self.requires("pro-mdnsd/0.8.4")
 
     def validate(self):
@@ -219,8 +267,8 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch
 
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
+        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
         if self.options.subscription != False:
-            self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
             if "events" in str(self.options.subscription):
                 self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
             if "alarms" in str(self.options.subscription) and "conditions" in str(self.options.subscription):
@@ -233,23 +281,24 @@ class Open62541Conan(ConanFile):
             )
         self._cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         self._cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
+        self._cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.historize != False
         if self.options.historize != False:
-            self._cmake.definitions["UA_ENABLE_HISTORIZING"] = True
             if self.options.historize == "Experimental":
                 self._cmake.definitions["UA_ENABLE_EXPERIMENTAL_HISTORIZING"] = True
+        self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
         if self.options.discovery != False:
-            self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
-            if self.options.discovery == "With Multicast":
-                self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = True
-            self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
+            self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = \
+                self.options.discovery == "With Multicast" or "multicast" in self.options.discovery
+            self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
+                self.options.discovery_semaphore or "semaphore" in self.options.discovery
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
+        self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption != False
         if self.options.encryption != False:
-            self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
             if self.options.encryption == "openssl":
                 self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
+        self._cmake.definitions["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
         if self.options.pub_sub != False:
-            self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
             elif self.settings.os == "Linux" and self.options.pub_sub == "Ethernet_XDP":
