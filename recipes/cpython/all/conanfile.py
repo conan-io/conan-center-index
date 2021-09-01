@@ -624,13 +624,13 @@ class CPythonConan(ConanFile):
         # FIXME: conan components need to generate multiple .pc files (python2, python-27)
 
         py_version = tools.Version(self._version_number_only)
-
         # python component: "Build a C extension for Python"
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
-            self.cpp_info.components["python"].libdirs = [os.path.join(self._msvc_install_subprefix, "libs")]
+            libdir = os.path.join(self._msvc_install_subprefix, "libs")
         else:
             self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}{}".format(self._version_suffix, self._abi_suffix)))
+            libdir = "lib"
         if self.options.shared:
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
@@ -643,17 +643,21 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].names["pkg_config"] = "python-{}.{}".format(py_version.major, py_version.minor)
+        self.cpp_info.components["python"].libdirs = []
 
         self.cpp_info.components["_python_copy"].names["pkg_config"] = "python{}".format(py_version.major)
         self.cpp_info.components["_python_copy"].requires = ["python"]
+        self.cpp_info.components["_python_copy"].libdirs = []
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
+        self.cpp_info.components["embed"].libdirs = [libdir]
         self.cpp_info.components["embed"].names["pkg_config"] = "python-{}.{}-embed".format(py_version.major, py_version.minor)
         self.cpp_info.components["embed"].requires = ["python"]
 
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
         self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
+        self.cpp_info.components["_embed_copy"].libdirs = []
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
@@ -681,6 +685,7 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
+            self.cpp_info.components["_hidden"].libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
