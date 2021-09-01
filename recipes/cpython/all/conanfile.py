@@ -130,7 +130,7 @@ class CPythonConan(ConanFile):
                 del self.options.with_lzma
         if self.settings.compiler == "Visual Studio":
             # The msbuild generator only works with Visual Studio
-            self.generators.append("msbuild")
+            self.generators.append("MSBuildDeps")
 
     def validate(self):
         if self.options.shared:
