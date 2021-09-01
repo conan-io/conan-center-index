@@ -61,8 +61,8 @@ class LibfabricConan(ConanFile):
             self.requires("libnl/3.2.25")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("The libfabric package cannot be built on Visual Studio.")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("The libfabric package cannot be built on Windows.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
