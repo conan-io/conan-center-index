@@ -225,7 +225,6 @@ class CPythonConan(ConanFile):
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "ac_cv_func_getrandom=no",  # FIXME: check
         ]
         if self._is_py2:
             conf_args.extend([
