@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class FollyConan(ConanFile):
     name = "folly"
     description = "An open-source C++ components library developed and used at Facebook"
-    topics = ("conan", "folly", "facebook", "components", "core", "efficiency")
+    topics = ("folly", "facebook", "components", "core", "efficiency")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/folly"
     license = "Apache-2.0"
