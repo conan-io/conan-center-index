@@ -48,7 +48,7 @@ class Jinja2cppConan(ConanFile):
         self.requires("variant-lite/2.0.0")
         if self.version == "1.1.0":
             self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
-        if self.version == "1.2.1":
+        else:
             self.requires("nlohmann_json/3.10.2")
             self.requires("fmt/8.0.1")
 
