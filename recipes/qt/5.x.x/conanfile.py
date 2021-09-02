@@ -883,6 +883,30 @@ Examples = bin/datadir/examples""")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
+
+            if self.settings.os == "Windows":
+                _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
+                    "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
+            elif self.settings.os == "Android":
+                _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
+            elif self.settings.os == "Macos":
+                _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
+                    "IOKit", "IOSurface", "Metal", "QuartzCore"]
+            elif self.settings.os in ["iOS", "tvOS"]:
+                _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
+                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
+                    "QuartzCore", "UIKit"]
+            elif self.settings.os == "watchOS":
+                _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
+            elif self.settings.os == "Emscripten":
+                _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
+            else:
+                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
+                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
+
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
