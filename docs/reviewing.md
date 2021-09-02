@@ -137,7 +137,7 @@ target_link_libraries(${PROJECT_NAME} package::package)
 ```
 
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
-done creating and linking different libraries and or executables.
+done creating and linking different libraries and/or executables.
 
 ### Recommended feature options names
 
