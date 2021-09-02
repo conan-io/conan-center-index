@@ -278,6 +278,11 @@ class BoostConan(ConanFile):
             self.options.i18n_backend_iconv = "off"
         elif tools.is_apple_os(self.settings.os):
             self.options.i18n_backend_iconv = "libiconv"
+        elif self.settings.os == "Android":
+            # bionic provides iconv since API level 28
+            api_level = self.settings.get_safe("os.api_level")
+            if api_level and tools.Version(api_level) < "28":
+                self.options.i18n_backend_iconv = "libiconv"
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
