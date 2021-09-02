@@ -173,8 +173,7 @@ class CPythonConan(ConanFile):
     def _with_libffi(self):
         # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self._supports_modules \
-               and (self.settings.compiler != "Visual Studio" or tools.Version(self._version_number_only) >= "3.8") \
-               and not tools.is_apple_os(self.settings.os)
+               and (self.settings.compiler != "Visual Studio" or tools.Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
