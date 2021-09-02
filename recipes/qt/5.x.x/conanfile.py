@@ -307,8 +307,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.172")
-
+            self.requires("vulkan-loader/1.2.182")
+            if tools.is_apple_os(self.settings.os):
+                self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
             self.requires("glib/2.69.2")
         # if self.options.with_libiconv: # QTBUG-84708
@@ -876,6 +877,10 @@ Examples = bin/datadir/examples""")
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.get_safe("with_vulkan", False):
+                gui_reqs.append("vulkan-loader::vulkan-loader")
+                if tools.is_apple_os(self.settings.os):
+                    gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
