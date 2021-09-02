@@ -1159,8 +1159,10 @@ Examples = bin/datadir/examples""")
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
             for m in os.listdir(object_dir):
-                submodules_dir = os.path.join(object_dir, m)
                 component = "qt" + m[:m.find("_")]
+                if component not in self.cpp_info.components:
+                    continue
+                submodules_dir = os.path.join(object_dir, m)
                 for sub_dir in os.listdir(submodules_dir):
                     submodule_dir = os.path.join(submodules_dir, sub_dir)
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
