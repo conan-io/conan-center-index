@@ -117,7 +117,7 @@ enforce this generator to align with the upcoming
 and it should help in the migration (and compatibility) with Conan v2.
 
 In ConanCenter we try to mimic the names of the targets and the information provided by CMake's modules and config files that some libraries
-provide. If CMake or the library itself don't enforce any target name, the ones provided by Conan should be recomended. The minimal project
+provide. If CMake or the library itself don't enforce any target name, the ones provided by Conan should be recommended. The minimal project
 in the `test_package` folder should serve as an example of the best way to consume the package, and targets are preferred over raw variables.
 
 This rule applies for the _global_ target and for components ones. The following snippet should serve as example:
