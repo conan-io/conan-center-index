@@ -118,7 +118,7 @@ class CoinClpConan(ConanFile):
         tools.mkdir(os.path.join(self.package_folder, "include", "coin"))
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.install(args=["-j1"]) # due to configure generated with old autotools version
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
