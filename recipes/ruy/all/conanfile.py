@@ -1,0 +1,109 @@
+import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
+
+
+class RuyConan(ConanFile):
+    name = "ruy"
+    description = "ruy is a matrix multiplication library.\n" \
+                  "Its focus is to cover the matrix multiplication needs of neural network inference engines\n"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/google/ruy"
+    license = "Apache-2.0"
+    topics = ("matrix", "multiplication", "neural", "network", "AI", "tensorflow")
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False,
+    }
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("cpuinfo/cci.20201217")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                destination=self._source_subfolder, strip_root=True)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["RUY_MINIMAL_BUILD"] = True
+        self._cmake.configure()
+        return self._cmake
+
+    def build(self):
+        # 1. Allow Shared builds
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "ruy_cc_library.cmake"),
+                              "add_library(${_NAME} STATIC",
+                              "add_library(${_NAME}"
+                              )
+        # 2. Shared builds fail with undefined symbols without this. clog is a library from the cpuinfo
+        tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
+                              "set(ruy_6_cpuinfo \"cpuinfo\")",
+                              "set(ruy_6_cpuinfo \"cpuinfo;clog\")"
+                              )
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*.h", dst=os.path.join("include", "ruy"), src=os.path.join(self._source_subfolder, "ruy"))
+        self.copy(pattern="*", dst="lib", src="lib")
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ruy"
+        self.cpp_info.names["cmake_find_package_multi"] = "ruy"
+        self.cpp_info.libs = ["ruy_frontend",
+                            "ruy_context",
+                            "ruy_trmul",
+                            "ruy_thread_pool",
+                            "ruy_blocking_counter",
+                            "ruy_prepare_packed_matrices",
+                            "ruy_ctx",
+                            "ruy_allocator",
+                            "ruy_prepacked_cache",
+                            "ruy_tune",
+                            "ruy_wait",
+                            "ruy_apply_multiplier",
+                            "ruy_block_map",
+                            "ruy_context_get_ctx",
+                            "ruy_cpuinfo",
+                            "ruy_denormal",
+                            "ruy_have_built_path_for_avx",
+                            "ruy_have_built_path_for_avx2_fma",
+                            "ruy_have_built_path_for_avx512",
+                            "ruy_kernel_arm",
+                            "ruy_kernel_avx",
+                            "ruy_kernel_avx2_fma",
+                            "ruy_kernel_avx512",
+                            "ruy_pack_arm",
+                            "ruy_pack_avx",
+                            "ruy_pack_avx2_fma",
+                            "ruy_pack_avx512",
+                            "ruy_system_aligned_alloc",
+                            "ruy_profiler_instrumentation",
+                            "ruy_profiler_profiler"
+                            ]
