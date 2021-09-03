@@ -74,6 +74,8 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_zstd": [True, False],
         "with_gstreamer": [True, False],
+        "with_pulseaudio": [True, False],
+        "with_dbus": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -111,6 +113,8 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_zstd": True,
         "with_gstreamer": False,
+        "with_pulseaudio": False,
+        "with_dbus": False,
 
         "gui": True,
         "widgets": True,
@@ -208,6 +212,7 @@ class QtConan(ConanFile):
             del self.options.with_libalsa
             del self.options.with_openal
             del self.options.with_gstreamer
+            del self.options.with_pulseaudio
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
@@ -291,6 +296,10 @@ class QtConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.X does not support GCC or clang before 5.0")
 
+        if self.options.get_safe("with_pulseaudio", default=False) and not self.options["pulseaudio"].with_glib:
+            # https://bugreports.qt.io/browse/QTBUG-95952
+            raise ConanInvalidConfiguration("Pulseaudio needs to be built with glib option or qt's configure script won't detect it")
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
@@ -298,10 +307,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.172")
-
+            self.requires("vulkan-loader/1.2.182")
+            if tools.is_apple_os(self.settings.os):
+                self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
-            self.requires("glib/2.68.3")
+            self.requires("glib/2.69.2")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -349,6 +359,10 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_gstreamer", False):
             raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
+        if self.options.get_safe("with_pulseaudio", False):
+            self.requires("pulseaudio/14.2")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -529,7 +543,13 @@ class QtConan(ConanFile):
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
-            args.append("--gstreamer" if self.options.with_gstreamer else "--no-gstreamer")
+            args.append("--gstreamer" if self.options.get_safe("with_gstreamer", False) else "--no-gstreamer")
+            args.append("--pulseaudio" if self.options.get_safe("with_pulseaudio", False) else "--no-pulseaudio")
+
+        if self.options.with_dbus:
+            args.append("-dbus-linked")
+        else:
+            args.append("-no-dbus")
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -842,7 +862,9 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
 
         if self.options.gui:
-            gui_reqs = ["DBus"]
+            gui_reqs = []
+            if self.options.with_dbus:
+                gui_reqs.append("DBus")
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -855,6 +877,10 @@ Examples = bin/datadir/examples""")
                     gui_reqs.append("xkbcommon::xkbcommon")
             if self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
+            if self.options.get_safe("with_vulkan", False):
+                gui_reqs.append("vulkan-loader::vulkan-loader")
+                if tools.is_apple_os(self.settings.os):
+                    gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
@@ -885,7 +911,8 @@ Examples = bin/datadir/examples""")
             _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
-        _create_module("DBus")
+        if self.options.with_dbus:
+            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
@@ -906,6 +933,8 @@ Examples = bin/datadir/examples""")
             _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
+            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package"] = "LinguistTools"
+            self.cpp_info.components["qtLinguistTools"].names["cmake_find_package_multi"] = "LinguistTools"
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
@@ -1018,6 +1047,8 @@ Examples = bin/datadir/examples""")
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
                 multimedia_reqs.append("openal::openal")
+            if self.options.get_safe("with_pulseaudio", False):
+                multimedia_reqs.append("pulseaudio::pulse")
             _create_module("Multimedia", multimedia_reqs)
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and self.options.gui:
@@ -1066,6 +1097,9 @@ Examples = bin/datadir/examples""")
         if self.options.qtwinextras:
             _create_module("WinExtras")
 
+        if self.options.qtxmlpatterns:
+             _create_module("XmlPatterns", ["Network"])
+
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
@@ -1075,6 +1109,9 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
+                if self.options.qtwinextras:
+                    self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
+
 
             if self.settings.os == "Macos":
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework

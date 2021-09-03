@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,6 @@
+ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+ project(VulkanBootstrap)
+ 
+-find_package(Vulkan REQUIRED)
+ 
+ add_library(vk-bootstrap src/VkBootstrap.h src/VkBootstrap.cpp)
+ add_library(vk-bootstrap::vk-bootstrap ALIAS vk-bootstrap)
+@@ -21,11 +20,9 @@ target_compile_options(vk-bootstrap-compiler-warnings
+         $<$<OR:$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>,${VK_BOOTSTRAP_COMPILER_CLANGPP}>:
+         -Wall
+         -Wextra
+-        -pedantic-errors
+         -Wconversion
+         -Wsign-conversion>
+         $<$<CXX_COMPILER_ID:MSVC>:
+-        /WX
+         /W4>
+         )
+ 
+@@ -33,7 +30,15 @@ target_include_directories(vk-bootstrap PUBLIC src)
+ target_include_directories(vk-bootstrap PUBLIC ${Vulkan_INCLUDE_DIR})
+ target_link_libraries(vk-bootstrap
+         PRIVATE
++        ${CMAKE_DL_LIBS}
+         vk-bootstrap-compiler-warnings)
++target_compile_features(vk-bootstrap PUBLIC cxx_std_14)
++include(GNUInstallDirs)
++install(FILES src/VkBootstrap.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(TARGETS vk-bootstrap
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ option(VK_BOOTSTRAP_TEST "Test Vk-Bootstrap with glfw and Catch2" OFF)
+ 

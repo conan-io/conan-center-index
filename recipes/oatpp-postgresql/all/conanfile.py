@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches
 import os
 
 required_conan_version = ">=1.35.0"
@@ -12,7 +11,7 @@ class OatppPostgresqlConan(ConanFile):
     homepage = "https://github.com/oatpp/oatpp-postgresql"
     url = "https://github.com/conan-io/conan-center-index"
     description = "oat++ PostgreSQL library"
-    topics = ("conan", "oat++", "oatpp", "postgresql")
+    topics = ("oat", "postgresql", "orm", "database")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -36,6 +35,8 @@ class OatppPostgresqlConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
@@ -63,7 +64,8 @@ class OatppPostgresqlConan(ConanFile):
         return self._cmake
 
     def build(self):
-        apply_conandata_patches(self)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

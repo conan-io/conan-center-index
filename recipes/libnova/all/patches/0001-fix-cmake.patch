@@ -1,0 +1,103 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,9 +1,9 @@
+-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.1)
+ 
+-project(libnova)
++project(libnova C)
+ 
+ # define the name of the library
+-set(LIBRARY_NAME libnova)
++set(LIBRARY_NAME nova)
+ 
+ option(BUILD_SHARED_LIBRARY "Set to ON to build libnova as a shared library." ON)
+ if(BUILD_SHARED_LIBRARY)
+@@ -23,10 +23,10 @@ if(WIN32)
+ endif(WIN32)
+ 
+ # add more optimization flags to the visual studio release compilation
+-if(MSVC)
++if(0)
+     set(CMAKE_CXX_FLAGS_RELEASE "/MD /Ox /Ob2 /D NDEBUG")
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2 /GS-")
+-endif(MSVC)
++endif()
+ 
+ 
+ # set the debug postfix
+@@ -69,5 +69,3 @@ include_directories(${libnova_SOURCE_DIR}/src)
+ 
+ # traverse the sub directories
+ add_subdirectory(src)
+-add_subdirectory(lntest)
+-add_subdirectory(examples)
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-set(HEADER_PATH ${libnova_SOURCE_DIR}/src/${LIBRARY_NAME})
++set(HEADER_PATH libnova)
+ 
+ set(LIBRARY_PUBLIC_HEADERS
+ 	${HEADER_PATH}/julian_day.h
+@@ -36,6 +36,7 @@ set(LIBRARY_PUBLIC_HEADERS
+ 	${HEADER_PATH}/parallax.h
+ 	${HEADER_PATH}/airmass.h
+ 	${HEADER_PATH}/heliocentric_time.h
++	${HEADER_PATH}/constellation.h
+ )
+ 
+ add_library(${LIBRARY_NAME} 
+@@ -73,15 +74,22 @@ add_library(${LIBRARY_NAME}
+ 	parallax.c
+ 	airmass.c
+ 	heliocentric_time.c
++  constellation.c
+ )
+ 
+-if(MSVC)
++set_target_properties(${LIBRARY_NAME} PROPERTIES C_STANDARD 99)
++target_compile_definitions(${LIBRARY_NAME} PRIVATE HAVE_ROUND)
++find_library(M_LIB m)
++if(M_LIB)
++    target_link_libraries(${LIBRARY_NAME} PRIVATE ${M_LIB})
++endif()
++if(0)
+     if(BUILD_SHARED_LIBRARY)
+         set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "../../bin/" IMPORT_PREFIX "../")
+     else(BUILD_SHARED_LIBRARY)
+         set_target_properties(${LIBRARY_NAME} PROPERTIES PREFIX "../")
+     endif(BUILD_SHARED_LIBRARY)
+-endif(MSVC)
++endif()
+ 
+ 
+ 
+@@ -93,8 +101,8 @@ if(WIN32)
+     set(INSTALL_LIBDIR bin)
+     set(INSTALL_ARCHIVEDIR lib)
+ else(WIN32)
+-    set(INSTALL_LIBDIR lib${LIB_POSTFIX})
+-    set(INSTALL_ARCHIVEDIR lib${LIB_POSTFIX})
++    set(INSTALL_LIBDIR lib)
++    set(INSTALL_ARCHIVEDIR lib)
+ endif(WIN32)
+ 
+ install(
+@@ -106,5 +114,5 @@ install(
+ 
+ install(
+     FILES       ${LIBRARY_PUBLIC_HEADERS}
+-    DESTINATION ${INSTALL_INCDIR}/${LIBRARY_NAME}
++    DESTINATION ${INSTALL_INCDIR}/libnova
+ )
+--- a/src/julian_day.c
++++ b/src/julian_day.c
+@@ -27,7 +27,6 @@
+ #include <libnova/julian_day.h>
+ #include <libnova/utility.h>
+ 
+-#include "config.h"
+ 
+ #if !defined(__WIN32__) || defined(__MINGW__)
+ #include <sys/time.h>

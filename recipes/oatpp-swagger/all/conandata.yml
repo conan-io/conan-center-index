@@ -1,4 +1,7 @@
 sources:
+  "1.2.5":
+    url: "https://github.com/oatpp/oatpp-swagger/archive/1.2.5.tar.gz"
+    sha256: "56dd44f3b041fe432c27b52f741bb98f1ef97b3c6c4095dc8b9d76e840639ac8"
   "1.2.0":
     url: "https://github.com/oatpp/oatpp-swagger/archive/1.2.0.tar.gz"
     sha256: "8457c9d6f13165428df66f8ff648d3970d0108d572cf8c42bb87122a05e507e6"

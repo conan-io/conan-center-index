@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 void f3() {
     std::cout << "==start stacktrace==\n" << boost::stacktrace::stacktrace() << "==end stacktrace==\n";
 }

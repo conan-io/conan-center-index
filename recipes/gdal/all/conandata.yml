@@ -11,6 +11,9 @@ sources:
   "3.2.1":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.2.1/gdal-3.2.1.tar.gz"
     sha256: "43d40ba940e3927e38f9e98062ff62f9fa993ceade82f26f16fab7e73edb572e"
+  "3.3.1":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.3.1/gdal-3.3.1.tar.gz"
+    sha256: "6c3c2422d129a9fef030d6aaa5bd3dd45ee798808953099313ffd36ab2945055"
 patches:
   "3.1.0":
     - patch_file: "patches/3.1.x/fix-autotools-3.1.0.patch"
@@ -65,4 +68,13 @@ patches:
     - patch_file: "patches/3.2.x/fix-include-xerces.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.2.x/fix-ogrelasticlayer-gcc-less-5.patch"
+      base_path: "source_subfolder"
+  "3.3.1":
+    - patch_file: "patches/3.3.x/fix-autotools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.3.x/fix-nmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.3.x/fix-include-jsonc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/3.3.x/fix-include-xerces.patch"
       base_path: "source_subfolder"

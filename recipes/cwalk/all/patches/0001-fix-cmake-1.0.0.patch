@@ -1,0 +1,29 @@
+Fixes:
+* export symbols if shared msvc
+* add install target
+* disable tests and warnings as errors
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,7 +41,16 @@ add_library(${LIBRARY_TARGET}
+   "${INCLUDE_DIRECTORY}/cwalk.h"
+   "${SOURCE_DIRECTORY}/cwalk.c")
+ target_include_directories(${LIBRARY_TARGET} PUBLIC "${INCLUDE_DIRECTORY}")
++set_target_properties(${LIBRARY_TARGET} PROPERTIES
++  PUBLIC_HEADER "${INCLUDE_DIRECTORY}/cwalk.h"
++  WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
++install(TARGETS ${LIBRARY_TARGET}
++        RUNTIME DESTINATION bin
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib
++        PUBLIC_HEADER DESTINATION include)
+ 
++if(0) # disable tests and warnings as errors
+ # add tests
+ enable_testing()
+ create_test(DEFAULT absolute simple)
+@@ -152,3 +161,4 @@ target_include_directories(${TEST_TARGET} PUBLIC "${INCLUDE_DIRECTORY}")
+ 
+ # enable warnings
+ enable_warnings(${LIBRARY_TARGET})
++endif()

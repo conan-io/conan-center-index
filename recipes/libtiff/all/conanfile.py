@@ -106,9 +106,10 @@ class LibtiffConan(ConanFile):
 
     def _patch_sources(self):
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
-        tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
-                     os.path.join(self.build_folder, "ConanFindjbig.cmake"))
-        if tools.Version(self.version) >= "4.1":
+        if self.options.jbig:
+            tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
+                         os.path.join(self.build_folder, "ConanFindjbig.cmake"))
+        if self.options.get_safe("zstd"):
             tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
                          os.path.join(self.build_folder, "ConanFindzstd.cmake"))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -148,6 +149,14 @@ class LibtiffConan(ConanFile):
             if self._has_webp_option:
                 self._cmake.definitions["webp"] = self.options.webp
             self._cmake.definitions["cxx"] = self.options.cxx
+
+            # Workaround for cross-build to at least iOS/tvOS/watchOS,
+            # when dependencies like libdeflate, jbig and zstd are found with find_path() and find_library()
+            # see https://github.com/conan-io/conan-center-index/issues/6637
+            if tools.cross_building(self):
+                self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
+                self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
+
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

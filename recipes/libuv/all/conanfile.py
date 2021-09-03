@@ -1,7 +1,7 @@
-import glob
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
 
 
 class libuvConan(ConanFile):
@@ -15,11 +15,11 @@ class libuvConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
     generators = "cmake"
@@ -43,13 +43,15 @@ class libuvConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("Visual Studio 2015 or higher required")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libuv-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -70,10 +72,11 @@ class libuvConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "libuv"
+        self.cpp_info.libs = ["uv" if self.options.shared else "uv_a"]
         if self.options.shared:
             self.cpp_info.defines = ["USING_UV_SHARED=1"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "rt"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
