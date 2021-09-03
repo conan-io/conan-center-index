@@ -1,6 +1,6 @@
-commit fa629835c7d890d4181dbd5b309c8a8405e9ceb4
+commit a9b8fe86b3d8659e02653a4a502827a6f779e4ba
 Author: Martin Delille <martin@delille.org>
-Date:   Tue Aug 3 11:49:46 2021 +0200
+Date:   Thu Sep 2 16:38:59 2021 +0200
 
     Remove expat
 
@@ -17,10 +17,10 @@ index b1fe34c52..8f4df30b9 100644
  add_subdirectory(plugins)
  add_subdirectory(src/com-api)
 diff --git a/ref-impl/src/OM/CMakeLists.txt b/ref-impl/src/OM/CMakeLists.txt
-index e0c5be195..1693af987 100644
+index e0c5be195..1210f4d99 100644
 --- a/ref-impl/src/OM/CMakeLists.txt
 +++ b/ref-impl/src/OM/CMakeLists.txt
-@@ -158,9 +158,11 @@ target_include_directories(OM PRIVATE
+@@ -158,9 +158,13 @@ target_include_directories(OM PRIVATE
      # HACK (see OMStructuredStorage.h): Required with OM_USE_SCHEMASOFT_SS and OM_USE_GSF_SS
      ${AAFSDK_ROOT}/ss-impl/ref
      # AAF-XML stored format support requires the expat library which is bundled with the AAF SDK.
@@ -28,7 +28,9 @@ index e0c5be195..1693af987 100644
 +    #${AAFSDK_ROOT}/ref-impl/expat
  )
  
-+target_link_libraries(OM PUBLIC ${CONAN_LIBS})
++find_package(EXPAT REQUIRED)
++
++target_link_libraries(OM PUBLIC EXPAT::EXPAT)
 +
  target_compile_definitions(OM PUBLIC
      XML_STATIC
