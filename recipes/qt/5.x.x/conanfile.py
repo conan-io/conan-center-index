@@ -1001,7 +1001,10 @@ Examples = bin/datadir/examples""")
             _create_module("WebChannel", ["Qml"])
 
         if self.options.qtwebengine:
-            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat", "opus::libopus"])
+            webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
+            if self.settings.os == "Linux":
+                webenginereqs.extend(["expat::expat", "opus::libopus"])
+            _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
