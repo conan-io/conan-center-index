@@ -790,11 +790,11 @@ class BoostConan(ConanFile):
                                   "static __thread", "/* static __thread */")
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
-                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone ] ;",
+                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
                               strict=False)
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local no-threading = android beos haiku sgi darwin vxworks ;",
-                              "local no-threading = android beos haiku sgi darwin vxworks iphone ;",
+                              "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
                               strict=False)
 
         if self.options.header_only:
