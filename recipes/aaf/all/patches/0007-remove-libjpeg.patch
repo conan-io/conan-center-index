@@ -1,6 +1,6 @@
-commit a13ac7edf3c42de433999a9c2a9a3034ca236fd8
+commit 03d84af50a106955f3af7a8f27b9b2f77fa9ddb7
 Author: Martin Delille <martin@delille.org>
-Date:   Wed Aug 4 12:22:47 2021 +0200
+Date:   Thu Sep 2 16:45:22 2021 +0200
 
     Remove libjpeg
 
@@ -17,21 +17,30 @@ index 8f4df30b9..cdcf808de 100644
  add_subdirectory(src/com-api)
  add_subdirectory(src/impl)
 diff --git a/ref-impl/plugins/CMakeLists.txt b/ref-impl/plugins/CMakeLists.txt
-index a9ed0163f..512814263 100644
+index a9ed0163f..0570e0b98 100644
 --- a/ref-impl/plugins/CMakeLists.txt
 +++ b/ref-impl/plugins/CMakeLists.txt
-@@ -79,12 +79,13 @@ target_include_directories(AAFStandardCodecs PUBLIC
+@@ -71,6 +71,8 @@ add_library(AAFStandardCodecs SHARED
+     ../src/OM/utf8.cpp
+ )
+ 
++find_package(JPEG REQUIRED)
++
+ target_include_directories(AAFStandardCodecs PUBLIC
+     .
+     ../include/OM
+@@ -79,12 +81,13 @@ target_include_directories(AAFStandardCodecs PUBLIC
      ../src/impl
      ../src/OM
      ../../Utilities/Include
-+    ${CONAN_RES_DIRS_LIBJPEG}
++    ${JPEG_RES_DIRS}
  )
  
  target_link_libraries(AAFStandardCodecs PRIVATE
      AAFIID
      AAFLIB
 -    libjpeg
-+    ${CONAN_LIBS_LIBJPEG}
++    JPEG::JPEG
  )
  
  if(MSVC)
