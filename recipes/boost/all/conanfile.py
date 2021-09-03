@@ -1486,6 +1486,8 @@ class BoostConan(ConanFile):
                     if name == "boost_stacktrace_addr2line" and (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
                         # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
                         continue
+                    if name == "boost_stacktrace_backtrace" and self.options.get_safe("with_stacktrace_backtrace") == False:
+                        continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
                     new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
