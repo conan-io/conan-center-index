@@ -1033,6 +1033,9 @@ class BoostConan(ConanFile):
                                                                     self.settings.get_safe("os.sdk"),
                                                                     self.settings.get_safe("os.subsystem"),
                                                                     self.settings.get_safe("arch")))
+                if self.settings.get_safe("os.subsystem") == "catalyst":
+                    cxx_flags.append("--target=arm64-apple-ios-macabi")
+                    link_flags.append("--target=arm64-apple-ios-macabi")
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
