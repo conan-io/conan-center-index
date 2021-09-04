@@ -74,6 +74,8 @@ class SysConfigOpenGLConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
             self.cpp_info.frameworks.append("OpenGL")
+        elif self.settings.os in ["iOS", "tvOS"]:
+            self.cpp_info.frameworks.append("OpenGLES")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["opengl32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
