@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 import re
 
 required_conan_version = ">=1.33.0"
@@ -62,14 +63,14 @@ class MagnumConan(ConanFile):
         "with_glxcontext": [True, False],
         "with_wglcontext": [True, False],
 
-        # self._cmake.definitions["WITH_GL_INFO"] = False
-        # self._cmake.definitions["WITH_VK_INFO"] = False
-        # self._cmake.definitions["WITH_AL_INFO"] = False
-        # self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = False
-        # self._cmake.definitions["WITH_FONTCONVERTER"] = False
-        # self._cmake.definitions["WITH_IMAGECONVERTER"] = False
-        # self._cmake.definitions["WITH_SCENECONVERTER"] = False
-        # self._cmake.definitions["WITH_SHADERCONVERTER"] = False
+        "with_gl_info": [True, False],
+        # "with_vk_info": [True, False], Not in sources
+        "with_al_info": [True, False],
+        "with_distancefieldconverter": [True, False],
+        "with_fontconverter": [True, False],
+        "with_imageconverter": [True, False],
+        "with_sceneconverter": [True, False],
+        # "with_shaderconverter": [True, False],  Not in sources
 
         # Options related to plugins
         "with_anyaudioimporter": [True, False],
@@ -127,6 +128,13 @@ class MagnumConan(ConanFile):
         "with_glxcontext": True,
         "with_wglcontext": True,
 
+        "with_gl_info": True,
+        "with_al_info": False,
+        "with_distancefieldconverter": True,
+        "with_fontconverter": True,
+        "with_imageconverter": True,
+        "with_sceneconverter": True,
+
         # Related to plugins
         "with_anyaudioimporter": False,
         "with_anyimageconverter": True,
@@ -142,7 +150,7 @@ class MagnumConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "cmake/*"]
-
+    
     _cmake = None
 
     @property
@@ -169,6 +177,7 @@ class MagnumConan(ConanFile):
             del self.options.with_windowlessglxapplication  # Requires GL/glx.h (maybe XQuartz project)
             del self.options.with_windowlesswglapplication
             del self.options.with_windowlesswindowseglapplication
+            del self.options.target_headless  # Requires EGL (when used with_gl_info)
 
         if self.settings.os != "Android":
             del self.options.with_androidapplication
@@ -178,6 +187,11 @@ class MagnumConan(ConanFile):
 
         if self.settings.os != "iOS":
             del self.options.with_windowlessiosapplication
+
+    @property
+    def _executables(self):
+        all_execs = ("gl-info", "al-info", "distancefieldconverter", "fontconverter", "imageconverter", "sceneconverter")
+        return [it for it in all_execs if getattr(self.options, "with_{}".format(it.replace("-", "_")))]
 
     def configure(self):
         if self.options.shared:
@@ -190,7 +204,12 @@ class MagnumConan(ConanFile):
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
-        if self.options.get_safe("with_eglcontext", False) or self.options.get_safe("with_xeglapplication", False) or self.options.get_safe("with_windowlesseglapplication", False) or self.options.get_safe("with_windowlessiosapplication") or self.options.get_safe("with_windowlesswindowseglapplication", False):
+        if self.options.get_safe("with_eglcontext", False) or \
+           self.options.get_safe("with_xeglapplication", False) or \
+           self.options.get_safe("with_windowlesseglapplication", False) or \
+           self.options.get_safe("with_windowlessiosapplication") or \
+           self.options.get_safe("with_windowlesswindowseglapplication", False) or \
+           self.options.get_safe("target_headless", False):
             self.requires("egl/system")
 
         if self.options.with_glfwapplication:
@@ -217,7 +236,7 @@ class MagnumConan(ConanFile):
                                          self.options.get_safe("target_gles", False) or
                                          self.options.get_safe("target_gles2", False) or
                                          self.options.target_desktop_gles or
-                                         self.options.target_headless):
+                                         self.options.get_safe("target_headless", False)):
             raise ConanInvalidConfiguration("Option 'with_gl=True' is required")
         if not self.options.with_vk and self.options.target_vk:
             raise ConanInvalidConfiguration("Option 'with_vk=True' is required")
@@ -231,6 +250,9 @@ class MagnumConan(ConanFile):
         if self.options.with_windowlesscglapplication and not self.options.target_gl:
             raise ConanInvalidConfiguration("Option 'with_windowlesscglapplication' requires 'target_gl=True'")
 
+        if self.options.with_al_info and not self.options.with_audio:
+            raise ConanInvalidConfiguration("Option 'with_al_info' requires 'with_audio=True'")
+
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
 
@@ -239,6 +261,7 @@ class MagnumConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_DEPRECATED"] = False
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
         # self._cmake.definitions["BUILD_STATIC_UNIQUE_GLOBALS"]
@@ -254,7 +277,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["TARGET_GLES"] = self.options.get_safe("target_gles", False)
         self._cmake.definitions["TARGET_GLES2"] = self.options.get_safe("target_gles2", False)
         self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_desktop_gles
-        self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
+        self._cmake.definitions["TARGET_HEADLESS"] = self.options.get_safe("target_headless", False)
         self._cmake.definitions["TARGET_VK"] = self.options.target_vk
 
         self._cmake.definitions["WITH_AUDIO"] = self.options.with_audio
@@ -301,14 +324,12 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_WAVAUDIOIMPORTER"] = self.options.with_wavaudioimporter
 
         #### Command line utilities ####
-        self._cmake.definitions["WITH_GL_INFO"] = False
-        self._cmake.definitions["WITH_VK_INFO"] = False
-        self._cmake.definitions["WITH_AL_INFO"] = False
-        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = False
-        self._cmake.definitions["WITH_FONTCONVERTER"] = False
-        self._cmake.definitions["WITH_IMAGECONVERTER"] = False
-        self._cmake.definitions["WITH_SCENECONVERTER"] = False
-        self._cmake.definitions["WITH_SHADERCONVERTER"] = False
+        self._cmake.definitions["WITH_GL_INFO"] = self.options.with_gl_info
+        self._cmake.definitions["WITH_AL_INFO"] = self.options.with_al_info
+        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.with_distancefieldconverter
+        self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.with_fontconverter
+        self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.with_imageconverter
+        self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.with_sceneconverter
 
         self._cmake.configure()
         return self._cmake
@@ -321,10 +342,9 @@ class MagnumConan(ConanFile):
                               'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
                               "")
         # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
-        #   let the Conan user to decide what to use and what not.
+        #   let the Conan user decide what to use and what not.
         with open(os.path.join(self._source_subfolder, "CMakeLists.txt"), 'r+') as f:
             text = f.read()
-            # cmake_dependent_option(BUILD_GL_TESTS "Build unit tests for OpenGL code" OFF "BUILD_TESTS;TARGET_GL" OFF)
             text = re.sub('cmake_dependent_option\(([0-9A-Z_]+) .*\)', r'option(\1 "Option \1 disabled by Conan" OFF)', text)
             f.seek(0)
             f.write(text)
@@ -361,6 +381,25 @@ class MagnumConan(ConanFile):
     def package(self):
         cm = self._configure_cmake()
         cm.install()
+
+        build_modules_folder = os.path.join(self.package_folder, "lib", "cmake")
+        os.makedirs(build_modules_folder)
+        for exec in self._executables:
+            build_module_path = os.path.join(build_modules_folder, "conan-magnum-{}.cmake".format(exec))
+            with open(build_module_path, "w+") as f:
+                f.write(textwrap.dedent("""\
+                    if(NOT TARGET Magnum::{exec})
+                        if(CMAKE_CROSSCOMPILING)
+                            find_program(MAGNUM_EXEC_PROGRAM magnum-{exec} PATHS ENV PATH NO_DEFAULT_PATH)
+                        endif()
+                        if(NOT MAGNUM_EXEC_PROGRAM)
+                            set(MAGNUM_EXEC_PROGRAM "${{CMAKE_CURRENT_LIST_DIR}}/../../bin/magnum-{exec}")
+                        endif()
+                        get_filename_component(MAGNUM_EXEC_PROGRAM "${{MAGNUM_EXEC_PROGRAM}}" ABSOLUTE)
+                        add_executable(Magnum::{exec} IMPORTED)
+                        set_property(TARGET Magnum::gl-info PROPERTY IMPORTED_LOCATION ${{MAGNUM_EXEC_PROGRAM}})
+                    endif()
+                """.format(exec=exec)))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
@@ -626,11 +665,10 @@ class MagnumConan(ConanFile):
         if self.options.with_wavaudioimporter:
             raise Exception("Component required here")
 
-        """
         #### EXECUTABLES ####
-        if self.options.with_gl_info:
-            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-gl-info.cmake"))
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
 
-        if self.options.with_distancefieldconverter:
-            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-distancefieldconverter.cmake"))
-        """
+        for exec in self._executables:
+            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-{}.cmake".format(exec)))
