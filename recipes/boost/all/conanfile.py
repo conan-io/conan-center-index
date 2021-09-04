@@ -329,6 +329,9 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
+        if (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
+             # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
+            return False
         return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
     def configure(self):
@@ -1478,8 +1481,7 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue
-                    if name == "boost_stacktrace_addr2line" and (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
-                        # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
+                    if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
                     if name == "boost_stacktrace_backtrace" and self.options.get_safe("with_stacktrace_backtrace") == False:
                         continue
@@ -1545,7 +1547,8 @@ class BoostConan(ConanFile):
             if not self.options.without_stacktrace:
                 if self.settings.os in ("Linux", "FreeBSD"):
                     self.cpp_info.components["stacktrace_basic"].system_libs.append("dl")
-                    self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
+                    if self._stacktrace_addr2line_available:
+                        self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
                     if self._with_stacktrace_backtrace:
                         self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
 
