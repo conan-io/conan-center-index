@@ -667,7 +667,7 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
             if self.settings.os != "Windows":
                 if not tools.is_apple_os(self.settings.os):
-                    self.cpp_info.components["_hidden"].append("libuuid::libuuid")
+                    self.cpp_info.components["_hidden"].requires.append("libuuid::libuuid")
                 self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
