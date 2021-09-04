@@ -70,8 +70,6 @@ class SfmlConan(ConanFile):
     def validate(self):
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("SFML shared with MT/MTd runtime is not supported")
         if self.settings.os == "Linux":
             raise ConanInvalidConfiguration("Linux not supported yet (missing libudev recipe)")
 
