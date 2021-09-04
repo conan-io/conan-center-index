@@ -89,8 +89,8 @@ class MagnumConan(ConanFile):
 
         "with_cglcontext": True,
         "with_eglcontext": True,
-        "with_glxcontext": False,
-        "with_wglcontext": False,
+        "with_glxcontext": True,
+        "with_wglcontext": True,
 
         # Related to plugins
         "with_anyaudioimporter": False,
@@ -449,10 +449,16 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["eglcontext"].requires = ["gl", "egl::egl"]
 
         if self.options.with_glxcontext:
-            raise Exception()
+            self.cpp_info.components["glxcontext"].names["cmake_find_package"] = "GlxContext"
+            self.cpp_info.components["glxcontext"].names["cmake_find_package_multi"] = "GlxContext"
+            self.cpp_info.components["glxcontext"].libs = ["MagnumGlxContext{}".format(lib_suffix)]
+            self.cpp_info.components["glxcontext"].requires = ["gl"]
 
         if self.options.with_wglcontext:
-            raise Exception()
+            self.cpp_info.components["wglcontext"].names["cmake_find_package"] = "WglContext"
+            self.cpp_info.components["wglcontext"].names["cmake_find_package_multi"] = "WglContext"
+            self.cpp_info.components["wglcontext"].libs = ["MagnumWglContext{}".format(lib_suffix)]
+            self.cpp_info.components["wglcontext"].requires = ["gl"]
 
 
         ######## PLUGINS ########
