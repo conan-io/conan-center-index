@@ -1,5 +1,5 @@
 sources:
-#  "3.10.0rc1":
+  "3.10.0rc1":
     url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0rc1.tgz"
     sha256: "b7efa6edd72bfeae57295f1ccc7c38c9ede8087f9f082382f16f92aa38f684d3"
   "3.9.7":
