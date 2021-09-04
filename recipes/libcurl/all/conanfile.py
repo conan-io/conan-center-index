@@ -23,10 +23,6 @@ class LibcurlConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
-        "with_openssl": [True, False, "deprecated"],
-        "with_wolfssl": [True, False, "deprecated"],
-        "with_winssl": [True, False, "deprecated"],
-        "darwin_ssl": [True, False, "deprecated"],
         "with_ldap": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
@@ -49,10 +45,6 @@ class LibcurlConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_ssl": "openssl",
-        "with_openssl": "deprecated",
-        "with_wolfssl": "deprecated",
-        "with_winssl": "deprecated",
-        "darwin_ssl": "deprecated",
         "with_ldap": False,
         "with_libssh2": False,
         "with_libidn": False,
@@ -121,30 +113,6 @@ class LibcurlConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        # Deprecated options
-        # ===============================
-        if (any(deprecated_option != "deprecated" for deprecated_option in [self.options.with_openssl, self.options.with_wolfssl, self.options.with_winssl, self.options.darwin_ssl])):
-            self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
-            if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
-                if self.options.darwin_ssl == True:
-                    self.options.with_ssl = "darwinssl"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-            if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
-                if self.settings.os == "Windows" and self.options.with_winssl == True:
-                    self.options.with_ssl = "schannel"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-        # ===============================
-
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
         if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
@@ -160,7 +128,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.6.0")
         if self.options.with_nghttp2:
