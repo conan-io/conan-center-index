@@ -9,7 +9,15 @@ class TestPackageConan(ConanFile):
     @property
     def _executables(self):
         all_execs = ("gl-info", "al-info", "distancefieldconverter", "fontconverter", "imageconverter", "sceneconverter")
-        return [it for it in all_execs if getattr(self.options["magnum"], "with_{}".format(it.replace("-", "_")))]
+        available = []
+        for it in all_execs:
+            try:
+                opt_value = getattr(self.options["magnum"], "with_{}".format(it.replace("-", "_")))
+                if opt_value:
+                    available.append(it)
+            except:
+                pass
+        return available
 
     def build(self):
         cmake = CMake(self)

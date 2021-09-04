@@ -92,9 +92,9 @@ class MagnumConan(ConanFile):
         "shared_plugins": True,
 
         "target_gl": True,
-        "target_gles": True,
-        "target_gles2": True,
-        "target_desktop_gles": True,
+        "target_gles": True, # TODO: Here we probably have a CHOICE OPTION
+        "target_gles2": True, # TODO: Here we probably have a CHOICE OPTION
+        "target_desktop_gles": True, # TODO: Here we probably have a CHOICE OPTION
         "target_headless": True,
         "target_vk": True,
 
@@ -161,11 +161,20 @@ class MagnumConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
+        # Doc says that 'with_distancefieldconverter' is only available with "desktop GL" (the same is said for 'fontconverter', but it builds)
+        # TODO: Here we probably have a CHOICE OPTION
+        if self.options.target_gles or self.options.target_gles2:
+            del self.options.with_distancefieldconverter
+
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os != "Macos":
+        if self.settings.os == "Linux":
             del self.options.with_cglcontext
+            del self.options.with_windowlesscglapplication
+            del self.options.with_wglcontext
+            del self.options.with_windowlesswglapplication
+            del self.options.with_windowlesswindowseglapplication
         
         if self.settings.os == "Macos":
             del self.options.with_eglcontext
@@ -191,7 +200,7 @@ class MagnumConan(ConanFile):
     @property
     def _executables(self):
         all_execs = ("gl-info", "al-info", "distancefieldconverter", "fontconverter", "imageconverter", "sceneconverter")
-        return [it for it in all_execs if getattr(self.options, "with_{}".format(it.replace("-", "_")))]
+        return [it for it in all_execs if self.options.get_safe("with_{}".format(it.replace("-", "_")))]
 
     def configure(self):
         if self.options.shared:
@@ -247,7 +256,7 @@ class MagnumConan(ConanFile):
         if self.options.get_safe("target_gles2", False) and not self.options.get_safe("target_gles", False):
             raise ConanInvalidConfiguration("Option 'target_gles2' requires 'target_gles=True'")
 
-        if self.options.with_windowlesscglapplication and not self.options.target_gl:
+        if self.options.get_safe("with_windowlesscglapplication", False) and not self.options.target_gl:
             raise ConanInvalidConfiguration("Option 'with_windowlesscglapplication' requires 'target_gl=True'")
 
         if self.options.with_al_info and not self.options.with_audio:
@@ -298,7 +307,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_GLXAPPLICATION"] = self.options.get_safe("with_glxapplication", False)
         self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.with_sdl2application
         self._cmake.definitions["WITH_XEGLAPPLICATION"] = self.options.get_safe("with_xeglapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.with_windowlesscglapplication
+        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.get_safe("with_windowlesscglapplication", False)
         self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("with_windowlesseglapplication", False)
         self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("with_windowlessglxapplication", False)
         self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("with_windowlessiosapplication", False)
@@ -308,7 +317,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
         self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("with_eglcontext", False)
         self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.with_glxcontext
-        self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.with_wglcontext
+        self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.get_safe("with_wglcontext", False)
 
         ##### Plugins related #####
         self._cmake.definitions["WITH_ANYAUDIOIMPORTER"] = self.options.with_anyaudioimporter
@@ -326,7 +335,7 @@ class MagnumConan(ConanFile):
         #### Command line utilities ####
         self._cmake.definitions["WITH_GL_INFO"] = self.options.with_gl_info
         self._cmake.definitions["WITH_AL_INFO"] = self.options.with_al_info
-        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.with_distancefieldconverter
+        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("with_distancefieldconverter", False)
         self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.with_fontconverter
         self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.with_imageconverter
         self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.with_sceneconverter
@@ -508,7 +517,10 @@ class MagnumConan(ConanFile):
             raise Exception("Recipe doesn't define this component")
 
         if self.options.get_safe("with_glxapplication", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["glx_application"].names["cmake_find_package"] = "GlxApplication"
+            self.cpp_info.components["glx_application"].names["cmake_find_package_multi"] = "GlxApplication"
+            self.cpp_info.components["glx_application"].libs = ["MagnumGlxApplication{}".format(lib_suffix)]
+            self.cpp_info.components["glx_application"].requires = ["gl"]  # TODO: Add x11
 
         if self.options.with_glfwapplication:
             self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
@@ -527,19 +539,28 @@ class MagnumConan(ConanFile):
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
 
         if self.options.get_safe("with_xeglapplication", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["xegl_application"].names["cmake_find_package"] = "XEglApplication"
+            self.cpp_info.components["xegl_application"].names["cmake_find_package_multi"] = "XEglApplication"
+            self.cpp_info.components["xegl_application"].libs = ["MagnumXEglApplication{}".format(lib_suffix)]
+            self.cpp_info.components["xegl_application"].requires = ["gl", "egl::egl"] # TODO: Add x11
 
-        if self.options.with_windowlesscglapplication:
+        if self.options.get_safe("with_windowlesscglapplication", False):
             self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package"] = "WindowlessCglApplication"
             self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package_multi"] = "WindowlessCglApplication"
             self.cpp_info.components["windowless_cgl_application"].libs = ["MagnumWindowlessCglApplication{}".format(lib_suffix)]
             self.cpp_info.components["windowless_cgl_application"].requires = ["gl"]
 
         if self.options.get_safe("with_windowlesseglapplication", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["windowless_egl_application"].names["cmake_find_package"] = "WindowlessEglApplication"
+            self.cpp_info.components["windowless_egl_application"].names["cmake_find_package_multi"] = "WindowlessEglApplication"
+            self.cpp_info.components["windowless_egl_application"].libs = ["MagnumWindowlessEglApplication{}".format(lib_suffix)]
+            self.cpp_info.components["windowless_egl_application"].requires = ["gl", "egl::egl"]
 
         if self.options.get_safe("with_windowlessglxapplication", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["windowless_glx_application"].names["cmake_find_package"] = "WindowlessGlxApplication"
+            self.cpp_info.components["windowless_glx_application"].names["cmake_find_package_multi"] = "WindowlessGlxApplication"
+            self.cpp_info.components["windowless_glx_application"].libs = ["MagnumWindowlessGlxApplication{}".format(lib_suffix)]
+            self.cpp_info.components["windowless_glx_application"].requires = ["gl"]  # TODO: Add x11
 
         if self.options.get_safe("with_windowlessiosapplication", False):
             raise Exception("Recipe doesn't define this component")
@@ -576,7 +597,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["glxcontext"].libs = ["MagnumGlxContext{}".format(lib_suffix)]
             self.cpp_info.components["glxcontext"].requires = ["gl"]
 
-        if self.options.with_wglcontext:
+        if self.options.get_safe("with_wglcontext", False):
             self.cpp_info.components["wglcontext"].names["cmake_find_package"] = "WglContext"
             self.cpp_info.components["wglcontext"].names["cmake_find_package_multi"] = "WglContext"
             self.cpp_info.components["wglcontext"].libs = ["MagnumWglContext{}".format(lib_suffix)]
