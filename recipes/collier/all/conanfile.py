@@ -38,9 +38,6 @@ class Gm2calcConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("gfortran/10.2")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("COLLIER-{}".format(self.version), self._source_subfolder)
