@@ -16,9 +16,57 @@ set_target_properties(${PROJECT_NAME}
         CXX_EXTENSIONS OFF
 )
 
-# Run some executables
-#add_custom_command(
-#    TARGET ${PROJECT_NAME} PRE_BUILD
-#    COMMAND Magnum::gl-info
-#    COMMENT "Running magnum-gl-info"
-#)
+# Run some executables (we can only be sure they exist in a native build)
+if (EXEC_GL_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::gl-info
+        ARGS "--help"
+        COMMENT "Running magnum-gl-info"
+    )
+endif()
+
+if (EXEC_AL_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::al-info
+        ARGS "--help"
+        COMMENT "Running magnum-al-info"
+    )
+endif()
+
+if (EXEC_DISTANCEFIELDCONVERTER_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::distancefieldconverter
+        ARGS "--help"
+        COMMENT "Running magnum-distancefieldconverter"
+    )
+endif()
+
+if (EXEC_FONTCONVERTER_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::fontconverter
+        ARGS "--help"
+        COMMENT "Running magnum-fontconverter"
+    )
+endif()
+
+if (EXEC_IMAGECONVERTER_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::imageconverter
+        ARGS "--help"
+        COMMENT "Running magnum-imageconverter"
+    )
+endif()
+
+if (EXEC_SCENECONVERTER_INFO AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND Magnum::sceneconverter
+        ARGS "--help"
+        COMMENT "Running magnum-sceneconverter"
+    )
+endif()
