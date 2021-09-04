@@ -133,16 +133,9 @@ class CPythonConan(ConanFile):
             self.generators.append("MSBuildDeps")
 
     def validate(self):
-        if not tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("Only APPLE")  # FIXME: DEBUG! REMOVEME!!!
         if self.options.shared:
             if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
-        # FIXME: enable py2 on Mac to debug problem
-        # if tools.is_apple_os(self.settings.os):
-        #     if self._is_py2:
-        #         # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
-        #         raise ConanInvalidConfiguration("This recipe (currently) does not support building python2 for apple products.")
         if self.settings.compiler == "Visual Studio":
             if self.options.optimizations:
                 raise ConanInvalidConfiguration("This recipe does not support optimized MSVC cpython builds (yet)")
