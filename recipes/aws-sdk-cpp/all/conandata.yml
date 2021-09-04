@@ -18,5 +18,3 @@ patches:
   "1.9.58":
     - base_path: source_subfolder
       patch_file: patches/0001-disable-sort-links.patch
-    - base_path: source_subfolder
-      patch_file: patches/1.9.58-0001-remove-external-cjson-tinyxml2.patch
