@@ -373,8 +373,6 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.definitions["BUILD_DEPS"] = False
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
         self._cmake.configure()
         return self._cmake
