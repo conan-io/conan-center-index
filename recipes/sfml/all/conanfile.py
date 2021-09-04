@@ -188,6 +188,10 @@ class SfmlConan(ConanFile):
         def uikit():
             return ["UIKit"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
 
+        # TODO: to remove, it should come from opengl recipe
+        def opengles():
+            return ["OpenGLES"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+
         suffix = "" if self.options.shared else "-s"
         suffix += "-d" if self.settings.build_type == "Debug" else ""
 
@@ -218,7 +222,8 @@ class SfmlConan(ConanFile):
                     "requires": ["system", "opengl::opengl"] + xorg() + libudev(),
                     "system_libs": gdi32() + winmm() + usbhid() + android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
-                                  uikit() + coregraphics() + quartzcore() + coremotion(),
+                                  uikit() + coregraphics() + quartzcore() +
+                                  coremotion() + opengles(),
                 },
             })
         if self.options.graphics:
