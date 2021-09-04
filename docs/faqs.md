@@ -200,3 +200,11 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+
+## Why ConanCenter does **not** build and execute tests in recipes
+
+<!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
+
+There are different motivations
+- time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
+- ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
