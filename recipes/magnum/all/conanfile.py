@@ -44,10 +44,32 @@ class MagnumConan(ConanFile):
         "with_trade": [True, False],
         "with_vk": [True, False],
         
+        "with_androidapplication": [True, False],
+        "with_emscriptenapplication": [True, False],
+        "with_glfwapplication": [True, False],
+        "with_glxapplication": [True, False],
+        "with_sdl2application": [True, False],
+        "with_xeglapplication": [True, False],
+        "with_windowlesscglapplication": [True, False],
+        "with_windowlesseglapplication": [True, False],
+        "with_windowlessglxapplication": [True, False],
+        "with_windowlessiosapplication": [True, False],
+        "with_windowlesswglapplication": [True, False],
+        "with_windowlesswindowseglapplication": [True, False],
+
         "with_cglcontext": [True, False],
         "with_eglcontext": [True, False],
         "with_glxcontext": [True, False],
         "with_wglcontext": [True, False],
+
+        # self._cmake.definitions["WITH_GL_INFO"] = False
+        # self._cmake.definitions["WITH_VK_INFO"] = False
+        # self._cmake.definitions["WITH_AL_INFO"] = False
+        # self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = False
+        # self._cmake.definitions["WITH_FONTCONVERTER"] = False
+        # self._cmake.definitions["WITH_IMAGECONVERTER"] = False
+        # self._cmake.definitions["WITH_SCENECONVERTER"] = False
+        # self._cmake.definitions["WITH_SHADERCONVERTER"] = False
 
         # Options related to plugins
         "with_anyaudioimporter": [True, False],
@@ -87,6 +109,19 @@ class MagnumConan(ConanFile):
         "with_trade": True,
         "with_vk": True,
 
+        "with_androidapplication": True,
+        "with_emscriptenapplication": True,
+        "with_glfwapplication": True,
+        "with_glxapplication": True,
+        "with_sdl2application": True,
+        "with_xeglapplication": True,
+        "with_windowlesscglapplication": True,
+        "with_windowlesseglapplication": True,
+        "with_windowlessglxapplication": True,
+        "with_windowlessiosapplication": True,
+        "with_windowlesswglapplication": True,
+        "with_windowlesswindowseglapplication": True,
+
         "with_cglcontext": True,
         "with_eglcontext": True,
         "with_glxcontext": True,
@@ -120,10 +155,6 @@ class MagnumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        
-        #if self.settings.os == "Android":
-        #    del self.options.with_glfw_application
-        #    del self.options.with_sdl2_application
 
         if self.settings.os != "Macos":
             del self.options.with_cglcontext
@@ -132,6 +163,21 @@ class MagnumConan(ConanFile):
             del self.options.with_eglcontext
             del self.options.target_gles
             del self.options.target_gles2
+            del self.options.with_glxapplication  # Requires GL/glx.h (maybe XQuartz project)
+            del self.options.with_xeglapplication
+            del self.options.with_windowlesseglapplication
+            del self.options.with_windowlessglxapplication  # Requires GL/glx.h (maybe XQuartz project)
+            del self.options.with_windowlesswglapplication
+            del self.options.with_windowlesswindowseglapplication
+
+        if self.settings.os != "Android":
+            del self.options.with_androidapplication
+
+        if self.settings.os != "Emscripten":
+            del self.options.with_emscriptenapplication
+
+        if self.settings.os != "iOS":
+            del self.options.with_windowlessiosapplication
 
     def configure(self):
         if self.options.shared:
@@ -141,15 +187,17 @@ class MagnumConan(ConanFile):
         self.requires("corrade/{}".format(self.version))
         if self.options.with_gl:
             self.requires("opengl/system")
-        #if self.options.get_safe("sdl2_application", False):
-        #    self.requires("sdl/2.0.16")
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
-        if self.options.get_safe("with_eglcontext", False):
+        if self.options.get_safe("with_eglcontext", False) or self.options.get_safe("with_xeglapplication", False) or self.options.get_safe("with_windowlesseglapplication", False) or self.options.get_safe("with_windowlessiosapplication") or self.options.get_safe("with_windowlesswindowseglapplication", False):
             self.requires("egl/system")
-        #if self.options.get_safe("with_glfw_application", False):
-        #    self.requires("glfw/3.3.4")
+
+        if self.options.with_glfwapplication:
+            self.requires("glfw/3.3.4")
+
+        if self.options.with_sdl2application:
+            self.requires("sdl/2.0.16")
 
     def build_requirements(self):
         self.build_requires("corrade/{}".format(self.version))
@@ -178,7 +226,10 @@ class MagnumConan(ConanFile):
             raise ConanInvalidConfiguration("Option 'with_cglcontext' requires 'target_gl=True'")
 
         if self.options.get_safe("target_gles2", False) and not self.options.get_safe("target_gles", False):
-            raise ConanIvanlidConfiguration("Option 'target_gles2' requires 'target_gles=True'")
+            raise ConanInvalidConfiguration("Option 'target_gles2' requires 'target_gles=True'")
+
+        if self.options.with_windowlesscglapplication and not self.options.target_gl:
+            raise ConanInvalidConfiguration("Option 'with_windowlesscglapplication' requires 'target_gl=True'")
 
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
@@ -218,18 +269,18 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TRADE"] = self.options.with_trade
         self._cmake.definitions["WITH_VK"] = self.options.with_vk
 
-        self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = False
-        self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = False
-        self._cmake.definitions["WITH_GLFWAPPLICATION"] = False
-        self._cmake.definitions["WITH_GLXAPPLICATION"] = False
-        self._cmake.definitions["WITH_SDL2APPLICATION"] = False
-        self._cmake.definitions["WITH_XEGLAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSWGLAPPLICATION"] = False
-        self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = False
+        self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("with_androidapplication", False)
+        self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("with_emscriptenapplication", False)
+        self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.with_glfwapplication
+        self._cmake.definitions["WITH_GLXAPPLICATION"] = self.options.get_safe("with_glxapplication", False)
+        self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.with_sdl2application
+        self._cmake.definitions["WITH_XEGLAPPLICATION"] = self.options.get_safe("with_xeglapplication", False)
+        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.with_windowlesscglapplication
+        self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("with_windowlesseglapplication", False)
+        self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("with_windowlessglxapplication", False)
+        self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("with_windowlessiosapplication", False)
+        self._cmake.definitions["WITH_WINDOWLESSWGLAPPLICATION"] = self.options.get_safe("with_windowlesswglapplication", False)
+        self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = self.options.get_safe("with_windowlesswindowseglapplication", False)
 
         self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
         self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("with_eglcontext", False)
@@ -410,25 +461,57 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["vk"].requires = ["magnum_main", "vulkan-loader::vulkan-loader"]
 
 
-        """
         #### APPLICATIONS ####
-        if self.options.get_safe("with_glfw_application", False):
+        if self.options.get_safe("with_androidapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_emscriptenapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_glxapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.with_glfwapplication:
             self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
             self.cpp_info.components["glfw_application"].names["cmake_find_package_multi"] = "GlfwApplication"
             self.cpp_info.components["glfw_application"].libs = ["MagnumGlfwApplication{}".format(lib_suffix)]
             self.cpp_info.components["glfw_application"].requires = ["magnum_main", "glfw::glfw"]
-            if self._target_gl:
+            if self.options.target_gl:
                 self.cpp_info.components["glfw_application"].requires.append("gl")
-            # Require also GLX or EGL depending on other config
 
-        if self.options.sdl2_application:
+        if self.options.with_sdl2application:
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
             self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
-            if self.options.with_gl:
+            if self.options.target_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
 
+        if self.options.get_safe("with_xeglapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.with_windowlesscglapplication:
+            self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package"] = "WindowlessCglApplication"
+            self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package_multi"] = "WindowlessCglApplication"
+            self.cpp_info.components["windowless_cgl_application"].libs = ["MagnumWindowlessCglApplication{}".format(lib_suffix)]
+            self.cpp_info.components["windowless_cgl_application"].requires = ["gl"]
+
+        if self.options.get_safe("with_windowlesseglapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_windowlessglxapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_windowlessiosapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_windowlesswglapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        if self.options.get_safe("with_windowlesswindowseglapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
+        """
             # If there is only one application, here it is an alias
             self.cpp_info.components["application"].names["cmake_find_package"] = "Application"
             self.cpp_info.components["application"].names["cmake_find_package_multi"] = "Application"
