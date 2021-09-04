@@ -127,6 +127,11 @@ class MagnumConan(ConanFile):
 
         if self.settings.os != "Macos":
             del self.options.with_cglcontext
+        
+        if self.settings.os == "Macos":
+            del self.options.with_eglcontext
+            del self.options.target_gles
+            del self.options.target_gles2
 
     def configure(self):
         if self.options.shared:
@@ -141,7 +146,7 @@ class MagnumConan(ConanFile):
         if self.options.with_vk:
             self.requires("vulkan-loader/1.2.182")
 
-        if self.options.with_eglcontext:
+        if self.options.get_safe("with_eglcontext", False):
             self.requires("egl/system")
         #if self.options.get_safe("with_glfw_application", False):
         #    self.requires("glfw/3.3.4")
@@ -161,8 +166,8 @@ class MagnumConan(ConanFile):
             raise ConanInvalidConfiguration("If using 'shared=True', corrade should be shared as well")
 
         if not self.options.with_gl and (self.options.target_gl or 
-                                         self.options.target_gles or
-                                         self.options.target_gles2 or
+                                         self.options.get_safe("target_gles", False) or
+                                         self.options.get_safe("target_gles2", False) or
                                          self.options.target_desktop_gles or
                                          self.options.target_headless):
             raise ConanInvalidConfiguration("Option 'with_gl=True' is required")
@@ -170,7 +175,10 @@ class MagnumConan(ConanFile):
             raise ConanInvalidConfiguration("Option 'with_vk=True' is required")
 
         if self.options.get_safe("with_cglcontext", False) and not self.options.target_gl:
-            raise ConanInvalidConfiguration("--")
+            raise ConanInvalidConfiguration("Option 'with_cglcontext' requires 'target_gl=True'")
+
+        if self.options.get_safe("target_gles2", False) and not self.options.get_safe("target_gles", False):
+            raise ConanIvanlidConfiguration("Option 'target_gles2' requires 'target_gles=True'")
 
         if self.options.with_magnumfontconverter and not self.options.with_tgaimageconverter:
             raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
@@ -192,8 +200,8 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_VULKANTESTER"] = False
 
         self._cmake.definitions["TARGET_GL"] = self.options.target_gl
-        self._cmake.definitions["TARGET_GLES"] = self.options.target_gles
-        self._cmake.definitions["TARGET_GLES2"] = self.options.target_gles2
+        self._cmake.definitions["TARGET_GLES"] = self.options.get_safe("target_gles", False)
+        self._cmake.definitions["TARGET_GLES2"] = self.options.get_safe("target_gles2", False)
         self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_desktop_gles
         self._cmake.definitions["TARGET_HEADLESS"] = self.options.target_headless
         self._cmake.definitions["TARGET_VK"] = self.options.target_vk
@@ -224,7 +232,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = False
 
         self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("with_cglcontext", False)
-        self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.with_eglcontext
+        self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("with_eglcontext", False)
         self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.with_glxcontext
         self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.with_wglcontext
 
@@ -429,9 +437,12 @@ class MagnumConan(ConanFile):
 
         #### CONTEXTS ####
         if self.options.get_safe("with_cglcontext", False):
-            raise Exception()
+            self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
+            self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
+            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext{}".format(lib_suffix)]
+            self.cpp_info.components["cglcontext"].requires = ["gl"]
 
-        if self.options.with_eglcontext:
+        if self.options.get_safe("with_eglcontext", False):
             self.cpp_info.components["eglcontext"].names["cmake_find_package"] = "EglContext"
             self.cpp_info.components["eglcontext"].names["cmake_find_package_multi"] = "EglContext"
             self.cpp_info.components["eglcontext"].libs = ["MagnumEglContext{}".format(lib_suffix)]
