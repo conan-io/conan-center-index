@@ -1,0 +1,24 @@
+From af1935b567c18c8b2de71d6ea97239be60876335 Mon Sep 17 00:00:00 2001
+From: Chris Mc <prince.chrismc@gmail.com>
+Date: Fri, 3 Sep 2021 20:21:37 -0400
+Subject: [PATCH] link to installed CMake targets of CURL
+https://github.com/apache/xerces-c/pull/34
+
+Just like how it was done for ICU
+---
+ src/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 344851fad..f396fc5ef 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1085,7 +1085,7 @@ endif()
+ if(XERCES_USE_NETACCESSOR_CURL)
+   list(APPEND libxerces_c_SOURCES ${curl_sources})
+   list(APPEND libxerces_c_HEADERS ${curl_headers})
+-  list(APPEND libxerces_c_DEPS ${CURL_LIBRARIES})
++  list(APPEND libxerces_c_DEPS CURL::libcurl)
+ endif()
+ 
+ if(XERCES_USE_NETACCESSOR_SOCKET)

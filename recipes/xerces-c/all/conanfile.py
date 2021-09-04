@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class XercesCConan(ConanFile):
     name = "xerces-c"
@@ -12,8 +13,8 @@ class XercesCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -99,9 +100,8 @@ class XercesCConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -113,13 +113,12 @@ class XercesCConan(ConanFile):
         self._cmake.definitions["message-loader"] = "inmemory"
         self._cmake.definitions["xmlch-type"] = self.options.char_type
         self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
-        # avoid picking up system dependency
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
