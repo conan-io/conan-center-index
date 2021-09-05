@@ -45,15 +45,4 @@ class WiseEnumConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "wise_enum"
         self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
-        
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wise_enum"
-        self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
-        
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wise_enum"
-        self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
-        
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wise_enum"
-        self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
+
