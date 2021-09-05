@@ -68,6 +68,8 @@ class SfmlConan(ConanFile):
             self.requires("vorbis/1.3.7")
 
     def validate(self):
+        if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
+            raise ConanInvalidConfiguration("SFML not supported on {}".format(self.settings.os))
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
         if self.settings.os == "Linux":
@@ -177,20 +179,20 @@ class SfmlConan(ConanFile):
             return ["IOKit"] if self.settings.os == "Macos" else []
 
         def coregraphics():
-            return ["CoreGraphics"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+            return ["CoreGraphics"] if self.settings.os == "iOS" else []
 
         def coremotion():
-            return ["CoreMotion"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+            return ["CoreMotion"] if self.settings.os == "iOS" else []
 
         def quartzcore():
-            return ["QuartzCore"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+            return ["QuartzCore"] if self.settings.os == "iOS" else []
 
         def uikit():
-            return ["UIKit"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+            return ["UIKit"] if self.settings.os == "iOS" else []
 
         # TODO: to remove, it should come from opengl recipe
         def opengles():
-            return ["OpenGLES"] if self.settings.os in ["iOS", "tvOS", "watchOS"] else []
+            return ["OpenGLES"] if self.settings.os == "iOS" else []
 
         suffix = "" if self.options.shared else "-s"
         suffix += "-d" if self.settings.build_type == "Debug" else ""
