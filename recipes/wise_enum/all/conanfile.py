@@ -16,7 +16,8 @@ class WiseEnumConan(ConanFile):
         "header-only",
         "compile-time"
     )
-    url = "https://github.com/quicknir/wise_enum"
+    homepage = "https://github.com/quicknir/wise_enum"
+    url = "https://github.com/conan-io/conan-center-index/"
     homepage = url
     license = "BPL"
     settings = "compiler"
