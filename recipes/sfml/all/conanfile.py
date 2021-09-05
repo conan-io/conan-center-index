@@ -194,7 +194,10 @@ class SfmlConan(ConanFile):
         def opengl():
             return ["opengl::opengl"] if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"] else []
 
-        def opengles():
+        def opengles_android():
+            return ["EGL", "GLESv1_CM"] if self.settings.os == "Android" else []
+
+        def opengles_ios():
             return ["OpenGLES"] if self.settings.os == "iOS" else []
 
         suffix = "" if self.options.shared else "-s"
@@ -225,10 +228,10 @@ class SfmlConan(ConanFile):
                     "target": "sfml-window",
                     "libs": ["sfml-window{}".format(suffix)],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
-                    "system_libs": gdi32() + winmm() + usbhid() + android(),
+                    "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
-                                  coremotion() + opengles(),
+                                  coremotion() + opengles_ios(),
                 },
             })
         if self.options.graphics:
