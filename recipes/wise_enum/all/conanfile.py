@@ -43,3 +43,7 @@ class WiseEnumConan(ConanFile):
     def package(self):
         self.copy("*.h", dst="include", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
+        
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "wise_enum"
+        self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
