@@ -54,7 +54,8 @@ class SfmlConan(ConanFile):
 
     def requirements(self):
         if self.options.window:
-            self.requires("opengl/system")
+            if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
+                self.requires("opengl/system")
             if self.settings.os == "Linux":
                 self.requires("xorg/system")
                 # TODO: add libudev recipe
@@ -190,7 +191,9 @@ class SfmlConan(ConanFile):
         def uikit():
             return ["UIKit"] if self.settings.os == "iOS" else []
 
-        # TODO: to remove, it should come from opengl recipe
+        def opengl():
+            return ["opengl::opengl"] if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"] else []
+
         def opengles():
             return ["OpenGLES"] if self.settings.os == "iOS" else []
 
@@ -221,7 +224,7 @@ class SfmlConan(ConanFile):
                 "window": {
                     "target": "sfml-window",
                     "libs": ["sfml-window{}".format(suffix)],
-                    "requires": ["system", "opengl::opengl"] + xorg() + libudev(),
+                    "requires": ["system"] + opengl() + xorg() + libudev(),
                     "system_libs": gdi32() + winmm() + usbhid() + android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
