@@ -25,13 +25,13 @@ class WiseEnumConan(ConanFile):
     
     @property
     def _source_subfolder(self):
-        return "src"
-    
+        return "source_subfolder"    
    
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
+
     def package_id(self):
         self.info.header_only()
 
