@@ -256,7 +256,8 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def validate(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
