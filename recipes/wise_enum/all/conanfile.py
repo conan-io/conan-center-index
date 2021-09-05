@@ -4,7 +4,7 @@ import os
 
 class WiseEnumConan(ConanFile):
     name = "wise_enum"
-    description = "Header-only C++11/14/17 library provides static reflection for enums, work with any enum type without any macro or boilerplate code."
+    description = "Header-only C++11/14/17 library provides static reflection for enums, work with any enum type without any boilerplate code."
     topics = (
         "conan",
         "cplusplus",
