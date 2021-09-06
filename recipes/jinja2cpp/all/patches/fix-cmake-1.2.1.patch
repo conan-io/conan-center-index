@@ -12,18 +12,28 @@ index bf603b0..6229f02 100644
  )
  
 diff --git a/src/helpers.h b/src/helpers.h
-index 3af280f..a14c0fd 100644
+index 3af280f..a6a3205 100644
 --- a/src/helpers.h
 +++ b/src/helpers.h
-@@ -33,9 +33,9 @@ struct MultiStringLiteral
+@@ -32,12 +32,21 @@ struct MultiStringLiteral
+ #endif
      }
  
-     template<typename CharT>
--    constexpr auto GetValueStr() const
++#ifdef _WIN32
++    template<typename CharT>
 +    auto GetValueStr() const
-     {
--        constexpr auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
++    {
 +        auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
++        return std::basic_string<CharT>(this->*memPtr);
++    }
++#else
+     template<typename CharT>
+     constexpr auto GetValueStr() const
+     {
+         constexpr auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
          return std::basic_string<CharT>(this->*memPtr);
      }
++#endif
  
+     template<typename CharT, const char* MultiStringLiteral::*, const wchar_t* MultiStringLiteral::*>
+     struct SelectMemberPtr;
