@@ -11,3 +11,19 @@ index bf603b0..6229f02 100644
      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jinja2cpp
  )
  
+diff --git a/src/helpers.h b/src/helpers.h
+index 3af280f..a14c0fd 100644
+--- a/src/helpers.h
++++ b/src/helpers.h
+@@ -33,9 +33,9 @@ struct MultiStringLiteral
+     }
+ 
+     template<typename CharT>
+-    constexpr auto GetValueStr() const
++    auto GetValueStr() const
+     {
+-        constexpr auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
++        auto memPtr = SelectMemberPtr<CharT, &MultiStringLiteral::charValue, &MultiStringLiteral::wcharValue>::GetPtr();
+         return std::basic_string<CharT>(this->*memPtr);
+     }
+ 
