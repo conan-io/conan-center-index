@@ -113,6 +113,9 @@ class XercesCConan(ConanFile):
         self._cmake.definitions["message-loader"] = self.options.message_loader
         self._cmake.definitions["xmlch-type"] = self.options.char_type
         self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
+        # avoid picking up system dependency
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = "icu" not in (self.options.transcoder, self.options.message_loader)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
