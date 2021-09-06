@@ -12,7 +12,6 @@ class WasmtimeCppConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi", "c++")
-    settings = "os", "compiler", "arch"
     exports_sources = "include/*"
     no_copy_source = True
 
@@ -29,43 +28,11 @@ class WasmtimeCppConan(ConanFile):
             "gcc": "8.0"
         }
 
-    @property
-    def _sources_key(self):
-        if self.settings.compiler == "Visual Studio":
-            return "Windows"
-        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            return "MinGW"
-        return str(self.settings.os)
-
-    def configure(self):
-        del self.settings.compiler.runtime
-
     def requirements(self):
         self.requires("wasmtime/0.29.0")
 
-    def validate(self):
-        compiler = self.settings.compiler
-        min_version = self._minimum_compilers_version[str(compiler)]
-        try:
-            if tools.Version(compiler.version) < min_version:
-                msg = (
-                    "{} requires C++{} features which are not supported by compiler {} {} !!"
-                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                "{} recipe lacks information about the {} compiler, "
-                "support for the required C++{} features is assumed"
-            ).format(self.name, compiler, self._minimum_cpp_standard)
-            self.output.warn(msg)
-
-        try:
-            self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)]
-        except KeyError:
-            raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)], destination=self.source_folder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def package(self):
         shutil.copytree(os.path.join(self.source_folder, "include"),
