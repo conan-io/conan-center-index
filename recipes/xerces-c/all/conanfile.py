@@ -110,7 +110,7 @@ class XercesCConan(ConanFile):
         # https://xerces.apache.org/xerces-c/build-3.html
         self._cmake.definitions["network-accessor"] = self.options.network_accessor
         self._cmake.definitions["transcoder"] = self.options.transcoder
-        self._cmake.definitions["message-loader"] = "inmemory"
+        self._cmake.definitions["message-loader"] = self.options.message_loader
         self._cmake.definitions["xmlch-type"] = self.options.char_type
         self._cmake.definitions["mutex-manager"] = self.options.mutex_manager
         self._cmake.configure(build_folder=self._build_subfolder)
