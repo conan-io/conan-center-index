@@ -12,6 +12,7 @@ class WasmtimeCppConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi", "c++")
+    settings = "compiler"
     exports_sources = "include/*"
     no_copy_source = True
 
@@ -30,6 +31,22 @@ class WasmtimeCppConan(ConanFile):
 
     def requirements(self):
         self.requires("wasmtime/0.29.0")
+
+    def validate(self):
+        compiler = self.settings.compiler
+        min_version = self._minimum_compilers_version[str(compiler)]
+        try:
+            if tools.Version(compiler.version) < min_version:
+                msg = (
+                    "{} requires C++{} features which are not supported by compiler {} {} !!"
+                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                raise ConanInvalidConfiguration(msg)
+        except KeyError:
+            msg = (
+                "{} recipe lacks information about the {} compiler, "
+                "support for the required C++{} features is assumed"
+            ).format(self.name, compiler, self._minimum_cpp_standard)
+            self.output.warn(msg)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
