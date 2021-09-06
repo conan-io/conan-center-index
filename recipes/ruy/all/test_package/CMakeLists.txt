@@ -8,3 +8,4 @@ find_package(ruy REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ruy::ruy)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
