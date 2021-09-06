@@ -1,7 +1,7 @@
 sources:
   "1.2.182":
-    url: "https://github.com/zeux/volk/archive/1.2.170.tar.gz"
-    sha256: "01f37fc0c904afd2eb8060cada73f903ab1cdae87c7c24e77585ca7fb9bafae4"
+    url: "https://github.com/zeux/volk/archive/d75c007f375f35612dba3de512ac73f10bf9aa0e.zip"
+    sha256: "4d2d2121ce7694c652242e677bce779fe69b40a2ccaeab93b3a3a5fe4f147ac3"
   "1.2.170":
     url: "https://github.com/zeux/volk/archive/1.2.170.tar.gz"
     sha256: "01f37fc0c904afd2eb8060cada73f903ab1cdae87c7c24e77585ca7fb9bafae4"
