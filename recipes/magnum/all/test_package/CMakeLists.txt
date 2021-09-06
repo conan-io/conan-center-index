@@ -9,14 +9,8 @@ find_package(Magnum REQUIRED)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} Magnum::Magnum)
 
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-        CXX_STANDARD 11
-        CXX_STANDARD_REQUIRED ON
-        CXX_EXTENSIONS OFF
-)
 
-# Run some executables (we can only be sure they exist in a native build)
+# Run some executables (we can only be sure they exist if native build)
 if (EXEC_GL_INFO AND NOT CMAKE_CROSSCOMPILING)
     add_custom_command(
         TARGET ${PROJECT_NAME} PRE_BUILD
