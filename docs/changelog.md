@@ -1,5 +1,12 @@
 # Changelog
 
+### 7-September-2021 - TBD
+
+- [configs] Remove Visual Studio 2015
+- [configs] Remove Macos apple-clang 10
+- [configs] Remove Linux GCC 4.9
+- [configs] Linux Clang: keep only latest versions 10 and 11
+
 ### 6-September-2021 - 11:15 CEST
 
 - [feature] Display useful CI status notifications in Github pull requests.
