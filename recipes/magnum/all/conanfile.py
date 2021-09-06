@@ -168,6 +168,18 @@ class MagnumConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.target_gles
+            del self.options.target_gles2
+            del self.options.with_eglcontext
+            del self.options.with_xeglapplication
+            del self.options.with_windowlesseglapplication
+            del self.options.with_windowlessiosapplication
+            del self.options.with_windowlessglxapplication
+            del self.options.with_windowlesswindowseglapplication  # requires ANGLE
+            del self.options.target_headless  # Requires EGL (when used with_gl_info)
+            del self.options.with_glxapplication
+            del self.options.with_cglcontext
+            del self.options.with_windowlesscglapplication
 
         if self.settings.os == "Linux":
             del self.options.with_cglcontext
@@ -516,6 +528,9 @@ class MagnumConan(ConanFile):
         if self.options.get_safe("with_emscriptenapplication", False):
             raise Exception("Recipe doesn't define this component")
 
+        if self.options.get_safe("with_windowlessiosapplication", False):
+            raise Exception("Recipe doesn't define this component")
+
         if self.options.get_safe("with_glxapplication", False):
             self.cpp_info.components["glx_application"].names["cmake_find_package"] = "GlxApplication"
             self.cpp_info.components["glx_application"].names["cmake_find_package_multi"] = "GlxApplication"
@@ -562,11 +577,11 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["windowless_glx_application"].libs = ["MagnumWindowlessGlxApplication{}".format(lib_suffix)]
             self.cpp_info.components["windowless_glx_application"].requires = ["gl"]  # TODO: Add x11
 
-        if self.options.get_safe("with_windowlessiosapplication", False):
-            raise Exception("Recipe doesn't define this component")
-
         if self.options.get_safe("with_windowlesswglapplication", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["windowlesswglapplication"].names["cmake_find_package"] = "WindowlessWglApplication"
+            self.cpp_info.components["windowlesswglapplication"].names["cmake_find_package_multi"] = "WindowlessWglApplication"
+            self.cpp_info.components["windowlesswglapplication"].libs = ["MagnumWindowlessWglApplication{}".format(lib_suffix)]
+            self.cpp_info.components["windowless_glx_application"].requires = ["gl"]
 
         if self.options.get_safe("with_windowlesswindowseglapplication", False):
             raise Exception("Recipe doesn't define this component")
