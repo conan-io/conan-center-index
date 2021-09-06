@@ -1,0 +1,13 @@
+--- mDNSWindows/SystemService/Service.c
++++ mDNSWindows/SystemService/Service.new.c
+@@ -2127,9 +2127,8 @@
+ }
+ 
+ 
+-mDNSexport void RecordUpdatedNiceLabel(mDNS *const m, mDNSs32 delay)
++mDNSexport void RecordUpdatedNiceLabel(mDNSs32 delay)
+ 	{
+-	(void)m;
+ 	(void)delay;
+ 	// No-op, for now
+ 	}
