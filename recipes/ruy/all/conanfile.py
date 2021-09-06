@@ -95,8 +95,6 @@ class RuyConan(ConanFile):
         self.copy(pattern="*", dst="lib", src="lib")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "ruy"
-        self.cpp_info.names["cmake_find_package_multi"] = "ruy"
         self.cpp_info.libs = ["ruy_frontend",
                             "ruy_context",
                             "ruy_trmul",
