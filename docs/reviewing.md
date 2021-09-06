@@ -139,7 +139,7 @@ target_link_libraries(${PROJECT_NAME} package::package)
 We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
 done creating and linking different libraries and/or executables.
 
-### Recommended feature options names
+## Recommended feature options names
 
 It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
 
