@@ -7,12 +7,8 @@ sources:
     sha256: "a7cf582d618c048ef6a4684457a641940179c446e5f02c81f582f5952755a76a"
 patches:
   "3.2.2":
-    - patch_file: "patches/0001-usercurl-cmake-targets.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-remove-test-samples.patch"
+    - patch_file: "patches/0001-remove-test-samples.patch"
       base_path: "source_subfolder"
   "3.2.3":
-    - patch_file: "patches/0001-usercurl-cmake-targets.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-remove-test-samples.patch"
+    - patch_file: "patches/0001-remove-test-samples.patch"
       base_path: "source_subfolder"
