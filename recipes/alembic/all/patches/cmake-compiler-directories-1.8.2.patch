@@ -1,0 +1,67 @@
+diff '--color=auto' -Naur ./CMakeLists.txt ./CMakeLists.txt
+--- ./CMakeLists.txt	2021-08-23 14:34:04.141208518 +0300
++++ ./CMakeLists.txt	2021-08-23 14:42:28.163384280 +0300
+@@ -115,8 +115,8 @@
+ 
+ # if not set fall back to VFX reference platform 2018 to 2020
+ IF ("${CMAKE_CXX_STANDARD}" STREQUAL "")
+-    MESSAGE("Defaulting CMAKE_CXX_STANDARD to 14")
+-    SET(CMAKE_CXX_STANDARD 14)
++    MESSAGE("Defaulting CMAKE_CXX_STANDARD to 11")
++    SET(CMAKE_CXX_STANDARD 11)
+     SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ ENDIF()
+ 
+@@ -127,7 +127,7 @@
+ 
+ # Set some debug vs opt flags
+ if ("${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT MSVC)
+-    add_definitions(-Wall -Werror -Wextra -Wno-unused-parameter -Wno-deprecated)
++    add_definitions(-Wall -Wextra -Wno-unused-parameter -Wno-deprecated)
+     if((CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
+         CMAKE_CXX_COMPILER_ID MATCHES "CLANG")
+         add_definitions( -Wno-error=implicit-fallthrough)
+@@ -210,9 +210,6 @@
+     FIND_PACKAGE(Doxygen)
+ ENDIF()
+ 
+-# IlmBase
+-INCLUDE("./cmake/AlembicIlmBase.cmake")
+-
+ # HDF5
+ IF (USE_HDF5)
+     FIND_PACKAGE(ZLIB REQUIRED)
+@@ -228,7 +225,7 @@
+ # Alembic
+ IF (ALEMBIC_BUILD_LIBS)
+     ADD_SUBDIRECTORY(lib)
+-    INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
++    INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/lib" "${PROJECT_BINARY_DIR}/lib")
+     ADD_LIBRARY( Alembic::Alembic ALIAS Alembic )
+ ELSE()
+     FIND_PACKAGE(Alembic REQUIRED CONFIG HINTS ${ALEMBIC_ROOT})
+diff '--color=auto' -Naur ./lib/Alembic/CMakeLists.txt ./lib/Alembic/CMakeLists.txt
+--- ./lib/Alembic/CMakeLists.txt	2021-08-23 14:34:04.155208355 +0300
++++ ./lib/Alembic/CMakeLists.txt	2021-08-23 14:43:52.417413762 +0300
+@@ -52,7 +52,7 @@
+ 
+ TARGET_INCLUDE_DIRECTORIES(Alembic
+     PUBLIC
+-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/lib>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/lib>
+     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>
+     ${ALEMBIC_ILMBASE_INCLUDE_DIRECTORY}
+@@ -81,9 +81,9 @@
+ SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE PATH "Where to install the Alembic libs")
+ INSTALL(TARGETS Alembic
+         EXPORT AlembicTargets
+-        LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR})
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ #-******************************************************************************
+ # PACKAGE EXPORTS

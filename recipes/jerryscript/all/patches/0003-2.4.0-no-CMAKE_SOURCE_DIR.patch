@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -16,7 +16,7 @@
+ project (Jerry C)
+ 
+ # Determining version
+-execute_process(COMMAND python ${CMAKE_SOURCE_DIR}/tools/version.py
++execute_process(COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/tools/version.py
+                 OUTPUT_VARIABLE JERRY_VERSION
+                 OUTPUT_STRIP_TRAILING_WHITESPACE)
+ 

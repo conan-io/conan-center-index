@@ -4,7 +4,5 @@ sources:
     url: https://github.com/google/effcee/archive/refs/tags/v2019.1.zip
 patches:
   "2019.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-substitute-conan-libs.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-fix_install.patch"
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"

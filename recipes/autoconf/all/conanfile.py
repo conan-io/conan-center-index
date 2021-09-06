@@ -1,5 +1,7 @@
-import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class AutoconfConan(ConanFile):
@@ -9,20 +11,28 @@ class AutoconfConan(ConanFile):
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    exports_sources = "patches/**"
     settings = "os", "arch", "compiler"
+
+    exports_sources = "patches/**"
+
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
         self.requires("m4/1.4.18")
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires("m4/1.4.18")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.arch
@@ -30,9 +40,9 @@ class AutoconfConan(ConanFile):
         # The m4 requirement does not change the contents of this package
         self.info.requires.clear()
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _datarootdir(self):

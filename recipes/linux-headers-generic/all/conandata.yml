@@ -1,0 +1,4 @@
+sources:
+  "5.13.9":
+    url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.13.9.tar.gz"
+    sha256: "cc82e4461d5f759c820b74079164450d1f1ad09def9f3356a58814abd0268787"

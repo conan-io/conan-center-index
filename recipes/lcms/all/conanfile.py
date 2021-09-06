@@ -13,7 +13,7 @@ class LcmsConan(ConanFile):
     description = "A free, open source, CMM engine."
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
-    topics = ("conan", "lcms", "cmm", "icc", "cmm-engine")
+    topics = ("lcms", "cmm", "icc", "cmm-engine")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,10 +33,6 @@ class LcmsConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,14 +59,18 @@ class LcmsConan(ConanFile):
             # since VS2015 vsnprintf is built-in
             path = os.path.join(self._source_subfolder, "src", "lcms2_internal.h")
             tools.replace_in_file(path, "#       define vsnprintf  _vsnprintf", "")
-        if self.settings.os == "Android" and self._settings_build.os == "Windows":
+        if self.settings.os == "Android" and tools.os_info.is_windows:
             # remove escape for quotation marks, to make ndk on windows happy
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
                                   "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g",
                                   "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
 
     def _build_visual_studio(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "Projects", "VC2013")):
+        if tools.Version(self.version) <= "2.11":
+            vc_sln_subdir = "VC2013"
+        else:
+            vc_sln_subdir = "VC2015"
+        with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "12"
             properties = {
@@ -94,6 +94,14 @@ class LcmsConan(ConanFile):
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
+
+    @property
+    def _user_info_build(self):
+        # If using the experimental feature with different context for host and
+        # build, the 'user_info' attributes of the 'build_requires' packages
+        # will be located into the 'user_info_build' object. In other cases they
+        # will be located into the 'deps_user_info' object.
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def build(self):
         self._patch_sources()

@@ -98,6 +98,8 @@ class BoostConan(ConanFile):
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": "ANY",
         "with_stacktrace_backtrace": [True, False],
+        "buildid": "ANY",
+        "python_buildid": "ANY",
     }
     options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -132,6 +134,8 @@ class BoostConan(ConanFile):
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
         "with_stacktrace_backtrace": True,
+        "buildid": None,
+        "python_buildid": None,
     }
     default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
     default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
@@ -351,6 +355,8 @@ class BoostConan(ConanFile):
             if not self.options.python_version:
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
+        else:
+            del self.options.python_buildid
 
         if self._stacktrace_addr2line_available:
             if os.path.abspath(str(self.options.addr2line_location)) != str(self.options.addr2line_location):
@@ -1038,6 +1044,11 @@ class BoostConan(ConanFile):
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
         flags.append(cxx_flags)
 
+        if self.options.buildid:
+            flags.append("--buildid=%s" % self.options.buildid)
+        if not self.options.without_python and self.options.python_buildid:
+            flags.append("--python-buildid=%s" % self.options.python_buildid)
+
         if self.options.extra_b2_flags:
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
@@ -1329,6 +1340,13 @@ class BoostConan(ConanFile):
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
+        if self.options.buildid:
+            # If you built Boost using the --buildid option then set this macro to the same value
+            # as you passed to bjam.
+            # For example if you built using bjam address-model=64 --buildid=amd64 then compile your code with
+            # -DBOOST_LIB_BUILDID=amd64 to ensure the correct libraries are selected at link time.
+            self.cpp_info.components["headers"].defines.append("BOOST_LIB_BUILDID=%s" % self.options.buildid)
+
         if not self.options.header_only:
             if self.options.error_code_header_only:
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
@@ -1446,7 +1464,15 @@ class BoostConan(ConanFile):
                         continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
-                    libs.append(add_libprefix(name.format(**libformatdata)) + libsuffix)
+                    new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
+                    if self.options.namespace != 'boost':
+                        new_name = new_name.replace('boost_', str(self.options.namespace) + '_')
+                    if name.startswith('boost_python') or name.startswith('boost_numpy'):
+                        if self.options.python_buildid:
+                            new_name += '-%s' % self.options.python_buildid
+                    if self.options.buildid:
+                        new_name += '-%s' % self.options.buildid
+                    libs.append(new_name)
                 return libs
 
             for module in self._dependencies["dependencies"].keys():

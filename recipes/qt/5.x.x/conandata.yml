@@ -22,3 +22,5 @@ patches:
       base_path: "qt5/qtbase"
     - patch_file: "patches/declarative_missing_header.diff"
       base_path: "qt5/qtdeclarative"
+    - patch_file: "patches/f830b86.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty"

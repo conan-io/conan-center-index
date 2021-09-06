@@ -85,7 +85,7 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.9.1")
+            self.requires("robin-hood-hashing/3.11.3")
 
     @property
     def _source_subfolder(self):

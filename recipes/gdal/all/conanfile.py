@@ -1,8 +1,7 @@
-from contextlib import contextmanager
-import os
-
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -15,8 +14,7 @@ class GdalConan(ConanFile):
     topics = ("conan", "gdal", "osgeo", "geospatial", "raster", "vector")
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
-    generators = "pkg_config"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,7 +60,6 @@ class GdalConan(ConanFile):
         "with_sqlite3": [True, False],
         # "with_rasterlite2": [True, False],
         "with_pcre": [True, False],
-        # "with_epsilon": [True, False],
         "with_webp": [True, False],
         "with_geos": [True, False],
         # "with_sfcgal": [True, False],
@@ -127,7 +124,6 @@ class GdalConan(ConanFile):
         "with_sqlite3": True,
         # "with_rasterlite2": False,
         "with_pcre": False,
-        # "with_epsilon": False,
         "with_webp": False,
         "with_geos": True,
         # "with_sfcgal": False,
@@ -149,6 +145,8 @@ class GdalConan(ConanFile):
         "with_heif": False,
     }
 
+    exports_sources = "patches/**"
+    generators = "pkg_config"
     _autotools= None
     _nmake_args = None
 
@@ -196,8 +194,6 @@ class GdalConan(ConanFile):
             del self.options.with_null
             del self.options.with_zlib # zlib and png are always used in nmake build,
             del self.options.with_png  # and it's not trivial to fix
-        else:
-            del self.options.with_libiconv
         self._strict_options_requirements()
 
     def _strict_options_requirements(self):
@@ -208,7 +204,7 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.15")
         self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.2.0")
+        self.requires("libtiff/4.3.0")
         self.requires("proj/8.1.0")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.0")
@@ -216,7 +212,7 @@ class GdalConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.8")
-        if self.options.get_safe("with_libiconv", True):
+        if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
@@ -279,7 +275,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.77.0")
+            self.requires("libcurl/7.78.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.12")
         # if self.options.with_spatialite:
@@ -290,8 +286,6 @@ class GdalConan(ConanFile):
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
             self.requires("pcre/8.45")
-        # if self.options.with_epsilon:
-        #     self.requires("epsilon/0.9.2")
         if self.options.with_webp:
             self.requires("libwebp/1.2.0")
         if self.options.with_geos:
@@ -336,7 +330,7 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
-        if tools.cross_building(self.settings):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
             if self.options.shared:
                 raise ConanInvalidConfiguration("GDAL build system can't cross-build shared lib")
             if self.options.tools:
@@ -359,7 +353,7 @@ class GdalConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return self.settings_build if hasattr(self, "settings_build") else self.settings
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
@@ -486,6 +480,10 @@ class GdalConan(ConanFile):
         if self._nmake_args:
             return self._nmake_args
 
+        rootpath = lambda req: self.deps_cpp_info[req].rootpath
+        include_paths = lambda req: " -I".join(self.deps_cpp_info[req].include_paths)
+        version = lambda req: tools.Version(self.deps_cpp_info[req].version)
+
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
         args.append("DATADIR=\"{}\"".format(os.path.join(self.package_folder, "res", "gdal")))
@@ -493,74 +491,77 @@ class GdalConan(ConanFile):
             args.append("WIN64=1")
         args.append("DEBUG={}".format("1" if self.settings.build_type == "Debug" else "0"))
         args.append("DLLBUILD={}".format("1" if self.options.shared else "0"))
-        args.append("PROJ_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["proj"].include_paths)))
+        args.append("PROJ_INCLUDE=\"-I{}\"".format(include_paths("proj")))
         if self.options.with_libiconv:
-            args.append("LIBICONV_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libiconv"].include_paths)))
+            args.append("LIBICONV_INCLUDE=\"-I{}\"".format(include_paths("libiconv")))
             args.append("LIBICONV_CFLAGS=\"-DICONV_CONST=\"")
         args.append("JPEG_EXTERNAL_LIB=1")
         if self.options.with_jpeg == "libjpeg":
-            args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg"].include_paths)))
+            args.append("JPEGDIR=\"{}\"".format(include_paths("libjpeg")))
         elif self.options.with_jpeg == "libjpeg-turbo":
-            args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg-turbo"].include_paths)))
+            args.append("JPEGDIR=\"{}\"".format(include_paths("libjpeg-turbo")))
         args.append("PNG_EXTERNAL_LIB=1")
-        args.append("PNGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpng"].include_paths)))
+        args.append("PNGDIR=\"{}\"".format(include_paths("libpng")))
         if self.options.with_gif:
             args.append("GIF_SETTING=EXTERNAL")
         if self.options.with_pcraster:
             args.append("PCRASTER_SETTING=INTERNAL")
-        args.append("TIFF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libtiff"].include_paths)))
-        args.append("GEOTIFF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgeotiff"].include_paths)))
+        args.append("TIFF_INC=\"-I{}\"".format(include_paths("libtiff")))
+        args.append("GEOTIFF_INC=\"-I{}\"".format(include_paths("libgeotiff")))
         if self.options.with_libkml:
-            args.append("LIBKML_DIR=\"{}\"".format(self.deps_cpp_info["libkml"].rootpath))
+            args.append("LIBKML_DIR=\"{}\"".format(rootpath("libkml")))
         if self.options.with_expat:
-            args.append("EXPAT_DIR=\"{}\"".format(self.deps_cpp_info["expat"].rootpath))
-            args.append("EXPAT_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["expat"].include_paths)))
+            args.append("EXPAT_DIR=\"{}\"".format(rootpath("expat")))
+            args.append("EXPAT_INCLUDE=\"-I{}\"".format(include_paths("expat")))
         if self.options.with_xerces:
-            args.append("XERCES_DIR=\"{}\"".format(self.deps_cpp_info["xerces-c"].rootpath))
-            args.append("XERCES_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["xerces-c"].include_paths)))
+            args.append("XERCES_DIR=\"{}\"".format(rootpath("xerces-c")))
+            args.append("XERCES_INCLUDE=\"-I{}\"".format(include_paths("xerces-c")))
         if self.options.with_jasper:
-            args.append("JASPER_DIR=\"{}\"".format(self.deps_cpp_info["jasper"].rootpath))
+            args.append("JASPER_DIR=\"{}\"".format(rootpath("jasper")))
         if self.options.with_hdf4:
-            args.append("HDF4_DIR=\"{}\"".format(self.deps_cpp_info["hdf4"].rootpath))
-            args.append("HDF4_INCLUDE=\"{}\"".format(" -I".join(self.deps_cpp_info["hdf4"].include_paths)))
-            if tools.Version(self.deps_cpp_info["hdf4"].version) >= "4.2.5":
+            args.append("HDF4_DIR=\"{}\"".format(rootpath("hdf4")))
+            args.append("HDF4_INCLUDE=\"{}\"".format(include_paths("hdf4")))
+            if version("hdf4") >= "4.2.5":
                 args.append("HDF4_HAS_MAXOPENFILES=YES")
         if self.options.with_hdf5:
-            args.append("HDF5_DIR=\"{}\"".format(self.deps_cpp_info["hdf5"].rootpath))
+            args.append("HDF5_DIR=\"{}\"".format(rootpath("hdf5")))
         if self.options.with_kea:
-            args.append("KEA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["kealib"].include_paths)))
+            args.append("KEA_CFLAGS=\"-I{}\"".format(include_paths("kealib")))
         if self.options.with_pg:
-            args.append("PG_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpq"].include_paths)))
+            args.append("PG_INC_DIR=\"{}\"".format(include_paths("libpq")))
         if self.options.with_mysql == "libmysqlclient":
-            args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libmysqlclient"].include_paths)))
+            args.append("MYSQL_INC_DIR=\"{}\"".format(include_paths("libmysqlclient")))
         elif self.options.with_mysql == "mariadb-connector-c":
-            args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["mariadb-connector-c"].include_paths)))
+            args.append("MYSQL_INC_DIR=\"{}\"".format(include_paths("mariadb-connector-c")))
         if self.options.get_safe("with_sqlite3"):
-            args.append("SQLITE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["sqlite3"].include_paths)))
+            args.append("SQLITE_INC=\"-I{}\"".format(include_paths("sqlite3")))
         if self.options.get_safe("with_pcre"):
-            args.append("PCRE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["pcre"].include_paths)))
+            args.append("PCRE_INC=\"-I{}\"".format(include_paths("pcre")))
         if self.options.with_cfitsio:
-            args.append("FITS_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["cfitsio"].include_paths)))
+            args.append("FITS_INC_DIR=\"{}\"".format(include_paths("cfitsio")))
         if self.options.with_netcdf:
             args.extend([
                 "NETCDF_SETTING=YES",
-                "NETCDF_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["netcdf"].include_paths))
+                "NETCDF_INC_DIR=\"{}\"".format(include_paths("netcdf"))
             ])
             if self.options["netcdf"].netcdf4 and self.options["netcdf"].with_hdf5:
                 args.append("NETCDF_HAS_NC4=YES")
+            if tools.Version(self.version) >= "3.3.0" and \
+               os.path.isfile(os.path.join(self.deps_cpp_info["netcdf"].rootpath, "include", "netcdf_mem.h")):
+                args.append("NETCDF_HAS_NETCDF_MEM=YES")
         if self.options.with_curl:
-            args.append("CURL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libcurl"].include_paths)))
+            args.append("CURL_INC=\"-I{}\"".format(include_paths("libcurl")))
         if self.options.with_geos:
-            args.append("GEOS_CFLAGS=\"-I{} -DHAVE_GEOS\"".format(" -I".join(self.deps_cpp_info["geos"].include_paths)))
+            args.append("GEOS_CFLAGS=\"-I{} -DHAVE_GEOS\"".format(include_paths("geos")))
         if self.options.with_openjpeg:
             args.append("OPENJPEG_ENABLED=YES")
         if self.options.get_safe("with_zlib", True):
             args.append("ZLIB_EXTERNAL_LIB=1")
-            args.append("ZLIB_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zlib"].include_paths)))
+            args.append("ZLIB_INC=\"-I{}\"".format(include_paths("zlib")))
         if self.options.get_safe("with_libdeflate"):
-            args.append("LIBDEFLATE_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libdeflate"].include_paths)))
+            args.append("LIBDEFLATE_CFLAGS=\"-I{}\"".format(include_paths("libdeflate")))
         if self.options.with_poppler:
-            poppler_version = tools.Version(self.deps_cpp_info["poppler"].version)
+            poppler_version = version("poppler")
             args.extend([
                 "POPPLER_ENABLED=YES",
                 "POPPLER_MAJOR_VERSION={}".format(poppler_version.major),
@@ -569,37 +570,37 @@ class GdalConan(ConanFile):
         if self.options.with_podofo:
             args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
-            args.append("ZSTD_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zstd"].include_paths)))
+            args.append("ZSTD_CFLAGS=\"-I{}\"".format(include_paths("zstd")))
         if self.options.with_webp:
             args.append("WEBP_ENABLED=YES")
-            args.append("WEBP_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libwebp"].include_paths)))
+            args.append("WEBP_CFLAGS=\"-I{}\"".format(include_paths("libwebp")))
         if self.options.with_xml2:
-            args.append("LIBXML2_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libxml2"].include_paths)))
+            args.append("LIBXML2_INC=\"-I{}\"".format(include_paths("libxml2")))
         if self.options.with_gta:
-            args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
+            args.append("GTA_CFLAGS=\"-I{}\"".format(include_paths("libgta")))
         if self.options.with_mongocxx:
-            args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["mongo-cxx-driver"].include_paths)))
+            args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(include_paths("mongo-cxx-driver")))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
         if self.options.with_cryptopp:
-            args.append("CRYPTOPP_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["cryptopp"].include_paths)))
+            args.append("CRYPTOPP_INC=\"-I{}\"".format(include_paths("cryptopp")))
             if self.options["cryptopp"].shared:
                 args.append("USE_ONLY_CRYPTODLL_ALG=YES")
         if self.options.with_crypto:
-            args.append("OPENSSL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openssl"].include_paths)))
+            args.append("OPENSSL_INC=\"-I{}\"".format(include_paths("openssl")))
         if self.options.without_lerc:
             args.append("HAVE_LERC=0")
         if self.options.with_charls:
-            charls_version = tools.Version(self.deps_cpp_info["charls"].version)
+            charls_version = version("charls")
             if charls_version >= "2.1.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2_1")
             elif charls_version >= "2.0.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2")
         if self.options.with_dds:
-            args.append("CRUNCH_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["crunch"].include_paths)))
+            args.append("CRUNCH_INC=\"-I{}\"".format(include_paths("crunch")))
         if self.options.get_safe("with_exr"):
-            args.append("EXR_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openexr"].include_paths)))
+            args.append("EXR_INC=\"-I{}\"".format(include_paths("openexr")))
         if self.options.get_safe("with_heif"):
-            args.append("HEIF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libheif"].include_paths)))
+            args.append("HEIF_INC=\"-I{}\"".format(include_paths("libheif")))
 
         self._nmake_args = args
         return self._nmake_args
@@ -618,13 +619,18 @@ class GdalConan(ConanFile):
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
+        yes_no = lambda v: "yes" if v else "no"
+        internal_no = lambda v: "internal" if v else "no"
+        rootpath = lambda req: tools.unix_path(self.deps_cpp_info[req].rootpath)
+        rootpath_no = lambda v, req: rootpath(req) if v else "no"
+
         args = []
         args.append("--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))))
         # Shared/Static
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
+        args.extend([
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+        ])
         # Enable C++14 if requested in conan profile or if with_charls enabled
         if (self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14)) or self.options.with_charls:
             args.append("--with-cpp14")
@@ -648,15 +654,15 @@ class GdalConan(ConanFile):
         # Do not add /usr/local/lib and /usr/local/include
         args.append("--without-local")
         # Threadsafe
-        args.append("--with-threads={}".format("yes" if self.options.threadsafe else "no"))
+        args.append("--with-threads={}".format(yes_no(self.options.threadsafe)))
         # Depencencies:
         args.append("--with-proj=yes") # always required !
-        args.append("--with-libz={}".format("yes" if self.options.with_zlib else "no"))
+        args.append("--with-libz={}".format(yes_no(self.options.with_zlib)))
         if self._has_with_libdeflate_option:
-            args.append("--with-libdeflate={}".format("yes" if self.options.with_libdeflate else "no"))
-        args.append("--with-libiconv-prefix={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)))
+            args.append("--with-libdeflate={}".format(yes_no(self.options.with_libdeflate)))
+        args.append("--with-libiconv-prefix={}".format(rootpath_no(self.options.with_libiconv, "libiconv")))
         args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
-        args.append("--with-zstd={}".format("yes" if self.options.get_safe("with_zstd") else "no")) # Optional direct dependency of gdal only if lerc lib enabled
+        args.append("--with-zstd={}".format(yes_no(self.options.get_safe("with_zstd")))) # Optional direct dependency of gdal only if lerc lib enabled
         # Drivers:
         if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
             # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
@@ -664,36 +670,36 @@ class GdalConan(ConanFile):
                 args.append("--without-mrf")
             else:
                 args.append("--disable-driver-mrf")
-        args.append("--with-pg={}".format("yes" if self.options.with_pg else "no"))
+        args.append("--with-pg={}".format(yes_no(self.options.with_pg)))
         args.extend(["--without-grass", "--without-libgrass"]) # TODO: to implement when libgrass lib available
-        args.append("--with-cfitsio={}".format(tools.unix_path(self.deps_cpp_info["cfitsio"].rootpath) if self.options.with_cfitsio else "no"))
-        args.append("--with-pcraster={}".format("internal" if self.options.with_pcraster else "no")) # TODO: use conan recipe when available instead of internal one
-        args.append("--with-png={}".format(tools.unix_path(self.deps_cpp_info["libpng"].rootpath) if self.options.with_png else "no"))
-        args.append("--with-dds={}".format(tools.unix_path(self.deps_cpp_info["crunch"].rootpath) if self.options.with_dds else "no"))
-        args.append("--with-gta={}".format(tools.unix_path(self.deps_cpp_info["libgta"].rootpath) if self.options.with_gta else "no"))
-        args.append("--with-pcidsk={}".format("internal" if self.options.with_pcidsk else "no")) # TODO: use conan recipe when available instead of internal one
-        args.append("--with-libtiff={}".format(tools.unix_path(self.deps_cpp_info["libtiff"].rootpath))) # always required !
-        args.append("--with-geotiff={}".format(tools.unix_path(self.deps_cpp_info["libgeotiff"].rootpath))) # always required !
+        args.append("--with-cfitsio={}".format(rootpath_no(self.options.with_cfitsio, "cfitsio")))
+        args.append("--with-pcraster={}".format(internal_no(self.options.with_pcraster))) # TODO: use conan recipe when available instead of internal one
+        args.append("--with-png={}".format(rootpath_no(self.options.with_png, "libpng")))
+        args.append("--with-dds={}".format(rootpath_no(self.options.with_dds, "crunch")))
+        args.append("--with-gta={}".format(rootpath_no(self.options.with_gta, "libgta")))
+        args.append("--with-pcidsk={}".format(internal_no(self.options.with_pcidsk))) # TODO: use conan recipe when available instead of internal one
+        args.append("--with-libtiff={}".format(rootpath("libtiff"))) # always required !
+        args.append("--with-geotiff={}".format(rootpath("libgeotiff"))) # always required !
         if self.options.with_jpeg == "libjpeg":
-            args.append("--with-jpeg={}".format(tools.unix_path(self.deps_cpp_info["libjpeg"].rootpath)))
+            args.append("--with-jpeg={}".format(rootpath("libjpeg")))
         elif self.options.with_jpeg == "libjpeg-turbo":
-            args.append("--with-jpeg={}".format(tools.unix_path(self.deps_cpp_info["libjpeg-turbo"].rootpath)))
+            args.append("--with-jpeg={}".format(rootpath("libjpeg-turbo")))
         else:
             args.append("--without-jpeg")
         args.append("--without-jpeg12") # disabled: it requires internal libjpeg and libgeotiff
-        args.append("--with-charls={}".format("yes" if self.options.with_charls else "no"))
-        args.append("--with-gif={}".format(tools.unix_path(self.deps_cpp_info["giflib"].rootpath) if self.options.with_gif else "no"))
+        args.append("--with-charls={}".format(yes_no(self.options.with_charls)))
+        args.append("--with-gif={}".format(rootpath_no(self.options.with_gif, "giflib")))
         args.append("--without-ogdi") # TODO: to implement when ogdi lib available (https://sourceforge.net/projects/ogdi/)
         args.append("--without-fme") # commercial library
         args.append("--without-sosi") # TODO: to implement when fyba lib available
         args.append("--without-mongocxx") # TODO: handle mongo-cxx-driver v2
-        args.append("--with-mongocxxv3={}".format("yes" if self.options.with_mongocxx else "no"))
-        args.append("--with-hdf4={}".format("yes" if self.options.with_hdf4 else "no"))
-        args.append("--with-hdf5={}".format("yes" if self.options.with_hdf5 else "no"))
-        args.append("--with-kea={}".format("yes" if self.options.with_kea else "no"))
-        args.append("--with-netcdf={}".format(tools.unix_path(self.deps_cpp_info["netcdf"].rootpath) if self.options.with_netcdf else "no"))
-        args.append("--with-jasper={}".format(tools.unix_path(self.deps_cpp_info["jasper"].rootpath) if self.options.with_jasper else "no"))
-        args.append("--with-openjpeg={}".format("yes" if self.options.with_openjpeg else "no"))
+        args.append("--with-mongocxxv3={}".format(yes_no(self.options.with_mongocxx)))
+        args.append("--with-hdf4={}".format(yes_no(self.options.with_hdf4)))
+        args.append("--with-hdf5={}".format(yes_no(self.options.with_hdf5)))
+        args.append("--with-kea={}".format(yes_no(self.options.with_kea)))
+        args.append("--with-netcdf={}".format(rootpath_no(self.options.with_netcdf, "netcdf")))
+        args.append("--with-jasper={}".format(rootpath_no(self.options.with_jasper, "jasper")))
+        args.append("--with-openjpeg={}".format(yes_no(self.options.with_openjpeg)))
         args.append("--without-fgdb") # TODO: to implement when file-geodatabase-api lib available
         args.append("--without-ecw") # commercial library
         args.append("--without-kakadu") # commercial library
@@ -701,32 +707,33 @@ class GdalConan(ConanFile):
         args.append("--without-jp2lura") # commercial library
         args.append("--without-msg") # commercial library
         args.append("--without-oci") # TODO
-        args.append("--with-gnm={}".format("yes" if self.options.with_gnm else "no"))
-        args.append("--with-mysql={}".format("yes" if bool(self.options.with_mysql) else "no"))
+        args.append("--with-gnm={}".format(yes_no(self.options.with_gnm)))
+        args.append("--with-mysql={}".format(yes_no(self.options.with_mysql)))
         args.append("--without-ingres") # commercial library
-        args.append("--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath) if self.options.with_xerces else "no"))
-        args.append("--with-expat={}".format("yes" if self.options.with_expat else "no"))
-        args.append("--with-libkml={}".format(tools.unix_path(self.deps_cpp_info["libkml"].rootpath) if self.options.with_libkml else "no"))
+        args.append("--with-xerces={}".format(rootpath_no(self.options.with_xerces, "xerces-c")))
+        args.append("--with-expat={}".format(yes_no(self.options.with_expat)))
+        args.append("--with-libkml={}".format(rootpath_no(self.options.with_libkml, "libkml")))
         if self.options.with_odbc:
-            args.append("--with-odbc={}".format("yes" if self.settings.os == "Windows" else tools.unix_path(self.deps_cpp_info["odbc"].rootpath)))
+            args.append("--with-odbc={}".format("yes" if self.settings.os == "Windows" else rootpath("odbc")))
         else:
             args.append("--without-odbc")
         args.append("--without-dods-root") # TODO: to implement when libdap lib available
-        args.append("--with-curl={}".format("yes" if self.options.with_curl else "no"))
-        args.append("--with-xml2={}".format("yes" if self.options.with_xml2 else "no"))
+        args.append("--with-curl={}".format(yes_no(self.options.with_curl)))
+        args.append("--with-xml2={}".format(yes_no(self.options.with_xml2)))
         args.append("--without-spatialite") # TODO: to implement when libspatialite lib available
-        args.append("--with-sqlite3={}".format("yes" if self.options.get_safe("with_sqlite3") else "no"))
+        args.append("--with-sqlite3={}".format(yes_no(self.options.get_safe("with_sqlite3"))))
         args.append("--without-rasterlite2") # TODO: to implement when rasterlite2 lib available
-        args.append("--with-pcre={}".format("yes" if self.options.get_safe("with_pcre") else "no"))
+        args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
         args.append("--without-teigha") # commercial library
         args.append("--without-idb") # commercial library
         if tools.Version(self.version) < "3.2.0":
             args.append("--without-sde") # commercial library
-        args.append("--without-epsilon") # TODO: to implement when epsilon lib available
-        args.append("--with-webp={}".format(tools.unix_path(self.deps_cpp_info["libwebp"].rootpath) if self.options.with_webp else "no"))
-        args.append("--with-geos={}".format("yes" if self.options.with_geos else "no"))
+        if tools.Version(self.version) < "3.3.0":
+            args.append("--without-epsilon")
+        args.append("--with-webp={}".format(rootpath_no(self.options.with_webp, "libwebp")))
+        args.append("--with-geos={}".format(yes_no(self.options.with_geos)))
         args.append("--without-sfcgal") # TODO: to implement when sfcgal lib available
-        args.append("--with-qhull={}".format("yes" if self.options.with_qhull else "no"))
+        args.append("--with-qhull={}".format(yes_no(self.options.with_qhull)))
         if self.options.with_opencl:
             args.extend([
                 "--with-opencl",
@@ -735,18 +742,14 @@ class GdalConan(ConanFile):
             ])
         else:
             args.append("--without-opencl")
-        args.append("--with-freexl={}".format("yes" if self.options.with_freexl else "no"))
-        args.append("--with-libjson-c={}".format(tools.unix_path(self.deps_cpp_info["json-c"].rootpath))) # always required !
+        args.append("--with-freexl={}".format(yes_no(self.options.with_freexl)))
+        args.append("--with-libjson-c={}".format(rootpath("json-c"))) # always required !
         if self.options.without_pam:
             args.append("--without-pam")
-        args.append("--with-poppler={}".format("yes" if self.options.with_poppler else "no"))
+        args.append("--with-poppler={}".format(yes_no(self.options.with_poppler)))
+        args.append("--with-podofo={}".format(rootpath_no(self.options.with_podofo, "podofo")))
         if self.options.with_podofo:
-            args.extend([
-                "--with-podofo={}".format(tools.unix_path(self.deps_cpp_info["podofo"].rootpath)),
-                "--with-podofo-lib=-l{}".format(" -l".join(self._gather_libs("podofo")))
-            ])
-        else:
-            args.append("--without-podofo")
+            args.append("--with-podofo-lib=-l{}".format(" -l".join(self._gather_libs("podofo"))))
         args.append("--without-pdfium") # TODO: to implement when pdfium lib available
         args.append("--without-perl")
         args.append("--without-python")
@@ -759,15 +762,18 @@ class GdalConan(ConanFile):
         if tools.Version(self.version) >= "3.1.0":
             args.append("--without-rdb") # commercial library
         args.append("--without-armadillo") # TODO: to implement when armadillo lib available
-        args.append("--with-cryptopp={}".format(tools.unix_path(self.deps_cpp_info["cryptopp"].rootpath) if self.options.with_cryptopp else "no"))
-        args.append("--with-crypto={}".format("yes" if self.options.with_crypto else "no"))
-        args.append("--with-lerc={}".format("no" if self.options.without_lerc else "yes"))
+        args.append("--with-cryptopp={}".format(rootpath_no(self.options.with_cryptopp, "cryptopp")))
+        args.append("--with-crypto={}".format(yes_no(self.options.with_crypto)))
+        if tools.Version(self.version) >= "3.3.0":
+            args.append("--with-lerc={}".format(internal_no(not self.options.without_lerc)))
+        else:
+            args.append("--with-lerc={}".format(yes_no(not self.options.without_lerc)))
         if self.options.with_null:
             args.append("--with-null")
         if self._has_with_exr_option:
-            args.append("--with-exr={}".format("yes" if self.options.with_exr else "no"))
+            args.append("--with-exr={}".format(yes_no(self.options.with_exr)))
         if self._has_with_heif_option:
-            args.append("--with-heif={}".format("yes" if self.options.with_heif else "no"))
+            args.append("--with-heif={}".format(yes_no(self.options.with_heif)))
 
         # Inject -stdlib=libc++ for clang with libc++
         env_build_vars = self._autotools.vars

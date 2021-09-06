@@ -8,7 +8,6 @@
 #include <QNetworkAccessManager>
 #include <QtConcurrent>
 #include <QDomText>
-#include <QDBusMessage>
 #include <QSqlDatabase>
 
 int main(int argc, char *argv[]){
@@ -38,8 +37,6 @@ int main(int argc, char *argv[]){
     QFuture<void> future = QtConcurrent::run([](){});
 
     QDomText xmlTester;
-
-    QDBusMessage dbusTester;
 
     return app.exec();
 }

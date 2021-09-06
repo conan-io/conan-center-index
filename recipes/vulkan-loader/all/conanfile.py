@@ -73,12 +73,12 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.18.0")
+            self.requires("wayland/1.19.0")
 
     def build_requirements(self):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
            self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
         if self._is_mingw:
             self.build_requires("jwasm/2.13")
 

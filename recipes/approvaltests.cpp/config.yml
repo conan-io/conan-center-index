@@ -63,3 +63,7 @@ versions:
     folder: all
   10.9.1:
     folder: all
+  10.10.0:
+    folder: all
+  10.11.0:
+    folder: all

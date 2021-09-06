@@ -2,3 +2,7 @@ sources:
   "1.12":
     url: "https://taglib.org/releases/taglib-1.12.tar.gz"
     sha256: "7fccd07669a523b07a15bd24c8da1bbb92206cb19e9366c3692af3d79253b703"
+patches:
+  "1.12":
+    - patch_file: "patches/1.12-0001-fix-error-duplicate-volatile.patch"
+      base_path: "source_subfolder"

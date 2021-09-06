@@ -7,7 +7,7 @@ conan_basic_setup(TARGETS)
 
 find_package(effcee REQUIRED)
 
-add_executable(effcee-example main.cc)
+add_executable(${PROJECT_NAME} test_package.cpp)
 
-target_link_libraries(effcee-example effcee::effcee)
-set_property(TARGET effcee-example PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} effcee::effcee)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

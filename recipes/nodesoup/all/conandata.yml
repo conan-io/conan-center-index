@@ -1,0 +1,8 @@
+sources:
+  "cci.20200905":
+    url: "https://github.com/olvb/nodesoup/archive/3158ad082bb0cd1abee75418b12b35522dbca74f.tar.gz"
+    sha256: "be95ae6f584afae52f2951a15ef0e4896265f15fd1fab6b449afa75c023538e9"
+patches:
+  "cci.20200905":
+    - patch_file: "patches/0001-install-shared-windows.patch"
+      base_path: "source_subfolder"

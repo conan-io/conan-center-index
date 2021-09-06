@@ -14,8 +14,7 @@ class SpirvCrossConan(ConanFile):
     topics = ("conan", "spirv-cross", "reflection", "disassembler", "spirv", "spir-v", "glsl", "hlsl")
     homepage = "https://github.com/KhronosGroup/SPIRV-Cross"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,6 +43,8 @@ class SpirvCrossConan(ConanFile):
         "namespace": "spirv_cross",
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
