@@ -3,11 +3,11 @@ sources:
     Windows:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.28.0.zip"
-        sha256: "57ba0732597c2fd8717738067e4067ff571f11ed87b32bd251fe0335bee107af"
+        sha256: "0d27382c4632faa467b07b12c60d6462a608505f1aa60e46fc305299cc517d23"
     MinGW:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.28.0.zip"
-        sha256: "9c5c5c2baa624a04506474ca488c875d4fd99268370e74eb4ce12e6d9db767d4"
+        sha256: "0d27382c4632faa467b07b12c60d6462a608505f1aa60e46fc305299cc517d23"
     Linux:
       "x86_64":
         url: "https://github.com/bytecodealliance/wasmtime-cpp/archive/refs/tags/v0.28.0.tar.gz"

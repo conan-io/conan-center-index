@@ -8,6 +8,7 @@ conan_basic_setup()
 
 find_package(wasmtime-cpp REQUIRED)
 
-add_executable(example example.c)
+add_executable(example example.cpp)
 target_link_libraries(example PRIVATE wasmtime-cpp::wasmtime-cpp)
+target_compile_definitions(example PUBLIC WASMTIME_EXAMPLES_PATH="${CMAKE_SOURCE_DIR}")
 target_compile_options(example PRIVATE ${CONAN_COMPILE_DEFINITIONS_WASMTIME})
