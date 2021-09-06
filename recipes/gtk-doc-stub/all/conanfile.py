@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class GtkDocStubConan(ConanFile):
     name = "gtk-doc-stub"
     homepage = "https://gitlab.gnome.org/GNOME/gtk-doc-stub"
-    description = "Helper scripts for generating GTK documentaiton"
+    description = "Helper scripts for generating GTK documentation"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPLv2-or-later"
     topics = ("gtk", "documentation", "gtkdocize")
