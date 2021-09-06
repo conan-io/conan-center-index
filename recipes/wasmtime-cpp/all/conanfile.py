@@ -13,8 +13,7 @@ class WasmtimeCppConan(ConanFile):
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi", "c++")
     settings = "os", "compiler", "arch"
-    options = { "shared": [True, False] }
-    default_options = { 'shared': False }
+    exports_sources = "include/*"
     no_copy_source = True
 
     @property
@@ -73,8 +72,3 @@ class WasmtimeCppConan(ConanFile):
                         os.path.join(self.package_folder, "include"))
 
         self.copy('LICENSE', dst='licenses', src=self.source_folder)
-
-    def package_info(self):
-        if not self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.defines= ["/DWASM_API_EXTERN=", "/DWASI_API_EXTERN="]
