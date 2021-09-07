@@ -57,7 +57,7 @@ class VulkanValidationLayersConan(ConanFile):
         }.get(str(self.version), False)
 
     def requirements(self):
-        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=True)
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
         self.requires("vulkan-headers/{}".format(self.version))
         if tools.Version(self.version) >= "1.2.173":
             self.requires("robin-hood-hashing/3.11.3")
