@@ -23,8 +23,8 @@ class WasmtimeCppConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "apple-clang": "8.0",
-            "clang": "11.0",
+            "apple-clang": "12.0",
+            "clang": "12.0",
             "gcc": "10.0"
         }
 
