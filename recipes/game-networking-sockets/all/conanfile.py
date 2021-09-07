@@ -104,11 +104,14 @@ class GameNetworkingSocketsConan(ConanFile):
             self.cpp_info.libs = ["GameNetworkingSockets"]
         else:
             self.cpp_info.libs = ["GameNetworkingSockets_s"]
+            self.cpp_info.defines = ["STEAMNETWORKINGSOCKETS_STATIC_LINK"]
+
         self.cpp_info.requires = ["protobuf::libprotobuf"]
         if self.options.encryption == "openssl":
             self.cpp_info.requires += ["openssl::crypto"]
         elif self.options.encryption == "libsodium":
             self.cpp_info.requires += ["libsodium::libsodium"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         
