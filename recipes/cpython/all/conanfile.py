@@ -697,13 +697,18 @@ class CPythonConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             pythonhome = os.path.join(self.package_folder, "bin")
-            if self.options.env_vars:
-                self.output.info("Setting PYTHON environment variable: {}".format(pythonhome))
-                self.env_info.PYTHONHOME = pythonhome
         else:
             version = tools.Version(self._version_number_only)
             pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
         self.user_info.pythonhome = pythonhome
+
+        pythonhome_required = self.setings.compiler == "Visual Studio" or tools.is_apple_os(self.settings.os)
+        self.user_info.pythonhome_required = pythonhome_required
+
+        if pythonhome_required:
+            if self.options.env_vars:
+                self.output.info("Setting PYTHON environment variable: {}".format(pythonhome))
+                self.env_info.PYTHONHOME = pythonhome
 
         if self._is_py2:
             python_root = ""
