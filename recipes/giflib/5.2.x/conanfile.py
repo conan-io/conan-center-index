@@ -40,6 +40,10 @@ class GiflibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.settings.compiler == "Visual Studio":
+            self.requires("getopt-for-visual-studio/20200201")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
