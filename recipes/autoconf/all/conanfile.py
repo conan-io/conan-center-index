@@ -37,6 +37,7 @@ class AutoconfConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.arch
+        del self.info.settings.os
         del self.info.settings.compiler
         # The m4 requirement does not change the contents of this package
         self.info.requires.clear()
