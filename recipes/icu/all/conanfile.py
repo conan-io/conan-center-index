@@ -191,7 +191,7 @@ class ICUBase(ConanFile):
                 args.append("--host={}".format(tools.get_gnu_triplet("Macos", str(self.settings.arch))))
             elif env_build.host:
                 args.append("--host={}".format(env_build.host))
-            bin_path = self.deps_env_info["icu"].PATH[0]
+            bin_path = self.deps_env_info["icu"].PATH[0].replace("\\", "/")
             base_path, _ = bin_path.rsplit('/', 1)
             args.append("--with-cross-build={}".format(base_path))
         else:
