@@ -51,6 +51,9 @@ class RuyConan(ConanFile):
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
 
+        if str(self.settings.compiler) == "clang" and tools.Version(self.settings.compiler.version) <= 5 and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("Debug builds are not supported on older versions of Clang (<=5)")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
