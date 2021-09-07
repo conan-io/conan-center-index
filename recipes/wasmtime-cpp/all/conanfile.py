@@ -24,7 +24,7 @@ class WasmtimeCppConan(ConanFile):
         return {
             "Visual Studio": "16",
             "apple-clang": "8.0",
-            "clang": "8.0",
+            "clang": "11.0",
             "gcc": "10.0"
         }
 
