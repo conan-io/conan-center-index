@@ -14,7 +14,7 @@ class AutoconfConan(ConanFile):
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler"
 
-    exports_sources = "patches/**"
+    exports_sources = "patches/*"
 
     _autotools = None
 
@@ -36,11 +36,7 @@ class AutoconfConan(ConanFile):
             self.build_requires("msys2/cci.latest")
 
     def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.os
-        del self.info.settings.compiler
-        # The m4 requirement does not change the contents of this package
-        self.info.requires.clear()
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
