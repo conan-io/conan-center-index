@@ -5,11 +5,11 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
-    @ property
+    @property
     def _atlas_texture_file(self):
         return os.path.join(self.build_folder, "atlas_texture.png")
 
-    @ property
+    @property
     def _atlas_desc_file(self):
         return os.path.join(self.build_folder, "atlas_desc.json")
 
