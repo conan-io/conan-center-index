@@ -19,7 +19,6 @@ index 3af280f..a6a3205 100644
  #endif
      }
  
-+// Fixing some constexpr incompatibilities with Visual Studio 14.0
 +#ifdef (_MSC_VER == 1900)
 +    template<typename CharT>
 +    auto GetValueStr() const
