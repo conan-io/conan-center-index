@@ -73,6 +73,9 @@ class WasmtimeConan(ConanFile):
             # FIXME: https://github.com/bytecodealliance/wasmtime/issues/3168
             raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
+    def package_id(self):
+        del self.info.settings.compiler.version
+
     def build(self):
         tools.get(**self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)],
                   destination=self.source_folder, strip_root=True)
