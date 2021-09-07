@@ -13,7 +13,6 @@ class WasmtimeCppConan(ConanFile):
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi", "c++")
     settings = "compiler"
-    exports_sources = "include/*"
     no_copy_source = True
 
     @property
@@ -24,8 +23,8 @@ class WasmtimeCppConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
-            "apple-clang": "9.4",
-            "clang": "5.0",
+            "apple-clang": "8.0",
+            "clang": "8.0",
             "gcc": "8.0"
         }
 
@@ -34,6 +33,8 @@ class WasmtimeCppConan(ConanFile):
 
     def validate(self):
         compiler = self.settings.compiler
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
         min_version = self._minimum_compilers_version[str(compiler)]
         try:
             if tools.Version(compiler.version) < min_version:
