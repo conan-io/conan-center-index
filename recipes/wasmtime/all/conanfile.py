@@ -75,6 +75,8 @@ class WasmtimeConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler.version
+        if self.settings.compiler == "clang":
+            self.info.settings.compiler = "gcc"
 
     def build(self):
         tools.get(**self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)],
