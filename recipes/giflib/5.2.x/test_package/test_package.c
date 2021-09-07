@@ -1,9 +1,10 @@
+#include "gif_lib.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 
-#include "gif_lib.h"
 
 
 #define LINE_LEN		40
@@ -26,6 +27,11 @@ int main(int argc, char **argv)
     GifFileType *GifFile;
     GifColorType	ScratchMap[256];
 
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s OUTPUTGIF\n", argv[0]);
+        return 1;
+    }
+
     /* Allocate the raster buffer for GIF_FONT_HEIGHT scan lines. */
     for (i = 0; i < GIF_FONT_HEIGHT; i++)
     {
@@ -35,7 +41,7 @@ int main(int argc, char **argv)
     }
 
     /* Open stdout for the output file: */
-    if ((GifFile = EGifOpenFileName("out.gif", 0, &ErrorCode)) == NULL) {
+    if ((GifFile = EGifOpenFileName(argv[1], 0, &ErrorCode)) == NULL) {
 	printf("error: %d\n", ErrorCode);
 	exit(EXIT_FAILURE);
     }
