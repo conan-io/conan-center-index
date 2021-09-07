@@ -79,6 +79,7 @@ class WasmtimeConan(ConanFile):
             self.info.settings.compiler = "gcc"
 
     def build(self):
+        # This is packaging binaries so the download needs to be in build
         tools.get(**self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)],
                   destination=self.source_folder, strip_root=True)
 
