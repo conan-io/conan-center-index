@@ -25,7 +25,7 @@ class WasmtimeCppConan(ConanFile):
             "Visual Studio": "16",
             "apple-clang": "8.0",
             "clang": "8.0",
-            "gcc": "8.0"
+            "gcc": "9.0"
         }
 
     def requirements(self):
