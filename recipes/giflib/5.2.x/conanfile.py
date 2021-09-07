@@ -68,7 +68,7 @@ class GiflibConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GIF"
         self.cpp_info.names["cmake_find_package_multi"] = "GIF"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["gif"]
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
 
