@@ -1,6 +1,6 @@
 # Changelog
 
-### 7-September-2021 - TBD
+### 7-September-2021 - 16:49 CEST
 
 - [configs] Remove Visual Studio 2015
 - [configs] Remove Macos apple-clang 10
