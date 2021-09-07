@@ -36,7 +36,7 @@ class RuyConan(ConanFile):
         return {
             "Visual Studio": "15",
             "gcc": "5",
-            "clang": "5",
+            "clang": "3.4",
             "apple-clang": "5.1",
         }
 
@@ -73,6 +73,7 @@ class RuyConan(ConanFile):
         self._cmake.definitions["RUY_MINIMAL_BUILD"] = True
         self._cmake.configure()
         return self._cmake
+
 
     def build(self):
         # 1. Allow Shared builds
