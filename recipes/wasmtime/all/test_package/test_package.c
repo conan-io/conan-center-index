@@ -12,7 +12,15 @@ int main() {
                    "\t\ti32.add))";
     wasm_byte_vec_t ret;
     wasmtime_error_t *error = wasmtime_wat2wasm(wat, strlen(wat), &ret);
-    printf("wasm:\n%s\n", wat);
+    if (error != NULL) {
+        fprintf(stderr, "wasmtime_wat2wasm failed:\n");
+        wasm_name_t message;
+        wasmtime_error_message(error, &message);
+        fprintf(stderr, "%s\n", message.data);
+        wasm_byte_vec_delete(&message);
+        return EXIT_FAILURE;
+    }
+    printf("wasm text:\n%s\n", wat);
     puts("assembly:");
     for(size_t i = 0; i < ret.size; ++i) {
         printf(" 0x%02x", ret.data[i]);
@@ -21,5 +29,6 @@ int main() {
         }
     }
     puts("");
+    wasm_byte_vec_delete(&ret);
     return EXIT_SUCCESS;
 }
