@@ -6,6 +6,8 @@
 - [configs] Remove Macos apple-clang 10
 - [configs] Remove Linux GCC 4.9
 - [configs] Linux Clang: keep only latest versions 10 and 11
+- [feature] Rename EAP to Access Request.
+- [feature] Display merge error in pull-requests.
 
 ### 6-September-2021 - 11:15 CEST
 
