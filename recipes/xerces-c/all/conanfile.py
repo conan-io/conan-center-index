@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class XercesCConan(ConanFile):
     name = "xerces-c"
     description = (
@@ -13,8 +14,7 @@ class XercesCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package_multi"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,6 +36,8 @@ class XercesCConan(ConanFile):
         "mutex_manager": "standard",
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -45,6 +47,29 @@ class XercesCConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            self.options.network_accessor = "winsock"
+            self.options.transcoder = "windows"
+            self.options.mutex_manager = "windows"
+        elif self.settings.os == "Macos":
+            self.options.network_accessor = "cfurl"
+            self.options.transcoder = "macosunicodeconverter"
+            self.options.mutex_manager = "posix"
+        elif self.settings.os == "Linux":
+            self.options.mutex_manager = "posix"
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if "icu" in (self.options.transcoder, self.options.message_loader):
+            self.requires("icu/69.1")
+        if self.options.network_accessor == "curl":
+            self.requires("libcurl/7.78.0")
 
     def _validate(self, option, value, os):
         """
@@ -64,6 +89,8 @@ class XercesCConan(ConanFile):
             )
 
     def validate(self):
+        if self.settings.os not in ("Windows", "Macos", "Linux"):
+            raise ConanInvalidConfiguration("OS is not supported")
         self._validate("char_type", "wchar_t", ("Windows", ))
         self._validate("network_accessor", "winsock", ("Windows", ))
         self._validate("network_accessor", "cfurl", ("Macos", ))
@@ -74,30 +101,9 @@ class XercesCConan(ConanFile):
         self._validate("mutex_manager", "posix", ("Linux", "Macos"))
         self._validate("mutex_manager", "windows", ("Windows", ))
 
-    def requirements(self):
-        if "icu" in (self.options.transcoder, self.options.message_loader):
-            self.requires("icu/69.1")
-        if self.options.network_accessor == "curl":
-            self.requires("libcurl/7.78.0")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-            self.options.network_accessor = "winsock"
-            self.options.transcoder = "windows"
-            self.options.mutex_manager = "windows"
-        elif self.settings.os == "Macos":
-            self.options.network_accessor = "cfurl"
-            self.options.transcoder = "macosunicodeconverter"
-            self.options.mutex_manager = "posix"
-        elif self.settings.os == "Linux":
-            self.options.mutex_manager = "posix"
-
-    def configure(self):
-        if self.settings.os not in ("Windows", "Macos", "Linux"):
-            raise ConanInvalidConfiguration("OS is not supported")
-        if self.options.shared:
-            del self.options.fPIC
+    def build_requirements(self):
+        if hasattr(self, "settings_build") and self.options.message_loader == "icu":
+            self.build_requires("icu/69.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
