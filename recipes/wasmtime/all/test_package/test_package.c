@@ -16,6 +16,7 @@ int main() {
         fprintf(stderr, "wasmtime_wat2wasm failed:\n");
         wasm_name_t message;
         wasmtime_error_message(error, &message);
+        wasmtime_error_delete(error);
         fprintf(stderr, "%s\n", message.data);
         wasm_byte_vec_delete(&message);
         return EXIT_FAILURE;
