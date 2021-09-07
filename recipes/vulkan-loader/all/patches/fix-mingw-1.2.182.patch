@@ -1,0 +1,24 @@
+--- a/loader/CMakeLists.txt
++++ b/loader/CMakeLists.txt
+@@ -229,7 +229,6 @@ if(WIN32)
+                 $<TARGET_OBJECTS:loader-unknown-chain>
+                 ${CMAKE_CURRENT_SOURCE_DIR}/vulkan-1.def
+                 ${CMAKE_CURRENT_SOURCE_DIR}/loader.rc)
+-    if(MSVC)
+     set_target_properties(vulkan
+                           PROPERTIES
+                           #LINK_FLAGS_DEBUG "/ignore:4098"
+@@ -237,13 +236,6 @@ if(WIN32)
+                                      vulkan-1
+                                      PREFIX
+                                      "")
+-    else()
+-    set_target_properties(vulkan
+-                          PROPERTIES
+-                          LIBRARY_OUTPUT_NAME vulkan
+-                          RUNTIME_OUTPUT_NAME vulkan-1
+-                          ARCHIVE_OUTPUT_NAME vulkan)
+-    endif()
+     target_link_libraries(vulkan Vulkan::Headers)
+ 
+     if(MSVC AND ENABLE_WIN10_ONECORE)
