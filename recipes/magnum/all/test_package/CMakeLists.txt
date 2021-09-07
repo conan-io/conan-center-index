@@ -12,6 +12,12 @@ else()
     add_executable(${PROJECT_NAME} test_windowless.cpp)
 endif()
 target_link_libraries(${PROJECT_NAME} Magnum::Magnum)
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+)
 
 
 # Run some executables (we can only be sure they exist if native build)
