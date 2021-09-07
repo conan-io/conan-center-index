@@ -51,5 +51,6 @@ endif()
 install(TARGETS ${PROJECT_NAME} ${GIF_UTILS}
         ARCHIVE DESTINATION "lib"
         LIBRARY DESTINATION "lib"
-        RUNTIME DESTINATION "bin")
+        RUNTIME DESTINATION "bin"
+        BUNDLE DESTINATION "bin")
 install(FILES "source_subfolder/gif_lib.h" DESTINATION "include")
