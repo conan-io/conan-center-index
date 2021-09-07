@@ -53,6 +53,7 @@ class VulkanValidationLayersConan(ConanFile):
     def _get_compatible_spirv_tools_version(self):
         return {
             "1.2.182": "2021.2",
+            "1.2.172": "2021.2",
             "1.2.154.0": "2020.5",
         }.get(str(self.version), False)
 
