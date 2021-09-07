@@ -82,8 +82,7 @@ class FlatbuffersConan(ConanFile):
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = self.options.flatbuffers and not self.options.shared
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self.options.flatc
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
-        if self.settings.os != "Macos":
-             self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = not self.options.shared
+        self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = False
         self._cmake.configure()
         return self._cmake
 
