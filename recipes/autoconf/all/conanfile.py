@@ -89,14 +89,6 @@ class AutoconfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
-        if self.settings.os == "Windows":
-            binpath = os.path.join(self.package_folder, "bin")
-            for filename in os.listdir(binpath):
-                fullpath = os.path.join(binpath, filename)
-                if not os.path.isfile(fullpath):
-                    continue
-                os.rename(fullpath, fullpath + ".exe")
-
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
@@ -107,26 +99,18 @@ class AutoconfConan(ConanFile):
         self.env_info.AC_MACRODIR = ac_macrodir
 
         autoconf = os.path.join(self.package_folder, "bin", "autoconf")
-        if self.settings.os == "Windows":
-            autoconf = tools.unix_path(autoconf) + ".exe"
         self.output.info("Setting AUTOCONF to {}".format(autoconf))
         self.env_info.AUTOCONF = autoconf
 
         autoreconf = os.path.join(self.package_folder, "bin", "autoreconf")
-        if self.settings.os == "Windows":
-            autoreconf = tools.unix_path(autoreconf) + ".exe"
         self.output.info("Setting AUTORECONF to {}".format(autoreconf))
         self.env_info.AUTORECONF = autoreconf
 
         autoheader = os.path.join(self.package_folder, "bin", "autoheader")
-        if self.settings.os == "Windows":
-            autoheader = tools.unix_path(autoheader) + ".exe"
         self.output.info("Setting AUTOHEADER to {}".format(autoheader))
         self.env_info.AUTOHEADER = autoheader
 
         autom4te = os.path.join(self.package_folder, "bin", "autom4te")
-        if self.settings.os == "Windows":
-            autom4te = tools.unix_path(autom4te) + ".exe"
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
 
