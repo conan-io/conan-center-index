@@ -19,7 +19,7 @@ index 3af280f..a6a3205 100644
  #endif
      }
  
-+#ifdef (_MSC_VER == 1900)
++#if (_MSC_VER == 1900)
 +    template<typename CharT>
 +    auto GetValueStr() const
 +    {
