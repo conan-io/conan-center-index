@@ -6,11 +6,7 @@ conan_basic_setup(TARGETS)
 
 find_package(Magnum REQUIRED)
 
-if(TEST_NAIVE)
-    add_executable(${PROJECT_NAME} test_naive.cpp)
-else()
-    add_executable(${PROJECT_NAME} test_windowless.cpp)
-endif()
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} Magnum::Magnum)
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

@@ -2,6 +2,11 @@
 #include "Magnum/Math/Vector.h"
 #include "Magnum/Math/StrictWeakOrdering.h"
 
+/*
+    I would like to use some windowless application to test, like
+    https://github.com/mosra/magnum-bootstrap/tree/windowless
+    but it doesn't work in CI.
+*/
 
 int main() {
     const Magnum::Math::Vector<2, Magnum::Float> v2a{1.0f, 2.0f};

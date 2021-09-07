@@ -21,12 +21,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-
-        # CCI runs Linux docker, where the windowless application fails to run
-        #   with error: Platform::WindowlessEglApplication::tryCreateContext(): cannot initialize EGL: EGL_NOT_INITIALIZED
-        if self.settings.os == "Linux":
-            cmake.definitions["TEST_NAIVE"] = True
-
         for exec in self._executables:
             cmake.definitions["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
         cmake.configure()
