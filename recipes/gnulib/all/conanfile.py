@@ -44,6 +44,8 @@ class GnuLibConanFile(ConanFile):
                 shutil.copy(src, dst)
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(binpath))
         self.env_info.PATH.append(binpath)
