@@ -703,9 +703,9 @@ class CPythonConan(ConanFile):
         self.user_info.pythonhome = pythonhome
 
         pythonhome_required = self.settings.compiler == "Visual Studio" or tools.is_apple_os(self.settings.os)
-        self.user_info.pythonhome_required = pythonhome_required
+        self.user_info.module_requires_pythonhome = pythonhome_required
 
-        if pythonhome_required:
+        if self.settings.compiler == "Visual Studio":
             if self.options.env_vars:
                 self.output.info("Setting PYTHON environment variable: {}".format(pythonhome))
                 self.env_info.PYTHONHOME = pythonhome
