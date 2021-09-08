@@ -130,7 +130,7 @@ class MagnumConan(ConanFile):
         "scene_converter": True,
 
         # Related to plugins
-        "any_audio_importer": False,
+        "any_audio_importer": True,
         "any_image_converter": True,
         "any_image_importer": True,
         "any_scene_converter": True,
@@ -140,7 +140,7 @@ class MagnumConan(ConanFile):
         "obj_importer": True,
         "tga_importer": True,
         "tga_image_converter": True,
-        "wav_audio_importer": False,
+        "wav_audio_importer": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "cmake/*"]
@@ -625,7 +625,12 @@ class MagnumConan(ConanFile):
         ######## PLUGINS ########
         # If shared, there are no libraries to link with
         if self.options.any_audio_importer:
-            raise Exception("Create component here")
+            self.cpp_info.components["any_audio_importer"].names["cmake_find_package"] = "AnyAudioConverter"
+            self.cpp_info.components["any_audio_importer"].names["cmake_find_package_multi"] = "AnyAudioConverter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["any_audio_importer"].libs = ["AnyAudioConverter"]
+                self.cpp_info.components["any_audio_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'audioimporters')]
+            self.cpp_info.components["any_audio_importer"].requires = ["magnum_main", "audio"]
 
         if self.options.any_image_converter:
             self.cpp_info.components["any_image_converter"].names["cmake_find_package"] = "AnyImageConverter"
@@ -702,7 +707,12 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["tga_image_converter"].requires = ["trade"]
 
         if self.options.wav_audio_importer:
-            raise Exception("Component required here")
+            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package"] = "WavAudioConverter"
+            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package_multi"] = "WavAudioConverter"
+            if not self.options.shared_plugins:
+                self.cpp_info.components["wav_audio_importer"].libs = ["WavAudioConverter"]
+                self.cpp_info.components["wav_audio_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'audioimporters')]
+            self.cpp_info.components["wav_audio_importer"].requires = ["magnum_main", "audio"]
 
         #### EXECUTABLES ####
         bindir = os.path.join(self.package_folder, "bin")
