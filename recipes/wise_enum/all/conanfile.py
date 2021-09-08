@@ -40,7 +40,7 @@ class WiseEnumConan(ConanFile):
         unsupported = {"Visual Studio"}
         if compiler in unsupported:
             raise ConanInvalidConfiguration(
-                "{} doe not support  {} compiler".format(self.name, compiler)
+                "{} does not support  {} compiler".format(self.name, compiler)
             )
 
         if compiler in minimal_version and compiler_version < minimal_version[compiler]:
