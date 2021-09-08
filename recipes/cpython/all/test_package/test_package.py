@@ -199,10 +199,15 @@ def test_tkinter():
     print("tk version: {}".format(_tkinter.TK_VERSION))
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
-parser.add_argument("-t", dest="test_module", help="test python module")
-ns = parser.parse_args()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
+    parser.add_argument("-t", dest="test_module", help="test python module")
+    ns = parser.parse_args()
 
-os.chdir(ns.build_folder)
-ALL_TESTS[ns.test_module]()
+    os.chdir(ns.build_folder)
+    ALL_TESTS[ns.test_module]()
+
+
+if __name__ == "__main__":
+    main()
