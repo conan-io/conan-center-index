@@ -144,13 +144,6 @@ class LibcurlConan(ConanFile):
         if self.options.with_c_ares:
             self.requires("c-ares/1.17.1")
 
-    def package_id(self):
-        # Deprecated options
-        del self.info.options.with_openssl
-        del self.info.options.with_winssl
-        del self.info.options.darwin_ssl
-        del self.info.options.with_wolfssl
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
