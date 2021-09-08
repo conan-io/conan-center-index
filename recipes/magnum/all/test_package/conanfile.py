@@ -8,13 +8,18 @@ class TestPackageConan(ConanFile):
 
     @property
     def _executables(self):
-        all_execs = ("gl-info", "al-info", "distancefieldconverter", "fontconverter", "imageconverter", "sceneconverter")
         available = []
-        for it in all_execs:
+        #            (executable, option name)
+        all_execs = (("gl-info", "gl_info"), 
+                     ("al-info", "al_info"), 
+                     ("distancefieldconverter", "distance_field_converter"), 
+                     ("fontconverter", "font_converter"), 
+                     ("imageconverter", "image_converter"), 
+                     ("sceneconverter", "scene_converter"))
+        for executable, opt_name in all_execs:
             try:
-                opt_value = getattr(self.options["magnum"], it.replace("-", "_"))
-                if opt_value:
-                    available.append(it)
+                if getattr(self.options["magnum"], opt_name):
+                    available.append(executable)
             except:
                 pass
         return available

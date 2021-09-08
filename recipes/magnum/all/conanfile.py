@@ -65,10 +65,10 @@ class MagnumConan(ConanFile):
 
         "gl_info": [True, False],
         "al_info": [True, False],
-        "distancefieldconverter": [True, False],
-        "fontconverter": [True, False],
-        "imageconverter": [True, False],
-        "sceneconverter": [True, False],
+        "distance_field_converter": [True, False],
+        "font_converter": [True, False],
+        "image_converter": [True, False],
+        "scene_converter": [True, False],
 
         # Options related to plugins
         "any_audio_importer": [True, False],
@@ -124,10 +124,10 @@ class MagnumConan(ConanFile):
 
         "gl_info": True,
         "al_info": True,
-        "distancefieldconverter": True,
-        "fontconverter": True,
-        "imageconverter": True,
-        "sceneconverter": True,
+        "distance_field_converter": True,
+        "font_converter": True,
+        "image_converter": True,
+        "scene_converter": True,
 
         # Related to plugins
         "any_audio_importer": False,
@@ -155,10 +155,10 @@ class MagnumConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
-        # Doc says that 'distancefieldconverter' is only available with "desktop GL" (the same is said for 'fontconverter', but it builds)
+        # Doc says that 'distance_field_converter' is only available with "desktop GL" (the same is said for 'font_converter', but it builds)
         # TODO: Here we probably have a CHOICE OPTION
         if self.options.target_gl in ["gles2", "gles3"]:
-            del self.options.distancefieldconverter
+            del self.options.distance_field_converter
 
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -201,8 +201,14 @@ class MagnumConan(ConanFile):
 
     @property
     def _executables(self):
-        all_execs = ("gl-info", "al-info", "distancefieldconverter", "fontconverter", "imageconverter", "sceneconverter")
-        return [it for it in all_execs if self.options.get_safe(it.replace("-", "_"))]
+        #            (executable, option name)
+        all_execs = (("gl-info", "gl_info"), 
+                     ("al-info", "al_info"), 
+                     ("distancefieldconverter", "distance_field_converter"), 
+                     ("fontconverter", "font_converter"), 
+                     ("imageconverter", "image_converter"), 
+                     ("sceneconverter", "scene_converter"))
+        return [executable for executable, opt_name in all_execs if self.options.get_safe(opt_name)]
 
     def configure(self):
         if self.options.shared:
@@ -339,10 +345,10 @@ class MagnumConan(ConanFile):
         #### Command line utilities ####
         self._cmake.definitions["WITH_GL_INFO"] = self.options.gl_info
         self._cmake.definitions["WITH_AL_INFO"] = self.options.al_info
-        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("distancefieldconverter", False)
-        self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.fontconverter
-        self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.imageconverter
-        self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.sceneconverter
+        self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("distance_field_converter", False)
+        self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.font_converter
+        self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.image_converter
+        self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.scene_converter
 
         self._cmake.configure()
         return self._cmake
@@ -397,8 +403,8 @@ class MagnumConan(ConanFile):
 
         build_modules_folder = os.path.join(self.package_folder, "lib", "cmake")
         os.makedirs(build_modules_folder)
-        for exec in self._executables:
-            build_module_path = os.path.join(build_modules_folder, "conan-magnum-{}.cmake".format(exec))
+        for executable in self._executables:
+            build_module_path = os.path.join(build_modules_folder, "conan-magnum-{}.cmake".format(executable))
             with open(build_module_path, "w+") as f:
                 f.write(textwrap.dedent("""\
                     if(NOT TARGET Magnum::{exec})
@@ -412,7 +418,7 @@ class MagnumConan(ConanFile):
                         add_executable(Magnum::{exec} IMPORTED)
                         set_property(TARGET Magnum::{exec} PROPERTY IMPORTED_LOCATION ${{MAGNUM_EXEC_PROGRAM}})
                     endif()
-                """.format(exec=exec)))
+                """.format(exec=executable)))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
@@ -703,5 +709,5 @@ class MagnumConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        for exec in self._executables:
-            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-{}.cmake".format(exec)))
+        for executable in self._executables:
+            self.cpp_info.components["_magnum"].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-{}.cmake".format(executable)))
