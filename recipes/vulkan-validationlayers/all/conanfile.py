@@ -61,6 +61,7 @@ class VulkanValidationLayersConan(ConanFile):
         }.get(str(self.version), False)
 
     def requirements(self):
+        #TODO set private=False, one the issue is resolved https://github.com/conan-io/conan/issues/9390
         self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not self._is_cross_building())
         self.requires("vulkan-headers/{}".format(self.version))
         if tools.Version(self.version) >= "1.2.173":
