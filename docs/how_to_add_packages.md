@@ -20,13 +20,13 @@ When pull requests are merged, the CI will upload the generated packages to the 
     * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
   * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
 
-## Join the Early Access Program
+## Request access
 
-:one: The first step in adding packages to ConanCenter is requesting access to the **Early Access Program**. To enroll in EAP, please write a comment
-requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors
-to the new process.
+:one: The first step in adding packages to ConanCenter is requesting access. To enroll in ConanCenter repository, please write a comment
+requesting access in this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). Feel free to introduce yourself and
+your motivation to join ConanCenter.
 
-All EAP requests are reviewed and approved (or denied) every week, thus your request can take one week to be approved, so don't worry. This
+All requests are reviewed and approved every week, please be patient, the process is not automated and it won't be. This
 process helps conan-center-index against spam and malicious code.
 
 ## Submitting a Package
@@ -48,7 +48,7 @@ The **build service** associated to this repo will generate binary packages auto
 
 > ⚠️ **Note**: This not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor run in recipes by default. Before submitting a pull request, please ensure that it works locally for some configurations.
 
-- The CI bot will start a new build only after being approved in EAP. Your PR may be reviewed in the mean time, but is not guaranteed.
+- The CI bot will start a new build only after the author is approved. Your PR may be reviewed in the mean time, but is not guaranteed.
 - The CI system will also report with messages in the PR any error in the process, even linking to the logs to see more details and debug.
 
 The pipeline will report errors and build logs by creating a comment in the pull-request after every commit. The message will include links to the logs for inspecting.
