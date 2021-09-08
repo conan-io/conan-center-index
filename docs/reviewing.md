@@ -105,22 +105,41 @@ def _configure_cmake(self):
 
 ### Minimalistic Source Code
 
-The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple instantiation of objects to ensure linkage
-and dependencies are correct.
+The contents of `test_package.c` or `test_package.cpp` should be as minimal as possible, including a few headers at most with simple
+instantiation of objects to ensure linkage and dependencies are correct. Any build system can be used to test the package, but
+CMake or Meson are usually preferred.
 
-### Verifying Components
+### CMake targets
 
-When components are defined in the `package_info` in `conanfile.py` the following conditions are desired
+When using CMake to test a package, the information should be consumed using the **targets provided by `cmake_find_package_multi` generator**. We
+enforce this generator to align with the upcoming 
+[Conan's new `CMakeDeps` generator](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps)
+and it should help in the migration (and compatibility) with Conan v2.
 
-* use `cmake_find_package` if library has an [official](cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules) CMake module emulated in the recipe.
-* use `cmake_find_package_multi` if library provides an official cmake config file emulated in the recipe. If there are more than one target, try to use all of them, or add another executable linking to the global (usually unofficial) target. There may additionally be variables that are emulated by the recipe which should be used as well. There are some ways to identify when to use it:
-    * Usually, project installs its cmake files into `package_folder/lib/cmake`. The folder is removed from package folder by calling `tools.rmdir(os.path.join(self.package_folder), "lib", "cmake")`
-    * Also, the library's CMake scripts can use [install(EXPORT ..)](https://cmake.org/cmake/help/latest/command/install.html#export) and/or may install [package configuration helpers](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html)
-      to indicate an exported CMake config file.
-    * When `self.cpp_info.filenames["cmake_find_package_multi"]`, `self.cpp_info.names["cmake_find_package_multi"]` are declared
-* otherwise, use [cmake generator](https://docs.conan.io/en/latest/reference/generators/cmake.html) to not suggest an unofficial cmake target in test package.
+In ConanCenter we try to mimic the names of the targets and the information provided by CMake's modules and config files that some libraries
+provide. If CMake or the library itself don't enforce any target name, the ones provided by Conan should be recommended. The minimal project
+in the `test_package` folder should serve as an example of the best way to consume the package, and targets are preferred over raw variables.
 
-### Recommended feature options names
+This rule applies for the _global_ target and for components ones. The following snippet should serve as example:
+
+**CMakeLists.txt**
+```cmake
+cmake_minimum_required(VERSION 3.1.2)
+project(test_package CXX)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+find_package(package REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} package::package)
+```
+
+We encourage contributors to check that not only the _global_ target works properly, but also the ones for the components. It can be
+done creating and linking different libraries and/or executables.
+
+## Recommended feature options names
 
 It's often needed to add options to toggle specific library features on/off. Regardless of the default, there is a strong preference for using positive naming for options. In order to avoid the fragmentation, we recommend to use the following naming conventions for such options:
 
