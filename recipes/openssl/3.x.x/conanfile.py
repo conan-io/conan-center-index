@@ -591,7 +591,7 @@ class OpenSSLConan(ConanFile):
 
             self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
 
-            self._patch_install_name()
+            #self._patch_install_name()
 
             self._run_make()
 
