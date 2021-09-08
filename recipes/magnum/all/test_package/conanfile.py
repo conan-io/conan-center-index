@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         available = []
         for it in all_execs:
             try:
-                opt_value = getattr(self.options["magnum"], "with_{}".format(it.replace("-", "_")))
+                opt_value = getattr(self.options["magnum"], it.replace("-", "_"))
                 if opt_value:
                     available.append(it)
             except:
