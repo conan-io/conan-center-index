@@ -107,6 +107,9 @@ class SwigConan(ConanFile):
         self._autotools.libs = []
         self._autotools.library_paths = []
 
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+            self._autotools.libs.extend(["mingwex", "ssp"])
+
         self._autotools.configure(args=args, configure_dir=self._source_subfolder,
                                   host=host, build=build)
         return self._autotools
