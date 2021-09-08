@@ -256,6 +256,8 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
@@ -825,7 +827,11 @@ Examples = bin/datadir/examples""")
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
-            self.cpp_info.components[componentname].libs = ["Qt5%s%s" % (module, libsuffix)]
+            if module.endswith("Private"):
+                libname = module[:-7]
+            else:
+                libname = module
+            self.cpp_info.components[componentname].libs = ["Qt5%s%s" % (libname, libsuffix)]
             self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
             self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
@@ -888,6 +894,30 @@ Examples = bin/datadir/examples""")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
+
+            if self.settings.os == "Windows":
+                _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
+                    "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
+            elif self.settings.os == "Android":
+                _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
+            elif self.settings.os == "Macos":
+                _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
+                    "IOKit", "IOSurface", "Metal", "QuartzCore"]
+            elif self.settings.os in ["iOS", "tvOS"]:
+                _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
+                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
+                    "QuartzCore", "UIKit"]
+            elif self.settings.os == "watchOS":
+                _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
+            elif self.settings.os == "Emscripten":
+                _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
+            else:
+                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
+                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
+
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
@@ -977,7 +1007,10 @@ Examples = bin/datadir/examples""")
             _create_module("WebChannel", ["Qml"])
 
         if self.options.qtwebengine:
-            _create_module("WebEngineCore", ["Gui", "Quick", "WebChannel", "Positioning", "expat::expat", "opus::libopus"])
+            webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
+            if self.settings.os == "Linux":
+                webenginereqs.extend(["expat::expat", "opus::libopus"])
+            _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
@@ -1140,8 +1173,10 @@ Examples = bin/datadir/examples""")
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
             for m in os.listdir(object_dir):
-                submodules_dir = os.path.join(object_dir, m)
                 component = "qt" + m[:m.find("_")]
+                if component not in self.cpp_info.components:
+                    continue
+                submodules_dir = os.path.join(object_dir, m)
                 for sub_dir in os.listdir(submodules_dir):
                     submodule_dir = os.path.join(submodules_dir, sub_dir)
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
