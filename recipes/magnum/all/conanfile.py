@@ -24,11 +24,11 @@ class MagnumConan(ConanFile):
         "shared_plugins": [True, False],
 
         # Follow documented build-options in https://doc.magnum.graphics/magnum/building.html#building-features
+        #   Options like `with_xxxx` has been renamed to `xxxx`
+        #   Options related to GL are being refactored into a choice option: gles2, gles3 or desktop_gl
+        #   Some documented options are not available in sources: with_shaderstools, vk_info, with_shaderconverter and with_anyshaderconverter
         
-        "target_gl": [True, False],
-        "target_gles": [True, False],
-        "target_gles2": [True, False],
-        "target_desktop_gles": [True, False],
+        "target_gl": ["gles2", "gles3", "desktop_gl", False],
         "target_headless": [True, False],
         "target_vk": [True, False],
 
@@ -39,7 +39,6 @@ class MagnumConan(ConanFile):
         "primitives": [True, False],
         "scenegraph": [True, False],
         "shaders": [True, False],
-        #"with_shaderstools": [True, False],  Option not available in sources!
         "text": [True, False],
         "texturetools": [True, False],
         "trade": [True, False],
@@ -64,13 +63,11 @@ class MagnumConan(ConanFile):
         "wglcontext": [True, False],
 
         "gl_info": [True, False],
-        # "vk_info": [True, False], Not in sources
         "al_info": [True, False],
         "distancefieldconverter": [True, False],
         "fontconverter": [True, False],
         "imageconverter": [True, False],
         "sceneconverter": [True, False],
-        # "with_shaderconverter": [True, False],  Not in sources
 
         # Options related to plugins
         "anyaudioimporter": [True, False],
@@ -78,7 +75,6 @@ class MagnumConan(ConanFile):
         "anyimageimporter": [True, False],
         "anysceneconverter": [True, False],
         "anysceneimporter": [True, False],
-        #"with_anyshaderconverter": [True, False],  Not in sources
         "magnumfont": [True, False],
         "magnumfontconverter": [True, False],
         "objimporter": [True, False],
@@ -91,10 +87,7 @@ class MagnumConan(ConanFile):
         "fPIC": True,
         "shared_plugins": True,
 
-        "target_gl": True,
-        "target_gles": True, # TODO: Here we probably have a CHOICE OPTION
-        "target_gles2": True, # TODO: Here we probably have a CHOICE OPTION
-        "target_desktop_gles": True, # TODO: Here we probably have a CHOICE OPTION
+        "target_gl": "desktop_gl",
         "target_headless": True,
         "target_vk": True,
 
@@ -163,13 +156,11 @@ class MagnumConan(ConanFile):
     def config_options(self):
         # Doc says that 'distancefieldconverter' is only available with "desktop GL" (the same is said for 'fontconverter', but it builds)
         # TODO: Here we probably have a CHOICE OPTION
-        if self.options.target_gles or self.options.target_gles2:
+        if self.options.target_gl in ["gles2", "gles3"]:
             del self.options.distancefieldconverter
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.target_gles
-            del self.options.target_gles2
             del self.options.eglcontext
             del self.options.xeglapplication
             del self.options.windowlesseglapplication
@@ -190,8 +181,6 @@ class MagnumConan(ConanFile):
         
         if self.settings.os == "Macos":
             del self.options.eglcontext
-            del self.options.target_gles
-            del self.options.target_gles2
             del self.options.glxapplication  # Requires GL/glx.h (maybe XQuartz project)
             del self.options.xeglapplication
             del self.options.windowlesseglapplication
@@ -255,23 +244,23 @@ class MagnumConan(ConanFile):
             # To fix issue with resource management, see here: https://github.com/mosra/magnum/issues/304#issuecomment-451768389
             raise ConanInvalidConfiguration("If using 'shared=True', corrade should be shared as well")
 
-        if not self.options.gl and (self.options.target_gl or 
-                                         self.options.get_safe("target_gles", False) or
-                                         self.options.get_safe("target_gles2", False) or
-                                         self.options.target_desktop_gles or
-                                         self.options.get_safe("target_headless", False)):
+        if not self.options.gl and (self.options.target_gl or self.options.get_safe("target_headless", False)):
             raise ConanInvalidConfiguration("Option 'gl=True' is required")
+        
+        if self.options.target_gl in ["gles2", "gles3"] and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("OpenGL ES is not supported in Macos")
+
+        if self.options.target_gl in ["gles2", "gles3"] and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("OpenGL ES is not supported in Windows")        
+
         if not self.options.vk and self.options.target_vk:
             raise ConanInvalidConfiguration("Option 'vk=True' is required")
 
         if self.options.get_safe("cglcontext", False) and not self.options.target_gl:
-            raise ConanInvalidConfiguration("Option 'cglcontext' requires 'target_gl=True'")
-
-        if self.options.get_safe("target_gles2", False) and not self.options.get_safe("target_gles", False):
-            raise ConanInvalidConfiguration("Option 'target_gles2' requires 'target_gles=True'")
+            raise ConanInvalidConfiguration("Option 'cglcontext' requires some 'target_gl'")
 
         if self.options.get_safe("windowlesscglapplication", False) and not self.options.target_gl:
-            raise ConanInvalidConfiguration("Option 'windowlesscglapplication' requires 'target_gl=True'")
+            raise ConanInvalidConfiguration("Option 'windowlesscglapplication' requires some 'target_gl'")
 
         if self.options.al_info and not self.options.audio:
             raise ConanInvalidConfiguration("Option 'al_info' requires 'audio=True'")
@@ -296,10 +285,10 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_OPENGLTESTER"] = False
         self._cmake.definitions["WITH_VULKANTESTER"] = False
 
-        self._cmake.definitions["TARGET_GL"] = self.options.target_gl
-        self._cmake.definitions["TARGET_GLES"] = self.options.get_safe("target_gles", False)
-        self._cmake.definitions["TARGET_GLES2"] = self.options.get_safe("target_gles2", False)
-        self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_desktop_gles
+        self._cmake.definitions["TARGET_GL"] = bool(self.options.target_gl)
+        self._cmake.definitions["TARGET_GLES"] = self.options.target_gl == "gles3"
+        self._cmake.definitions["TARGET_GLES2"] = self.options.target_gl == "gles2"
+        self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_gl == "desktop_gl"
         self._cmake.definitions["TARGET_HEADLESS"] = self.options.get_safe("target_headless", False)
         self._cmake.definitions["TARGET_VK"] = self.options.target_vk
 
