@@ -99,6 +99,11 @@ class SwigConan(ConanFile):
             # MSVC canonical names aren't understood
             host, build = False, False
 
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: Apple ARM should be handled by build helpers
+            self._autotools.flags.append("-arch arm64")
+            self._autotools.link_flags.append("-arch arm64")
+
         self._autotools.libs = []
         self._autotools.library_paths = []
 
