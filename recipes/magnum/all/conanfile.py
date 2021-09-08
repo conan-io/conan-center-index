@@ -12,7 +12,7 @@ class MagnumConan(ConanFile):
     description = "Lightweight and modular C++11/C++14 graphics middleware for games and data visualization"
     license = "MIT"
     short_paths = True
-    topics = ("magnum", "graphics", "middleware", "graphics", "rendering", "gamedev", "opengl", "3d", "3d", "opengl", "game-engine")
+    topics = ("magnum", "graphics", "middleware", "graphics", "rendering", "gamedev", "opengl", "3d", "2d", "opengl", "game-engine")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics"
 
@@ -98,7 +98,7 @@ class MagnumConan(ConanFile):
         "target_headless": True,
         "target_vk": True,
 
-        "with_audio": False,
+        "with_audio": True,
         "with_debugtools": True,
         "with_gl": True,
         "with_meshtools": True,
@@ -129,7 +129,7 @@ class MagnumConan(ConanFile):
         "with_wglcontext": True,
 
         "with_gl_info": True,
-        "with_al_info": False,
+        "with_al_info": True,
         "with_distancefieldconverter": True,
         "with_fontconverter": True,
         "with_imageconverter": True,
@@ -220,6 +220,8 @@ class MagnumConan(ConanFile):
     
     def requirements(self):
         self.requires("corrade/{}".format(self.version))
+        if self.options.with_audio:
+            self.requires("openal/1.21.1")
         if self.options.with_gl:
             self.requires("opengl/system")
         if self.options.with_vk:
@@ -418,7 +420,7 @@ class MagnumConan(ConanFile):
                         endif()
                         get_filename_component(MAGNUM_EXEC_PROGRAM "${{MAGNUM_EXEC_PROGRAM}}" ABSOLUTE)
                         add_executable(Magnum::{exec} IMPORTED)
-                        set_property(TARGET Magnum::gl-info PROPERTY IMPORTED_LOCATION ${{MAGNUM_EXEC_PROGRAM}})
+                        set_property(TARGET Magnum::{exec} PROPERTY IMPORTED_LOCATION ${{MAGNUM_EXEC_PROGRAM}})
                     endif()
                 """.format(exec=exec)))
 
@@ -444,8 +446,13 @@ class MagnumConan(ConanFile):
 
         # Audio
         if self.options.with_audio:
-            raise Exception("Component not created")
-        
+            self.cpp_info.components["audio"].names["cmake_find_package"] = "Audio"
+            self.cpp_info.components["audio"].names["cmake_find_package_multi"] = "Audio"
+            self.cpp_info.components["audio"].libs = ["MagnumAudio{}".format(lib_suffix)]
+            self.cpp_info.components["audio"].requires = ["magnum_main", "corrade::plugin_manager", "openal::openal"]
+            if self.options.with_scenegraph:
+                self.cpp_info.components["audio"].requires += ["scenegraph"] 
+
         # DebugTools
         if self.options.with_debugtools:
             self.cpp_info.components["debugtools"].names["cmake_find_package"] = "DebugTools"
