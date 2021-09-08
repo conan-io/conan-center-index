@@ -38,6 +38,12 @@ class GStPluginsBaseConan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
+    def validate(self):
+        if self.options.shared != self.options["gstreamer"].shared or \
+            self.options.shared != self.options["glib"].shared:
+                # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
+                raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
