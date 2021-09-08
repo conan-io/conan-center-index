@@ -62,6 +62,8 @@ class LibSafeCConan(ConanFile):
         return True
 
     def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This platform is not yet supported by libsafec (os=Macos arch=armv8)")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration(
                 "libsafec doesn't support {}/{}".format(
