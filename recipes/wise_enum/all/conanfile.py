@@ -25,7 +25,8 @@ class WiseEnumConan(ConanFile):
     
     @property
     def _source_subfolder(self):
-        return "source_subfolder"  
+        return "source_subfolder"
+
     @property
     def _python_executable(self):
         """
