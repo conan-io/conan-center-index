@@ -269,7 +269,7 @@ class FFMpegConan(ConanFile):
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
             opt_enable_disable("nonfree", self.options.with_libfdk_aac),
-            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.with_postproc)
+            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
         if self._arch:
             args.append("--arch={}".format(self._arch))
@@ -332,7 +332,7 @@ class FFMpegConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["avdevice"].libs = ["avdevice"]
-        self.cpp_info.components["avdevice"].requires = ["avfilter", "swscale", "postproc", "avformat", "avcodec", "swresample", "avutil"]
+        self.cpp_info.components["avdevice"].requires = ["avfilter", "swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avdevice"].names["pkg_config"] = "libavdevice"
 
         self.cpp_info.components["avfilter"].libs = ["avfilter"]
