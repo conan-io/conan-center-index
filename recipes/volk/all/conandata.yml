@@ -1,4 +1,7 @@
 sources:
+  "1.2.190":
+    url: "https://github.com/zeux/volk/archive/1.2.190.tar.gz"
+    sha256: "07f03720b8c70a626c98cc9545350538122bca9f853e6ed20ccad5a25d55fa4b"
   "1.2.170":
     url: "https://github.com/zeux/volk/archive/1.2.170.tar.gz"
     sha256: "01f37fc0c904afd2eb8060cada73f903ab1cdae87c7c24e77585ca7fb9bafae4"
