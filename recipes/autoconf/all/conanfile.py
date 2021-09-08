@@ -98,19 +98,19 @@ class AutoconfConan(ConanFile):
         self.output.info("Setting AC_MACRODIR to {}".format(ac_macrodir))
         self.env_info.AC_MACRODIR = ac_macrodir
 
-        autoconf = os.path.join(self.package_folder, "bin", "autoconf")
+        autoconf = tools.unix_path(os.path.join(self.package_folder, "bin", "autoconf"))
         self.output.info("Setting AUTOCONF to {}".format(autoconf))
         self.env_info.AUTOCONF = autoconf
 
-        autoreconf = os.path.join(self.package_folder, "bin", "autoreconf")
+        autoreconf = tools.unix_path(os.path.join(self.package_folder, "bin", "autoreconf"))
         self.output.info("Setting AUTORECONF to {}".format(autoreconf))
         self.env_info.AUTORECONF = autoreconf
 
-        autoheader = os.path.join(self.package_folder, "bin", "autoheader")
+        autoheader = tools.unix_path(os.path.join(self.package_folder, "bin", "autoheader"))
         self.output.info("Setting AUTOHEADER to {}".format(autoheader))
         self.env_info.AUTOHEADER = autoheader
 
-        autom4te = os.path.join(self.package_folder, "bin", "autom4te")
+        autom4te = tools.unix_path(os.path.join(self.package_folder, "bin", "autom4te"))
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
 
