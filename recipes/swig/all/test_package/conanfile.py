@@ -21,6 +21,7 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio"
 
     def build(self):
+        self.run("swig -swiglib", run_environment=True)
         if self._can_build:
             self._cmake.configure()
             self._cmake.build()
