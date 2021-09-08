@@ -12,7 +12,7 @@ class MagnumConan(ConanFile):
     description = "Lightweight and modular C++11/C++14 graphics middleware for games and data visualization"
     license = "MIT"
     short_paths = True
-    topics = ("conan", "corrade", "graphics", "rendering", "3d", "2d", "opengl")
+    topics = ("magnum", "graphics", "middleware", "graphics", "rendering", "gamedev", "opengl", "3d", "3d", "opengl", "game-engine")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics"
 
@@ -223,7 +223,7 @@ class MagnumConan(ConanFile):
         if self.options.with_gl:
             self.requires("opengl/system")
         if self.options.with_vk:
-            self.requires("vulkan-loader/1.2.182")
+            self.requires("vulkan-loader/1.2.190")
 
         if self.options.get_safe("with_eglcontext", False) or \
            self.options.get_safe("with_xeglapplication", False) or \
