@@ -27,40 +27,41 @@ class MagnumConan(ConanFile):
         #   Options like `with_xxxx` has been renamed to `xxxx`
         #   Options related to GL are being refactored into a choice option: gles2, gles3 or desktop_gl
         #   Some documented options are not available in sources: with_shaderstools, vk_info, with_shaderconverter and with_anyshaderconverter
-        
+        #   Option names are converted to snake_case
+
         "target_gl": ["gles2", "gles3", "desktop_gl", False],
         "target_headless": [True, False],
         "target_vk": [True, False],
 
         "audio": [True, False],
-        "debugtools": [True, False],
+        "debug_tools": [True, False],
         "gl": [True, False],
-        "meshtools": [True, False],
+        "mesh_tools": [True, False],
         "primitives": [True, False],
-        "scenegraph": [True, False],
+        "scene_graph": [True, False],
         "shaders": [True, False],
         "text": [True, False],
-        "texturetools": [True, False],
+        "texture_tools": [True, False],
         "trade": [True, False],
         "vk": [True, False],
         
-        "androidapplication": [True, False],
-        "emscriptenapplication": [True, False],
-        "glfwapplication": [True, False],
-        "glxapplication": [True, False],
-        "sdl2application": [True, False],
-        "xeglapplication": [True, False],
-        "windowlesscglapplication": [True, False],
-        "windowlesseglapplication": [True, False],
-        "windowlessglxapplication": [True, False],
-        "windowlessiosapplication": [True, False],
-        "windowlesswglapplication": [True, False],
-        "windowlesswindowseglapplication": [True, False],
+        "android_application": [True, False],
+        "emscripten_application": [True, False],
+        "glfw_application": [True, False],
+        "glx_application": [True, False],
+        "sdl2_application": [True, False],
+        "xegl_application": [True, False],
+        "windowless_cgl_application": [True, False],
+        "windowless_egl_application": [True, False],
+        "windowless_glx_application": [True, False],
+        "windowless_ios_application": [True, False],
+        "windowless_wgl_application": [True, False],
+        "windowless_windows_egl_application": [True, False],
 
-        "cglcontext": [True, False],
-        "eglcontext": [True, False],
-        "glxcontext": [True, False],
-        "wglcontext": [True, False],
+        "cgl_context": [True, False],
+        "egl_context": [True, False],
+        "glx_context": [True, False],
+        "wgl_context": [True, False],
 
         "gl_info": [True, False],
         "al_info": [True, False],
@@ -70,17 +71,17 @@ class MagnumConan(ConanFile):
         "sceneconverter": [True, False],
 
         # Options related to plugins
-        "anyaudioimporter": [True, False],
-        "anyimageconverter": [True, False],
-        "anyimageimporter": [True, False],
-        "anysceneconverter": [True, False],
-        "anysceneimporter": [True, False],
-        "magnumfont": [True, False],
-        "magnumfontconverter": [True, False],
-        "objimporter": [True, False],
-        "tgaimporter": [True, False],
-        "tgaimageconverter": [True, False],
-        "wavaudioimporter": [True, False],
+        "any_audio_importer": [True, False],
+        "any_image_converter": [True, False],
+        "any_image_importer": [True, False],
+        "any_scene_converter": [True, False],
+        "any_scene_importer": [True, False],
+        "magnum_font": [True, False],
+        "magnum_font_converter": [True, False],
+        "obj_importer": [True, False],
+        "tga_importer": [True, False],
+        "tga_image_converter": [True, False],
+        "wav_audio_importer": [True, False],
     }
     default_options = {
         "shared": False,
@@ -92,34 +93,34 @@ class MagnumConan(ConanFile):
         "target_vk": True,
 
         "audio": True,
-        "debugtools": True,
+        "debug_tools": True,
         "gl": True,
-        "meshtools": True,
+        "mesh_tools": True,
         "primitives": True,
-        "scenegraph": True,
+        "scene_graph": True,
         "shaders": True,
         "text": True,
-        "texturetools": True,
+        "texture_tools": True,
         "trade": True,
         "vk": True,
 
-        "androidapplication": True,
-        "emscriptenapplication": True,
-        "glfwapplication": True,
-        "glxapplication": True,
-        "sdl2application": True,
-        "xeglapplication": True,
-        "windowlesscglapplication": True,
-        "windowlesseglapplication": True,
-        "windowlessglxapplication": True,
-        "windowlessiosapplication": True,
-        "windowlesswglapplication": True,
-        "windowlesswindowseglapplication": True,
+        "android_application": True,
+        "emscripten_application": True,
+        "glfw_application": True,
+        "glx_application": True,
+        "sdl2_application": True,
+        "xegl_application": True,
+        "windowless_cgl_application": True,
+        "windowless_egl_application": True,
+        "windowless_glx_application": True,
+        "windowless_ios_application": True,
+        "windowless_wgl_application": True,
+        "windowless_windows_egl_application": True,
 
-        "cglcontext": True,
-        "eglcontext": True,
-        "glxcontext": True,
-        "wglcontext": True,
+        "cgl_context": True,
+        "egl_context": True,
+        "glx_context": True,
+        "wgl_context": True,
 
         "gl_info": True,
         "al_info": True,
@@ -129,17 +130,17 @@ class MagnumConan(ConanFile):
         "sceneconverter": True,
 
         # Related to plugins
-        "anyaudioimporter": False,
-        "anyimageconverter": True,
-        "anyimageimporter": True,
-        "anysceneconverter": True,
-        "anysceneimporter": True,
-        "magnumfont": True,
-        "magnumfontconverter": True,
-        "objimporter": True,
-        "tgaimporter": True,
-        "tgaimageconverter": True,
-        "wavaudioimporter": False,
+        "any_audio_importer": False,
+        "any_image_converter": True,
+        "any_image_importer": True,
+        "any_scene_converter": True,
+        "any_scene_importer": True,
+        "magnum_font": True,
+        "magnum_font_converter": True,
+        "obj_importer": True,
+        "tga_importer": True,
+        "tga_image_converter": True,
+        "wav_audio_importer": False,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "cmake/*"]
@@ -161,42 +162,42 @@ class MagnumConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.eglcontext
-            del self.options.xeglapplication
-            del self.options.windowlesseglapplication
-            del self.options.windowlessiosapplication
-            del self.options.windowlessglxapplication
-            del self.options.windowlesswindowseglapplication  # requires ANGLE
+            del self.options.egl_context
+            del self.options.xegl_application
+            del self.options.windowless_egl_application
+            del self.options.windowless_ios_application
+            del self.options.windowless_glx_application
+            del self.options.windowless_windows_egl_application  # requires ANGLE
             del self.options.target_headless  # Requires EGL (when used gl_info)
-            del self.options.glxapplication
-            del self.options.cglcontext
-            del self.options.windowlesscglapplication
+            del self.options.glx_application
+            del self.options.cgl_context
+            del self.options.windowless_cgl_application
 
         if self.settings.os == "Linux":
-            del self.options.cglcontext
-            del self.options.windowlesscglapplication
-            del self.options.wglcontext
-            del self.options.windowlesswglapplication
-            del self.options.windowlesswindowseglapplication
+            del self.options.cgl_context
+            del self.options.windowless_cgl_application
+            del self.options.wgl_context
+            del self.options.windowless_wgl_application
+            del self.options.windowless_windows_egl_application
         
         if self.settings.os == "Macos":
-            del self.options.eglcontext
-            del self.options.glxapplication  # Requires GL/glx.h (maybe XQuartz project)
-            del self.options.xeglapplication
-            del self.options.windowlesseglapplication
-            del self.options.windowlessglxapplication  # Requires GL/glx.h (maybe XQuartz project)
-            del self.options.windowlesswglapplication
-            del self.options.windowlesswindowseglapplication
+            del self.options.egl_context
+            del self.options.glx_application  # Requires GL/glx.h (maybe XQuartz project)
+            del self.options.xegl_application
+            del self.options.windowless_egl_application
+            del self.options.windowless_glx_application  # Requires GL/glx.h (maybe XQuartz project)
+            del self.options.windowless_wgl_application
+            del self.options.windowless_windows_egl_application
             del self.options.target_headless  # Requires EGL (when used gl_info)
 
         if self.settings.os != "Android":
-            del self.options.androidapplication
+            del self.options.android_application
 
         if self.settings.os != "Emscripten":
-            del self.options.emscriptenapplication
+            del self.options.emscripten_application
 
         if self.settings.os != "iOS":
-            del self.options.windowlessiosapplication
+            del self.options.windowless_ios_application
 
     @property
     def _executables(self):
@@ -216,18 +217,18 @@ class MagnumConan(ConanFile):
         if self.options.vk:
             self.requires("vulkan-loader/1.2.190")
 
-        if self.options.get_safe("eglcontext", False) or \
-           self.options.get_safe("xeglapplication", False) or \
-           self.options.get_safe("windowlesseglapplication", False) or \
-           self.options.get_safe("windowlessiosapplication") or \
-           self.options.get_safe("windowlesswindowseglapplication", False) or \
+        if self.options.get_safe("egl_context", False) or \
+           self.options.get_safe("xegl_application", False) or \
+           self.options.get_safe("windowless_egl_application", False) or \
+           self.options.get_safe("windowless_ios_application") or \
+           self.options.get_safe("windowless_windows_egl_application", False) or \
            self.options.get_safe("target_headless", False):
             self.requires("egl/system")
 
-        if self.options.glfwapplication:
+        if self.options.glfw_application:
             self.requires("glfw/3.3.4")
 
-        if self.options.sdl2application:
+        if self.options.sdl2_application:
             self.requires("sdl/2.0.16")
 
     def build_requirements(self):
@@ -256,17 +257,17 @@ class MagnumConan(ConanFile):
         if not self.options.vk and self.options.target_vk:
             raise ConanInvalidConfiguration("Option 'vk=True' is required")
 
-        if self.options.get_safe("cglcontext", False) and not self.options.target_gl:
-            raise ConanInvalidConfiguration("Option 'cglcontext' requires some 'target_gl'")
+        if self.options.get_safe("cgl_context", False) and not self.options.target_gl:
+            raise ConanInvalidConfiguration("Option 'cgl_context' requires some 'target_gl'")
 
-        if self.options.get_safe("windowlesscglapplication", False) and not self.options.target_gl:
-            raise ConanInvalidConfiguration("Option 'windowlesscglapplication' requires some 'target_gl'")
+        if self.options.get_safe("windowless_cgl_application", False) and not self.options.target_gl:
+            raise ConanInvalidConfiguration("Option 'windowless_cgl_application' requires some 'target_gl'")
 
         if self.options.al_info and not self.options.audio:
             raise ConanInvalidConfiguration("Option 'al_info' requires 'audio=True'")
 
-        if self.options.magnumfontconverter and not self.options.tgaimageconverter:
-            raise ConanInvalidConfiguration("magnumfontconverter requires tgaimageconverter")
+        if self.options.magnum_font_converter and not self.options.tga_image_converter:
+            raise ConanInvalidConfiguration("magnum_font_converter requires tga_image_converter")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -293,47 +294,47 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["TARGET_VK"] = self.options.target_vk
 
         self._cmake.definitions["WITH_AUDIO"] = self.options.audio
-        self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.debugtools
+        self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.debug_tools
         self._cmake.definitions["WITH_GL"] = self.options.gl
-        self._cmake.definitions["WITH_MESHTOOLS"] = self.options.meshtools
+        self._cmake.definitions["WITH_MESHTOOLS"] = self.options.mesh_tools
         self._cmake.definitions["WITH_PRIMITIVES"] = self.options.primitives
-        self._cmake.definitions["WITH_SCENEGRAPH"] = self.options.scenegraph
+        self._cmake.definitions["WITH_SCENEGRAPH"] = self.options.scene_graph
         self._cmake.definitions["WITH_SHADERS"] = self.options.shaders
         self._cmake.definitions["WITH_TEXT"] = self.options.text
-        self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.texturetools
+        self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.texture_tools
         self._cmake.definitions["WITH_TRADE"] = self.options.trade
         self._cmake.definitions["WITH_VK"] = self.options.vk
 
-        self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("androidapplication", False)
-        self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("emscriptenapplication", False)
-        self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.glfwapplication
-        self._cmake.definitions["WITH_GLXAPPLICATION"] = self.options.get_safe("glxapplication", False)
-        self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.sdl2application
-        self._cmake.definitions["WITH_XEGLAPPLICATION"] = self.options.get_safe("xeglapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.get_safe("windowlesscglapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("windowlesseglapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("windowlessglxapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("windowlessiosapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSWGLAPPLICATION"] = self.options.get_safe("windowlesswglapplication", False)
-        self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = self.options.get_safe("windowlesswindowseglapplication", False)
+        self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("android_application", False)
+        self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("emscripten_application", False)
+        self._cmake.definitions["WITH_GLFWAPPLICATION"] = self.options.glfw_application
+        self._cmake.definitions["WITH_GLXAPPLICATION"] = self.options.get_safe("glx_application", False)
+        self._cmake.definitions["WITH_SDL2APPLICATION"] = self.options.sdl2_application
+        self._cmake.definitions["WITH_XEGLAPPLICATION"] = self.options.get_safe("xegl_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.get_safe("windowless_cgl_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("windowless_egl_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("windowless_glx_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("windowless_ios_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSWGLAPPLICATION"] = self.options.get_safe("windowless_wgl_application", False)
+        self._cmake.definitions["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = self.options.get_safe("windowless_windows_egl_application", False)
 
-        self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("cglcontext", False)
-        self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("eglcontext", False)
-        self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.glxcontext
-        self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.get_safe("wglcontext", False)
+        self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("cgl_context", False)
+        self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("egl_context", False)
+        self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.glx_context
+        self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.get_safe("wgl_context", False)
 
         ##### Plugins related #####
-        self._cmake.definitions["WITH_ANYAUDIOIMPORTER"] = self.options.anyaudioimporter
-        self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.anyimageconverter
-        self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.anyimageimporter
-        self._cmake.definitions["WITH_ANYSCENECONVERTER"] = self.options.anysceneconverter
-        self._cmake.definitions["WITH_ANYSCENEIMPORTER"] = self.options.anysceneimporter
-        self._cmake.definitions["WITH_MAGNUMFONT"] = self.options.magnumfont
-        self._cmake.definitions["WITH_MAGNUMFONTCONVERTER"] = self.options.magnumfontconverter
-        self._cmake.definitions["WITH_OBJIMPORTER"] = self.options.objimporter
-        self._cmake.definitions["WITH_TGAIMPORTER"] = self.options.tgaimporter
-        self._cmake.definitions["WITH_TGAIMAGECONVERTER"] = self.options.tgaimageconverter
-        self._cmake.definitions["WITH_WAVAUDIOIMPORTER"] = self.options.wavaudioimporter
+        self._cmake.definitions["WITH_ANYAUDIOIMPORTER"] = self.options.any_audio_importer
+        self._cmake.definitions["WITH_ANYIMAGECONVERTER"] = self.options.any_image_converter
+        self._cmake.definitions["WITH_ANYIMAGEIMPORTER"] = self.options.any_image_importer
+        self._cmake.definitions["WITH_ANYSCENECONVERTER"] = self.options.any_scene_converter
+        self._cmake.definitions["WITH_ANYSCENEIMPORTER"] = self.options.any_scene_importer
+        self._cmake.definitions["WITH_MAGNUMFONT"] = self.options.magnum_font
+        self._cmake.definitions["WITH_MAGNUMFONTCONVERTER"] = self.options.magnum_font_converter
+        self._cmake.definitions["WITH_OBJIMPORTER"] = self.options.obj_importer
+        self._cmake.definitions["WITH_TGAIMPORTER"] = self.options.tga_importer
+        self._cmake.definitions["WITH_TGAIMAGECONVERTER"] = self.options.tga_image_converter
+        self._cmake.definitions["WITH_WAVAUDIOIMPORTER"] = self.options.wav_audio_importer
 
         #### Command line utilities ####
         self._cmake.definitions["WITH_GL_INFO"] = self.options.gl_info
@@ -439,17 +440,17 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["audio"].names["cmake_find_package_multi"] = "Audio"
             self.cpp_info.components["audio"].libs = ["MagnumAudio{}".format(lib_suffix)]
             self.cpp_info.components["audio"].requires = ["magnum_main", "corrade::plugin_manager", "openal::openal"]
-            if self.options.scenegraph:
-                self.cpp_info.components["audio"].requires += ["scenegraph"] 
+            if self.options.scene_graph:
+                self.cpp_info.components["audio"].requires += ["scene_graph"] 
 
         # DebugTools
-        if self.options.debugtools:
-            self.cpp_info.components["debugtools"].names["cmake_find_package"] = "DebugTools"
-            self.cpp_info.components["debugtools"].names["cmake_find_package_multi"] = "DebugTools"
-            self.cpp_info.components["debugtools"].libs = ["MagnumDebugTools{}".format(lib_suffix)]
-            self.cpp_info.components["debugtools"].requires = ["magnum_main"]
+        if self.options.debug_tools:
+            self.cpp_info.components["debug_tools"].names["cmake_find_package"] = "DebugTools"
+            self.cpp_info.components["debug_tools"].names["cmake_find_package_multi"] = "DebugTools"
+            self.cpp_info.components["debug_tools"].libs = ["MagnumDebugTools{}".format(lib_suffix)]
+            self.cpp_info.components["debug_tools"].requires = ["magnum_main"]
             if self.options["corrade"].with_testsuite and self.options.trade:
-                self.cpp_info.components["debugtools"].requires += ["corrade::test_suite", "trade"]
+                self.cpp_info.components["debug_tools"].requires += ["corrade::test_suite", "trade"]
 
         # GL
         if self.options.gl:
@@ -459,25 +460,25 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["gl"].requires = ["magnum_main", "opengl::opengl"]
 
         # MeshTools
-        if self.options.meshtools:
-            self.cpp_info.components["meshtools"].names["cmake_find_package"] = "MeshTools"
-            self.cpp_info.components["meshtools"].names["cmake_find_package_multi"] = "MeshTools"
-            self.cpp_info.components["meshtools"].libs = ["MagnumMeshTools{}".format(lib_suffix)]
-            self.cpp_info.components["meshtools"].requires = ["magnum_main", "trade", "gl"]
+        if self.options.mesh_tools:
+            self.cpp_info.components["mesh_tools"].names["cmake_find_package"] = "MeshTools"
+            self.cpp_info.components["mesh_tools"].names["cmake_find_package_multi"] = "MeshTools"
+            self.cpp_info.components["mesh_tools"].libs = ["MagnumMeshTools{}".format(lib_suffix)]
+            self.cpp_info.components["mesh_tools"].requires = ["magnum_main", "trade", "gl"]
 
         # Primitives
         if self.options.primitives:
             self.cpp_info.components["primitives"].names["cmake_find_package"] = "Primitives"
             self.cpp_info.components["primitives"].names["cmake_find_package_multi"] = "Primitives"
             self.cpp_info.components["primitives"].libs = ["MagnumPrimitives{}".format(lib_suffix)]
-            self.cpp_info.components["primitives"].requires = ["magnum_main", "meshtools", "trade"]
+            self.cpp_info.components["primitives"].requires = ["magnum_main", "mesh_tools", "trade"]
 
         # SceneGraph
-        if self.options.scenegraph:
-            self.cpp_info.components["scenegraph"].names["cmake_find_package"] = "SceneGraph"
-            self.cpp_info.components["scenegraph"].names["cmake_find_package_multi"] = "SceneGraph"
-            self.cpp_info.components["scenegraph"].libs = ["MagnumSceneGraph{}".format(lib_suffix)]
-            self.cpp_info.components["scenegraph"].requires = ["magnum_main"]
+        if self.options.scene_graph:
+            self.cpp_info.components["scene_graph"].names["cmake_find_package"] = "SceneGraph"
+            self.cpp_info.components["scene_graph"].names["cmake_find_package_multi"] = "SceneGraph"
+            self.cpp_info.components["scene_graph"].libs = ["MagnumSceneGraph{}".format(lib_suffix)]
+            self.cpp_info.components["scene_graph"].requires = ["magnum_main"]
 
         # Shaders
         if self.options.shaders:
@@ -491,16 +492,16 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["text"].names["cmake_find_package"] = "Text"
             self.cpp_info.components["text"].names["cmake_find_package_multi"] = "Text"
             self.cpp_info.components["text"].libs = ["MagnumText{}".format(lib_suffix)]
-            self.cpp_info.components["text"].requires = ["magnum_main", "texturetools", "corrade::plugin_manager", "gl"]
+            self.cpp_info.components["text"].requires = ["magnum_main", "texture_tools", "corrade::plugin_manager", "gl"]
 
         # TextureTools
-        if self.options.texturetools:
-            self.cpp_info.components["texturetools"].names["cmake_find_package"] = "TextureTools"
-            self.cpp_info.components["texturetools"].names["cmake_find_package_multi"] = "TextureTools"
-            self.cpp_info.components["texturetools"].libs = ["MagnumTextureTools{}".format(lib_suffix)]
-            self.cpp_info.components["texturetools"].requires = ["magnum_main"]
+        if self.options.texture_tools:
+            self.cpp_info.components["texture_tools"].names["cmake_find_package"] = "TextureTools"
+            self.cpp_info.components["texture_tools"].names["cmake_find_package_multi"] = "TextureTools"
+            self.cpp_info.components["texture_tools"].libs = ["MagnumTextureTools{}".format(lib_suffix)]
+            self.cpp_info.components["texture_tools"].requires = ["magnum_main"]
             if self.options.gl:
-                self.cpp_info.components["texturetools"].requires += ["gl"]
+                self.cpp_info.components["texture_tools"].requires += ["gl"]
 
         # Trade
         if self.options.trade:
@@ -518,22 +519,22 @@ class MagnumConan(ConanFile):
 
 
         #### APPLICATIONS ####
-        if self.options.get_safe("androidapplication", False):
+        if self.options.get_safe("android_application", False):
             raise Exception("Recipe doesn't define this component")
 
-        if self.options.get_safe("emscriptenapplication", False):
+        if self.options.get_safe("emscripten_application", False):
             raise Exception("Recipe doesn't define this component")
 
-        if self.options.get_safe("windowlessiosapplication", False):
+        if self.options.get_safe("windowless_ios_application", False):
             raise Exception("Recipe doesn't define this component")
 
-        if self.options.get_safe("glxapplication", False):
+        if self.options.get_safe("glx_application", False):
             self.cpp_info.components["glx_application"].names["cmake_find_package"] = "GlxApplication"
             self.cpp_info.components["glx_application"].names["cmake_find_package_multi"] = "GlxApplication"
             self.cpp_info.components["glx_application"].libs = ["MagnumGlxApplication{}".format(lib_suffix)]
             self.cpp_info.components["glx_application"].requires = ["gl"]  # TODO: Add x11
 
-        if self.options.glfwapplication:
+        if self.options.glfw_application:
             self.cpp_info.components["glfw_application"].names["cmake_find_package"] = "GlfwApplication"
             self.cpp_info.components["glfw_application"].names["cmake_find_package_multi"] = "GlfwApplication"
             self.cpp_info.components["glfw_application"].libs = ["MagnumGlfwApplication{}".format(lib_suffix)]
@@ -541,7 +542,7 @@ class MagnumConan(ConanFile):
             if self.options.target_gl:
                 self.cpp_info.components["glfw_application"].requires.append("gl")
 
-        if self.options.sdl2application:
+        if self.options.sdl2_application:
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
@@ -549,37 +550,37 @@ class MagnumConan(ConanFile):
             if self.options.target_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
 
-        if self.options.get_safe("xeglapplication", False):
+        if self.options.get_safe("xegl_application", False):
             self.cpp_info.components["xegl_application"].names["cmake_find_package"] = "XEglApplication"
             self.cpp_info.components["xegl_application"].names["cmake_find_package_multi"] = "XEglApplication"
             self.cpp_info.components["xegl_application"].libs = ["MagnumXEglApplication{}".format(lib_suffix)]
             self.cpp_info.components["xegl_application"].requires = ["gl", "egl::egl"] # TODO: Add x11
 
-        if self.options.get_safe("windowlesscglapplication", False):
+        if self.options.get_safe("windowless_cgl_application", False):
             self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package"] = "WindowlessCglApplication"
             self.cpp_info.components["windowless_cgl_application"].names["cmake_find_package_multi"] = "WindowlessCglApplication"
             self.cpp_info.components["windowless_cgl_application"].libs = ["MagnumWindowlessCglApplication{}".format(lib_suffix)]
             self.cpp_info.components["windowless_cgl_application"].requires = ["gl"]
 
-        if self.options.get_safe("windowlesseglapplication", False):
+        if self.options.get_safe("windowless_egl_application", False):
             self.cpp_info.components["windowless_egl_application"].names["cmake_find_package"] = "WindowlessEglApplication"
             self.cpp_info.components["windowless_egl_application"].names["cmake_find_package_multi"] = "WindowlessEglApplication"
             self.cpp_info.components["windowless_egl_application"].libs = ["MagnumWindowlessEglApplication{}".format(lib_suffix)]
             self.cpp_info.components["windowless_egl_application"].requires = ["gl", "egl::egl"]
 
-        if self.options.get_safe("windowlessglxapplication", False):
+        if self.options.get_safe("windowless_glx_application", False):
             self.cpp_info.components["windowless_glx_application"].names["cmake_find_package"] = "WindowlessGlxApplication"
             self.cpp_info.components["windowless_glx_application"].names["cmake_find_package_multi"] = "WindowlessGlxApplication"
             self.cpp_info.components["windowless_glx_application"].libs = ["MagnumWindowlessGlxApplication{}".format(lib_suffix)]
             self.cpp_info.components["windowless_glx_application"].requires = ["gl"]  # TODO: Add x11
 
-        if self.options.get_safe("windowlesswglapplication", False):
-            self.cpp_info.components["windowlesswglapplication"].names["cmake_find_package"] = "WindowlessWglApplication"
-            self.cpp_info.components["windowlesswglapplication"].names["cmake_find_package_multi"] = "WindowlessWglApplication"
-            self.cpp_info.components["windowlesswglapplication"].libs = ["MagnumWindowlessWglApplication{}".format(lib_suffix)]
-            self.cpp_info.components["windowless_glx_application"].requires = ["gl"]
+        if self.options.get_safe("windowless_wgl_application", False):
+            self.cpp_info.components["windowless_wgl_application"].names["cmake_find_package"] = "WindowlessWglApplication"
+            self.cpp_info.components["windowless_wgl_application"].names["cmake_find_package_multi"] = "WindowlessWglApplication"
+            self.cpp_info.components["windowless_wgl_application"].libs = ["MagnumWindowlessWglApplication{}".format(lib_suffix)]
+            self.cpp_info.components["windowless_wgl_application"].requires = ["gl"]
 
-        if self.options.get_safe("windowlesswindowseglapplication", False):
+        if self.options.get_safe("windowless_windows_egl_application", False):
             raise Exception("Recipe doesn't define this component")
 
         """
@@ -590,111 +591,111 @@ class MagnumConan(ConanFile):
         """
 
         #### CONTEXTS ####
-        if self.options.get_safe("cglcontext", False):
-            self.cpp_info.components["cglcontext"].names["cmake_find_package"] = "CglContext"
-            self.cpp_info.components["cglcontext"].names["cmake_find_package_multi"] = "CglContext"
-            self.cpp_info.components["cglcontext"].libs = ["MagnumCglContext{}".format(lib_suffix)]
-            self.cpp_info.components["cglcontext"].requires = ["gl"]
+        if self.options.get_safe("cgl_context", False):
+            self.cpp_info.components["cgl_context"].names["cmake_find_package"] = "CglContext"
+            self.cpp_info.components["cgl_context"].names["cmake_find_package_multi"] = "CglContext"
+            self.cpp_info.components["cgl_context"].libs = ["MagnumCglContext{}".format(lib_suffix)]
+            self.cpp_info.components["cgl_context"].requires = ["gl"]
 
-        if self.options.get_safe("eglcontext", False):
-            self.cpp_info.components["eglcontext"].names["cmake_find_package"] = "EglContext"
-            self.cpp_info.components["eglcontext"].names["cmake_find_package_multi"] = "EglContext"
-            self.cpp_info.components["eglcontext"].libs = ["MagnumEglContext{}".format(lib_suffix)]
-            self.cpp_info.components["eglcontext"].requires = ["gl", "egl::egl"]
+        if self.options.get_safe("egl_context", False):
+            self.cpp_info.components["egl_context"].names["cmake_find_package"] = "EglContext"
+            self.cpp_info.components["egl_context"].names["cmake_find_package_multi"] = "EglContext"
+            self.cpp_info.components["egl_context"].libs = ["MagnumEglContext{}".format(lib_suffix)]
+            self.cpp_info.components["egl_context"].requires = ["gl", "egl::egl"]
 
-        if self.options.glxcontext:
-            self.cpp_info.components["glxcontext"].names["cmake_find_package"] = "GlxContext"
-            self.cpp_info.components["glxcontext"].names["cmake_find_package_multi"] = "GlxContext"
-            self.cpp_info.components["glxcontext"].libs = ["MagnumGlxContext{}".format(lib_suffix)]
-            self.cpp_info.components["glxcontext"].requires = ["gl"]
+        if self.options.glx_context:
+            self.cpp_info.components["glx_context"].names["cmake_find_package"] = "GlxContext"
+            self.cpp_info.components["glx_context"].names["cmake_find_package_multi"] = "GlxContext"
+            self.cpp_info.components["glx_context"].libs = ["MagnumGlxContext{}".format(lib_suffix)]
+            self.cpp_info.components["glx_context"].requires = ["gl"]
 
-        if self.options.get_safe("wglcontext", False):
-            self.cpp_info.components["wglcontext"].names["cmake_find_package"] = "WglContext"
-            self.cpp_info.components["wglcontext"].names["cmake_find_package_multi"] = "WglContext"
-            self.cpp_info.components["wglcontext"].libs = ["MagnumWglContext{}".format(lib_suffix)]
-            self.cpp_info.components["wglcontext"].requires = ["gl"]
+        if self.options.get_safe("wgl_context", False):
+            self.cpp_info.components["wgl_context"].names["cmake_find_package"] = "WglContext"
+            self.cpp_info.components["wgl_context"].names["cmake_find_package_multi"] = "WglContext"
+            self.cpp_info.components["wgl_context"].libs = ["MagnumWglContext{}".format(lib_suffix)]
+            self.cpp_info.components["wgl_context"].requires = ["gl"]
 
 
         ######## PLUGINS ########
         # If shared, there are no libraries to link with
-        if self.options.anyaudioimporter:
+        if self.options.any_audio_importer:
             raise Exception("Create component here")
 
-        if self.options.anyimageconverter:
-            self.cpp_info.components["anyimageconverter"].names["cmake_find_package"] = "AnyImageConverter"
-            self.cpp_info.components["anyimageconverter"].names["cmake_find_package_multi"] = "AnyImageConverter"
+        if self.options.any_image_converter:
+            self.cpp_info.components["any_image_converter"].names["cmake_find_package"] = "AnyImageConverter"
+            self.cpp_info.components["any_image_converter"].names["cmake_find_package_multi"] = "AnyImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["anyimageconverter"].libs = ["AnyImageConverter"]
-                self.cpp_info.components["anyimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
-            self.cpp_info.components["anyimageconverter"].requires = ["trade"]
+                self.cpp_info.components["any_image_converter"].libs = ["AnyImageConverter"]
+                self.cpp_info.components["any_image_converter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
+            self.cpp_info.components["any_image_converter"].requires = ["trade"]
 
-        if self.options.anyimageimporter:
-            self.cpp_info.components["anyimageimporter"].names["cmake_find_package"] = "AnyImageImporter"
-            self.cpp_info.components["anyimageimporter"].names["cmake_find_package_multi"] = "AnyImageImporter"
+        if self.options.any_image_importer:
+            self.cpp_info.components["any_image_importer"].names["cmake_find_package"] = "AnyImageImporter"
+            self.cpp_info.components["any_image_importer"].names["cmake_find_package_multi"] = "AnyImageImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["anyimageimporter"].libs = ["AnyImageImporter"]
-                self.cpp_info.components["anyimageimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["anyimageimporter"].requires = ["trade"]
+                self.cpp_info.components["any_image_importer"].libs = ["AnyImageImporter"]
+                self.cpp_info.components["any_image_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["any_image_importer"].requires = ["trade"]
 
-        if self.options.anysceneconverter:
-            self.cpp_info.components["anysceneconverter"].names["cmake_find_package"] = "AnySceneConverter"
-            self.cpp_info.components["anysceneconverter"].names["cmake_find_package_multi"] = "AnySceneConverter"
+        if self.options.any_scene_converter:
+            self.cpp_info.components["any_scene_converter"].names["cmake_find_package"] = "AnySceneConverter"
+            self.cpp_info.components["any_scene_converter"].names["cmake_find_package_multi"] = "AnySceneConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["anysceneconverter"].libs = ["AnySceneConverter"]
-                self.cpp_info.components["anysceneconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'sceneconverters')]
-            self.cpp_info.components["anysceneconverter"].requires = ["trade"]
+                self.cpp_info.components["any_scene_converter"].libs = ["AnySceneConverter"]
+                self.cpp_info.components["any_scene_converter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'sceneconverters')]
+            self.cpp_info.components["any_scene_converter"].requires = ["trade"]
 
-        if self.options.anysceneimporter:
-            self.cpp_info.components["anysceneimporter"].names["cmake_find_package"] = "AnySceneImporter"
-            self.cpp_info.components["anysceneimporter"].names["cmake_find_package_multi"] = "AnySceneImporter"
+        if self.options.any_scene_importer:
+            self.cpp_info.components["any_scene_importer"].names["cmake_find_package"] = "AnySceneImporter"
+            self.cpp_info.components["any_scene_importer"].names["cmake_find_package_multi"] = "AnySceneImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["anysceneimporter"].libs = ["AnySceneImporter"]
-                self.cpp_info.components["anysceneimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["anysceneimporter"].requires = ["trade"]
+                self.cpp_info.components["any_scene_importer"].libs = ["AnySceneImporter"]
+                self.cpp_info.components["any_scene_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["any_scene_importer"].requires = ["trade"]
 
-        if self.options.magnumfont:
-            self.cpp_info.components["magnumfont"].names["cmake_find_package"] = "MagnumFont"
-            self.cpp_info.components["magnumfont"].names["cmake_find_package_multi"] = "MagnumFont"
+        if self.options.magnum_font:
+            self.cpp_info.components["magnum_font"].names["cmake_find_package"] = "MagnumFont"
+            self.cpp_info.components["magnum_font"].names["cmake_find_package_multi"] = "MagnumFont"
             if not self.options.shared_plugins:
-                self.cpp_info.components["magnumfont"].libs = ["MagnumFont"]
-                self.cpp_info.components["magnumfont"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fonts')]
-            self.cpp_info.components["magnumfont"].requires = ["magnum_main", "trade", "text"]
+                self.cpp_info.components["magnum_font"].libs = ["MagnumFont"]
+                self.cpp_info.components["magnum_font"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fonts')]
+            self.cpp_info.components["magnum_font"].requires = ["magnum_main", "trade", "text"]
 
-        if self.options.magnumfontconverter:
-            self.cpp_info.components["magnumfontconverter"].names["cmake_find_package"] = "MagnumFontConverter"
-            self.cpp_info.components["magnumfontconverter"].names["cmake_find_package_multi"] = "MagnumFontConverter"
+        if self.options.magnum_font_converter:
+            self.cpp_info.components["magnum_font_converter"].names["cmake_find_package"] = "MagnumFontConverter"
+            self.cpp_info.components["magnum_font_converter"].names["cmake_find_package_multi"] = "MagnumFontConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["magnumfontconverter"].libs = ["MagnumFontConverter"]
-                self.cpp_info.components["magnumfontconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fontconverters')]
-            self.cpp_info.components["magnumfontconverter"].requires = ["magnum_main", "trade", "text"]
+                self.cpp_info.components["magnum_font_converter"].libs = ["MagnumFontConverter"]
+                self.cpp_info.components["magnum_font_converter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'fontconverters')]
+            self.cpp_info.components["magnum_font_converter"].requires = ["magnum_main", "trade", "text"]
             if not self.options.shared_plugins:
-                self.cpp_info.components["magnumfontconverter"].requires += ["tgaimageconverter"]
+                self.cpp_info.components["magnum_font_converter"].requires += ["tga_image_converter"]
 
-        if self.options.objimporter:
-            self.cpp_info.components["objimporter"].names["cmake_find_package"] = "ObjImporter"
-            self.cpp_info.components["objimporter"].names["cmake_find_package_multi"] = "ObjImporter"
+        if self.options.obj_importer:
+            self.cpp_info.components["obj_importer"].names["cmake_find_package"] = "ObjImporter"
+            self.cpp_info.components["obj_importer"].names["cmake_find_package_multi"] = "ObjImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["objimporter"].libs = ["ObjImporter"]
-                self.cpp_info.components["objimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["objimporter"].requires = ["trade", "meshtools"]
+                self.cpp_info.components["obj_importer"].libs = ["ObjImporter"]
+                self.cpp_info.components["obj_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["obj_importer"].requires = ["trade", "mesh_tools"]
 
-        if self.options.tgaimporter:
-            self.cpp_info.components["tgaimporter"].names["cmake_find_package"] = "TgaImporter"
-            self.cpp_info.components["tgaimporter"].names["cmake_find_package_multi"] = "TgaImporter"
+        if self.options.tga_importer:
+            self.cpp_info.components["tga_importer"].names["cmake_find_package"] = "TgaImporter"
+            self.cpp_info.components["tga_importer"].names["cmake_find_package_multi"] = "TgaImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["tgaimporter"].libs = ["TgaImporter"]
-                self.cpp_info.components["tgaimporter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
-            self.cpp_info.components["tgaimporter"].requires = ["trade"]
+                self.cpp_info.components["tga_importer"].libs = ["TgaImporter"]
+                self.cpp_info.components["tga_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'importers')]
+            self.cpp_info.components["tga_importer"].requires = ["trade"]
 
-        if self.options.tgaimageconverter:
-            self.cpp_info.components["tgaimageconverter"].names["cmake_find_package"] = "TgaImageConverter"
-            self.cpp_info.components["tgaimageconverter"].names["cmake_find_package_multi"] = "TgaImageConverter"
+        if self.options.tga_image_converter:
+            self.cpp_info.components["tga_image_converter"].names["cmake_find_package"] = "TgaImageConverter"
+            self.cpp_info.components["tga_image_converter"].names["cmake_find_package_multi"] = "TgaImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["tgaimageconverter"].libs = ["TgaImageConverter"]
-                self.cpp_info.components["tgaimageconverter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
-            self.cpp_info.components["tgaimageconverter"].requires = ["trade"]
+                self.cpp_info.components["tga_image_converter"].libs = ["TgaImageConverter"]
+                self.cpp_info.components["tga_image_converter"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'imageconverters')]
+            self.cpp_info.components["tga_image_converter"].requires = ["trade"]
 
-        if self.options.wavaudioimporter:
+        if self.options.wav_audio_importer:
             raise Exception("Component required here")
 
         #### EXECUTABLES ####
