@@ -89,12 +89,14 @@ class IslConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        vars = self._autotools.vars
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-int={}".format(self.options.with_int),
             "--enable-portable-binary",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]),
         ]
         if self.options.with_int == "gmp":
             conf_args.extend([
