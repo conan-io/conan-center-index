@@ -26,7 +26,7 @@ class TestPackageConan(ConanFile):
                 self._cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             if self._can_build:
                 self._cmake.test(output_on_failure=True)
             self.run("swig -version", run_environment=True)

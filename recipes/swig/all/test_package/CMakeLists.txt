@@ -3,7 +3,7 @@ project(PackageTest C)
 enable_testing()
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(NO_OUTPUT_DIRS)
+conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
 find_program(PYTHON_EXECUTABLE NAMES python3 python REQUIRED)
 find_package(PythonLibs 3 REQUIRED)
