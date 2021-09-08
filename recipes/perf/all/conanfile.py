@@ -1,9 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches
 import os
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.33.0"
 
 class Perf(ConanFile):
     name = "perf"
@@ -15,7 +14,9 @@ class Perf(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "patches/*"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
 
     def validate(self):
@@ -30,7 +31,8 @@ class Perf(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        apply_conandata_patches(self)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         autotools = AutoToolsBuildEnvironment(self)
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder, "tools", "perf")):
             vars=autotools.vars
