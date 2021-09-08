@@ -2,7 +2,7 @@ from conans import CMake, ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
 
     __cmake = None
@@ -21,9 +21,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if self._can_build:
-            with tools.run_environment(self):
-                self._cmake.configure()
-                self._cmake.build()
+            self._cmake.configure()
+            self._cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
