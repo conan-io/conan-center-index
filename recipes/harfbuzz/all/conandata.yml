@@ -26,6 +26,9 @@ sources:
   "2.9.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/2.9.0/harfbuzz-2.9.0.tar.xz"
     sha256: "3e1c2e1d2c65d56364fd16d1c41a06b2a35795496f78dfff635c2b7414b54c5a"
+  "2.9.1":
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.9.1.tar.gz"
+    sha256: "f997abd0e3b90647408bfb01af2383b5fc9557af20137e7c2deaf2fa13705dc8"
 patches:
   "2.6.8":
     - patch_file: "patches/icu.patch"
@@ -52,5 +55,8 @@ patches:
     - patch_file: "patches/icu-2.8.x.patch"
       base_path: "source_subfolder"
   "2.9.0":
+    - patch_file: "patches/icu-2.8.x.patch"
+      base_path: "source_subfolder"
+  "2.9.1":
     - patch_file: "patches/icu-2.8.x.patch"
       base_path: "source_subfolder"
