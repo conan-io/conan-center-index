@@ -44,14 +44,19 @@ class WiseEnumConan(ConanFile):
         compiler_version = tools.Version(self.settings.compiler.version)
 
         minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "5"
+           "gcc": "5"
         }
+        unsupported = {"Visual Studio"}
+        if compiler in unsupported:
+            raise ConanInvalidConfiguration(
+                "{} doe not support  {} compiler".format(self.name, compiler)
+            )
 
         if compiler in minimal_version and compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
             )
+        
 
     def package_id(self):
         self.info.header_only()
@@ -59,11 +64,7 @@ class WiseEnumConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        if self.settings.compiler == "Visual Studio":
-            with tools.chdir(self._source_subfolder):
-                self.run("{} create_generated.py 125  wise_enum_generated.h".format(self._python_executable))
-          
-
+        
     def package(self):
         self.copy("*.h", dst="include", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
