@@ -87,7 +87,7 @@ class NsprConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-mozilla={}".format(yes_no(self.options.with_mozilla)),
-            "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
+            "--enable-64bit={}".format(yes_no(self.settings.arch in ("armv8", "x86_64", "mips64", "ppc64", "ppc64le"))),
             "--enable-strip={}".format(yes_no(self.settings.build_type not in ("Debug", "RelWithDebInfo"))),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
