@@ -42,8 +42,9 @@ class TestPackageConan(ConanFile):
         with tools.chdir(self.build_folder):
             for fn in ("COPYING", "NEWS", "INSTALL", "README", "AUTHORS", "ChangeLog"):
                 tools.save(fn, "\n")
-            self.run("gnulib-tool --list", win_bash=tools.os_info.is_windows)
-            self.run("gnulib-tool --import getopt-posix", win_bash=tools.os_info.is_windows)
+            with tools.run_environment(self):
+                self.run("gnulib-tool --list", win_bash=tools.os_info.is_windows)
+                self.run("gnulib-tool --import getopt-posix", win_bash=tools.os_info.is_windows)
             self.run("{} -ifv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
 
             with self._build_context():
