@@ -124,13 +124,8 @@ class NsprConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             with self._build_context():
-                try:
-                    autotools = self._configure_autotools()
-                    autotools.make()
-                except:
-                    # FIXME: DEBUG
-                    print(tools.load("config.log"))
-                    raise
+                autotools = self._configure_autotools()
+                autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
