@@ -61,7 +61,7 @@ class VulkanValidationLayersConan(ConanFile):
         }.get(str(self.version), False)
 
     def requirements(self):
-        #TODO set private=False, one the issue is resolved https://github.com/conan-io/conan/issues/9390
+        #TODO set private=False, once the issue is resolved https://github.com/conan-io/conan/issues/9390
         self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not self._is_cross_building())
         self.requires("vulkan-headers/{}".format(self.version))
         if tools.Version(self.version) >= "1.2.173":
@@ -74,6 +74,8 @@ class VulkanValidationLayersConan(ConanFile):
     def validate(self):
         if self.options["spirv-tools"].shared:
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
+        if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            raise ConanInvalidConfiguration("vulkan-validationlayers can't be build with this arch; open a PR to fix")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
