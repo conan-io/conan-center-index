@@ -91,15 +91,14 @@ class IslConan(ConanFile):
         self._autotools.libs = []
         vars = self._autotools.vars
         yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
+        args = [
             "--with-int={}".format(self.options.with_int),
             "--enable-portable-binary",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-            "MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]),
         ]
         if self.options.with_int == "gmp":
-            conf_args.extend([
+            args.extend([
                 "--with-gmp=system",
                 "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
             ])
@@ -109,7 +108,8 @@ class IslConan(ConanFile):
             # FIXME: should be handled by helper
             self._autotools.flags.append("-arch arm64")
             self._autotools.link_flags.append("-arch arm64")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        args.append("MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]))
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
