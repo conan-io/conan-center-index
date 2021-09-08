@@ -40,6 +40,9 @@ class LzipConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio is not supported")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def _detect_compilers(self):
         tools.rmdir("detectdir")
         tools.mkdir("detectdir")
