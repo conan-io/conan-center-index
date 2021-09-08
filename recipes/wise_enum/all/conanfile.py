@@ -17,8 +17,7 @@ class WiseEnumConan(ConanFile):
         "compile-time"
     )
     homepage = "https://github.com/quicknir/wise_enum"
-    url = "https://github.com/conan-io/conan-center-index/"
-    homepage = url
+    url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
     settings = "compiler"
     no_copy_source = True
@@ -28,7 +27,7 @@ class WiseEnumConan(ConanFile):
         return "source_subfolder"    
    
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
@@ -50,3 +49,4 @@ class WiseEnumConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "wise_enum"
         self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
+
