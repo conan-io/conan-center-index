@@ -96,6 +96,7 @@ class RuyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.h", dst=os.path.join("include", "ruy"), src=os.path.join(self._source_subfolder, "ruy"))
         self.copy(pattern="*", dst="lib", src="lib")
+        self.copy(pattern="*", dst="bin", src="bin")
 
     def package_info(self):
         self.cpp_info.libs = ["ruy_frontend",
