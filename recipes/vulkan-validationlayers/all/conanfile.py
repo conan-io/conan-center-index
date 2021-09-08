@@ -33,6 +33,10 @@ class VulkanValidationLayersConan(ConanFile):
     generators = "cmake"
     _cmake = None
 
+    def _is_cross_building(self):
+        settings_target = getattr(self, 'settings_target', None)
+        return settings_target is not None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -57,7 +61,7 @@ class VulkanValidationLayersConan(ConanFile):
         }.get(str(self.version), False)
 
     def requirements(self):
-        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not self._is_cross_building())
         self.requires("vulkan-headers/{}".format(self.version))
         if tools.Version(self.version) >= "1.2.173":
             self.requires("robin-hood-hashing/3.11.3")
