@@ -326,7 +326,7 @@ class CernRootConan(ConanFile):
         self.cpp_info.build_modules.extend(
             [
                 os.path.join("lib", "cmake", "RootMacros.cmake"),
-                # os.path.join("res", "cmake", "ROOTUseFile.cmake"),
+                # os.path.join("lib", "cmake", "ROOTUseFile.cmake"),
             ]
         )
         self.cpp_info.resdirs = ["res"]
