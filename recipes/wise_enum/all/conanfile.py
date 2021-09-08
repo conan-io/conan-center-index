@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import sys
 
 required_conan_version = ">=1.33.0"
 
@@ -24,7 +25,15 @@ class WiseEnumConan(ConanFile):
     
     @property
     def _source_subfolder(self):
-        return "source_subfolder"    
+        return "source_subfolder"  
+    @property
+    def _python_executable(self):
+        """
+        obtain full path to the python interpreter executable
+        :return: path to the python interpreter executable, either set by option, or system default
+        """
+        exe = sys.executable
+        return str(exe).replace('\\', '/')  
    
 
     def validate(self):
@@ -50,6 +59,9 @@ class WiseEnumConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+        if self.settings.compiler == "Visual Studio":
+            with tools.chdir(self._source_subfolder):
+                self.run("{} create_generated.py 125  wise_enum_generated.h".format(self._python_executable))
           
 
     def package(self):
