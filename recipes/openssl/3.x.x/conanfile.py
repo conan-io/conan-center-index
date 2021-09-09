@@ -556,7 +556,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and \
+        return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
             (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
 
