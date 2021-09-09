@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         if self.settings.os == "Android":
             cmake.definitions["CONAN_LIBCXX"] = ""
 
-        cmake.definitions["OPENSSL_WITH_ZLIB"] = self.options["openssl"].zlib
+        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = "MT" in self.settings.compiler.runtime
 
