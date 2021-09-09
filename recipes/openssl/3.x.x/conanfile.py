@@ -587,12 +587,12 @@ class OpenSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+            os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
     @staticmethod
     def _create_cmake_module_variables(module_file):
-        content = """\
+        content = textwrap.dedent("""\
             if(DEFINED OpenSSL_FOUND)
                 set(OPENSSL_FOUND ${OpenSSL_FOUND})
             endif()
@@ -619,26 +619,25 @@ class OpenSSLConan(ConanFile):
             if(DEFINED OpenSSL_VERSION)
                 set(OPENSSL_VERSION ${OpenSSL_VERSION})
             endif()
-        """
-        content = textwrap.dedent(content)
+        """)
         tools.save(module_file, content)
 
     @property
     def _module_subfolder(self):
         return os.path.join("lib", "cmake")
 
-    @property
-    def _module_file(self):
-        return "conan-official-{}-variables.cmake".format(self.name)
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         self.cpp_info.names["pkg_config"] = "openssl"
-        self.cpp_info.components["ssl"].builddirs = [self._module_subfolder]
-        self.cpp_info.components["ssl"].build_modules = [os.path.join(self._module_subfolder, self._module_file)]
-        self.cpp_info.components["crypto"].builddirs = [self._module_subfolder]
-        self.cpp_info.components["crypto"].build_modules = [os.path.join(self._module_subfolder, self._module_file)]
+        self.cpp_info.components["ssl"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
