@@ -55,19 +55,24 @@ class NsimdConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        defs = {}
         if self.options.simd:
-            defs["simd"] = self.options.simd
+            self._cmake.definitions["simd"] = self.options.simd
         if self.settings.arch == "armv7hf":
-            defs["NSIMD_ARM32_IS_ARMEL"] = "OFF"
-        self._cmake.configure(build_folder=self._build_subfolder, defs=defs)
+            self._cmake.definitions["NSIMD_ARM32_IS_ARMEL"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
-        # allow static library (not in patch file to avoid one patch per version)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+    def _patch_sources(self):
+        cmakefile_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakefile_path,
                               " SHARED ",
                               " ")
+        tools.replace_in_file(cmakefile_path,
+                              "RUNTIME DESTINATION lib",
+                              "RUNTIME DESTINATION bin")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
