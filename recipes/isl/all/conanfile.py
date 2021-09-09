@@ -89,7 +89,6 @@ class IslConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        vars = self._autotools.vars
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--with-int={}".format(self.options.with_int),
@@ -108,6 +107,7 @@ class IslConan(ConanFile):
             # FIXME: should be handled by helper
             self._autotools.flags.append("-arch arm64")
             self._autotools.link_flags.append("-arch arm64")
+        vars = self._autotools.vars
         args.append("MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]))
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
