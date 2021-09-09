@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.31.0"
+required_conan_version = ">=1.33.0"
 
 
 class ErkirConan(ConanFile):
@@ -11,6 +11,7 @@ class ErkirConan(ConanFile):
     license = "MIT"
     description = "a C++ library for geodetic and trigonometric calculations"
     topics = ("earth", "geodesy", "geography", "coordinate-systems", "geodetic", "datum")
+    exports_sources = "CMakeLists.txt"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,11 +21,16 @@ class ErkirConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -37,7 +43,8 @@ class ErkirConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.definitions["CODE_COVERAGE"] = False
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
@@ -54,4 +61,4 @@ class ErkirConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["erkir"]
