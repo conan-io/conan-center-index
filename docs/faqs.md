@@ -237,5 +237,5 @@ Right now, only the [CPython](https://github.com/python/cpython) flavor of the i
 
 In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 architecture) - 32-bit builds (x86) are not supported and not installed on the agents.
 
-There are no guarantees that recipes will work correctly in future python versions having breaking changes to the interpreter,
+There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
  as we don't test all the possible combinations (and probably will never be). Patches are welcomed if probllems are found.
