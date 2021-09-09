@@ -1,7 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration, ConanException
-import os
 import fnmatch
+import os
+import textwrap
 
 
 required_conan_version = ">=1.33.0"
@@ -406,25 +407,26 @@ class OpenSSLConan(ConanFile):
         return args
 
     def _create_targets(self):
-        config_template = """{targets} = (
-    "{target}" => {{
-        inherit_from => {ancestor},
-        cflags => add("{cflags}"),
-        cxxflags => add("{cxxflags}"),
-        {defines}
-        includes => add({includes}),
-        lflags => add("{lflags}"),
-        {shared_target}
-        {shared_cflag}
-        {shared_extension}
-        {cc}
-        {cxx}
-        {ar}
-        {ranlib}
-        {perlasm_scheme}
-    }},
-);
-"""
+        config_template = textwrap.dedent("""\
+            {targets} = (
+                "{target}" => {{
+                inherit_from => {ancestor},
+                cflags => add("{cflags}"),
+                cxxflags => add("{cxxflags}"),
+                {defines}
+                includes => add({includes}),
+                lflags => add("{lflags}"),
+                {shared_target}
+                {shared_cflag}
+                {shared_extension}
+                {cc}
+                {cxx}
+                {ar}
+                {ranlib}
+                {perlasm_scheme}
+                }},
+            );
+        """)
         cflags = []
 
         env_build = self._get_env_build()
