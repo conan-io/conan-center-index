@@ -227,7 +227,7 @@ The version run by our agents and docker images is a subject to change, as secur
 
 Additional concerns about supported versions within conan ecosystem (not just ConanCenter, but client itself and other tools) are documented in [tribe](https://github.com/conan-io/tribe/pull/3).
 
-For ConanCenter, besides security, there are various concerns about critical features provided by python interpreter, include its syntax and the standard library, e.g.:
+For ConanCenter, besides security, there are various concerns about critical features provided by the Python interpreter, include its syntax and the standard library, e.g.:
 
 - LZMA compression support
 - Unicode awareness
