@@ -48,18 +48,26 @@ class OpenSSLConan(ConanFile):
     default_options["fPIC"] = True
     default_options["zlib"] = True
     default_options["openssldir"] = None
-    _env_build = None
-    _source_subfolder = "source_subfolder"
+
     exports_sources = ["patches/*"]
+    _env_build = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows":
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.15.05")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ:
+            if not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def requirements(self):
@@ -96,9 +104,8 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "openssl-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _target(self):
