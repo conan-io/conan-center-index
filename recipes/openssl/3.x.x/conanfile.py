@@ -593,8 +593,8 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             if self.settings.build_type == "Debug":
                 with tools.chdir(os.path.join(self.package_folder, "lib")):
-                    os.rename("libssl.lib", "libssld.lib")
-                    os.rename("libcrypto.lib", "libcryptod.lib")
+                    tools.rename("libssl.lib", "libssld.lib")
+                    tools.rename("libcrypto.lib", "libcryptod.lib")
 
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
