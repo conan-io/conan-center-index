@@ -15,4 +15,4 @@ set(OpenSSL_DEBUG 1)
 find_package(OpenSSL REQUIRED)
 message("LINK WITH ${OpenSSL_LIBRARIES}")
 
-target_link_libraries(digest OpenSSL::SSL)
+target_link_libraries(digest OpenSSL::Crypto)
