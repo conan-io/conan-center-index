@@ -1,16 +1,16 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import fnmatch
+import functools
 import os
 import textwrap
-
 
 required_conan_version = ">=1.33.0"
 
 
 class OpenSSLConan(ConanFile):
     name = "openssl"
-    settings = "os", "compiler", "arch", "build_type"
+    settings = "os", "arch"1, "compiler", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "Apache-2.0"
@@ -44,15 +44,14 @@ class OpenSSLConan(ConanFile):
         "no_sse2": [True, False],
         "no_threads": [True, False],
         "openssldir": "ANY",
-        "zlib": [True, False]
-        }
+        "zlib": [True, False],
+    }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["zlib"] = True
     default_options["openssldir"] = None
 
-    exports_sources = ["patches/*"]
-    _env_build = None
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -125,22 +124,24 @@ class OpenSSLConan(ConanFile):
     @property
     def _perlasm_scheme(self):
         # right now, we need to tweak this for iOS & Android only, as they inherit from generic targets
-        the_arch = str(self.settings.arch)
-        the_os = str(self.settings.os)
-        if the_os in ["iOS", "watchOS", "tvOS"]:
-            return {"armv7": "ios32",
-                    "armv7s": "ios32",
-                    "armv8": "ios64",
-                    "armv8_32": "ios64",
-                    "armv8.3": "ios64",
-                    "armv7k": "ios32"}.get(the_arch, None)
-        elif the_os == "Android":
-            return {"armv7": "void",
-                    "armv8": "linux64",
-                    "mips": "o32",
-                    "mips64": "64",
-                    "x86": "android",
-                    "x86_64": "elf"}.get(the_arch, None)
+        if self.settings.os in ("iOS", "watchOS", "tvOS"):
+            return {
+                "armv7": "ios32",
+                "armv7s": "ios32",
+                "armv8": "ios64",
+                "armv8_32": "ios64",
+                "armv8.3": "ios64",
+                "armv7k": "ios32",
+            }.get(str(self.settings.arch), None)
+        elif self.settings.os == "Android":
+            return {
+                "armv7": "void",
+                "armv8": "linux64",
+                "mips": "o32",
+                "mips64": "64",
+                "x86": "android",
+                "x86_64": "elf",
+            }.get(str(self.settings.arch), None)
         return None
 
     @property
@@ -282,15 +283,12 @@ class OpenSSLConan(ConanFile):
         query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
-            raise ConanInvalidConfiguration("Unsupported configuration: %s %s %s, "
-                                            "please open an issue: "
-                                            "https://github.com/conan-io/conan-center-index/issues. "
-                                            "alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable "
-                                            "into your conan profile "
-                                            "(list of configurations can be found by running './Configure --help')." %
-                                            (self.settings.os,
-                                            self.settings.arch,
-                                            self.settings.compiler))
+            raise ConanInvalidConfiguration(
+                f"Unsupported configuration ({self.settings.os}/{self.settings.arch}/{self.settings.compiler}).\n"
+                f"Please open an issue at {self.url}.\n"
+                f"Alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable into your conan profile."
+                f"(list of configurations can be found by running './Configure --help')"
+            )
         return ancestor
 
     def _tool(self, env_name, apple_name):
@@ -330,20 +328,20 @@ class OpenSSLConan(ConanFile):
                 if "AS" in os.environ:
                     tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
 
+    @functools.lru_cache(1)
     def _get_env_build(self):
-        if not self._env_build:
-            self._env_build = AutoToolsBuildEnvironment(self)
-            if self.settings.compiler == "apple-clang":
-                # add flags only if not already specified, avoid breaking Catalyst which needs very special flags
-                flags = " ".join(self._env_build.flags)
-                if "-arch" not in flags:
-                    self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
-                if "-isysroot" not in flags:
-                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
-                if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
-                    self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
+        autotools = AutoToolsBuildEnvironment(self)
+        if self.settings.compiler == "apple-clang":
+            # add flags only if not already specified, avoid breaking Catalyst which needs very special flags
+            flags = " ".join(autotools.flags)
+            if "-arch" not in flags:
+                autotools.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
+            if "-isysroot" not in flags:
+                autotools.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
+            if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
+                autotools.flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                               self.settings.os.version))
-        return self._env_build
+        return autotools
 
     @property
     def _configure_args(self):
@@ -387,8 +385,8 @@ class OpenSSLConan(ConanFile):
                 lib_path = zlib_info.lib_paths[0]
             if tools.os_info.is_windows:
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
-                include_path = include_path.replace('\\', '/')
-                lib_path = lib_path.replace('\\', '/')
+                include_path = include_path.replace("\\", "/")
+                lib_path = lib_path.replace("\\", "/")
 
             if self.options["zlib"].shared:
                 args.append("zlib-dynamic")
@@ -452,38 +450,40 @@ class OpenSSLConan(ConanFile):
         targets = "my %targets"
         includes = ", ".join(['"%s"' % include for include in env_build.include_paths])
         if self.settings.os == "Windows":
-            includes = includes.replace('\\', '/') # OpenSSL doesn't like backslashes
+            includes = includes.replace("\\", "/") # OpenSSL doesn't like backslashes
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
         else:
             ancestor = '[ "%s" ]' % self._ancestor_target
-        shared_cflag = ''
-        shared_extension = ''
-        shared_target = ''
-        if self.settings.os == 'Neutrino':
+        shared_cflag = ""
+        shared_extension = ""
+        shared_target = ""
+        if self.settings.os == "Neutrino":
             if self.options.shared:
                 shared_extension = 'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
                 shared_target = 'shared_target  => "gnu-shared",'
             if self.options.get_safe("fPIC"):
                 shared_cflag = 'shared_cflag => "-fPIC",'
 
-        config = config_template.format(targets=targets,
-                                        target=self._target,
-                                        ancestor=ancestor,
-                                        cc=cc,
-                                        cxx=cxx,
-                                        ar=ar,
-                                        ranlib=ranlib,
-                                        cflags=" ".join(cflags),
-                                        cxxflags=" ".join(cxxflags),
-                                        defines=defines,
-                                        includes=includes,
-                                        perlasm_scheme=perlasm_scheme,
-                                        shared_target=shared_target,
-                                        shared_extension=shared_extension,
-                                        shared_cflag=shared_cflag,
-                                        lflags=" ".join(env_build.link_flags))
+        config = config_template.format(
+            targets=targets,
+            target=self._target,
+            ancestor=ancestor,
+            cc=cc,
+            cxx=cxx,
+            ar=ar,
+            ranlib=ranlib,
+            cflags=" ".join(cflags),
+            cxxflags=" ".join(cxxflags),
+            defines=defines,
+            includes=includes,
+            perlasm_scheme=perlasm_scheme,
+            shared_target=shared_target,
+            shared_extension=shared_extension,
+            shared_cflag=shared_cflag,
+            lflags=" ".join(env_build.link_flags)
+        )
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
 
@@ -520,7 +520,7 @@ class OpenSSLConan(ConanFile):
             if self._use_nmake:
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-            self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
+            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), win_bash=self._win_bash)
 
             self._patch_install_name()
 
@@ -573,8 +573,8 @@ class OpenSSLConan(ConanFile):
 
     def _patch_install_name(self):
         if self.settings.os == "Macos" and self.options.shared:
-            old_str = '-install_name $(INSTALLTOP)/$(LIBDIR)/'
-            new_str = '-install_name '
+            old_str = "-install_name $(INSTALLTOP)/$(LIBDIR)/"
+            new_str = "-install_name "
 
             tools.replace_in_file("Makefile", old_str, new_str, strict=self.in_local_cache)
 
