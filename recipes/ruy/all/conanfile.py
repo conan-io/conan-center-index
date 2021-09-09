@@ -132,3 +132,5 @@ class RuyConan(ConanFile):
                             "ruy_profiler_instrumentation",
                             "ruy_profiler_profiler"
                             ]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
