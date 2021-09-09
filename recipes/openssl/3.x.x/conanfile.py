@@ -521,8 +521,6 @@ class OpenSSLConan(ConanFile):
 
             self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), win_bash=self._win_bash)
 
-            self._patch_install_name()
-
             self._run_make()
 
     def _make_install(self):
@@ -569,13 +567,6 @@ class OpenSSLConan(ConanFile):
         if not make_program:
             raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
         return make_program
-
-    def _patch_install_name(self):
-        if self.settings.os == "Macos" and self.options.shared:
-            old_str = "-install_name $(INSTALLTOP)/$(LIBDIR)/"
-            new_str = "-install_name "
-
-            tools.replace_in_file("Makefile", old_str, new_str, strict=self.in_local_cache)
 
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
