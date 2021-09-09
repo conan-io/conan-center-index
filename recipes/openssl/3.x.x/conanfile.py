@@ -327,19 +327,8 @@ class OpenSSLConan(ConanFile):
                 if "AS" in os.environ:
                     tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
 
-    @functools.lru_cache(1)
     def _get_env_build(self):
         autotools = AutoToolsBuildEnvironment(self)
-        if self.settings.compiler == "apple-clang":
-            # add flags only if not already specified, avoid breaking Catalyst which needs very special flags
-            flags = " ".join(autotools.flags)
-            if "-arch" not in flags:
-                autotools.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
-            if "-isysroot" not in flags:
-                autotools.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
-            if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
-                autotools.flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                              self.settings.os.version))
         return autotools
 
     @property
@@ -425,11 +414,11 @@ class OpenSSLConan(ConanFile):
             );
         """)
         cflags = []
+        cxxflags = []
 
         env_build = self._get_env_build()
-        cflags.extend(env_build.flags)
-        cxxflags = cflags[:]
-        cxxflags.extend(env_build.cxx_flags)
+        cflags.extend(env_build.vars_dict["CFLAGS"])
+        cxxflags.extend(env_build.vars_dict["CXXFLAGS"])
 
         cc = self._tool("CC", "cc")
         cxx = self._tool("CXX", "cxx")
