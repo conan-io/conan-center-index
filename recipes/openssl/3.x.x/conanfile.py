@@ -117,11 +117,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _target(self):
-        target = "conan-%s-%s-%s-%s-%s" % (self.settings.build_type,
-                                           self.settings.os,
-                                           self.settings.arch,
-                                           self.settings.compiler,
-                                           self.settings.compiler.version)
+        target = f"conan-{self.settings.build_type}-{self.settings.os}-{self.settings.arch}-{self.settings.compiler}-{self.settings.compiler.version}"
         if self._use_nmake:
             target = "VC-" + target  # VC- prefix is important as it's checked by Configure
         if self._is_mingw:
@@ -288,7 +284,7 @@ class OpenSSLConan(ConanFile):
     def _ancestor_target(self):
         if "CONAN_OPENSSL_CONFIGURATION" in os.environ:
             return os.environ["CONAN_OPENSSL_CONFIGURATION"]
-        query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
+        query = f"{self.settings.os}-{self.settings.arch}-{self.settings.compiler}"
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
             raise ConanInvalidConfiguration(
@@ -404,20 +400,20 @@ class OpenSSLConan(ConanFile):
         config_template = textwrap.dedent("""\
             {targets} = (
                 "{target}" => {{
-                inherit_from => {ancestor},
-                cflags => add("{cflags}"),
-                cxxflags => add("{cxxflags}"),
-                {defines}
-                includes => add({includes}),
-                lflags => add("{lflags}"),
-                {shared_target}
-                {shared_cflag}
-                {shared_extension}
-                {cc}
-                {cxx}
-                {ar}
-                {ranlib}
-                {perlasm_scheme}
+                    inherit_from => {ancestor},
+                    cflags => add("{cflags}"),
+                    cxxflags => add("{cxxflags}"),
+                    {defines}
+                    includes => add({includes}),
+                    lflags => add("{lflags}"),
+                    {shared_target}
+                    {shared_cflag}
+                    {shared_extension}
+                    {cc}
+                    {cxx}
+                    {ar}
+                    {ranlib}
+                    {perlasm_scheme}
                 }},
             );
         """)

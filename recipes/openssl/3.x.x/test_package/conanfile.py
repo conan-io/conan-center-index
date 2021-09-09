@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["CONAN_LIBCXX"] = ""
 
         cmake.definitions["OPENSSL_WITH_ZLIB"] = self.options["openssl"].zlib
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.compiler == "Visual Studio":
             cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = "MT" in self.settings.compiler.runtime
 
         cmake.configure()
