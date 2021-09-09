@@ -7,18 +7,24 @@ conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
-find_program(PYTHON_EXECUTABLE NAMES python3 python REQUIRED)
-find_package(PythonLibs 3 REQUIRED)
-
-swig_add_library(${PROJECT_NAME}
-    LANGUAGE python
-    SOURCES
-        test.i
-        test_package.c
-)
-target_include_directories(_${PROJECT_NAME} PRIVATE ${PYTHON_INCLUDE_DIRS})
-target_link_libraries(_${PROJECT_NAME} PRIVATE ${PYTHON_LIBRARIES})
+set(Python_ADDITIONAL_VERSIONS 3)
+find_package(PythonInterp)
+find_package(PythonLibs 3)
 
 enable_testing()
-add_test(gcd_test ${PYTHON_EXECUTABLE} -c "import PackageTest; assert PackageTest.gcd(12, 16) == 4")
-add_test(foo_test ${PYTHON_EXECUTABLE} -c "import PackageTest; assert PackageTest.cvar.foo == 3.14159265359")
+
+if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
+    swig_add_library(${PROJECT_NAME}
+        LANGUAGE python
+        SOURCES
+            test.i
+            test_package.c
+    )
+    target_include_directories(_${PROJECT_NAME} PRIVATE ${PYTHON_INCLUDE_DIRS})
+    target_link_libraries(_${PROJECT_NAME} PRIVATE ${PYTHON_LIBRARIES})
+
+    add_test(gcd_test ${PYTHON_EXECUTABLE} -c "import PackageTest; assert PackageTest.gcd(12, 16) == 4")
+    add_test(foo_test ${PYTHON_EXECUTABLE} -c "import PackageTest; assert PackageTest.cvar.foo == 3.14159265359")
+else()
+    message(STATUS "Not building swig python module")
+endif()
