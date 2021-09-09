@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
     def build(self):
         cmake = CMake(self)
@@ -20,6 +20,9 @@ class TestPackageConan(ConanFile):
 
         cmake.configure()
         cmake.build()
+
+        for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
+            assert os.path.isfile(os.path.join(self.build_folder, fn))
 
     def test(self):
         if not tools.cross_building(self):

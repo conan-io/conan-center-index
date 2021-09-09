@@ -1,5 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 import fnmatch
 import os
 import textwrap
@@ -353,8 +353,9 @@ class OpenSSLConan(ConanFile):
         args = [
             '"%s"' % (self._target),
             "shared" if self.options.shared else "no-shared",
-                "--prefix=\"%s\"" % prefix,
-                "--openssldir=\"%s\"" % openssldir,
+            "--prefix=\"%s\"" % prefix,
+            "--libdir=%s/lib" % prefix,
+            "--openssldir=\"%s\"" % openssldir,
             "no-unit-test",
             "no-threads" if self.options.no_threads else "threads"
         ]
@@ -610,6 +611,7 @@ class OpenSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
+        self.cpp_info.names["pkg_config"] = "openssl"
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
