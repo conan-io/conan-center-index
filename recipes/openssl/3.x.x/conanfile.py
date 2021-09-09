@@ -1,9 +1,11 @@
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 import fnmatch
 import platform
-from conans.errors import ConanInvalidConfiguration, ConanException
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.tools import Version
+
+
+required_conan_version = ">=1.33.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -143,8 +145,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _asm_target(self):
-        the_os = str(self.settings.os)
-        if the_os in ["Android", "iOS", "watchOS", "tvOS"]:
+        if self.settings.os in ("Android", "iOS", "watchOS", "tvOS"):
             return {
                 "x86": "x86_asm" if the_os == "Android" else None,
                 "x86_64": "x86_64_asm" if the_os == "Android" else None,

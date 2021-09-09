@@ -16,8 +16,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
         if self.settings.compiler == 'Visual Studio':
-            cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = 'MT' in str(
-                self.settings.compiler.runtime)
+            cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = "MT" in self.settings.compiler.runtime
 
         cmake.configure()
         cmake.build()
