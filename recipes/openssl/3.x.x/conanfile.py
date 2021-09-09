@@ -357,11 +357,11 @@ class OpenSSLConan(ConanFile):
             "--libdir=%s/lib" % prefix,
             "--openssldir=\"%s\"" % openssldir,
             "no-unit-test",
-            "no-threads" if self.options.no_threads else "threads"
+            "no-threads" if self.options.no_threads else "threads",
+            "PERL=%s" % self._perl,
+            "no-tests",
+            "--debug" if self.settings.build_type == "Debug" else "--release",
         ]
-        args.append("PERL=%s" % self._perl)
-        args.append("no-tests")
-        args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
         if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
@@ -401,7 +401,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.options.values.fields:
-            if self.options.get_safe(option_name, False) and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib"):
                 self.output.info("activated option: {}".format(option_name))
                 args.append(option_name.replace("_", "-"))
         return args
@@ -516,7 +516,6 @@ class OpenSSLConan(ConanFile):
             if self._is_clangcl:
                 tools.save("ossl_static.pdb", "")
             args = " ".join(self._configure_args)
-            self.output.info(self._configure_args)
 
             if self._use_nmake:
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
