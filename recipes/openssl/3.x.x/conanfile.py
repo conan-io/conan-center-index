@@ -1,8 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import fnmatch
-import functools
 import os
 import textwrap
 
@@ -537,7 +536,7 @@ class OpenSSLConan(ConanFile):
             return "gcc"
         return "cc"
 
-    @contextmanager
+    @contextlib.contextmanager
     def _make_context(self):
         if self._use_nmake:
             # Windows: when cmake generates its cache, it populates some environment variables as well.
@@ -648,6 +647,7 @@ class OpenSSLConan(ConanFile):
     def _module_subfolder(self):
         return os.path.join("lib", "cmake")
 
+    @property
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder,
                             "conan-official-{}-variables.cmake".format(self.name))
