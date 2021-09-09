@@ -4,11 +4,10 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["SPIRV_TOOLS_STATIC"] = not self.options["spirv-tools"].shared
         cmake.configure()
         cmake.build()
 
