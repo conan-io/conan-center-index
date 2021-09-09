@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
 import fnmatch
 import functools
 import os
@@ -530,6 +531,20 @@ class OpenSSLConan(ConanFile):
             return "gcc"
         return "cc"
 
+    @contextmanager
+    def _make_context(self):
+        if self._use_nmake:
+            # Windows: when cmake generates its cache, it populates some environment variables as well.
+            # If cmake also initiates openssl build, their values (containing spaces and forward slashes)
+            # break nmake (don't know about mingw make). So we fix them
+            def sanitize_env_var(var):
+                return '"{}"'.format(var).replace('/', '\\') if '"' not in var else var
+            env = {key: sanitize_env_var(tools.get_env(key)) for key in ("CC", "RC") if tools.get_env(key)}
+            with tools.environment_append(env):
+                yield
+        else:
+            yield
+
     def build(self):
         with tools.vcvars(self) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
@@ -539,7 +554,8 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
                 self._create_targets()
-                self._make()
+                with self._make_context():
+                    self._make()
 
     @property
     def _win_bash(self):
