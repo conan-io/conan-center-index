@@ -65,5 +65,5 @@ class WiseEnumConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "WiseEnum"
         self.cpp_info.names["pkg_config"] = "WiseEnum"
         self.cpp_info.components["_wise_enum"].names["cmake_find_package"] = "wise_enum"
-        self.cpp_info.components["_wise_enum"].names["cmake_find_package"] = "wise_enum"
+        self.cpp_info.components["_wise_enum"].names["cmake_find_package_multi"] = "wise_enum"
         self.cpp_info.components["_wise_enum"].names["pkg_config"] = "WiseEnum"
