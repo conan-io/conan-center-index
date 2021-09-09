@@ -287,7 +287,6 @@ class OpenSSLConan(ConanFile):
                 f"Unsupported configuration ({self.settings.os}/{self.settings.arch}/{self.settings.compiler}).\n"
                 f"Please open an issue at {self.url}.\n"
                 f"Alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable into your conan profile."
-                f"(list of configurations can be found by running './Configure --help')"
             )
         return ancestor
 
