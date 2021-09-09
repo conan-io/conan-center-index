@@ -1,24 +1,19 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class SpirvtoolsConan(ConanFile):
     name = "spirv-tools"
     homepage = "https://github.com/KhronosGroup/SPIRV-Tools/"
     description = "Create and optimize SPIRV shaders"
-    topics = ("conan", "spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos")
+    topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
-    short_paths = True
-    settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     license = "Apache-2.0"
-    generators = "cmake"
-    _cmake = None
 
+    settings = "os", "compiler", "arch", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -27,6 +22,12 @@ class SpirvtoolsConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+
+    short_paths = True
+
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -49,8 +50,6 @@ class SpirvtoolsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         if not self._get_compatible_spirv_headers_version:
@@ -66,15 +65,18 @@ class SpirvtoolsConan(ConanFile):
             "2019.2": "1.5.1",
         }.get(str(self._version), False)
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def _validate_dependency_graph(self):
         if self.deps_cpp_info["spirv-headers"].version != self._get_compatible_spirv_headers_version:
             raise ConanInvalidConfiguration("spirv-tools {0} requires spirv-headers {1}"
                                             .format(self._version, self._get_compatible_spirv_headers_version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SPIRV-Tools-" + self._version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
