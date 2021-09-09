@@ -187,7 +187,7 @@ class SpirvtoolsConan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["spirv-tools-core"].defines = ["SPIRV_TOOLS_SHAREDLIB"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["spirv-tools-core"].system_libs.append("rt")
+            self.cpp_info.components["spirv-tools-core"].system_libs.extend(["m", "rt"])
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["spirv-tools-core"].system_libs.append(tools.stdcpp_library(self))
 
