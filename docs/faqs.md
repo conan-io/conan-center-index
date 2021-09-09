@@ -24,7 +24,8 @@ This section gathers the most common questions from the community related to pac
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
-  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)<!-- endToc -->
+  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [What is the policy for supported python versions?](#What-is-the-policy-for-supported-python-versions)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -209,3 +210,32 @@ This is for historical reasons, when older versions were permitted the overwhelm
 There are different motivations
 - time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
 - ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+## What is the policy for supported python versions?
+
+`Python 2.7` and earlier is not supported by the ConanCenter, as it's already [EOL](https://www.python.org/doc/sunset-python-2/).
+
+`Python 3.5` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://www.python.org/dev/peps/pep-0478/).
+
+Versions `Python 3.6+` onwards are currently supported by the infrastructure and the recipes.
+
+Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.5+` ATM.
+
+Windows agents currently use `Python 3.6.7+`. macOS agents use version `Python 3.7.3+`.
+
+The version run by our agents and docker images is a subject to change, as security updates to the Python are released, or they enter EOL.
+
+Additional concerns about supported versions within conan ecosystem (not just ConanCenter, but client itself and other tools) are documented in [tribe](https://github.com/conan-io/tribe/pull/3).
+
+For ConanCenter, besides security, there are various concerns about critical features provided by python interpreter, include its syntax and the standard library, e.g.:
+
+- LZMA compression support
+- Unicode awareness
+- long-path awareness
+
+Right now, only the [CPython](https://github.com/python/cpython) flavor of the interpreter is supported (e.g. we never tested recipes work with IronPython, JPython, Cython, etc.).
+
+In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 architecture) - 32-bit builds (x86) are not supported and not installed on the agents.
+
+There are no guarantees that recipes will work correctly in future python versions having breaking changes to the interpreter,
+ as we don't test all the possible combinations (and probably will never be). Patches are welcomed if probllems are found.
