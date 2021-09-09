@@ -12,7 +12,7 @@ class OpenSSLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "Apache-2.0"
-    topics = ("conan", "openssl", "ssl", "tls", "encryption", "security")
+    topics = ("openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
     options = {
         "shared": [True, False],
