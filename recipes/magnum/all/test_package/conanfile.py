@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
             try:
                 if getattr(self.options["magnum"], opt_name):
                     available.append(executable)
-            except:
+            except ConanException:
                 pass
         return available
 
