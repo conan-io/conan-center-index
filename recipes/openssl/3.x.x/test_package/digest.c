@@ -45,8 +45,6 @@ int main()
         sha3_512_string[SHA512_DIGEST_LENGTH*2+1] = {0};
     char string[] = "happy";
 
-    SSL_library_init();
-
     SHA256((unsigned char*)&string, strlen(string), (unsigned char*)&sha256_digest);
     SHA512((unsigned char*)&string, strlen(string), (unsigned char*)&sha512_digest);
     SHA3_hash(EVP_sha3_256(), (unsigned char*)&string, strlen(string), (unsigned char*)&sha3_256_digest, &digest_len);
