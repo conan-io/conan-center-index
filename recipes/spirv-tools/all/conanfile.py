@@ -37,12 +37,6 @@ class SpirvtoolsConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _version(self):
-        if self.version[0] == "v":
-            return self.version[1:]
-        return self.version
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,7 +57,7 @@ class SpirvtoolsConan(ConanFile):
             "2020.5": "1.5.4",
             "2020.3": "1.5.3",
             "2019.2": "1.5.1",
-        }.get(str(self._version), False)
+        }.get(str(self.version), False)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -72,7 +66,7 @@ class SpirvtoolsConan(ConanFile):
     def _validate_dependency_graph(self):
         if self.deps_cpp_info["spirv-headers"].version != self._get_compatible_spirv_headers_version:
             raise ConanInvalidConfiguration("spirv-tools {0} requires spirv-headers {1}"
-                                            .format(self._version, self._get_compatible_spirv_headers_version))
+                                            .format(self.version, self._get_compatible_spirv_headers_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -84,10 +78,10 @@ class SpirvtoolsConan(ConanFile):
 
         cmake = CMake(self)
 
-        # - Before v2020.5, the shared lib is always built, but static libs might be built as shared
+        # - Before 2020.5, the shared lib is always built, but static libs might be built as shared
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
-        # - From v2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
-        if tools.Version(self._version) < "2020.5":
+        # - From 2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
+        if tools.Version(self.version) < "2020.5":
             cmake.definitions["BUILD_SHARED_LIBS"] = False
 
         # Required by the project's CMakeLists.txt
