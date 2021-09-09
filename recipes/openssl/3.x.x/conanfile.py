@@ -373,7 +373,7 @@ class OpenSSLConan(ConanFile):
             if self.options.capieng_dialog:
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
-            args.append("-fPIC" if self.options.get_safe("fPIC") else "no-pic")
+            args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
@@ -390,7 +390,7 @@ class OpenSSLConan(ConanFile):
                 include_path = include_path.replace('\\', '/')
                 lib_path = lib_path.replace('\\', '/')
 
-            if zlib_info.shared:
+            if self.options["zlib"].shared:
                 args.append("zlib-dynamic")
             else:
                 args.append("zlib")
