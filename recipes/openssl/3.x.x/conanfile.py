@@ -21,6 +21,7 @@ class OpenSSLConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "386": [True, False],
+        "no_stdio": [True, False],
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
         "no_asm": [True, False],
@@ -104,6 +105,11 @@ class OpenSSLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os == "Emscripten":
+            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
