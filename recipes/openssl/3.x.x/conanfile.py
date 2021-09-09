@@ -25,7 +25,7 @@ class OpenSSLConan(ConanFile):
         "no_async": [True, False],
         "no_bf": [True, False],
         "no_cast": [True, False],
-        "no_deprected": [True, False],
+        "no_deprecated": [True, False],
         "no_des": [True, False],
         "no_dh": [True, False],
         "no_dsa": [True, False],
