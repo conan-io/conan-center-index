@@ -131,9 +131,12 @@ class QtConan(ConanFile):
 
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
+        
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+        if self._settings_build.os == "Windows" and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
             self.build_requires("ninja/1.10.2")
