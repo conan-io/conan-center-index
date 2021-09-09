@@ -1,20 +1,25 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
 required_conan_version = ">=1.33.0"
 
+
 class WasmtimeConan(ConanFile):
-    name = 'wasmtime'
-    homepage = 'https://github.com/bytecodealliance/wasmtime'
-    license = 'Apache-2.0'
-    url = 'https://github.com/conan-io/conan-center-index'
+    name = "wasmtime"
+    homepage = "https://github.com/bytecodealliance/wasmtime"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi")
-    settings = "os", "compiler", "arch"
-    options = { "shared": [True, False] }
-    default_options = { 'shared': False }
+    settings = "os", "arch", "compiler"
+    options = {
+        "shared": [True, False],
+    }
+    default_options = {
+        "shared": False,
+    }
     no_copy_source = True
 
     @property
@@ -31,7 +36,7 @@ class WasmtimeConan(ConanFile):
         }
 
     @property
-    def _sources_key(self):
+    def _sources_os_key(self):
         if self.settings.compiler == "Visual Studio":
             return "Windows"
         elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
@@ -60,16 +65,23 @@ class WasmtimeConan(ConanFile):
             self.output.warn(msg)
 
         try:
-            self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)]
+            self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)]
         except KeyError:
-            raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
+            raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os are not available")
 
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
             # FIXME: https://github.com/bytecodealliance/wasmtime/issues/3168
             raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version][self._sources_key][str(self.settings.arch)], destination=self.source_folder, strip_root=True)
+    def package_id(self):
+        del self.info.settings.compiler.version
+        if self.settings.compiler == "clang":
+            self.info.settings.compiler = "gcc"
+
+    def build(self):
+        # This is packaging binaries so the download needs to be in build
+        tools.get(**self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)],
+                  destination=self.source_folder, strip_root=True)
 
     def package(self):
         shutil.copytree(os.path.join(self.source_folder, "include"),
@@ -86,7 +98,7 @@ class WasmtimeConan(ConanFile):
             self.copy("wasmtime.lib", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmtime.a", src=srclibdir, dst="lib", keep_path=False)
 
-        self.copy('LICENSE', dst='licenses', src=self.source_folder)
+        self.copy("LICENSE", dst="licenses", src=self.source_folder)
 
     def package_info(self):
         if self.options.shared:
@@ -96,10 +108,10 @@ class WasmtimeConan(ConanFile):
                 self.cpp_info.libs = ["wasmtime"]
         else:
             if self.settings.os == "Windows":
-                self.cpp_info.defines= ["/DWASM_API_EXTERN=", "/DWASI_API_EXTERN="]
+                self.cpp_info.defines = ["WASM_API_EXTERN=", "WASI_API_EXTERN="]
             self.cpp_info.libs = ["wasmtime"]
 
-        if self.settings.os == 'Windows':
-            self.cpp_info.system_libs = ['ws2_32', 'bcrypt', 'advapi32', 'userenv', 'ntdll', 'shell32', 'ole32']
-        elif self.settings.os == 'Linux':
-            self.cpp_info.system_libs = ['pthread', 'dl', 'm']
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
+            elif self.settings.os == "Linux":
+                self.cpp_info.system_libs = ["pthread", "dl", "m"]
