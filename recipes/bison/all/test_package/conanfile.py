@@ -3,20 +3,23 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    @ property
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    @property
     def _mc_parser_source(self):
         return os.path.join(self.source_folder, "mc_parser.yy")
 
     def build(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             # verify bison may run
             self.run("bison --version", run_environment=True)
             # verify yacc may run
@@ -30,7 +33,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
 
