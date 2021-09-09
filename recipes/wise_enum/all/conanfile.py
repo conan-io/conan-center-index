@@ -61,6 +61,9 @@ class WiseEnumConan(ConanFile):
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
         
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wise_enum"
-        self.cpp_info.names["cmake_find_package_multi"] = "wise_enum"
-
+        self.cpp_info.names["cmake_find_package"] = "WiseEnum"
+        self.cpp_info.names["cmake_find_package_multi"] = "WiseEnum"
+        self.cpp_info.names["pkg_config"] = "WiseEnum"
+        self.cpp_info.components["_wise_enum"].names["cmake_find_package"] = "wise_enum"
+        self.cpp_info.components["_wise_enum"].names["cmake_find_package"] = "wise_enum"
+        self.cpp_info.components["_wise_enum"].names["pkg_config"] = "WiseEnum"
