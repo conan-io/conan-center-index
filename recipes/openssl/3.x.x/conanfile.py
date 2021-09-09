@@ -296,7 +296,7 @@ class OpenSSLConan(ConanFile):
         if env_name in os.environ:
             return os.environ[env_name]
         if self.settings.compiler == "apple-clang":
-            return getattr(tools.XCRun(self.settings), apple_name)
+            return getattr(tools.XCRun(self, self.settings), apple_name)
         return None
 
     def _patch_configure(self):
@@ -338,7 +338,7 @@ class OpenSSLConan(ConanFile):
                 if "-arch" not in flags:
                     self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
                 if "-isysroot" not in flags:
-                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
+                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self, self.settings).sdk_path)
                 if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
                     self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                               self.settings.os.version))
@@ -536,7 +536,7 @@ class OpenSSLConan(ConanFile):
         if "CC" in os.environ:
             return os.environ["CC"]
         if self.settings.compiler == "apple-clang":
-            return tools.XCRun(self.settings).find("clang")
+            return tools.XCRun(self, self.settings).find("clang")
         elif self.settings.compiler == "clang":
             return "clang"
         elif self.settings.compiler == "gcc":
@@ -544,10 +544,10 @@ class OpenSSLConan(ConanFile):
         return "cc"
 
     def build(self):
-        with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
+        with tools.vcvars(self) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self.settings.compiler == "apple-clang":
-                xcrun = tools.XCRun(self.settings)
+                xcrun = tools.XCRun(self, self.settings)
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
@@ -558,7 +558,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return tools.os_info.is_windows and \
                not self._use_nmake and \
-            (self._is_mingw or tools.cross_building(self.settings, skip_x64_x86=True))
+            (self._is_mingw or tools.cross_building(self, skip_x64_x86=True))
 
     @property
     def _make_program(self):
