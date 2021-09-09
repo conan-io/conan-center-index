@@ -20,3 +20,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0009-disable-hardening-in-source.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0010-c-stack-stop-using-SIGSTKSZ.patch"
+      base_path: "source_subfolder"
