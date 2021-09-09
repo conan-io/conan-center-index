@@ -400,9 +400,8 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.options.values.fields:
-            activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
-                self.output.info("activated option: %s" % option_name)
+            if self.options.get_safe(option_name, False) and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
+                self.output.info("activated option: {}".format(option_name))
                 args.append(option_name.replace("_", "-"))
         return args
 
