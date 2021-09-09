@@ -10,7 +10,7 @@ required_conan_version = ">=1.33.0"
 
 class OpenSSLConan(ConanFile):
     name = "openssl"
-    settings = "os", "arch"1, "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "Apache-2.0"
