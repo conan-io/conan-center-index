@@ -7,7 +7,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
 <!-- toc -->
 ## Contents
 
-  * [Join the Early Access Program](#join-the-early-access-program)
+  * [Request Access](#request-access)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
   * [More Information about Recipes](#more-information-about-recipes)
