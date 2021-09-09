@@ -135,10 +135,6 @@ class OpenSSLConan(ConanFile):
     exports_sources = ['patches/*']
 
     def config_options(self):
-        #if self._full_version >= "3.0.0":
-        #    del self.options.no_md2
-        #    del self.options.no_rc4
-        #    del self.options.no_rc5
 
         if self.settings.os != "Windows":
             del self.options.capieng_dialog
