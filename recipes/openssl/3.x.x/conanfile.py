@@ -147,8 +147,8 @@ class OpenSSLConan(ConanFile):
     def _asm_target(self):
         if self.settings.os in ("Android", "iOS", "watchOS", "tvOS"):
             return {
-                "x86": "x86_asm" if the_os == "Android" else None,
-                "x86_64": "x86_64_asm" if the_os == "Android" else None,
+                "x86": "x86_asm" if self.settings.os == "Android" else None,
+                "x86_64": "x86_64_asm" if self.settings.os == "Android" else None,
                 "armv5el": "armv4_asm",
                 "armv5hf": "armv4_asm",
                 "armv6": "armv4_asm",
@@ -170,7 +170,7 @@ class OpenSSLConan(ConanFile):
                 "ppc64": "ppc64_asm",
                 "s390": "s390x_asm",
                 "s390x": "s390x_asm"
-            }.get(the_os, None)
+            }.get(str(self.settings.os), None)
 
     @property
     def _targets(self):
