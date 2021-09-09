@@ -1,8 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import textwrap
 import re
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -24,7 +24,7 @@ class MagnumConan(ConanFile):
         "shared_plugins": [True, False],
 
         # Follow documented build-options in https://doc.magnum.graphics/magnum/building.html#building-features
-        #   Options like `with_xxxx` has been renamed to `xxxx`
+        #   Options like `with_xxxx` have been renamed to `xxxx`
         #   Options related to GL are being refactored into a choice option: gles2, gles3 or desktop_gl
         #   Some documented options are not available in sources: with_shaderstools, vk_info, with_shaderconverter and with_anyshaderconverter
         #   Option names are converted to snake_case
