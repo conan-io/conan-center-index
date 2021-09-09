@@ -70,6 +70,9 @@ class NsimdConan(ConanFile):
         tools.replace_in_file(cmakefile_path,
                               "RUNTIME DESTINATION lib",
                               "RUNTIME DESTINATION bin")
+        tools.replace_in_file(cmakefile_path,
+                              "set_property(TARGET ${o} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+                              "")
 
     def build(self):
         self._patch_sources()
