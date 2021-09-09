@@ -5,7 +5,8 @@
 /*
     I would like to use some windowless application to test, like
     https://github.com/mosra/magnum-bootstrap/tree/windowless
-    but it doesn't work in CI.
+    but it doesn't work in CI, it complains about EGL_NOT_INITIALIZED
+    (headless machine?)
 */
 
 int main() {
