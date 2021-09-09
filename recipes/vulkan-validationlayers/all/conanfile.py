@@ -33,10 +33,6 @@ class VulkanValidationLayersConan(ConanFile):
     generators = "cmake"
     _cmake = None
 
-    def _is_cross_building(self):
-        settings_target = getattr(self, 'settings_target', None)
-        return settings_target is not None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
