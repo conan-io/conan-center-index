@@ -31,7 +31,7 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
 
-    def configure(self):
+    def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
@@ -61,7 +61,7 @@ class CMakeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -80,6 +80,7 @@ class CMakeConan(ConanFile):
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE"] = ''
                 self._cmake.definitions["HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT"] = ''
             self._cmake.configure(source_folder=self._source_subfolder)
+
         return self._cmake
 
     def build(self):

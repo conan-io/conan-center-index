@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
-project(Example CXX)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup()
 
-add_executable(example test.cpp)
-target_link_libraries(example CONAN_PKG::libsodium)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})

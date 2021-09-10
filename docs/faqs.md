@@ -23,7 +23,8 @@ This section gathers the most common questions from the community related to pac
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
-  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -213,3 +214,11 @@ system packages at same recipe.
 However, there are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
 in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, the
 [OpenGL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opengl/all/conanfile.py) is a good example.
+
+## Why ConanCenter does **not** build and execute tests in recipes
+
+<!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
+
+There are different motivations
+- time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
+- ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.

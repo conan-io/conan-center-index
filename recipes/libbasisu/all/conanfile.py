@@ -20,13 +20,15 @@ class LibBasisUniversalConan(ConanFile):
         "shared": [True, False],
         "use_sse4": [True, False],
         "with_zstd": [True, False],
+        "enable_encoder": [True, False],
         "custom_iterator_debug_level": [True, False]
     }
     default_options = {
         "fPIC": True,
         "shared": False,
-        "use_sse4": True,
+        "use_sse4": False,
         "with_zstd": True,
+        "enable_encoder": True,
         "custom_iterator_debug_level": False
     }
 
@@ -40,6 +42,9 @@ class LibBasisUniversalConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _use_custom_iterator_debug_level(self):
+        return self.options.get_safe("custom_iterator_debug_level", default=self.default_options["custom_iterator_debug_level"])
+ 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,7 +58,7 @@ class LibBasisUniversalConan(ConanFile):
             "clang": "3.9",
             "apple-clang": "10"
         }
- 
+
     def validate(self):
         min_version = self._minimum_compiler_version().get(str(self.settings.compiler))
         if not min_version:
@@ -77,7 +82,8 @@ class LibBasisUniversalConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SSE4"] = self.options.use_sse4
         self._cmake.definitions["ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["BASISU_NO_ITERATOR_DEBUG_LEVEL"] = not self.options.get_safe("custom_iterator_debug_level", default=self.default_options["custom_iterator_debug_level"])
+        self._cmake.definitions["ENABLE_ENCODER"] = self.options.enable_encoder
+        self._cmake.definitions["NO_ITERATOR_DEBUG_LEVEL"] = not self._use_custom_iterator_debug_level()
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
  
@@ -90,7 +96,8 @@ class LibBasisUniversalConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=os.path.join("include", self.name, "transcoder"), src=os.path.join(self._source_subfolder, "transcoder"))
-        self.copy("*.h", dst=os.path.join("include", self.name, "encoder"), src=os.path.join(self._source_subfolder, "encoder"))
+        if self.options.enable_encoder:
+            self.copy("*.h", dst=os.path.join("include", self.name, "encoder"), src=os.path.join(self._source_subfolder, "encoder"))
         self.copy(pattern="*.a", dst="lib", keep_path=False)
         self.copy(pattern="*.so", dst="lib", keep_path=False)
         self.copy(pattern="*.dylib*", dst="lib", keep_path=False)
@@ -104,3 +111,4 @@ class LibBasisUniversalConan(ConanFile):
         self.cpp_info.includedirs = ["include", os.path.join("include", self.name)]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
+        self.cpp_info.defines.append("BASISU_NO_ITERATOR_DEBUG_LEVEL={}".format("1" if self._use_custom_iterator_debug_level() else "0"))

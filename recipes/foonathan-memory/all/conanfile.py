@@ -22,7 +22,7 @@ class FoonathanMemory(ConanFile):
         "shared":            False,
         "fPIC":              True,
         "with_tools":        False,
-        "with_sizecheck":    True
+        "with_sizecheck":    False
     }
     generators = "cmake"
     exports_sources =  ["patches/**","CMakeLists.txt"]

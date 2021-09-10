@@ -20,6 +20,7 @@ class ZimgConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
     exports_sources = "patches/**"
 
     _autotools = None
@@ -27,6 +28,10 @@ class ZimgConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,28 +49,28 @@ class ZimgConan(ConanFile):
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("libtool/2.4.6")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("zimg-release-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = []
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
+        yes_no = lambda v: "yes" if v else "no"
+        conf_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autools()
         autotools.make()
 
@@ -132,3 +137,9 @@ class ZimgConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["zimg"]
+        if not self.options.shared:
+            if self.settings.os in ("FreeBSD", "Linux"):
+                self.cpp_info.system_libs = ["m"]
+            stdcpp = tools.stdcpp_library(self)
+            if stdcpp:
+                self.cpp_info.system_libs.append(stdcpp)
