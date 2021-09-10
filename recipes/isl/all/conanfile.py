@@ -1,6 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -24,8 +25,6 @@ class IslConan(ConanFile):
         "fPIC": True,
         "with_int": "gmp",
     }
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -54,9 +53,9 @@ class IslConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -84,11 +83,10 @@ class IslConan(ConanFile):
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--with-int={}".format(self.options.with_int),
@@ -102,15 +100,15 @@ class IslConan(ConanFile):
                 "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
             ])
         if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: should be handled by helper
-            self._autotools.flags.append("-arch arm64")
-            self._autotools.link_flags.append("-arch arm64")
-        vars = self._autotools.vars
+            autotools.flags.append("-arch arm64")
+            autotools.link_flags.append("-arch arm64")
+        vars = autotools.vars
         args.append("MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]))
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         with self._build_context():
@@ -123,7 +121,7 @@ class IslConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libisl.la")))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
