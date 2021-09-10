@@ -13,8 +13,6 @@ class NsyncConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt"]
 
-    options = {"with_tests": [True, False]}
-    default_options = {"with_tests": False}
 
     generators = "cmake", "cmake_find_package"
     _cmake = None
