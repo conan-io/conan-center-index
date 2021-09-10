@@ -14,7 +14,7 @@ class NsyncTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            test_package_c = os.path.join("bin", "test_package_c")
+            test_package_c = os.path.join("bin", "test_package")
             test_package_cpp = os.path.join("bin", "test_package_cpp")
             self.run(test_package_c, run_environment=True)
             self.run(test_package_cpp, run_environment=True)
