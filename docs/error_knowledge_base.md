@@ -365,3 +365,12 @@ The .gitattribute file lists which files should be converted to LF when commit. 
     > git config --local core.eol lf
 
 The `core.autocrlf` disabled means that git will not convert from CRLF to LF on commit. The `core.eol` sets the specific line ending to be used for every commit.
+
+#### **<a name="KB-H062">#KB-H062</a>: "TOOLS CROSS BUILDING"**
+
+Replace all occurrences of `tools.cross_building(self.settings)` with `tools.cross_building(self)`.
+When cross building, conan needs to compare `self.settings` and `self.settings_build`, which are attributes of `self`.
+
+#### **<a name="KB-H064">#KB-H064</a>: "INVALID TOPICS"**
+
+An invalid topic has been detected. Remove or rename it.
