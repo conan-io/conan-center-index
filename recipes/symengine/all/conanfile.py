@@ -56,6 +56,10 @@ class SymengineConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
