@@ -7,7 +7,7 @@ When pull requests are merged, the CI will upload the generated packages to the 
 <!-- toc -->
 ## Contents
 
-  * [Request Access](#request-access)
+  * [Request access](#request-access)
   * [Submitting a Package](#submitting-a-package)
     * [The Build Service](#the-build-service)
   * [More Information about Recipes](#more-information-about-recipes)
