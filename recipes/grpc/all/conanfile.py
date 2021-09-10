@@ -176,7 +176,8 @@ class grpcConan(ConanFile):
         self.cpp_info.components["_grpc"].names["cmake_find_package"] = "grpc"
         self.cpp_info.components["_grpc"].names["cmake_find_package_multi"] = "grpc"
         self.cpp_info.components["_grpc"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_bind_front", "abseil::absl_statusor", "gpr", "openssl::ssl", "openssl::crypto", "address_sorting", "upb"]
-        self.cpp_info.components["_grpc"].frameworks = ["CoreFoundation"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["_grpc"].frameworks = ["CoreFoundation"]
         self.cpp_info.components["_grpc"].system_libs = _system_libs
         self.cpp_info.components["_grpc"].libs = ["grpc"]
 
@@ -184,7 +185,8 @@ class grpcConan(ConanFile):
         self.cpp_info.components["grpc_unsecure"].names["cmake_find_package"] = "grpc_unsecure"
         self.cpp_info.components["grpc_unsecure"].names["cmake_find_package_multi"] = "grpc_unsecure"
         self.cpp_info.components["grpc_unsecure"].requires = ["zlib::zlib", "c-ares::cares", "address_sorting", "re2::re2", "upb", "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector", "abseil::absl_statusor", "gpr", "address_sorting", "upb"]
-        self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["grpc_unsecure"].frameworks = ["CoreFoundation"]
         self.cpp_info.components["grpc_unsecure"].system_libs = _system_libs
         self.cpp_info.components["grpc_unsecure"].libs = ["grpc_unsecure"]
 
