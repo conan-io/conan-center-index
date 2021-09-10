@@ -35,3 +35,5 @@ versions:
     folder: "1.x.x"
   1.0.2s:
     folder: "1.x.x"
+  3.0.0:
+    folder: "3.x.x"
