@@ -13,6 +13,7 @@ class TlExpectedConan(ConanFile):
     topics = ("cpp11", "cpp14", "cpp17", "expected")
     license = "CC0-1.0"
     no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
@@ -28,6 +29,10 @@ class TlExpectedConan(ConanFile):
         ]
         return expected_dirs[0].name
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
+    
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self._archive_dir, self._source_subfolder)
