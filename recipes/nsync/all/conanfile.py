@@ -35,7 +35,7 @@ class NsyncConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["NSYNC_ENABLE_TESTS"] = False
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
