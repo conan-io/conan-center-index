@@ -139,3 +139,16 @@
                  inPct = true;  // Get more digits
                  widthSet = true;
                  width = width * 10 + (fmt - '0');
+--- src/bisonpre
++++ src/bisonpre
+@@ -160,8 +160,8 @@
+ 
+     (my $basename = tmp_prefix().".") =~ s!.*/!!;
+     $basename = quotemeta($basename);
+-    (my $newbase = $Opt_Input) =~ s!.*/!!;
+-    $newbase =~ s/\.y/./;
++    (my $newbase = $Opt_Output) =~ s!.*/!!;
++    $newbase =~ s/\.[cy]/./;
+ 
+     if ($is_output) {
+         my %state_line; my $l=0;

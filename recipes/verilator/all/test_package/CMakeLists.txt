@@ -10,6 +10,10 @@ add_executable(blinky
     blinky.cpp
 )
 verilate(blinky SOURCES blinky.v TRACE)
+set_property(TARGET blinky PROPERTY CXX_STANDARD 11)
+if(MSVC)
+    target_compile_options(blinky PRIVATE -Zc:__cplusplus)
+endif()
 
 option(BUILD_SYSTEMC "Build SystemC example" ON)
 
@@ -19,4 +23,8 @@ if(BUILD_SYSTEMC)
     )
     verilate(blinky_sc SOURCES blinky.v SYSTEMC)
     target_link_libraries(blinky_sc PRIVATE CONAN_PKG::systemc)
+    set_property(TARGET blinky_sc PROPERTY CXX_STANDARD 11)
+    if(MSVC)
+        target_compile_options(blinky_sc PRIVATE -Zc:__cplusplus)
+    endif()
 endif()
