@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -52,7 +53,7 @@ class SwigConan(ConanFile):
         # will be located into the 'deps_user_info' object.
         return getattr(self, "user_info_build", self.deps_user_info)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         env = {}
         if self.settings.compiler != "Visual Studio":
@@ -71,16 +72,14 @@ class SwigConan(ConanFile):
             with tools.environment_append(env):
                 yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        deps_libpaths = self._autotools.library_paths
-        deps_libs = self._autotools.libs
-        deps_defines = self._autotools.defines
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        deps_libpaths = autotools.library_paths
+        deps_libs = autotools.libs
+        deps_defines = autotools.defines
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self._autotools.link_flags.append("-static")
+            autotools.link_flags.append("-static")
 
         libargs = list("-L\"{}\"".format(p) for p in deps_libpaths) + list("-l\"{}\"".format(l) for l in deps_libs)
         args = [
@@ -95,24 +94,24 @@ class SwigConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.output.warn("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
             args.append("--disable-ccache")
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
             # MSVC canonical names aren't understood
             host, build = False, False
 
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Apple ARM should be handled by build helpers
-            self._autotools.flags.append("-arch arm64")
-            self._autotools.link_flags.append("-arch arm64")
+            autotools.flags.append("-arch arm64")
+            autotools.link_flags.append("-arch arm64")
 
-        self._autotools.libs = []
-        self._autotools.library_paths = []
+        autotools.libs = []
+        autotools.library_paths = []
 
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self._autotools.libs.extend(["mingwex", "ssp"])
+            autotools.libs.extend(["mingwex", "ssp"])
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder,
+        autotools.configure(args=args, configure_dir=self._source_subfolder,
                                   host=host, build=build)
-        return self._autotools
+        return autotools
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
