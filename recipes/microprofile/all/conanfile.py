@@ -124,7 +124,7 @@ class MicroprofileConan(ConanFile):
         if self.options.with_miniz:
             self.requires("miniz/2.2.0")
         if self.options.enable_timer == "gl":
-            self.requires("glad/0.1.34")
+            self.requires("opengl/system")
         if self.options.enable_timer == "vulkan":
             self.requires("vulkan-loader/1.2.182")
 
@@ -170,17 +170,12 @@ class MicroprofileConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
-        self.copy("microprofile.h", dst=os.path.join("include", self.name), src=self._source_subfolder)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def _create_defines(self):
         defines = []
-        if not self.options.shared:
-            defines.append("_MICROPROFILE_STATIC")
+        defines.append("MICROPROFILE_EXPORT")
         defines.append("MICROPROFILE_ENABLED=" + ("1" if self.options.microprofile_enabled else "0"))
         defines.append("MICROPROFILE_DEBUG=" + ("1" if self.settings.build_type == "Debug" else "0"))
         defines.append("MICROPROFILE_MINIZ=" + ("1" if self.options.with_miniz else "0"))

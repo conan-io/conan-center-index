@@ -10,4 +10,3 @@ patches:
           base_path: "source_subfolder"
         - patch_file: "patches/cmake.patch"
           base_path: "source_subfolder"
-
