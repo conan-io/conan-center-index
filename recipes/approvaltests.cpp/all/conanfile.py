@@ -83,6 +83,8 @@ class ApprovalTestsCppConan(ConanFile):
         return Version(self.version) >= "10.2.0"
 
     def _validate_compiler_settings(self):
+        if self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("see #7146")
         if self._std_puttime_required():
             self._require_at_least_compiler_version("gcc", 5)
 
