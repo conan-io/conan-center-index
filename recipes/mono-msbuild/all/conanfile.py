@@ -21,6 +21,30 @@ class MonoConan(ConanFile):
     requires = ["mono/6.12.0.122"]
 
     @property
+    def _minimum_compilers_version(self):
+        # requires C++11
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "9"
+        }
+
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("mono cannot be built on Windows")
+
+    def configure(self):
+        # C++ minimum standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++11 support required. Your compiler is unknown. Assuming it supports C++11.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++11 support required, which your compiler does not support.")
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
