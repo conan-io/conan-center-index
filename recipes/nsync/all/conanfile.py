@@ -1,3 +1,4 @@
+import os
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
@@ -11,8 +12,9 @@ class NsyncConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("c", "thread", "multithreading", "google")
     settings = "os", "compiler", "build_type", "arch"
+    options = {"fPIC": [True, False], "shared": [True, False]}
+    default_options = {"fPIC": True, "shared": False}
     exports_sources = ["CMakeLists.txt"]
-
 
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -24,6 +26,14 @@ class NsyncConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -38,7 +48,14 @@ class NsyncConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        if not self.options.get_safe("fPIC", True):
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
