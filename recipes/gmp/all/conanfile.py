@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
 import stat
 
@@ -70,15 +71,14 @@ class GmpConan(ConanFile):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("yasm/1.3.0")
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if tools.is_apple_os(self.settings.os):
             configure_file = os.path.join(self._source_subfolder, "configure")
             tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
@@ -100,12 +100,12 @@ class GmpConan(ConanFile):
                 "gmp_cv_asm_label_suffix=:",
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
-            self._autotools.flags.append("-FS")
-            # self._autotools.cxx_flags.append("-EHsc")
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
+            autotools.flags.append("-FS")
+            autotools.cxx_flags.append("-EHsc")
+        autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        return autotools
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self):
@@ -119,7 +119,7 @@ class GmpConan(ConanFile):
                     "CXX": "cl -nologo",
                     "AR": "{} lib".format(self.deps_user_info["automake"].ar_lib.replace("\\", "/")),
                     "LD": "link -nologo",
-                    "NM": "python {}".format(os.path.join(self.build_folder, "dumpbin_nm.py").replace("\\", "/")),
+                    "NM": "python {}".format(tools.unix_path(os.path.join(self.build_folder, "dumpbin_nm.py"))),
                 }
                 with tools.environment_append(env):
                     yield
