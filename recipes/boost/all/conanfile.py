@@ -276,8 +276,13 @@ class BoostConan(ConanFile):
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
             self.options.i18n_backend_iconv = "off"
-        elif self.settings.os == "Macos":
+        elif tools.is_apple_os(self.settings.os):
             self.options.i18n_backend_iconv = "libiconv"
+        elif self.settings.os == "Android":
+            # bionic provides iconv since API level 28
+            api_level = self.settings.get_safe("os.api_level")
+            if api_level and tools.Version(api_level) < "28":
+                self.options.i18n_backend_iconv = "libiconv"
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
@@ -324,6 +329,9 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
+        if (self.settings.os in ["iOS", "watchOS", "tvOS"] or self.settings.get_safe("os.subsystem") == "catalyst"):
+             # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
+            return False
         return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
     def configure(self):
@@ -778,6 +786,14 @@ class BoostConan(ConanFile):
                                   "thread_local", "/* thread_local */")
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "static __thread", "/* static __thread */")
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
+                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
+                              strict=False)
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
+                              "local no-threading = android beos haiku sgi darwin vxworks ;",
+                              "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
+                              strict=False)
 
         if self.options.header_only:
             self.output.warn("Header only package, skipping build")
@@ -1015,6 +1031,9 @@ class BoostConan(ConanFile):
                                                                     self.settings.get_safe("os.sdk"),
                                                                     self.settings.get_safe("os.subsystem"),
                                                                     self.settings.get_safe("arch")))
+                if self.settings.get_safe("os.subsystem") == "catalyst":
+                    cxx_flags.append("--target=arm64-apple-ios-macabi")
+                    link_flags.append("--target=arm64-apple-ios-macabi")
 
         if self.settings.os == "iOS":
             if self.options.multithreading:
@@ -1462,6 +1481,10 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue
+                    if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
+                        continue
+                    if name == "boost_stacktrace_backtrace" and self.options.get_safe("with_stacktrace_backtrace") == False:
+                        continue
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
                     new_name = add_libprefix(name.format(**libformatdata)) + libsuffix
@@ -1524,7 +1547,8 @@ class BoostConan(ConanFile):
             if not self.options.without_stacktrace:
                 if self.settings.os in ("Linux", "FreeBSD"):
                     self.cpp_info.components["stacktrace_basic"].system_libs.append("dl")
-                    self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
+                    if self._stacktrace_addr2line_available:
+                        self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
                     if self._with_stacktrace_backtrace:
                         self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
 
@@ -1545,7 +1569,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace_windb"].system_libs.extend(["ole32", "dbgeng"])
                     self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
                     self.cpp_info.components["stacktrace_windb_cached"].system_libs.extend(["ole32", "dbgeng"])
-                elif tools.is_apple_os(self.settings.os):
+                elif tools.is_apple_os(self.settings.os) or self.settings.os == "FreeBSD":
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 
             if not self.options.without_python:
