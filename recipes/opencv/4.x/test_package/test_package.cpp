@@ -7,6 +7,11 @@
  */
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#ifdef BUILT_WITH_ADE
+#include <opencv2/gapi.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#endif
 
 #define w 400
 
@@ -17,6 +22,8 @@ void MyEllipse( Mat img, double angle );
 void MyFilledCircle( Mat img, Point center );
 void MyPolygon( Mat img );
 void MyLine( Mat img, Point start, Point end );
+// to test `with_ade` option
+void TestGAPI();
 
 /**
  * @function main
@@ -71,6 +78,7 @@ int main( void ){
   MyLine( rook_image, Point( w/2, 7*w/8 ), Point( w/2, w ) );
   MyLine( rook_image, Point( 3*w/4, 7*w/8 ), Point( 3*w/4, w ) );
   //![draw_rook]
+  TestGAPI();
 
   return(0);
 }
@@ -177,3 +185,23 @@ void MyLine( Mat img, Point start, Point end )
     lineType );
 }
 //![my_line]
+
+/**
+ * @function TestGAPI
+   @brief to test `with_ade`
+   derived from https://docs.opencv.org/4.5.0/d0/d1e/gapi.html
+*/
+void TestGAPI()
+{
+#ifdef BUILT_WITH_ADE
+    cv::GMat in;
+    cv::GMat vga      = cv::gapi::resize(in, cv::Size(), 0.5, 0.5);
+    cv::GMat gray     = cv::gapi::BGR2Gray(vga);
+    cv::GMat blurred  = cv::gapi::blur(gray, cv::Size(5,5));
+    cv::GMat edges    = cv::gapi::Canny(blurred, 32, 128, 3);
+    cv::GMat b,g,r;
+    std::tie(b,g,r)   = cv::gapi::split3(vga);
+    cv::GMat out      = cv::gapi::merge3(b, g | edges, r);
+    cv::GComputation ac(in, out);
+#endif
+}
