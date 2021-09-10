@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -14,8 +15,6 @@ class GtkDocStubConan(ConanFile):
     settings = "os"
 
     exports_sources = "patches/*"
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -36,16 +35,15 @@ class GtkDocStubConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
             "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
         ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -62,6 +60,6 @@ class GtkDocStubConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = ["res"]
 
-        automake_dir = os.path.join(self.package_folder, "res", "aclocal")
+        automake_dir = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_dir))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_dir)

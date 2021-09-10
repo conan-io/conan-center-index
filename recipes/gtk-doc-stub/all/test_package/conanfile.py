@@ -6,6 +6,7 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac",
+    test_type = "requires", "build_requires"
 
     @property
     def _settings_build(self):
@@ -20,7 +21,6 @@ class TestPackageConan(ConanFile):
         for src in self.exports_sources:
             shutil.copy(os.path.join(self.source_folder, src),
                         os.path.join(self.build_folder, src))
-        # self.run("gtkdocize", run_environment=True, win_bash=tools.os_info.is_windows)
         self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
