@@ -8,17 +8,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-
+        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
         if self.settings.os == "Android":
             cmake.definitions["CONAN_LIBCXX"] = ""
-
-        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
-
         cmake.configure()
         cmake.build()
-
-        for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
-            assert os.path.isfile(os.path.join(self.build_folder, fn))
 
     def test(self):
         if not tools.cross_building(self):
@@ -28,3 +22,6 @@ class TestPackageConan(ConanFile):
             if not self.options["openssl"].no_stdio:
                 self.run("openssl version", run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
+
+        for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
+            assert os.path.isfile(os.path.join(self.build_folder, fn))

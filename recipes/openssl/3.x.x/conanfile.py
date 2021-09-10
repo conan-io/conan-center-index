@@ -50,6 +50,7 @@ class OpenSSLConan(ConanFile):
         "no_gost": [True, False],
         "no_idea": [True, False],
         "no_legacy": [True, False],
+        "no_md2": [True, False],
         "no_md4": [True, False],
         "no_mdc2": [True, False],
         "no_ocsp": [True, False],
@@ -64,6 +65,7 @@ class OpenSSLConan(ConanFile):
         "no_sm4": [True, False],
         "no_srp": [True, False],
         "no_srtp": [True, False],
+        "no_sse2": [True, False],
         "no_ssl": [True, False],
         "no_stdio": [True, False],
         "no_seed": [True, False],
@@ -152,9 +154,9 @@ class OpenSSLConan(ConanFile):
     def _target(self):
         target = f"conan-{self.settings.build_type}-{self.settings.os}-{self.settings.arch}-{self.settings.compiler}-{self.settings.compiler.version}"
         if self._use_nmake:
-            target = "VC-" + target  # VC- prefix is important as it's checked by Configure
+            target = f"VC-{target}"  # VC- prefix is important as it's checked by Configure
         if self._is_mingw:
-            target = "mingw-" + target
+            target = f"mingw-{target}"
         return target
 
     @property
@@ -480,7 +482,7 @@ class OpenSSLConan(ConanFile):
         targets = "my %targets"
         includes = ", ".join(['"%s"' % include for include in env_build.include_paths])
         if self.settings.os == "Windows":
-            includes = includes.replace("\\", "/") # OpenSSL doesn't like backslashes
+            includes = includes.replace("\\", "/")  # OpenSSL doesn't like backslashes
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
@@ -616,13 +618,13 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             return "nmake"
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
-        make_program = tools.unix_path(make_program) if tools.os_info.is_windows else make_program
         if not make_program:
             raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
+        make_program = tools.unix_path(make_program)
         return make_program
 
     def _replace_runtime_in_file(self, filename):
-        for e in ["MDd", "MTd", "MD", "MT"]:
+        for e in ("MDd", "MTd", "MD", "MT"):
             tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
             tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
 
@@ -714,7 +716,7 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["ssl"].requires = ["crypto"]
 
         if not self.options.no_zlib:
-            self.cpp_info.components["crypto"].requires = ["zlib::zlib"]
+            self.cpp_info.components["crypto"].requires.append("zlib::zlib")
 
         if self.settings.os == "Windows":
             self.cpp_info.components["crypto"].system_libs.extend(["crypt32", "ws2_32", "advapi32", "user32"])

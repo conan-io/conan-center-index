@@ -6,11 +6,6 @@ conan_basic_setup(TARGETS)
 
 option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 
-add_executable(digest digest.c)
-if(OPENSSL_WITH_ZLIB)
-    target_compile_definitions(digest PRIVATE WITH_ZLIB)
-endif()
-
 set(OpenSSL_DEBUG 1)
 find_package(OpenSSL REQUIRED)
 
@@ -23,4 +18,8 @@ message("OPENSSL_SSL_LIBRARIES: ${OPENSSL_SSL_LIBRARIES}")
 message("OPENSSL_LIBRARIES: ${OPENSSL_LIBRARIES}")
 message("OPENSSL_VERSION: ${OPENSSL_VERSION}")
 
+add_executable(digest digest.c)
+if(OPENSSL_WITH_ZLIB)
+    target_compile_definitions(digest PRIVATE WITH_ZLIB)
+endif()
 target_link_libraries(digest OpenSSL::Crypto)
