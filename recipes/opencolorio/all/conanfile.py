@@ -45,8 +45,6 @@ class OpenColorIOConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
-        if not self.options["tinyxml"].with_stl:
-            raise ConanInvalidConfiguration("tinyxml option 'with_stl' has to be enabled to build opencolorio!")
 
     def requirements(self):
         # TODO: add GLUT (needed for ociodisplay tool)
@@ -71,6 +69,7 @@ class OpenColorIOConan(ConanFile):
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
+        self._cmake.definitions["OCIO_USE_BOOST_PTR"] = False
 
         self._cmake.definitions["USE_EXTERNAL_YAML"] = True
         self._cmake.definitions["USE_EXTERNAL_TINYXML"] = True
