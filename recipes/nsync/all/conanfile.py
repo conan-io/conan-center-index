@@ -70,8 +70,5 @@ class NsyncConan(ConanFile):
         self._add_pthread_dep(nsync_cpp)
 
     def _add_pthread_dep(self, component):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             component.system_libs = ["pthread"]
-            component.cxxflags.append("-pthread")
-            component.exelinkflags.append("-pthread")
-            component.sharedlinkflags.append("-pthread")
