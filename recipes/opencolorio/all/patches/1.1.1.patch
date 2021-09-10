@@ -190,15 +190,19 @@ index 4955f4db..14b5017f 100644
      )
  
 diff --git a/src/core/CDLTransform.cpp b/src/core/CDLTransform.cpp
-index 8b05debc..37f8d1cd 100644
+index 8b05debc..a7d6031f 100644
 --- a/src/core/CDLTransform.cpp
 +++ b/src/core/CDLTransform.cpp
-@@ -126,7 +126,7 @@ OCIO_NAMESPACE_ENTER
+@@ -126,7 +126,11 @@ OCIO_NAMESPACE_ENTER
              TiXmlPrinter printer;
              printer.SetStreamPrinting();
              doc.Accept( &printer );
 -            return printer.Str();
-+            return printer.CStr();
++            #ifdef TIXML_USE_STL
++                return printer.Str();
++            #else
++                return printer.CStr();
++            #endif
          }
      }
      
