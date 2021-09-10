@@ -38,12 +38,10 @@ class ErkirConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            print(patch)
             tools.patch(**patch)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        self._patch_sources()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -54,6 +52,7 @@ class ErkirConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
