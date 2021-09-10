@@ -84,10 +84,14 @@ class RuyConan(ConanFile):
                               "add_library(${_NAME} STATIC",
                               "add_library(${_NAME}"
                               )
-        # 2. Shared builds fail with undefined symbols without this. clog is a library from the cpuinfo
+
+        # 2. Shared builds fail with undefined symbols without this fix.
+        # This is because ruy only links to 'cpuinfo' but it also needs 'clog' (from the same package)
+        cpuinfoLibs = self.deps_cpp_info["cpuinfo"].libs + self.deps_cpp_info["cpuinfo"].system_libs
+        libsListAsString = ";".join(cpuinfoLibs)
         tools.replace_in_file(os.path.join(self._source_subfolder, "ruy", "CMakeLists.txt"),
                               "set(ruy_6_cpuinfo \"cpuinfo\")",
-                              "set(ruy_6_cpuinfo \"cpuinfo;clog\")"
+                              f"set(ruy_6_cpuinfo \"{libsListAsString}\")"
                               )
         cmake = self._configure_cmake()
         cmake.build()
