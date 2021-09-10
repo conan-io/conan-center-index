@@ -36,11 +36,7 @@ class SymengineConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if (
-            self.settings.compiler == "gcc"
-            and self.settings.compiler.version == "5"
-            and self.settings.compiler.libcxx == "libstdc++11"
-        ):
+        if self.settings.compiler == "gcc" and self.settings.compiler.version == "5":
             raise ConanInvalidConfiguration(
                 "Unsupported configuration: gcc 5 with libstdc++11."
             )
