@@ -1,4 +1,3 @@
-import os
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
@@ -12,6 +11,7 @@ class NsyncConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("c", "thread", "multithreading", "google")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["CMakeLists.txt"]
 
     options = {"with_tests": [True, False]}
     default_options = {"with_tests": False}
@@ -37,9 +37,7 @@ class NsyncConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["NSYNC_ENABLE_TESTS"] = self.options.with_tests
-        self._cmake.configure(
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
