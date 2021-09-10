@@ -9,7 +9,7 @@ class SymengineConan(ConanFile):
     license = "MIT"
     topics = ("symbolic", "algebra")
     homepage = "https://symengine.org/"
-    url = "https://github.com/symengine/symengine.git"
+    url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
