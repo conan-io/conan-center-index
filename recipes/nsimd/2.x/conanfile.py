@@ -59,6 +59,7 @@ class NsimdConan(ConanFile):
             self._cmake.definitions["simd"] = self.options.simd
         if self.settings.arch == "armv7hf":
             self._cmake.definitions["NSIMD_ARM32_IS_ARMEL"] = False
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
