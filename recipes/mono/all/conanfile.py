@@ -67,6 +67,31 @@ class MonoConan(ConanFile):
     #     "enable-wasm": False,
     # }
 
+
+    @property
+    def _minimum_compilers_version(self):
+        # requires C++11
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "9"
+        }
+
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("mono cannot be built on Windows")
+
+    def configure(self):
+        # C++ minimum standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++11 support required. Your compiler is unknown. Assuming it supports C++11.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++11 support required, which your compiler does not support.")
+
     def requirements(self):
         self.requires("zlib/1.2.11")
 
@@ -111,6 +136,10 @@ class MonoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "mono"
         self.cpp_info.names["pkg_config"] = "mono"
         self.cpp_info.libs = tools.collect_libs(self)
+
+
+        # from https://stackoverflow.com/a/50374000
+        self.env_info.MONO_TLS_PROVIDER = "legacy"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
