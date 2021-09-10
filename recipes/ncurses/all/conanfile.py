@@ -1,6 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import contextlib
+import functools
 import os
 import textwrap
 
@@ -42,8 +43,6 @@ class NCursesConan(ConanFile):
 
     generators = "pkg_config"
     exports_sources = "patches/*"
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -110,10 +109,9 @@ class NCursesConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-shared={}".format(yes_no(self.options.shared)),
@@ -156,14 +154,14 @@ class NCursesConan(ConanFile):
                 "ac_cv_func_setvbuf_reversed=no",
             ])
             build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
-            self._autotools.cxx_flags.append("-EHsc")
+            autotools.cxx_flags.append("-EHsc")
             if tools.Version(self.settings.compiler.version) >= 12:
-                self._autotools.flags.append("-FS")
+                autotools.flags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
-            self._autotools.libs.append("ssp")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
-        return self._autotools
+            autotools.libs.append("ssp")
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
+        return autotools
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
