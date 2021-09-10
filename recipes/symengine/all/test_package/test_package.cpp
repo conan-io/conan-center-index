@@ -1,6 +1,7 @@
 #include <symengine/constants.h>
 #include <symengine/expression.h>
 #include <symengine/integer.h>
+#include <symengine/mul.h>
 
 #include <iostream>
 
