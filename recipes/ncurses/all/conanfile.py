@@ -81,7 +81,7 @@ class NCursesConan(ConanFile):
 
     def requirements(self):
         if self.options.with_pcre2:
-            self.requires("pcre2/10.33")
+            self.requires("pcre2/10.37")
         if self.settings.compiler == "Visual Studio":
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.23.2")
@@ -94,7 +94,7 @@ class NCursesConan(ConanFile):
 
     def validate(self):
         if any("arm" in arch for arch in (self.settings.arch, self._settings_build.arch)) and tools.cross_building(self):
-            # FIXME: Cannot buid ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
+            # FIXME: Cannot build ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
             # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
             raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
         if self.options.shared and self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
@@ -196,7 +196,6 @@ class NCursesConan(ConanFile):
     def _major_version(self):
         return tools.Version(self.version).major
 
-
     @staticmethod
     def _create_cmake_module_alias_targets(module_file):
         tools.save(module_file, textwrap.dedent("""\
@@ -241,10 +240,7 @@ class NCursesConan(ConanFile):
         res = self._suffix
         if self.options.shared:
             if self.settings.os == "Windows":
-                if self.settings.compiler == "Visual Studio":
-                    res += ".dll.lib"
-                else:
-                    res += ".dll"
+                res += ".dll"
         return res
 
     def package_id(self):
