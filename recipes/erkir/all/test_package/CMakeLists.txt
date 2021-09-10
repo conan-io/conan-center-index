@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(erkir REQUIRED)
+find_package(erkir REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} example.cpp)
 target_link_libraries(${PROJECT_NAME} erkir::erkir)

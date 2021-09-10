@@ -11,7 +11,7 @@ class ErkirConan(ConanFile):
     license = "MIT"
     description = "a C++ library for geodetic and trigonometric calculations"
     topics = ("earth", "geodesy", "geography", "coordinate-systems", "geodetic", "datum")
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/*"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,8 +36,14 @@ class ErkirConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            print(patch)
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        self._patch_sources()
 
     def _configure_cmake(self):
         if self._cmake:
