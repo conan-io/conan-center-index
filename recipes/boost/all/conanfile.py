@@ -291,7 +291,9 @@ class BoostConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             # Shared builds of numa do not link on Visual Studio due to missing symbols
-            self.options.numa = False
+            numa_value = self.options.get_safe("numa", default=False)
+            if numa_value:
+                self.options.numa = False
 
         if tools.Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
