@@ -1,22 +1,20 @@
-commit 2909f77ad421951cb3abf49da9af9b6317691c1a
+commit 3493606ddd76e8a44c1a5f3e2ee0cee2c3a418c1
 Author: Martin Delille <martin@delille.org>
 Date:   Tue Sep 7 16:21:39 2021 +0200
 
     Define interface for Windows
 
-diff --git a/ref-impl/include/ref-api/AAF.h b/ref-impl/include/ref-api/AAF.h
-index 058e325cc..6d93d0f97 100644
---- a/ref-impl/include/ref-api/AAF.h
-+++ b/ref-impl/include/ref-api/AAF.h
-@@ -49,6 +49,11 @@
- #endif
+diff --git a/ref-impl/include/AAFCOMPlatformTypes.h b/ref-impl/include/AAFCOMPlatformTypes.h
+index 44b3d2ae3..af19d94a0 100644
+--- a/ref-impl/include/AAFCOMPlatformTypes.h
++++ b/ref-impl/include/AAFCOMPlatformTypes.h
+@@ -46,6 +46,9 @@
+ #if defined( OS_WINDOWS )
+   #include <wtypes.h>
  
- #ifdef __cplusplus
-+
-+#if defined (_WINDOWS_) && !defined (interface)
++#if !defined (interface)
 +#define interface struct
 +#endif
-+
- interface IAAFAES3PCMDescriptor;
- interface IAAFAIFCDescriptor;
- interface IAAFAsyncStreamRawStorage;
+ 
+ #elif defined( OS_UNIX )
+ 
