@@ -17,13 +17,14 @@ class SymengineConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "integer_class": ["boostmp", "gmp"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "integer_class": "boostmp",
     }
     short_paths = True
-    requires = "boost/1.76.0"
 
     _cmake = None
 
@@ -34,6 +35,12 @@ class SymengineConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def requirements(self):
+        if self.options.integer_class == "boostmp":
+            self.requires("boost/1.76.0")
+        else:
+            self.requires("gmp/6.2.1")
 
     def source(self):
         tools.get(
@@ -47,7 +54,7 @@ class SymengineConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_TESTS"] = False
             self._cmake.definitions["BUILD_BENCHMARKS"] = False
-            self._cmake.definitions["INTEGER_CLASS"] = "boostmp"
+            self._cmake.definitions["INTEGER_CLASS"] = self.options.integer_class
             self._cmake.definitions["MSVC_USE_MT"] = False
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
