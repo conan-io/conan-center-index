@@ -14,7 +14,7 @@ class NsyncConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -49,6 +49,10 @@ class NsyncConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            patch["base_path"] = self._source_subfolder
+            tools.patch(**patch)
+
         if not self.options.get_safe("fPIC", True):
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
