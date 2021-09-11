@@ -67,6 +67,8 @@ class NsyncConan(ConanFile):
         self.copy("LICENSE", dst='licenses', src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.os == "Windows" and self.options.shared:
+            self.copy("bin/*.dll", dst='lib', src=self._build_subfolder)
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "nsync"
