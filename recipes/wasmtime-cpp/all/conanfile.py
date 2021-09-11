@@ -12,7 +12,7 @@ class WasmtimeCppConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     description = "Standalone JIT-style runtime for WebAssembly, using Cranelift"
     topics = ("webassembly", "wasm", "wasi", "c++")
-    settings = "compiler"
+    settings = "os", "compiler"
     no_copy_source = True
 
     @property
