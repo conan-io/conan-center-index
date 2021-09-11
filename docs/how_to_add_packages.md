@@ -179,8 +179,8 @@ For cases where a project only offers source files, but not a build script, you 
 The system will use the [conan-center hook](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hook running:
 
 ```sh
-$ conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
-$ conan config set hooks.conan-center
+conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
+conan config set hooks.conan-center
 ```
 
 The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
@@ -194,8 +194,8 @@ All hook checks will print a similar message:
 Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
 
 ```sh
-$ cd conan-center-index/recipes/boost/all
-$ conan create . boost/1.74.0@
+cd conan-center-index/recipes/boost/all
+conan create . boost/1.74.0@
 ```
 
 ### Updating conan hooks on your machine
@@ -203,7 +203,7 @@ $ conan create . boost/1.74.0@
 The hooks are updated from time to time, so it's worth keeping your own copy of the hooks updated regularly. To do this:
 
 ```sh
-$ conan config install
+conan config install
 ```
 
 ## Debugging failed builds
