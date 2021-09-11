@@ -287,6 +287,9 @@ class FFMpegConan(ConanFile):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
             args.append("--cxx=".format(tools.get_env("CXX")))
+        if self.settings.os == "Macos":
+            print("os.version:" + self.settings.os.version)
+        raise ConanInvalidConfiguration("securetransport is only available on Apple")
         if self.settings.compiler == "Visual Studio":
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
