@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -72,6 +73,9 @@ class SymengineConan(ConanFile):
         cmake.install()
         # [CMAKE-MODULES-CONFIG-FILES (KB-H016)]
         tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        # [DEFAULT PACKAGE LAYOUT (KB-H013)]
+        if self.settings.os == "Windows":
+            tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
