@@ -68,7 +68,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
@@ -138,16 +138,16 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:
             self.cpp_info.components["pulse"].requires.append("dbus::dbus")
-        
+
         self.cpp_info.components["pulse-simple"].names["pkg_config"] = "libpulse-simple"
         self.cpp_info.components["pulse-simple"].libs = ["pulse-simple"]
         self.cpp_info.components["pulse-simple"].defines.append("_REENTRANT")
         self.cpp_info.components["pulse-simple"].requires = ["pulse"]
-        
+
         if self.options.with_glib:
             self.cpp_info.components["pulse-mainloop-glib"].names["pkg_config"] = "libpulse-mainloop-glib"
             self.cpp_info.components["pulse-mainloop-glib"].libs = ["pulse-mainloop-glib"]
             self.cpp_info.components["pulse-mainloop-glib"].defines.append("_REENTRANT")
             self.cpp_info.components["pulse-mainloop-glib"].requires = ["pulse", "glib::glib-2.0"]
-        
+
         # FIXME: add cmake generators when conan can generate PULSEAUDIO_INCLUDE_DIR PULSEAUDIO_LIBRARY vars
