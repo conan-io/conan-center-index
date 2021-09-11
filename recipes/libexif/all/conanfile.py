@@ -20,7 +20,6 @@ class LibexifConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    
     _autotools = None
 
     @property
@@ -42,7 +41,7 @@ class LibexifConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("gettext/0.20.1")
+        self.build_requires("gettext/0.21")
         self.build_requires("libtool/2.4.6")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
