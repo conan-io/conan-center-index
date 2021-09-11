@@ -1,34 +1,27 @@
 from conans import CMake, tools, ConanFile
-from conans.tools import Version
 import os
 
 
-class DefaultNameConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
-    def _build_cmake(self, use_find_package):
+    def build(self):
         cmake = CMake(self)
-
+        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
         if self.settings.os == "Android":
             cmake.definitions["CONAN_LIBCXX"] = ""
-        openssl_version = Version(self.deps_cpp_info["openssl"].version)
-        cmake.definitions["OPENSSL_WITH_ZLIB"] = False
-        cmake.definitions["USE_FIND_PACKAGE"] = use_find_package
-        cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-        if self.settings.compiler == 'Visual Studio':
-            cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = 'MT' in str(self.settings.compiler.runtime)
-
         cmake.configure()
         cmake.build()
 
-    def build(self):
-        self._build_cmake(use_find_package=True)
-        self._build_cmake(use_find_package=False)
-
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
+
+            if not self.options["openssl"].no_stdio:
+                self.run("openssl version", run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
+
+        for fn in ("libcrypto.pc", "libssl.pc", "openssl.pc",):
+            assert os.path.isfile(os.path.join(self.build_folder, fn))
