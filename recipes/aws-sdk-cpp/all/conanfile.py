@@ -339,7 +339,8 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.77.0")
+            self.requires("openssl/1.1.1l")
+            self.requires("libcurl/7.78.0")
         if self.settings.os in["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
@@ -441,7 +442,7 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].system_libs.append("winmm")
         else:
-            self.cpp_info.components["core"].requires.append("libcurl::curl")
+            self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
         if self.settings.os in["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("atomic")
