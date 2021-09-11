@@ -106,7 +106,7 @@ class MicroprofileConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.os != "Windows" and self.options.enable_timer in ["d3d11", "d3d12"]:
             raise ConanInvalidConfiguration("DirectX timers can only be used in Windows.")
-        if self.options.enable_timer is not None and self.options.enable_gpu_timer_callbacks:
+        if self.options.enable_timer and self.options.enable_gpu_timer_callbacks:
             raise ConanInvalidConfiguration("Cannot mix GPU callbacks and GPU timers.")
 
         self._validate_int_options()
@@ -133,6 +133,7 @@ class MicroprofileConan(ConanFile):
         tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):
+        self._create_defines_file(os.path.join(self._source_subfolder, "microprofile.config.h"))
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
@@ -142,28 +143,7 @@ class MicroprofileConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["MP_ENABLED"] = self.options.microprofile_enabled
-        self._cmake.definitions["MP_DEBUG"] = self.settings.build_type == "Debug"
         self._cmake.definitions["MP_MINIZ"] = self.options.with_miniz
-        self._cmake.definitions["MP_THREAD_BUFFER_SIZE"] = self.options.thread_buffer_size
-        self._cmake.definitions["MP_THREAD_GPU_BUFFER_SIZE"] = self.options.thread_gpu_buffer_size
-        self._cmake.definitions["MP_MAX_FRAME_HISTORY"] = self.options.max_frame_history
-        self._cmake.definitions["MP_WEBSERVER_PORT"] = self.options.webserver_port
-        self._cmake.definitions["MP_WEBSERVER_MAXFRAMES"] = self.options.webserver_maxframes
-        self._cmake.definitions["MP_WEBSERVER_SOCKET_BUFFER_SIZE"] = self.options.webserver_socket_buffer_size
-        self._cmake.definitions["MP_GPU_FRAME_DELAY"] = self.options.gpu_frame_delay
-        self._cmake.definitions["MP_NAME_MAX_LENGTH"] = self.options.name_max_length
-        self._cmake.definitions["MP_MAX_TIMERS"] = self.options.max_timers
-        self._cmake.definitions["MP_MAX_THREADS"] = self.options.max_threads
-        self._cmake.definitions["MP_MAX_STRING_LENGTH"] = self.options.max_string_length
-        self._cmake.definitions["MP_TIMELINE_MAX_TOKENS"] = self.options.timeline_max_tokens
-        self._cmake.definitions["MP_THREAD_LOG_FRAMES_REUSE"] = self.options.thread_log_frames_reuse
-        self._cmake.definitions["MP_MAX_GROUPS"] = self.options.max_groups
-        self._cmake.definitions["MP_BIG_ENDIAN"] = self.options.use_big_endian
-        self._cmake.definitions["MP_GPU_TIMER_CALLBACKS"] = self.options.enable_gpu_timer_callbacks
-        self._cmake.definitions["MP_GPU_TIMERS_GL"] = self.options.enable_timer == "gl"
-        self._cmake.definitions["MP_GPU_TIMERS_D3D11"] = self.options.enable_timer == "d3d11"
-        self._cmake.definitions["MP_GPU_TIMERS_D3D12"] = self.options.enable_timer == "d3d12"
         self._cmake.definitions["MP_GPU_TIMERS_VULKAN"] = self.options.enable_timer == "vulkan"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -174,33 +154,43 @@ class MicroprofileConan(ConanFile):
         cmake.install()
 
     def _create_defines(self):
-        defines = []
-        defines.append("MICROPROFILE_EXPORT")
-        defines.append("MICROPROFILE_ENABLED=" + ("1" if self.options.microprofile_enabled else "0"))
-        defines.append("MICROPROFILE_DEBUG=" + ("1" if self.settings.build_type == "Debug" else "0"))
-        defines.append("MICROPROFILE_MINIZ=" + ("1" if self.options.with_miniz else "0"))
-        defines.append("MICROPROFILE_BIG_ENDIAN=" + ("1" if self.options.use_big_endian else "0"))
-        defines.append("MICROPROFILE_GPU_TIMERS=" + ("1" if self.options.enable_timer is not None else "0"))
-        defines.append("MICROPROFILE_GPU_TIMER_CALLBACKS=" + ("1" if self.options.enable_gpu_timer_callbacks else "0"))
-        defines.append("MICROPROFILE_GPU_TIMERS_GL=" + ("1" if self.options.enable_timer == "gl" else "0"))
-        defines.append("MICROPROFILE_GPU_TIMERS_D3D11=" + ("1" if self.options.enable_timer == "d3d11" else "0"))
-        defines.append("MICROPROFILE_GPU_TIMERS_D3D12=" + ("1" if self.options.enable_timer == "d3d12" else "0"))
-        defines.append("MICROPROFILE_GPU_TIMERS_VULKAN=" + ("1" if self.options.enable_timer == "vulkan" else "0"))
-        defines.append("MICROPROFILE_PER_THREAD_BUFFER_SIZE=" + str(self.options.thread_buffer_size))
-        defines.append("MICROPROFILE_PER_THREAD_GPU_BUFFER_SIZE=" + str(self.options.thread_gpu_buffer_size))
-        defines.append("MICROPROFILE_MAX_FRAME_HISTORY=" + str(self.options.max_frame_history))
-        defines.append("MICROPROFILE_WEBSERVER_PORT=" + str(self.options.webserver_port))
-        defines.append("MICROPROFILE_WEBSERVER_MAXFRAMES=" + str(self.options.webserver_maxframes))
-        defines.append("MICROPROFILE_WEBSERVER_SOCKET_BUFFER_SIZE=" + str(self.options.webserver_socket_buffer_size))
-        defines.append("MICROPROFILE_GPU_FRAME_DELAY=" + str(self.options.gpu_frame_delay))
-        defines.append("MICROPROFILE_NAME_MAX_LEN=" + str(self.options.name_max_length))
-        defines.append("MICROPROFILE_MAX_TIMERS=" + str(self.options.max_timers))
-        defines.append("MICROPROFILE_MAX_THREADS=" + str(self.options.max_threads))
-        defines.append("MICROPROFILE_MAX_STRING=" + str(self.options.max_string_length))
-        defines.append("MICROPROFILE_TIMELINE_MAX_TOKENS=" + str(self.options.timeline_max_tokens))
-        defines.append("MICROPROFILE_THREAD_LOG_FRAMES_REUSE=" + str(self.options.thread_log_frames_reuse))
-        defines.append("MICROPROFILE_MAX_GROUPS=" + str(self.options.max_groups))
-        return defines
+        return [
+            "MICROPROFILE_EXPORT",
+            ("MICROPROFILE_ENABLED", ("1" if self.options.microprofile_enabled else "0")),
+            ("MICROPROFILE_DEBUG", ("1" if self.settings.build_type == "Debug" else "0")),
+            ("MICROPROFILE_MINIZ", ("1" if self.options.with_miniz else "0")),
+            ("MICROPROFILE_BIG_ENDIAN", ("1" if self.options.use_big_endian else "0")),
+            ("MICROPROFILE_GPU_TIMERS", ("1" if self.options.enable_timer else "0")),
+            ("MICROPROFILE_GPU_TIMER_CALLBACKS", ("1" if self.options.enable_gpu_timer_callbacks else "0")),
+            ("MICROPROFILE_GPU_TIMERS_GL", ("1" if self.options.enable_timer == "gl" else "0")),
+            ("MICROPROFILE_GPU_TIMERS_D3D11", ("1" if self.options.enable_timer == "d3d11" else "0")),
+            ("MICROPROFILE_GPU_TIMERS_D3D12", ("1" if self.options.enable_timer == "d3d12" else "0")),
+            ("MICROPROFILE_GPU_TIMERS_VULKAN", ("1" if self.options.enable_timer == "vulkan" else "0")),
+            ("MICROPROFILE_PER_THREAD_BUFFER_SIZE", str(self.options.thread_buffer_size)),
+            ("MICROPROFILE_PER_THREAD_GPU_BUFFER_SIZE", str(self.options.thread_gpu_buffer_size)),
+            ("MICROPROFILE_MAX_FRAME_HISTORY", str(self.options.max_frame_history)),
+            ("MICROPROFILE_WEBSERVER_PORT", str(self.options.webserver_port)),
+            ("MICROPROFILE_WEBSERVER_MAXFRAMES", str(self.options.webserver_maxframes)),
+            ("MICROPROFILE_WEBSERVER_SOCKET_BUFFER_SIZE", str(self.options.webserver_socket_buffer_size)),
+            ("MICROPROFILE_GPU_FRAME_DELAY", str(self.options.gpu_frame_delay)),
+            ("MICROPROFILE_NAME_MAX_LEN", str(self.options.name_max_length)),
+            ("MICROPROFILE_MAX_TIMERS", str(self.options.max_timers)),
+            ("MICROPROFILE_MAX_THREADS", str(self.options.max_threads)),
+            ("MICROPROFILE_MAX_STRING", str(self.options.max_string_length)),
+            ("MICROPROFILE_TIMELINE_MAX_TOKENS", str(self.options.timeline_max_tokens)),
+            ("MICROPROFILE_THREAD_LOG_FRAMES_REUSE", str(self.options.thread_log_frames_reuse)),
+            ("MICROPROFILE_MAX_GROUPS", str(self.options.max_groups))
+        ]
+
+    def _create_defines_file(self, filename):
+        defines = self._create_defines()
+        defines_list = ["#pragma once\n"]
+        for define in defines:
+            if isinstance(define, tuple) or isinstance(define, list):
+                defines_list.append("#define {} {}\n".format(define[0], define[1]))
+            else:
+                defines_list.append("#define {}\n".format(define))
+        tools.save(filename, "".join(defines_list))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
@@ -210,4 +200,4 @@ class MicroprofileConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32"]
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
-        self.cpp_info.defines = self._create_defines()
+        self.cpp_info.defines.append("MICROPROFILE_USE_CONFIG")
