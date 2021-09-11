@@ -1,9 +1,8 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import contextlib
 import functools
 import os
 import shutil
-import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -28,10 +27,10 @@ class VerilatorConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.build_requires("automake/1.16.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             if self.settings.compiler == "Visual Studio":
                 self.build_requires("msys2/cci.latest")
-                self.build_requires("automake/1.16.4")
             self.build_requires("winflexbison/2.5.24")
             self.build_requires("strawberryperl/5.30.0.1")
         else:
