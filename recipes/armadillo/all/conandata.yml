@@ -1,0 +1,4 @@
+sources:
+  "10.6.1":
+    url: "http://sourceforge.net/projects/arma/files/armadillo-10.6.1.tar.xz"
+    sha256: "1d06c3237d65c7bc461ea12f4fdfd8b5a69b6a965b4900ae70960ce92088179f"
