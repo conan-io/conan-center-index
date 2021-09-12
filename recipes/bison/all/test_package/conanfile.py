@@ -14,6 +14,12 @@ class TestPackageConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
+    # def requirements(self):
+    #     if self.settings.os == "Windows":
+    #         self.requires("winflexbison/2.5.24")
+    #     else:
+    #         self.requires("flex/2.6.4")
+
     @property
     def _mc_parser_source(self):
         return os.path.join(self.source_folder, "mc_parser.yy")
@@ -27,10 +33,12 @@ class TestPackageConan(ConanFile):
             # verify bison may preprocess something
             self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
 
-            # verify CMake integration
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+            with tools.run_environment(self):
+                # verify CMake integration
+                cmake = CMake(self)
+                cmake.verbose = True
+                cmake.configure()
+                cmake.build()
 
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):

@@ -1,12 +1,7 @@
 %{
 #include <iostream>
-#include <string>
-#include <map>
-#include <cstdlib> //-- I need this for atoi
-using namespace std;
 
-int yylex();
-int yyerror(const char *p) { cerr << "Error!" << endl; return 42; }
+int yylex();int yyerror(const char *p) { std::cerr << "Error: " << p << std::endl; return 42; }
 %}
 
 %union {
@@ -20,7 +15,7 @@ int yyerror(const char *p) { cerr << "Error!" << endl; return 42; }
 %%
 run: res run | res    /* forces bison to process many stmts */
 
-res: exp STOP         { cout << $1 << endl; }
+res: exp STOP         { std::cout << $1 << '\n'; }
 
 exp: exp OPA term     { $$ = ($2 == '+' ? $1 + $3 : $1 - $3); }
 | term                { $$ = $1; }

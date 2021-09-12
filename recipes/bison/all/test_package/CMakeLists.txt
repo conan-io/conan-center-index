@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 project(test_package)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(BISON)
+# FIXME: should be handled by CMakeToolchain
+link_directories(${CONAN_LIB_DIRS})
+
+find_package(BISON REQUIRED)
 
 set(BISON_VARS
     BISON_FOUND
@@ -26,6 +29,6 @@ bison_target(Bison_McParser
 add_library(McParser STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp"
 )
-add_executable(${PROJECT_NAME} test_package.cpp)
-set_propertY(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.c)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PRIVATE y)

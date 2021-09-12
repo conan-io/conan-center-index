@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import contextlib
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -21,8 +22,6 @@ class BisonConan(ConanFile):
     }
 
     exports_sources = "patches/*"
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -78,10 +77,9 @@ class BisonConan(ConanFile):
     def _datarootdir(self):
         return os.path.join(self.package_folder, "res")
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
             "--enable-relocatable",
             "--disable-nls",
@@ -89,7 +87,7 @@ class BisonConan(ConanFile):
         ]
         host, build = None, None
         if self.settings.os == "Windows":
-            self._autotools.defines.append("_WINDOWS")
+            autotools.defines.append("_WINDOWS")
         if self.settings.compiler == "Visual Studio":
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:
@@ -97,10 +95,10 @@ class BisonConan(ConanFile):
             # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
             # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
             args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
             host, build = False, False
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
-        return self._autotools
+        autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
+        return autotools
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
