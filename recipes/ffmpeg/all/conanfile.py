@@ -119,12 +119,6 @@ class FFMpegConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
-        self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -176,6 +170,12 @@ class FFMpegConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("securetransport is only available on Apple")
+
+    def build_requirements(self):
+        self.build_requires("yasm/1.3.0")
+        self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
