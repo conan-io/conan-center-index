@@ -176,10 +176,6 @@ class FFMpegConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("securetransport is only available on Apple")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_libvpx:
-            raise ConanInvalidConfiguration("libvpx doesn't support armv8 (yet)")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl:
-            raise ConanInvalidConfiguration("sdl is not supported by this recipe (yet)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
