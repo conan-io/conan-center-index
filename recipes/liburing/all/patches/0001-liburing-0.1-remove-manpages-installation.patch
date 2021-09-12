@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index 4f524df..c435f35 100644
+--- a/Makefile
++++ b/Makefile
+@@ -40,8 +40,6 @@ endif
+ install: $(NAME).pc
+ 	@$(MAKE) -C src install prefix=$(DESTDIR)$(prefix) includedir=$(DESTDIR)$(includedir) libdir=$(DESTDIR)$(libdir)
+ 	$(INSTALL) -D -m 644 $(NAME).pc $(DESTDIR)$(libdir)/pkgconfig/$(NAME).pc
+-	$(INSTALL) -m 755 -d $(DESTDIR)$(mandir)/man2
+-	$(INSTALL) -m 644 man/*.2 $(DESTDIR)$(mandir)/man2
+ 
+ clean:
+ 	@rm -f config-host.mak config-host.h cscope.out $(NAME).pc
