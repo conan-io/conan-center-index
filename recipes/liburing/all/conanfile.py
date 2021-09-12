@@ -1,8 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import platform
-import re
 
 required_conan_version = ">=1.33.0"
 
@@ -29,7 +27,7 @@ side implementation."""
         "shared": False,
     }
 
-    exports_sources = [ "patches/*" ]
+    exports_sources = ["patches/*"]
 
     _autotools = None
 
@@ -49,14 +47,10 @@ side implementation."""
         del self.settings.compiler.cppstd
 
     def validate(self):
+        # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
-
-        # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
-        linux_kernel_version = re.match("([0-9.]+)", platform.release()).group(1)
-        if tools.Version(linux_kernel_version) < "5.1":
-            raise ConanInvalidConfiguration("This linux kernel version does not support io uring")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
