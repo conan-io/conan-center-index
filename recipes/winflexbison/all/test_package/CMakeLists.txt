@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(test_package)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 # Flex
 
@@ -11,7 +11,7 @@ if(MSVC)
     set(FLEX_TARGET_COMPILE_FLAGS "--wincompat")
 endif()
 
-find_package(FLEX)
+find_package(FLEX REQUIRED)
 set(FLEX_VARS
     FLEX_FOUND
     FLEX_EXECUTABLE
@@ -49,6 +49,6 @@ endforeach()
 
 bison_target(bison_parser_target mc_parser.yy "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp")
 
-add_executable(bison_test_package "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp" dummy_lex.cpp)
+add_executable(bison_test_package "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp" dummy_lex.c)
 set_property(TARGET bison_test_package PROPERTY CXX_STANDARD 11)
 target_include_directories(bison_test_package PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")

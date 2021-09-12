@@ -1,14 +1,12 @@
 #include "mc_parser.hpp"
 
-namespace {
-    const int VARS[] = {
-        NUM,
-        OPA,
-        NUM,
-        STOP,
-        0,
-    };
-}
+static const int VARS[] = {
+    NUM,
+    OPA,
+    NUM,
+    STOP,
+    0,
+};
 
 int yylex() {
     static unsigned pos = 0;
