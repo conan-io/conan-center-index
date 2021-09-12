@@ -31,3 +31,7 @@ patches:
   "0.1":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-liburing-0.1-remove-manpages-installation.patch"
+
+  "0.5":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-liburing-0.5-configure-fix-statx.patch"
