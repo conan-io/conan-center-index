@@ -187,7 +187,8 @@ class FFMpegConan(ConanFile):
     def _target_arch(self):
         target_arch, _, _ = tools.get_gnu_triplet(
             "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
-            str(self.settings.arch)
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
         ).split("-")
         return target_arch
 
@@ -195,7 +196,8 @@ class FFMpegConan(ConanFile):
     def _target_os(self):
         _, _, target_os = tools.get_gnu_triplet(
             "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
-            str(self.settings.arch)
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
         ).split("-")
         return target_os
 
