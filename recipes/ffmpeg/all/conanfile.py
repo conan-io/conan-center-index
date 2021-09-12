@@ -147,13 +147,13 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.0.14")
+            self.requires("sdl/2.0.16")
         if self.options.with_libx264:
             self.requires("libx264/20191217")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.9.0")
+            self.requires("libvpx/1.10.0")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.with_libfdk_aac:
