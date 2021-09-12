@@ -1,1 +1,0 @@
-int cplusplus = __cplusplus;
