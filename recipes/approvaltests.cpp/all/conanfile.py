@@ -28,7 +28,7 @@ class ApprovalTestsCppConan(ConanFile):
         "with_cpputest": False,
     }
     no_copy_source = True
-    settings = "compiler", "arch"
+    settings = "compiler"
 
     def configure(self):
         if not self._boost_test_supported():
