@@ -184,14 +184,20 @@ class FFMpegConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     @property
-    def _arch(self):
-        return {
-            "armv6": "arm",
-            "armv7": "arm",
-            "armv8": "aarch64",
-            "x86": "x86",
-            "x86_64": "x86_64",
-        }.get(str(self.settings.arch))
+    def _target_arch(self):
+        target_arch, _, _ = tools.get_gnu_triplet(
+            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+            str(self.settings.arch)
+        ).split("-")
+        return target_arch
+
+    @property
+    def _target_os(self):
+        _, _, target_os = tools.get_gnu_triplet(
+            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+            str(self.settings.arch)
+        ).split("-")
+        return target_os
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_libx264 and not self.options["libx264"].shared:
@@ -225,7 +231,7 @@ class FFMpegConan(ConanFile):
             "--pkg-config-flags=--static",
             "--disable-doc",
             "--disable-programs",
-            opt_enable_disable("cross-compile", tools.cross_building(self, skip_x64_x86=True)),
+            opt_enable_disable("cross-compile", tools.cross_building(self)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),
@@ -269,8 +275,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
-        if self._arch:
-            args.append("--arch={}".format(self._arch))
+        args.append("--arch={}".format(self._target_arch))
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
@@ -284,15 +289,30 @@ class FFMpegConan(ConanFile):
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
-            args.append("--cxx=".format(tools.get_env("CXX")))
+            args.append("--cxx={}".format(tools.get_env("CXX")))
+        extra_cflags = []
+        extra_ldflags = []
+        if tools.is_apple_os(self.settings.os) and self.settings.os.version:
+            extra_cflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
+            extra_ldflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
         if self.settings.compiler == "Visual Studio":
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
             if tools.Version(str(self.settings.compiler.version)) <= 12:
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
+        if tools.cross_building(self):
+            args.append("--target-os={}".format(self._target_os))
+            if tools.is_apple_os(self.settings.os):
+                xcrun = tools.XCRun(self.settings)
+                apple_arch = tools.to_apple_arch(str(self.settings.arch))
+                extra_cflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                extra_ldflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
+        args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
+
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
         return self._autotools
 
     def build(self):
