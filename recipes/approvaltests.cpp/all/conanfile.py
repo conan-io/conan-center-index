@@ -49,7 +49,7 @@ class ApprovalTestsCppConan(ConanFile):
         if self.options.with_gtest:
             self.requires("gtest/1.10.0")
         if self.options.with_doctest:
-            self.requires("doctest/2.3.6")
+            self.requires("doctest/2.4.6")
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
 
