@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index e32b859..30b0a5a 100755
+index a52644f..30b0a5a 100755
 --- a/configure
 +++ b/configure
 @@ -245,6 +245,27 @@ if compile_prog "" "" "open_how"; then

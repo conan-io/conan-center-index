@@ -1,10 +1,10 @@
 diff --git a/configure b/configure
-index e32b859..30b0a5a 100755
+index babbae1..a89b829 100755
 --- a/configure
 +++ b/configure
-@@ -245,6 +245,27 @@ if compile_prog "" "" "open_how"; then
+@@ -207,6 +223,28 @@ if compile_prog "" "" "__kernel_timespec"; then
  fi
- print_config "open_how" "$open_how"
+ print_config "__kernel_timespec" "$__kernel_timespec"
  
 +##########################################
 +# check for statx
@@ -27,16 +27,16 @@ index e32b859..30b0a5a 100755
 +  statx="yes"
 +fi
 +print_config "statx" "$statx"
- 
++
  #############################################################################
  
-@@ -257,6 +278,9 @@ fi
- if test "$open_how" = "yes"; then
-   output_sym "CONFIG_HAVE_OPEN_HOW"
+ if test "$__kernel_rwf_t" = "yes"; then
+@@ -215,3 +253,7 @@ fi
+ if test "$__kernel_timespec" = "yes"; then
+   output_sym "CONFIG_HAVE_KERNEL_TIMESPEC"
  fi
 +if test "$statx" = "yes"; then
 +  output_sym "CONFIG_HAVE_STATX"
 +fi
- 
- echo "CC=$cc" >> $config_host_mak
- 
++
+

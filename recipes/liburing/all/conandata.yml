@@ -29,6 +29,20 @@ patches:
     - base_path: "source_subfolder"
       patch_file: "patches/0001-liburing-0.1-remove-manpages-installation.patch"
 
+  "0.3":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0006-liburing-0.3-configure-fix-statx.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0007-liburing-0.3-test-makefile-fix-statx.patch"
+
+  "0.4":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-liburing-0.4-configure-fix-statx.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0005-liburing-0.4-test-makefile-fix-statx.patch"
+
   "0.5":
     - base_path: "source_subfolder"
       patch_file: "patches/0002-liburing-0.5-configure-fix-statx.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-liburing-0.5-test-makefile-fix-statx.patch"
