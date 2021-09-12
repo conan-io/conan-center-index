@@ -16,7 +16,7 @@ class VerilatorConan(ConanFile):
     topics = ("verilog", "HDL", "EDA", "simulator", "hardware", "fpga")
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "patches/**"
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -47,6 +47,14 @@ class VerilatorConan(ConanFile):
         else:
             self.requires("flex/2.6.4")  # Needed for `FlexLexer.h` header
 
+    def validate(self):
+        if hasattr(self.settings.compiler, "cppstd"):
+            tools.check_min_cppstd(self, 11)
+
+    def package_id(self):
+        # Verilator is a executable-only package, so the compiler version does not matter
+        del self.info.settings.compiler.version
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -54,13 +62,13 @@ class VerilatorConan(ConanFile):
     @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            build_env = {
+            env = {
                 "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                 "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                 "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
             }
             with tools.vcvars(self):
-                with tools.environment_append(build_env):
+                with tools.environment_append(env):
                     yield
         else:
             yield
@@ -143,10 +151,6 @@ class VerilatorConan(ConanFile):
 
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"), "*")
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
-
-    def package_id(self):
-        # Verilator is a executable-only package, so the compiler version does not matter
-        del self.info.settings.compiler.version
 
     def package_info(self):
         verilator_include_root = os.path.join(self.package_folder, "share", "verilator", "include")
