@@ -42,6 +42,10 @@ class VerilatorConan(ConanFile):
             self.requires("strawberryperl/5.30.0.1")
         if self.settings.compiler == "Visual Studio":
             self.requires("dirent/1.23.2", private=True)
+        if self.settings.os == "Windows":
+            self.requires("winflexbison/2.5.24")
+        else:
+            self.requires("flex/2.6.4")  # Needed for `FlexLexer.h` header
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -66,6 +70,7 @@ class VerilatorConan(ConanFile):
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         autotools.libs = []
         autotools.library_paths = []
+
         if self.settings.get_safe("compiler.libcxx") == "libc++":
             autotools.libs.append("c++")
         if self.settings.compiler == "Visual Studio":
@@ -158,6 +163,7 @@ class VerilatorConan(ConanFile):
 
         verilator_root = os.path.join(self.package_folder)
         self.output.info("Setting VERILATOR_ROOT environment variable to {}".format(verilator_root))
+        self.user_info.verilator_root = verilator_root
         self.env_info.VERILATOR_ROOT = verilator_root
 
         self.cpp_info.builddirs = [os.path.join("bin", "share", "verilator")]

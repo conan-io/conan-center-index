@@ -31,3 +31,14 @@
  	$(MKINSTALLDIRS) $(DESTDIR)$(pkgdatadir)/bin
  	( cd ${srcdir}/bin ; $(INSTALL_PROGRAM) verilator_includer $(DESTDIR)$(pkgdatadir)/bin/verilator_includer )
  
+--- src/Makefile_obj.in
++++ src/Makefile_obj.in
+@@ -326,7 +326,7 @@
+ 
+ V3Lexer_pregen.yy.cpp:	verilog.l V3ParseBison.h $(HEADERS)
+ 	${LEX} --version
+-	${LEX} ${LFLAGS} -o$@ $<
++	${LEX} ${LFLAGS} -o$@ $<  # --header-file=FlexLexer.h $<
+ 
+ V3Lexer.yy.cpp:	V3Lexer_pregen.yy.cpp $(FLEXFIX)
+ 	$(PERL) $(FLEXFIX) V3Lexer <$< >$@

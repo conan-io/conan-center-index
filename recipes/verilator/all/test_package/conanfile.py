@@ -2,8 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class TestPackage(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
 
     @property
@@ -17,10 +17,12 @@ class TestPackage(ConanFile):
 
     def build(self):
         if not tools.cross_building(self, skip_x64_x86=True):
-            cmake = CMake(self)
-            cmake.definitions["BUILD_SYSTEMC"] = self._with_systemc_example
-            cmake.configure()
-            cmake.build()
+            with tools.run_environment(self):
+                with tools.environment_append({"VERILATOR_ROOT": self.deps_user_info["verilator"].verilator_root}):
+                    cmake = CMake(self)
+                    cmake.definitions["BUILD_SYSTEMC"] = self._with_systemc_example
+                    cmake.configure()
+                    cmake.build()
 
     def test(self):
         if not tools.cross_building(self, skip_x64_x86=True):

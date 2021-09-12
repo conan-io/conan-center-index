@@ -152,3 +152,14 @@
  
      if ($is_output) {
          my %state_line; my $l=0;
+--- src/V3Os.cpp
++++ src/V3Os.cpp
+@@ -343,7 +343,7 @@
+ int V3Os::system(const string& command) {
+     UINFO(1, "Running system: " << command << endl);
+     const int ret = ::system(command.c_str());
+-#ifdef _MSC_VER
++#if defined(_WIN32)
+     return ret;
+ #else
+     if (ret == -1) {
