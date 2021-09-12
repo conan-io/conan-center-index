@@ -25,7 +25,7 @@ This section gathers the most common questions from the community related to pac
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
-  * [What is the policy for supported python versions?](#What-is-the-policy-for-supported-python-versions)<!-- endToc -->
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
