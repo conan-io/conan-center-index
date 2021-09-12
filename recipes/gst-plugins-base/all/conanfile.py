@@ -76,7 +76,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.settings.os == 'Windows':
             self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
         if self.options.with_introspection:
             self.build_requires("gobject-introspection/1.68.0")
