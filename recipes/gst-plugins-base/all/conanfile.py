@@ -122,25 +122,10 @@ class GStPluginsBaseConan(ConanFile):
                         defs=defs)
         return meson
 
-    def _copy_pkg_config(self, name):
-        root = self.deps_cpp_info[name].rootpath
-        pc_dir = os.path.join(root, 'lib', 'pkgconfig')
-        pc_files = glob.glob('%s/*.pc' % pc_dir)
-        if not pc_files:  # zlib store .pc in root
-            pc_files = glob.glob('%s/*.pc' % root)
-        for pc_name in pc_files:
-            new_pc = os.path.basename(pc_name)
-            self.output.warn('copy .pc file %s' % os.path.basename(pc_name))
-            shutil.copy(pc_name, new_pc)
-            prefix = tools.unix_path(root) if self.settings.os == 'Windows' else root
-            tools.replace_prefix_in_pc_file(new_pc, prefix)
-
     def build(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**p)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
-        self._copy_pkg_config("glib")
-        self._copy_pkg_config("gstreamer")
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
             meson = self._configure_meson()
             meson.build()
