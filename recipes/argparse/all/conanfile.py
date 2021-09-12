@@ -40,10 +40,7 @@ class ArgparseConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "argparse"))
+        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
