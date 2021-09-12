@@ -384,9 +384,12 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics", "OpenGL"]
-            self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
+            self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]
+            self.cpp_info.components["avfilter"].frameworks = ["CoreGraphics"]
             self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["avdevice"].frameworks.append("OpenGL")
+                self.cpp_info.components["avfilter"].frameworks.append("OpenGL")
 
         if self.options.get_safe("with_libalsa"):
             self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
