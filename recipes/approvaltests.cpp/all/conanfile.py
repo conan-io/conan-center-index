@@ -45,7 +45,7 @@ class ApprovalTestsCppConan(ConanFile):
         if self.options.get_safe("with_boosttest"):
             self.requires("boost/1.72.0")
         if self.options.with_catch2:
-            self.requires("catch2/2.11.0")
+            self.requires("catch2/2.13.7")
         if self.options.with_gtest:
             self.requires("gtest/1.10.0")
         if self.options.with_doctest:
@@ -83,8 +83,6 @@ class ApprovalTestsCppConan(ConanFile):
         return Version(self.version) >= "10.2.0"
 
     def _validate_compiler_settings(self):
-        if self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("Currently unsupported by this recipe, see https://github.com/conan-io/conan-center-index/pull/7213#issuecomment-916983425 for more information")
         if self._std_puttime_required():
             self._require_at_least_compiler_version("gcc", 5)
 
