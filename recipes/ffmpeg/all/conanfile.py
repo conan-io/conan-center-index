@@ -108,10 +108,12 @@ class FFMpegConan(ConanFile):
             del self.options.with_pulse
         if self.settings.os != "Macos":
             del self.options.with_appkit
-            del self.options.with_avfoundation
+        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             del self.options.with_coreimage
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
+        if not tools.is_apple_os(self.settings.os):
+            del self.options.with_avfoundation
 
     def configure(self):
         if self.options.shared:
