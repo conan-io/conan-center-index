@@ -9,4 +9,14 @@
  #else
  # define VL_LOCALTIME_R(timep, tmp) localtime_r((timep), (tmp))
  #endif
-
+--- src/V3Param.cpp
++++ src/V3Param.cpp
+@@ -57,7 +57,7 @@
+ #include "V3Width.h"
+ #include "V3Unroll.h"
+ #include "V3Hasher.h"
+-
++#include <cctype>
+ #include <deque>
+ #include <map>
+ #include <memory>
