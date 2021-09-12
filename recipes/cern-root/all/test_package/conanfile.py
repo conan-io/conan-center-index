@@ -1,11 +1,10 @@
+from conans import CMake, ConanFile, RunEnvironment, tools
 import os
 
-from conans import CMake, ConanFile, RunEnvironment, tools
 
-
-class CernRootTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ("cmake", "cmake_find_package")
+    generators = "cmake", "cmake_find_package"
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -43,4 +42,5 @@ class CernRootTestConan(ConanFile):
         self.run("root -q", run_environment=True)
 
     def _check_root_dictionaries(self):
-        self.run(".{}testrootdictionaries".format(os.sep), run_environment=True)
+        bin_path = os.path.join("bin", "testrootdictionaries")
+        self.run(bin_path, run_environment=True)
