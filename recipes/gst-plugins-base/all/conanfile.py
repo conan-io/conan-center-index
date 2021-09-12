@@ -74,7 +74,7 @@ class GStPluginsBaseConan(ConanFile):
         if not tools.which("pkg-config"):
             self.build_requires("pkgconf/1.7.4")
         if self.settings.os == 'Windows':
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.5.3")
             self.build_requires("flex/2.6.4")
