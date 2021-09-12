@@ -84,7 +84,7 @@ class ApprovalTestsCppConan(ConanFile):
 
     def _validate_compiler_settings(self):
         if self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("see #7146")
+            raise ConanInvalidConfiguration("Currently unsupported by this recipe, see https://github.com/conan-io/conan-center-index/pull/7213#issuecomment-916983425 for more information")
         if self._std_puttime_required():
             self._require_at_least_compiler_version("gcc", 5)
 
