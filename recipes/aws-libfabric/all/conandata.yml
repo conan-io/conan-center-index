@@ -1,0 +1,4 @@
+sources:
+  "1.9.1amzncdi1.0":
+    url: https://github.com/aws/libfabric/archive/refs/tags/1.9.1amzncdi1.0.tar.gz
+    sha256: 714935292fb85a6edad4f3824cc23e46d18ba0a65ba5e292b6378440e8293ce7
