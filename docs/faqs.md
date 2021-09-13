@@ -24,6 +24,7 @@ This section gathers the most common questions from the community related to pac
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)<!-- endToc -->
 
