@@ -35,7 +35,6 @@ class GmpConan(ConanFile):
 
     exports_sources = "patches/*"
 
-    _autotools = None
 
     @property
     def _source_subfolder(self):
