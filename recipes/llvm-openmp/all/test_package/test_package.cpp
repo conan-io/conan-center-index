@@ -3,7 +3,7 @@
 
 int main()
 {
-    int num_threads = omp_get_num_procs();
+    int num_threads = std::max(5, omp_get_num_procs());
     omp_set_num_threads(num_threads);
     int actual_number;
     #pragma omp parallel
