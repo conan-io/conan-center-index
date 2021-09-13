@@ -33,7 +33,6 @@ class WinflexbisonConan(ConanFile):
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         return cmake
 
