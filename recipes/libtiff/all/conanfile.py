@@ -114,9 +114,12 @@ class LibtiffConan(ConanFile):
                          os.path.join(self.build_folder, "ConanFindjbig.cmake"))
         else:
             os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
-        if self.options.get_safe("zstd"):
-            tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
-                         os.path.join(self.build_folder, "ConanFindzstd.cmake"))
+        if self._has_zstd_option:
+            if self.options.zstd:
+                tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
+                             os.path.join(self.build_folder, "ConanFindzstd.cmake"))
+            else:
+                os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
 
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
