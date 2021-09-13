@@ -16,8 +16,6 @@ class SwigConan(ConanFile):
     exports_sources = "patches/**", "cmake/*"
     settings = "os", "arch", "compiler", "build_type"
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
