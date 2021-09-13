@@ -164,7 +164,7 @@ class FFMpegConan(ConanFile):
             self.requires("openssl/1.1.1l")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.5.1")
-        if self.options.get_safe("with_xcb"):
+        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
@@ -367,7 +367,7 @@ class FFMpegConan(ConanFile):
         self.cpp_info.components["avutil"].names["pkg_config"] = "libavutil"
 
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.components["avutil"].system_libs = ["pthread"]
+            self.cpp_info.components["avutil"].system_libs = ["pthread", "m", "dl"]
             self.cpp_info.components["swresample"].system_libs = ["m"]
             self.cpp_info.components["swscale"].system_libs = ["m"]
             if self.options.postproc:
@@ -450,10 +450,10 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avformat"].frameworks.append("Security")
 
         if self.options.get_safe("with_vaapi"):
-            self.cpp_info.components["avcodec"].requires.append("vaapi::vaapi")
+            self.cpp_info.components["avutil"].requires.extend(["vaapi::vaapi", "xorg::x11"])
 
         if self.options.get_safe("with_vdpau"):
-            self.cpp_info.components["avcodec"].requires.append("vdpau::vdpau")
+            self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
 
         if self.options.get_safe("with_appkit"):
             self.cpp_info.components["avdevice"].frameworks.append("AppKit")
@@ -463,7 +463,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avdevice"].frameworks.append("AVFoundation")
 
         if self.options.get_safe("with_coreimage"):
-            self.cpp_info.components["avfilter"].frameworks = ["CoreImage"]
+            self.cpp_info.components["avfilter"].frameworks.append("CoreImage")
 
         if self.options.get_safe("with_audiotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
