@@ -108,22 +108,18 @@ class FFMpegConan(ConanFile):
             del self.options.with_pulse
         if self.settings.os != "Macos":
             del self.options.with_appkit
-            del self.options.with_avfoundation
+        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             del self.options.with_coreimage
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
+        if not tools.is_apple_os(self.settings.os):
+            del self.options.with_avfoundation
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
-        self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -147,13 +143,13 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.4")
         if self.options.with_sdl:
-            self.requires("sdl/2.0.14")
+            self.requires("sdl/2.0.16")
         if self.options.with_libx264:
             self.requires("libx264/20191217")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.9.0")
+            self.requires("libvpx/1.10.0")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.with_libfdk_aac:
@@ -176,24 +172,35 @@ class FFMpegConan(ConanFile):
     def validate(self):
         if self.options.with_ssl == "securetransport" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("securetransport is only available on Apple")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and self.options.with_libvpx:
-            raise ConanInvalidConfiguration("libvpx doesn't support armv8 (yet)")
-        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_sdl:
-            raise ConanInvalidConfiguration("sdl is not supported by this recipe (yet)")
+
+    def build_requirements(self):
+        if self.settings.arch in ("x86", "x86_64"):
+            self.build_requires("yasm/1.3.0")
+        self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
     @property
-    def _arch(self):
-        return {
-            "armv6": "arm",
-            "armv7": "arm",
-            "armv8": "aarch64",
-            "x86": "x86",
-            "x86_64": "x86_64",
-        }.get(str(self.settings.arch))
+    def _target_arch(self):
+        target_arch, _, _ = tools.get_gnu_triplet(
+            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
+        ).split("-")
+        return target_arch
+
+    @property
+    def _target_os(self):
+        _, _, target_os = tools.get_gnu_triplet(
+            "Macos" if tools.is_apple_os(self.settings.os) else str(self.settings.os),
+            str(self.settings.arch),
+            str(self.settings.compiler) if self.settings.os == "Windows" else None,
+        ).split("-")
+        return target_os
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_libx264 and not self.options["libx264"].shared:
@@ -227,7 +234,7 @@ class FFMpegConan(ConanFile):
             "--pkg-config-flags=--static",
             "--disable-doc",
             "--disable-programs",
-            opt_enable_disable("cross-compile", tools.cross_building(self, skip_x64_x86=True)),
+            opt_enable_disable("cross-compile", tools.cross_building(self)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
             opt_enable_disable("static", not self.options.shared),
@@ -271,8 +278,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("nonfree", self.options.with_libfdk_aac),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
-        if self._arch:
-            args.append("--arch={}".format(self._arch))
+        args.append("--arch={}".format(self._target_arch))
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
@@ -286,15 +292,30 @@ class FFMpegConan(ConanFile):
         if tools.get_env("CC"):
             args.append("--cc={}".format(tools.get_env("CC")))
         if tools.get_env("CXX"):
-            args.append("--cxx=".format(tools.get_env("CXX")))
+            args.append("--cxx={}".format(tools.get_env("CXX")))
+        extra_cflags = []
+        extra_ldflags = []
+        if tools.is_apple_os(self.settings.os) and self.settings.os.version:
+            extra_cflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
+            extra_ldflags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
         if self.settings.compiler == "Visual Studio":
             args.append("--pkg-config={}".format(tools.get_env("PKG_CONFIG")))
             args.append("--toolchain=msvc")
             if tools.Version(str(self.settings.compiler.version)) <= 12:
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 self._autotools.defines.append("inline=__inline")
+        if tools.cross_building(self):
+            args.append("--target-os={}".format(self._target_os))
+            if tools.is_apple_os(self.settings.os):
+                xcrun = tools.XCRun(self.settings)
+                apple_arch = tools.to_apple_arch(str(self.settings.arch))
+                extra_cflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+                extra_ldflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
+        args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
+
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder, build=False, host=False, target=False)
         return self._autotools
 
     def build(self):
@@ -386,9 +407,12 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics", "OpenGL"]
-            self.cpp_info.components["avfilter"].frameworks = ["OpenGL", "CoreGraphics"]
+            self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]
+            self.cpp_info.components["avfilter"].frameworks = ["CoreGraphics"]
             self.cpp_info.components["avcodec"].frameworks = ["CoreVideo", "CoreMedia"]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["avdevice"].frameworks.append("OpenGL")
+                self.cpp_info.components["avfilter"].frameworks.append("OpenGL")
 
         if self.options.get_safe("with_libalsa"):
             self.cpp_info.components["avdevice"].requires.append("libalsa::libalsa")
