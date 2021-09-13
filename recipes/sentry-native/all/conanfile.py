@@ -106,7 +106,7 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/7.75.0")
+            self.requires("libcurl/7.78.0")
         if self.options.backend == "crashpad":
             if self.options.with_crashpad == "sentry":
                 self.requires("sentry-crashpad/{}".format(self.version))
@@ -119,7 +119,7 @@ class SentryNativeConan(ConanFile):
                 self.requires("breakpad/cci.20210521")
         if self.options.qt:
             self.requires("qt/5.15.2")
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
             if tools.Version(self.version) < "0.4.5":
                 raise ConanInvalidConfiguration("Qt integration available from version 0.4.5")
 
