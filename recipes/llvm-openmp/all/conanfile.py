@@ -49,7 +49,7 @@ class LLVMOpenMpConan(ConanFile):
         if (
             self.version <= "10.0.0"
             and self.settings.os == "Macos"
-        #    and self.settings.arch == "armv8"
+            and self.settings.arch == "armv8"
         ):
             raise ConanInvalidConfiguration("ARM v8 not supported")
 
