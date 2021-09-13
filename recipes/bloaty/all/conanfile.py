@@ -37,9 +37,6 @@ class BloatyConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-        # C++ standard in abseil must match the same in bloaty. Mismatching
-        # standard results in bloaty link error.
-        self.info.requires["abseil"].full_package_mode()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
