@@ -86,7 +86,7 @@ class ConanFile(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="src")
+        cmake.configure("src")
         cmake.build()
 
     def package(self):
