@@ -46,9 +46,9 @@ class ConanFile(ConanFile):
     def validate(self):
         if (self.settings.os == "Macos"
                 and self.settings.compiler == "apple-clang"
-                and tools.Version(self.settings.compiler.version) < "8.0"):
+                and tools.Version(self.settings.compiler.version) < "11.0"):
             raise ConanInvalidConfiguration(
-                "{} {} couldn't be built by apple-clang < 8.0".format(
+                "{} {} couldn't be built by apple-clang < 11.0".format(
                     self.name,
                     self.version,
                 ))
