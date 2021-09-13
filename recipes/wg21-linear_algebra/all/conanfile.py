@@ -35,7 +35,7 @@ class LAConan(ConanFile):
             "apple-clang": "11"
         }
 
-    def configure(self):
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -68,6 +68,3 @@ class LAConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "wg21_linear_algebra"
         self.cpp_info.names["cmake_find_package_multi"] = "wg21_linear_algebra"
-        self.cpp_info.components["_wg21_linear_algebra"].names["cmake_find_package"] = "wg21_linear_algebra"
-        self.cpp_info.components["_wg21_linear_algebra"].names["cmake_find_package_multi"] = "wg21_linear_algebra"
-        self.cpp_info.components["_wg21_linear_algebra"].requires = ["mdspan::mdspan"]
