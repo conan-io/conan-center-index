@@ -203,6 +203,19 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
 
+## Can I install packages from the system package manager?
+
+It depends. You can not mix both regular projects with system packages, but you can provide package wrappers for system packages.
+The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
+pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. However, Conan can not track system packages, like their
+version and options, which creates a fragile situation where affects libraries and binaries built in your package but can not be totally reproduced.
+Also, system package managers require administrator permission to install packages, which is not always possible and may break limited users. Moreover, more than one Conan package may require the same system package and there is no way to track their mutual usage.
+The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requirement` nor `SystemPackageTool` in recipes, to avoid mixing both regular projects with
+system packages at same recipe.
+However, there are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, the
+[OpenGL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opengl/all/conanfile.py) is a good example.
+
 ## Why ConanCenter does **not** build and execute tests in recipes
 
 <!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
