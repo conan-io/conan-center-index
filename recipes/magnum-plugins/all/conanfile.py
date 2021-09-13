@@ -20,68 +20,68 @@ class MagnumConan(ConanFile):
         "fPIC": [True, False],
         "shared_plugins": [True, False],
 
-        "assimpimporter": [True, False],
-        "basisimageconverter": [True, False],
-        "basisimporter": [True, False],
-        "ddsimporter": [True, False],
-        "devilimageimporter": [True, False],
-        "drflacaudioimporter": [True, False],
-        "drmp3audioimporter": [True, False],
-        "drwavaudioimporter": [True, False],
-        "faad2audioimporter": [True, False],
-        "freetypefont": [True, False],
-        "harfbuzzfont": [True, False],
-        "icoimporter": [True, False],
-        "jpegimageconverter": [True, False],
-        "jpegimporter": [True, False],
-        "meshoptimizersceneconverter": [True, False],
-        "miniexrimageconverter": [True, False],
-        "opengeximporter": [True, False],
-        "pngimageconverter": [True, False],
-        "pngimporter": [True, False],
-        "primitiveimporter": [True, False],
-        "stanfordimporter": [True, False],
-        "stanfordsceneconverter": [True, False],
-        "stbimageconverter": [True, False],
-        "stbimageimporter": [True, False],
-        "stbtruetypefont": [True, False],
-        "stbvorbisaudioimporter": [True, False],
-        "stlimporter": [True, False],
-        "tinygltfimporter": [True, False],
+        "assimp_importer": [True, False],
+        "basis_imageconverter": [True, False],
+        "basis_importer": [True, False],
+        "dds_importer": [True, False],
+        "devil_imageimporter": [True, False],
+        "drflac_audioimporter": [True, False],
+        "drmp3_audioimporter": [True, False],
+        "drwav_audioimporter": [True, False],
+        "faad2_audioimporter": [True, False],
+        "freetype_font": [True, False],
+        "harfbuzz_font": [True, False],
+        "ico_importer": [True, False],
+        "jpeg_imageconverter": [True, False],
+        "jpeg_importer": [True, False],
+        "meshoptimizer_sceneconverter": [True, False],
+        "miniexr_imageconverter": [True, False],
+        "opengex_importer": [True, False],
+        "png_imageconverter": [True, False],
+        "png_importer": [True, False],
+        "primitive_importer": [True, False],
+        "stanford_importer": [True, False],
+        "stanford_sceneconverter": [True, False],
+        "stb_imageconverter": [True, False],
+        "stb_imageimporter": [True, False],
+        "stbtruetype_font": [True, False],
+        "stbvorbis_audioimporter": [True, False],
+        "stl_importer": [True, False],
+        "tinygltf_importer": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "shared_plugins": True,
         
-        "assimpimporter": True,
-        "basisimageconverter": False,
-        "basisimporter": False,
-        "ddsimporter": True,
-        "devilimageimporter": False,
-        "drflacaudioimporter": True,
-        "drmp3audioimporter": True,
-        "drwavaudioimporter": True,
-        "faad2audioimporter": False,
-        "freetypefont": True,
-        "harfbuzzfont": True,
-        "icoimporter": True,
-        "jpegimageconverter": True,
-        "jpegimporter": True,
-        "meshoptimizersceneconverter": True,
-        "miniexrimageconverter": True,
-        "opengeximporter": True,
-        "pngimageconverter": True,
-        "pngimporter": True,
-        "primitiveimporter": True,
-        "stanfordimporter": True,
-        "stanfordsceneconverter": True,
-        "stbimageconverter": True,
-        "stbimageimporter": True,
-        "stbtruetypefont": True,
-        "stbvorbisaudioimporter": True,
-        "stlimporter": True,
-        "tinygltfimporter": True,
+        "assimp_importer": True,
+        "basis_imageconverter": False,
+        "basis_importer": False,
+        "dds_importer": True,
+        "devil_imageimporter": False,
+        "drflac_audioimporter": True,
+        "drmp3_audioimporter": True,
+        "drwav_audioimporter": True,
+        "faad2_audioimporter": False,
+        "freetype_font": True,
+        "harfbuzz_font": True,
+        "ico_importer": True,
+        "jpeg_imageconverter": True,
+        "jpeg_importer": True,
+        "meshoptimizer_sceneconverter": True,
+        "miniexr_imageconverter": True,
+        "opengex_importer": True,
+        "png_imageconverter": True,
+        "png_importer": True,
+        "primitive_importer": True,
+        "stanford_importer": True,
+        "stanford_sceneconverter": True,
+        "stb_imageconverter": True,
+        "stb_imageimporter": True,
+        "stbtruetype_font": True,
+        "stbvorbis_audioimporter": True,
+        "stl_importer": True,
+        "tinygltf_importer": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -123,19 +123,19 @@ class MagnumConan(ConanFile):
     
     def requirements(self):
         self.requires("magnum/{}".format(self.version))
-        if self.options.assimpimporter:
+        if self.options.assimp_importer:
             self.requires("assimp/5.0.1")
-        if self.options.harfbuzzfont:
+        if self.options.harfbuzz_font:
             self.requires("harfbuzz/2.8.2")
-        if self.options.jpegimporter or self.options.jpegimageconverter:
+        if self.options.jpeg_importer or self.options.jpeg_imageconverter:
             self.requires("libjpeg/9d")
-        if self.options.meshoptimizersceneconverter:
+        if self.options.meshoptimizer_sceneconverter:
             self.requires("meshoptimizer/0.15")
-        if self.options.basisimageconverter or self.options.basisimporter:
+        if self.options.basis_imageconverter or self.options.basis_importer:
             raise ConanInvalidConfiguration("Requires 'basisuniversal', not available in ConanCenter yet")
-        if self.options.devilimageimporter:
+        if self.options.devil_imageimporter:
             raise ConanInvalidConfiguration("Requires 'DevIL', not available in ConanCenter yet")
-        if self.options.faad2audioimporter:
+        if self.options.faad2_audioimporter:
             raise ConanInvalidConfiguration("Requires 'faad2', not available in ConanCenter yet")
 
     #def build_requirements(self):
@@ -156,34 +156,34 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
 
-        self._cmake.definitions["WITH_ASSIMPIMPORTER"] = self.options.assimpimporter
-        self._cmake.definitions["WITH_BASISIMAGECONVERTER"] = self.options.basisimageconverter
-        self._cmake.definitions["WITH_BASISIMPORTER"] = self.options.basisimporter
-        self._cmake.definitions["WITH_DDSIMPORTER"] = self.options.ddsimporter
-        self._cmake.definitions["WITH_DEVILIMAGEIMPORTER"] = self.options.devilimageimporter
-        self._cmake.definitions["WITH_DRFLACAUDIOIMPORTER"] = self.options.drflacaudioimporter
-        self._cmake.definitions["WITH_DRMP3AUDIOIMPORTER"] = self.options.drmp3audioimporter
-        self._cmake.definitions["WITH_DRWAVAUDIOIMPORTER"] = self.options.drwavaudioimporter
-        self._cmake.definitions["WITH_FAAD2AUDIOIMPORTER"] = self.options.faad2audioimporter
-        self._cmake.definitions["WITH_FREETYPEFONT"] = self.options.freetypefont
-        self._cmake.definitions["WITH_HARFBUZZFONT"] = self.options.harfbuzzfont
-        self._cmake.definitions["WITH_ICOIMPORTER"] = self.options.icoimporter
-        self._cmake.definitions["WITH_JPEGIMAGECONVERTER"] = self.options.jpegimageconverter
-        self._cmake.definitions["WITH_JPEGIMPORTER"] = self.options.jpegimporter
-        self._cmake.definitions["WITH_MESHOPTIMIZERSCENECONVERTER"] = self.options.meshoptimizersceneconverter
-        self._cmake.definitions["WITH_MINIEXRIMAGECONVERTER"] = self.options.miniexrimageconverter
-        self._cmake.definitions["WITH_OPENGEXIMPORTER"] = self.options.opengeximporter
-        self._cmake.definitions["WITH_PNGIMAGECONVERTER"] = self.options.pngimageconverter
-        self._cmake.definitions["WITH_PNGIMPORTER"] = self.options.pngimporter
-        self._cmake.definitions["WITH_PRIMITIVEIMPORTER"] = self.options.primitiveimporter
-        self._cmake.definitions["WITH_STANFORDIMPORTER"] = self.options.stanfordimporter
-        self._cmake.definitions["WITH_STANFORDSCENECONVERTER"] = self.options.stanfordsceneconverter
-        self._cmake.definitions["WITH_STBIMAGECONVERTER"] = self.options.stbimageconverter
-        self._cmake.definitions["WITH_STBIMAGEIMPORTER"] = self.options.stbimageimporter
-        self._cmake.definitions["WITH_STBTRUETYPEFONT"] = self.options.stbtruetypefont
-        self._cmake.definitions["WITH_STBVORBISAUDIOIMPORTER"] = self.options.stbvorbisaudioimporter
-        self._cmake.definitions["WITH_STLIMPORTER"] = self.options.stlimporter
-        self._cmake.definitions["WITH_TINYGLTFIMPORTER"] = self.options.tinygltfimporter
+        self._cmake.definitions["WITH_ASSIMPIMPORTER"] = self.options.assimp_importer
+        self._cmake.definitions["WITH_BASISIMAGECONVERTER"] = self.options.basis_imageconverter
+        self._cmake.definitions["WITH_BASISIMPORTER"] = self.options.basis_importer
+        self._cmake.definitions["WITH_DDSIMPORTER"] = self.options.dds_importer
+        self._cmake.definitions["WITH_DEVILIMAGEIMPORTER"] = self.options.devil_imageimporter
+        self._cmake.definitions["WITH_DRFLACAUDIOIMPORTER"] = self.options.drflac_audioimporter
+        self._cmake.definitions["WITH_DRMP3AUDIOIMPORTER"] = self.options.drmp3_audioimporter
+        self._cmake.definitions["WITH_DRWAVAUDIOIMPORTER"] = self.options.drwav_audioimporter
+        self._cmake.definitions["WITH_FAAD2AUDIOIMPORTER"] = self.options.faad2_audioimporter
+        self._cmake.definitions["WITH_FREETYPEFONT"] = self.options.freetype_font
+        self._cmake.definitions["WITH_HARFBUZZFONT"] = self.options.harfbuzz_font
+        self._cmake.definitions["WITH_ICOIMPORTER"] = self.options.ico_importer
+        self._cmake.definitions["WITH_JPEGIMAGECONVERTER"] = self.options.jpeg_imageconverter
+        self._cmake.definitions["WITH_JPEGIMPORTER"] = self.options.jpeg_importer
+        self._cmake.definitions["WITH_MESHOPTIMIZERSCENECONVERTER"] = self.options.meshoptimizer_sceneconverter
+        self._cmake.definitions["WITH_MINIEXRIMAGECONVERTER"] = self.options.miniexr_imageconverter
+        self._cmake.definitions["WITH_OPENGEXIMPORTER"] = self.options.opengex_importer
+        self._cmake.definitions["WITH_PNGIMAGECONVERTER"] = self.options.png_imageconverter
+        self._cmake.definitions["WITH_PNGIMPORTER"] = self.options.png_importer
+        self._cmake.definitions["WITH_PRIMITIVEIMPORTER"] = self.options.primitive_importer
+        self._cmake.definitions["WITH_STANFORDIMPORTER"] = self.options.stanford_importer
+        self._cmake.definitions["WITH_STANFORDSCENECONVERTER"] = self.options.stanford_sceneconverter
+        self._cmake.definitions["WITH_STBIMAGECONVERTER"] = self.options.stb_imageconverter
+        self._cmake.definitions["WITH_STBIMAGEIMPORTER"] = self.options.stb_imageimporter
+        self._cmake.definitions["WITH_STBTRUETYPEFONT"] = self.options.stbtruetype_font
+        self._cmake.definitions["WITH_STBVORBISAUDIOIMPORTER"] = self.options.stbvorbis_audioimporter
+        self._cmake.definitions["WITH_STLIMPORTER"] = self.options.stl_importer
+        self._cmake.definitions["WITH_TINYGLTFIMPORTER"] = self.options.tinygltf_importer
 
         self._cmake.configure()
         return self._cmake
@@ -215,200 +215,200 @@ class MagnumConan(ConanFile):
         self.cpp_info.components["magnumopenddl"].requires = ["magnum::magnum"]
 
         # Plugins
-        if self.options.assimpimporter:
-            self.cpp_info.components["assimpimporter"].names["cmake_find_package"] = "AssimpImporter"
-            self.cpp_info.components["assimpimporter"].names["cmake_find_package_multi"] = "AssimpImporter"
+        if self.options.assimp_importer:
+            self.cpp_info.components["assimp_importer"].names["cmake_find_package"] = "AssimpImporter"
+            self.cpp_info.components["assimp_importer"].names["cmake_find_package_multi"] = "AssimpImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["assimpimporter"].libs = ["AssimpImporter"]
-                self.cpp_info.components["assimpimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["assimpimporter"].requires = ["magnum::trade", "assimp::assimp"]
+                self.cpp_info.components["assimp_importer"].libs = ["AssimpImporter"]
+                self.cpp_info.components["assimp_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["assimp_importer"].requires = ["magnum::trade", "assimp::assimp"]
 
-        if self.options.basisimageconverter:
+        if self.options.basis_imageconverter:
             raise ConanException("Component not defined, please contribute it to the Conan recipe")
 
-        if self.options.basisimporter:
+        if self.options.basis_importer:
             raise ConanException("Component not defined, please contribute it to the Conan recipe")
 
-        if self.options.ddsimporter:
-            self.cpp_info.components["ddsimporter"].names["cmake_find_package"] = "DdsImporter"
-            self.cpp_info.components["ddsimporter"].names["cmake_find_package_multi"] = "DdsImporter"
+        if self.options.dds_importer:
+            self.cpp_info.components["dds_importer"].names["cmake_find_package"] = "DdsImporter"
+            self.cpp_info.components["dds_importer"].names["cmake_find_package_multi"] = "DdsImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["ddsimporter"].libs = ["DdsImporter"]
-                self.cpp_info.components["ddsimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["ddsimporter"].requires = ["magnum::trade"]
+                self.cpp_info.components["dds_importer"].libs = ["DdsImporter"]
+                self.cpp_info.components["dds_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["dds_importer"].requires = ["magnum::trade"]
 
-        if self.options.devilimageimporter:
+        if self.options.devil_imageimporter:
             raise ConanException("Component not defined, please contribute it to the Conan recipe")
 
-        if self.options.drflacaudioimporter:
-            self.cpp_info.components["drflacaudioimporter"].names["cmake_find_package"] = "DrFlacAudioImporter"
-            self.cpp_info.components["drflacaudioimporter"].names["cmake_find_package_multi"] = "DrFlacAudioImporter"
+        if self.options.drflac_audioimporter:
+            self.cpp_info.components["drflac_audioimporter"].names["cmake_find_package"] = "DrFlacAudioImporter"
+            self.cpp_info.components["drflac_audioimporter"].names["cmake_find_package_multi"] = "DrFlacAudioImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["drflacaudioimporter"].libs = ["DrFlacAudioImporter"]
-                self.cpp_info.components["drflacaudioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
-            self.cpp_info.components["drflacaudioimporter"].requires = ["magnum::audio"]
+                self.cpp_info.components["drflac_audioimporter"].libs = ["DrFlacAudioImporter"]
+                self.cpp_info.components["drflac_audioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
+            self.cpp_info.components["drflac_audioimporter"].requires = ["magnum::audio"]
 
-        if self.options.drmp3audioimporter:
-            self.cpp_info.components["drmp3audioimporter"].names["cmake_find_package"] = "DrMp3AudioImporter"
-            self.cpp_info.components["drmp3audioimporter"].names["cmake_find_package_multi"] = "DrMp3AudioImporter"
+        if self.options.drmp3_audioimporter:
+            self.cpp_info.components["drmp3_audioimporter"].names["cmake_find_package"] = "DrMp3AudioImporter"
+            self.cpp_info.components["drmp3_audioimporter"].names["cmake_find_package_multi"] = "DrMp3AudioImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["drmp3audioimporter"].libs = ["DrMp3AudioImporter"]
-                self.cpp_info.components["drmp3audioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
-            self.cpp_info.components["drmp3audioimporter"].requires = ["magnum::audio"]
+                self.cpp_info.components["drmp3_audioimporter"].libs = ["DrMp3AudioImporter"]
+                self.cpp_info.components["drmp3_audioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
+            self.cpp_info.components["drmp3_audioimporter"].requires = ["magnum::audio"]
 
-        if self.options.drwavaudioimporter:
-            self.cpp_info.components["drwavaudioimporter"].names["cmake_find_package"] = "DrWavAudioImporter"
-            self.cpp_info.components["drwavaudioimporter"].names["cmake_find_package_multi"] = "DrWavAudioImporter"
+        if self.options.drwav_audioimporter:
+            self.cpp_info.components["drwav_audioimporter"].names["cmake_find_package"] = "DrWavAudioImporter"
+            self.cpp_info.components["drwav_audioimporter"].names["cmake_find_package_multi"] = "DrWavAudioImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["drwavaudioimporter"].libs = ["DrWavAudioImporter"]
-                self.cpp_info.components["drwavaudioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
-            self.cpp_info.components["drwavaudioimporter"].requires = ["magnum::audio"]
+                self.cpp_info.components["drwav_audioimporter"].libs = ["DrWavAudioImporter"]
+                self.cpp_info.components["drwav_audioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
+            self.cpp_info.components["drwav_audioimporter"].requires = ["magnum::audio"]
 
-        if self.options.faad2audioimporter:
+        if self.options.faad2_audioimporter:
             raise ConanException("Component not defined, please contribute it to the Conan recipe")
 
-        if self.options.freetypefont:
-            self.cpp_info.components["freetypefont"].names["cmake_find_package"] = "FreeTypeFont"
-            self.cpp_info.components["freetypefont"].names["cmake_find_package_multi"] = "FreeTypeFont"
+        if self.options.freetype_font:
+            self.cpp_info.components["freetype_font"].names["cmake_find_package"] = "FreeTypeFont"
+            self.cpp_info.components["freetype_font"].names["cmake_find_package_multi"] = "FreeTypeFont"
             if not self.options.shared_plugins:
-                self.cpp_info.components["freetypefont"].libs = ["FreeTypeFont"]
-                self.cpp_info.components["freetypefont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
-            self.cpp_info.components["freetypefont"].requires = ["magnum::text"]
+                self.cpp_info.components["freetype_font"].libs = ["FreeTypeFont"]
+                self.cpp_info.components["freetype_font"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
+            self.cpp_info.components["freetype_font"].requires = ["magnum::text"]
 
-        if self.options.harfbuzzfont:
-            self.cpp_info.components["harfbuzzfont"].names["cmake_find_package"] = "HarfBuzzFont"
-            self.cpp_info.components["harfbuzzfont"].names["cmake_find_package_multi"] = "HarfBuzzFont"
+        if self.options.harfbuzz_font:
+            self.cpp_info.components["harfbuzz_font"].names["cmake_find_package"] = "HarfBuzzFont"
+            self.cpp_info.components["harfbuzz_font"].names["cmake_find_package_multi"] = "HarfBuzzFont"
             if not self.options.shared_plugins:
-                self.cpp_info.components["harfbuzzfont"].libs = ["HarfBuzzFont"]
-                self.cpp_info.components["harfbuzzfont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
-            self.cpp_info.components["harfbuzzfont"].requires = ["magnum::text", "harfbuzz::harfbuzz"]
+                self.cpp_info.components["harfbuzz_font"].libs = ["HarfBuzzFont"]
+                self.cpp_info.components["harfbuzz_font"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
+            self.cpp_info.components["harfbuzz_font"].requires = ["magnum::text", "harfbuzz::harfbuzz"]
 
-        if self.options.jpegimageconverter:
-            self.cpp_info.components["jpegimageconverter"].names["cmake_find_package"] = "JpegImageConverter"
-            self.cpp_info.components["jpegimageconverter"].names["cmake_find_package_multi"] = "JpegImageConverter"
+        if self.options.jpeg_imageconverter:
+            self.cpp_info.components["jpeg_imageconverter"].names["cmake_find_package"] = "JpegImageConverter"
+            self.cpp_info.components["jpeg_imageconverter"].names["cmake_find_package_multi"] = "JpegImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["jpegimageconverter"].libs = ["JpegImageConverter"]
-                self.cpp_info.components["jpegimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
-            self.cpp_info.components["jpegimageconverter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
+                self.cpp_info.components["jpeg_imageconverter"].libs = ["JpegImageConverter"]
+                self.cpp_info.components["jpeg_imageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
+            self.cpp_info.components["jpeg_imageconverter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
 
-        if self.options.jpegimporter:
-            self.cpp_info.components["jpegimporter"].names["cmake_find_package"] = "JpegImporter"
-            self.cpp_info.components["jpegimporter"].names["cmake_find_package_multi"] = "JpegImporter"
+        if self.options.jpeg_importer:
+            self.cpp_info.components["jpeg_importer"].names["cmake_find_package"] = "JpegImporter"
+            self.cpp_info.components["jpeg_importer"].names["cmake_find_package_multi"] = "JpegImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["jpegimporter"].libs = ["JpegImporter"]
-                self.cpp_info.components["jpegimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["jpegimporter"].requires = ["magnum::trade", "libjpeg::libjpeg"]
+                self.cpp_info.components["jpeg_importer"].libs = ["JpegImporter"]
+                self.cpp_info.components["jpeg_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["jpeg_importer"].requires = ["magnum::trade", "libjpeg::libjpeg"]
 
-        if self.options.meshoptimizersceneconverter:
-            self.cpp_info.components["meshoptimizersceneconverter"].names["cmake_find_package"] = "MeshOptimizerSceneConverter"
-            self.cpp_info.components["meshoptimizersceneconverter"].names["cmake_find_package_multi"] = "MeshOptimizerSceneConverter"
+        if self.options.meshoptimizer_sceneconverter:
+            self.cpp_info.components["meshoptimizer_sceneconverter"].names["cmake_find_package"] = "MeshOptimizerSceneConverter"
+            self.cpp_info.components["meshoptimizer_sceneconverter"].names["cmake_find_package_multi"] = "MeshOptimizerSceneConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["meshoptimizersceneconverter"].libs = ["MeshOptimizerSceneConverter"]
-                self.cpp_info.components["meshoptimizersceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
-            self.cpp_info.components["meshoptimizersceneconverter"].requires = ["magnum::trade", "magnum::meshtools", "meshoptimizer::meshoptimizer"]
+                self.cpp_info.components["meshoptimizer_sceneconverter"].libs = ["MeshOptimizerSceneConverter"]
+                self.cpp_info.components["meshoptimizer_sceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
+            self.cpp_info.components["meshoptimizer_sceneconverter"].requires = ["magnum::trade", "magnum::meshtools", "meshoptimizer::meshoptimizer"]
 
-        if self.options.miniexrimageconverter:
-            self.cpp_info.components["miniexrimageconverter"].names["cmake_find_package"] = "MiniExrImageConverter"
-            self.cpp_info.components["miniexrimageconverter"].names["cmake_find_package_multi"] = "MiniExrImageConverter"
+        if self.options.miniexr_imageconverter:
+            self.cpp_info.components["miniexr_imageconverter"].names["cmake_find_package"] = "MiniExrImageConverter"
+            self.cpp_info.components["miniexr_imageconverter"].names["cmake_find_package_multi"] = "MiniExrImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["miniexrimageconverter"].libs = ["MiniExrImageConverter"]
-                self.cpp_info.components["miniexrimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
-            self.cpp_info.components["miniexrimageconverter"].requires = ["magnum::trade"]
+                self.cpp_info.components["miniexr_imageconverter"].libs = ["MiniExrImageConverter"]
+                self.cpp_info.components["miniexr_imageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
+            self.cpp_info.components["miniexr_imageconverter"].requires = ["magnum::trade"]
 
-        if self.options.opengeximporter:
-            self.cpp_info.components["opengeximporter"].names["cmake_find_package"] = "OpenGexImporter"
-            self.cpp_info.components["opengeximporter"].names["cmake_find_package_multi"] = "OpenGexImporter"
+        if self.options.opengex_importer:
+            self.cpp_info.components["opengex_importer"].names["cmake_find_package"] = "OpenGexImporter"
+            self.cpp_info.components["opengex_importer"].names["cmake_find_package_multi"] = "OpenGexImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["opengeximporter"].libs = ["OpenGexImporter"]
-                self.cpp_info.components["opengeximporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["opengeximporter"].requires = ["magnum::trade", "magnumopenddl"]
+                self.cpp_info.components["opengex_importer"].libs = ["OpenGexImporter"]
+                self.cpp_info.components["opengex_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["opengex_importer"].requires = ["magnum::trade", "magnumopenddl"]
             if not self.options["magnum"].shared_plugins:
-                self.cpp_info.components["opengeximporter"].requires = ["magnum::anyimageimporter"]
+                self.cpp_info.components["opengex_importer"].requires = ["magnum::anyimageimporter"]
 
-        if self.options.pngimporter:
-            self.cpp_info.components["pngimporter"].names["cmake_find_package"] = "PngImporter"
-            self.cpp_info.components["pngimporter"].names["cmake_find_package_multi"] = "PngImporter"
+        if self.options.png_importer:
+            self.cpp_info.components["png_importer"].names["cmake_find_package"] = "PngImporter"
+            self.cpp_info.components["png_importer"].names["cmake_find_package_multi"] = "PngImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["pngimporter"].libs = ["PngImporter"]
-                self.cpp_info.components["pngimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["pngimporter"].requires = ["magnum::trade"]
+                self.cpp_info.components["png_importer"].libs = ["PngImporter"]
+                self.cpp_info.components["png_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["png_importer"].requires = ["magnum::trade"]
 
-        if self.options.pngimageconverter:
-            self.cpp_info.components["pngimageconverter"].names["cmake_find_package"] = "PngImageConverter"
-            self.cpp_info.components["pngimageconverter"].names["cmake_find_package_multi"] = "PngImageConverter"
+        if self.options.png_imageconverter:
+            self.cpp_info.components["png_imageconverter"].names["cmake_find_package"] = "PngImageConverter"
+            self.cpp_info.components["png_imageconverter"].names["cmake_find_package_multi"] = "PngImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["pngimageconverter"].libs = ["PngImageConverter"]
-                self.cpp_info.components["pngimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
-            self.cpp_info.components["pngimageconverter"].requires = ["magnum::trade"]
+                self.cpp_info.components["png_imageconverter"].libs = ["PngImageConverter"]
+                self.cpp_info.components["png_imageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
+            self.cpp_info.components["png_imageconverter"].requires = ["magnum::trade"]
 
-        if self.options.primitiveimporter:
-            self.cpp_info.components["primitiveimporter"].names["cmake_find_package"] = "PrimitiveImporter"
-            self.cpp_info.components["primitiveimporter"].names["cmake_find_package_multi"] = "PrimitiveImporter"
+        if self.options.primitive_importer:
+            self.cpp_info.components["primitive_importer"].names["cmake_find_package"] = "PrimitiveImporter"
+            self.cpp_info.components["primitive_importer"].names["cmake_find_package_multi"] = "PrimitiveImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["primitiveimporter"].libs = ["PrimitiveImporter"]
-                self.cpp_info.components["primitiveimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["primitiveimporter"].requires = ["magnum::primitives", "magnum::trade"]
+                self.cpp_info.components["primitive_importer"].libs = ["PrimitiveImporter"]
+                self.cpp_info.components["primitive_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["primitive_importer"].requires = ["magnum::primitives", "magnum::trade"]
 
-        if self.options.stanfordimporter:
-            self.cpp_info.components["stanfordimporter"].names["cmake_find_package"] = "StandfordImporter"
-            self.cpp_info.components["stanfordimporter"].names["cmake_find_package_multi"] = "StandfordImporter"
+        if self.options.stanford_importer:
+            self.cpp_info.components["stanford_importer"].names["cmake_find_package"] = "StandfordImporter"
+            self.cpp_info.components["stanford_importer"].names["cmake_find_package_multi"] = "StandfordImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stanfordimporter"].libs = ["StandfordImporter"]
-                self.cpp_info.components["stanfordimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["stanfordimporter"].requires = ["magnum::meshtools", "magnum::trade"]
+                self.cpp_info.components["stanford_importer"].libs = ["StandfordImporter"]
+                self.cpp_info.components["stanford_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["stanford_importer"].requires = ["magnum::meshtools", "magnum::trade"]
 
-        if self.options.stanfordsceneconverter:
-            self.cpp_info.components["stanfordsceneconverter"].names["cmake_find_package"] = "StandfordSceneConverter"
-            self.cpp_info.components["stanfordsceneconverter"].names["cmake_find_package_multi"] = "StandfordSceneConverter"
+        if self.options.stanford_sceneconverter:
+            self.cpp_info.components["stanford_sceneconverter"].names["cmake_find_package"] = "StandfordSceneConverter"
+            self.cpp_info.components["stanford_sceneconverter"].names["cmake_find_package_multi"] = "StandfordSceneConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stanfordsceneconverter"].libs = ["StandfordSceneConverter"]
-                self.cpp_info.components["stanfordsceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
-            self.cpp_info.components["stanfordsceneconverter"].requires = ["magnum::meshtools", "magnum::trade"]
+                self.cpp_info.components["stanford_sceneconverter"].libs = ["StandfordSceneConverter"]
+                self.cpp_info.components["stanford_sceneconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "sceneconverters")]
+            self.cpp_info.components["stanford_sceneconverter"].requires = ["magnum::meshtools", "magnum::trade"]
 
-        if self.options.stbimageconverter:
-            self.cpp_info.components["stbimageconverter"].names["cmake_find_package"] = "StbImageConverter"
-            self.cpp_info.components["stbimageconverter"].names["cmake_find_package_multi"] = "StbImageConverter"
+        if self.options.stb_imageconverter:
+            self.cpp_info.components["stb_imageconverter"].names["cmake_find_package"] = "StbImageConverter"
+            self.cpp_info.components["stb_imageconverter"].names["cmake_find_package_multi"] = "StbImageConverter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stbimageconverter"].libs = ["StbImageConverter"]
-                self.cpp_info.components["stbimageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
-            self.cpp_info.components["stbimageconverter"].requires = ["magnum::trade"]
+                self.cpp_info.components["stb_imageconverter"].libs = ["StbImageConverter"]
+                self.cpp_info.components["stb_imageconverter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "imageconverters")]
+            self.cpp_info.components["stb_imageconverter"].requires = ["magnum::trade"]
 
-        if self.options.stbimageimporter:
-            self.cpp_info.components["stbimageimporter"].names["cmake_find_package"] = "StbImageImporter"
-            self.cpp_info.components["stbimageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
+        if self.options.stb_imageimporter:
+            self.cpp_info.components["stb_imageimporter"].names["cmake_find_package"] = "StbImageImporter"
+            self.cpp_info.components["stb_imageimporter"].names["cmake_find_package_multi"] = "StbImageImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stbimageimporter"].libs = ["StbImageImporter"]
-                self.cpp_info.components["stbimageimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["stbimageimporter"].requires = ["magnum::trade"]
+                self.cpp_info.components["stb_imageimporter"].libs = ["StbImageImporter"]
+                self.cpp_info.components["stb_imageimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["stb_imageimporter"].requires = ["magnum::trade"]
 
-        if self.options.stbtruetypefont:
-            self.cpp_info.components["stbtruetypefont"].names["cmake_find_package"] = "StbTrueTypeFont"
-            self.cpp_info.components["stbtruetypefont"].names["cmake_find_package_multi"] = "StbTrueTypeFont"
+        if self.options.stbtruetype_font:
+            self.cpp_info.components["stbtruetype_font"].names["cmake_find_package"] = "StbTrueTypeFont"
+            self.cpp_info.components["stbtruetype_font"].names["cmake_find_package_multi"] = "StbTrueTypeFont"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stbtruetypefont"].libs = ["StbTrueTypeFont"]
-                self.cpp_info.components["stbtruetypefont"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
-            self.cpp_info.components["stbtruetypefont"].requires = ["magnum::text"]
+                self.cpp_info.components["stbtruetype_font"].libs = ["StbTrueTypeFont"]
+                self.cpp_info.components["stbtruetype_font"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "fonts")]
+            self.cpp_info.components["stbtruetype_font"].requires = ["magnum::text"]
 
-        if self.options.stlimporter:
-            self.cpp_info.components["stlimporter"].names["cmake_find_package"] = "StlImporter"
-            self.cpp_info.components["stlimporter"].names["cmake_find_package_multi"] = "StlImporter"
+        if self.options.stl_importer:
+            self.cpp_info.components["stl_importer"].names["cmake_find_package"] = "StlImporter"
+            self.cpp_info.components["stl_importer"].names["cmake_find_package_multi"] = "StlImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stlimporter"].libs = ["StlImporter"]
-                self.cpp_info.components["stlimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["stlimporter"].requires = ["magnum::meshtools", "magnum::trade"]
+                self.cpp_info.components["stl_importer"].libs = ["StlImporter"]
+                self.cpp_info.components["stl_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["stl_importer"].requires = ["magnum::meshtools", "magnum::trade"]
 
-        if self.options.stbvorbisaudioimporter:
-            self.cpp_info.components["stbvorbisaudioimporter"].names["cmake_find_package"] = "StbVorbisAudioImporter"
-            self.cpp_info.components["stbvorbisaudioimporter"].names["cmake_find_package_multi"] = "StbVorbisAudioImporter"
+        if self.options.stbvorbis_audioimporter:
+            self.cpp_info.components["stbvorbis_audioimporter"].names["cmake_find_package"] = "StbVorbisAudioImporter"
+            self.cpp_info.components["stbvorbis_audioimporter"].names["cmake_find_package_multi"] = "StbVorbisAudioImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["stbvorbisaudioimporter"].libs = ["StbVorbisAudioImporter"]
-                self.cpp_info.components["stbvorbisaudioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
-            self.cpp_info.components["stbvorbisaudioimporter"].requires = ["magnum::audio"]
+                self.cpp_info.components["stbvorbis_audioimporter"].libs = ["StbVorbisAudioImporter"]
+                self.cpp_info.components["stbvorbis_audioimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "audioimporters")]
+            self.cpp_info.components["stbvorbis_audioimporter"].requires = ["magnum::audio"]
 
-        if self.options.tinygltfimporter:
-            self.cpp_info.components["tinygltfimporter"].names["cmake_find_package"] = "TinyGltfImporter"
-            self.cpp_info.components["tinygltfimporter"].names["cmake_find_package_multi"] = "TinyGltfImporter"
+        if self.options.tinygltf_importer:
+            self.cpp_info.components["tinygltf_importer"].names["cmake_find_package"] = "TinyGltfImporter"
+            self.cpp_info.components["tinygltf_importer"].names["cmake_find_package_multi"] = "TinyGltfImporter"
             if not self.options.shared_plugins:
-                self.cpp_info.components["tinygltfimporter"].libs = ["TinyGltfImporter"]
-                self.cpp_info.components["tinygltfimporter"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
-            self.cpp_info.components["tinygltfimporter"].requires = ["magnum::trade", "magnum::anyimageimporter"]
+                self.cpp_info.components["tinygltf_importer"].libs = ["TinyGltfImporter"]
+                self.cpp_info.components["tinygltf_importer"].libdirs = [os.path.join(self.package_folder, "lib", "magnum", "importers")]
+            self.cpp_info.components["tinygltf_importer"].requires = ["magnum::trade", "magnum::anyimageimporter"]
