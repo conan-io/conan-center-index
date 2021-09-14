@@ -53,7 +53,7 @@ class GetTextConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self._is_msvc:
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -92,7 +92,7 @@ class GetTextConan(ConanFile):
             elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
-            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "bin", "share", "automake-1.16"))
+            automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "res", "automake-1.16"))
             args.extend(["CC=%s/compile cl -nologo" % automake_perldir,
                          "LD=link",
                          "NM=dumpbin -symbols",
