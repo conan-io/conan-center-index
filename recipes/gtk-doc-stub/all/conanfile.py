@@ -14,7 +14,7 @@ class GtkDocStubConan(ConanFile):
     topics = ("gtk", "documentation", "gtkdocize")
     settings = "os"
 
-    exports_sources = "patches/*
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
