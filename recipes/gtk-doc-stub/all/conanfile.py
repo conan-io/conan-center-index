@@ -12,8 +12,9 @@ class GtkDocStubConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-2.0-or-later"
     topics = ("gtk", "documentation", "gtkdocize")
+    settings = "os"
 
-    exports_sources = "patches/*"
+    exports_sources = "patches/*
 
     @property
     def _source_subfolder(self):
