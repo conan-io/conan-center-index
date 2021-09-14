@@ -365,10 +365,10 @@ class AwsSdkCppConan(ConanFile):
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
             
         if tools.cross_building(self):
-            cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
-            cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
-            cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
-            cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         self._cmake.configure()
         return self._cmake
 
