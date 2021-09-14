@@ -52,6 +52,13 @@ side implementation."""
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
 
+        # FIXME: There is no problem with gcc-5 but with glibc < 2.27
+        # without platform module there is no way to find glibc version
+        if tools.Version(self.version) >= "2.1":
+            if self.settings.compiler == "gcc":
+                if tools.Version(self.settings.compiler.version) <= "5":
+                    raise ConanInvalidConfiguration("gcc5 and less are unsupported")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
