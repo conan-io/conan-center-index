@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class GetTextConan(ConanFile):
     name = "libgettext"
     description = "An internationalization and localization system for multilingual programs"
-    topics = ("conan32", "gettext", "intl", "libintl", "i18n")
+    topics = ("gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
@@ -49,8 +49,12 @@ class GetTextConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.16")
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self._is_msvc:
             self.build_requires("automake/1.16.3")
