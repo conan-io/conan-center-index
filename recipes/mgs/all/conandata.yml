@@ -5,3 +5,6 @@ sources:
   0.1.4:
     url: https://github.com/theodelrieu/mgs/releases/download/v0.1.4/mgs.zip
     sha256: e247976860a0c8d237caaf62a918627f59d4f8a5b5bb811ab01e7cbecf31d4ce
+  0.1.5:
+    url: https://github.com/theodelrieu/mgs/releases/download/v0.1.5/mgs.zip
+    sha256: ca00e5d26be18beac9874270c17bddbc4f96cad6d92aab685c9eb4be0e6d7fc7
