@@ -108,8 +108,6 @@ class PCREConan(ConanFile):
         # Avoid CMP0006 error (macos bundle)
         tools.replace_in_file(
             cmake_file, "RUNTIME DESTINATION bin", "RUNTIME DESTINATION bin\n        BUNDLE DESTINATION bin")
-        tools.replace_in_file(
-            cmake_file, "BZIP2_LIBRARIES", "BZip2_LIBRARIES")
 
     def _configure_cmake(self):
         if self._cmake:
