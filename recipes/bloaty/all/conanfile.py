@@ -16,7 +16,7 @@ class BloatyConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    build_requires = (
+    requires = (
         "capstone/4.0.2",
         "protobuf/3.17.1",
         "pkgconf/1.7.4",
