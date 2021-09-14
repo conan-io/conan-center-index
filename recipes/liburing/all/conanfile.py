@@ -1,6 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import subprocess
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -46,18 +48,21 @@ side implementation."""
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def get_glibc_version(self):
+        with subprocess.Popen(["ldd", "--version"], stdout=subprocess.PIPE) as p:
+            output = p.stdout.read().decode("utf-8")
+            m = re.search(r'[0-9]+\.[0-9]+', output)
+            return tools.Version(m.group(0))
+
     def validate(self):
         # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
 
-        # FIXME: There is no problem with gcc-5 but with glibc < 2.27
-        # without platform module there is no way to find glibc version
-        if tools.Version(self.version) >= "2.1":
-            if self.settings.compiler == "gcc":
-                if tools.Version(self.settings.compiler.version) <= "5":
-                    raise ConanInvalidConfiguration("gcc5 and less are unsupported")
+        if tools.Version(self.version) >= "2.1" and self.get_glibc_version() < "2.27":
+            raise ConanInvalidConfiguration(
+                "glibc 2.27 or higher required to build this package")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
