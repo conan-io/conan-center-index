@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class GetTextConan(ConanFile):
     name = "libgettext"
     description = "An internationalization and localization system for multilingual programs"
-    topics = ("conan", "gettext", "intl", "libintl", "i18n")
+    topics = ("conan32", "gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
