@@ -169,9 +169,10 @@ having the same naming conventions for the options may help consumers, e.g. they
 
 ## Supported Versions
 
-Keeping older versions is needed due users which are still using legacy versions and can not update their packages. However, some points should be considered:
-- Adding older versions should allowed only strict cases when required by an user. The committer should express he/she needs on the PR.
-- Removing older versions is allowed, since it keeps at least one version for each older major release available. For the latest major version, at least,
-  three last versions should be available.
+Keeping older versions is needed due to users who are still using legacy versions and can not update their packages. However, some points should be considered:
+- Adding older versions should be allowed only in strict cases, when required by a user. The committer should express their needs on the PR.
+- Removing older versions is allowed, so long as it keeps:
+  - for each older major release available, at least one version
+  - for the latest major version, at least three last versions should be available (if there are more than three such versions).
 
 Also, consider these FAQs: [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)  and [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
