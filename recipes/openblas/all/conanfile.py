@@ -9,11 +9,7 @@ class OpenblasConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openblas.net"
     description = "An optimized BLAS library based on GotoBLAS2 1.13 BSD version"
-    topics = (
-        "openblas",
-        "blas",
-        "lapack"
-    )
+    topics = ("openblas", "blas", "lapack")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -27,7 +23,7 @@ class OpenblasConan(ConanFile):
         "fPIC": True,
         "build_lapack": False,
         "use_thread": True,
-        "dynamic_arch": False
+        "dynamic_arch": False,
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -45,19 +41,32 @@ class OpenblasConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+        if hasattr(self, "settings_build") and tools.cross_building(
+            self, skip_x64_x86=True
+        ):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self._source_subfolder
+        )
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
+            """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")""",
+            """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")""",
+        )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        
+
         if self.options.build_lapack:
-            self.output.warn("Building with lapack support requires a Fortran compiler.")
+            self.output.warn(
+                "Building with lapack support requires a Fortran compiler."
+            )
         self._cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         self._cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
         self._cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
@@ -66,7 +75,9 @@ class OpenblasConan(ConanFile):
         # Required for safe concurrent calls to OpenBLAS routines
         self._cmake.definitions["USE_LOCKING"] = not self.options.use_thread
 
-        self._cmake.definitions["MSVC_STATIC_CRT"] = False # don't, may lie to consumer, /MD or /MT is managed by conan
+        self._cmake.definitions[
+            "MSVC_STATIC_CRT"
+        ] = False  # don't, may lie to consumer, /MD or /MT is managed by conan
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
@@ -95,16 +106,28 @@ class OpenblasConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
         self.cpp_info.names["pkg_config"] = "openblas"
         cmake_component_name = "pthread" if self.options.use_thread else "serial"
-        self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
-        self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
+        self.cpp_info.components["openblas_component"].names[
+            "cmake_find_package"
+        ] = cmake_component_name
+        self.cpp_info.components["openblas_component"].names[
+            "cmake_find_package_multi"
+        ] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["pkg_config"] = "openblas"
-        self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
+        self.cpp_info.components["openblas_component"].includedirs.append(
+            os.path.join("include", "openblas")
+        )
         self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.use_thread:
-                self.cpp_info.components["openblas_component"].system_libs.append("pthread")
+                self.cpp_info.components["openblas_component"].system_libs.append(
+                    "pthread"
+                )
             if self.options.build_lapack:
-                self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
+                self.cpp_info.components["openblas_component"].system_libs.append(
+                    "gfortran"
+                )
 
-        self.output.info("Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder))
+        self.output.info(
+            "Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder)
+        )
         self.env_info.OpenBLAS_HOME = self.package_folder
