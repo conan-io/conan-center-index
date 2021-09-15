@@ -24,6 +24,7 @@ This section gathers the most common questions from the community related to pac
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
   * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)<!-- endToc -->
@@ -203,6 +204,12 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+
+## What is the policy for removing older versions of a package?
+
+Keeping older versions can be a problem as longer they become incompatible, less downloaded and consumes CI resources. Thus, removing older versions from
+`config.yml` and `conandata.yml` is totally fine. The respective binary packages will not be from Conan Center, but they will not receive new updates, as
+they are not listed to be built. There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
 
 ## Can I install packages from the system package manager?
 
