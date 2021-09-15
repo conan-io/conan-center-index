@@ -175,4 +175,6 @@ Keeping older versions is needed due to users who are still using legacy version
   - for each older major release available, at least one version
   - for the latest major version, at least three last versions should be available (if there are more than three such versions).
 
-Also, consider these FAQs: [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)  and [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
+Also, consider these FAQs:
+- [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)
+- [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
