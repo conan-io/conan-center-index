@@ -216,8 +216,9 @@ class ArmadilloConan(ConanFile):
         if self.options.USE_OPENBLAS:
             self.requires(openblas)
             # Note that if you're relying on this to build LAPACK, you _must_ have
-            # gfortran installed. If you don't, OpenBLAS will build successfully but
+            # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
             # without LAPACK support, which isn't obvious.
+            # This can be achieved by setting the FC environment variable in your conan profile
             self.options["openblas"].build_lapack = (
                 self.options.ARMA_USE_LAPACK and not self.options.USE_SYSTEM_LAPACK
             )
