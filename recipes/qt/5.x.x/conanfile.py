@@ -1130,6 +1130,9 @@ Examples = bin/datadir/examples""")
         if self.options.qtwinextras:
             _create_module("WinExtras")
 
+        if self.options.qtmacextras:
+            _create_module("MacExtras")
+
         if self.options.qtxmlpatterns:
              _create_module("XmlPatterns", ["Network"])
 
