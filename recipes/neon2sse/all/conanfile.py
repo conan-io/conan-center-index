@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 class neon2sseConan(ConanFile):
     name = "neon2sse"
@@ -24,6 +25,10 @@ class neon2sseConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.configure()
         return self._cmake
+    
+    def validate(self):
+        if "x86" not in self.settings.arch:
+            raise ConanInvalidConfiguration("neon2sse only supports x86")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
