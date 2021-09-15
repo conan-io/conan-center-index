@@ -51,8 +51,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 ## Linux
 
 - Compilers:
-  - GCC versions: 10, 4.9, 5, 6, 7, 8, 9
-  - Clang versions: 10, 11, 3.9, 4.0, 5.0, 6.0, 7.0, 8, 9
+  - GCC versions: 10, 5, 6, 7, 8, 9
+  - Clang versions: 10, 11
 - C++ Standard Library (`libcxx`):
   - GCC compiler: `libstdc++`, `libstdc++11`
   - Clang compiler: `libstdc++`, `libc++`
@@ -64,7 +64,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 ## MacOS
 
-- Compilers: Apple-clang versions 10.0.1, 11.0.0, 12.0.0, 12.0.0 (three latest versions, we will rotate the older when a new compiler version is released)
+- Compilers: Apple-clang versions 11.0.0, 12.0.0, 12.0.0 (three latest versions, we will rotate the older when a new compiler version is released)
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug

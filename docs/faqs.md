@@ -23,7 +23,10 @@ This section gathers the most common questions from the community related to pac
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
-  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
+  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -200,3 +203,53 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+
+## Can I install packages from the system package manager?
+
+It depends. You can not mix both regular projects with system packages, but you can provide package wrappers for system packages.
+The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
+pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. However, Conan can not track system packages, like their
+version and options, which creates a fragile situation where affects libraries and binaries built in your package but can not be totally reproduced.
+Also, system package managers require administrator permission to install packages, which is not always possible and may break limited users. Moreover, more than one Conan package may require the same system package and there is no way to track their mutual usage.
+The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requirement` nor `SystemPackageTool` in recipes, to avoid mixing both regular projects with
+system packages at same recipe.
+However, there are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, the
+[OpenGL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opengl/all/conanfile.py) is a good example.
+
+## Why ConanCenter does **not** build and execute tests in recipes
+
+<!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
+
+There are different motivations
+- time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
+- ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+## What is the policy for supported python versions?
+
+`Python 2.7` and earlier is not supported by the ConanCenter, as it's already [EOL](https://www.python.org/doc/sunset-python-2/).
+
+`Python 3.5` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://www.python.org/dev/peps/pep-0478/).
+
+Versions `Python 3.6+` onwards are currently supported by the infrastructure and the recipes.
+
+Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.5+` ATM.
+
+Windows agents currently use `Python 3.6.7+`. macOS agents use version `Python 3.7.3+`.
+
+The version run by our agents and docker images is a subject to change, as security updates to the Python are released, or they enter EOL.
+
+Additional concerns about supported versions within conan ecosystem (not just ConanCenter, but client itself and other tools) are documented in [tribe](https://github.com/conan-io/tribe/pull/3).
+
+For ConanCenter, besides security, there are various concerns about critical features provided by the Python interpreter, include its syntax and the standard library, e.g.:
+
+- LZMA compression support
+- Unicode awareness
+- long-path awareness
+
+Right now, only the [CPython](https://github.com/python/cpython) flavor of the interpreter is supported (e.g. we never tested recipes work with IronPython, JPython, Cython, etc.).
+
+In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 architecture) - 32-bit builds (x86) are not supported and not installed on the agents.
+
+There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
+ as we don't test all the possible combinations (and probably will never be). Patches are welcomed if problems are found.

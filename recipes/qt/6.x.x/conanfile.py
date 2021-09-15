@@ -236,8 +236,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.2.172")
-
+            self.requires("vulkan-loader/1.2.182")
+            if tools.is_apple_os(self.settings.os):
+                self.requires("moltenvk/1.1.4")
         if self.options.with_glib:
             self.requires("glib/2.69.2")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -692,7 +693,11 @@ class QtConan(ConanFile):
             assert componentname not in self.cpp_info.components, "Module %s already present in self.cpp_info.components" % module
             self.cpp_info.components[componentname].names["cmake_find_package"] = module
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = module
-            self.cpp_info.components[componentname].libs = ["Qt6%s%s" % (module, libsuffix)]
+            if module.endswith("Private"):
+                libname = module[:-7]
+            else:
+                libname = module
+            self.cpp_info.components[componentname].libs = ["Qt6%s%s" % (libname, libsuffix)]
             self.cpp_info.components[componentname].includedirs = ["include", os.path.join("include", "Qt%s" % module)]
             self.cpp_info.components[componentname].defines = ["QT_%s_LIB" % module.upper()]
             if module != "Core" and "Core" not in requires:
@@ -747,6 +752,8 @@ class QtConan(ConanFile):
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
+                if tools.is_apple_os(self.settings.os):
+                    gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
                 gui_reqs.append("harfbuzz::harfbuzz")
             if self.options.with_libjpeg == "libjpeg-turbo":
@@ -754,6 +761,30 @@ class QtConan(ConanFile):
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
+
+            if self.settings.os == "Windows":
+                _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs = ["advapi32", "dwmapi", "gdi32", "imm32",
+                    "ole32", "oleaut32", "shell32", "shlwapi", "user32", "winmm", "winspool", "wtsapi32"]
+            elif self.settings.os == "Android":
+                _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["qtQAndroidIntegrationPlugin"].system_libs = ["android", "jnigraphics"]
+            elif self.settings.os == "Macos":
+                _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
+                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
+                    "IOKit", "IOSurface", "Metal", "QuartzCore"]
+            elif self.settings.os in ["iOS", "tvOS"]:
+                _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
+                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
+                    "QuartzCore", "UIKit"]
+            elif self.settings.os == "watchOS":
+                _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
+            elif self.settings.os == "Emscripten":
+                _create_plugin("QWasmIntegrationPlugin", "qwasm", "platforms", ["Core", "Gui"])
+            else:
+                _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
+                _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
+
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
@@ -936,8 +967,10 @@ class QtConan(ConanFile):
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
             for m in os.listdir(object_dir):
-                submodules_dir = os.path.join(object_dir, m)
                 component = "qt" + m[:m.find("_")]
+                if component not in self.cpp_info.components:
+                    continue
+                submodules_dir = os.path.join(object_dir, m)
                 for sub_dir in os.listdir(submodules_dir):
                     submodule_dir = os.path.join(submodules_dir, sub_dir)
                     obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]

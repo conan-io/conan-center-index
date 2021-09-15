@@ -59,11 +59,8 @@ class LibCoapConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + \
-            os.path.basename(
-                self.conan_data["sources"][self.version]["url"]).split(".")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -72,6 +69,11 @@ class LibCoapConan(ConanFile):
         self._cmake.definitions["WITH_EPOLL"] = self.options.with_epoll
         self._cmake.definitions["ENABLE_DTLS"] = self.options.dtls_backend != None
         self._cmake.definitions["DTLS_BACKEND"] = self.options.dtls_backend
+
+        if self.version != "cci.20200424":
+            self._cmake.definitions["ENABLE_DOCS"] = False
+            self._cmake.definitions["ENABLE_EXAMPLES"] = False
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -86,12 +88,21 @@ class LibCoapConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        pkgconfig_filename = "libcoap-2{}".format("-{}".format(self.options.dtls_backend) if self.options.dtls_backend else "")
-        self.cpp_info.names["pkg_config"] = pkgconfig_filename 
+        library_name = ""
+        pkgconfig_name = ""
+        if self.version == "cci.20200424":
+            library_name = "coap"
+            pkgconfig_name = "libcoap-2"
+        else:
+            library_name = "coap-3"
+            pkgconfig_name = "libcoap-3"
+
         self.cpp_info.components["coap"].names["cmake_find_package"] = "coap"
         self.cpp_info.components["coap"].names["cmake_find_package_multi"] = "coap"
+        pkgconfig_filename = "{}{}".format(pkgconfig_name, "-{}".format(self.options.dtls_backend) if self.options.dtls_backend else "")
         self.cpp_info.components["coap"].names["pkg_config"] = pkgconfig_filename
-        self.cpp_info.components["coap"].libs = ["coap"]
+        self.cpp_info.components["coap"].libs = [library_name]
+
         if self.settings.os == "Linux":
             self.cpp_info.components["coap"].system_libs = ["pthread"]
             if self.options.dtls_backend == "openssl":
