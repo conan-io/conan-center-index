@@ -8,3 +8,6 @@ sources:
   "4.7.1":
     url: "https://github.com/zeromq/cppzmq/archive/v4.7.1.tar.gz"
     sha256: "9853e0437d834cbed5d3c223bf1d755cadee70e7c964c6e42c4c6783dee5d02c"
+  "4.8.0":
+    url: "https://github.com/zeromq/cppzmq/archive/v4.8.0.tar.gz"
+    sha256: "4c07600e3ef311e24d9cf1917122067b48bd447cb7de86c5d23a29826a204649"
