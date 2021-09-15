@@ -1,4 +1,5 @@
 import os
+import inspect
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
@@ -58,6 +59,15 @@ class NsyncConan(ConanFile):
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
+        if self.settings.os == "Windows" and self.options.shared:
+            ar_dest = \
+                "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} " \
+                "COMPONENT Development"
+            rt_dest = 'RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"'
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                f"{ar_dest})", f"{ar_dest}\n{rt_dest})")
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -67,8 +77,6 @@ class NsyncConan(ConanFile):
         self.copy("LICENSE", dst='licenses', src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if self.settings.os == "Windows" and self.options.shared:
-            self.copy("bin/*.dll", dst='lib', src=self._build_subfolder)
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "nsync"
@@ -91,5 +99,5 @@ class NsyncConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             component.system_libs = ["pthread"]
-        if self.settings.os == "Windows" and self.options.shared:
-            component.libdirs = ["lib"]
+        if self.settings.os == "Windows":
+            component.libdirs = ["lib", "bin"]
