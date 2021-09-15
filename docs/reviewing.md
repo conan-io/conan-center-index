@@ -17,7 +17,8 @@ The following policies are preferred during the review, but not mandatory:
   * [Test Package](#test-package)
     * [Minimalistic Source Code](#minimalistic-source-code)
     * [CMake targets](#cmake-targets)
-  * [Recommended feature options names](#recommended-feature-options-names)<!-- endToc -->
+  * [Recommended feature options names](#recommended-feature-options-names)
+  * [Supported Versions](#supported-versions)<!-- endToc -->
 
 ## Trailing white-spaces
 
@@ -112,7 +113,7 @@ CMake or Meson are usually preferred.
 ### CMake targets
 
 When using CMake to test a package, the information should be consumed using the **targets provided by `cmake_find_package_multi` generator**. We
-enforce this generator to align with the upcoming 
+enforce this generator to align with the upcoming
 [Conan's new `CMakeDeps` generator](https://docs.conan.io/en/latest/reference/conanfile/tools/cmake/cmakedeps.html?highlight=cmakedeps)
 and it should help in the migration (and compatibility) with Conan v2.
 
@@ -165,3 +166,12 @@ the actual recipe code then may look like:
 ```
 
 having the same naming conventions for the options may help consumers, e.g. they will be able to specify options with wildcards: `-o *:with_threads=True`, therefore, `with_threads` options will be enabled for all packages in the graph that support it.
+
+## Supported Versions
+
+Keeping older versions is needed due users which are still using legacy versions and can not update their packages. However, some points should be considered:
+- Adding older versions should allowed only strict cases when required by an user. The committer should express he/she needs on the PR.
+- Removing older versions is allowed, since it keeps at least one version for each older major release available. For the latest major version, at least,
+  three last versions should be available.
+
+Also, consider these FAQs: [What is the policy for adding older versions of a package?](faqs.md#what-is-the-policy-for-adding-older-versions-of-a-package)  and [What is the policy for removing older versions of a package?](faqs.md#what-is-the-policy-for-removing-older-versions-of-a-package)
