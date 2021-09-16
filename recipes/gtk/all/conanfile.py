@@ -69,34 +69,34 @@ class GtkConan(ConanFile):
             raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
 
     def build_requirements(self):
-        self.build_requires("meson/0.57.1")
-        self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.59.1")
+        self.build_requires("pkgconf/1.7.4")
         if self._gtk4:
-            self.build_requires("sassc/3.6.1")
+            self.build_requires("sassc/3.6.2")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.4")
-        self.requires("glib/2.68.0")
+        self.requires("glib/2.69.3")
         if self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.4")
         if self._gtk4:
-            self.requires("graphene/1.10.4")
+            self.requires("graphene/1.10.6")
         if self.settings.os == "Linux":
             if self._gtk4:
-                self.requires("xkbcommon/1.1.0")
+                self.requires("xkbcommon/1.3.1")
             if self._gtk3:
                 self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
-                    self.requires("xkbcommon/1.1.0")
+                    self.requires("xkbcommon/1.3.1")
                 self.requires("wayland/1.19.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
             self.requires("atk/2.36.0")
-        self.requires("libepoxy/1.5.5")
+        self.requires("libepoxy/1.5.9")
         if self.options.with_pango:
-            self.requires("pango/1.48.3")
+            self.requires("pango/1.49.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
