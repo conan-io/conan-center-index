@@ -1,5 +1,5 @@
 versions:
-#  "6.12.0.122":
-#    folder: all
+  "6.12.0.122":
+    folder: all
   "6.12.0.154":
     folder: all
