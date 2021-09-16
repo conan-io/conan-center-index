@@ -322,9 +322,17 @@ class Open62541Conan(ConanFile):
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+            tools.patch(**patch)        
         cmake = self._configure_cmake()
         cmake.build()
+
+    @property
+    def _tools_subfolder(self):
+        return os.path.join(self._source_subfolder, "tools")
+
+    # @property
+    # def _deps_subfolder(self):
+    #     return os.path.join(self._source_subfolder, "deps")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -342,7 +350,10 @@ class Open62541Conan(ConanFile):
                 os.remove(cmake_file)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
+        self.copy("generate_*.py", dst="share/tools", src=self._tools_subfolder)
+        self.copy("nodeset_compiler/*", dst="share/tools", src=self._tools_subfolder)
+        #use local local ua-nodeset instead of the OPC Founation files (NOT RECOMMENDED) Use the UA-Nodeset package instead
+        #self.copy("ua-nodeset/*", dst="share", src=self._deps_subfolder)
     @property
     def _module_subfolder(self):
         return os.path.join("lib", "cmake", "open62541")
@@ -350,6 +361,11 @@ class Open62541Conan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder, "open62541Macros.cmake")
+
+    @staticmethod
+    def _chmod_plus_x(filename):
+        if os.name == 'posix':
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"
@@ -360,6 +376,12 @@ class Open62541Conan(ConanFile):
             "include",
             os.path.join("include", "plugin")
         ]
+
+        #required for creating servers from ua nodesets
+        self.env_info.open62541_TOOLS_DIR = os.path.join(self.package_folder, "share", "tools")
+        self._chmod_plus_x(os.path.join(self.package_folder, "share", "tools", "generate_nodeid_header.py"))
+        #use local local ua-nodeset instead of the OPC Founation files (NOT RECOMMENDED) Use the UA-Nodeset package instead
+        #self.env_info.open62541_NODESET_DIR = os.path.join(self.package_folder, "share", "ua-nodeset")
 
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
