@@ -30,7 +30,7 @@ class Neon2sseConan(ConanFile):
         return self._cmake
     
     def validate(self):
-        if "x86" not in self.settings.arch:
+        if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("neon2sse only supports x86")
 
     def source(self):
