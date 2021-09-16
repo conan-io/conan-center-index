@@ -20,14 +20,23 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
-        "with_pango": [True, False]
+        "with_pango": [True, False],
+        "with_ffmpeg": [True, False],
+        "with_gstreamer": [True, False],
+        "with_cups": [True, False],
+        "with_cloudprint": [True, False]
         }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_wayland": False,
         "with_x11": True,
-        "with_pango": True}
+        "with_pango": True,
+        "with_ffmpeg": False,
+        "with_gstreamer": False,
+        "with_cups": False,
+        "with_cloudprint": False
+    }
 
     @property
     def _source_subfolder(self):
@@ -97,6 +106,10 @@ class GtkConan(ConanFile):
         self.requires("libepoxy/1.5.9")
         if self.options.with_pango:
             self.requires("pango/1.49.1")
+        if self.options.with_ffmpeg:
+            self.requires("ffmpeg/4.2.1")
+        if self.options.with_gstreamer:
+            self.requires("gstreamer/1.19.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -116,6 +129,13 @@ class GtkConan(ConanFile):
         defs["datadir"] = os.path.join(self.package_folder, "res", "share")
         defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
         defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
+        
+        if self._gtk4:
+            enabled_disabled = lambda opt : "enabled" if opt else "disabled" 
+            defs["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
+            defs["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
+            defs["print-cups"] = enabled_disabled(self.options.with_cups)
+            defs["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
