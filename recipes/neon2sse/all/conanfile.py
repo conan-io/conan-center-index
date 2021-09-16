@@ -1,8 +1,11 @@
-import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
 
-class neon2sseConan(ConanFile):
+
+required_conan_version = ">=1.33.0"
+
+class Neon2sseConan(ConanFile):
     name = "neon2sse"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/intel/ARM_NEON_2_x86_SSE"
