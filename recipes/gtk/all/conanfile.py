@@ -144,6 +144,10 @@ class GtkConan(ConanFile):
     def build(self):
         if self._gtk3:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+        if tools.Version(self.Version) >= "4.2.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                  "gtk_update_icon_cache: true",
+                                  "gtk_update_icon_cache: false")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
