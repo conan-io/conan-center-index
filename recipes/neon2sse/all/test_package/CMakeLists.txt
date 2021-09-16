@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(NEON_2_SSE REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} NEON_2_SSE::NEON_2_SSE)
