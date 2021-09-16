@@ -26,4 +26,4 @@ class UaNodeSetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
-        self.user_info.nodeset_path = os.path.join(self.package_folder, "res")
+        self.env_info.nodeset_path = os.path.join(self.package_folder, "res")
