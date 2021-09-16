@@ -13,7 +13,7 @@ class MonoConan(ConanFile):
     description = "Mono open source ECMA CLI, C# and .NET implementation."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mono-project.com/"
-    license = "MIT, BSD"
+    license = ("MIT", "BSD-3-Clause", "Apache-2.0")
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
     generators = "pkg_config"
