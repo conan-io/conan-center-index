@@ -51,5 +51,6 @@ class Neon2sseConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.libdirs = []
         self.cpp_info.names["cmake_find_package"] = "NEON_2_SSE"
         self.cpp_info.names["cmake_find_package_multi"] = "NEON_2_SSE"
