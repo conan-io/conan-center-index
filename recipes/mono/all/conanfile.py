@@ -135,7 +135,7 @@ class MonoConan(ConanFile):
         self.run('find {2} -type f -exec grep -Iq . {{}} \\; -print | xargs sed -i "s@{0}/@{1}/@g" '.format(self.package_folder, "\\${MONO_CONAN_ROOT_DIR}", os.path.join(self.package_folder, "bin")))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        # Note: the etc folder is needed, otherwise some of the mono scripts do not properly work
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
