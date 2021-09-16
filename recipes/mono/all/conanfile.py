@@ -82,7 +82,6 @@ class MonoConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("mono cannot be built on Windows")
 
-    def configure(self):
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
