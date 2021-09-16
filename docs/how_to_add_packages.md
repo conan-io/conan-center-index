@@ -216,7 +216,7 @@ Call `conan create . lib/1.0@` in the folder of the recipe using the profile you
 
 ```sh
 cd conan-center-index/recipes/boost/all
-conan create . boost/1.74.0@
+conan create conanfile.py boost/1.77.0@
 ```
 
 ### Updating conan hooks on your machine
