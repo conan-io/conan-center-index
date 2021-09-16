@@ -2,4 +2,7 @@ sources:
   "6.12.0.122":
     url: "https://download.mono-project.com/sources/mono/mono-6.12.0.122.tar.xz"
     sha256: "29c277660fc5e7513107aee1cbf8c5057c9370a4cdfeda2fc781be6986d89d23"
+  "6.12.0.154":
+    url: "https://download.mono-project.com/sources/mono/preview/mono-6.12.0.154.tar.xz"
+    sha256: "3466155366232ccd67a7c76ebae43d9e4fab7027a4b77f567f37cdb2108a3d90"
 

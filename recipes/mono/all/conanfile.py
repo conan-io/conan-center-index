@@ -15,8 +15,7 @@ class MonoConan(ConanFile):
     homepage = "https://www.mono-project.com/"
     license = ("MIT", "BSD-3-Clause", "Apache-2.0")
     exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config"
+    settings = "os", "compiler"
     topics = "dotnet", "mono", "csharp", "runtime", "compiler"
     # options = {
     #     "with-sgen": ["yes", "no"],
@@ -124,11 +123,22 @@ class MonoConan(ConanFile):
             autotools.make()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder_with_root)
         with tools.chdir(self._source_subfolder_with_root):
             autotools = self._configure_autotools()
             autotools.install()
+
+        # The scripts in the bin folder all have absolute paths. Replace them with the MONO_CONAN_ROOT_DIR environment variable
+        # which is set in the package_info step
+        # The find code before sed is filtering to only replace in text files and skip binary files
+        # Source: https://stackoverflow.com/a/13659891
+        self.run('find {2} -type f -exec grep -Iq . {{}} \\; -print | xargs sed -i "s@{0}/@{1}/@g" '.format(self.package_folder, "\\${MONO_CONAN_ROOT_DIR}", os.path.join(self.package_folder, "bin")))
+
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "mono"
@@ -136,6 +146,14 @@ class MonoConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "mono"
         self.cpp_info.libs = tools.collect_libs(self)
 
+        # This variable is required within the mono scripts in mono/bin folder
+        self.env_info.MONO_CONAN_ROOT_DIR = self.package_folder
+
+        # The cert-sync script is requiring MONO_CONAN_ROOT_DIR
+        env = {"MONO_CONAN_ROOT_DIR": self.package_folder}
+        with tools.environment_append(env):
+            # See https://github.com/mono/mono/issues/12406#issuecomment-453998125
+            self.run("{} --user --quiet /etc/ssl/certs/ca-certificates.crt".format(os.path.join(self.package_folder, "bin", "cert-sync")))
 
         # from https://stackoverflow.com/a/50374000
         self.env_info.MONO_TLS_PROVIDER = "legacy"
