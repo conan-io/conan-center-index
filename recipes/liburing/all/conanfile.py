@@ -48,7 +48,7 @@ side implementation."""
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def get_glibc_version(self):
+    def _get_glibc_version(self):
         with subprocess.Popen(["ldd", "--version"], stdout=subprocess.PIPE) as p:
             output = p.stdout.read().decode("utf-8")
             m = re.search(r'[0-9]+\.[0-9]+', output)
@@ -60,7 +60,7 @@ side implementation."""
             raise ConanInvalidConfiguration(
                 "liburing is supported only on linux")
 
-        if tools.Version(self.version) >= "2.1" and self.get_glibc_version() < "2.27":
+        if tools.Version(self.version) >= "2.1" and self._get_glibc_version() < "2.27":
             raise ConanInvalidConfiguration(
                 "glibc 2.27 or higher required to build this package")
 
