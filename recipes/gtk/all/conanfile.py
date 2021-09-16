@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class GtkConan(ConanFile):
     name = "gtk"
     description = "libraries used for creating graphical user interfaces for applications."
-    topics = ("conan", "gtk", "widgets")
+    topics = ("gtk", "widgets")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gtk.org"
     license = "LGPL-2.1-or-later"
