@@ -46,7 +46,7 @@ The specific steps to add new packages are:
 
 The **build service** associated to this repo will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) for a list of generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
-> ⚠️ **Note**: This not a testing service, it is a binary building service for package **released**. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
+> ⚠️ **Note**: This not a testing service, it is a binary building service for package **released**. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
 
 - The CI bot will start a new build only after the author is approved. Your PR may be reviewed in the mean time, but is not guaranteed.
 - The CI system will also report with messages in the PR any error in the process, even linking to the logs to see more details and debug.
@@ -156,7 +156,7 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
      tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 ```
 
-> :warning: Please be aware that `conan-center-index` only builds from sources and pre-compiled binaries are not acceptable. For more information see our [packaging policy](https://github.com/conan-io/conan-center-index/blob/master/docs/packaging_policy.md).
+> :warning: Please be aware that `conan-center-index` only builds from sources and pre-compiled binaries are not acceptable. For more information see our [packaging policy](packaging_policy.md).
 
 ## How to provide a good recipe
 
@@ -190,6 +190,9 @@ For cases where a project only offers source files, but not a build script, you 
 
 > :information_source: For exceptional cases where only system packages can be used and a regular Conan package may result in an incompatible and fragile package, a separated system package may be created. See the [FAQs](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#can-i-install-packages-from-the-system-package-manager) for more.
  
+The [SystemPackageTool](https://docs.conan.io/en/latest/reference/conanfile/methods.html#systempackagetool) can easily manage a system package manager (e.g. apt,
+pacman, brew, choco) and install packages which are missing on Conan Center but available for most distributions. It is key to correctly fill in the `cpp_info` for the consumers of a system package to have access to whatever was installed.
+
 As example there are [glu](https://github.com/conan-io/conan-center-index/blob/master/recipes/glu/all/conanfile.py) and [OpenGL](https://github.com/conan-io/conan-center-index/blob/master/recipes/opengl/all/conanfile.py). Also, it will require an exception rule for [conan-center hook](https://github.com/conan-io/hooks#conan-center), a [pull request](https://github.com/conan-io/hooks/pulls) should be open to allow it over the KB-H032.
 
 ## Test the recipe locally
