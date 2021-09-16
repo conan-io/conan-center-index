@@ -1,0 +1,7 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/xissburg/edyn/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "c42b6254b2852a9b5666468d8211ae1111d853fb527f0179251dceb9c7f03ad8"
+  "0.2.0":
+    url: "https://github.com/xissburg/edyn/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "6c222f3f844219ffce3de8cc1c89ad2f42b721f05d465d2be617c05b73c7c56c"
