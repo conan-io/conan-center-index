@@ -31,7 +31,7 @@ class Neon2sseConan(ConanFile):
     
     def validate(self):
         if self.settings.arch not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("neon2sse only supports x86")
+            raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
