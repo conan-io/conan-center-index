@@ -363,7 +363,12 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
-
+            
+        if tools.cross_building(self):
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         self._cmake.configure()
         return self._cmake
 
