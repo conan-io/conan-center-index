@@ -1,10 +1,6 @@
 #include <NEON_2_SSE.h>
 #include <stdio.h>
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
-
 int main()
 {
     uint64_t a = 0x0102030405060708;
