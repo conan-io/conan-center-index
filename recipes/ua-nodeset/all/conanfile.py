@@ -16,14 +16,14 @@ class UaNodeSetConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), "source_subfolder")
 
     def build(self):
         pass
  
 
     def package(self):
-        self.copy("*", dst="res")
+        self.copy("*", dst="res", src="source_subfolder")
 
 
     def package_info(self):
