@@ -16,6 +16,13 @@ When pull requests are merged, the CI will upload the generated packages to the 
     * [The `conanfile.py` and `test_package` folder](#the-conanfilepy-and-test_package-folder)
     * [The `conandata.yml`](#the-conandatayml)
   * [How to provide a good recipe](#how-to-provide-a-good-recipe)
+    * [Header Only](#header-only)
+    * [CMake](#cmake)
+      * [Components](#components)
+    * [Autotools](#autotools)
+      * [Components](#components-1)
+    * [No Upstream Build Scripts](#no-upstream-build-scripts)
+    * [System Packages](#system-packages)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
   * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
