@@ -65,3 +65,6 @@ sources:
   "2.69.3":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.69.3/glib-2.69.3.tar.gz"
     sha256: "290f05eb5affd1bac142010d6511c7a3de361e5f69addc677cf6b3c92a757b44"
+  "2.70.0":
+    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.70.0/glib-2.70.0.tar.gz"
+    sha256: "aadf815ed908d4cc14ac3976f325b986b4ab2b65ad85bc214ddf2e200648bd1c"
