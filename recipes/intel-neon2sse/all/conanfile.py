@@ -15,6 +15,14 @@ class IntelNeon2sseConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
+    options = {
+        "SSE4": [True, False],
+        "disable_performance_warnings": [True, False],
+    }
+    default_options = {
+        "SSE4": False,
+        "disable_performance_warnings": False,
+    }
 
     _cmake = None
 
@@ -28,7 +36,7 @@ class IntelNeon2sseConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.configure()
         return self._cmake
-    
+
     def validate(self):
         if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
@@ -54,3 +62,7 @@ class IntelNeon2sseConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.names["cmake_find_package"] = "NEON_2_SSE"
         self.cpp_info.names["cmake_find_package_multi"] = "NEON_2_SSE"
+        if self.options.SSE4:
+            self.cpp_info.defines.append("USE_SSE4")
+        if self.options.disable_performance_warnings:
+            self.cpp_info.defines.append("NEON2SSE_DISABLE_PERFORMANCE_WARNING")
