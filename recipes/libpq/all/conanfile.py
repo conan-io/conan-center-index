@@ -29,11 +29,16 @@ class LibpqConan(ConanFile):
     }
     _autotools = None
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("strawberryperl/5.30.0.1")
         elif self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
