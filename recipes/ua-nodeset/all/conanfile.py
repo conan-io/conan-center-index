@@ -1,11 +1,13 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class UaNodeSetConan(ConanFile):
     name = "UA-Nodeset"
     license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
-    description = "This repository contains UANodeSets and other normative files which are released with a specification"
+    description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
     url = "https://www.github.com/conan-io/conan-center-index"
     
@@ -26,4 +28,5 @@ class UaNodeSetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
-        self.env_info.nodeset_path = os.path.join(self.package_folder, "res")
+        self.cpp_info.resdirs = ["res"]
+        self.user_info.nodeset_path = os.path.join(self.package_folder, "res")
