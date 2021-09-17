@@ -12,7 +12,7 @@ class FontconfigConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Fontconfig is a library for configuring and customizing font access"
     homepage = "https://gitlab.freedesktop.org/fontconfig/fontconfig"
-    topics = ("conan", "fontconfig", "fonts", "freedesktop")
+    topics = ("fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
