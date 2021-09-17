@@ -5,7 +5,7 @@ required_conan_version = ">=1.33.0"
 
 
 class UaNodeSetConan(ConanFile):
-    name = "UA-Nodeset"
+    name = "ua-nodeset"
     license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
