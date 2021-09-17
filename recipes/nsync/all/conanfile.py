@@ -1,5 +1,4 @@
 import os
-import inspect
 from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.33.0"
@@ -54,10 +53,9 @@ class NsyncConan(ConanFile):
             patch["base_path"] = self._source_subfolder
             tools.patch(**patch)
 
-        if not self.options.get_safe("fPIC", True):
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
         if self.settings.os == "Windows" and self.options.shared:
             ar_dest = \
@@ -99,5 +97,3 @@ class NsyncConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             component.system_libs = ["pthread"]
-        if self.settings.os == "Windows":
-            component.libdirs = ["lib", "bin"]
