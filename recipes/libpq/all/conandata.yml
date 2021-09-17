@@ -1,4 +1,7 @@
 sources:
+  "13.4":
+    url: "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz"
+    sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
   "13.3":
     url: "https://ftp.postgresql.org/pub/source/v13.3/postgresql-13.3.tar.gz"
     sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
