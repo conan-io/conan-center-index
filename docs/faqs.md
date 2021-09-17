@@ -209,7 +209,7 @@ This is for historical reasons, when older versions were permitted the overwhelm
 
 Keeping many older versions can be a problem, as over time they may become incompatible with newer versions of the package's Python code and/or dependencies. They also become downloaded less often than newer versions, and yet continue to consume CI resources during Pull Requests.
 
-Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
+Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective recipes and binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
 
 There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
 
