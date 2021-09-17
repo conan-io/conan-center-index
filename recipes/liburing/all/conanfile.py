@@ -1,8 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import platform
-import re
 
 required_conan_version = ">=1.33.0"
 
@@ -12,18 +10,15 @@ class LiburingConan(ConanFile):
     license = "GPL-2.0-or-later"
     homepage = "https://github.com/axboe/liburing"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
-    description = """helpers to setup and
-teardown io_uring instances, and also a simplified interface for
-applications that don't need (or want) to deal with the full kernel
-side implementation."""
+    description = ("helpers to setup and teardown io_uring instances, and also a simplified interface for "
+                   "applications that don't need (or want) to deal with the full kernel side implementation.")
     topics = ("asynchronous-io", "async", "kernel")
 
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
     }
-
     default_options = {
         "fPIC": True,
         "shared": False,
@@ -46,14 +41,12 @@ side implementation."""
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("liburing is supported only on linux")
-
-        # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
-        linux_kernel_version = re.match("([0-9.]+)", platform.release()).group(1)
-        if tools.Version(linux_kernel_version) < "5.1":
-            raise ConanInvalidConfiguration("This linux kernel version does not support io uring")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

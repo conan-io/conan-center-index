@@ -11,7 +11,13 @@ sources:
   "248.3":
     url: "https://github.com/systemd/systemd-stable/archive/v248.3.tar.gz"
     sha256: "cc372aeed563379a734901ed73d6fbb6b75c171251e1d69c0b5650aaf9c15d06"
+  "249.4":
+    url: "https://github.com/systemd/systemd-stable/archive/v249.4.tar.gz"
+    sha256: "f3df809bbe777fcb5ffe2b29aaf6f871de764ef22706940960f88b8a850e9278"
 patches:
   "248.3":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+      patch_file: "patches/248.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
+  "249.4":
+    - base_path: "source_subfolder"
+      patch_file: "patches/249.4/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"

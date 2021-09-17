@@ -21,6 +21,7 @@ class OpenCVConan(ConanFile):
         "contrib_freetype": [True, False],
         "contrib_sfm": [True, False],
         "parallel": [False, "tbb", "openmp"],
+        "with_ade": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_png": [True, False],
         "with_tiff": [True, False],
@@ -49,6 +50,7 @@ class OpenCVConan(ConanFile):
         "contrib": False,
         "contrib_freetype": False,
         "contrib_sfm": False,
+        "with_ade": True,
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
@@ -162,6 +164,8 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
         if self.options.dnn:
             self.requires("protobuf/3.17.1")
+        if self.options.with_ade:
+            self.requires("ade/0.1.1f")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -220,6 +224,17 @@ class OpenCVConan(ConanFile):
                 tools.replace_in_file(find_protobuf,
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
+        if self.options.with_ade:
+            ade_cmake = os.path.join(self._source_subfolder, "modules", "gapi",
+                                     "cmake", "init.cmake")
+            replacement = '''find_package(ade REQUIRED)
+            if(ade_DIR)'''
+            tools.replace_in_file(ade_cmake, 'if(ade_DIR)', replacement, strict=False)
+            tools.replace_in_file(ade_cmake, 'if (ade_DIR)', replacement, strict=False)
+            tools.replace_in_file(ade_cmake, "TARGET ade", "TARGET ade::ade")
+            gapi_cmake = os.path.join(self._source_subfolder, "modules", "gapi", "CMakeLists.txt")
+            tools.replace_in_file(gapi_cmake, "ade", "ade::ade")
+
 
     def _configure_cmake(self):
         if self._cmake:
@@ -351,6 +366,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
 
         self._cmake.definitions["WITH_CUDA"] = self.options.with_cuda
+        self._cmake.definitions["WITH_ADE"] = self.options.with_ade
         if self.options.with_cuda:
             # This allows compilation on older GCC/NVCC, otherwise build errors.
             self._cmake.definitions["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
@@ -551,7 +567,7 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_cudaarithm",     "lib": "cudaarithm",        "requires": ["opencv_core"] + eigen()},
                 {"target": "opencv_cudabgsegm",     "lib": "cudabgsegm",        "requires": ["opencv_core", "opencv_video"] + eigen()},
                 {"target": "opencv_cudacodec",      "lib": "cudacodec",         "requires": ["opencv_core"] + eigen()},
-                {"target": "opencv_features2d",     "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen()},
+                {"target": "opencv_cudafeatures2d", "lib": "cudafeatures2d",    "requires": ["opencv_core", "opencv_cudafilters"] + eigen()},
                 {"target": "opencv_cudafilters",    "lib": "cudafilters",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_cudaimgproc",    "lib": "cudaimgproc",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_cudalegacy",     "lib": "cudalegacy",        "requires": ["opencv_core", "opencv_video"] + eigen()},
@@ -560,6 +576,11 @@ class OpenCVConan(ConanFile):
                 {"target": "opencv_cudastereo",     "lib": "cudastereo",        "requires": ["opencv_core", "opencv_calib3d"] + eigen()},
                 {"target": "opencv_cudawarping",    "lib": "cudawarping",       "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
                 {"target": "opencv_cudev",          "lib": "cudev",             "requires": [] + eigen()},
+            ])
+
+        if self.options.with_ade:
+            opencv_components.extend([
+                {"target": "opencv_gapi",           "lib": "gapi",              "requires": ["opencv_imgproc", "opencv_calib3d", "opencv_video", "ade::ade"]},
             ])
 
         return opencv_components
