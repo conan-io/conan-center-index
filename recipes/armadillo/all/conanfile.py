@@ -33,6 +33,7 @@ class ArmadilloConan(ConanFile):
         "ARMA_USE_EXTERN_RNG": [True, False],
         "ARMA_USE_SUPERLU": [True, False],
         "ARMA_USE_WRAPPER": [True, False],
+        "ARMA_USE_ACCELERATE": [True, False],  # Use system accelerate framework.
         # These are the options that the armadillo CMakeLists exposes
         "ALLOW_FLEXIBLAS_LINUX": [True, False],
         "ALLOW_OPENBLAS_MACOS": [True, False],
@@ -64,6 +65,7 @@ class ArmadilloConan(ConanFile):
         "ARMA_USE_EXTERN_RNG": False,
         "ARMA_USE_SUPERLU": False,
         "ARMA_USE_WRAPPER": False,
+        "ARMA_USE_ACCELERATE": False,  # Use system accelerate framework.
         # These are the options that the armadillo CMakeLists exposes
         "ALLOW_FLEXIBLAS_LINUX": False,
         "ALLOW_OPENBLAS_MACOS": False,
@@ -91,14 +93,33 @@ class ArmadilloConan(ConanFile):
     }
     # Options that require another option to be set to be valid
     opt_dependencies = {
-        "ARMA_USE_LAPACK": "ARMA_USE_BLAS",
-        "USE_SYSTEM_LAPACK": "ARMA_USE_LAPACK",
-        "USE_SYSTEM_BLAS": "ARMA_USE_BLAS",
-        "USE_SYSTEM_ATLAS": "ARMA_USE_ATLAS",
-        "USE_SYSTEM_ARPACK": "ARMA_USE_ARPACK",
-        "USE_SYSTEM_SUPERLU": "ARMA_USE_SUPERLU",
-        "USE_SYSTEM_HDF5": "ARMA_USE_HDF5",
-        "MKL_LIBRARY_PATH": "USE_SYSTEM_MKL",
+        "Macos": {
+            "USE_OPENBLAS": [
+                "ALLOW_OPENBLAS_MACOS",
+            ],
+            "USE_SYSTEM_BLAS": [
+                "ALLOW_BLAS_LAPACK_MACOS",
+            ],
+            "USE_SYSTEM_LAPACK": [
+                "ALLOW_BLAS_LAPACK_MACOS",
+            ],
+        },
+        "Linux": {
+            "USE_SYSTEM_FLEXIBLAS": [
+                "ALLOW_FLEXIBLAS_LINUX",
+            ],
+        },
+        "Windows": {},
+        "all": {
+            "ARMA_USE_LAPACK": ["ARMA_USE_BLAS"],
+            "USE_SYSTEM_LAPACK": ["ARMA_USE_LAPACK"],
+            "USE_SYSTEM_BLAS": ["ARMA_USE_BLAS"],
+            "USE_SYSTEM_ATLAS": ["ARMA_USE_ATLAS"],
+            "USE_SYSTEM_ARPACK": ["ARMA_USE_ARPACK"],
+            "USE_SYSTEM_SUPERLU": ["ARMA_USE_SUPERLU"],
+            "USE_SYSTEM_HDF5": ["ARMA_USE_HDF5"],
+            "MKL_LIBRARY_PATH": ["USE_SYSTEM_MKL"],
+        },
     }
     # Options that are mutually exclusive
     exclusions = {
@@ -108,8 +129,14 @@ class ArmadilloConan(ConanFile):
             "USE_SYSTEM_MKL",
             "USE_SYSTEM_FLEXIBLAS",
             "USE_SYSTEM_BLAS",
+            "ARMA_USE_ACCELERATE",
         ],
-        "lapack": ["USE_SYSTEM_LAPACK", "USE_SYSTEM_ATLAS"],
+        "lapack": [
+            "USE_SYSTEM_LAPACK",
+            "USE_SYSTEM_ATLAS",
+            "USE_SYSTEM_MKL",
+            "ARMA_USE_ACCELERATE",
+        ],
     }
     exports_sources = "CMakeLists.txt"
     generators = (
@@ -129,6 +156,12 @@ class ArmadilloConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os == "Macos":
+            # Macos will default to Accelerate framework
+            self.options.USE_OPENBLAS = False
+            self.options.ARMA_USE_ACCELERATE = True
+        if self.settings.os != "Macos":
+            del self.options.ARMA_USE_ACCELERATE
 
     def configure(self):
         if self.options.shared:
@@ -160,7 +193,7 @@ class ArmadilloConan(ConanFile):
                 (
                     (
                         self.settings.os == "Macos"
-                        and self.ALLOW_BLAS_LAPACK_MACOS
+                        and self.options.ALLOW_BLAS_LAPACK_MACOS
                         and self.options.ALLOW_OPENBLAS_MACOS
                     )
                     or self.settings.os != "Macos"
@@ -169,22 +202,33 @@ class ArmadilloConan(ConanFile):
                 and not blas_conflicts
             ):
                 self.options.USE_OPENBLAS = True
+        if self.options.ALLOW_BLAS_LAPACK_MACOS:
+            self.options.ARMA_USE_ACCELERATE = False
 
     def validate(self):
-        # Do validation stuff here to make sure options are valid
+        tools.check_min_cppstd(self, "11")
         # Iterate over dependency maps to confirm requirements are met
         for option, dependency in self.os_dependencies.items():
             if getattr(self.options, option) and self.settings.os != dependency:
                 raise ConanInvalidConfiguration(
                     f"Option {option} can only be enabled on {dependency} operating systems"
                 )
-
-        for option, dependency in self.opt_dependencies.items():
-            if getattr(self.options, option) and not getattr(self.options, dependency):
-                raise ConanInvalidConfiguration(
-                    f"Option {option} cannot be enabled without enabling {dependency}"
-                )
-
+        # Optional option co-depdendencies
+        for platform, opts in self.opt_dependencies.items():
+            if platform == "all" or platform == self.settings.os:
+                for option, dependencies in opts.items():
+                    dependencies_in_error = [
+                        dependency
+                        for dependency in dependencies
+                        if not getattr(self.options, dependency)
+                    ]
+                    if getattr(self.options, option) and dependencies_in_error:
+                        raise ConanInvalidConfiguration(
+                            "Option {option} cannot be enabled without enabling {missing}".format(
+                                option=option, missing=", ".join(dependencies_in_error)
+                            )
+                        )
+        # Mutually exclusive options
         for category, incompatible_opts in self.exclusions.items():
             conflicts = [x for x in incompatible_opts if getattr(self.options, x)]
             if len(conflicts) > 1:
@@ -193,7 +237,6 @@ class ArmadilloConan(ConanFile):
                         conflict=", ".join(conflicts)
                     )
                 )
-
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.output.warn(
                 "Building a shared library with MSVC is not supported. This may not be successful."
@@ -238,6 +281,9 @@ class ArmadilloConan(ConanFile):
         ] = self.options.ARMA_USE_EXTERN_RNG
         self._cmake.definitions["ARMA_USE_SUPERLU"] = self.options.ARMA_USE_SUPERLU
         self._cmake.definitions["ARMA_USE_WRAPPER"] = self.options.ARMA_USE_WRAPPER
+        self._cmake.definitions[
+            "ARMA_USE_ACCELERATE"
+        ] = self.options.ARMA_USE_ACCELERATE
         self._cmake.definitions["DETECT_HDF5"] = self.options.ARMA_USE_HDF5
         self._cmake.definitions["USE_OPENBLAS"] = self.options.USE_OPENBLAS
         self._cmake.definitions["USE_SYSTEM_LAPACK"] = self.options.USE_SYSTEM_LAPACK
@@ -395,7 +441,7 @@ endif()""",
         # linked manually
         if not self.options.ARMA_USE_WRAPPER:
             self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
-            if self.settings.os == "Macos" and not self.options.ALLOW_BLAS_LAPACK_MACOS:
+            if self.options.ARMA_USE_ACCELERATE:
                 self.cpp_info.frameworks.append("Accelerate")
 
         if self.options.ARMA_USE_HDF5:
