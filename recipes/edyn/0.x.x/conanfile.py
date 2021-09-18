@@ -56,10 +56,11 @@ class EdynConan(ConanFile):
             self.copy(pattern, dst="lib", keep_path=False)
 
     def package_info(self):
+        libsuffix = "_d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["Edyn" + libsuffix]
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["winmm"]
-        elif self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.libs = ["pthread", "dl"]
-        self.cpp_info.libs.append("Edyn")
+            self.cpp_info.system_libs = ["winmm"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "dl"]
         self.cpp_info.names["cmake_find_package"] = "Edyn"
         self.cpp_info.names["cmake_find_package_multi"] = "Edyn"
