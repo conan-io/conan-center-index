@@ -19,19 +19,24 @@ class EdynConan(ConanFile):
     def _source_subfolder(self):
         return "edyn"
 
-    def configure(self):
-        minimal_cpp_standard = "17"
-
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-
+    def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.version == "0.1.0":
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if tools.Version(self.version) < "0.2.0":
             self.requires("entt/3.5.2")
-        elif self.version == "0.2.0":
+        else:
             self.requires("entt/3.8.0")
+
+    def validate(self):
+        minimal_cpp_standard = "17"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
