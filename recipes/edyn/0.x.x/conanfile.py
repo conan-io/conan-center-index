@@ -44,7 +44,7 @@ class EdynConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
