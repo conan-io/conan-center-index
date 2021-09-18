@@ -8,7 +8,7 @@ class EdynConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/xissburg/edyn"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Edyn is a real-time physics engine organized as an ECS. "
+    description = "Edyn is a real-time physics engine organized as an ECS."
     topics = ("game-development", "physics-engine", "ecs",
               "entity-component-system", "entt")
     settings = "os", "compiler", "build_type", "arch"
@@ -46,8 +46,9 @@ class EdynConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(source_folder=self._source_subfolder)
         cmake.definitions["EDYN_BUILD_EXAMPLES"] = False
+        cmake.definitions["EDYN_CONFIG_DOUBLE"] = False
         cmake.build()
 
     def package(self):
