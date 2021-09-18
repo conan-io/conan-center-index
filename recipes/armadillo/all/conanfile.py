@@ -161,7 +161,7 @@ class ArmadilloConan(ConanFile):
             self.options.USE_OPENBLAS = False
             self.options.ARMA_USE_ACCELERATE = True
         if self.settings.os != "Macos":
-            del self.options.ARMA_USE_ACCELERATE
+            self.options.ARMA_USE_ACCELERATE = False
 
     def configure(self):
         if self.options.shared:
