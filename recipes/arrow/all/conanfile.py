@@ -239,7 +239,7 @@ class ArrowConan(ConanFile):
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self._with_llvm():
-            raise ConanInvalidConfiguration("CCI has no llvm recipe (yet)")
+            self.requires("llvm-core/12.0.0")
         if self._with_openssl():
             self.requires("openssl/1.1.1l")
         if self.options.with_s3:
@@ -353,8 +353,7 @@ class ArrowConan(ConanFile):
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
         if self._with_llvm():
-            self._cmake.definitions["LLVM_DIR"] = self.deps_cpp_info["llvm"].rootpath.replace("\\", "/")
-
+            self._cmake.definitions["LLVM_DIR"] = self.deps_cpp_info["llvm-core"].rootpath.replace("\\", "/")
         self._cmake.configure()
         return self._cmake
 
@@ -458,15 +457,14 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("jemalloc::jemalloc")
         if self._with_re2():
             self.cpp_info.components["libgandiva"].requires.append("re2::re2")
+        if self._with_llvm():
+            self.cpp_info.components["libgandiva"].requires.append("llvm-core::llvm-core")
         if self._with_protobuf():
             self.cpp_info.components["libarrow"].requires.append("protobuf::protobuf")
         if self._with_utf8proc():
             self.cpp_info.components["libarrow"].requires.append("uff8proc::uff8proc")
-        if self._with_llvm():
-            self.cpp_info.components["libarrow"].requires.append("llvm::llvm")
         if self._with_thrift():
             self.cpp_info.components["libarrow"].requires.append("thrift::thrift")
-
         if self.options.with_backtrace:
             self.cpp_info.components["libarrow"].requires.append("backtrace::backtrace")
         if self.options.with_cuda:
