@@ -9,5 +9,5 @@ find_package(Edyn REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
-target_link_libraries(${PROJECT_NAME} Edyn::Edyn EnTT::EnTT)
+target_link_libraries(${PROJECT_NAME} PRIVATE Edyn::Edyn)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CONAN_INCLUDE_DIRS_EDYN})
