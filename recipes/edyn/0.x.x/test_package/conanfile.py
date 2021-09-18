@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class EdynTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package", "cmake_paths"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
