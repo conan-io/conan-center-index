@@ -4,7 +4,6 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(EnTT REQUIRED)
 find_package(Edyn REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
