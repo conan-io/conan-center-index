@@ -47,6 +47,7 @@ class EdynConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        cmake.definitions["EDYN_BUILD_EXAMPLES"] = False
         cmake.build()
 
     def package(self):
