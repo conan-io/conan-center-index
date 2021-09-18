@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 conan_basic_setup()
 
 find_package(EnTT REQUIRED)
