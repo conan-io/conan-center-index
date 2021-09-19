@@ -52,10 +52,26 @@ class OpenblasConan(ConanFile):
             strip_root=True,
             destination=self._source_subfolder
         )
+
+        if tools.Version(self.version) >= "0.3.12":
+            search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
+            replace = """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
+        else:
+            search = "enable_language(Fortran)"
+            replace = """include(CheckLanguage)
+check_language(Fortran)
+if(CMAKE_Fortran_COMPILER)
+  enable_language(Fortran)
+else()
+  message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
+  set (NOFORTRAN 1)
+  set (NO_LAPACK 1)
+endif()"""
+
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
-            """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")""",
-            """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")""",
+            search,
+            replace,
         )
 
     def _configure_cmake(self):
