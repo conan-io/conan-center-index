@@ -14,7 +14,7 @@ class FreetypeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freetype.org"
     license = "FTL"
-    topics = ("conan", "freetype", "fonts")
+    topics = ("freetype", "fonts")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,7 +31,7 @@ class FreetypeConan(ConanFile):
         "with_png": True,
         "with_zlib": True,
         "with_bzip2": True,
-        "with_brotli": True
+        "with_brotli": True,
     }
 
     exports_sources = "CMakeLists.txt"
