@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(geotrans VERSION 3.8 LANGUAGES CXX)
+project(geotrans LANGUAGES CXX)
 ####
 # Conan
 ####
@@ -54,7 +54,7 @@ set(PUBLIC_HEADERS ${DTTC_HEADERS} ${CCS_HEADERS})
 ####
 
 find_package(Threads REQUIRED)
-
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 # Create libMSPdtcc
 add_library(MSPdtcc ${DTCCSRCS} ${CCSERVICESRCS})
 target_compile_features(MSPdtcc PUBLIC cxx_std_11)
