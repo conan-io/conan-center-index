@@ -68,7 +68,7 @@ class SentryCrashpadConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
-        if tools.Version(self.version) < "0.4" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def source(self):
