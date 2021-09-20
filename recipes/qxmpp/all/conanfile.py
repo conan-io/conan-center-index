@@ -72,7 +72,9 @@ class QxmppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["qxmpp"]
         self.cpp_info.includedirs.append(os.path.join("include", "qxmpp"))
-        self.cpp_info.names["cmake_find_package"] = "QXmpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "QXmpp"
+        self.cpp_info.filenames["cmake_find_package"] = "QXmpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "QXmpp"
+        self.cpp_info.names["cmake_find_package"] = "qxmpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "qxmpp"
         self.cpp_info.names["pkg_config"] = "qxmpp"
 
