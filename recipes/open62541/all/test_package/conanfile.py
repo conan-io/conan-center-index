@@ -21,5 +21,5 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
 
-            bin_path = os.path.join("bin", "test_package_custom")
+            bin_path = os.path.join("bin", "test_package_nodeset")
             self.run(bin_path, run_environment=True)

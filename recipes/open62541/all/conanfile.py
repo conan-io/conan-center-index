@@ -374,7 +374,7 @@ class Open62541Conan(ConanFile):
 
         # required for creating custom servers from ua-nodeset
         self.user_info.tools_dir = os.path.join(self.package_folder, "res", "tools")
-        self._chmod_plus_x(os.path.join(self.package_folder, "share", "tools", "generate_nodeid_header.py"))
+        self._chmod_plus_x(os.path.join(self.package_folder, "res", "tools", "generate_nodeid_header.py"))
 
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")

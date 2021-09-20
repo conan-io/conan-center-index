@@ -29,11 +29,11 @@ ua_generate_nodeset_and_datatypes(
     INTERNAL
 )
 # Previous macro automatically sets some variables which hold the generated source code files using the provided NAME
-add_executable(${PROJECT_NAME}_custom
+add_executable(${PROJECT_NAME}_nodeset
     ${UA_NODESET_FOO_FLT_SOURCES}
     ${UA_TYPES_FOO_FLT_SOURCES}
-    test_package_custom.c
+    test_package_nodeset.c
 )
 # Make sure the nodeset compiler is executed before compiling the main file
-add_dependencies(${PROJECT_NAME}_custom ${PROJECT_NAME}-ns-foo_flt)
-target_link_libraries(${PROJECT_NAME}_custom PRIVATE open62541::open62541)
+add_dependencies(${PROJECT_NAME}_nodeset ${PROJECT_NAME}-ns-foo_flt)
+target_link_libraries(${PROJECT_NAME}_nodeset PRIVATE open62541::open62541)
