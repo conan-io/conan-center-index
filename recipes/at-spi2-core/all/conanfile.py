@@ -49,6 +49,10 @@ class AtSpi2CoreConan(ConanFile):
             self.requires("xorg/system")
         self.requires("dbus/1.12.20")
 
+    def validate(self):
+        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                     strip_root=True, destination=self._source_subfolder)
