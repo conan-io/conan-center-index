@@ -77,4 +77,5 @@ class QxmppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "QXmpp"
         self.cpp_info.names["cmake_find_package_multi"] = "QXmpp"
         self.cpp_info.names["pkg_config"] = "qxmpp"
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtNetwork", "qt::qtXml"]
 
