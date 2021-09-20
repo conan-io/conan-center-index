@@ -54,7 +54,7 @@ class SentryCrashpadConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.get_safe("with_tls"):
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -68,6 +68,8 @@ class SentryCrashpadConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("Build requires support for C++14. Minimum version for {} is {}"
                 .format(str(self.settings.compiler), minimum_version))
+        if tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
