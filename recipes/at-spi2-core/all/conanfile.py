@@ -50,8 +50,8 @@ class AtSpi2CoreConan(ConanFile):
         self.requires("dbus/1.12.20")
 
     def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
+        if tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("Apple is not supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
