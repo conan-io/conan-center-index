@@ -41,9 +41,7 @@ class OpenblasConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(
-            self, skip_x64_x86=True
-        ):
+        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
@@ -53,36 +51,13 @@ class OpenblasConan(ConanFile):
             destination=self._source_subfolder
         )
 
-        if tools.Version(self.version) >= "0.3.12":
-            search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
-            replace = """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
-        else:
-            search = "enable_language(Fortran)"
-            replace = """include(CheckLanguage)
-check_language(Fortran)
-if(CMAKE_Fortran_COMPILER)
-  enable_language(Fortran)
-else()
-  message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
-  set (NOFORTRAN 1)
-  set (NO_LAPACK 1)
-endif()"""
-
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
-            search,
-            replace,
-        )
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
 
         if self.options.build_lapack:
-            self.output.warn(
-                "Building with lapack support requires a Fortran compiler."
-            )
+            self.output.warn("Building with lapack support requires a Fortran compiler.")
         self._cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         self._cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
         self._cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
@@ -103,6 +78,28 @@ endif()"""
         return self._cmake
 
     def build(self):
+        if tools.Version(self.version) >= "0.3.12":
+            search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
+            replace = (
+                """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
+            )
+        else:
+            search = "enable_language(Fortran)"
+            replace = """include(CheckLanguage)
+check_language(Fortran)
+if(CMAKE_Fortran_COMPILER)
+  enable_language(Fortran)
+else()
+  message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
+  set (NOFORTRAN 1)
+  set (NO_LAPACK 1)
+endif()"""
+
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
+            search,
+            replace,
+        )
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -135,13 +132,9 @@ endif()"""
         self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.use_thread:
-                self.cpp_info.components["openblas_component"].system_libs.append(
-                    "pthread"
-                )
+                self.cpp_info.components["openblas_component"].system_libs.append("pthread")
             if self.options.build_lapack:
-                self.cpp_info.components["openblas_component"].system_libs.append(
-                    "gfortran"
-                )
+                self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(
             "Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder)
