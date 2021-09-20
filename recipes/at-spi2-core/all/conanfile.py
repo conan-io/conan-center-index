@@ -55,8 +55,8 @@ class AtSpi2CoreConan(ConanFile):
         self.requires("dbus/1.12.20")
 
     def validate(self):
-        if tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("Apple is not supported by this recipe")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("only linux is supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -78,6 +78,10 @@ class AtSpi2CoreConan(ConanFile):
         return self._meson
 
     def build(self):
+        if tools.Version(self.version) >= "2.42.0":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "bus", "meson.build"),
+                                  "x11_dep.found()",
+                                  "true" if self.options.with_x11 else "false")
         meson = self._configure_meson()
         meson.build()
 
