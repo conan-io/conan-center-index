@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include <cairo.h>
 #include <cairo-version.h>
+#include <stdio.h>
 
 int main()
 {
