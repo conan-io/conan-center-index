@@ -50,7 +50,6 @@ class NsyncConan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            patch["base_path"] = self._source_subfolder
             tools.patch(**patch)
 
         tools.replace_in_file(
