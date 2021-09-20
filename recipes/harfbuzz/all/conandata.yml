@@ -31,7 +31,7 @@ sources:
     sha256: "f997abd0e3b90647408bfb01af2383b5fc9557af20137e7c2deaf2fa13705dc8"
   "3.0.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.0.0/harfbuzz-3.0.0.tar.xz"
-    sha256: "f997abd0e3b90647408bfb01af2383b5fc9557af20137e7c2deaf2fa13705dc8"
+    sha256: "036b0ee118451539783ec7864148bb4106be42a2eb964df4e83e6703ec46f3d9"
 patches:
   "2.6.8":
     - patch_file: "patches/icu.patch"
