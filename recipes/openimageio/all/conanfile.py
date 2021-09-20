@@ -124,12 +124,6 @@ class OpenImageIOConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        # Override dependencies
-        self.requires("zstd/1.5.0", override=True)
-        self.requires("lcms/2.12", override=True)
-        self.requires("jasper/2.0.33", override=True)
-        self.requires("openssl/1.1.1l", override=True)
-
         # Required libraries
         self.requires("zlib/1.2.11")
         self.requires("boost/1.76.0")
