@@ -6,7 +6,7 @@ class OpenclIcdLoaderConan(ConanFile):
     name = "opencl-icd-loader"
     description = "OpenCL ICD Loader."
     license = "Apache-2.0"
-    topics = ("conan", "opencl-icd-loader", "opencl", "khronos", "parallel", "icd-loader")
+    topics = ("opencl-icd-loader", "opencl", "khronos", "parallel", "icd-loader")
     homepage = "https://github.com/KhronosGroup/OpenCL-ICD-Loader"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -37,7 +37,7 @@ class OpenclIcdLoaderConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("OpenCL-ICD-Loader-" + self.version, self._source_subfolder)
+        tools.rename("OpenCL-ICD-Loader-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
