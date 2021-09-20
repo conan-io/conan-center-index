@@ -14,7 +14,7 @@ class FreetypeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freetype.org"
     license = "FTL"
-    topics = ("conan", "freetype", "fonts")
+    topics = ("freetype", "fonts")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,7 +31,7 @@ class FreetypeConan(ConanFile):
         "with_png": True,
         "with_zlib": True,
         "with_bzip2": True,
-        "with_brotli": True
+        "with_brotli": True,
     }
 
     exports_sources = "CMakeLists.txt"
@@ -80,8 +80,9 @@ class FreetypeConan(ConanFile):
         # Do not accidentally enable dependencies we have disabled
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if tools.Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
+        if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if tools.Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
         tools.replace_in_file(cmakelists, find_harfbuzz, "")
-        tools.replace_in_file(cmakelists, "if (HARFBUZZ_FOUND)", "if(0)")
+        tools.replace_in_file(cmakelists, if_harfbuzz_found, "if(0)")
         if not self.options.with_png:
             tools.replace_in_file(cmakelists, "find_package(PNG)", "")
             tools.replace_in_file(cmakelists, "if (PNG_FOUND)", "if(0)")
