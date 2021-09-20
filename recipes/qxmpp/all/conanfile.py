@@ -45,12 +45,6 @@ class QxmppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
-    def __get_option_str(self, b: bool) -> str:
-        if b:
-            return "ON"
-        else:
-            return "OFF"
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
