@@ -11,8 +11,8 @@ class OpenclIcdLoaderConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "disable_openclon12": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "disable_openclon12": False}
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
@@ -48,6 +48,7 @@ class OpenclIcdLoaderConan(ConanFile):
             self._cmake.definitions["USE_DYNAMIC_VCXX_RUNTIME"] = str(self.settings.compiler.runtime).startswith("MD")
         self._cmake.definitions["OPENCL_ICD_LOADER_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["OPENCL_ICD_LOADER_BUILD_TESTING"] = False
+        self._cmake.definitions["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = True
         self._cmake.configure()
         return self._cmake
 
