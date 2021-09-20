@@ -100,11 +100,11 @@ class GslConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")
-        args.extend([
-            "ac_cv_func_memcpy=yes",
-            "ac_cv_func_memmove=yes",
-            "ac_cv_c_c99inline=no",
-        ])
+            args.extend([
+                "ac_cv_func_memcpy=yes",
+                "ac_cv_func_memmove=yes",
+                "ac_cv_c_c99inline=no",
+            ])
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
