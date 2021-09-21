@@ -8,6 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if tools.Version(self.deps_cpp_info["bitmagic"].version) < "7.5.0":
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+        else:
+            cmake.definitions["CMAKE_CXX_STANDARD"] = 17
         cmake.configure()
         cmake.build()
 
