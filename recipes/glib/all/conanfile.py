@@ -1,5 +1,6 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
+from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.meson import MesonToolchain, Meson
 import os
 import shutil
 import glob
@@ -31,24 +32,20 @@ class GLibConan(ConanFile):
         "with_mount": True,
         "with_selinux": True,
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     short_paths = True
     generators = "pkg_config"
+    
+    _meson = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     def validate(self):
-        if hasattr(self, 'settings_build') and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.os == "Windows" and not self.options.shared:
             raise ConanInvalidConfiguration(
                 "glib can not be built as static library on Windows. "
@@ -56,6 +53,12 @@ class GLibConan(ConanFile):
             )
         if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
             raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,30 +92,29 @@ class GLibConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = dict()
+        
+    def generate(self):
+        tc = MesonToolchain(self)
         if tools.is_apple_os(self.settings.os):
-            defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
-        defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        defs["internal_pcre"] = not self.options.with_pcre
+            tc.definitions["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
+        tc.definitions["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
+        tc.definitions["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
+        tc.definitions["internal_pcre"] = not self.options.with_pcre
 
         if self.settings.os == "FreeBSD":
-            defs["xattr"] = "false"
-        defs["tests"] = "false"
+            tc.definitions["xattr"] = "false"
+        tc.definitions["tests"] = "false"
 
         if tools.Version(self.version) >= "2.67.0":
-            defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
+            tc.definitions["libelf"] = "enabled" if self.options.with_elf else "disabled"
+        tc.generate()
 
-        meson.configure(
-            source_folder=self._source_subfolder,
-            args=["--wrap-mode=nofallback"],
-            build_folder=self._build_subfolder,
-            defs=defs,
-        )
-        return meson
+    def _configure_meson(self):
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
+        self._meson.configure(source_folder=self._source_subfolder)
+        return self._meson
 
     def _patch_sources(self):
         if self.version < "2.67.2":
