@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import re
 import shutil
 import textwrap
 
@@ -8,8 +9,6 @@ required_conan_version = ">=1.33.0"
 
 class FreetypeConan(ConanFile):
     name = "freetype"
-
-    _libtool_version = "23.0.17"  # check docs/version.txt, this is a different version mumber!
     description = "FreeType is a freely available software library to render fonts."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freetype.org"
@@ -107,7 +106,6 @@ class FreetypeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["PROJECT_VERSION"] = self._libtool_version
         self._cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["FT_WITH_PNG"] = self.options.with_png
         self._cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
@@ -123,7 +121,7 @@ class FreetypeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _make_freetype_config(self):
+    def _make_freetype_config(self, version):
         freetype_config_in = os.path.join(self._source_subfolder, "builds", "unix", "freetype-config.in")
         if not os.path.isdir(os.path.join(self.package_folder, "bin")):
             os.makedirs(os.path.join(self.package_folder, "bin"))
@@ -139,23 +137,34 @@ class FreetypeConan(ConanFile):
         tools.replace_in_file(freetype_config, r"%ft_version%", r"$conan_ftversion")
         tools.replace_in_file(freetype_config, r"%LIBSSTATIC_CONFIG%", r"$conan_staticlibs")
         tools.replace_in_file(freetype_config, r"-lfreetype", libs)
-        tools.replace_in_file(freetype_config, r"export LC_ALL", """export LC_ALL
-BINDIR=$(dirname $0)
-conan_prefix=$(dirname $BINDIR)
-conan_exec_prefix=${{conan_prefix}}/bin
-conan_includedir=${{conan_prefix}}/include
-conan_libdir=${{conan_prefix}}/lib
-conan_ftversion={version}
-conan_staticlibs="{staticlibs}"
-""".format(version=self._libtool_version, staticlibs=staticlibs))
+        tools.replace_in_file(freetype_config, r"export LC_ALL", textwrap.dedent("""\
+            export LC_ALL
+            BINDIR=$(dirname $0)
+            conan_prefix=$(dirname $BINDIR)
+            conan_exec_prefix=${{conan_prefix}}/bin
+            conan_includedir=${{conan_prefix}}/include
+            conan_libdir=${{conan_prefix}}/lib
+            conan_ftversion={version}
+            conan_staticlibs="{staticlibs}"
+        """).format(version=version, staticlibs=staticlibs))
+
+    @property
+    def _pkg_config_version_txt(self):
+        return os.path.join(self.package_folder, "res", "freetype-pkg_config-version.txt")
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self._make_freetype_config()
-        self.copy("FTL.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
-        self.copy("GPLv2.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
-        self.copy("LICENSE.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
+
+        freetype_pc = tools.load(os.path.join(self.package_folder, "lib", "pkgconfig", "freetype2.pc")).replace("\r\n", "\n")
+        pkgconfig_version = next(re.finditer(r"^Version:\s*([0-9.]+)$", freetype_pc, flags=re.M)).group(1)
+        tools.save(self._pkg_config_version_txt, pkgconfig_version)
+
+        self._make_freetype_config(pkgconfig_version)
+        self.copy("FTL.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
+        self.copy("GPLv2.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
+        self.copy("LICENSE.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         self._create_cmake_module_variables(
@@ -223,7 +232,6 @@ conan_staticlibs="{staticlibs}"
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FT2_CONFIG = freetype_config
-        self.user_info.LIBTOOL_VERSION = self._libtool_version
         self._chmod_plus_x(freetype_config)
         # cmake's FindFreetype.cmake module with imported target: Freetype::Freetype
         self.cpp_info.filenames["cmake_find_package"] = "Freetype"
@@ -234,3 +242,8 @@ conan_staticlibs="{staticlibs}"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "freetype2"
+
+        pkg_config_version = tools.load(self._pkg_config_version_txt).strip()
+        self.user_info.LIBTOOL_VERSION = pkg_config_version
+        # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
+        # self.cpp_info.version["pkg_config"] = pkg_config_version
