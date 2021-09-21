@@ -54,21 +54,21 @@ class CaffeConan(ConanFile):
             del self.options.gpu_arch_ptx
 
     def requirements(self):
-        self.requires.add("boost/1.54.0")
+        self.requires.add("boost/1.69.0.dssl1")
         self.requires.add("glog/0.4.0")
         self.requires.add("gflags/2.2.2")
         self.requires.add("hdf5/1.10.6")
         # caffe supports those BLAS implementations: openblas, mkl, accelerate, atlas
         # Choose Accelerate for MAC and openblas otherwise
         if self.settings.os != "Macos":
-            self.requires.add("openblas/0.3.7")
-        self.requires.add("protobuf/3.9.1")
+            self.requires.add("openblas/0.3.7.dssl1")
+        self.requires.add("protobuf/3.9.1.dssl1")
         if self.options.with_opencv:
-            self.requires.add("opencv/2.4.13.5")
+            self.requires.add("opencv/2.4.13.7")
         if self.options.with_leveldb:
             self.requires.add("leveldb/1.22")
         if self.options.with_lmdb:
-            self.requires.add("lmdb/0.9.28")
+            self.requires.add("lmdb/0.9.28.dssl1")
 
 
     def build_requirements(self):
@@ -80,7 +80,7 @@ class CaffeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        cmake = CMake(self, generator='Ninja', parallel=False)
         cmake.definitions["BUILD_python"] = False
         cmake.definitions["BUILD_python_layer"] = False
         cmake.definitions["BUILD_docs"] = False
@@ -128,6 +128,7 @@ class CaffeConan(ConanFile):
     def build(self):
         self._prepare()
         cmake = self._configure_cmake()
+        cmake.build(target='caffe')
         cmake.build()
 
     def package(self):

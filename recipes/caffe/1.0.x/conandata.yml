@@ -2,7 +2,7 @@ sources:
   "1.0.release":
     url: "https://github.com/BVLC/caffe/archive/1.0.tar.gz"
     sha256: "71d3c9eb8a183150f965a465824d01fe82826c22505f7aa314f700ace03fa77f"
-  "1.0.windows":
+  "1.0.windows.dssl1":
     url: "https://github.com/BVLC/caffe/archive/509dae053b89a9085f2dbf66d55993a7423eb860.tar.gz"
     sha256: "91206914f304d2b2761198b160ca6ed3c61c0706ed0e949091ee29c21e43e867"
 patches:
@@ -25,7 +25,7 @@ patches:
       patch_file: "patches/1.0.release/0008-cmake-protobuf-case.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.release/0009-empty-defs.patch"
-  "1.0.windows":
+  "1.0.windows.dssl1":
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.windows/0001-find-package-protobuf.patch"
     - base_path: "source_subfolder"
@@ -36,3 +36,5 @@ patches:
       patch_file: "patches/1.0.windows/0004-hdf5-finder.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.windows/0005-package-name-fixes.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.windows/0006-add_deploy_enum.patch"

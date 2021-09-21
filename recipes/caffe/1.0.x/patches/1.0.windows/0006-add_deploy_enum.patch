@@ -1,0 +1,663 @@
+diff --git a/src/caffe/proto/caffe.proto b/src/caffe/proto/caffe.proto
+index 81a8c69..f9b5b13 100644
+--- a/src/caffe/proto/caffe.proto
++++ b/src/caffe/proto/caffe.proto
+@@ -254,6 +254,7 @@
+ enum Phase {
+    TRAIN = 0;
+    TEST = 1;
++   DEPLOY = 2;
+ }
+ 
+ message NetState {
+@@ -386,11 +387,13 @@
+   optional LogParameter log_param = 134;
+   optional LRNParameter lrn_param = 118;
+   optional MemoryDataParameter memory_data_param = 119;
++  optional MultiBoxLossParameter multibox_loss_param = 201;
+   optional MVNParameter mvn_param = 120;
+   optional ParameterParameter parameter_param = 145;
+   optional PoolingParameter pooling_param = 121;
+   optional PowerParameter power_param = 122;
+   optional PReLUParameter prelu_param = 131;
++  optional PriorBoxParameter prior_box_param = 203;
+   optional PythonParameter python_param = 130;
+   optional RecurrentParameter recurrent_param = 146;
+   optional ReductionParameter reduction_param = 136;
+@@ -398,6 +401,7 @@
+   optional ReshapeParameter reshape_param = 133;
+   optional ScaleParameter scale_param = 142;
+   optional SigmoidParameter sigmoid_param = 124;
++  optional SmoothL1LossParameter smooth_l1_loss_param = 148;
+   optional SoftmaxParameter softmax_param = 125;
+   optional SPPParameter spp_param = 132;
+   optional SliceParameter slice_param = 126;
+@@ -672,6 +676,15 @@
+   optional uint32 prefetch = 10 [default = 4];
+ }
+ 
++message NonMaximumSuppressionParameter {
++  // Threshold to be used in nms.
++  optional float nms_threshold = 1 [default = 0.3];
++  // Maximum number of results to be kept.
++  optional int32 top_k = 2;
++  // Parameter for adaptive nms.
++  optional float eta = 3 [default = 1.0];
++}
++
+ message DropoutParameter {
+   optional float dropout_ratio = 1 [default = 0.5]; // dropout ratio
+ }
+@@ -879,6 +892,78 @@
+   optional uint32 width = 4;
+ }
+ 
++// Message that store parameters used by MultiBoxLossLayer
++message MultiBoxLossParameter {
++  // Localization loss type.
++  enum LocLossType {
++    L2 = 0;
++    SMOOTH_L1 = 1;
++  }
++  optional LocLossType loc_loss_type = 1 [default = SMOOTH_L1];
++  // Confidence loss type.
++  enum ConfLossType {
++    SOFTMAX = 0;
++    LOGISTIC = 1;
++  }
++  optional ConfLossType conf_loss_type = 2 [default = SOFTMAX];
++  // Weight for localization loss.
++  optional float loc_weight = 3 [default = 1.0];
++  // Number of classes to be predicted. Required!
++  optional uint32 num_classes = 4;
++  // If true, bounding box are shared among different classes.
++  optional bool share_location = 5 [default = true];
++  // Matching method during training.
++  enum MatchType {
++    BIPARTITE = 0;
++    PER_PREDICTION = 1;
++  }
++  optional MatchType match_type = 6 [default = PER_PREDICTION];
++  // If match_type is PER_PREDICTION, use overlap_threshold to
++  // determine the extra matching bboxes.
++  optional float overlap_threshold = 7 [default = 0.5];
++  // Use prior for matching.
++  optional bool use_prior_for_matching = 8 [default = true];
++  // Background label id.
++  optional uint32 background_label_id = 9 [default = 0];
++  // If true, also consider difficult ground truth.
++  optional bool use_difficult_gt = 10 [default = true];
++  // If true, perform negative mining.
++  // DEPRECATED: use mining_type instead.
++  optional bool do_neg_mining = 11;
++  // The negative/positive ratio.
++  optional float neg_pos_ratio = 12 [default = 3.0];
++  // The negative overlap upperbound for the unmatched predictions.
++  optional float neg_overlap = 13 [default = 0.5];
++  // Type of coding method for bbox.
++  optional PriorBoxParameter.CodeType code_type = 14 [default = CORNER];
++  // If true, encode the variance of prior box in the loc loss target instead of
++  // in bbox.
++  optional bool encode_variance_in_target = 16 [default = false];
++  // If true, map all object classes to agnostic class. It is useful for learning
++  // objectness detector.
++  optional bool map_object_to_agnostic = 17 [default = false];
++  // If true, ignore cross boundary bbox during matching.
++  // Cross boundary bbox is a bbox who is outside of the image region.
++  optional bool ignore_cross_boundary_bbox = 18 [default = false];
++  // If true, only backpropagate on corners which are inside of the image
++  // region when encode_type is CORNER or CORNER_SIZE.
++  optional bool bp_inside = 19 [default = false];
++  // Mining type during training.
++  //   NONE : use all negatives.
++  //   MAX_NEGATIVE : select negatives based on the score.
++  //   HARD_EXAMPLE : select hard examples based on "Training Region-based Object Detectors with Online Hard Example Mining", Shrivastava et.al.
++  enum MiningType {
++    NONE = 0;
++    MAX_NEGATIVE = 1;
++    HARD_EXAMPLE = 2;
++  }
++  optional MiningType mining_type = 20 [default = MAX_NEGATIVE];
++  // Parameters used for non maximum suppression durig hard example mining.
++  optional NonMaximumSuppressionParameter nms_param = 21;
++  optional int32 sample_size = 22 [default = 64];
++  optional bool use_prior_for_nms = 23 [default = false];
++}
++
+ message MVNParameter {
+   // This parameter can be set to false to normalize mean only
+   optional bool normalize_variance = 1 [default = true];
+@@ -930,6 +1015,47 @@
+   optional float shift = 3 [default = 0.0];
+ }
+ 
++message PriorBoxParameter {
++  // Encode/decode type.
++  enum CodeType {
++    CORNER = 1;
++    CENTER_SIZE = 2;
++    CORNER_SIZE = 3;
++  }
++  // Minimum box size (in pixels). Required!
++  repeated float min_size = 1;
++  // Maximum box size (in pixels). Required!
++  repeated float max_size = 2;
++  // Various of aspect ratios. Duplicate ratios will be ignored.
++  // If none is provided, we use default ratio 1.
++  repeated float aspect_ratio = 3;
++  // If true, will flip each aspect ratio.
++  // For example, if there is aspect ratio "r",
++  // we will generate aspect ratio "1.0/r" as well.
++  optional bool flip = 4 [default = true];
++  // If true, will clip the prior so that it is within [0, 1]
++  optional bool clip = 5 [default = false];
++  // Variance for adjusting the prior bboxes.
++  repeated float variance = 6;
++  // By default, we calculate img_height, img_width, step_x, step_y based on
++  // bottom[0] (feat) and bottom[1] (img). Unless these values are explicitely
++  // provided.
++  // Explicitly provide the img_size.
++  optional uint32 img_size = 7;
++  // Either img_size or img_h/img_w should be specified; not both.
++  optional uint32 img_h = 8;
++  optional uint32 img_w = 9;
++
++  // Explicitly provide the step size.
++  optional float step = 10;
++  // Either step or step_h/step_w should be specified; not both.
++  optional float step_h = 11;
++  optional float step_w = 12;
++
++  // Offset to the top left corner of each cell.
++  optional float offset = 13 [default = 0.5];
++}
++
+ message PythonParameter {
+   optional string module = 1;
+   optional string layer = 2;
+@@ -1127,6 +1253,13 @@
+   optional uint32 slice_dim = 1 [default = 1];
+ }
+ 
++message SmoothL1LossParameter {
++  // SmoothL1Loss(x) =
++  //   0.5 * (sigma * x) ** 2    -- if x < 1.0 / sigma / sigma
++  //   |x| - 0.5 / sigma / sigma -- otherwise
++  optional float sigma = 1 [default = 1];
++}
++
+ // Message that stores parameters used by SoftmaxLayer, SoftmaxWithLossLayer
+ message SoftmaxParameter {
+   enum Engine {
+--- /dev/null
++++ b/src/caffe/layers/smooth_L1_loss_layer.cu
+@@ -0,0 +1,96 @@
++// ------------------------------------------------------------------
++// Fast R-CNN
++// copyright (c) 2015 Microsoft
++// Licensed under The MIT License [see fast-rcnn/LICENSE for details]
++// Written by Ross Girshick
++// Modified by Wei Liu
++// ------------------------------------------------------------------
++
++#include <vector>
++
++#include "caffe/layers/smooth_L1_loss_layer.hpp"
++#include "caffe/util/math_functions.hpp"
++
++namespace caffe {
++
++template <typename Dtype>
++__global__ void SmoothL1Forward(const int n, const Dtype* in, Dtype* out) {
++  // f(x) = 0.5 * x^2    if |x| < 1
++  //        |x| - 0.5    otherwise
++  CUDA_KERNEL_LOOP(index, n) {
++    Dtype val = in[index];
++    Dtype abs_val = abs(val);
++    if (abs_val < 1) {
++      out[index] = 0.5 * val * val;
++    } else {
++      out[index] = abs_val - 0.5;
++    }
++  }
++}
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
++    const vector<Blob<Dtype>*>& top) {
++  int count = bottom[0]->count();
++  caffe_gpu_sub(
++      count,
++      bottom[0]->gpu_data(),
++      bottom[1]->gpu_data(),
++      diff_.mutable_gpu_data());    // d := b0 - b1
++  if (has_weights_) {
++    caffe_gpu_mul(
++        count,
++        bottom[2]->gpu_data(),
++        diff_.gpu_data(),
++        diff_.mutable_gpu_data());  // d := w * (b0 - b1)
++  }
++  // NOLINT_NEXT_LINE(whitespace/operators)
++  SmoothL1Forward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
++      count, diff_.gpu_data(), errors_.mutable_gpu_data());
++  CUDA_POST_KERNEL_CHECK;
++
++  Dtype loss;
++  caffe_gpu_asum(count, errors_.gpu_data(), &loss);
++  top[0]->mutable_cpu_data()[0] = loss / bottom[0]->num();
++}
++
++template <typename Dtype>
++__global__ void SmoothL1Backward(const int n, const Dtype* in, Dtype* out) {
++  // f'(x) = x         if |x| < 1
++  //       = sign(x)   otherwise
++  CUDA_KERNEL_LOOP(index, n) {
++    Dtype val = in[index];
++    Dtype abs_val = abs(val);
++    if (abs_val < 1) {
++      out[index] = val;
++    } else {
++      out[index] = (Dtype(0) < val) - (val < Dtype(0));
++    }
++  }
++}
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
++    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
++  int count = diff_.count();
++  // NOLINT_NEXT_LINE(whitespace/operators)
++  SmoothL1Backward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
++      count, diff_.gpu_data(), diff_.mutable_gpu_data());
++  CUDA_POST_KERNEL_CHECK;
++  for (int i = 0; i < 2; ++i) {
++    if (propagate_down[i]) {
++      const Dtype sign = (i == 0) ? 1 : -1;
++      const Dtype alpha = sign * top[0]->cpu_diff()[0] / bottom[i]->num();
++      caffe_gpu_axpby(
++          bottom[i]->count(),              // count
++          alpha,                           // alpha
++          diff_.gpu_data(),                // x
++          Dtype(0),                        // beta
++          bottom[i]->mutable_gpu_diff());  // y
++    }
++  }
++}
++
++INSTANTIATE_LAYER_GPU_FUNCS(SmoothL1LossLayer);
++
++}  // namespace caffe
+--- /dev/null
++++ b/src/caffe/layers/smooth_L1_loss_layer.cpp
+@@ -0,0 +1,145 @@
++/*
++All modification made by Intel Corporation: © 2016 Intel Corporation
++
++All contributions by the University of California:
++Copyright (c) 2014, 2015, The Regents of the University of California (Regents)
++All rights reserved.
++
++All other contributions:
++Copyright (c) 2014, 2015, the respective contributors
++All rights reserved.
++For the list of contributors go to https://github.com/BVLC/caffe/blob/master/CONTRIBUTORS.md
++
++
++Redistribution and use in source and binary forms, with or without
++modification, are permitted provided that the following conditions are met:
++
++    * Redistributions of source code must retain the above copyright notice,
++      this list of conditions and the following disclaimer.
++    * Redistributions in binary form must reproduce the above copyright
++      notice, this list of conditions and the following disclaimer in the
++      documentation and/or other materials provided with the distribution.
++    * Neither the name of Intel Corporation nor the names of its contributors
++      may be used to endorse or promote products derived from this software
++      without specific prior written permission.
++
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
++FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
++OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++*/
++
++// ------------------------------------------------------------------
++// Fast R-CNN
++// copyright (c) 2015 Microsoft
++// Licensed under The MIT License [see fast-rcnn/LICENSE for details]
++// Written by Ross Girshick
++// Modified by Wei Liu
++// ------------------------------------------------------------------
++
++#include <vector>
++
++#include "caffe/layers/smooth_L1_loss_layer.hpp"
++#include "caffe/util/math_functions.hpp"
++
++namespace caffe {
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::LayerSetUp(
++  const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
++  LossLayer<Dtype>::LayerSetUp(bottom, top);
++  has_weights_ = (bottom.size() == 3);
++}
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::Reshape(
++  const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
++  LossLayer<Dtype>::Reshape(bottom, top);
++  CHECK_EQ(bottom[0]->channels(), bottom[1]->channels());
++  CHECK_EQ(bottom[0]->height(), bottom[1]->height());
++  CHECK_EQ(bottom[0]->width(), bottom[1]->width());
++  if (has_weights_) {
++    CHECK_EQ(bottom[0]->channels(), bottom[2]->channels());
++    CHECK_EQ(bottom[0]->height(), bottom[2]->height());
++    CHECK_EQ(bottom[0]->width(), bottom[2]->width());
++  }
++  diff_.Reshape(bottom[0]->num(), bottom[0]->channels(),
++      bottom[0]->height(), bottom[0]->width());
++  errors_.Reshape(bottom[0]->num(), bottom[0]->channels(),
++      bottom[0]->height(), bottom[0]->width());
++}
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
++    const vector<Blob<Dtype>*>& top) {
++  int count = bottom[0]->count();
++  caffe_sub(
++      count,
++      bottom[0]->cpu_data(),
++      bottom[1]->cpu_data(),
++      diff_.mutable_cpu_data());
++  if (has_weights_) {
++    caffe_mul(
++        count,
++        bottom[2]->cpu_data(),
++        diff_.cpu_data(),
++        diff_.mutable_cpu_data());  // d := w * (b0 - b1)
++  }
++  const Dtype* diff_data = diff_.cpu_data();
++  Dtype* error_data = errors_.mutable_cpu_data();
++  for (int i = 0; i < count; ++i) {
++    Dtype val = diff_data[i];
++    Dtype abs_val = fabs(val);
++    if (abs_val < 1.) {
++      error_data[i] = 0.5 * val * val;
++    } else {
++      error_data[i] = abs_val - 0.5;
++    }
++  }
++  top[0]->mutable_cpu_data()[0] =
++      caffe_cpu_asum(count, errors_.cpu_data()) / bottom[0]->num();
++}
++
++template <typename Dtype>
++void SmoothL1LossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
++    const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
++  int count = diff_.count();
++  Dtype* diff_data = diff_.mutable_cpu_data();
++  for (int i = 0; i < count; ++i) {
++    Dtype val = diff_data[i];
++    // f'(x) = x         if |x| < 1
++    //       = sign(x)   otherwise
++    if (fabs(val) < 1.) {
++      diff_data[i] = val;
++    } else {
++      diff_data[i] = (Dtype(0) < val) - (val < Dtype(0));
++    }
++  }
++  for (int i = 0; i < 2; ++i) {
++    if (propagate_down[i]) {
++      const Dtype sign = (i == 0) ? 1 : -1;
++      const Dtype alpha = sign * top[0]->cpu_diff()[0] / bottom[i]->num();
++      caffe_cpu_axpby(
++          bottom[i]->count(),               // count
++          alpha,                            // alpha
++          diff_.cpu_data(),                 // a
++          Dtype(0),                         // beta
++          bottom[i]->mutable_cpu_diff());   // b
++    }
++  }
++}
++
++#ifdef CPU_ONLY
++STUB_GPU(SmoothL1LossLayer);
++#endif
++
++INSTANTIATE_CLASS(SmoothL1LossLayer);
++REGISTER_LAYER_CLASS(SmoothL1Loss);
++
++}  // namespace caffe
+--- /dev/null
++++ b/include/caffe/layers/smooth_L1_loss_layer.hpp
+@@ -0,0 +1,105 @@
++/*
++All modification made by Intel Corporation: © 2016 Intel Corporation
++
++All contributions by the University of California:
++Copyright (c) 2014, 2015, The Regents of the University of California (Regents)
++All rights reserved.
++
++All other contributions:
++Copyright (c) 2014, 2015, the respective contributors
++All rights reserved.
++For the list of contributors go to https://github.com/BVLC/caffe/blob/master/CONTRIBUTORS.md
++
++
++Redistribution and use in source and binary forms, with or without
++modification, are permitted provided that the following conditions are met:
++
++    * Redistributions of source code must retain the above copyright notice,
++      this list of conditions and the following disclaimer.
++    * Redistributions in binary form must reproduce the above copyright
++      notice, this list of conditions and the following disclaimer in the
++      documentation and/or other materials provided with the distribution.
++    * Neither the name of Intel Corporation nor the names of its contributors
++      may be used to endorse or promote products derived from this software
++      without specific prior written permission.
++
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
++DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
++FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
++OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++*/
++
++// ------------------------------------------------------------------
++// Fast R-CNN
++// copyright (c) 2015 Microsoft
++// Licensed under The MIT License [see fast-rcnn/LICENSE for details]
++// Written by Ross Girshick
++// Modified by Wei Liu
++// ------------------------------------------------------------------
++
++#ifndef CAFFE_SMOOTH_L1_LOSS_LAYER_HPP_
++#define CAFFE_SMOOTH_L1_LOSS_LAYER_HPP_
++
++#include <vector>
++
++#include "caffe/blob.hpp"
++#include "caffe/layer.hpp"
++#include "caffe/proto/caffe.pb.h"
++
++#include "caffe/layers/loss_layer.hpp"
++
++namespace caffe {
++
++/**
++ * @brief Computes the SmoothL1 loss as introduced in:@f$
++ *  Fast R-CNN, Ross Girshick, ICCV 2015.
++ */
++template <typename Dtype>
++class SmoothL1LossLayer : public LossLayer<Dtype> {
++ public:
++  explicit SmoothL1LossLayer(const LayerParameter& param)
++      : LossLayer<Dtype>(param), diff_() {}
++  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
++      const vector<Blob<Dtype>*>& top);
++  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
++      const vector<Blob<Dtype>*>& top);
++
++  virtual inline const char* type() const { return "SmoothL1Loss"; }
++
++  virtual inline int MinBottomBlobs() const { return 2; }
++  virtual inline int MaxBottomBlobs() const { return 3; }
++
++  /**
++   * Unlike most loss layers, in the SmoothL1LossLayer we can backpropagate
++   * to both inputs -- override to return true and always allow force_backward.
++   */
++  virtual inline bool AllowForceBackward(const int bottom_index) const {
++    return true;
++  }
++
++ protected:
++  /// @copydoc SmoothL1LossLayer
++  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
++      const vector<Blob<Dtype>*>& top);
++  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
++      const vector<Blob<Dtype>*>& top);
++
++  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
++      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
++  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
++      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
++
++  Blob<Dtype> diff_;
++  Blob<Dtype> errors_;
++  bool has_weights_;
++};
++
++}  // namespace caffe
++
++#endif  // CAFFE_SMOOTH_L1_LOSS_LAYER_HPP_
+--- a/cmake/WindowsCreateLinkHeader.cmake
++++ b/cmake/WindowsCreateLinkHeader.cmake
+@@ -1,8 +1,11 @@
+-set(_windows_create_link_header "${CMAKE_CURRENT_LIST_FILE}")
++set(_windows_create_link_header "${CMAKE_CURRENT_LIST_DIR}/generate_header.cmake")
++if(NOT EXISTS ${_windows_create_link_header})
++    message(FATAL_ERROR "Not found header generator")
++endif()
+ 
+ # function to add a post build command to create a link header
+ function(windows_create_link_header target outputfile)
+-    add_custom_command(TARGET ${target} POST_BUILD
++    add_custom_command(TARGET ${target} PRE_BUILD
+                        COMMAND ${CMAKE_COMMAND}
+                                 #-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+                                 -DMSVC_VERSION=${MSVC_VERSION}
+@@ -15,58 +18,3 @@
+                         BYPRODUCTS ${outputfile}
+                       )
+ endfunction()
+-
+-
+-function(find_dumpbin var)
+-    # MSVC_VERSION =
+-    # 1200 = VS  6.0
+-    # 1300 = VS  7.0
+-    # 1310 = VS  7.1
+-    # 1400 = VS  8.0
+-    # 1500 = VS  9.0
+-    # 1600 = VS 10.0
+-    # 1700 = VS 11.0
+-    # 1800 = VS 12.0
+-    # 1900 = VS 14.0
+-    set(MSVC_PRODUCT_VERSION_1200 6.0)
+-    set(MSVC_PRODUCT_VERSION_1300 7.0)
+-    set(MSVC_PRODUCT_VERSION_1310 7.1)
+-    set(MSVC_PRODUCT_VERSION_1400 8.0)
+-    set(MSVC_PRODUCT_VERSION_1500 9.0)
+-    set(MSVC_PRODUCT_VERSION_1600 10.0)
+-    set(MSVC_PRODUCT_VERSION_1700 11.0)
+-    set(MSVC_PRODUCT_VERSION_1800 12.0)
+-    set(MSVC_PRODUCT_VERSION_1900 14.0)
+-    get_filename_component(MSVC_VC_DIR [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${MSVC_PRODUCT_VERSION_${MSVC_VERSION}}\\Setup\\VC;ProductDir] REALPATH CACHE)
+-
+-    find_program(DUMPBIN_EXECUTABLE dumpbin ${MSVC_VC_DIR}/bin)
+-    if(NOT DUMPBIN_EXECUTABLE)
+-        message(FATAL_ERROR "Could not find DUMPBIN_EXECUTABLE please define this variable")
+-    endif()
+-    set(${var} ${DUMPBIN_EXECUTABLE} PARENT_SCOPE)
+-endfunction()
+-
+-macro(print_date)
+-    execute_process(COMMAND powershell -NoProfile -Command "get-date")
+-endmacro()
+-
+-
+-if(CMAKE_SCRIPT_MODE_FILE)
+-    cmake_policy(SET CMP0007 NEW)
+-    # find the dumpbin exe
+-    find_dumpbin(dumpbin)
+-    # execute dumpbin to generate a list of symbols
+-    execute_process(COMMAND ${dumpbin} /SYMBOLS ${TARGET_FILE}
+-                    RESULT_VARIABLE _result
+-                    OUTPUT_VARIABLE _output
+-                    ERROR_VARIABLE _error
+-    )
+-    # match all layers and solvers instantiation guard
+-    string(REGEX MATCHALL "\\?gInstantiationGuard[^\\(\\) ]*" __symbols ${_output})
+-    # define a string to generate a list of pragmas
+-    foreach(__symbol ${__symbols})
+-        set(__pragma "${__pragma}#pragma comment(linker, \"/include:${__symbol}\")\n")        
+-    endforeach()
+-    file(WRITE ${OUTPUT_FILE} ${__pragma})
+-endif()
+-
+--- /dev/null
++++ b/cmake/generate_header.cmake
+@@ -0,0 +1,28 @@
++function(find_dumpbin var)
++    find_program(DUMPBIN_EXECUTABLE dumpbin)
++    if(NOT DUMPBIN_EXECUTABLE)
++        message(FATAL_ERROR "Could not find DUMPBIN_EXECUTABLE please define this variable")
++    endif()
++    set(${var} ${DUMPBIN_EXECUTABLE} PARENT_SCOPE)
++endfunction()
++
++macro(print_date)
++    execute_process(COMMAND powershell -NoProfile -Command "get-date")
++endmacro()
++
++cmake_policy(SET CMP0007 NEW)
++# find the dumpbin exe
++find_dumpbin(dumpbin)
++# execute dumpbin to generate a list of symbols
++execute_process(COMMAND ${dumpbin} /SYMBOLS ${TARGET_FILE}
++                RESULT_VARIABLE _result
++                OUTPUT_VARIABLE _output
++                ERROR_VARIABLE _error
++)
++# match all layers and solvers instantiation guard
++string(REGEX MATCHALL "\\?gInstantiationGuard[^\\(\\) ]*" __symbols ${_output})
++# define a string to generate a list of pragmas
++foreach(__symbol ${__symbols})
++    set(__pragma "${__pragma}#pragma comment(linker, \"/include:${__symbol}\")\n")        
++endforeach()
++file(WRITE ${OUTPUT_FILE} ${__pragma})
+--- a/include/caffe/sgd_solvers.hpp
++++ b/include/caffe/sgd_solvers.hpp
+@@ -23,7 +23,7 @@
+ 
+   const vector<shared_ptr<Blob<Dtype> > >& history() { return history_; }
+ 
+- protected:
++ public:
+   void PreSolve();
+   Dtype GetLearningRate();
+   virtual void ApplyUpdate();
