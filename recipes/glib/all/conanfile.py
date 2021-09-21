@@ -116,6 +116,7 @@ class GLibConan(ConanFile):
             return self._meson
         self._meson = Meson(self)
         self._meson.configure(source_folder=self._source_subfolder)
+        self.output.info(tools.load(os.path.join("build", "meson-logs", "meson-log.txt"))) # REMOVE THIS BEFORE MERGE!!!
         return self._meson
 
     def _patch_sources(self):
