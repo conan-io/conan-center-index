@@ -25,7 +25,7 @@ class OpenblasConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_lapack": False,
+        "build_lapack": True,
         "use_thread": True,
         "dynamic_arch": False
     }
