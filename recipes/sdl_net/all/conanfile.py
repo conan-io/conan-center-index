@@ -78,7 +78,10 @@ class SdlnetConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.libs = ["SDL2_net"]
         self.cpp_info.names["cmake_find_package"] = "SDL2_net"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_net"
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.libs = ["SDL2_net"]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])

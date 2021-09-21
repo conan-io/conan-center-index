@@ -23,6 +23,11 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE "source_subfolder")
 
 target_link_libraries(${PROJECT_NAME} SDL2::SDL2)
+
+if(WIN32)
+  target_link_libraries(${PROJECT_NAME} ws2_32 iphlpapi)
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/SDL_net.h)
 
 if(${BUILD_SHARED_LIBS})
