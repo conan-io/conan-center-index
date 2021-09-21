@@ -80,8 +80,8 @@ class AtSpi2CoreConan(ConanFile):
     def build(self):
         if tools.Version(self.version) >= "2.42.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "bus", "meson.build"),
-                                  "x11_dep.found()",
-                                  "true" if self.options.with_x11 else "false")
+                                  "if x11_dep.found()",
+                                  "if x11_option == 'yes'")
         meson = self._configure_meson()
         meson.build()
 
