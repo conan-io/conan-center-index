@@ -439,6 +439,7 @@ class MagnumConan(ConanFile):
         self.cpp_info.components["magnum_main"].names["cmake_find_package_multi"] = "Magnum"
         self.cpp_info.components["magnum_main"].libs = ["Magnum{}".format(lib_suffix)]
         self.cpp_info.components["magnum_main"].requires = ["_magnum", "corrade::utility"]
+        self.cpp_info.components["magnum_main"].build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "conan-bugfix-global-target.cmake"))
 
         # Audio
         if self.options.audio:
@@ -624,9 +625,9 @@ class MagnumConan(ConanFile):
 
         ######## PLUGINS ########
         if self.options.any_audio_importer:
-            self.cpp_info.components["any_audio_importer"].names["cmake_find_package"] = "AnyAudioConverter"
-            self.cpp_info.components["any_audio_importer"].names["cmake_find_package_multi"] = "AnyAudioConverter"
-            self.cpp_info.components["any_audio_importer"].libs = ["AnyAudioConverter"]
+            self.cpp_info.components["any_audio_importer"].names["cmake_find_package"] = "AnyAudioImporter"
+            self.cpp_info.components["any_audio_importer"].names["cmake_find_package_multi"] = "AnyAudioImporter"
+            self.cpp_info.components["any_audio_importer"].libs = ["AnyAudioImporter"]
             self.cpp_info.components["any_audio_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'audioimporters')]
             self.cpp_info.components["any_audio_importer"].requires = ["magnum_main", "audio"]
 
@@ -694,9 +695,9 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["tga_image_converter"].requires = ["trade"]
 
         if self.options.wav_audio_importer:
-            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package"] = "WavAudioConverter"
-            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package_multi"] = "WavAudioConverter"
-            self.cpp_info.components["wav_audio_importer"].libs = ["WavAudioConverter"]
+            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package"] = "WavAudioImporter"
+            self.cpp_info.components["wav_audio_importer"].names["cmake_find_package_multi"] = "WavAudioImporter"
+            self.cpp_info.components["wav_audio_importer"].libs = ["WavAudioImporter"]
             self.cpp_info.components["wav_audio_importer"].libdirs = [os.path.join(self.package_folder, 'lib', magnum_plugin_libdir, 'audioimporters')]
             self.cpp_info.components["wav_audio_importer"].requires = ["magnum_main", "audio"]
 
