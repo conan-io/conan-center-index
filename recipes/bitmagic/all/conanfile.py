@@ -42,7 +42,7 @@ class BitmagicConan(ConanFile):
 
     @property
     def _cppstd(self):
-        return "11" if tools.Version(self.version) <= "7.5.0" else "17"
+        return "11" if tools.Version(self.version) < "7.5.0" else "17"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
