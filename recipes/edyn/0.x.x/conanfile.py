@@ -16,6 +16,7 @@ class EdynConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     exports_sources = "src/**"
+    requires = "entt/3.8.0"
 
     @property
     def _source_subfolder(self):
@@ -28,12 +29,6 @@ class EdynConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def requirements(self):
-        if tools.Version(self.version) < "0.2.0":
-            self.requires("entt/3.5.2")
-        else:
-            self.requires("entt/3.8.0")
 
     def validate(self):
         minimal_cpp_standard = "17"
