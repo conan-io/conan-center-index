@@ -85,7 +85,7 @@ class GTestConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
-        if self.settings.comiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio":
             if self.options.shared and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("gtest:shared=True with compiler=\"Visual Studio\" is not compatible with compiler.runtime=MT/MTd")
 
