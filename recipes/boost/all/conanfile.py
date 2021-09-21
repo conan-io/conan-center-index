@@ -289,10 +289,6 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, "without_{}".format(dep_name))
 
-        if self.settings.compiler == "Visual Studio":
-            # Shared builds of numa do not link on Visual Studio due to missing symbols
-            self.options.numa = False
-
         if tools.Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
             # ==> disable it by default for older compilers or c++ standards
@@ -394,8 +390,6 @@ class BoostConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self._shared:
             if "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
-            if self.options.get_safe("numa"):
-                raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -793,6 +787,10 @@ class BoostConan(ConanFile):
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local no-threading = android beos haiku sgi darwin vxworks ;",
                               "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
+                              strict=False)
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
+                              "    <conditional>@numa",
+                              "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
 
         if self.options.header_only:
