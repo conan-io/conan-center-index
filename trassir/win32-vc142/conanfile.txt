@@ -49,7 +49,7 @@ openssl/1.1.1d.dssl1
 pjsip/2.9
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
-signalr-qt/0.1.dssl1
+signalr-qt/0.1.dssl2
 qt/5.14.1.dssl2
 qtwebkit/5.212.0-alpha4.dssl2
 sqlite3/3.31.0.dssl1
