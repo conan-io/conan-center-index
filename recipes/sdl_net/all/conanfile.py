@@ -48,11 +48,6 @@ class SdlnetConan(ConanFile):
     def requirements(self):
         self.requires("sdl/2.0.16")
 
-    def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("sdl_net is not supported with Visual Studio")
-        # TODO: check that major version of sdl_net is the same than sdl (not possible yet in validate())
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -67,6 +62,9 @@ class SdlnetConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("sdl_net is not supported with Visual Studio")
+        # FIXME: check that major version of sdl_net is the same than sdl (not possible yet in validate())
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
