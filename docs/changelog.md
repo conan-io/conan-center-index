@@ -1,5 +1,9 @@
 # Changelog
 
+### 21-September-2021 - 12:09 CEST
+
+- [config] Upgrade Conan version to 1.39.0.
+
 ### 7-September-2021 - 16:49 CEST
 
 - [configs] Remove Visual Studio 2015
