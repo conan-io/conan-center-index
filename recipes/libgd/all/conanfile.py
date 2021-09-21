@@ -121,6 +121,8 @@ class LibgdConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("BGD_NONDLL")
             self.cpp_info.defines.append("BGDWIN32")
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs.append("m")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
