@@ -8,5 +8,5 @@ class TestUaNodeSetConan(ConanFile):
         pass
 
     def test(self):
-        assert os.path.exists(os.path.join(self.deps_user_info["ua-nodeset"].nodeset_path, "PLCopen"))
+        assert os.path.exists(os.path.join(self.deps_user_info["ua-nodeset"].nodeset_dir, "PLCopen"))
 
