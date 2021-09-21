@@ -23,30 +23,37 @@ class BitmagicConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "Visual Studio": "15.7",
-            "clang": "7",
-            "apple-clang": "11",
+    def _minimum_compilers_version(self, cppstd):
+        standards = {
+            "11": {
+                "Visual Studio": "15",
+                "gcc": "4.8",
+                "clang": "4",
+                "apple-clang": "9",
+            },
+            "17": {
+                "Visual Studio": "16",
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10",
+            },
         }
+        return standards.get(cppstd) or {}
+
+    @property
+    def _cppstd(self):
+        return "11" if tools.Version(self.version) <= "7.5.0" else "17"
 
     def validate(self):
-        if not self.settings.compiler.get_safe("cppstd"):
-            return
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._cppstd)
 
-        if tools.Version(self.version) < "7.5.0":
-            tools.check_min_cppstd(self, 11)
-            return
-
-        tools.check_min_cppstd(self, 17)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._minimum_compilers_version(self._cppstd).get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+                raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, self._cppstd))
         else:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+            self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, self._cppstd))
 
     def package_id(self):
         self.info.header_only()
