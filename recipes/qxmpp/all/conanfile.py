@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
+required_conan_version = ">=1.33.0"
 
 class QxmppConan(ConanFile):
     name = "qxmpp"
@@ -18,7 +20,6 @@ class QxmppConan(ConanFile):
                        "fPIC": True,
                        "with_gstreamer": False}
     generators = "cmake", "cmake_find_package_multi"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -28,7 +29,7 @@ class QxmppConan(ConanFile):
         self.requires("qt/6.1.2")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.19.1")
-            self.requires("glib/2.68.3")
+            self.requires("glib/2.70.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,24 +39,19 @@ class QxmppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = "OFF"
-        self._cmake.definitions["BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["WITH_GSTREAMER"] = self.options.with_gstreamer
-        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+        cmake = CMake(self)
+        cmake.definitions["BUILD_DOCUMENTATION"] = "OFF"
+        cmake.definitions["BUILD_TESTS"] = "OFF"
+        cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+        cmake.definitions["WITH_GSTREAMER"] = self.options.with_gstreamer
+        cmake.definitions["BUILD_SHARED"] = self.options.shared
+        cmake.configure()
+        return cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
