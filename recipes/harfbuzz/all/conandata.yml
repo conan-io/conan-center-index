@@ -63,3 +63,6 @@ patches:
   "2.9.1":
     - patch_file: "patches/icu-2.8.x.patch"
       base_path: "source_subfolder"
+  "3.0.0":
+    - patch_file: "patches/icu-3.0.x.patch"
+      base_path: "source_subfolder"
