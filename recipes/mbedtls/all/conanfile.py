@@ -53,6 +53,10 @@ class MBedTLSConan(ConanFile):
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration("{}-{} is not supported by this recipe".format(self.settings.compiler, self.settings.compiler.version))
 
+        if tools.Version(self.version) >= "3.0.0":
+            # Version 3.0.0 dropped zlib support
+            self.options.with_zlib = False
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -66,7 +70,8 @@ class MBedTLSConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
             self._cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-            self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+            if tools.Version(self.version) < "3.0.0":
+                self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
             self._cmake.configure()
@@ -78,6 +83,10 @@ class MBedTLSConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def package_id(self):
+        if tools.Version(self.version) >= "3.0.0":
+            del self.options.with_zlib
+
     def package(self):
         self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         if tools.Version(self.version) < "2.23.0": # less then 2.23 is multi-licensed
@@ -88,9 +97,25 @@ class MBedTLSConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        # https://gitlab.kitware.com/cmake/cmake/blob/de7c21d677db1ddaeece03c19e13e448f4031511/CMakeLists.txt#L380
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
-        self.cpp_info.libs = ["mbedtls", "mbedx509", "mbedcrypto"]
+        self.cpp_info.components["mbedcrypto"].names["cmake_find_package"] = "mbedcrypto"
+        self.cpp_info.components["mbedcrypto"].names["cmake_find_package_multi"] = "mbedcrypto"
+        self.cpp_info.components["mbedcrypto"].libs = ["mbedcrypto"]
+
+        self.cpp_info.components["mbedx509"].names["cmake_find_package"] = "mbedx509"
+        self.cpp_info.components["mbedx509"].names["cmake_find_package_multi"] = "mbedx509"
+        self.cpp_info.components["mbedx509"].libs = ["mbedx509"]
+        self.cpp_info.components["mbedx509"].requires = ["mbedcrypto"]
+
+        self.cpp_info.components["libembedtls"].names["cmake_find_package"] = "mbedtls"
+        self.cpp_info.components["libembedtls"].names["cmake_find_package_multi"] = "mbedtls"
+        self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
+        self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
+
+        if tools.Version(self.version) < "3.0.0" and self.options.with_zlib:
+            for component in self.cpp_info.components:
+                self.cpp_info.components[component].requires.append("zlib::zlib")
