@@ -115,8 +115,10 @@ class GLibConan(ConanFile):
         if self._meson:
             return self._meson
         self._meson = Meson(self)
-        self._meson.configure(source_folder=self._source_subfolder)
-        self.output.info(tools.load(os.path.join("build", "meson-logs", "meson-log.txt"))) # REMOVE THIS BEFORE MERGE!!!
+        try:
+            self._meson.configure(source_folder=self._source_subfolder)
+        finally:
+            self.output.info(tools.load(os.path.join("build", "meson-logs", "meson-log.txt"))) # REMOVE THIS BEFORE MERGE!!!
         return self._meson
 
     def _patch_sources(self):
@@ -142,7 +144,7 @@ class GLibConan(ConanFile):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "meson.build"),
             "libintl = cc.find_library('intl', required : false)",
-            "libintl = cc.find_library('gnuintl', required : false)",
+            "libintl = dependency('libgettext')",
         )
         tools.replace_in_file(
             os.path.join(
