@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 class UaNodeSetConan(ConanFile):
     name = "ua-nodeset"
-    license = "MIT"
+    license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
     url = "https://github.com/conan-io/conan-center-index"
@@ -15,13 +15,17 @@ class UaNodeSetConan(ConanFile):
         "industrial automation", "nodeset"
     )
 
-    exports_sources = ["LICENSE"]
     no_copy_source = True
 
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), "source_subfolder")
+
+        license_file = "Note: The license for each file can be found in the file's header."
+        with open("LICENSE", "w") as text_file:
+            text_file.write(license_file)
+
 
     def build(self):
         pass
