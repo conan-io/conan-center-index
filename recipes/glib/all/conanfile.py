@@ -107,6 +107,8 @@ class GLibConan(ConanFile):
 
         if tools.Version(self.version) >= "2.67.0":
             tc.definitions["libelf"] = "enabled" if self.options.with_elf else "disabled"
+            
+        tc.definitions['libdir'] = "lib" # this should be done inside MesonToolchain
         tc.generate()
 
     def _configure_meson(self):
