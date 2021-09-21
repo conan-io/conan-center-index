@@ -53,6 +53,7 @@ class QxmppConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = "OFF"
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["WITH_GSTREAMER"] = self.options.with_gstreamer
+        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
@@ -68,6 +69,11 @@ class QxmppConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        if self.options.shared and self.settings.os == "Windows":
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            tools.rename(os.path.join(self.package_folder, "lib", "qxmpp.dll"),
+                         os.path.join(self.package_folder, "bin", "qxmpp.dll"))
 
     def package_info(self):
         self.cpp_info.libs = ["qxmpp"]
