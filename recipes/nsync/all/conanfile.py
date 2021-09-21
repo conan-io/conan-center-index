@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class NsyncConan(ConanFile):
     name = "nsync"
     homepage = "https://github.com/google/nsync"
-    description = "Library that exports various synchronization primitive"
+    description = "Library that exports various synchronization primitives"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("c", "thread", "multithreading", "google")
