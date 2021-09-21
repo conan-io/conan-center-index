@@ -28,11 +28,10 @@ if(WIN32)
   target_link_libraries(${PROJECT_NAME} ws2_32 iphlpapi)
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/SDL_net.h)
-
-if(${BUILD_SHARED_LIBS})
-  target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
-endif()
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    DEFINE_SYMBOL DLL_EXPORT
+    PUBLIC_HEADER source_subfolder/SDL_net.h
+)
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
