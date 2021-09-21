@@ -4,9 +4,10 @@ diff -ru cmake/Dependencies.cmake cmake/Dependencies.cmake
 @@ -55,8 +55,8 @@
  # ---[ LMDB
  if(USE_LMDB)
-   find_package(LMDB REQUIRED)
+-  find_package(LMDB REQUIRED)
 -  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${LMDB_INCLUDE_DIR})
 -  list(APPEND Caffe_LINKER_LIBS PUBLIC ${LMDB_LIBRARIES})
++  find_package(lmdb REQUIRED)
 +  list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${lmdb_INCLUDE_DIR})
 +  list(APPEND Caffe_LINKER_LIBS PUBLIC ${lmdb_LIBRARIES})
    list(APPEND Caffe_DEFINITIONS PUBLIC -DUSE_LMDB)
@@ -32,7 +33,7 @@ diff -ru cmake/Dependencies.cmake cmake/Dependencies.cmake
 -  find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs)
 -  if(NOT OpenCV_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
 -    find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc)
-+  find_package(opencv QUIET COMPONENTS core highgui imgproc imgcodecs)
++  find_package(opencv QUIET COMPONENTS core highgui imgproc )
 +  if(NOT opencv_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
 +    find_package(opencv REQUIRED COMPONENTS core highgui imgproc)
    endif()
