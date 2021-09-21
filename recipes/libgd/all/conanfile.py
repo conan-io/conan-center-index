@@ -13,7 +13,7 @@ class LibgdConan(ConanFile):
     topics = ("images", "graphics")
     homepage = "https://libgd.github.io"
 
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -55,12 +55,13 @@ class LibgdConan(ConanFile):
         self.requires("zlib/1.2.11")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
+            self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
         if self.options.with_tiff:
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -108,10 +109,9 @@ class LibgdConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses",
-                  ignore_case=True, keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
