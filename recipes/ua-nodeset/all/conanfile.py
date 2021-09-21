@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 class UaNodeSetConan(ConanFile):
     name = "ua-nodeset"
-    license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
+    license = "MIT"
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
     url = "https://github.com/conan-io/conan-center-index"
@@ -14,7 +14,8 @@ class UaNodeSetConan(ConanFile):
         "OPC UA", "open62541", "iec-62541",
         "industrial automation", "nodeset"
     )
-    
+
+    exports_sources = ["LICENSE"]
     no_copy_source = True
 
 
@@ -24,10 +25,11 @@ class UaNodeSetConan(ConanFile):
 
     def build(self):
         pass
- 
+
 
     def package(self):
         self.copy("*", dst="res", src="source_subfolder")
+        self.copy("LICENSE", dst="licenses")
 
 
     def package_info(self):
