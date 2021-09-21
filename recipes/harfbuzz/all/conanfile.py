@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class HarfbuzzConan(ConanFile):
     name = "harfbuzz"
     description = "HarfBuzz is an OpenType text shaping engine."
-    topics = ("conan", "harfbuzz", "opentype", "text", "engine")
+    topics = "harfbuzz", "opentype", "text", "engine"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://harfbuzz.org"
     license = "MIT"
