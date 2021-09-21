@@ -9,7 +9,11 @@ class UaNodeSetConan(ConanFile):
     license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
-    url = "https://www.github.com/conan-io/conan-center-index"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = (
+        "OPC UA", "open62541", "iec-62541",
+        "industrial automation", "nodeset"
+    )
     
     no_copy_source = True
 
