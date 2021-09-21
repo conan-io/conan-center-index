@@ -2,6 +2,7 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
 
 class MBedTLSConan(ConanFile):
     name = "mbedtls"
@@ -57,11 +58,8 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self._version)
-        if tools.Version(self.version) >= "2.23.0": # went to mbedtls-mbedtls-X.X.X
-            extracted_dir = "{}-{}".format(self.name, extracted_dir)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                    strip_root = True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
