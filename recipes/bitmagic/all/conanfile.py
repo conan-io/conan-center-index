@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.tools import Version
 import os
 
 required_conan_version = ">=1.33.0"
@@ -24,7 +25,7 @@ class BitmagicConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if self.version < "7.5.0":
+            if Version(self.version) < "7.5.0":
                 tools.check_min_cppstd(self, 11)
             else:
                 tools.check_min_cppstd(self, 17)
