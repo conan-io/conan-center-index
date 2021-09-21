@@ -148,19 +148,22 @@ class FreetypeConan(ConanFile):
             conan_staticlibs="{staticlibs}"
         """).format(version=version, staticlibs=staticlibs))
 
+    def _extract_libtool_version(self):
+        conf_raw = tools.load(os.path.join(self._source_subfolder, "builds", "unix", "configure.raw"))
+        return next(re.finditer(r"^version_info='([0-9:]+)'", conf_raw, flags=re.M)).group(1).replace(":", ".")
+
     @property
-    def _pkg_config_version_txt(self):
-        return os.path.join(self.package_folder, "res", "freetype-pkg_config-version.txt")
+    def _libtool_version_txt(self):
+        return os.path.join(self.package_folder, "res", "freetype-libtool-version.txt")
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
 
-        freetype_pc = tools.load(os.path.join(self.package_folder, "lib", "pkgconfig", "freetype2.pc")).replace("\r\n", "\n")
-        pkgconfig_version = next(re.finditer(r"^Version:\s*([0-9.]+)$", freetype_pc, flags=re.M)).group(1)
-        tools.save(self._pkg_config_version_txt, pkgconfig_version)
+        libtool_version = self._extract_libtool_version()
+        tools.save(self._libtool_version_txt, libtool_version)
+        self._make_freetype_config(libtool_version)
 
-        self._make_freetype_config(pkgconfig_version)
         self.copy("FTL.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
         self.copy("GPLv2.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
         self.copy("LICENSE.TXT", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
@@ -243,7 +246,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "freetype2"
 
-        pkg_config_version = tools.load(self._pkg_config_version_txt).strip()
-        self.user_info.LIBTOOL_VERSION = pkg_config_version
+        libtool_version = tools.load(self._libtool_version_txt).strip()
+        self.user_info.LIBTOOL_VERSION = libtool_version
         # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
         # self.cpp_info.version["pkg_config"] = pkg_config_version
