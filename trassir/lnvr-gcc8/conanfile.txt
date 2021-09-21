@@ -69,7 +69,7 @@ openal/1.20.1
 opencv/2.4.13.7
 openh264/1.7.0
 openssl/1.1.1d.dssl1
-#pjsip/2.8@dssl/stable
+pjsip/2.9
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
 qt/5.14.1.dssl2
