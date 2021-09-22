@@ -67,7 +67,7 @@ odbc/2.3.7
 onnxruntime/1.7.2
 openal/1.20.1
 opencv/2.4.13.7
-openh264/1.7.0
+openh264/1.7.0.dssl1
 openssl/1.1.1d.dssl1
 pjsip/2.9
 protobuf/3.9.1.dssl1
