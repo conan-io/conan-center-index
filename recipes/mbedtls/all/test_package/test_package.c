@@ -1,7 +1,6 @@
 #include "mbedtls/version.h"
 
-#include <cstdlib>
-#include <cstdio>
+#include <stdio.h>
 
 int main()
 {
@@ -9,5 +8,5 @@ int main()
     mbedtls_version_get_string_full(mbedtls_version);
     printf("version: %s\n", mbedtls_version);
 
-    return EXIT_SUCCESS;
+    return 0;
 }
