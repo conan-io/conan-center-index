@@ -4,7 +4,7 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(QXmpp REQUIRED)
+find_package(QXmpp REQUIRED CONFIG)
 
 set(CMAKE_CXX_STANDARD 17)
 
