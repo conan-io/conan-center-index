@@ -716,6 +716,21 @@ class QtConan(ConanFile):
             if "Core" not in requires:
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
+            
+            ref_module = {
+                "platforms": "Gui",
+                "sqldrivers": "Sql",
+                "scxmldatamodel": "Scxml",
+                "platforminputcontexts": "Gui",
+                "virtualkeyboard": "VirtualKeyboard",
+                "geometryloaders": "3DRender",
+                "imageformats": "Gui",
+                "opcua": "OpcUa",
+            }.get(type)
+            assert ref_module, "plugin '%s' of type '%s' has no reference module" % (pluginname,type)
+            ref_module = "qt%s" % ref_module
+            assert ref_module in self.cpp_info.components, "plugin '%s' of type '%s' reference module '%s' does not exist yet" % (pluginname,type, ref_module)
+            self.cpp_info.components[ref_module].requires.append(componentname)
 
         core_reqs = ["zlib::zlib"]
         if self.options.with_pcre2:
@@ -785,6 +800,7 @@ class QtConan(ConanFile):
                 _create_module("XcbQpaPrivate", ["xkbcommon::libxkbcommon-x11", "xorg::xorg"])
                 _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpaPrivate"])
 
+        _create_module("Sql")
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
         if self.options.with_pq:
@@ -798,7 +814,6 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             networkReqs.append("brotli::brotli")
         _create_module("Network", networkReqs)
-        _create_module("Sql")
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
