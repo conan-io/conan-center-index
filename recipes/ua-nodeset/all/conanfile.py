@@ -6,14 +6,11 @@ required_conan_version = ">=1.33.0"
 
 class UaNodeSetConan(ConanFile):
     name = "ua-nodeset"
-    license = "UNKNOWN"  # https://github.com/OPCFoundation/UA-Nodeset/issues/79
+    license = "MIT"
     description = "UANodeSets and other normative files which are released with a specification"
     homepage = "https://github.com/OPCFoundation/UA-Nodeset"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = (
-        "OPC UA", "open62541", "iec-62541",
-        "industrial automation", "nodeset"
-    )
+    topics = ("opc-ua-specifications", "uanodeset", "normative-files", "companion-specification")
 
     no_copy_source = True
 
@@ -22,9 +19,10 @@ class UaNodeSetConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), "source_subfolder")
 
-        license_file = "Note: The license for each file can be found in the file's header."
-        with open("LICENSE", "w") as text_file:
-            text_file.write(license_file)
+    def _extract_license(self):
+        content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "UA-Nodeset", "AnsiC", "opcua_clientapi.c"))
+    license_contents = content[2:content.find("*/", 1)]
+    tools.save("LICENSE", license_contents)
 
 
     def build(self):
