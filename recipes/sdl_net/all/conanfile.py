@@ -65,6 +65,8 @@ class SdlnetConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("sdl_net is not supported with Visual Studio")
         # FIXME: check that major version of sdl_net is the same than sdl (not possible yet in validate())
+        if tools.Version(self.deps_cpp_info["sdl"]).major != tools.Version(self.version):
+            raise ConanInvalidConfiguration(f"The major versions of {self.name} and sdl must be the same")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
