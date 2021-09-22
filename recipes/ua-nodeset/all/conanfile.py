@@ -14,15 +14,20 @@ class UaNodeSetConan(ConanFile):
 
     no_copy_source = True
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def _extract_license(self):
+        content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "AnsiC", "opcua_clientapi.c"))
+        license_contents = content[2:content.find("*/", 1)]
+        tools.save("LICENSE", license_contents)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), "source_subfolder")
+        os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), self._source_subfolder)
+        self._extract_license()
 
-    def _extract_license(self):
-        content = tools.load(os.path.join(self.source_folder, self._source_subfolder, "UA-Nodeset", "AnsiC", "opcua_clientapi.c"))
-    license_contents = content[2:content.find("*/", 1)]
-    tools.save("LICENSE", license_contents)
 
 
     def build(self):
@@ -30,7 +35,7 @@ class UaNodeSetConan(ConanFile):
 
 
     def package(self):
-        self.copy("*", dst="res", src="source_subfolder")
+        self.copy("*", dst="res", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses")
 
 
