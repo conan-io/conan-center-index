@@ -69,7 +69,8 @@ class MBedTLSConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
             self._cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-            self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.get_safe("with_zlib") or False
+            if tools.Version(self.version) < "3.0.0":
+                self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
             self._cmake.configure()
