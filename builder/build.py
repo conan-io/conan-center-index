@@ -9,7 +9,7 @@ from conan_tools import ConanfileTxt, list_installed_packages, conan_run
 
 def remove_artifctory_deps_from_txt(filename):
     def wanted_line(line):
-        if 'trassir/stable' in line.decode('utf-8'):
+        if '@trassir/' in line.decode('utf-8'):
             return False
         return True
     conanfile_contents = []
