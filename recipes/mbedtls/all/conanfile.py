@@ -24,10 +24,6 @@ class MBedTLSConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def _version(self):
-        return self.version.rsplit("-", 1)[0]
-
-    @property
     def _license(self):
         return self.version.rsplit("-", 1)[1]
 
