@@ -34,6 +34,9 @@ class MBedTLSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) >= "3.0.0":
+            # ZLIB support has been ditched on version 3.0.0
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -53,12 +56,8 @@ class MBedTLSConan(ConanFile):
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration("{}-{} is not supported by this recipe".format(self.settings.compiler, self.settings.compiler.version))
 
-        if tools.Version(self.version) >= "3.0.0":
-            # Version 3.0.0 dropped zlib support
-            self.options.with_zlib = False
-
     def requirements(self):
-        if self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
     def source(self):
@@ -70,8 +69,7 @@ class MBedTLSConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
             self._cmake.definitions["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
-            if tools.Version(self.version) < "3.0.0":
-                self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+            self._cmake.definitions["ENABLE_ZLIB_SUPPORT"] = self.options.get_safe("with_zlib") or False
             self._cmake.definitions["ENABLE_PROGRAMS"] = False
             self._cmake.definitions["ENABLE_TESTING"] = False
             self._cmake.configure()
@@ -82,10 +80,6 @@ class MBedTLSConan(ConanFile):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
-
-    def package_id(self):
-        if tools.Version(self.version) >= "3.0.0":
-            del self.options.with_zlib
 
     def package(self):
         self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
@@ -116,6 +110,6 @@ class MBedTLSConan(ConanFile):
         self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
         self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
 
-        if tools.Version(self.version) < "3.0.0" and self.options.with_zlib:
+        if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
