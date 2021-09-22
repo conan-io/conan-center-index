@@ -31,6 +31,20 @@ class MBedTLSConan(ConanFile):
     def _license(self):
         return self.version.rsplit("-", 1)[1]
 
+    def validate(self):
+        if tools.Version(self.version) >= "2.23.0" \
+            and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.name}/{self.version} does not support shared build on Windows"
+                )
+
+        if tools.Version(self.version) >= "2.23.0" \
+            and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            # The command line flags set are not supported on older versions of gcc
+            raise ConanInvalidConfiguration(
+                f"{self.settings.compiler}-{self.settings.compiler.version} is not supported by this recipe"
+                )
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,16 +59,6 @@ class MBedTLSConan(ConanFile):
         del self.settings.compiler.libcxx
         if tools.Version(self.version) >= "2.23.0":
             self.license = "Apache-2.0"
-
-        if tools.Version(self.version) >= "2.23.0" \
-            and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "{}/{} does not support shared build on Windows".format(self.name, self.version))
-
-        if tools.Version(self.version) >= "2.23.0" \
-            and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            # The command line flags set are not supported on older versions of gcc
-            raise ConanInvalidConfiguration("{}-{} is not supported by this recipe".format(self.settings.compiler, self.settings.compiler.version))
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
