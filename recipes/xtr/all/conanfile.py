@@ -11,8 +11,6 @@ class XtrConan(ConanFile):
     topics = ("xtr", "logging", "logger")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/choll/xtr"
-    # 8.0.0 is excluded due to https://github.com/fmtlib/fmt/issues/2377
-    requires = "fmt/[>=6.0.0 < 8.0.0 || > 8.0.0]"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +24,9 @@ class XtrConan(ConanFile):
         "enable_lto": False,
     }
     generators = "make"
+
+    def requirements(self):
+        self.requires("fmt/7.1.3")
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
@@ -51,6 +52,12 @@ class XtrConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
+        # FIXME: should be done in validate (but version is not yet available there)
+        if tools.Version(self.deps_cpp_info["fmt"].version) < 6:
+            raise ConanInvalidConfiguration("The version of fmt must >= 6.0.0")
+        if tools.Version(self.deps_cpp_info["fmt"].version) == "8.0.0" and self.settings.compiler == "clang":
+            raise ConanInvalidConfiguration("fmt/8.0.0 is known to not work with clang (https://github.com/fmtlib/fmt/issues/2377)")
+
         autotools = AutoToolsBuildEnvironment(self)
         env_build_vars = autotools.vars
         # Conan uses LIBS, presumably following autotools conventions, while
