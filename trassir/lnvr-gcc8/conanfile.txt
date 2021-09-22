@@ -19,7 +19,7 @@ pkgconf/1.7.4
 ruby/2.3.7
 
 [requires]
-axtls/1.5.3.dssl2
+axtls/1.5.3.dssl3
 boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
