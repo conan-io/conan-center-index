@@ -67,7 +67,7 @@ class SdlnetConan(ConanFile):
 
     def build(self):
         # FIXME: check that major version of sdl_net is the same than sdl (not possible yet in validate())
-        if tools.Version(self.deps_cpp_info["sdl"]).major != tools.Version(self.version):
+        if tools.Version(self.deps_cpp_info["sdl"].version).major != tools.Version(self.version).major:
             raise ConanInvalidConfiguration(f"The major versions of {self.name} and sdl must be the same")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
