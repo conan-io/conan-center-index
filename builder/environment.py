@@ -62,11 +62,10 @@ def prepare_environment():
     conan_run(['user'])
 
     if 'GITHUB_HEAD_REF' in environ and environ['GITHUB_HEAD_REF'] != '':
-        print('Detected staging branch `{branch}`'
-              .format(branch=environ['GITHUB_HEAD_REF']))
+        print(f"Detected staging branch `{environ['GITHUB_HEAD_REF']}`")
         upload_remote = 'github-staging'
     else:
         upload_remote = 'github-stable'
-    print('Will upload to {remote}'.format(remote=upload_remote))
+    print(f'Will upload to {upload_remote}')
 
     return upload_remote

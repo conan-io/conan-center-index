@@ -44,7 +44,9 @@ def list_installed_packages():
     installed_packages = []
     conan_run(['search', '--json',
                path.join('sources', 'installed.json'), '*'])
-    installed = json.load(open(path.join('sources', 'installed.json'), 'r'))
+    instaled_path = path.join('sources', 'installed.json')
+    with open(instaled_path, 'r', encoding='utf8') as file:
+        installed = json.load(file)
     if installed['results']:
         for pkg in installed['results'][0]['items']:
             if _is_gha_buildable(pkg['recipe']['id']):
@@ -74,8 +76,8 @@ class PackageReference():
             strref_stripped = strref.strip()
             self.export_recipe = True
         if '/' not in strref_stripped:
-            raise RuntimeError('package reference `{ref}` does not contain `/`'
-                               .format(ref=strref))
+            raise RuntimeError(f'package reference `{strref}` \
+                does not contain `/`')
         self.name, self.version = strref_stripped.split('/')
         self.conanfile_path = None
         self.conanfile = ""
@@ -83,14 +85,15 @@ class PackageReference():
         if not self.export_recipe:
             return
         for loc in self._possible_conanfile_locations():
-            print('searching for conanfile.py in {loc}'.format(loc=loc))
+            print(f'searching for conanfile.py in {loc}')
             if path.isfile(loc):
                 self.conanfile_path = loc
                 break
         if not self.conanfile_path:
-            raise RuntimeError('Recipe for package {ref} could not be found'
-                               .format(ref=self.ref()))
-        self.conanfile = open(self.conanfile_path, 'rb').read()
+            raise RuntimeError(f'Recipe for package \
+                {self.ref()} could not be found')
+        with open(self.conanfile_path, 'rb') as file:
+            self.conanfile = file.read()
         md5 = hashlib.md5()
         md5.update(self.conanfile)
         self.md5sum = md5.hexdigest()
@@ -101,31 +104,28 @@ class PackageReference():
                        path.join('sources', self.conanfile_path),
                        self.ref() + '@_/_'])
         else:
-            print('exporting recipe for {ref} is disabled in {txt}'
-                  .format(ref=self.ref(), txt=environ['CONAN_TXT']))
+            print(f"exporting recipe for {self.ref()} \
+                is disabled in {environ['CONAN_TXT']}")
 
     def ref(self):
         return '/'.join([self.name, self.version])
 
     def __str__(self):
-        return 'name={name:<16}\tver={ver:<16}\tmd5={md5}\tsrc={src}'.format(
-            name=self.name,
-            ver=self.version,
-            md5=self.md5sum,
-            src=self.conanfile_path
-        )
+        return f'name={self.name:<16}\t' + \
+               f'ver={self.version:<16}\t' + \
+               f'md5={self.md5sum}\t' + \
+               f'src={self.conanfile_path}'
 
 
 class ConanfileTxt():
     def __init__(self, filename, conanfile_required):
         self.packages = {}
         if path.isfile(filename):
-            with open(filename) as txt_file:
+            with open(filename, encoding='utf8') as txt_file:
                 for strline in txt_file.read().splitlines():
                     self.add_package(strline)
         elif conanfile_required:
-            raise RuntimeError('File {filename} does not exist'.format(
-                               filename=filename))
+            raise RuntimeError(f'File {filename} does not exist')
 
     def add_package(self, strline):
         if not _is_gha_buildable(strline):

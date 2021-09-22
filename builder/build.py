@@ -29,8 +29,7 @@ def print_section(message):
 
 
 def collect_dependencies(branch_name):
-    print_section('Collect packages info from branch {branch}'
-                  .format(branch=branch_name))
+    print_section(f'Collect packages info from branch {branch_name}')
     mkdir(branch_name)
     with tools.chdir(branch_name):
         repo = '/'.join([environ['GITHUB_SERVER_URL'],
@@ -40,7 +39,7 @@ def collect_dependencies(branch_name):
         subprocess.check_call(['git', 'branch'])
         conanfile_txt = ConanfileTxt(environ['CONAN_TXT'],
                                      branch_name != 'master')
-    print('Collected {num} packages:'.format(num=len(conanfile_txt.packages)))
+    print(f'Collected {len(conanfile_txt.packages)} packages:')
     for _, found_pkg in conanfile_txt.packages.items():
         print(found_pkg)
     return conanfile_txt
@@ -54,28 +53,25 @@ def detect_updated_packages(master_txt, branch_txt):
     inconsistent_update = False
     for name, pkg in branch_txt.packages.items():
         if name not in master_txt.packages.keys():
-            print('CONAN_TXT: package added {pkg}'.format(pkg=pkg))
+            print(f'CONAN_TXT: package added {pkg}')
             continue
         if master_txt.packages[name].md5sum != pkg.md5sum:
             print(('CONAN_TXT: recipe update detected\n'
-                  + 'package(master): {pkg_master}\n'
-                  + 'package(branch): {pkg_branch}').format(
-                  pkg_master=master_txt.packages[name], pkg_branch=pkg))
+                  + f'package(master): {master_txt.packages[name]}\n'
+                  + f'package(branch): {pkg}'))
             if master_txt.packages[name].version == pkg.version:
                 inconsistent_update = True
                 print('CONAN_TXT: recipe updated but version did not')
         else:
             if master_txt.packages[name].version == pkg.version:
-                print('CONAN_TXT: package did not change: {name}/{ver}'
-                      .format(name=pkg.name, ver=pkg.version))
+                print(f'CONAN_TXT: package did not change: \
+                    {pkg.name}/{pkg.version}')
             else:
                 pkg_master_ref = '/'.join([
                     master_txt.packages[name].name,
                     master_txt.packages[name].version])
                 print('CONAN_TXT: package updated with no recipe changes: '
-                      + '{ref_master} => {ref_branch}'.format(
-                        ref_master=pkg_master_ref,
-                        ref_branch=pkg.name + '-' + pkg.version))
+                      + f'{pkg_master_ref} => {pkg.name}-{pkg.version}')
         if inconsistent_update:
             raise RuntimeError('package recipe updated but version did not')
 
@@ -88,8 +84,8 @@ def detect_dependency_lock(installed_packages, conanfile_txt):
     for installed_package in installed_packages:
         name, version = installed_package.split('/')
         if name not in conanfile_txt.packages:
-            print('Package {name}/{version} is not mentioned in {txt}'.format(
-                  name=name, version=version, txt=environ['CONAN_TXT']))
+            print(f"Package {name}/{version} is not mentioned \
+                in {environ['CONAN_TXT']}")
             txt_needs_updating = True
             continue
         if version != conanfile_txt.packages[name].version:
@@ -99,11 +95,11 @@ def detect_dependency_lock(installed_packages, conanfile_txt):
                   ver_txt=conanfile_txt.packages[name].version))
             txt_needs_updating = True
             continue
-        print('Package {name} is confirmed by {txt} as {name}/{ver}'
-              .format(name=name, txt=environ['CONAN_TXT'], ver=version))
+        print(f"Package {name} is confirmed \
+            by {environ['CONAN_TXT']} as {name}/{version}")
     if txt_needs_updating:
-        raise RuntimeError('{txt} needs updating, see packages listed above'
-                           .format(txt=environ['CONAN_TXT']))
+        raise RuntimeError(f"{environ['CONAN_TXT']} needs updating, \
+            see packages listed above")
 
 
 if __name__ == '__main__':
@@ -118,16 +114,13 @@ if __name__ == '__main__':
     print_section('Ensure recipe changes accompanied with version bump')
     detect_updated_packages(conanfile_txt_master, conanfile_txt_head)
 
-    print_section('Exporting all package recipes referenced in {txt}'
-                  .format(txt=environ['CONAN_TXT']))
+    print_section(f"Exporting all package recipes \
+        referenced in {environ['CONAN_TXT']}")
     for _, package in conanfile_txt_head.packages.items():
         package.export()
 
-    print_section('Building packages from {txt} for {profile}'
-                  .format(
-                      txt=environ['CONAN_TXT'],
-                      profile=environ['CONAN_PROFILE']
-                  ))
+    print_section(f"Building packages from {environ['CONAN_TXT']} \
+        for {environ['CONAN_PROFILE']}")
 
     # TODO: remove this once bintray and artifactory are merged
     remove_artifctory_deps_from_txt(path.join('sources', environ['CONAN_TXT']))
@@ -141,8 +134,8 @@ if __name__ == '__main__':
     print_section('Enumerating installed packages')
     installed = list_installed_packages()
 
-    print_section('Ensure all packages have mention in {txt}'
-                  .format(txt=environ['CONAN_TXT']))
+    print_section(f"Ensure all packages have mention \
+        in {environ['CONAN_TXT']}")
     detect_dependency_lock(installed, conanfile_txt_head)
 
     print_section('Uploading packages')
