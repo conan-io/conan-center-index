@@ -26,15 +26,13 @@ class UaNodeSetConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format("UA-Nodeset", "PADIM-1.02-2021-07-21"), self._source_subfolder)
-        self._extract_license()
-
-
 
     def build(self):
         pass
 
 
     def package(self):
+        self._extract_license()
         self.copy("*", dst="res", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses")
 
