@@ -18,15 +18,22 @@ class OpenH264Conan(ConanFile):
 
     exports_sources = ["platform-android.mk.patch"]
 
+    @property
+    def original_version(self):
+        if 'dssl' not in self.version:
+            return self.version
+        original_version = self.version.split('.')
+        return '.'.join(original_version[:-1])
+
     def build_requirements(self):
         self.build_requires("nasm/2.14")
         if tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+            if "CONAN_BASH_PATH" not in os.environ:
+                self.build_requires("msys2/20200517")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = self.name + "-" + self.original_version
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
