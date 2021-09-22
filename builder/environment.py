@@ -45,7 +45,7 @@ def prepare_environment():
                      url=artifactory_repo('github-stable'),
                      username=environ['LDAP_USERNAME'],
                      password=environ['LDAP_PASSWORD'])
-    conan_add_remote(name='conan-center', url='https://conan.bintray.com')
+    conan_add_remote(name='conancenter', url='https://center.conan.io')
 
     if custom_remotes:
         conan_add_remote(name='github-staging',
