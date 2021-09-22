@@ -4,7 +4,7 @@ virtualrunenv
 
 [requires]
 OpenSSL/1.0.2l@conan/stable # GHA: ignore trassir/stable
-axtls/1.5.3.dssl2
+axtls/1.5.3.dssl3
 boost/1.64.0@conan/stable # GHA: ignore trassir/stable
 c-ares/1.15.0@conan/stable # GHA: ignore trassir/stable
 ffmpeg/3.3.1@trassir/stable # GHA: ignore trassir/stable

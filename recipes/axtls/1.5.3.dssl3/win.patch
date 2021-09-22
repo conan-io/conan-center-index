@@ -35,7 +35,16 @@ diff -Naur a/crypto/os_int.h b/crypto/os_int.h
 diff -Naur a/ssl/os_port.h b/ssl/os_port.h
 --- a/ssl/os_port.h	2015-04-30 08:53:33.000000000 +0300
 +++ b/ssl/os_port.h	2021-06-28 17:47:49.818656716 +0300
-@@ -122,6 +122,10 @@ EXP_FUNC void STDCALL gettimeofday(struc
+@@ -46,7 +46,7 @@
+ #include <stdio.h>
+ 
+ #if defined(WIN32)
+-#define STDCALL                 __stdcall
++#define STDCALL
+ #define EXP_FUNC                __declspec(dllexport)
+ #else
+ #define STDCALL
+@@ -122,6 +122,10 @@
  EXP_FUNC int STDCALL strcasecmp(const char *s1, const char *s2);
  EXP_FUNC int STDCALL getdomainname(char *buf, int buf_size);
  
@@ -46,6 +55,7 @@ diff -Naur a/ssl/os_port.h b/ssl/os_port.h
  #else   /* Not Win32 */
  
  #include <unistd.h>
+
 diff -Naur a/ssl/tls1.h b/ssl/tls1.h
 --- a/ssl/tls1.h
 +++ b/ssl/tls1.h
@@ -69,16 +79,12 @@ diff -Naur a/ssl/tls1.h b/ssl/tls1.h
  #ifdef CONFIG_SSL_FULL_MODE
 --- a/crypto/crypto.h
 +++ b/crypto/crypto.h
-@@ -43,10 +43,10 @@
- #include "bigint.h"
- 
- #ifndef STDCALL
--#define STDCALL
-+#define STDCALL __stdcall
+@@ -46,7 +46,7 @@
+ #define STDCALL
  #endif
  #ifndef EXP_FUNC
 -#define EXP_FUNC
-+#define EXP_FUNC __declspec(dllexport)
++#define EXP_FUNC  __declspec(dllexport)
  #endif
  
  
@@ -89,7 +95,8 @@ diff -Naur a/ssl/tls1.h b/ssl/tls1.h
 -void AES_set_key(AES_CTX *ctx, const uint8_t *key, 
 +EXP_FUNC void AES_set_key(AES_CTX *ctx, const uint8_t *key, 
          const uint8_t *iv, AES_MODE mode);
- void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, 
+-void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, 
++EXP_FUNC void AES_cbc_encrypt(AES_CTX *ctx, const uint8_t *msg, 
          uint8_t *out, int length);
 -void AES_cbc_decrypt(AES_CTX *ks, const uint8_t *in, uint8_t *out, int length);
 -void AES_convert_key(AES_CTX *ctx);
@@ -98,6 +105,59 @@ diff -Naur a/ssl/tls1.h b/ssl/tls1.h
  
  /**************************************************************************
   * RC4 declarations 
+@@ -118,9 +118,9 @@
+     uint8_t Message_Block[64];      /* 512-bit message blocks */
+ } SHA1_CTX;
+ 
+-void SHA1_Init(SHA1_CTX *);
+-void SHA1_Update(SHA1_CTX *, const uint8_t * msg, int len);
+-void SHA1_Final(uint8_t *digest, SHA1_CTX *);
++EXP_FUNC void SHA1_Init(SHA1_CTX *);
++EXP_FUNC void SHA1_Update(SHA1_CTX *, const uint8_t * msg, int len);
++EXP_FUNC void SHA1_Final(uint8_t *digest, SHA1_CTX *);
+ 
+ /**************************************************************************
+  * SHA256 declarations 
+@@ -135,9 +135,9 @@
+     uint8_t buffer[64];
+ } SHA256_CTX;
+ 
+-void SHA256_Init(SHA256_CTX *c);
+-void SHA256_Update(SHA256_CTX *, const uint8_t *input, int len);
+-void SHA256_Final(uint8_t *digest, SHA256_CTX *);
++EXP_FUNC void SHA256_Init(SHA256_CTX *c);
++EXP_FUNC void SHA256_Update(SHA256_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA256_Final(uint8_t *digest, SHA256_CTX *);
+ 
+ /**************************************************************************
+  * SHA512 declarations 
+@@ -161,9 +161,9 @@
+     uint64_t totalSize;
+ } SHA512_CTX;
+ 
+-void SHA512_Init(SHA512_CTX *c);
+-void SHA512_Update(SHA512_CTX *, const uint8_t *input, int len);
+-void SHA512_Final(uint8_t *digest, SHA512_CTX *);
++EXP_FUNC void SHA512_Init(SHA512_CTX *c);
++EXP_FUNC void SHA512_Update(SHA512_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA512_Final(uint8_t *digest, SHA512_CTX *);
+ 
+ /**************************************************************************
+  * SHA384 declarations 
+@@ -172,9 +172,9 @@
+ #define SHA384_SIZE   48
+ 
+ typedef SHA512_CTX SHA384_CTX;
+-void SHA384_Init(SHA384_CTX *c);
+-void SHA384_Update(SHA384_CTX *, const uint8_t *input, int len);
+-void SHA384_Final(uint8_t *digest, SHA384_CTX *);
++EXP_FUNC void SHA384_Init(SHA384_CTX *c);
++EXP_FUNC void SHA384_Update(SHA384_CTX *, const uint8_t *input, int len);
++EXP_FUNC void SHA384_Final(uint8_t *digest, SHA384_CTX *);
+ 
+ /**************************************************************************
+  * MD5 declarations 
+
 --- a/ssl/tls1.c
 +++ b/ssl/tls1.c
 @@ -306,7 +306,7 @@

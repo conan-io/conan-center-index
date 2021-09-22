@@ -4,7 +4,7 @@ import shutil
 
 class AxtlsConan(ConanFile):
     name = "axtls"
-    version = "1.5.3.dssl2"
+    version = "1.5.3.dssl3"
     license = "GPL-3.0"
     author = "Starkov Kirill <k.starkov@dssl.ru>"
     url = "dssl.ru"
@@ -86,7 +86,7 @@ class AxtlsConan(ConanFile):
         
         tools.check_with_algorithm_sum("sha1", "CMakeLists.txt",     "0aeb4f29cc1ad2d66b2d77417acd619f0de80988")
         tools.check_with_algorithm_sum("sha1", "win_config.h",       "484eb1f669576af2793614482ba33b8bce40e0db")
-        tools.check_with_algorithm_sum("sha1", "win.patch",          "edc81ccb8a2a00ab0452a827f6a2b75eb2225e8e")
+        tools.check_with_algorithm_sum("sha1", "win.patch",          "5c9364fc147eef1e60d004a0ea565c10c5d1219c")
 
         # apply patches
         tools.patch(base_path = self._source_subfolder, patch_file = "SNI.patch", strip = 1)
