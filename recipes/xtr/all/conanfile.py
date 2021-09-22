@@ -14,27 +14,29 @@ class XtrConan(ConanFile):
     # 8.0.0 is excluded due to https://github.com/fmtlib/fmt/issues/2377
     requires = "fmt/[>=6.0.0 < 8.0.0 || > 8.0.0]"
     license = "MIT"
-    settings = {
-        "os": ["Linux", "FreeBSD"],
-        "compiler": ["gcc", "clang"],
-        "build_type": None,
-        "arch": ["x86_64"]}
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "enable_exceptions": [True, False],
-        "enable_lto": [True, False]}
+        "enable_lto": [True, False],
+    }
     default_options = {
         "fPIC": True,
         "enable_exceptions": True,
-        "enable_lto": False}
+        "enable_lto": False,
+    }
     generators = "make"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+    def validate(self):
+        if self.settings.os not in ("FreeBSD", "Linux"):
+            raise ConanInvalidConfiguration(f"Unsupported os={self.settings.os}")
+        if self.settings.compiler not in ("gcc", "clang"):
+            raise ConanInvalidConfiguration(f"Unsupported compiler={self.settings.compiler}")
+        if self.settings.arch not in ("x86_64", ):
+            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
 
-    def configure(self):
-        minimal_cpp_standard = "20"
-        if (self.settings.compiler.cppstd):
+        minimal_cpp_standard = 20
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
         minimum_version = {"gcc": 10, "clang": 12}
@@ -43,8 +45,10 @@ class XtrConan(ConanFile):
 
         if version < minimum_version[compiler]:
             raise ConanInvalidConfiguration(
-                "%s requires %s version %d or later"
-                % (self.name, compiler, minimum_version[compiler]))
+                f"{self.name} requires {self.settings.compiler} version {minimum_version[compiler]} or later")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
@@ -61,13 +65,16 @@ class XtrConan(ConanFile):
         autotools.make(vars=env_build_vars, target="xtrctl")
 
     def package(self):
-        self.copy("*.hpp", dst="include", src="include")
-        self.copy("*/libxtr.a", dst="lib", src="build", keep_path=False)
-        self.copy("*/xtrctl", dst="bin", src="build", keep_path=False)
-        self.copy("LICENSE", "licenses")
+        self.copy("LICENSE", dst="licenses")
+        self.copy("*.hpp", src="include", dst="include")
+        self.copy("*/libxtr.a", src="build", dst="lib", keep_path=False)
+        self.copy("*/xtrctl", src="build", dst="bin", keep_path=False)
+
+        tools.rmdir(os.path.join(self.package_folder, "man"))
 
     def package_info(self):
         self.cpp_info.libs = ["xtr"]
         self.cpp_info.system_libs = ["pthread"]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.MANPATH.append(os.path.join(self.package_folder, "man"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment variable: {bin_path}")
+        self.env_info.PATH.append(bin_path)
