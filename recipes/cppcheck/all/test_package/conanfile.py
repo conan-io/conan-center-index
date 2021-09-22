@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+import sys
 
 
 class TestPackageConan(ConanFile):
@@ -9,7 +10,6 @@ class TestPackageConan(ConanFile):
             self.run("cppcheck --version", run_environment=True)
             # On windows we need to explicitly use python to run the python script
             if self.settings.os == 'Windows':
-                if tools.which("python3"):
-                    self.run("python3 $CPPCHECK_HTMLREPORT -h", run_environment=True)
+                self.run("{} {} -h".format(sys.executable, tools.get_env("CPPCHECK_HTMLREPORT")))
             else:
                 self.run("cppcheck-htmlreport -h", run_environment=True)
