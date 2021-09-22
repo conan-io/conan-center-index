@@ -116,4 +116,6 @@ class SignalrQtConan(ConanFile):
             self.copy("*.so*", src="", dst="lib", keep_path=False, symlinks=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["signalr-qt"]
+        self.cpp_info.names["cmake_find_package"] = "SignalRQT"
+        self.cpp_info.names["cmake_find_package_multi"] = "SignalRQT"
+        self.cpp_info.libs = ["SignalRClient", "QextJson"]
