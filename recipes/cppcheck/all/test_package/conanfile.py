@@ -7,4 +7,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             self.run("cppcheck --version", run_environment=True)
-            self.run("cppcheck-htmlreport -h", run_environment=True)
+            # On windows we need to explicitly use python to run the python script
+            if self.settings.os == 'Windows':
+                self.run("python3 $CPPCHECK_HTMLREPORT -h", run_environment=True)
+            else:
+                self.run("cppcheck-htmlreport -h", run_environment=True)
