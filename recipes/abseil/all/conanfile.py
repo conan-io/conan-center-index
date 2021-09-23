@@ -21,7 +21,7 @@ class ConanRecipe(ConanFile):
     generators = "cmake"
     short_paths = True
 
-    settings = "os", "arch", "compiler", "build_type", "cppstd"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
 
@@ -30,6 +30,10 @@ class ConanRecipe(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def package_id(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            self.info.settings.cppstd = self.settings.compiler.get_safe("cppstd")
 
     def config_options(self):
         if self.settings.os == "Windows":
