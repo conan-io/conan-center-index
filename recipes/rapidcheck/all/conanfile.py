@@ -92,11 +92,11 @@ class RapidcheckConan(ConanFile):
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"rapidcheck": "rapidcheck::rapidcheck", 
-             "rapidcheck::catch": "rapidcheck_catch", 
-             "rapidcheck::gmock": "rapidcheck_gmock", 
-             "rapidcheck::gtest": "rapidcheck_gtest", 
-             "rapidcheck::boost": "rapidcheck_boost", 
-             "rapidcheck::boost_test": "rapidcheck_boost_test"}
+             "rapidcheck_catch":"rapidcheck::catch", 
+             "rapidcheck_gmock": "rapidcheck::gmock", 
+             "rapidcheck_gtest": "rapidcheck::gtest", 
+             "rapidcheck_boost": "rapidcheck::boost", 
+             "rapidcheck_boost_test": "rapidcheck::boost_test"}
         )
 
     @staticmethod
