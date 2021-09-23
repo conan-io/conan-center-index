@@ -7,7 +7,8 @@ class TestPackage(ConanFile):
 
     def _importer_plugins_folder(self):
         magnum_plugin_libdir = "magnum-d" if self.settings.build_type == "Debug" else "magnum"
-        return os.path.join(self.deps_cpp_info["magnum-plugins"].rootpath, "lib", magnum_plugin_libdir, "importers")
+        pkg_dir = "bin" if self.settings.os == "Windows" else "lib"
+        return os.path.join(self.deps_cpp_info["magnum-plugins"].rootpath, pkg_dir, magnum_plugin_libdir, "importers")
 
     def build(self):
         cmake = CMake(self)
