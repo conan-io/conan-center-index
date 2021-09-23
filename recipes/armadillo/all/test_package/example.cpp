@@ -40,11 +40,15 @@ main(int argc, char** argv)
         
   A.print("A:");
   
+#ifdef ARMA_USE_LAPACK
   // determinant
   cout << "det(A): " << det(A) << endl;
   
   // inverse
   cout << "inv(A): " << endl << inv(A) << endl;
+#else
+  cout << "LAPACK not available. Skipping calls to functions det() and inv()" << endl;
+#endif
   
   // save matrix as a text file
   A.save("A.txt", raw_ascii);

@@ -57,7 +57,7 @@ class ArmadilloConan(ConanFile):
         "shared": False,
         "fPIC": True,
         # These are options exposed by armadillo_bits/config.hpp
-        "ARMA_USE_LAPACK": True,
+        "ARMA_USE_LAPACK": False,
         "ARMA_USE_BLAS": True,
         "ARMA_USE_ATLAS": False,
         "ARMA_USE_HDF5": True,
@@ -244,8 +244,8 @@ class ArmadilloConan(ConanFile):
 
     def requirements(self):
         # Optional requirements
-        openblas = "openblas/[>=0.3.10]"
-        hdf5 = "hdf5/[>=1.12.0]"
+        openblas = "openblas/0.3.15"
+        hdf5 = "hdf5/1.12.0"
         # atlas = "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
         # superlu = "superlu/5.2.2" # Pending https://github.com/conan-io/conan-center-index/issues/6756
         # arpack = "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
