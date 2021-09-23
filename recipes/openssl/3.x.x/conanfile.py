@@ -404,6 +404,9 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
+
+        args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
+
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
 
@@ -431,7 +434,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.options.values.fields:
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -649,6 +652,11 @@ class OpenSSLConan(ConanFile):
                     continue
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
+
+
+        if not self.options.no_fips:
+            provdir = os.path.join(self._source_subfolder, "providers")
+            self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
