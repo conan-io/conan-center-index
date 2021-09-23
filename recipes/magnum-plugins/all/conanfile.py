@@ -87,6 +87,7 @@ class MagnumConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
     _cmake = None
+    short_paths = True
 
     @property
     def _source_subfolder(self):
