@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -7,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class HarfbuzzConan(ConanFile):
     name = "harfbuzz"
     description = "HarfBuzz is an OpenType text shaping engine."
-    topics = "harfbuzz", "opentype", "text", "engine"
+    topics = ("opentype", "text", "engine")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://harfbuzz.org"
     license = "MIT"
@@ -31,14 +32,13 @@ class HarfbuzzConan(ConanFile):
         "with_glib": True,
         "with_gdi": True,
         "with_uniscribe": True,
-        "with_directwrite": False
+        "with_directwrite": False,
     }
 
     short_paths = True
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -62,41 +62,40 @@ class HarfbuzzConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.with_icu:
             self.requires("icu/69.1")
         if self.options.with_glib:
-            self.requires("glib/2.69.1")
+            self.requires("glib/2.70.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
-        self._cmake.definitions["HB_HAVE_GRAPHITE2"] = False
-        self._cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
-        self._cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
+        cmake = CMake(self)
+        cmake.definitions["HB_HAVE_FREETYPE"] = self.options.with_freetype
+        cmake.definitions["HB_HAVE_GRAPHITE2"] = False
+        cmake.definitions["HB_HAVE_GLIB"] = self.options.with_glib
+        cmake.definitions["HB_HAVE_ICU"] = self.options.with_icu
         if tools.is_apple_os(self.settings.os):
-            self._cmake.definitions["HB_HAVE_CORETEXT"] = True
+            cmake.definitions["HB_HAVE_CORETEXT"] = True
         elif self.settings.os == "Windows":
-            self._cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
-            self._cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
-            self._cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
-        self._cmake.definitions["HB_BUILD_UTILS"] = False
-        self._cmake.definitions["HB_BUILD_SUBSET"] = False
-        self._cmake.definitions["HB_HAVE_GOBJECT"] = False
-        self._cmake.definitions["HB_HAVE_INTROSPECTION"] = False
+            cmake.definitions["HB_HAVE_GDI"] = self.options.with_gdi
+            cmake.definitions["HB_HAVE_UNISCRIBE"] = self.options.with_uniscribe
+            cmake.definitions["HB_HAVE_DIRECTWRITE"] = self.options.with_directwrite
+        cmake.definitions["HB_BUILD_UTILS"] = False
+        cmake.definitions["HB_BUILD_SUBSET"] = False
+        cmake.definitions["HB_HAVE_GOBJECT"] = False
+        cmake.definitions["HB_HAVE_INTROSPECTION"] = False
         # fix for MinGW debug build
         if self.settings.compiler == "gcc" and self.settings.os == "Windows":
-            self._cmake.definitions["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
-            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
+            cmake.definitions["CMAKE_C_FLAGS"] = "-Wa,-mbig-obj"
+            cmake.definitions["CMAKE_CXX_FLAGS"] = "-Wa,-mbig-obj"
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

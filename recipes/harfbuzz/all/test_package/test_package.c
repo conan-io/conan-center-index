@@ -67,8 +67,12 @@ get_font_ot(const char *filename, int size)
 int
 main(int argc, char **argv)
 {
-  const char *fontfile = "example.ttf";
-  const char *text = "Bincrafters";
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s FONT\n", argv[0]);
+    return 1;
+  }
+  const char *fontfile = argv[1];
+  const char *text = "conan-center-index";
 
   /* Create hb-ft font. */
   hb_font_t *hb_font;
