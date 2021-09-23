@@ -6,9 +6,9 @@ required_conan_version = ">=1.33.0"
 
 class CrowConan(ConanFile):
     name = "crowcpp-crow"
-    homepage = "https://github.com/CrowCpp/crow"
+    homepage = "http://crowcpp.org/"
     description = "Crow is a C++ microframework for running web services."
-    topics = ("conan", "web", "microframework", "header-only")
+    topics = ("web", "microframework", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "BSD-3-Clause"
