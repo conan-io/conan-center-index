@@ -1,12 +1,12 @@
 # If using 'cmake_find_package', all the components are being added to the global
-# target unconditionally. See generated FindMagnum.cmake file:
+# target unconditionally. See generated FindMagnumPlugins.cmake file:
 # 
 # if(NOT ${CMAKE_VERSION} VERSION_LESS "3.0")
-#     if(NOT TARGET Magnum::Magnum)
-#         add_library(Magnum::Magnum INTERFACE IMPORTED)
+#     if(NOT TARGET MagnumPlugins::MagnumPlugins)
+#         add_library(MagnumPlugins::MagnumPlugins INTERFACE IMPORTED)
 #     endif()
-#     set_property(TARGET Magnum::Magnum APPEND PROPERTY
-#                  INTERFACE_LINK_LIBRARIES "${Magnum_COMPONENTS}")
+#     set_property(TARGET MagnumPlugins::MagnumPlugins APPEND PROPERTY
+#                  INTERFACE_LINK_LIBRARIES "${MagnumPlugins_COMPONENTS}")
 # endif()
 # 
 # but it doesn't add the library directories and the linker will fail.
