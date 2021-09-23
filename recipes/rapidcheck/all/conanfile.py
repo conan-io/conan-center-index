@@ -129,7 +129,14 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.components["core"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["core"].libs = ["rapidcheck"]
         self.cpp_info.components["core"].includedirs  = ["include"]
-        
+        version = self.version[4:]
+        if tools.Version(version) < "20201218":
+            if self.options.enable_rtti:
+                self.cpp_info.components["core"].defines.append("RC_USE_RTTI")
+        else:
+            if not self.options.enable_rtti:
+                self.cpp_info.components["core"].defines.append("RC_DONT_USE_RTTI")
+                
         if(self.options.enable_catch):
             self.cpp_info.components["catch"].requires = ["core"]
             self.cpp_info.components["catch"].includedirs  = ["include"]
@@ -146,10 +153,3 @@ class RapidcheckConan(ConanFile):
             self.cpp_info.components["boost_test"].requires = ["core"]
             self.cpp_info.components["boost_test"].includedirs  = ["include"]
         
-        version = self.version[4:]
-        if tools.Version(version) < "20201218":
-            if self.options.enable_rtti:
-                self.cpp_info.defines.append("RC_USE_RTTI")
-        else:
-            if not self.options.enable_rtti:
-                self.cpp_info.defines.append("RC_DONT_USE_RTTI")
