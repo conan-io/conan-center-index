@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(test_package CXX)
 
-set(CONAN_CMAKE_SILENT_OUTPUT 1)
-
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
