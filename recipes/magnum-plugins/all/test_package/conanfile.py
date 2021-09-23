@@ -11,8 +11,8 @@ class TestPackage(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = self._importer_plugins_folder()
-        cmake.definitions["CONAN_STL_FILE"] = os.path.join(os.path.dirname(__file__), "conan.stl")
+        cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = self._importer_plugins_folder().replace("\\", "/")
+        cmake.definitions["CONAN_STL_FILE"] = os.path.join(os.path.dirname(__file__), "conan.stl").replace("\\", "/")
         cmake.configure()
         cmake.build()
 
