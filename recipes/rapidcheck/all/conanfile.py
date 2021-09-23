@@ -121,8 +121,8 @@ class RapidcheckConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        cpp_info.names["cmake_find_package"] = "rapidcheck"
-        cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
+        self.cpp_info.names["cmake_find_package"] = "rapidcheck"
+        self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
         
         self.cpp_info.components["core"].set_property("cmake_target_name", "rapidcheck")
         self.cpp_info.components["core"].builddirs.append(self._module_subfolder)
