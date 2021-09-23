@@ -159,6 +159,7 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Macos":
             # Macos will default to Accelerate framework
             self.options.USE_OPENBLAS = False
+            self.options.ARMA_USE_LAPACK = True
             self.options.ARMA_USE_ACCELERATE = True
         if self.settings.os != "Macos":
             self.options.ARMA_USE_ACCELERATE = False
