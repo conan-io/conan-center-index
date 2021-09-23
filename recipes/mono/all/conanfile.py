@@ -145,6 +145,7 @@ class MonoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "mono"
         self.cpp_info.names["pkg_config"] = "mono"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.resdirs = ["etc"]
 
         # This variable is required within the mono scripts in mono/bin folder
         self.env_info.MONO_CONAN_ROOT_DIR = self.package_folder
