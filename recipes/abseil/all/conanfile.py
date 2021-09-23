@@ -21,7 +21,7 @@ class ConanRecipe(ConanFile):
     generators = "cmake"
     short_paths = True
 
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type", "cppstd"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
 
