@@ -13,6 +13,7 @@ class TestPackage(ConanFile):
         cmake = CMake(self)
         cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = self._importer_plugins_folder().replace("\\", "/")
         cmake.definitions["CONAN_STL_FILE"] = os.path.join(os.path.dirname(__file__), "conan.stl").replace("\\", "/")
+        cmake.definitions["SHARED_PLUGINS"] = self.options["magnum-plugins"].shared_plugins
         cmake.configure()
         cmake.build()
 

@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -205,6 +206,20 @@ class MagnumConan(ConanFile):
         cm = self._configure_cmake()
         cm.install()
 
+        build_modules_folder = os.path.join(self.package_folder, "lib", "cmake")
+        os.makedirs(build_modules_folder)
+        for component, target, library, folder, deps in self._plugins:
+            build_module_path = os.path.join(build_modules_folder, "conan-magnum-plugins-{}.cmake".format(component))
+            with open(build_module_path, "w+") as f:
+                f.write(textwrap.dedent("""\
+                    if(NOT ${{CMAKE_VERSION}} VERSION_LESS "3.0")
+                        if(TARGET MagnumPlugins::{target})
+                            set_target_properties(MagnumPlugins::{target} PROPERTIES INTERFACE_SOURCES 
+                                                  "${{CMAKE_CURRENT_LIST_DIR}}/../../include/MagnumPlugins/{library}/importStaticPlugin.cpp")
+                        endif()
+                    endif()
+                """.format(target=target, library=library)))
+
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
@@ -374,12 +389,14 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["stbtruetype_font"].libdirs = [os.path.join(self.package_folder, "lib", magnum_plugin_libdir, "fonts")]
             self.cpp_info.components["stbtruetype_font"].requires = ["magnum::text"]
 
+        """
         if self.options.stl_importer:
             self.cpp_info.components["stl_importer"].names["cmake_find_package"] = "StlImporter"
             self.cpp_info.components["stl_importer"].names["cmake_find_package_multi"] = "StlImporter"
             self.cpp_info.components["stl_importer"].libs = ["StlImporter"]
             self.cpp_info.components["stl_importer"].libdirs = [os.path.join(self.package_folder, "lib", magnum_plugin_libdir, "importers")]
             self.cpp_info.components["stl_importer"].requires = ["magnum::mesh_tools", "magnum::trade"]
+        """
 
         if self.options.stbvorbis_audioimporter:
             self.cpp_info.components["stbvorbis_audioimporter"].names["cmake_find_package"] = "StbVorbisAudioImporter"
@@ -399,3 +416,21 @@ class MagnumConan(ConanFile):
         self.cpp_info.components["_global_target"].names["cmake_find_package"] = "MagnumPlugins"
         self.cpp_info.components["_global_target"].names["cmake_find_package_multi"] = "MagnumPlugins"
         self.cpp_info.components["_global_target"].build_modules["cmake_find_package"].append(os.path.join("lib", "cmake", "conan-bugfix-global-target.cmake"))
+
+        # Add all the plugins
+        for component, target, library, folder, deps in self._plugins:
+            self.cpp_info.components[component].names["cmake_find_package"] = target
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
+            self.cpp_info.components[component].libs = [library]
+            self.cpp_info.components[component].libdirs = [os.path.join(self.package_folder, "lib", magnum_plugin_libdir, folder)]
+            self.cpp_info.components[component].requires = deps
+            self.cpp_info.components[component].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-plugins-{}.cmake".format(component)))
+            
+
+    @property
+    def _plugins(self):
+        #   (opt_name, (component, target, library, folder, deps))
+        all_plugins = (
+            ("stl_importer", ("stl_importer", "StlImporter", "StlImporter", "importers", ["magnum::mesh_tools", "magnum::trade"])), 
+            )
+        return [plugin for opt_name, plugin in all_plugins if self.options.get_safe(opt_name)]

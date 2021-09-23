@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 project(test_package CXX)
 
 set(CONAN_CMAKE_SILENT_OUTPUT 1)
@@ -6,15 +6,22 @@ set(CONAN_CMAKE_SILENT_OUTPUT 1)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(MagnumPlugins REQUIRED)
+if(SHARED_PLUGINS)
+    find_package(MagnumPlugins REQUIRED)
+else()
+    find_package(MagnumPlugins REQUIRED StlImporter)
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 # Intentionally linking with the global 'MagnumPlugins::MagnumPlugins' target, I want to check it is a valid target (although it might be empty)
-target_link_libraries(${PROJECT_NAME} Magnum::Trade MagnumPlugins::MagnumPlugins)
+target_link_libraries(${PROJECT_NAME} PRIVATE Magnum::Trade MagnumPlugins::MagnumPlugins)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+if(NOT SHARED_PLUGINS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE MagnumPlugins::StlImporter)
+endif()
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
         CXX_STANDARD 11
