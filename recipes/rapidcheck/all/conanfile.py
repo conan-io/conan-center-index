@@ -20,11 +20,21 @@ class RapidcheckConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_rtti": [True, False],
+        "enable_catch": [True, False],
+        "enable_gmock": [True, False],
+        "enable_gtest": [True, False],
+        "enable_boost": [True, False],
+        "enable_boost_test": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_rtti": True,
+        "enable_catch": False,
+        "enable_gmock": False,
+        "enable_gtest": False,
+        "enable_boost": False,
+        "enable_boost_test": False
     }
 
     _cmake = None
@@ -62,6 +72,11 @@ class RapidcheckConan(ConanFile):
         self._cmake.definitions["RC_ENABLE_RTTI"] = self.options.enable_rtti
         self._cmake.definitions["RC_ENABLE_TESTS"] = False
         self._cmake.definitions["RC_ENABLE_EXAMPLES"] = False
+        self._cmake.definitions["RC_ENABLE_CATCH"] = self.options.enable_catch
+        self._cmake.definitions["RC_ENABLE_GMOCK"] = self.options.enable_gmock
+        self._cmake.definitions["RC_ENABLE_GTEST"] = self.options.enable_gtest
+        self._cmake.definitions["RC_ENABLE_BOOST"] = self.options.enable_boost
+        self._cmake.definitions["RC_ENABLE_BOOST_TEST"] = self.options.enable_boost_test
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -76,7 +91,12 @@ class RapidcheckConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"rapidcheck": "rapidcheck::rapidcheck"}
+            {"rapidcheck": "rapidcheck::rapidcheck", 
+             "rapidcheck::catch": "rapidcheck_catch", 
+             "rapidcheck::gmock": "rapidcheck_gmock", 
+             "rapidcheck::gtest": "rapidcheck_gtest", 
+             "rapidcheck::boost": "rapidcheck_boost", 
+             "rapidcheck::boost_test": "rapidcheck_boost_test"}
         )
 
     @staticmethod
@@ -101,12 +121,29 @@ class RapidcheckConan(ConanFile):
                             "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "rapidcheck"
-        self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.libs = ["rapidcheck"]
+        self.cpp_info.name = "rapidcheck"
+        
+        self.cpp_info.components["core"].set_property("cmake_target_name", "rapidcheck")
+        self.cpp_info.components["core"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["core"].set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.components["core"].libs = ["rapidcheck"]
+        self.cpp_info.components["core"].includedirs  = ["include"]
+        
+        if(self.options.enable_catch):
+            self.cpp_info.components["catch"].requires = ["core"]
+            self.cpp_info.components["catch"].includedirs  = ["include"]
+        if(self.options.enable_gmock):
+            self.cpp_info.components["gmock"].requires = ["core"]
+            self.cpp_info.components["gmock"].includedirs  = ["include"]
+        if(self.options.enable_gtest):
+            self.cpp_info.components["gtest"].requires = ["core"]
+            self.cpp_info.components["gtest"].includedirs  = ["include"]
+        if(self.options.enable_boost):
+            self.cpp_info.components["boost"].requires = ["core"]
+            self.cpp_info.components["boost"].includedirs  = ["include"]
+        if(self.options.enable_boost_test):
+            self.cpp_info.components["boost_test"].requires = ["core"]
+            self.cpp_info.components["boost_test"].includedirs  = ["include"]
         
         version = self.version[4:]
         if tools.Version(version) < "20201218":
