@@ -17,55 +17,6 @@ class MonoConan(ConanFile):
     exports_sources = "patches/**"
     settings = "os", "compiler"
     topics = "dotnet", "mono", "csharp", "runtime", "compiler"
-    # options = {
-    #     "with-sgen": ["yes", "no"],
-    #     "with-libgc": ["included", "none"],
-    #     "enable-cooperative-suspend": [True, False],
-    #     #"with-tls": ["__thread", "pthread", ""], #Review needed added ""
-    #     "with-sigaltstack": ["yes", "no"],
-    #     "with-static_mono": ["yes", "no"],
-    #     "with-xen-opt": ["yes", "no"],
-    #     "with-large-heap": ["yes", "no"],
-    #     "enable-small-config": ["yes", "no"],
-    #     "with-ikvm-native": ["yes", "no"],
-    #     "with-profile4": ["yes", "no"],
-    #     "with-libgdiplus": ["installed", "sibling"], #or <path> ?
-    #     # "enable-minimal": ["aot", "attach", "com", "debug", "decimal", "full_messages",
-    #     #                     "generics", "jit", "large_code", "logging", "pinvoke", "portability", "profiler",
-    #     #                     "reflection_emit", "reflection_emit_save", "shadow_copy", "simd", "ssa", []], #How ?????!! added []
-    #     "enable-llvm": [True, False],
-    #     "enable-big-arrays": [True, False],
-    #     "enable-parallel-mark": [True, False],
-    #     "enable-dtrace": [True, False],
-    #     "disable-dev-random": [True, False],
-    #     "with-csc": ["roslyn", "mcs", "default"],
-    #     "enable-nacl": [True, False],
-    #     "enable-wasm": [True, False],
-    # }
-    # default_options = {
-    #     "with-sgen": "no",
-    #     "with-libgc": "none",
-    #     "enable-cooperative-suspend": False, #recheck this
-    #     #"with-tls": "", #This value is typically pre-configured and there is no need to set it, unless you are trying to debug a problem
-    #     "with-sigaltstack": "no",
-    #     "with-static_mono": "yes",
-    #     "with-xen-opt": "yes",
-    #     "with-large-heap": "no",
-    #     "enable-small-config": "no",
-    #     "with-ikvm-native": "yes",
-    #     "with-profile4": "yes",
-    #     "with-libgdiplus": "installed",
-    #     #"enable-minimal" : [],
-    #     "enable-llvm": False,
-    #     "enable-big-arrays": False,
-    #     "enable-parallel-mark": False,
-    #     "enable-dtrace": False,
-    #     "disable-dev-random": False,
-    #     "with-csc": "default",
-    #     "enable-nacl": False,
-    #     "enable-wasm": False,
-    # }
-
 
     @property
     def _minimum_compilers_version(self):
