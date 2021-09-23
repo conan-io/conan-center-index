@@ -348,6 +348,11 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 Public Domain is not a license by itself, but consists of all the creative work to which no exclusive intellectual property rights apply.
 If a project is under Public Domain and there is no license listed, the [Unlicense](https://spdx.org/licenses/Unlicense) should be used.
 
+#### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
+
+The [rename()](https://docs.conan.io/en/latest/reference/conanfile/tools/files.html#conan-tools-rename) method will be the standard for Conan 2.0, and
+also, it uses [robocopy](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy), which is safer on Windows.
+
 #### **<a name="KB-H058">#KB-H058</a>: "ILLEGAL CHARACTERS"**
 
 Windows [naming conventions](https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions) and [reserved](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) characters must be avoided for file naming, otherwise the will not be supported on Windows.
