@@ -6,7 +6,7 @@ sources:
     url: "https://github.com/CrowCpp/crow/archive/v0.3.tar.gz"
     sha256: "75c4a9cf18bddd15320570a643bc3bdffba8eafaea7b383cf46df7219c80052e"
   "0.2":
-    sha256: "f52445e0b236ecf0fda50ac5a1b7a2da511401c885071fb97a74b6b9844a9e64"
+    sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
     url: "https://github.com/CrowCpp/crow/archive/0.2.tar.gz"
 patches:
   "0.3+2":
