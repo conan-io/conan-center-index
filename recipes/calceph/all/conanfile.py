@@ -1,8 +1,10 @@
-import glob
-import os
-
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
+import os
+
+required_conan_version = ">=1.33.0"
+
 
 class CalcephConan(ConanFile):
     name = "calceph"
@@ -16,12 +18,12 @@ class CalcephConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "threadsafe": [True, False]
+        "threadsafe": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "threadsafe": False
+        "threadsafe": False,
     }
 
     _autotools= None
@@ -42,17 +44,29 @@ class CalcephConan(ConanFile):
         del self.settings.compiler.libcxx
         if self.settings.compiler == "Visual Studio":
             del self.options.threadsafe
-            if self.options.shared:
-                raise ConanInvalidConfiguration("calceph doesn't support shared builds with Visual Studio yet")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("calceph doesn't support shared builds with Visual Studio yet")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    @contextmanager
+    def _msvc_build_environment(self):
+        with tools.vcvars(self):
+            with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                yield
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
@@ -60,9 +74,8 @@ class CalcephConan(ConanFile):
                                   "CFLAGS = /O2 /GR- /MD /nologo /EHs",
                                   "CFLAGS = /nologo /EHs")
             with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f Makefile.vc {}".format(" ".join(self._get_nmake_args())))
+                with self._msvc_build_environment():
+                    self.run("nmake -f Makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
             autotools = self._configure_autotools()
             autotools.make()
@@ -87,7 +100,7 @@ class CalcephConan(ConanFile):
             "--disable-python",
             "--disable-python-package-system",
             "--disable-python-package-user",
-            "--disable-mex-octave"
+            "--disable-mex-octave",
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -96,21 +109,20 @@ class CalcephConan(ConanFile):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
             with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f Makefile.vc install {}".format(" ".join(self._get_nmake_args())))
+                with self._msvc_build_environment():
+                    self.run("nmake -f Makefile.vc install {}".format(" ".join(self._get_nmake_args())))
             tools.rmdir(os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        self.cpp_info.libs = ["{}calceph".format(prefix)]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")

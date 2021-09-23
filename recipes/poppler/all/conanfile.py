@@ -12,8 +12,7 @@ class PopplerConan(ConanFile):
     topics = ("conan", "poppler", "pdf", "rendering")
     license = "GPL-2.0-or-later", "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package", "pkg_config"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -60,6 +59,9 @@ class PopplerConan(ConanFile):
         "with_zlib": True,
         "float": False,
     }
+
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     _cmake = None
 
     @property
@@ -110,9 +112,6 @@ class PopplerConan(ConanFile):
             self.requires("libjpeg/9d")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
-        if self.options.with_nss:
-            # FIXME: missing nss recipe
-            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
         if self.options.with_tiff:
             self.requires("libtiff/4.3.0")
         if self.options.splash:
@@ -145,6 +144,10 @@ class PopplerConan(ConanFile):
             self.output.warn("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
+
+        if self.options.with_nss:
+            # FIXME: missing nss recipe
+            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
@@ -209,7 +212,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
         self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "5"
         self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6"
-        
+
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_DCTDECODER"] = self._dct_decoder
         self._cmake.definitions["USE_FLOAT"] = self.options.float
@@ -217,6 +220,13 @@ class PopplerConan(ConanFile):
         if self.settings.os == "Windows":
             self._cmake.definitions["ENABLE_RELOCATABLE"] = self.options.shared
         self._cmake.definitions["EXTRA_WARN"] = False
+
+        # Workaround for cross-build to at least iOS/tvOS/watchOS,
+        # when dependencies are found with find_path() and find_library()
+        if tools.cross_building(self):
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_INCLUDE"] = "BOTH"
+            self._cmake.definitions["CMAKE_FIND_ROOT_PATH_MODE_LIBRARY"] = "BOTH"
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

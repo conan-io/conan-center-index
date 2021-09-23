@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class MoltenVKConan(ConanFile):
@@ -13,7 +13,7 @@ class MoltenVKConan(ConanFile):
                   "graphics framework, enabling Vulkan applications to run " \
                   "on iOS and macOS."
     license = "Apache-2.0"
-    topics = ("conan", "moltenvk", "khronos", "vulkan", "metal")
+    topics = ("moltenvk", "khronos", "vulkan", "metal")
     homepage = "https://github.com/KhronosGroup/MoltenVK"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -22,13 +22,13 @@ class MoltenVKConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_spirv_tools": [True, False],
-        "tools": [True, False]
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_spirv_tools": True,
-        "tools": True
+        "tools": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -42,20 +42,14 @@ class MoltenVKConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
-            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
-        if self.settings.compiler != "apple-clang":
-            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
 
     def requirements(self):
         self.requires("cereal/1.3.0")
-        self.requires("glslang/8.13.3559")
+        self.requires("glslang/11.5.0")
         self.requires("spirv-cross/{}".format(self._spirv_cross_version))
         self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2020.5")
+            self.requires("spirv-tools/2021.2")
         if tools.Version(self.version) < "1.1.0":
             raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
             self.requires("vulkan-portability/0.2")
@@ -63,6 +57,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _spirv_cross_version(self):
         return {
+            "1.1.4": "cci.20210621",
             "1.1.1": "20210115", # can't compile with spirv-cross < 20210115
             "1.1.0": "20200917", # compiles only with spirv-cross 20200917
             "1.0.44": "20200917", # compiles only with spirv-cross 20200917
@@ -76,6 +71,7 @@ class MoltenVKConan(ConanFile):
     @property
     def _vulkan_headers_version(self):
         return {
+            "1.1.4": "1.2.182",
             "1.1.1": "1.2.162.0",
             "1.1.0": "1.2.154.0",
             "1.0.44": "1.2.148.0",
@@ -118,13 +114,19 @@ class MoltenVKConan(ConanFile):
                 self.compatible_packages.append(compatible_pkg)
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+        if self.settings.os not in ["Macos", "iOS", "tvOS"]:
+            raise ConanInvalidConfiguration("MoltenVK only supported on MacOS, iOS and tvOS")
+        if self.settings.compiler != "apple-clang":
+            raise ConanInvalidConfiguration("MoltenVK requires apple-clang")
         if tools.Version(self.version) >= "1.0.42":
             if tools.Version(self.settings.compiler.version) < "12.0":
                 raise ConanInvalidConfiguration("MoltenVK {} requires XCode 12.0 or higher at build time".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("MoltenVK-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -154,6 +156,11 @@ class MoltenVKConan(ConanFile):
             self.cpp_info.frameworks.append("IOKit")
         elif self.settings.os in ["iOS", "tvOS"]:
             self.cpp_info.frameworks.append("UIKit")
+
+        if self.options.shared:
+            moltenvk_icd_path = os.path.join(self.package_folder, "lib", "MoltenVK_icd.json")
+            self.output.info("Appending VK_ICD_FILENAMES environment variable: {}".format(moltenvk_icd_path))
+            self.env_info.VK_ICD_FILENAMES.append(moltenvk_icd_path)
 
         if self.options.tools:
             bin_path = os.path.join(self.package_folder, "bin")

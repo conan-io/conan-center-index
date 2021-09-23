@@ -1,4 +1,7 @@
 sources:
+  "3.2.1":
+    url: "https://github.com/argtable/argtable3/releases/download/v3.2.1.52f24e5/argtable-v3.2.1.52f24e5.tar.gz"
+    sha256: "bf02394a21378fdca95937fc4e3aeff8af63a2bfed7e3f87b1c1eda8bf9227dc"
   "3.2.0":
     url: "https://github.com/argtable/argtable3/archive/refs/tags/v3.2.0.7402e6e.tar.gz"
     sha256: "e692ce51fb51dc750b47ef0ef2941573c8c49195aa2ddc48cb369239c400efa7"

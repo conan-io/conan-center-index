@@ -1,0 +1,46 @@
+commit 03d84af50a106955f3af7a8f27b9b2f77fa9ddb7
+Author: Martin Delille <martin@delille.org>
+Date:   Thu Sep 2 16:45:22 2021 +0200
+
+    Remove libjpeg
+
+diff --git a/ref-impl/CMakeLists.txt b/ref-impl/CMakeLists.txt
+index 8f4df30b9..cdcf808de 100644
+--- a/ref-impl/CMakeLists.txt
++++ b/ref-impl/CMakeLists.txt
+@@ -37,7 +37,6 @@ project(MakeSDK LANGUAGES CXX)
+ 
+ add_subdirectory(aafiid)
+ add_subdirectory(aaflib)
+-add_subdirectory(libjpeg)
+ add_subdirectory(plugins)
+ add_subdirectory(src/com-api)
+ add_subdirectory(src/impl)
+diff --git a/ref-impl/plugins/CMakeLists.txt b/ref-impl/plugins/CMakeLists.txt
+index a9ed0163f..0570e0b98 100644
+--- a/ref-impl/plugins/CMakeLists.txt
++++ b/ref-impl/plugins/CMakeLists.txt
+@@ -71,6 +71,8 @@ add_library(AAFStandardCodecs SHARED
+     ../src/OM/utf8.cpp
+ )
+ 
++find_package(JPEG REQUIRED)
++
+ target_include_directories(AAFStandardCodecs PUBLIC
+     .
+     ../include/OM
+@@ -79,12 +81,13 @@ target_include_directories(AAFStandardCodecs PUBLIC
+     ../src/impl
+     ../src/OM
+     ../../Utilities/Include
++    ${JPEG_RES_DIRS}
+ )
+ 
+ target_link_libraries(AAFStandardCodecs PRIVATE
+     AAFIID
+     AAFLIB
+-    libjpeg
++    JPEG::JPEG
+ )
+ 
+ if(MSVC)

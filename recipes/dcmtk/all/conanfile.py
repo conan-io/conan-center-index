@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -21,10 +22,8 @@ class DCMTKConan(ConanFile):
         "charset_conversion": [None, "libiconv", "icu"],
         "with_libxml2": [True, False],
         "with_zlib": [True, False],
-        "with_openjpeg": [True, False, "deprecated"],
         "with_openssl": [True, False],
         "with_libpng": [True, False],
-        "with_libsndfile": [True, False, "deprecated"],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
         "builtin_dictionary": [None, True, False],
@@ -40,10 +39,8 @@ class DCMTKConan(ConanFile):
         "charset_conversion": "libiconv",
         "with_libxml2": True,
         "with_zlib": True,
-        "with_openjpeg": "deprecated",
         "with_openssl": True,
         "with_libpng": True,
-        "with_libsndfile": "deprecated",
         "with_libtiff": True,
         "with_tcpwrappers": False,
         "builtin_dictionary": None,
@@ -73,41 +70,35 @@ class DCMTKConan(ConanFile):
             del self.options.fPIC
         if self.settings.os == "Windows":
             del self.options.with_tcpwrappers
-        
-        # Looking into source code, it appears that OpenJPEG and libsndfile are not used
-        if self.options.with_openjpeg != "deprecated":
-            self.output.warn("with_openjpeg option is deprecated, do not use anymore")
-        if self.options.with_libsndfile != "deprecated":
-            self.output.warn("with_libsndfile option is deprecated, do not use anymore")
+
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self) and self.settings.arch == "armv8":
+            # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
+            raise ConanInvalidConfiguration("Cross building to 'arm' is not supported (yet)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
         if self.options.charset_conversion == "libiconv":
             self.requires("libiconv/1.16")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/68.2")
+            self.requires("icu/69.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_openssl:
-            # FIXME: Bump openssl. dcmtk build files have a logic to detect
-            #        various openssl API but for some reason it fails with 1.1 API
+            # Library uses opaque type 'ssl_ctx_st' from openssl. Not available in >=1.1.0.
+            #   and it fails to build only in Windows
             self.requires("openssl/1.0.2u")
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
-
-    def package_id(self):
-        del self.info.options.with_openjpeg
-        del self.info.options.with_libsndfile
 
     def _configure_cmake(self):
         if self._cmake:

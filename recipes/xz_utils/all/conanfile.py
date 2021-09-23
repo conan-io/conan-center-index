@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
-import glob
 import os
 import textwrap
 
@@ -40,14 +39,18 @@ class XZUtils(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
            not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("xz-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _apply_patches(self):
         if tools.Version(self.version) == "5.2.4" and self.settings.compiler == "Visual Studio":
@@ -119,15 +122,14 @@ class XZUtils(ConanFile):
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
-            os.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
-                      os.path.join(self.package_folder, "lib", "lzma.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
+                         os.path.join(self.package_folder, "lib", "lzma.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),

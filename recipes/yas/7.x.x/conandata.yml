@@ -1,7 +1,0 @@
-sources:
-  7.0.4:
-    url: https://github.com/niXman/yas/archive/7.0.4.zip
-    sha256: 0959d5ac0b8354aa9ba1ea88834d4c118634baa2f85c83babba7f7f0abac7863
-  7.0.5:
-    url: https://github.com/niXman/yas/archive/7.0.5.zip
-    sha256: 9ffcc71d99adced5dcf93d72dc1a7e3fed2b2a3e410fc97c6f923e61577d263f

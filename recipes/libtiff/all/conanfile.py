@@ -105,15 +105,22 @@ class LibtiffConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         # Rename the generated Findjbig.cmake and Findzstd.cmake to avoid case insensitive conflicts with FindJBIG.cmake and FindZSTD.cmake on Windows
         if self.options.jbig:
             tools.rename(os.path.join(self.build_folder, "Findjbig.cmake"),
                          os.path.join(self.build_folder, "ConanFindjbig.cmake"))
-        if self.options.get_safe("zstd"):
-            tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
-                         os.path.join(self.build_folder, "ConanFindzstd.cmake"))
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        else:
+            os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindJBIG.cmake"))
+        if self._has_zstd_option:
+            if self.options.zstd:
+                tools.rename(os.path.join(self.build_folder, "Findzstd.cmake"),
+                             os.path.join(self.build_folder, "ConanFindzstd.cmake"))
+            else:
+                os.remove(os.path.join(self.build_folder, self._source_subfolder, "cmake", "FindZSTD.cmake"))
+
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, "libtiff", "CMakeLists.txt"),

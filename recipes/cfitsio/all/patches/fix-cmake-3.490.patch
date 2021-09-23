@@ -31,7 +31,7 @@
  
  
 -FILE(GLOB H_FILES "*.h")
-+SET(H_FILES fitsio.h longnam.h)
++SET(H_FILES fitsio.h fitsio2.h longnam.h)
 +SET(LINK_LIBS "")
  
  IF (USE_PTHREADS)

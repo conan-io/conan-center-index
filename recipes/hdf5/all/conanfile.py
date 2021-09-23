@@ -1,5 +1,5 @@
-import glob
 import os
+import textwrap
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -49,6 +49,14 @@ class Hdf5Conan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -155,37 +163,96 @@ class Hdf5Conan(ConanFile):
             "with_szip": "szip"
         }.get(str(self.options.szip_support))
 
+    def _components(self):
+        hdf5_requirements = []
+        if self.options.with_zlib:
+            hdf5_requirements.append("zlib::zlib")
+        if self.options.szip_support == "with_libaec":
+            hdf5_requirements.append("libaec::libaec")
+        elif self.options.szip_support == "with_szip":
+            hdf5_requirements.append("szip::szip")
+        if self.options.parallel:
+            hdf5_requirements.append("openmpi::openmpi")
+
+        return {
+            "hdf5_c": {"component": "C", "alias_target": "hdf5", "requirements": hdf5_requirements},
+            "hdf5_hl": {"component": "HL", "alias_target": "hdf5_hl", "requirements": ["hdf5_c"]},
+            "hdf5_cpp": {"component": "CXX", "alias_target": "hdf5_cpp", "requirements": ["hdf5_c"]},
+            "hdf5_hl_cpp": {"component": "HL_CXX", "alias_target": "hdf5_hl_cpp", "requirements": ["hdf5_c", "hdf5_cpp", "hdf5_hl"]}
+        }
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets, is_parallel):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                    if(TARGET {aliased} AND NOT TARGET {alias})
+                        add_library({alias} INTERFACE IMPORTED)
+                        set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                    endif()
+                """.format(alias=alias, aliased=aliased))
+
+        # add the additional hdf5_hl_cxx target when both CXX and HL components are specified
+        content += textwrap.dedent("""\
+                if(TARGET HDF5::HL AND TARGET HDF5::CXX AND NOT TARGET hdf5::hdf5_hl_cpp)
+                    add_library(hdf5::hdf5_hl_cpp INTERFACE IMPORTED)
+                    set_property(TARGET hdf5::hdf5_hl_cpp PROPERTY INTERFACE_LINK_LIBRARIES HDF5::HL_CXX)
+                endif()
+            """)
+        content += textwrap.dedent("set(HDF5_IS_PARALLEL {})".format("ON" if is_parallel else "OFF"))
+        tools.save(module_file, content)
+
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.remove(os.path.join(self.package_folder, "lib", "libhdf5.settings"))
+        # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
+        # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
+        components = self._components()
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_subfolder, self._module_file),
+            {"hdf5::{}".format(component["alias_target"]): "HDF5::{}".format(component["component"]) for component in components.values()},
+            self.options.get_safe("parallel", False)
+        )
 
     def package_info(self):
+        def add_component(component_name, component, alias_target, requirements):
+            def _config_libname(lib):
+                if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
+                    lib = "lib" + lib
+                if self.settings.build_type == "Debug":
+                    debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
+                    return lib + debug_postfix
+                # See config/cmake_ext_mod/HDFMacros.cmake
+                return lib
+
+            self.cpp_info.components[component_name].names["cmake_find_package"] = component
+            self.cpp_info.components[component_name].names["cmake_find_package_multi"] = component
+            self.cpp_info.components[component_name].libs = [_config_libname(alias_target)]
+            self.cpp_info.components[component_name].requires = requirements
+            self.cpp_info.components[component_name].builddirs.append(self._module_subfolder)
+            module_file_rel_path = os.path.join(self.package_folder, self._module_subfolder, self._module_file)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"] = [module_file_rel_path]
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"] = [module_file_rel_path]
+
         self.cpp_info.names["cmake_find_package"] = "HDF5"
         self.cpp_info.names["cmake_find_package_multi"] = "HDF5"
-        self.cpp_info.libs = self._get_ordered_libs()
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf5"))
-        if self.options.shared:
-            self.cpp_info.defines.append("H5_BUILT_AS_DYNAMIC_LIB")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "m"])
-            if self.options.get_safe("threadsafe"):
-                self.cpp_info.system_libs.append("pthread")
 
-    def _get_ordered_libs(self):
-        libs = ["hdf5"]
-        if self.options.enable_cxx:
-            libs.insert(0, "hdf5_cpp")
-        if self.options.hl:
-            libs.insert(0, "hdf5_hl")
-            if self.options.enable_cxx:
-                libs.insert(0, "hdf5_hl_cpp")
-        # See config/cmake_ext_mod/HDFMacros.cmake
-        if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
-            libs = ["lib" + lib for lib in libs]
-        if self.settings.build_type == "Debug":
-            debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
-            libs = [lib + debug_postfix for lib in libs]
-        return libs
+        components = self._components()
+        add_component("hdf5_c", **components["hdf5_c"])
+        self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join(self.package_folder, "include", "hdf5"))
+        if self.settings.os == "Linux":
+            self.cpp_info.components["hdf5_c"].system_libs.extend(["dl", "m"])
+            if self.options.get_safe("threadsafe"):
+                self.cpp_info.components["hdf5_c"].system_libs.append("pthread")
+
+        if self.options.shared:
+            self.cpp_info.components["hdf5_c"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")
+        if self.options.get_safe("enable_cxx"):
+            add_component("hdf5_cpp", **components["hdf5_cpp"])
+        if self.options.get_safe("hl"):
+            add_component("hdf5_hl", **components["hdf5_hl"])
+            if self.options.get_safe("enable_cxx"):
+                add_component("hdf5_hl_cpp", **components["hdf5_hl_cpp"])

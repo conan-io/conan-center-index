@@ -23,10 +23,6 @@ class LibcurlConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
-        "with_openssl": [True, False, "deprecated"],
-        "with_wolfssl": [True, False, "deprecated"],
-        "with_winssl": [True, False, "deprecated"],
-        "darwin_ssl": [True, False, "deprecated"],
         "with_ldap": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
@@ -41,15 +37,14 @@ class LibcurlConan(ConanFile):
         "with_c_ares": [True, False],
         "with_proxy": [True, False],
         "with_rtsp": [True, False],
+        "with_crypto_auth": [True, False],
+        "with_ntlm": [True, False],
+        "with_ntlm_wb": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": "openssl",
-        "with_openssl": "deprecated",
-        "with_wolfssl": "deprecated",
-        "with_winssl": "deprecated",
-        "darwin_ssl": "deprecated",
         "with_ldap": False,
         "with_libssh2": False,
         "with_libidn": False,
@@ -64,6 +59,9 @@ class LibcurlConan(ConanFile):
         "with_c_ares": False,
         "with_proxy": True,
         "with_rtsp": True,
+        "with_crypto_auth": True,
+        "with_ntlm": True,
+        "with_ntlm_wb": True,
     }
 
     _autotools = None
@@ -115,30 +113,6 @@ class LibcurlConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        # Deprecated options
-        # ===============================
-        if (any(deprecated_option != "deprecated" for deprecated_option in [self.options.with_openssl, self.options.with_wolfssl, self.options.with_winssl, self.options.darwin_ssl])):
-            self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
-            if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
-                if self.options.darwin_ssl == True:
-                    self.options.with_ssl = "darwinssl"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-            if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
-                if self.settings.os == "Windows" and self.options.with_winssl == True:
-                    self.options.with_ssl = "schannel"
-                elif self.options.with_openssl == True:
-                    self.options.with_ssl = "openssl"
-                elif self.options.with_wolfssl == True:
-                    self.options.with_ssl = "wolfssl"
-                else:
-                    self.options.with_ssl = False
-        # ===============================
-
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("schannel only suppported on Windows.")
         if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
@@ -154,7 +128,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.6.0")
         if self.options.with_nghttp2:
@@ -169,13 +143,6 @@ class LibcurlConan(ConanFile):
             self.requires("zstd/1.5.0")
         if self.options.with_c_ares:
             self.requires("c-ares/1.17.1")
-
-    def package_id(self):
-        # Deprecated options
-        del self.info.options.with_openssl
-        del self.info.options.with_winssl
-        del self.info.options.darwin_ssl
-        del self.info.options.with_wolfssl
 
     @property
     def _settings_build(self):
@@ -339,6 +306,19 @@ class LibcurlConan(ConanFile):
         if not self.options.with_rtsp:
             params.append("--disable-rtsp")
 
+        if not self.options.with_crypto_auth:
+            params.append("--disable-crypto-auth") # also disables NTLM in versions of curl prior to 7.78.0
+
+        # ntlm will default to enabled if any SSL options are enabled
+        if not self.options.with_ntlm:
+            if tools.Version(self.version) <= "7.77.0":
+                params.append("--disable-crypto-auth")
+            else:
+                params.append("--disable-ntlm")
+
+        if not self.options.with_ntlm_wb:
+            params.append("--disable-ntlm-wb")
+
         # Cross building flags
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -460,6 +440,15 @@ class LibcurlConan(ConanFile):
         if tools.Version(self.version) >= "7.75.0":
             self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn
         self._cmake.definitions["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
+        self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
+
+        # Also disables NTLM_WB if set to false
+        if not self.options.with_ntlm:
+            if tools.Version(self.version) <= "7.77.0":
+                self._cmake.definitions["CURL_DISABLE_CRYPTO_AUTH"] = True
+            else:
+                self._cmake.definitions["CURL_DISABLE_NTLM"] = True
+        self._cmake.definitions["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -550,3 +539,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("zstd::zstd")
         if self.options.with_c_ares:
             self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
+
+    def validate(self):
+        if self.options.with_ssl == "openssl":
+            if self.options.with_ntlm and self.options["openssl"].no_des:
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")

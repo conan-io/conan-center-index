@@ -21,7 +21,8 @@ class DoxygenConan(ConanFile):
         "enable_parse": True,
         "enable_search": True,
     }
-    exports_sources = "CMakeLists.txt", "patches/**"
+
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
     short_paths = True
 
@@ -35,9 +36,19 @@ class DoxygenConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    _minimum_compiler_version = {
-        "gcc": 5,
-    }
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def _minimum_compiler_version(self):
+        if tools.Version(self.version) <= "1.9.1":
+            return {
+                "gcc": 5,
+            }.get(str(self.settings.compiler))
+        return {
+            "gcc": 7,  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
+            "Visual Studio": 15,
+        }.get(str(self.settings.compiler))
 
     def validate(self):
         minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
@@ -61,10 +72,31 @@ class DoxygenConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
             self.build_requires("bison/3.7.1")
+
+    def validate(self):
+        minimum_compiler_version = self._minimum_compiler_version()
+        if minimum_compiler_version is not None:
+            if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
+                raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+        if (self.settings.compiler == "Visual Studio" and
+                tools.Version(self.settings.compiler.version.value) <= 14 and
+                tools.Version(self.version) == "1.8.18"):
+            raise ConanInvalidConfiguration("Doxygen version {} broken with VS {}.".format(self.version,
+                                                                                           self.settings.compiler.version))
+
+    def package_id(self):
+        del self.info.settings.compiler
+
+        # Doxygen doesn't make code. Any package that will run is ok to use.
+        # It's ok in general to use a release version of the tool that matches the
+        # build os and architecture.
+        compatible_pkg = self.info.clone()
+        compatible_pkg.settings.build_type = "Release"
+        self.compatible_packages.append(compatible_pkg)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -96,17 +128,8 @@ class DoxygenConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-    def package_id(self):
-        del self.info.settings.compiler
-
-        # Doxygen doesn't make code. Any package that will run is ok to use.
-        # It's ok in general to use a release version of the tool that matches the
-        # build os and architecture.
-        compatible_pkg = self.info.clone()
-        compatible_pkg.settings.build_type = "Release"
-        self.compatible_packages.append(compatible_pkg)
-
     def package_info(self):
+        self.cpp_info.libdirs = []
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
