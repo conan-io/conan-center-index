@@ -1,20 +1,14 @@
 sources:
   "0.3+2":
     url: "https://github.com/CrowCpp/crow/archive/refs/tags/v0.3+2.tar.gz"
-    sha256: "d23915eff1dd49d183169fd3fdbc1d7b124c7c8d49329dbfd26878c42d84651b"
+    sha256: "982fe978c113506aefe77c413befb3ab21fffb09d9bdf287ec8e8ba59bd786e7"
   "0.3":
     url: "https://github.com/CrowCpp/crow/archive/v0.3.tar.gz"
-    sha256: "75c4a9cf18bddd15320570a643bc3bdffba8eafaea7b383cf46df7219c80052e"
+    sha256: "95538db88fba73c0bc87bbc40b62dcf488012c133a895634ade015009ebb4f25"
   "0.2":
-    sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
     url: "https://github.com/CrowCpp/crow/archive/0.2.tar.gz"
+    sha256: "c419767f0a336f2add71fc8b311ad95434d59601fb8b0e5ba3048407d85d0a71"
 patches:
-  "0.3+2":
-    - patch_file: "patches/001-disable-examples.patch"
-      base_path: "source_subfolder"
-  "0.3":
-    - patch_file: "patches/001-disable-examples.patch"
-      base_path: "source_subfolder"
   "0.2":
-    - patch_file: "patches/001-disable-examples.patch"
+    - patch_file: "patches/0.2/0001-normalize-buildsystem.patch"
       base_path: "source_subfolder"

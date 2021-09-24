@@ -12,15 +12,19 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "BSD-3-Clause"
+    
+    provides = "crow"
+
+    exports_sources = ["patches/**", ]
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.77.0")
         if self.version == "0.2":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
 
     def source(self):
         tools.get(
@@ -30,6 +34,9 @@ class CrowConan(ConanFile):
         )
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmake = CMake(self)
         cmake.definitions["BUILD_EXAMPLES"] = False
         cmake.definitions["BUILD_TESTING"] = False
@@ -49,5 +56,9 @@ class CrowConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        # These are not official targets, this is just the name (without fork prefix)
+        self.cpp_info.names["cmake_find_package"] = "crow"
+        self.cpp_info.names["cmake_find_package_multi"] = "crow"
+
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
