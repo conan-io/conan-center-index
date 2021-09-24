@@ -27,7 +27,7 @@ int main() {
     // Test some plugin
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager{IMPORTER_PLUGINS_FOLDER};
     manager.load("ObjImporter");
-    Corrade::Containers::Pointer<Magnum::Trade::AbstractImporter> importer = manager.instantiate("ObjImporter");
+    auto importer = manager.instantiate("ObjImporter");
 
     if(!importer) Magnum::Fatal{} << "Cannot load the ObjImporter plugin";
 
