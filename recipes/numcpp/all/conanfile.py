@@ -75,9 +75,9 @@ class NumCppConan(ConanFile):
             self.cpp_info.cxxflags.append("-DNUMCPP_NO_USE_BOOST")
 
         if tools.Version(self.version) < "2.5.0" and self.options.threads == False:
-            self.cpp_info.cxxflags.append("-DNO_MULTITHREAD")
+            self.cpp_info.defines.append("NO_MULTITHREAD")
         if tools.Version(self.version) >= "2.5.0" and self.options.threads == True:
-            self.cpp_info.cxxflags.append("-DNUMCPP_USE_MULTITHREAD")
+            self.cpp_info.defines.append("NUMCPP_USE_MULTITHREAD")
 
         self.cpp_info.names["cmake_find_package"] = "NumCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "NumCpp"
