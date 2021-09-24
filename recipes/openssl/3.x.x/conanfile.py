@@ -656,7 +656,12 @@ class OpenSSLConan(ConanFile):
 
         if not self.options.no_fips:
             provdir = os.path.join(self._source_subfolder, "providers")
-            self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
+            if self.settings.os == "Macos":
+                self.copy("fips.dylib", src=provdir,dst="lib/ossl-modules")
+            elif self.settings.os == "Windows":
+                self.copy("fips.dll", src=provdir,dst="lib/ossl-modules")
+            else:
+                self.copy("fips.so", src=provdir,dst="lib/ossl-modules")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
