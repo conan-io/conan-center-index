@@ -27,6 +27,10 @@ class WaylandProtocolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Wayland-protocols can be built on Linux only")
 
     def build_requirements(self):
         self.build_requires("meson/0.59.1")

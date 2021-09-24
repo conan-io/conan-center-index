@@ -36,12 +36,14 @@ class WaylandConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Wayland can be built on Linux only")
         if self.options.shared:
             del self.options.fPIC
 
