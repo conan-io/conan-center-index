@@ -264,6 +264,8 @@ class MagnumConan(ConanFile):
             self.cpp_info.components[component].requires = deps
             if not self.options.shared_plugins:
                 self.cpp_info.components[component].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-plugins-{}.cmake".format(component)))
+        plugin_dir = "bin" if self.settings.os == "Windows" else "lib"
+        self.user_info.plugins_basepath = os.path.join(self.package_folder, plugin_dir, magnum_plugin_libdir)
 
     @property
     def _plugins(self):

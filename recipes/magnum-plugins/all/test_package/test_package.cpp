@@ -7,7 +7,7 @@
 int main() {
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager{IMPORTER_PLUGINS_FOLDER};
     manager.load("StlImporter");
-    Corrade::Containers::Pointer<Magnum::Trade::AbstractImporter> importer = manager.instantiate("StlImporter");
+    auto importer = manager.instantiate("StlImporter");
 
     if(!importer) Magnum::Fatal{} << "Cannot load the StlImporter plugin";
 
