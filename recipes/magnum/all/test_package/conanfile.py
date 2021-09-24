@@ -25,10 +25,18 @@ class TestPackageConan(ConanFile):
                 pass
         return available
 
+    def _importer_plugins_folder(self):
+        magnum_plugin_libdir = "magnum-d" if self.settings.build_type == "Debug" else "magnum"
+        pkg_dir = "bin" if self.settings.os == "Windows" else "lib"
+        return os.path.join(self.deps_cpp_info["magnum"].rootpath, pkg_dir, magnum_plugin_libdir, "importers")
+
     def build(self):
         cmake = CMake(self)
         for exec in self._executables:
             cmake.definitions["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
+        cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = self._importer_plugins_folder().replace("\\", "/")
+        cmake.definitions["OBJ_FILE"] = os.path.join(os.path.dirname(__file__), "triangleMesh.obj").replace("\\", "/")
+        cmake.definitions["SHARED_PLUGINS"] = self.options["magnum"].shared_plugins
         cmake.configure()
         cmake.build()
 
