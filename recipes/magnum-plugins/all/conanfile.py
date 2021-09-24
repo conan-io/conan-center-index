@@ -206,19 +206,20 @@ class MagnumConan(ConanFile):
         cm = self._configure_cmake()
         cm.install()
 
-        build_modules_folder = os.path.join(self.package_folder, "lib", "cmake")
-        os.makedirs(build_modules_folder)
-        for component, target, library, folder, deps in self._plugins:
-            build_module_path = os.path.join(build_modules_folder, "conan-magnum-plugins-{}.cmake".format(component))
-            with open(build_module_path, "w+") as f:
-                f.write(textwrap.dedent("""\
-                    if(NOT ${{CMAKE_VERSION}} VERSION_LESS "3.0")
-                        if(TARGET MagnumPlugins::{target})
-                            set_target_properties(MagnumPlugins::{target} PROPERTIES INTERFACE_SOURCES 
-                                                  "${{CMAKE_CURRENT_LIST_DIR}}/../../include/MagnumPlugins/{library}/importStaticPlugin.cpp")
+        if not self.options.shared_plugins:
+            build_modules_folder = os.path.join(self.package_folder, "lib", "cmake")
+            os.makedirs(build_modules_folder)
+            for component, target, library, folder, deps in self._plugins:
+                build_module_path = os.path.join(build_modules_folder, "conan-magnum-plugins-{}.cmake".format(component))
+                with open(build_module_path, "w+") as f:
+                    f.write(textwrap.dedent("""\
+                        if(NOT ${{CMAKE_VERSION}} VERSION_LESS "3.0")
+                            if(TARGET MagnumPlugins::{target})
+                                set_target_properties(MagnumPlugins::{target} PROPERTIES INTERFACE_SOURCES 
+                                                    "${{CMAKE_CURRENT_LIST_DIR}}/../../include/MagnumPlugins/{library}/importStaticPlugin.cpp")
+                            endif()
                         endif()
-                    endif()
-                """.format(target=target, library=library)))
+                    """.format(target=target, library=library)))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
@@ -261,7 +262,8 @@ class MagnumConan(ConanFile):
             self.cpp_info.components[component].libs = [library]
             self.cpp_info.components[component].libdirs = [os.path.join(self.package_folder, "lib", magnum_plugin_libdir, folder)]
             self.cpp_info.components[component].requires = deps
-            self.cpp_info.components[component].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-plugins-{}.cmake".format(component)))
+            if not self.options.shared_plugins:
+                self.cpp_info.components[component].build_modules.append(os.path.join("lib", "cmake", "conan-magnum-plugins-{}.cmake".format(component)))
 
     @property
     def _plugins(self):
