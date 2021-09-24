@@ -12,12 +12,12 @@ class NumCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpilger26/NumCpp"
     options = {
-        "use_boost" : [True, False],
-        "use_thread" : [True, False],
+        "with_boost" : [True, False],
+        "threads" : [True, False],
     }
     default_options = {
-        "use_boost" : True,
-        "use_thread" : False,
+        "with_boost" : True,
+        "threads" : False,
     }
     license = "MIT"
     no_copy_source = True
@@ -49,13 +49,13 @@ class NumCppConan(ConanFile):
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def requirements(self):
-        if tools.Version(self.version) < "2.5.0" or self.options.use_boost:
+        if tools.Version(self.version) < "2.5.0" or self.options.with_boost:
             self.requires("boost/1.75.0")
 
     def config_options(self):
         if tools.Version(self.version) < "2.5.0":
-            del self.options.use_boost
-            self.default_options["use_thread"] = True
+            del self.options.with_boost
+            self.options.threads = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -71,12 +71,12 @@ class NumCppConan(ConanFile):
         self.info.header_only()
         
     def package_info(self):
-        if tools.Version(self.version) >= "2.5.0" and self.options.use_boost == False:
+        if not self.options.get_safe("with_boost", False):
             self.cpp_info.cxxflags.append("-DNUMCPP_NO_USE_BOOST")
 
-        if tools.Version(self.version) < "2.5.0" and self.options.use_thread == False:
+        if tools.Version(self.version) < "2.5.0" and self.options.threads == False:
             self.cpp_info.cxxflags.append("-DNO_MULTITHREAD")
-        if tools.Version(self.version) >= "2.5.0" and self.options.use_thread == True:
+        if tools.Version(self.version) >= "2.5.0" and self.options.threads == True:
             self.cpp_info.cxxflags.append("-DNUMCPP_USE_MULTITHREAD")
 
         self.cpp_info.names["cmake_find_package"] = "NumCpp"
