@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
+import functools
 import os
 
 required_conan_version = ">=1.33.0"
@@ -8,15 +9,13 @@ required_conan_version = ">=1.33.0"
 class M4Conan(ConanFile):
     name = "m4"
     description = "GNU M4 is an implementation of the traditional Unix macro processor"
-    topics = ("conan", "m4", "macro", "macro processor")
+    topics = ("macro", "preprocessor")
     homepage = "https://www.gnu.org/software/m4/"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/*.patch",
-
-    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -41,18 +40,17 @@ class M4Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
         conf_args = []
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
+        autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         build_canonical_name = None
         host_canonical_name = None
         if self.settings.compiler == "Visual Studio":
             # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
             build_canonical_name = False
             host_canonical_name = False
-            self._autotools.flags.append("-FS")
+            autotools.flags.append("-FS")
             # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
             # Visual Studio does not support the %n format flag:
             # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
@@ -60,9 +58,12 @@ class M4Conan(ConanFile):
             # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
             conf_args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
-                self._autotools.link_flags.append("-PDB")
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
-        return self._autotools
+                autotools.link_flags.append("-PDB")
+        elif self.settings.compiler == "clang":
+            if tools.Version(self.version) < "1.4.19":
+                autotools.flags.extend(["-rtlib=compiler-rt", "-Wno-unused-command-line-argument"])
+        autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
+        return autotools
 
     @contextmanager
     def _build_context(self):
@@ -84,7 +85,7 @@ class M4Conan(ConanFile):
             yield
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
@@ -98,13 +99,15 @@ class M4Conan(ConanFile):
                     autotools.make(target="check")
 
     def package(self):
-        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
