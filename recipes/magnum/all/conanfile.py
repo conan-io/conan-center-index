@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import re
 import textwrap
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -192,9 +193,9 @@ class MagnumConan(ConanFile):
 
         if self.settings.os == "Emscripten":
             self.options.shared_plugins = False
-            self.options.target_gl = "desktop_gl"  # FIXME: Should be gles2?
+            self.options.target_gl = "gles2"
 
-            self.options.sdl2_application = False  # FIXME: Fails to build (because of target_gl value? Needs emscripten-port?)
+            self.options.sdl2_application = True  # FIXME: Fails to build. Use emscripten-port?)
             
             self.options.gl_info = False
 
@@ -276,7 +277,7 @@ class MagnumConan(ConanFile):
         if self.options.glfw_application:
             self.requires("glfw/3.3.4")
 
-        if self.options.sdl2_application:
+        if self.options.sdl2_application and self.settings.os != "Emscripten":
             self.requires("sdl/2.0.16")
 
     def build_requirements(self):
@@ -432,6 +433,12 @@ class MagnumConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "EGL::EGL",
                               "egl::egl")
+
+        # Copy FindOpenGLES2/3.cmake to build folder
+        shutil.copy(os.path.join(self._source_subfolder, "modules", "FindOpenGLES2.cmake"), "FindOpenGLES2.cmake")
+        shutil.copy(os.path.join(self._source_subfolder, "modules", "FindOpenGLES3.cmake"), "FindOpenGLES3.cmake")
+        if self.settings.os == "Emscripten":
+            shutil.copy(os.path.join(self._source_subfolder, "modules", "FindSDL2.cmake"), "FindSDL2.cmake")
 
     def build(self):
         self._patch_sources()
@@ -611,7 +618,9 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
-            self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
+            self.cpp_info.components["sdl2_application"].requires = ["magnum_main"]
+            if self.settings.os != "Emscripten":
+                self.cpp_info.components["sdl2_application"].requires += ["sdl::sdl"]
             if self.options.target_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
 
