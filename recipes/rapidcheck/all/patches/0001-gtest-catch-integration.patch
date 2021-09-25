@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 15c46d01288dce235179b791770187f5a38230ab..0c47308162af09841789ff9791b11839d524f852 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -111,8 +111,6 @@ if(NOT RC_ENABLE_RTTI)
+   target_compile_definitions(rapidcheck PUBLIC RC_DONT_USE_RTTI)
+ endif()
+ 
+-add_subdirectory(ext)
+-
+ if(RC_ENABLE_TESTS)
+   enable_testing()
+   add_subdirectory(test)
+@@ -122,6 +120,16 @@ if(RC_ENABLE_EXAMPLES)
+   add_subdirectory(examples)
+ endif()
+ 
++if (RC_ENABLE_CATCH)
++	find_package(Catch2 REQUIRED)
++	target_link_libraries(rapidcheck PUBLIC Catch2::Catch2)
++endif()
++
++if (RC_ENABLE_GMOCK OR RC_ENABLE_GTEST)
++	find_package(GTest REQUIRED)
++	target_link_libraries(rapidcheck PUBLIC GTest::GTest)
++endif()
++
+ add_subdirectory(extras)
+ 
+ # Install the export file specifying all the targets for RapidCheck

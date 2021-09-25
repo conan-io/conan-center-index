@@ -13,8 +13,8 @@ class RapidcheckConan(ConanFile):
     homepage = "https://github.com/emil-e/rapidcheck"
     license = "BSD-2-Clause"
     topics = "quickcheck", "testing", "property-testing"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = ["cmake", "cmake_find_package"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,9 +22,7 @@ class RapidcheckConan(ConanFile):
         "enable_rtti": [True, False],
         "enable_catch": [True, False],
         "enable_gmock": [True, False],
-        "enable_gtest": [True, False],
-        "enable_boost": [True, False],
-        "enable_boost_test": [True, False]
+        "enable_gtest": [True, False]
     }
     default_options = {
         "shared": False,
@@ -32,9 +30,7 @@ class RapidcheckConan(ConanFile):
         "enable_rtti": True,
         "enable_catch": False,
         "enable_gmock": False,
-        "enable_gtest": False,
-        "enable_boost": False,
-        "enable_boost_test": False
+        "enable_gtest": False
     }
 
     _cmake = None
@@ -61,6 +57,12 @@ class RapidcheckConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
 
+    def requirements(self):
+        if self.options.enable_catch:
+            self.requires("catch2/2.13.7")
+        if self.options.enable_gmock or self.options.enable_gtest:
+            self.requires("gtest/1.11.0")
+            
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -75,12 +77,12 @@ class RapidcheckConan(ConanFile):
         self._cmake.definitions["RC_ENABLE_CATCH"] = self.options.enable_catch
         self._cmake.definitions["RC_ENABLE_GMOCK"] = self.options.enable_gmock
         self._cmake.definitions["RC_ENABLE_GTEST"] = self.options.enable_gtest
-        self._cmake.definitions["RC_ENABLE_BOOST"] = self.options.enable_boost
-        self._cmake.definitions["RC_ENABLE_BOOST_TEST"] = self.options.enable_boost_test
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -94,9 +96,7 @@ class RapidcheckConan(ConanFile):
             {"rapidcheck": "rapidcheck::rapidcheck", 
              "rapidcheck_catch":"rapidcheck::catch", 
              "rapidcheck_gmock": "rapidcheck::gmock", 
-             "rapidcheck_gtest": "rapidcheck::gtest", 
-             "rapidcheck_boost": "rapidcheck::boost", 
-             "rapidcheck_boost_test": "rapidcheck::boost_test"}
+             "rapidcheck_gtest": "rapidcheck::gtest"}
         )
 
     @staticmethod
@@ -128,7 +128,6 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.components["core"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["core"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["core"].libs = ["rapidcheck"]
-        self.cpp_info.components["core"].includedirs  = ["include"]
         version = self.version[4:]
         if tools.Version(version) < "20201218":
             if self.options.enable_rtti:
@@ -137,14 +136,13 @@ class RapidcheckConan(ConanFile):
             if not self.options.enable_rtti:
                 self.cpp_info.components["core"].defines.append("RC_DONT_USE_RTTI")
                 
-        if(self.options.enable_catch):
-            self.cpp_info.components["catch"].requires = ["core"]
-        if(self.options.enable_gmock):
+        if self.options.enable_catch:
+            self.cpp_info.components["core"].requires.append("catch2::catch2")
+            self.cpp_info.components["catch"].requires = ["core", "catch2::catch2"]
+        if self.options.enable_gmock:
+            self.cpp_info.components["core"].requires.append("gtest::gtest")
             self.cpp_info.components["gmock"].requires = ["core"]
-        if(self.options.enable_gtest):
+        if self.options.enable_gtest:
+            self.cpp_info.components["core"].requires.append("gtest::gtest")
             self.cpp_info.components["gtest"].requires = ["core"]
-        if(self.options.enable_boost):
-            self.cpp_info.components["boost"].requires = ["core"]
-        if(self.options.enable_boost_test):
-            self.cpp_info.components["boost_test"].requires = ["core"]
         
