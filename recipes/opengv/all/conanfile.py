@@ -17,10 +17,12 @@ class opengvConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_python_bindings": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": False,
+        "with_python_bindings": False
     }
 
     _cmake = None
@@ -60,6 +62,8 @@ class opengvConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0")
+        if self.options.with_python_bindings:
+            self.requires("pybind11/2.7.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -70,6 +74,7 @@ class opengvConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python_bindings
         self._cmake.configure()
         return self._cmake
 
@@ -86,6 +91,12 @@ class opengvConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                             textwrap.dedent(old),
                             textwrap.dedent(new)
+        )
+
+        # Use conan's pybind11
+        tools.replace_in_file(os.path.join(self._source_subfolder, "python", "CMakeLists.txt"),
+                            "add_subdirectory(pybind11)",
+                            "find_package(pybind11 REQUIRED)"
         )
 
         # Let conan handle fPIC / shared
@@ -120,3 +131,5 @@ class opengvConan(ConanFile):
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        if self.options.with_python_bindings:
+            self.env_info.PYTHONPATH = os.path.join(self.package_folder, "lib", "python3", "dist-packages")
