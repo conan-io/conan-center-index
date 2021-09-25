@@ -75,6 +75,8 @@ class opengvConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_PYTHON"] = self.options.with_python_bindings
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         self._cmake.configure()
         return self._cmake
 
