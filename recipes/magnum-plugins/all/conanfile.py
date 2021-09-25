@@ -85,7 +85,7 @@ class MagnumConan(ConanFile):
         "tinygltf_importer": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = ["CMakeLists.txt", "cmake/*"]
+    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/*"]
 
     _cmake = None
     short_paths = True
@@ -119,6 +119,19 @@ class MagnumConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.os == "Emscripten":
+            self.options.shared_plugins = False
+            # FIXME: Transitive dep 'glib' is not prepared for Emscripten (https://github.com/emscripten-core/emscripten/issues/11066)
+            self.options.harfbuzz_font = False
+            # Audio is not provided by Magnum
+            self.options.drflac_audioimporter = False
+            self.options.drmp3_audioimporter = False
+            self.options.drwav_audioimporter = False
+            self.options.faad2_audioimporter = False
+            self.options.stbvorbis_audioimporter = False
+            # FIXME: Conan package fails for 'brotli'
+            self.options.freetype_font = False
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -129,16 +142,23 @@ class MagnumConan(ConanFile):
             self.requires("assimp/5.0.1")
         if self.options.harfbuzz_font:
             self.requires("harfbuzz/2.8.2")
+        if self.options.freetype_font:
+            self.requires("freetype/2.11.0")
         if self.options.jpeg_importer or self.options.jpeg_imageconverter:
             self.requires("libjpeg/9d")
         if self.options.meshoptimizer_sceneconverter:
             self.requires("meshoptimizer/0.15")
+        if self.options.png_imageconverter:
+            self.requires("libpng/1.6.37")
         if self.options.basis_imageconverter or self.options.basis_importer:
             raise ConanInvalidConfiguration("Requires 'basisuniversal', not available in ConanCenter yet")
         if self.options.devil_imageimporter:
             raise ConanInvalidConfiguration("Requires 'DevIL', not available in ConanCenter yet")
         if self.options.faad2_audioimporter:
             raise ConanInvalidConfiguration("Requires 'faad2', not available in ConanCenter yet")
+
+    def build_requirements(self):
+        self.build_requires("corrade/{}".format(self.version))
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -280,14 +300,14 @@ class MagnumConan(ConanFile):
             ("drmp3_audioimporter", ("drmp3_audioimporter", "DrMp3AudioImporter", "DrMp3AudioImporter", "audioimporters", ["magnum::audio"])), 
             ("drwav_audioimporter", ("drwav_audioimporter", "DrWavAudioImporter", "DrWavAudioImporter", "audioimporters", ["magnum::audio"])), 
             ("faad2_audioimporter", ("faad2_audioimporter", "--", "--", "--", [])), 
-            ("freetype_font", ("freetype_font", "FreeTypeFont", "FreeTypeFont", "fonts", ["magnum::text"])), 
+            ("freetype_font", ("freetype_font", "FreeTypeFont", "FreeTypeFont", "fonts", ["magnum::text", "freetype::freetype"])), 
             ("harfbuzz_font", ("harfbuzz_font", "HarfBuzzFont", "HarfBuzzFont", "fonts", ["magnum::text", "harfbuzz::harfbuzz"])), 
             ("jpeg_imageconverter", ("jpeg_imageconverter", "JpegImageConverter", "JpegImageConverter", "imageconverters", ["magnum::trade", "libjpeg::libjpeg"])), 
             ("jpeg_importer", ("jpeg_importer", "JpegImporter", "JpegImporter", "importers", ["magnum::trade", "libjpeg::libjpeg"])), 
             ("meshoptimizer_sceneconverter", ("meshoptimizer_sceneconverter", "MeshOptimizerSceneConverter", "MeshOptimizerSceneConverter", "sceneconverters", ["magnum::trade", "magnum::mesh_tools", "meshoptimizer::meshoptimizer"])), 
             ("miniexr_imageconverter", ("miniexr_imageconverter", "MiniExrImageConverter", "MiniExrImageConverter", "imageconverters", ["magnum::trade"])), 
             ("opengex_importer", ("opengex_importer", "OpenGexImporter", "OpenGexImporter", "importers", ["magnum::trade", "magnumopenddl", "magnum::any_image_importer"])), 
-            ("png_importer", ("png_importer", "PngImporter", "PngImporter", "importers", ["magnum::trade"])), 
+            ("png_importer", ("png_importer", "PngImporter", "PngImporter", "importers", ["magnum::trade", "libpng::libpng"])), 
             ("png_imageconverter", ("png_imageconverter", "PngImageConverter", "PngImageConverter", "imageconverters", ["magnum::trade"])), 
             ("primitive_importer", ("primitive_importer", "PrimitiveImporter", "PrimitiveImporter", "importers", ["magnum::primitives", "magnum::trade"])), 
             ("stanford_importer", ("stanford_importer", "StanfordImporter", "StanfordImporter", "importers", ["magnum::mesh_tools", "magnum::trade"])), 

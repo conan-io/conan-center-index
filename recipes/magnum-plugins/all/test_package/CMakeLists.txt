@@ -26,3 +26,11 @@ set_target_properties(${PROJECT_NAME}
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
 )
+
+if(TARGET_EMSCRIPTEN)
+    message("Embed OBJ file")
+    set_target_properties(${PROJECT_NAME} 
+        PROPERTIES 
+            LINK_FLAGS "--embed-file ${CONAN_STL_FILE}@${CONAN_STL_FILE}"
+    )
+endif()

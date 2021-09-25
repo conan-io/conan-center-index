@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
+set(CONAN_CMAKE_SILENT_OUTPUT 1)
+
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
