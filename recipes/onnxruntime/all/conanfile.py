@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class OnnxRuntimeConan(ConanFile):
@@ -76,7 +77,7 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("optional-lite/3.4.0")
         self.requires("safeint/3.0.26")
         self.requires("nlohmann_json/3.9.1")
-        self.requires("eigen/3.4-rc1")
+        self.requires("eigen/3.4.0")
 
     def configure(self):
         if self.settings.os == "Android" or self.settings.os == "iOS":
@@ -161,7 +162,8 @@ class OnnxRuntimeConan(ConanFile):
         self._add_definition(self._cmake_rt_def, self.options.with_static_rt)
 
         self._add_definition("USE_PREINSTALLED_EIGEN", True)
-        eigen_includedir = os.path.join(self.deps_cpp_info["eigen"].include_paths[0], "eigen3")
+        eigen_includedir = os.path.join(self.deps_cpp_info["eigen"]
+                                        .include_paths[0], "eigen3")
         self._cmake.definitions["eigen_SOURCE_PATH"] = eigen_includedir
 
         self._add_definition("USE_TVM", self.options.with_tvm)
@@ -263,15 +265,20 @@ class OnnxRuntimeConan(ConanFile):
                 raise Exception("ANDROID_SDK_ROOT env not defined")
 
             self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = os.path.join(
-                android_ndk_path, 'build', 'cmake', 'android.toolchain.cmake')
-            self._cmake.definitions["ANDROID_PLATFORM"] = "android-" + str(self.settings.os.api_level)
-            self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(self.settings.arch)
-            self._cmake.definitions["ANDROID_MIN_SDK"] = str(self.settings.os.api_level)
+                android_ndk_root, 'build', 'cmake', 'android.toolchain.cmake')
+            api_level = str(self.settings.os.api_level)
+            android_abi = tools.to_android_abi(self.settings.arch)
+            self._cmake.definitions["ANDROID_PLATFORM"] = \
+                f"android-{api_level}"
+            self._cmake.definitions["ANDROID_ABI"] = android_abi
+            self._cmake.definitions["ANDROID_MIN_SDK"] = api_level
 
-        self._cmake.definitions["ONNX_CUSTOM_PROTOC_EXECUTABLE"] = tools.which('protoc')
+        self._cmake.definitions["ONNX_CUSTOM_PROTOC_EXECUTABLE"] = \
+            tools.which('protoc')
 
+        src_folder = os.path.join(self._source_subfolder, 'cmake')
         self._cmake.configure(build_folder=self._build_subfolder,
-                              source_folder=os.path.join(self._source_subfolder, 'cmake'))
+                              source_folder=src_folder)
         return self._cmake
 
     def build(self):
