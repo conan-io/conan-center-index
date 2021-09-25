@@ -127,7 +127,7 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["bullet"].names["cmake_find_package"] = "Bullet"
             self.cpp_info.components["bullet"].names["cmake_find_package_multi"] = "Bullet"
             self.cpp_info.components["bullet"].libs = ["MagnumBulletIntegration"]
-            self.cpp_info.components["bullet"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::scenegraph", "magnum::shaders", "bullet3::bullet3"]
+            self.cpp_info.components["bullet"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "bullet3::bullet3"]
 
         if self.options.with_dart:
             pass
