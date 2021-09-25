@@ -13,8 +13,8 @@ patches:
     - patch_file: "patches/0001-gtest-catch-integration.patch"
       base_path: "source_subfolder"
   "cci.20210107":
-    - patch_file: "patches/0001-gtest-catch-integration.patch"
+    - patch_file: "patches/0001-gtest-catch-integration-20210107.patch"
       base_path: "source_subfolder"
   "cci.20200131":
-    - patch_file: "patches/0001-gtest-catch-integration.patch"
+    - patch_file: "patches/0001-gtest-catch-integration-20200131.patch"
       base_path: "source_subfolder"

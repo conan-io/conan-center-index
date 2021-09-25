@@ -1,0 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9f583afc171fab0a6894ffd64a0c787fd806bbaa..da2389500c99e4e4b59c772ee25285e2a9607de5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,8 +106,6 @@ if(NOT RC_ENABLE_RTTI)
+   target_compile_definitions(rapidcheck PUBLIC RC_DONT_USE_RTTI)
+ endif()
+ 
+-add_subdirectory(ext)
+-
+ if(RC_ENABLE_TESTS)
+   enable_testing()
+   add_subdirectory(test)
+@@ -116,6 +114,15 @@ endif()
+ if(RC_ENABLE_EXAMPLES)
+   add_subdirectory(examples)
+ endif()
++if (RC_ENABLE_CATCH)
++	find_package(Catch2 REQUIRED)
++	target_link_libraries(rapidcheck PUBLIC Catch2::Catch2)
++endif()
++
++if (RC_ENABLE_GMOCK OR RC_ENABLE_GTEST)
++	find_package(GTest REQUIRED)
++	target_link_libraries(rapidcheck PUBLIC GTest::GTest)
++endif()
+ 
+ add_subdirectory(extras)
+ 
