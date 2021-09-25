@@ -32,6 +32,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = os.path.join(self.deps_user_info["magnum"].plugins_basepath, "importers").replace("\\", "/")
         cmake.definitions["OBJ_FILE"] = os.path.join(self.source_folder, "triangleMesh.obj").replace("\\", "/")
         cmake.definitions["SHARED_PLUGINS"] = self.options["magnum"].shared_plugins
+        cmake.definitions["TARGET_EMSCRIPTEN"] = bool(self.settings.os == "Emscripten")
         cmake.configure()
         cmake.build()
 
@@ -42,3 +43,7 @@ class TestPackageConan(ConanFile):
 
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
+
+        if self.settings.os == "Emscripten":
+            bin_path = os.path.join("bin", "test_package.js")
+            self.run("node {}".format(bin_path), run_environment=True)

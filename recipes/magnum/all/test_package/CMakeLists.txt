@@ -26,6 +26,14 @@ set_target_properties(${PROJECT_NAME}
         CXX_EXTENSIONS OFF
 )
 
+if(TARGET_EMSCRIPTEN)
+    message("Embed OBJ file")
+    set_target_properties(${PROJECT_NAME} 
+        PROPERTIES 
+            LINK_FLAGS "--embed-file ${OBJ_FILE}@${OBJ_FILE}"
+    )
+endif()
+
 
 # Run some executables (we can only be sure they exist if native build)
 if (EXEC_GL_INFO AND NOT CMAKE_CROSSCOMPILING)
