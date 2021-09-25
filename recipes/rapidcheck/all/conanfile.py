@@ -139,17 +139,12 @@ class RapidcheckConan(ConanFile):
                 
         if(self.options.enable_catch):
             self.cpp_info.components["catch"].requires = ["core"]
-            self.cpp_info.components["catch"].includedirs  = ["include"]
         if(self.options.enable_gmock):
             self.cpp_info.components["gmock"].requires = ["core"]
-            self.cpp_info.components["gmock"].includedirs  = ["include"]
         if(self.options.enable_gtest):
             self.cpp_info.components["gtest"].requires = ["core"]
-            self.cpp_info.components["gtest"].includedirs  = ["include"]
         if(self.options.enable_boost):
             self.cpp_info.components["boost"].requires = ["core"]
-            self.cpp_info.components["boost"].includedirs  = ["include"]
         if(self.options.enable_boost_test):
             self.cpp_info.components["boost_test"].requires = ["core"]
-            self.cpp_info.components["boost_test"].includedirs  = ["include"]
         
