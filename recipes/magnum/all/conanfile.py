@@ -208,7 +208,7 @@ class MagnumConan(ConanFile):
 
             self.options.glfw_application = False
 
-            # X11 is not available
+            # X11 is not available
             del self.options.glx_context
             del self.options.glx_application
             del self.options.windowless_glx_application
