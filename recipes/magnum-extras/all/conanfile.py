@@ -18,17 +18,17 @@ class MagnumExtrasConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_player": [True, False],
-        "with_ui": [True, False],
-        "with_ui_gallery": [True, False],
+        "player": [True, False],
+        "ui": [True, False],
+        "ui_gallery": [True, False],
         "application": ["android", "emscripten", "glfw", "glx", "sdl2", "xegl"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_player": True,
-        "with_ui": True,
-        "with_ui_gallery": True,
+        "player": True,
+        "ui": True,
+        "ui_gallery": True,
         "application": "sdl2",
     }
     generators = "cmake", "cmake_find_package"
@@ -54,6 +54,10 @@ class MagnumExtrasConan(ConanFile):
             self.options.application = "android"
         if self.settings.os == "Emscripten":
             self.options.application = "emscripten"
+            # FIXME: Requires 'magnum:basis_importer=True' 
+            self.options.player = False
+            # #FIXME: Fails to compile
+            self.options.ui_gallery = False
 
     def configure(self):
         if self.options.shared:
@@ -62,8 +66,11 @@ class MagnumExtrasConan(ConanFile):
     def requirements(self):
         self.requires("magnum/{}".format(self.version))
         self.requires("corrade/{}".format(self.version))
-        if self.settings.os in ["iOS", "Emscripten", "Android"]:
+        if self.settings.os in ["iOS", "Emscripten", "Android"] and self.options.ui_gallery:
             self.requires("magnum-plugins/{}".format(self.version))
+
+    def build_requirements(self):
+        self.build_requires("corrade/{}".format(self.version))
 
     def validate(self):
         opt_name = "{}_application".format(self.options.application)
@@ -82,9 +89,9 @@ class MagnumExtrasConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_GL_TESTS"] = False
 
-        self._cmake.definitions["WITH_PLAYER"] = self.options.with_player
-        self._cmake.definitions["WITH_UI"] = self.options.with_ui
-        self._cmake.definitions["WITH_UI_GALLERY"] = self.options.with_ui_gallery
+        self._cmake.definitions["WITH_PLAYER"] = self.options.player
+        self._cmake.definitions["WITH_UI"] = self.options.ui
+        self._cmake.definitions["WITH_UI_GALLERY"] = self.options.ui_gallery
         
         self._cmake.configure()
         return self._cmake
@@ -118,13 +125,13 @@ class MagnumExtrasConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "MagnumExtras"
         self.cpp_info.names["cmake_find_package_multi"] = "MagnumExtras"
 
-        if self.options.with_ui:
+        if self.options.ui:
             self.cpp_info.components["ui"].names["cmake_find_package"] = "Ui"
             self.cpp_info.components["ui"].names["cmake_find_package_multi"] = "Ui"
             self.cpp_info.components["ui"].libs = ["MagnumUi"]
             self.cpp_info.components["ui"].requires = ["corrade::interconnect", "magnum::magnum_main", "magnum::gl", "magnum::text"]
 
-        if self.options.with_player or self.options.with_ui_gallery:
+        if self.options.player or self.options.ui_gallery:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info('Appending PATH environment variable: %s' % bin_path)
             self.env_info.path.append(bin_path)
