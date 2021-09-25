@@ -1,0 +1,4 @@
+sources:
+  "1.28":
+    url: "https://github.com/knik0/faac/archive/refs/tags/faac1_28.tar.gz"
+    sha256: "fec821797a541e8359f086fef454b947a7f7246fe8ec6207668968b86606a7dd"
