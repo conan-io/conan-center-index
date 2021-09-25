@@ -88,6 +88,20 @@ class opengvConan(ConanFile):
                             textwrap.dedent(new)
         )
 
+        # Let conan handle fPIC / shared
+        old = """\
+            IF(MSVC)
+              set(BUILD_SHARED_LIBS OFF)"""
+
+        new = """\
+            IF(1)
+              #set(BUILD_SHARED_LIBS OFF)"""
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                            textwrap.dedent(old),
+                            textwrap.dedent(new)
+        )
+
         cmake = self._configure_cmake()
         cmake.build()
 
