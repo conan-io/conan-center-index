@@ -1,5 +1,18 @@
 # Changelog
 
+### 21-September-2021 - 12:09 CEST
+
+- [config] Upgrade Conan version to 1.39.0.
+
+### 7-September-2021 - 16:49 CEST
+
+- [configs] Remove Visual Studio 2015
+- [configs] Remove Macos apple-clang 10
+- [configs] Remove Linux GCC 4.9
+- [configs] Linux Clang: keep only latest versions 10 and 11
+- [feature] Rename EAP to Access Request.
+- [feature] Display merge error in pull-requests.
+
 ### 6-September-2021 - 11:15 CEST
 
 - [feature] Display useful CI status notifications in Github pull requests.

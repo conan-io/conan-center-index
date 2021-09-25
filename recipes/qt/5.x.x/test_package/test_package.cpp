@@ -10,6 +10,11 @@
 #include <QDomText>
 #include <QSqlDatabase>
 
+void f()
+{
+    qDebug() << "inside f";
+}
+
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Application Example");
@@ -34,7 +39,8 @@ int main(int argc, char *argv[]){
 
     QSqlDatabase sqlTester;
 
-    QFuture<void> future = QtConcurrent::run([](){});
+    QFuture<void> future = QtConcurrent::run(::f);
+    future.waitForFinished();
 
     QDomText xmlTester;
 

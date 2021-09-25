@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
-            arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
-            self.run("%s %s" % (bin_path, arguments), run_environment=True)
+            arguments = "{}w+ conan-center-index".format("\\" if self.settings.os == "Windows" else "\\\\")
+            self.run("{} {}".format(bin_path, arguments), run_environment=True)

@@ -45,6 +45,14 @@ class LLVMOpenMpConan(ConanFile):
             raise ConanInvalidConfiguration("llvm-openmp doesn't support compiler: {} on OS: {}.".
                                             format(self.settings.compiler, self.settings.os))
 
+    def validate(self):
+        if (
+            tools.Version(self.version) <= "10.0.0"
+            and self.settings.os == "Macos"
+            and self.settings.arch == "armv8"
+        ):
+            raise ConanInvalidConfiguration("ARM v8 not supported")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "openmp-{}.src".format(self.version)

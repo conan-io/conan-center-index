@@ -1,0 +1,4 @@
+sources: 
+  "3.0.0":
+    url: "https://github.com/quicknir/wise_enum/archive/refs/tags/3.0.0.tar.gz"
+    sha256: "6e0d62855854ea755dd4277e74a599d1f4e7eec95562baf751151cc2e4df5eb8"
