@@ -27,11 +27,14 @@ endforeach()
 # When using Emscripten, the 'magnum' library provides some additional variables and functions
 if(CORRADE_TARGET_EMSCRIPTEN)
     find_file(MAGNUM_EMSCRIPTENAPPLICATION_JS EmscriptenApplication.js
-              PATH_SUFFIXES "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum")
+              PATHS "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum"
+              NO_DEFAULT_PATH)
     find_file(MAGNUM_WINDOWLESSEMSCRIPTENAPPLICATION_JS WindowlessEmscriptenApplication.js
-              PATH_SUFFIXES "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum")
+              PATHS "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum"
+              NO_DEFAULT_PATH)
     find_file(MAGNUM_WEBAPPLICATION_CSS WebApplication.css
-              PATH_SUFFIXES "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum")
+              PATHS "${CMAKE_CURRENT_LIST_DIR}/../../share/magnum"
+              NO_DEFAULT_PATH)
 
     function(emscripten_embed_file target file destination)
         get_filename_component(absolute_file ${file} ABSOLUTE)
