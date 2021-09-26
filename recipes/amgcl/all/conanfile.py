@@ -6,7 +6,7 @@ class UncrustifyConan(ConanFile):
     name = "amgcl"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ddemidov/amgcl"
-    topics = ("conan", "amgcl", "mathematics")
+    topics = ("mathematics", "opencl", "openmp", "cuda", "amg")
     license = "MIT"
     description = "AMGCL is a header-only C++ library for solving large sparse linear systems with algebraic multigrid (AMG) method."
     settings = "compiler"
