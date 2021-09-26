@@ -14,5 +14,5 @@ class AmgclTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
-            self.run(".{}solver".format(os.sep))
+            bin_path = os.path.join("bin", "solver")
+            self.run(bin_path, run_environment=True)
