@@ -83,7 +83,7 @@ class LibsodiumConan(ConanFile):
         sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._msvc_sln_folder, "libsodium.sln")
         build_type = "{}{}".format(
             "Dyn" if self.options.shared else "Static",
-            "Debug" if self.settings.build_type == "Debug" else "Release"
+            "Debug" if self.settings.build_type == "Debug" else "Release",
         )
         msbuild = MSBuild(self)
         msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=build_type)
