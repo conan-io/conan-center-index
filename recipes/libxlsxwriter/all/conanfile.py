@@ -81,7 +81,7 @@ class LibxlsxwriterConan(ConanFile):
         elif self.options.md5 == "openssl":
             self._cmake.definitions["USE_OPENSSL_MD5"] = True
 
-        self._cmake.definitions["USE_FMEMOPEN"] = self.options.fmemopen
+        self._cmake.definitions["USE_FMEMOPEN"] = self.options.get_safe("fmemopen", False)
         self._cmake.definitions["USE_DTOA_LIBRARY"] = self.options.dtoa
 
         self._cmake.configure()
