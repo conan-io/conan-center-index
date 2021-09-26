@@ -11,6 +11,13 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def build_requirements(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
+            # set. This could be because you are using a Mac OS X version less than 10.5
+            # or because CMake's platform configuration is corrupt.
+            self.build_requires("cmake/3.20.1")
+
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
