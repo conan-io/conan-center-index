@@ -414,6 +414,13 @@ else()
   list(GET HDF5_INCLUDE_DIRS 0 ARMA_HDF5_INCLUDE_DIR)
 endif()""",
         )
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper1.cpp ${PROJECT_SOURCE_DIR}/src/wrapper2.cpp )",
+            """set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper1.cpp ${PROJECT_SOURCE_DIR}/src/wrapper2.cpp )
+            """
+        )
 
     def build(self):
         cmake = self._configure_cmake()
