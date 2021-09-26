@@ -1,4 +1,7 @@
 sources:
+  "5.0":
+    url: "https://github.com/ridiculousfish/libdivide/archive/refs/tags/5.0.tar.gz"
+    sha256: "01ffdf90bc475e42170741d381eb9cfb631d9d7ddac7337368bcd80df8c98356"
   "3.0":
     url: "https://github.com/ridiculousfish/libdivide/archive/v3.0.tar.gz"
     sha256: "7c0baed201e78f12f290d3f8c22c974d2fa44aefd9820f8484f7972a431ff264"
