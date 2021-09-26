@@ -26,7 +26,6 @@ class LibsodiumConan(ConanFile):
         "PIE": False,
     }
 
-    generators = "cmake"
     exports_sources = "patches/*"
     short_paths = True
 
