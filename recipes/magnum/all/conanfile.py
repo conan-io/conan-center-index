@@ -624,10 +624,15 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
             self.cpp_info.components["sdl2_application"].requires = ["magnum_main"]
-            if self.settings.os != "Emscripten":
-                self.cpp_info.components["sdl2_application"].requires += ["sdl::sdl"]
             if self.options.target_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
+            if self.settings.os != "Emscripten":
+                self.cpp_info.components["sdl2_application"].requires += ["sdl::sdl"]
+            else:
+                if self.options.target_gl == "gles2":
+                    self.cpp_info.components["sdl2_application"].exelinkflags = ["-s FULL_ES2=1"]
+                elif self.options.target_gl == "gles3":
+                    self.cpp_info.components["sdl2_application"].exelinkflags = ["-s FULL_ES3=1"]
 
         if self.options.get_safe("xegl_application", False):
             self.cpp_info.components["xegl_application"].names["cmake_find_package"] = "XEglApplication"
