@@ -166,9 +166,9 @@ class LibsodiumConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libsodium"
+        self.cpp_info.libs = ["{}sodium".format("lib" if self.settings.compiler == "Visual Studio" else "")]
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
-        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
