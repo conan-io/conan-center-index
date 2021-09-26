@@ -24,7 +24,7 @@ class HsmConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=os.path.join(self._source_subfolder, "hsm-", self.version))
+        cmake.configure(source_folder=os.path.join(self._source_subfolder, "hsm-" + self.version))
 
     def package(self):
         cmake = CMake(self)    
