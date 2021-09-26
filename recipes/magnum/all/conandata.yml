@@ -9,3 +9,8 @@ patches:
       # patch_type: "portability" 
       # description: "Remove unnecessary dependency on UseEmscripten"
       # source: "https://github.com/mosra/magnum/issues/490"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2020.06/0002-emscripten-dyncall.patch"
+      # patch_type: "portability" 
+      # description: "Work around missing dynCall() since Emscripten 2.0.10"
+      # source: "https://github.com/mosra/magnum/commit/e65d6cff23b51b378bcdac32c8b2e7f09dd63caa"

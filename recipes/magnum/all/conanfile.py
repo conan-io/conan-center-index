@@ -193,7 +193,7 @@ class MagnumConan(ConanFile):
 
         if self.settings.os == "Emscripten":
             self.options.shared_plugins = False
-            self.options.target_gl = "gles2"
+            self.options.target_gl = "gles3"
 
             self.options.sdl2_application = True  # FIXME: Fails to build. Use emscripten-port?)
             
@@ -482,7 +482,7 @@ class MagnumConan(ConanFile):
                         endif()
                     """.format(target=target, library=library)))
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "cmake"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
@@ -595,7 +595,12 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["emscripten_application"].names["cmake_find_package"] = "EmscriptenApplication"
             self.cpp_info.components["emscripten_application"].names["cmake_find_package_multi"] = "EmscriptenApplication"
             self.cpp_info.components["emscripten_application"].libs = ["MagnumEmscriptenApplication{}".format(lib_suffix)]
-            self.cpp_info.components["emscripten_application"].requires = ["gl"]
+            self.cpp_info.components["emscripten_application"].requires = ["magnum_main", "gl"]
+            if self.options.target_gl == "gles2":
+                self.cpp_info.components["emscripten_application"].exelinkflags = ["-s FULL_ES2=1"]
+            elif self.options.target_gl == "gles3":
+                self.cpp_info.components["emscripten_application"].exelinkflags = ["-s FULL_ES3=1"]
+            
 
         if self.options.get_safe("windowless_ios_application", False):
             raise Exception("Recipe doesn't define this component")

@@ -1,0 +1,16 @@
+diff --git a/src/Magnum/Platform/EmscriptenApplication.cpp b/src/Magnum/Platform/EmscriptenApplication.cpp
+index 010c4cb..ac28a19 100644
+--- a/src/Magnum/Platform/EmscriptenApplication.cpp
++++ b/src/Magnum/Platform/EmscriptenApplication.cpp
+@@ -721,9 +721,8 @@ void EmscriptenApplication::redraw() {
+         var drawEvent = function() {
+             var id = window.requestAnimationFrame(drawEvent);
+ 
+-            /* Call our callback via function pointer returning int with two
+-            int params */
+-            if(!dynCall('ii', $0, [$1])) {
++            // https://github.com/mosra/magnum/commit/e65d6cff23b51b378bcdac32c8b2e7f09dd63caa
++            if(!wasmTable.get($0).apply(null, [$1])) {
+                 window.cancelAnimationFrame(id);
+             }
+         };

@@ -26,12 +26,8 @@ set_target_properties(${PROJECT_NAME}
         CXX_EXTENSIONS OFF
 )
 
-if(TARGET_EMSCRIPTEN)
-    message("Embed OBJ file")
-    set_target_properties(${PROJECT_NAME} 
-        PROPERTIES 
-            LINK_FLAGS "--embed-file ${OBJ_FILE}@${OBJ_FILE}"
-    )
+if(CORRADE_TARGET_EMSCRIPTEN)
+    emscripten_embed_file(${PROJECT_NAME} ${OBJ_FILE} ${OBJ_FILE})
 endif()
 
 
