@@ -101,7 +101,7 @@ class SentryNativeConan(ConanFile):
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
         if tools.Version(self.version) >= "0.4.7" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
-        if self.options.backend = "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if self.options.backend == "crashpad" and tools.Version(self.version) < "0.4.7" and self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This version doesn't support ARM compilation")
 
     def build_requirements(self):
