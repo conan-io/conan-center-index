@@ -93,7 +93,7 @@ class LibsodiumConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
-        # TODO: maybe remove this manual host logic? Is is not handled by Autotools helper already?
+        # TODO: maybe remove this manual host logic? Is it not handled by Autotools helper already?
         host = None
         if self.settings.os == "Android":
             android_id_str = "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
