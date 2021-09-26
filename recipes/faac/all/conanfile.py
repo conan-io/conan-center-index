@@ -12,16 +12,17 @@ class FaacConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/faac"
     license = "LGPL-2.0-only"
+    exports_sources = "patches/*"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
         "with_mp4": [True, False],
         "drm": [True, False]
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
         "with_mp4": False,
         "drm": False
@@ -53,7 +54,7 @@ class FaacConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-    
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -74,6 +75,8 @@ class FaacConan(ConanFile):
         self.build_requires("libtool/2.4.6")
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         autotools = self._configure_autotools()
         if self._is_mingw and self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "libfaac", "Makefile"),
