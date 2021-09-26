@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(pupnp REQUIRED)
 
-add_executable(example main.c)
-target_link_libraries(example pupnp::pupnp)
-set_target_properties(example PROPERTIES C_STANDARD 99)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} pupnp::pupnp)
+set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)

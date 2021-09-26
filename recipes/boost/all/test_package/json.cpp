@@ -1,4 +1,9 @@
 #include <boost/json.hpp>
+
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 using namespace boost::json;
 
 #include <string>

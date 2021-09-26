@@ -1,0 +1,14 @@
+Fix CMake configuration errors while cross-building to iOS/tvOS/watchOS
+
+--- a/cmake/tools.cmake
++++ b/cmake/tools.cmake
+@@ -5,8 +5,5 @@ if(NOT HAVE_GETOPT)
+ endif()
+ 
+ install(TARGETS matdump
+-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        DESTINATION ${CMAKE_INSTALL_BINDIR}
+ )

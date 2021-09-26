@@ -12,8 +12,7 @@ class SDLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
     license = "Zlib"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = ["cmake", "pkg_config"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,13 +41,14 @@ class SDLConan(ConanFile):
         "opengl": [True, False],
         "opengles": [True, False],
         "vulkan": [True, False],
+        "libunwind": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "directx": True,
         "alsa": True,
-        "jack": True,
+        "jack": False,
         "pulse": True,
         "sndio": False,
         "nas": True,
@@ -62,19 +62,28 @@ class SDLConan(ConanFile):
         "xscrnsaver": True,
         "xshape": True,
         "xvm": True,
-        "wayland": False,
+        "wayland": True,
         "directfb": False,
         "iconv": True,
         "video_rpi": False,
         "sdl2main": True,
         "opengl": True,
         "opengles": True,
-        "vulkan": True
+        "vulkan": True,
+        "libunwind": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = ["cmake", "pkg_config"]
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,6 +109,7 @@ class SDLConan(ConanFile):
             del self.options.wayland
             del self.options.directfb
             del self.options.video_rpi
+            del self.options.libunwind
         if self.settings.os != "Windows":
             del self.options.directx
 
@@ -108,29 +118,46 @@ class SDLConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Macos" and not self.options.iconv:
-            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("Linux not supported yet")
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
             self.requires("libiconv/1.16")
         if self.settings.os == "Linux":
-            self.requires("xorg/system")
             if self.options.alsa:
                 self.requires("libalsa/1.2.4")
             if self.options.pulse:
-                self.requires("pulseaudio/13.0")
+                self.requires("pulseaudio/14.2")
+            if self.options.sndio:
+                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
             if self.options.opengl:
                 self.requires("opengl/system")
+            if self.options.nas:
+                self.requires("nas/1.9.4")
+            if self.options.jack:
+                raise ConanInvalidConfiguration("Package for 'jack' is not available (yet)")
+            if self.options.esd:
+                raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
+            if self.options.wayland:
+                self.requires("wayland/1.19.0")
+                self.requires("xkbcommon/1.3.0")
+                self.requires("egl/system")
+            if self.options.directfb:
+                raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
+            if self.options.libunwind:
+                self.requires("libunwind/1.5.0")
+
+    def validate(self):
+        if self.settings.os == "Macos" and not self.options.iconv:
+            raise ConanInvalidConfiguration("On macOS iconv can't be disabled")
 
     def package_id(self):
         del self.info.options.sdl2main
 
     def build_requirements(self):
         if self.settings.os == "Linux":
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
+        if self.options.get_safe("wayland", False):
+            self.build_requires("wayland/1.19.0")  # Provides wayland-scanner
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
@@ -139,39 +166,16 @@ class SDLConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # ensure sdl2-config is created for MinGW
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(NOT WINDOWS OR CYGWIN)",
-                              "if(NOT WINDOWS OR CYGWIN OR MINGW)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "if(NOT (WINDOWS OR CYGWIN))",
-                              "if(NOT (WINDOWS OR CYGWIN OR MINGW))")
-        if self.version >= "2.0.14":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                                  '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
         self._build_cmake()
-
-    def _check_pkg_config(self, option, package_name):
-        if option:
-            pkg_config = tools.PkgConfig(package_name)
-            if not pkg_config.provides:
-                raise ConanInvalidConfiguration("package %s is not available" % package_name)
-
-    def _check_dependencies(self):
-        if self.settings.os == "Linux":
-            self._check_pkg_config(self.options.jack, "jack")
-            self._check_pkg_config(self.options.esd, "esound")
-            self._check_pkg_config(self.options.wayland, "wayland-client")
-            self._check_pkg_config(self.options.wayland, "wayland-protocols")
-            self._check_pkg_config(self.options.directfb, "directfb")
-
-    def validate(self):
-        self._check_dependencies()
 
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
+            cmake_extra_ldflags = []
             # FIXME: self.install_folder not defined? Neccessary?
             self._cmake.definitions["CONAN_INSTALL_FOLDER"] = self.install_folder
             if self.settings.os != "Windows":
@@ -190,12 +194,26 @@ class SDLConan(ConanFile):
 
                 self._cmake.definitions["ALSA"] = self.options.alsa
                 if self.options.alsa:
+                    self._cmake.definitions["ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
                     self._cmake.definitions["HAVE_ASOUNDLIB_H"] = True
                     self._cmake.definitions["HAVE_LIBASOUND"] = True
                 self._cmake.definitions["JACK"] = self.options.jack
+                if self.options.jack:
+                    self._cmake.definitions["JACK_SHARED"] = self.deps_cpp_info["jack"].shared
+                self._cmake.definitions["ESD"] = self.options.esd
+                if self.options.esd:
+                    self._cmake.definitions["ESD_SHARED"] = self.deps_cpp_info["esd"].shared
                 self._cmake.definitions["PULSEAUDIO"] = self.options.pulse
+                if self.options.pulse:
+                    self._cmake.definitions["PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
                 self._cmake.definitions["SNDIO"] = self.options.sndio
+                if self.options.sndio:
+                    self._cmake.definitions["SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
                 self._cmake.definitions["NAS"] = self.options.nas
+                if self.options.nas:
+                    cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
+                    cmake_required_includes += [os.path.join(self.deps_cpp_info["nas"].rootpath, str(it)) for it in self.deps_cpp_info["nas"].includedirs]
+                    self._cmake.definitions["NAS_SHARED"] = self.options["nas"].shared
                 self._cmake.definitions["VIDEO_X11"] = self.options.x11
                 if self.options.x11:
                     self._cmake.definitions["HAVE_XEXT_H"] = True
@@ -221,25 +239,35 @@ class SDLConan(ConanFile):
                 if self.options.xvm:
                     self._cmake.definitions["HAVE_XF86VM_H"] = True
                 self._cmake.definitions["VIDEO_WAYLAND"] = self.options.wayland
+                if self.options.wayland:
+                    # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
+                    cmake_extra_ldflags += ["-L{}".format(os.path.join(self.deps_cpp_info["wayland"].rootpath, it)) for it in self.deps_cpp_info["wayland"].libdirs]
+                    self._cmake.definitions["WAYLAND_SHARED"] = self.options["wayland"].shared
+                    self._cmake.definitions["WAYLAND_SCANNER_1_15_FOUND"] = 1  # FIXME: Check actual build-requires version
+
                 self._cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
+                self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
+            # Add extra information collected from the deps
+            self._cmake.definitions["EXTRA_LDFLAGS"] = " ".join(cmake_extra_ldflags)
+            self._cmake.definitions["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
             self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
     def _build_cmake(self):
-        if self.settings.os == "Linux":
-            if self.options.pulse:
-                tools.rename("libpulse.pc", "libpulse-simple.pc")
         lib_paths = [lib for dep in self.deps_cpp_info.deps for lib in self.deps_cpp_info[dep].lib_paths]
         with tools.environment_append({"LIBRARY_PATH": os.pathsep.join(lib_paths)}):
             cmake = self._configure_cmake()
             cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
+        if self.version >= "2.0.16":
+            self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        else:
+            self.copy(pattern="COPYING.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "sdl2-config")
@@ -248,17 +276,6 @@ class SDLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "libdata"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def _add_libraries_from_pc(self, library, static=None):
-        if static is None:
-            static = not self.options.shared
-        pkg_config = tools.PkgConfig(library, static=static)
-        libs = [lib[2:] for lib in pkg_config.libs_only_l]  # cut -l prefix
-        lib_paths = [lib[2:] for lib in pkg_config.libs_only_L]  # cut -L prefix
-        self.cpp_info.components["libsdl2"].libs.extend(libs)
-        self.cpp_info.components["libsdl2"].libdirs.extend(lib_paths)
-        self.cpp_info.components["libsdl2"].sharedlinkflags.extend(pkg_config.libs_only_other)
-        self.cpp_info.components["libsdl2"].exelinkflags.extend(pkg_config.libs_only_other)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SDL2"
@@ -269,13 +286,13 @@ class SDLConan(ConanFile):
         sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
         self.cpp_info.components["libsdl2"].names["cmake_find_package"] = sdl2_cmake_target
         self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
+        self.cpp_info.components["libsdl2"].names["pkg_config"] = "sdl2"
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + postfix]
         if self.options.get_safe("iconv", False):
             self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
             self.cpp_info.components["libsdl2"].system_libs = ["dl", "rt", "pthread"]
-            self.cpp_info.components["libsdl2"].requires.append("xorg::xorg")
             if self.options.alsa:
                 self.cpp_info.components["libsdl2"].requires.append("libalsa::libalsa")
             if self.options.pulse:
@@ -283,15 +300,15 @@ class SDLConan(ConanFile):
             if self.options.opengl:
                 self.cpp_info.components["libsdl2"].requires.append("opengl::opengl")
             if self.options.jack:
-                self._add_libraries_from_pc("jack")
+                self.cpp_info.components["libsdl2"].requires.append("jack::jack")
             if self.options.sndio:
-                self._add_libraries_from_pc("sndio")
+                self.cpp_info.components["libsdl2"].requires.append("sndio::sndio")
             if self.options.nas:
-                self.cpp_info.components["libsdl2"].libs.append("audio")
+                self.cpp_info.components["libsdl2"].requires.append("nas::nas")
             if self.options.esd:
-                self._add_libraries_from_pc("esound")
+                self.cpp_info.components["libsdl2"].requires.append("esd::esd")
             if self.options.directfb:
-                self._add_libraries_from_pc("directfb")
+                self.cpp_info.components["libsdl2"].requires.append("directfb::directfb")
             if self.options.video_rpi:
                 self.cpp_info.components["libsdl2"].libs.append("bcm_host")
                 self.cpp_info.components["libsdl2"].includedirs.extend([
@@ -302,8 +319,24 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].libdirs.append("/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].sharedlinkflags.append("-Wl,-rpath,/opt/vc/lib")
                 self.cpp_info.components["libsdl2"].exelinkflags.append("-Wl,-rpath,/opt/vc/lib")
-        elif self.settings.os == "Macos":
-            self.cpp_info.components["libsdl2"].frameworks = ["Cocoa", "Carbon", "IOKit", "CoreVideo", "CoreAudio", "AudioToolbox", "ForceFeedback"]
+            if self.options.wayland:
+                self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
+                self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
+                self.cpp_info.components["libsdl2"].requires.append("egl::egl")
+            if self.options.libunwind:
+                self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["libsdl2"].frameworks = [
+                "CoreVideo", "CoreAudio", "AudioToolbox",
+                "AVFoundation", "Foundation", "QuartzCore",
+            ]
+            if self.settings.os == "Macos":
+                self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
+            elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                self.cpp_info.components["libsdl2"].frameworks.extend([
+                    "UIKit", "OpenGLES", "GameController", "CoreMotion",
+                    "CoreGraphics", "CoreBluetooth", "CoreHaptics",
+                ])
             if tools.Version(self.version) >= "2.0.14":
                 self.cpp_info.components["libsdl2"].frameworks.append("Metal")
         elif self.settings.os == "Windows":

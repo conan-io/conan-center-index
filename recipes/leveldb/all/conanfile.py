@@ -35,6 +35,10 @@ class LevelDBCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     # FIXME: crc32, tcmalloc are also conditionally included in leveldb, but
     # there are no "official" conan packages yet; when those are available, we
     # can add similar with options for those

@@ -1,6 +1,9 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class GdbmConan(ConanFile):
@@ -34,41 +37,51 @@ class GdbmConan(ConanFile):
         "with_nls": True,
     }
 
+    exports_sources = "patches/**"
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("gdbm is not supported on Windows")
-
     def configure(self):
-        # Disabling NLS will render the dependency on libiconv and gettext moot
-        # as the configure script will no longer look for that
-        if not self.options.with_nls:
-            if self.options.with_libiconv:
-                raise ConanInvalidConfiguration(
-                    "with_libiconv=True when with_nls=False is not possible "
-                    "as it's NLS that requires libiconv")
-
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if not self.options.with_nls:
+            del self.options.with_libiconv
 
     def requirements(self):
-        if self.options.with_libiconv:
+        if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.with_readline:
             self.requires("readline/8.0")
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("gdbm is not supported on Windows")
+
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
         self.build_requires("flex/2.6.4")
+        self.build_requires("gnu-config/cci.20201022")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("gdbm-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "build-aux", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "build-aux", "config.guess"))
 
     def _configure_autotools(self):
         if self._autotools:
@@ -87,13 +100,13 @@ class GdbmConan(ConanFile):
         else:
             conf_args.extend([
                 "--disable-shared", "--enable-static",
-                "--with-pic" if self.options.fPIC else "--without-pic"]
+                "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic"]
             )
 
         if not self.options.with_nls:
             conf_args.extend(["--disable-nls"])
 
-        if self.options.with_libiconv:
+        if self.options.get_safe("with_libiconv"):
             conf_args.extend([
                 "--with-libiconv-prefix={}"
                 .format(self.deps_cpp_info["libiconv"].rootpath),
@@ -107,6 +120,7 @@ class GdbmConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             with tools.chdir("src"):
@@ -118,11 +132,7 @@ class GdbmConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        os.unlink(os.path.join(self.package_folder, "lib", "libgdbm.la"))
-        compat_la = os.path.join(self.package_folder, "lib",
-                                 "libgdbm_compat.la")
-        if (os.path.exists(compat_la)):
-            os.unlink(compat_la)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):

@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 import shutil
 
@@ -26,6 +27,8 @@ class LibVPXConan(ConanFile):
 
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration('Windows shared builds are not supported')
 
@@ -35,6 +38,10 @@ class LibVPXConan(ConanFile):
         if str(self.settings.arch) not in ['x86', 'x86_64']:
             for name in self._arch_options:
                 delattr(self.options, name)
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
+            raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
 
     def build_requirements(self):
         self.build_requires('yasm/1.3.0')
@@ -56,13 +63,14 @@ class LibVPXConan(ConanFile):
                 '--disable-examples',
                 '--disable-unit-tests',
                 '--disable-tools',
+                '--disable-docs',
                 '--enable-vp9-highbitdepth',
                 '--as=yasm']
         if self.options.shared:
             args.extend(['--disable-static', '--enable-shared'])
         else:
             args.extend(['--disable-shared', '--enable-static'])
-        if self.settings.os != 'Windows' and self.options.fPIC:
+        if self.settings.os != 'Windows' and self.options.get_safe("fPIC"):
             args.append('--enable-pic')
         if self.settings.build_type == "Debug":
             args.append('--enable-debug')
@@ -88,8 +96,14 @@ class LibVPXConan(ConanFile):
         build_os = str(self.settings.os)
         if build_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif build_os in ['Macos', 'iOS', 'watchOS', 'tvOS']:
-            os_name = 'darwin11'
+        elif tools.is_apple_os(build_os):
+            if self.settings.arch in ["x86", "x86_64"]:
+                os_name = 'darwin11'
+            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
+                os_name = 'darwin20'
+            else:
+                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
+                os_name = 'darwin'
         elif build_os == 'Linux':
             os_name = 'linux'
         elif build_os == 'Solaris':
@@ -97,14 +111,20 @@ class LibVPXConan(ConanFile):
         elif build_os == 'Android':
             os_name = 'android'
         target = "%s-%s-%s" % (arch, os_name, compiler)
-        if tools.cross_building(self) or self.settings.compiler == 'Visual Studio':
-            args.append('--target=%s' % target)
+        args.append('--target=%s' % target)
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
                     args.append('--disable-%s' % name)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
             env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
+            if self.settings.compiler == "Visual Studio":
+                # gen_msvs_vcxproj.sh doesn't like custom flags
+                env_build.cxxflags = []
+                env_build.flags = []
+            if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
+                # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
+                env_build.link_flags.append("-stdlib=libc++")
             env_build.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
         return env_build
 

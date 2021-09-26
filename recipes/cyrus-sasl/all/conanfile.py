@@ -1,8 +1,11 @@
 import glob
 import os
+import shutil
 
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.33.0"
 
 
 class CyrusSaslConan(ConanFile):
@@ -73,25 +76,35 @@ class CyrusSaslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1k")
         if self.options.with_postgresql:
-            self.requires("libpq/13.1")
+            self.requires("libpq/13.3")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
+            self.requires("libmysqlclient/8.0.25")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.34.0")
+            self.requires("sqlite3/3.36.0")
         if self.options.with_gssapi:
             raise ConanInvalidConfiguration("with_gssapi requires krb5 recipe, not yet available in CCI")
             self.requires("krb5/1.18.3")
 
+    def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config", "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config", "config.guess"))
 
     def _configure_autotools(self):
         if self._autotools is None:

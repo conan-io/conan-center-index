@@ -1,6 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
+
+required_conan_version = ">=1.33.0"
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -12,7 +15,7 @@ class JsonSchemaValidatorConan(ConanFile):
     topics = ("json-schema-validator", "modern-json",
               "schema-validation", "json")
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -32,6 +35,13 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("nlohmann_json/3.9.1")
+
+    def validate(self):
         version = tools.Version(self.version)
         min_vs_version = "16" if version < "2.1.0" else "14"
         min_cppstd = "17" if self.settings.compiler == "Visual Studio" and version < "2.1.0" else "11"
@@ -41,7 +51,7 @@ class JsonSchemaValidatorConan(ConanFile):
 
         compilers = {
             "Visual Studio": min_vs_version,
-            "gcc": "5",
+            "gcc": "5" if version < "2.1.0" else "4.9",
             "clang": "4",
             "apple-clang": "9"}
         min_version = compilers.get(str(self.settings.compiler))
@@ -53,13 +63,9 @@ class JsonSchemaValidatorConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires c++{} support. The current compiler {} {} does not support it.".format(
                     self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
 
-    def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -67,6 +73,8 @@ class JsonSchemaValidatorConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
+        if tools.Version(self.version) < "2.1.0":
+            self._cmake.definitions["NLOHMANN_JSON_DIR"] = ";".join(self.deps_cpp_info["nlohmann_json"].include_paths)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -76,13 +84,43 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(os.path.join("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"),  # This is not installed in 2.0.0 correctly
-                  src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        if tools.Version(self.version) < "2.1.0":
+            self.copy("json-schema.hpp",
+                      dst=os.path.join("include", "nlohmann"),
+                      src=os.path.join(self._source_subfolder, "src"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"nlohmann_json_schema_validator": "nlohmann_json_schema_validator::nlohmann_json_schema_validator"}
+        )
+
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"
         self.cpp_info.names["cmake_find_package_multi"] = "nlohmann_json_schema_validator"
+        self.cpp_info.builddirs.append(self._module_subfolder)
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.libs = ["json-schema-validator" if tools.Version(self.version) < "2.1.0" else "nlohmann_json_schema_validator"]

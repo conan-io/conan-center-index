@@ -1,0 +1,8 @@
+sources:
+  "2019.1":
+    sha256: 332586221ef53a615cc6595cc54643610b1f9f77acd2862860a1eda6f03de8b9
+    url: https://github.com/google/effcee/archive/refs/tags/v2019.1.zip
+patches:
+  "2019.1":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"

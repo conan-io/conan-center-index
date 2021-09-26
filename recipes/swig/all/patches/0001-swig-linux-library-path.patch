@@ -4,7 +4,7 @@
    }
  }
  
-+#if defined(HAVE_UNISTD_H)
++#if defined(HAVE_UNISTD_H) && !defined(_WIN32)
 +#include <libgen.h>
 +#include <unistd.h>
 +
@@ -36,7 +36,7 @@
      }
      if (Len(SWIG_LIB_WIN_UNIX) > 0)
        SwigLibWinUnix = NewString(SWIG_LIB_WIN_UNIX); // Unix installation path using a drive letter (for msys/mingw)
-+#elif defined(HAVE_UNISTD_H)
++#elif defined(HAVE_UNISTD_H) && !defined(_WIN32)
 +    SwigLib = get_exe_path();
  #else
      SwigLib = NewString(SWIG_LIB);

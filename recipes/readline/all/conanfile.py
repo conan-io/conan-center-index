@@ -66,6 +66,10 @@ class ReadLineConan(ConanFile):
             configure_args.append("bash_cv_wcwidth_broken=yes")
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # this should be really done automatically by the AutoToolsBuildEnvironment helper,
+            # but very unlikely old helper will be fixed any time soon
+            self._autotools.link_flags.extend(["-arch", "arm64"])
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 

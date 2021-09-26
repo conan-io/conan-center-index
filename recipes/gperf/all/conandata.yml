@@ -4,5 +4,5 @@ sources:
     sha256: "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2"
 patches:
   "3.1":
-    - patch_file: "all/0001-assert-exception-upstream-issue-2011.patch"
+    - patch_file: "patches/0001-remove-register-keyword.patch"
       base_path: "source_subfolder"

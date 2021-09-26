@@ -32,3 +32,9 @@ sources:
   "3.7.1":
     url: https://github.com/skypjack/entt/archive/refs/tags/v3.7.1.tar.gz
     sha256: fe3ce773c17797c0c57ffa97f73902854fcc8e7afc7e09bea373e0c64fa24a23
+  "3.8.0":
+    url: https://github.com/skypjack/entt/archive/refs/tags/v3.8.0.tar.gz
+    sha256: 71c8ff5a604e8e214571a8b2218dfeaf61be59e2fe2ff5b550b4810c37d4da3c
+  "3.8.1":
+    url: "https://github.com/skypjack/entt/archive/v3.8.1.tar.gz"
+    sha256: "a2b767f06bca67a73a4d71fb9ebb6ed823bb5146faad3c282b9dbbbdae1aa01b"

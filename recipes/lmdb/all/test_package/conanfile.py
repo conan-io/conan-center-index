@@ -5,10 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class LmdbTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
-
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
+    generators = "cmake"
 
     def build(self):
         cmake = CMake(self)

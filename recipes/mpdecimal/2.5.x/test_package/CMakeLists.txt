@@ -4,6 +4,7 @@ project(test_package)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
+# This is a non-official mpdecimal module!
 find_package(mpdecimal REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)

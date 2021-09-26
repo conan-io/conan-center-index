@@ -105,13 +105,17 @@ class MsdfgenConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "msdfgen"
         self.cpp_info.names["cmake_find_package_multi"] = "msdfgen"
 
+        includedir = os.path.join("include", "msdfgen")
+
         self.cpp_info.components["_msdfgen"].names["cmake_find_package"] = "msdfgen"
         self.cpp_info.components["_msdfgen"].names["cmake_find_package_multi"] = "msdfgen"
+        self.cpp_info.components["_msdfgen"].includedirs.append(includedir)
         self.cpp_info.components["_msdfgen"].libs = ["msdfgen"]
         self.cpp_info.components["_msdfgen"].defines = ["MSDFGEN_USE_CPP11"]
 
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package"] = "msdfgen-ext"
         self.cpp_info.components["msdfgen-ext"].names["cmake_find_package_multi"] = "msdfgen-ext"
+        self.cpp_info.components["msdfgen-ext"].includedirs.append(includedir)
         self.cpp_info.components["msdfgen-ext"].libs = ["msdfgen-ext"]
         self.cpp_info.components["msdfgen-ext"].requires = [
             "_msdfgen", "freetype::freetype",

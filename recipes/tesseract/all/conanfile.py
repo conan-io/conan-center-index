@@ -54,6 +54,11 @@ class TesseractConan(ConanFile):
             # do not enforce failure and allow user to build with system cairo, pango, fontconfig
             self.output.warn("*** Build with training is not yet supported, continue on your own")
 
+    def requirements(self):
+        self.requires("leptonica/1.81.0")
+        self.requires("libarchive/3.5.1")
+
+    def validate(self):
         # Check compiler version
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
@@ -70,14 +75,9 @@ class TesseractConan(ConanFile):
         elif compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
-    def requirements(self):
-        self.requires("leptonica/1.80.0")
-        self.requires("libarchive/3.5.1")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

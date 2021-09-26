@@ -1,4 +1,7 @@
 sources:
+  "13.4":
+    url: "https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz"
+    sha256: "59d7bc523e78570c549876fed297ec3e46dd307e90f5b1d22f49181191cf203e"
   "13.3":
     url: "https://ftp.postgresql.org/pub/source/v13.3/postgresql-13.3.tar.gz"
     sha256: "0b54a8a68dbfaf5dcddd89eb3922740143df50fbea02fefda8de743d8af99516"
@@ -48,3 +51,6 @@ patches:
       # url: https://www.postgresql.org/message-id/09A4B554-82B1-4536-B191-2461342EE0BB%40icloud.com
       # patch_source: https://www.postgresql.org/message-id/attachment/45881/0002-Use-return-instead-of-exit-in-configure.patch
       # patch_type: portability
+  "13.3":
+    - patch_file: "patches/13.3/001-Remove-thread-safety-check.patch"
+      base_path: "source_subfolder"

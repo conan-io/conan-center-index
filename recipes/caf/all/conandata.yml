@@ -8,6 +8,9 @@ sources:
   "0.18.2":
     url: "https://github.com/actor-framework/actor-framework/archive/0.18.2.tar.gz"
     sha256: "03837dbef73a13c3e4cac76c009d018f48d1d97b182277230f204984c9542ccc"
+  "0.18.5":
+    url: "https://github.com/actor-framework/actor-framework/archive/0.18.5.tar.gz"
+    sha256: "4c96f896f000218bb65890b4d7175451834add73750d5f33b0c7fe82b7d5a679"
 patches:
   "0.17.6":
     - patch_file: "patches/win_install.patch"

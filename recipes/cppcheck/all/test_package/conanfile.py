@@ -1,7 +1,9 @@
-from conans import ConanFile
+from conans import ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
+    settings = "os", "arch"
 
     def test(self):
-        self.run("cppcheck --version", run_environment=True)
+        if not tools.cross_building(self.settings):
+            self.run("cppcheck --version", run_environment=True)

@@ -44,4 +44,6 @@ If your issue is not appropriate for a public discussion, please contact us via 
 
 ### License
 
-[MIT](LICENSE)
+All the Conan recipes in this repository are distributed under the [MIT](LICENSE) license. There
+are other files, like patches or examples used to test the packages, that could use different licenses,
+for those files specific license and credit must be checked in the file itself.

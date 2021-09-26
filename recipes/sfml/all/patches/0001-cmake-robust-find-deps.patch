@@ -1,0 +1,79 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -161,7 +161,7 @@ endif()
+ # (except for stb_image)
+ # yes this is horrible, but GLOB_RECURSE sucks
+ sfml_set_option(SFML_USE_SYSTEM_DEPS FALSE BOOL "TRUE to use system dependencies, FALSE to use the bundled ones.")
+-if(SFML_USE_SYSTEM_DEPS)
++if(0)
+     if(SFML_INSTALL_XCODE_TEMPLATES)
+         message(FATAL_ERROR "XCode templates installation cannot be used with the SFML_USE_SYSTEM_DEPS option (the bundled frameworks are required.)")
+     endif()
+--- a/cmake/Macros.cmake
++++ b/cmake/Macros.cmake
+@@ -260,7 +260,7 @@ endmacro()
+ #                          [INCLUDE "OPENGL_INCLUDE_DIR"]
+ #                          [LINK "OPENGL_gl_LIBRARY"])
+ function(sfml_find_package)
+-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/")
++    list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+     list(GET ARGN 0 target)
+     list(REMOVE_AT ARGN 0)
+ 
+--- a/src/SFML/Audio/CMakeLists.txt
++++ b/src/SFML/Audio/CMakeLists.txt
+@@ -66,20 +66,18 @@ elseif(SFML_OS_ANDROID)
+ endif()
+ 
+ # find external libraries
+-sfml_find_package(OpenAL INCLUDE "OPENAL_INCLUDE_DIR" LINK "OPENAL_LIBRARY")
+-sfml_find_package(Vorbis INCLUDE "VORBIS_INCLUDE_DIRS" LINK "VORBIS_LIBRARIES")
+-sfml_find_package(FLAC INCLUDE "FLAC_INCLUDE_DIR" LINK "FLAC_LIBRARY")
++find_package(OpenAL REQUIRED)
++find_package(Vorbis REQUIRED Enc File CONFIG)
++find_package(FLAC REQUIRED CONFIG)
+ 
+ # avoids warnings in vorbisfile.h
+-target_compile_definitions(Vorbis INTERFACE "OV_EXCLUDE_STATIC_CALLBACKS")
+-target_compile_definitions(FLAC INTERFACE "FLAC__NO_DLL")
+ 
+ # define the sfml-audio target
+ sfml_add_library(sfml-audio
+                  SOURCES ${SRC} ${CODECS_SRC})
+ 
+ # setup dependencies
+-target_link_libraries(sfml-audio PRIVATE OpenAL)
++target_link_libraries(sfml-audio PRIVATE OpenAL::OpenAL)
+ 
+ if(SFML_OS_ANDROID)
+     target_link_libraries(sfml-audio PRIVATE android OpenSLES)
+@@ -87,4 +85,4 @@ endif()
+ 
+ target_link_libraries(sfml-audio
+                       PUBLIC sfml-system
+-                      PRIVATE Vorbis FLAC)
++                      PRIVATE Vorbis::vorbisenc Vorbis::vorbisfile FLAC::FLAC)
+--- a/src/SFML/CMakeLists.txt
++++ b/src/SFML/CMakeLists.txt
+@@ -40,7 +40,7 @@ elseif(SFML_OS_ANDROID)
+ endif()
+ 
+ # define the path of our additional CMake modules
+-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/")
++list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+ 
+ # set the output directory for SFML libraries
+ set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
+--- a/src/SFML/Graphics/CMakeLists.txt
++++ b/src/SFML/Graphics/CMakeLists.txt
+@@ -134,8 +134,8 @@ if(SFML_OS_ANDROID)
+     target_link_libraries(sfml-graphics PRIVATE z EGL GLESv1_CM)
+ endif()
+ 
+-sfml_find_package(Freetype INCLUDE "FREETYPE_INCLUDE_DIRS" LINK "FREETYPE_LIBRARY")
+-target_link_libraries(sfml-graphics PRIVATE Freetype)
++find_package(Freetype REQUIRED)
++target_link_libraries(sfml-graphics PRIVATE Freetype::Freetype)
+ 
+ # add preprocessor symbols
+ target_compile_definitions(sfml-graphics PRIVATE "STBI_FAILURE_USERMSG")

@@ -7,7 +7,7 @@ class RingSpanLiteConan(ConanFile):
     name = "ring-span-lite"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/ring-span-lite"
-    description = ("any lite - A ring_span type for C++98, C++11 and later in a \
+    description = ("ring-span lite - A ring_span type for C++98, C++11 and later in a \
                     single-file header-only library ")
     topics = ("conan", "cpp98", "cpp11", "cpp14", "cpp17", "ring-span")
     license = "BSL-1.0"

@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os, shutil
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -12,8 +12,16 @@ class OpenColorIOConan(ConanFile):
     homepage = "https://opencolorio.org/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "use_sse": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "use_sse": True
+    }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     topics = ("colors", "visual", "effects", "animation")
@@ -27,25 +35,26 @@ class OpenColorIOConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.use_sse
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         # TODO: add GLUT (needed for ociodisplay tool)
-        self.requires("lcms/2.11")
-        self.requires("yaml-cpp/0.6.3")
-
-    def validate(self):
-        if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Only x86/x86_64 supported")
+        self.requires("lcms/2.12")
+        self.requires("yaml-cpp/0.7.0")
+        self.requires("tinyxml/2.6.2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -55,16 +64,16 @@ class OpenColorIOConan(ConanFile):
 
         self._cmake.definitions["OCIO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["OCIO_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
         self._cmake.definitions["OCIO_BUILD_APPS"] = True
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
-        self._cmake.definitions["USE_EXTERNAL_YAML"] = True
-        self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+        self._cmake.definitions["OCIO_USE_BOOST_PTR"] = False
 
-        # FIXME: OpenColorIO uses old TinyXML which doesn't have Conan package.
-        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
-        self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
+        self._cmake.definitions["USE_EXTERNAL_YAML"] = True
+        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = True
+        self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
 
         self._cmake.configure()
         return self._cmake
@@ -84,7 +93,8 @@ class OpenColorIOConan(ConanFile):
         cm.install()
 
         if not self.options.shared:
-            self.copy("*", src=os.path.join(self.package_folder, "lib", "static"), dst="lib")
+            self.copy("*", src=os.path.join(self.package_folder,
+                      "lib", "static"), dst="lib")
             tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))

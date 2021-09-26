@@ -1,6 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from contextlib import contextmanager
+import contextlib
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibltcConan(ConanFile):
@@ -14,17 +16,21 @@ class LibltcConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
-        }
+    }
+
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _autotools = None
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -37,24 +43,28 @@ class LibltcConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "LD": "{} link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "LD": "{} link -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
                 }
                 with tools.environment_append(env):
                     yield
@@ -65,14 +75,15 @@ class LibltcConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = []
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
-            self._autotools.flags.append("-FS")
+            if tools.Version(self.settings.compiler.version) >= "12":
+                self._autotools.flags.append("-FS")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -96,5 +107,5 @@ class LibltcConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "ltc"
         self.cpp_info.libs = ["ltc"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

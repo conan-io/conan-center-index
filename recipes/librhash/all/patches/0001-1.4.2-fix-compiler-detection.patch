@@ -1,0 +1,29 @@
+Revert compiler detection to state of 1.3.9
+
+--- configure
++++ configure
+@@ -513,14 +513,9 @@
+   CC_TMP="$CC"
+   test -n "$OPT_CC" && OTHER_CC= || OTHER_CC="gcc cc"
+   for CC in "$CC_TMP" $OTHER_CC; do
+-    cc_name_tmp=
+     if run_cmd "$CC -v"; then
+       cc_name_tmp=$($CC -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
+-    elif run_cmd "$CC --version"; then
+-      cc_name_tmp=$($CC --version 2>&1 | head -n 1 | cut -d ' ' -f 1)
+-    fi
+-    if test -n "${cc_name_tmp}"; then
+-      if echo "$cc_name_tmp" | grep -q "gcc"; then
++      if test "$cc_name_tmp" = "gcc"; then
+         cc_name=$cc_name_tmp
+         start_check "$CC version"
+         cc_vendor=gnu
+@@ -544,7 +539,7 @@
+         finish_check "$cc_name $cc_version"
+         break
+       fi
+-      if echo "$cc_name_tmp" | grep -q "clang"; then
++      if $CC -v 2>&1 | grep -q "clang"; then
+         start_check "$CC version"
+         cc_vendor=clang
+         cc_version=$($CC -dumpversion 2>&1)

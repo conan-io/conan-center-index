@@ -1,7 +1,8 @@
-import os
-
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class CppSortConan(ConanFile):
@@ -51,9 +52,8 @@ class CppSortConan(ConanFile):
             self.output.warn(msg)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         # Install with CMake
@@ -74,6 +74,8 @@ class CppSortConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "cpp-sort"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpp-sort"
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.cxxflags = ["/permissive-"]
 
