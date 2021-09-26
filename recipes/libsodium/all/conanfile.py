@@ -88,43 +88,39 @@ class LibsodiumConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=build_type)
 
-    @property
-    def _android_abi_str(self):
-        return "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        yes_no = lambda v: "yes" if v else "no"
-        if self.settings.os in ("FreeBSD", "Linux"):
-            host = None
-        elif self._is_mingw:
-            host = "{}-w64-mingw32".format("i686" if self.settings.arch == "x86" else self.settings.arch)
-        elif tools.is_apple_os(self.settings.os):
-            host = "{}-apple-{}".format(self.settings.arch, "ios" if self.settings.os == "iOS" else "darwin")
-        elif self.settings.os == "Android":
-            host = "%s-linux-%s" % (tools.to_android_abi(self.settings.arch), self._android_abi_str)
+
+        # TODO: maybe remove this manual host logic? Is is not handled by Autotools helper already?
+        host = None
+        if self.settings.os == "Android":
+            android_id_str = "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
+            host = "{}-linux-{}".format(tools.to_android_abi(self.settings.arch), android_id_str)
         elif self.settings.os == "Neutrino":
-            neutrino_archs = {"x86_64":"x86_64-pc", "x86":"i586-pc", "armv7":"arm-unknown", "armv8": "aarch64-unknown"}
+            neutrino_archs = {
+                "x86_64": "x86_64-pc",
+                "x86": "i586-pc",
+                "armv7": "arm-unknown",
+                "armv8": "aarch64-unknown",
+            }
             if self.settings.os.version == "7.0" and str(self.settings.arch) in neutrino_archs:
                 host = "{}-nto-qnx7.0.0".format(neutrino_archs[str(self.settings.arch)])
                 if self.settings.arch == "armv7":
                     host += "eabi"
-            else:
-                raise ConanInvalidConfiguration("Unsupported arch or Neutrino version for libsodium: {} {}".format(self.settings.os, self.settings.arch))
         elif self.settings.os == "Emscripten":
-            host = None
             self.output.warn("os=Emscripten is not tested/supported by this recipe")
             # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
-        else:
-            raise ConanInvalidConfiguration("Unsupported os for libsodium: {}".format(self.settings.os))
+
+        yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-soname-versions={}".format(yes_no(self.options.use_soname)),
             "--enable-pie={}".format(yes_no(self.options.PIE)),
         ]
+
         self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host)
         return self._autotools
 
