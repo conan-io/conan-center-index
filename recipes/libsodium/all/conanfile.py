@@ -70,10 +70,11 @@ class LibsodiumConan(ConanFile):
                 raise ConanInvalidConfiguration("Unsupported Visual Studio version: {}".format(self.settings.compiler.version))
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self._is_mingw:
-            self.build_requires("libtool/2.4.6")
+        if self.settings.compiler != "Visual Studio":
+            if self._is_mingw:
+                self.build_requires("libtool/2.4.6")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
