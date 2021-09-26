@@ -92,6 +92,8 @@ class LibsodiumConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self._is_mingw:
+            self._autotools.libs.append("ssp")
 
         # TODO: maybe remove this manual host logic? Is it not handled by Autotools helper already?
         host = None
@@ -157,4 +159,6 @@ class LibsodiumConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["SODIUM_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs.append("pthread")
+        if self._is_mingw:
+            self.cpp_info.system_libs.append("ssp")
