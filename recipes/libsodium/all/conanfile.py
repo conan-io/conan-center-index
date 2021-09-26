@@ -44,6 +44,14 @@ class LibsodiumConan(ConanFile):
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
+    @property
+    def _msvc_sln_folder(self):
+        return {
+            "14": "vs2015",
+            "15": "vs2017",
+            "16": "vs2019",
+        }.get(str(self.settings.compiler.version), None)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -58,6 +66,8 @@ class LibsodiumConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.options.shared and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with MT(d) runtime")
+            if not self._msvc_sln_folder:
+                raise ConanInvalidConfiguration("Unsupported Visual Studio version: {}".format(self.settings.compiler.version))
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
@@ -69,33 +79,14 @@ class LibsodiumConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @property
-    def _msvc_configuration(self):
-        configuration = ""
-        if self.options.shared:
-            configuration += "Dyn"
-        else:
-            configuration += "Static"
-        build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
-        configuration += build_type
-        return configuration
-
-    @property
-    def _msvc_sln_folder(self):
-        folder = {
-            "14": "vs2015",
-            "15": "vs2017",
-            "16": "vs2019",
-        }.get(str(self.settings.compiler.version), None)
-        if not folder:
-            raise ConanInvalidConfiguration("Unsupported msvc version: {}".format(self.settings.compiler.version))
-        return folder
-
     def _build_msvc(self):
         sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._msvc_sln_folder, "libsodium.sln")
-
+        build_type = "{}{}".format(
+            "Dyn" if self.options.shared else "Static",
+            "Debug" if self.settings.build_type == "Debug" else "Release"
+        )
         msbuild = MSBuild(self)
-        msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=self._msvc_configuration)
+        msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=build_type)
 
     @property
     def _android_abi_str(self):
