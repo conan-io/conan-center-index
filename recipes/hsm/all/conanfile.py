@@ -13,6 +13,7 @@ class HsmConan(ConanFile):
     requires = "boost/1.72.0"
     no_copy_source = True
     generators = "cmake"
+    settings = "os", "arch", "build_type", "compiler"
 
     @property
     def _source_subfolder(self):
