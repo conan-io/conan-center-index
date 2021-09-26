@@ -3,6 +3,6 @@
 
 int main()
 {
-    std::cout << "Bincrafters\n";
+    std::cout << "conan-center-index\n";
     return EXIT_SUCCESS;
 }
