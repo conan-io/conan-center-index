@@ -65,10 +65,6 @@ class FaacConan(ConanFile):
                 args.append("--enable-shared")
             else:
                 args.append("--enable-static")
-            if self.settings.os != "Windows" and self.options.get_safe('fPIC'):
-                args.append("--enable-pic")
-            if self.settings.build_type == "Debug":
-                args.append("--enable-debug")
             args.append("--{}-mp4v2".format("with" if self.options.with_mp4 else "without"))
             args.append("--{}-drm".format("enable" if self.options.drm else "disable"))
             self._autotools.configure(args=args)
@@ -85,7 +81,7 @@ class FaacConan(ConanFile):
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         with tools.chdir(os.path.join(self.build_folder, self._source_subfolder)):
-            autotools.make(vars=vars)
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
