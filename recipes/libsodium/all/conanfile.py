@@ -54,14 +54,16 @@ class LibsodiumConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             if self.options.shared and "MT" in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Cannot build shared libsodium libraries with MT(d) runtime")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        if self._is_mingw:
+            self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
