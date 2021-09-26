@@ -72,6 +72,7 @@ class MagnumIntegrationConan(ConanFile):
         if self.options.with_bullet:
             self.requires("bullet3/3.17")
         if self.options.with_dart:
+            # FIXME: Add 'dart' requirement
             raise ConanInvalidConfiguration("DART library is not available in ConanCenter (yet)")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
@@ -80,6 +81,7 @@ class MagnumIntegrationConan(ConanFile):
         if self.options.with_imgui:
             self.requires("imgui/1.84.2")
         if self.options.with_ovr:
+            # FIXME: Add 'ovr' requirement
             raise ConanInvalidConfiguration("OVR library is not available in ConanCenter (yet)")
 
     def _configure_cmake(self):
