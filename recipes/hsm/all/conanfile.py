@@ -5,7 +5,6 @@ required_conan_version = ">=1.32.1"
 
 class HsmConan(ConanFile):
     name = "hsm"
-    version = "1.4.7"
     license = "MIT"
     author = "Erik Zenker erikzenker@hotmail.com"
     url = "https://github.com/erikzenker/hsm.git"
