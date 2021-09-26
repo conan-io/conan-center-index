@@ -195,7 +195,7 @@ class MagnumConan(ConanFile):
             self.options.shared_plugins = False
             self.options.target_gl = "gles3"
 
-            self.options.sdl2_application = True  # FIXME: Fails to build. Use emscripten-port?)
+            self.options.sdl2_application = True
             
             self.options.gl_info = False
 
