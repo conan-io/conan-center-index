@@ -81,6 +81,8 @@ class RapidcheckConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.options.enable_gmock and not self.deps_cpp_info["gtest"].build_gmock:
+            raise ConanInvalidConfiguration("The option `rapidcheck:enable_gmock` requires gtest:build_gmock=True`")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
