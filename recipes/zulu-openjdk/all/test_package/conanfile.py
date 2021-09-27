@@ -1,4 +1,4 @@
-from conans import ConanFile
+from conans import ConanFile, tools
 from six import StringIO
 
 
@@ -10,7 +10,10 @@ class TestPackage(ConanFile):
     def test(self):
         test_cmd = ['java', '--version']
         output = StringIO()
-        self.run(test_cmd, output=output)
+        if tools.cross_building(self):
+            self.run("java --version", run_environment=True)
+        else:
+            self.run(test_cmd, output=output)
         version_info = output.getvalue()
         if "Zulu" in version_info:
             pass
