@@ -124,22 +124,22 @@ class RapidcheckConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "rapidcheck"
         self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
         
-        self.cpp_info.components["core"].set_property("cmake_target_name", "rapidcheck")
-        self.cpp_info.components["core"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["core"].set_property("cmake_build_modules", [self._module_file_rel_path])
-        self.cpp_info.components["core"].libs = ["rapidcheck"]
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
+        self.cpp_info.components["rapidcheck_rapidcheck"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
         version = self.version[4:]
         if tools.Version(version) < "20201218":
             if self.options.enable_rtti:
-                self.cpp_info.components["core"].defines.append("RC_USE_RTTI")
+                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_USE_RTTI")
         else:
             if not self.options.enable_rtti:
-                self.cpp_info.components["core"].defines.append("RC_DONT_USE_RTTI")
+                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
                 
         if self.options.enable_catch:
-            self.cpp_info.components["rapidcheck_catch"].requires = ["core", "catch2::catch2"]
+            self.cpp_info.components["rapidcheck_catch"].requires = ["rapidcheck_rapidcheck", "catch2::catch2"]
         if self.options.enable_gmock:
-            self.cpp_info.components["rapidcheck_gmock"].requires = ["core", "gtest::gtest"]
+            self.cpp_info.components["rapidcheck_gmock"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
         if self.options.enable_gtest:
-            self.cpp_info.components["rapidcheck_gtest"].requires = ["core", "gtest::gtest"]
+            self.cpp_info.components["rapidcheck_gtest"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
         
