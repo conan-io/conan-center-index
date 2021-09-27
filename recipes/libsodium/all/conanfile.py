@@ -95,23 +95,7 @@ class LibsodiumConan(ConanFile):
         if self._is_mingw:
             self._autotools.libs.append("ssp")
 
-        # TODO: maybe remove this manual host logic? Is it not handled by Autotools helper already?
-        host = None
-        if self.settings.os == "Android":
-            android_id_str = "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
-            host = "{}-linux-{}".format(tools.to_android_abi(self.settings.arch), android_id_str)
-        elif self.settings.os == "Neutrino":
-            neutrino_archs = {
-                "x86_64": "x86_64-pc",
-                "x86": "i586-pc",
-                "armv7": "arm-unknown",
-                "armv8": "aarch64-unknown",
-            }
-            if self.settings.os.version == "7.0" and str(self.settings.arch) in neutrino_archs:
-                host = "{}-nto-qnx7.0.0".format(neutrino_archs[str(self.settings.arch)])
-                if self.settings.arch == "armv7":
-                    host += "eabi"
-        elif self.settings.os == "Emscripten":
+        if self.settings.os == "Emscripten":
             self.output.warn("os=Emscripten is not tested/supported by this recipe")
             # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
 
@@ -123,7 +107,7 @@ class LibsodiumConan(ConanFile):
             "--enable-pie={}".format(yes_no(self.options.PIE)),
         ]
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
