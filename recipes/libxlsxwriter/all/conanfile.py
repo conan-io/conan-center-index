@@ -24,7 +24,7 @@ class LibxlsxwriterConan(ConanFile):
         "tmpfile": False,
         "md5": "openwall",
         "fmemopen": False,
-        "dtoa": False,        
+        "dtoa": False,
     }
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
