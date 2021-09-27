@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from six import StringIO
+from io import StringIO
 
 
 class TestPackage(ConanFile):
@@ -9,16 +9,13 @@ class TestPackage(ConanFile):
         pass # nothing to build, but tests should not warn
 
     def test(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if tools.cross_building(self):
             return
-        # if tools.cross_building(self):
-        #     return
             # OK, this needs some explanation
             # You basically do not crosscompile that package, never
             # But C3I does, Macos x86_64 to M1,
             # and this is why there is some cross compilation going on
             # The test will not work in that environment, so .... don't test
-
         test_cmd = ['java', '--version']
         output = StringIO()
         self.run(test_cmd, output=output, run_environment=True)
