@@ -288,14 +288,14 @@ class AwsSdkCppConan(ConanFile):
                 }
             }
     default_options = {key: False for key in options.keys()}
-    default_options["fPIC"] = True
     default_options["access-management"] = True
+    default_options["fPIC"] = True
     default_options["identity-management"] = True
-    default_options["queues"] = True
-    default_options["transfer"] = True
-    default_options["s3-encryption"] = True
-    default_options["text-to-speech"] = True
     default_options["monitoring"] = True
+    default_options["queues"] = True
+    default_options["s3-encryption"] = True
+    default_options["transfer"] = True
+    default_options["text-to-speech"] = True
     _internal_requirements = {
             "access-management": ["iam", "cognito-identity"],
             "identity-management": ["cognito-identity", "sts"],
