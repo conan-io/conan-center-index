@@ -94,9 +94,9 @@ class RapidcheckConan(ConanFile):
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"rapidcheck": "rapidcheck::rapidcheck", 
-             "rapidcheck_catch":"rapidcheck::catch", 
-             "rapidcheck_gmock": "rapidcheck::gmock", 
-             "rapidcheck_gtest": "rapidcheck::gtest"}
+             "rapidcheck_catch":"rapidcheck::rapidcheck_catch", 
+             "rapidcheck_gmock": "rapidcheck::rapidcheck_gmock", 
+             "rapidcheck_gtest": "rapidcheck::rapidcheck_gtest"}
         )
 
     @staticmethod
@@ -137,12 +137,9 @@ class RapidcheckConan(ConanFile):
                 self.cpp_info.components["core"].defines.append("RC_DONT_USE_RTTI")
                 
         if self.options.enable_catch:
-            self.cpp_info.components["core"].requires.append("catch2::catch2")
-            self.cpp_info.components["catch"].requires = ["core", "catch2::catch2"]
+            self.cpp_info.components["rapidcheck_catch"].requires = ["core", "catch2::catch2"]
         if self.options.enable_gmock:
-            self.cpp_info.components["core"].requires.append("gtest::gtest")
-            self.cpp_info.components["gmock"].requires = ["core"]
+            self.cpp_info.components["rapidcheck_gmock"].requires = ["core", "gtest::gtest"]
         if self.options.enable_gtest:
-            self.cpp_info.components["core"].requires.append("gtest::gtest")
-            self.cpp_info.components["gtest"].requires = ["core"]
+            self.cpp_info.components["rapidcheck_gtest"].requires = ["core", "gtest::gtest"]
         
