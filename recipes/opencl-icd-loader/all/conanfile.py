@@ -26,6 +26,8 @@ class OpenclIcdLoaderConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.disable_openclon12
 
     def configure(self):
         if self.options.shared:
@@ -48,7 +50,8 @@ class OpenclIcdLoaderConan(ConanFile):
             self._cmake.definitions["USE_DYNAMIC_VCXX_RUNTIME"] = str(self.settings.compiler.runtime).startswith("MD")
         self._cmake.definitions["OPENCL_ICD_LOADER_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["OPENCL_ICD_LOADER_BUILD_TESTING"] = False
-        self._cmake.definitions["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = self.options.disable_openclon12
+        if self.settings.os == "Windows":
+            self._cmake.definitions["OPENCL_ICD_LOADER_DISABLE_OPENCLON12"] = self.options.disable_openclon12
         self._cmake.configure()
         return self._cmake
 
