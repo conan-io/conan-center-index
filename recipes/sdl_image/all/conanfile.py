@@ -85,7 +85,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         self.requires("zlib/1.2.11")
 
     def source(self):
