@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake
 from conans import tools
-import os
+
 
 class UnityConan(ConanFile):
     name = "unity"
@@ -35,7 +35,8 @@ class UnityConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True,
+                  destination=self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -51,17 +52,20 @@ class UnityConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        # TODO - check if we can remove this.
+        # need to add these manually, since otherwise includes within other
+        # tools like cmock or cexception won't be able to find them properly.
         self.copy("*.h", dst="include", src=(self._source_subfolder + "/src"))
-        self.copy("*.h", dst="include", src=(self._source_subfolder + "/extras/fixture/src"))
-        self.copy("*.h", dst="include", src=(self._source_subfolder + "/extras/memory/src"))
-        self.copy("*.rb", dst="auto", src=(self._source_subfolder + "/auto"))
+        self.copy("*.h", dst="include",
+                  src=(self._source_subfolder + "/extras/fixture/src"))
+        self.copy("*.h", dst="include",
+                  src=(self._source_subfolder + "/extras/memory/src"))
+        self.copy("*.rb", dst="bin", src=(self._source_subfolder + "/auto"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "unity"
         self.cpp_info.names["cmake_find_package_multi"] = "unity"
-        self.cpp_info.bindirs = ['auto']
+        self.cpp_info.bindirs = ['bin']
