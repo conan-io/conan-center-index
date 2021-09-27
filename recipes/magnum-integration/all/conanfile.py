@@ -38,6 +38,7 @@ class MagnumIntegrationConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
+    short_paths = True
     _cmake = None
 
     @property
