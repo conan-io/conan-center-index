@@ -12,11 +12,12 @@ class TestPackage(ConanFile):
         pass  # nothing to build, but tests should not warn
 
     def test(self):
-        output = StringIO()
-        self.run("java --version", output=output, run_environment=True)
-        print(output.getvalue)
-        version_info = output.getvalue()
-        if "openjdk" in version_info:
-            pass
-        else:
-            raise ConanException("java call seems not use the openjdk bin")
+        if not tools.cross_building(self):
+            output = StringIO()
+            self.run("java --version", output=output, run_environment=True)
+            print(output.getvalue)
+            version_info = output.getvalue()
+            if "openjdk" in version_info:
+                pass
+            else:
+                raise ConanException("java call seems not use the openjdk bin")
