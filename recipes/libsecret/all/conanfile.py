@@ -52,10 +52,8 @@ class LibsecretConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.options.with_libgcrypt and self.settings.os != "Linux":
-            self.output.warn(
-                "gcrypt is only available on Linux. Option will be ignored."
-            )
+        if self.settings.os != "Linux":
+            # libgcrypt recipe is currently only available on Linux
             del self.options.with_libgcrypt
 
         del self.settings.compiler.libcxx
