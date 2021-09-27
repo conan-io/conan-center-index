@@ -3,13 +3,16 @@ from six import StringIO
 
 
 class TestPackage(ConanFile):
+    settings = "os", "arch"
 
     def build(self):
         pass # nothing to build, but tests should not warn
 
     def test(self):
-        if tools.cross_building(self):
-            return
+        if self.settings.os == "Macos" and self.arch == "armv8":
+            return 
+        # if tools.cross_building(self):
+        #     return
             # OK, this needs some explanation
             # You basically do not crosscompile that package, never
             # But C3I does, Macos x86_64 to M1,
