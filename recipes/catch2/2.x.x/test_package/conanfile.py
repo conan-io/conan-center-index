@@ -10,6 +10,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["WITH_MAIN"] = self.options["catch2"].with_main
+        cmake.definitions["WITH_BENCHMARK"] = self.options["catch2"].with_main and self.options["catch2"].with_benchmark
         cmake.configure()
         cmake.build()
 
@@ -19,3 +20,5 @@ class TestPackageConan(ConanFile):
 
             if self.options["catch2"].with_main:
                 self.run(os.path.join("bin", "standalone"), run_environment=True)
+                if self.options["catch2"].with_benchmark:
+                    self.run(os.path.join("bin", "benchmark"), run_environment=True)
