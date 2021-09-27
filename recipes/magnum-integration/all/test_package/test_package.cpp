@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <assert.h>
 
 #ifdef WITH_BULLET
     #include "Magnum/BulletIntegration/Integration.h"
