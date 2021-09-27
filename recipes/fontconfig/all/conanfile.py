@@ -77,8 +77,8 @@ class FontconfigConan(ConanFile):
         autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
-            "--enable-static={}".format(yes_no(self.options.shared)),
-            "--enable-shared={}".format(yes_no(not self.options.shared)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-docs",
             "--disable-nls",
             "--sysconfdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "etc"))),
