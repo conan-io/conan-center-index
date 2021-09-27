@@ -55,7 +55,7 @@ class LibxlsxwriterConan(ConanFile):
         self.requires("minizip/1.2.11")
         self.requires("zlib/1.2.11")
         if self.options.md5 == "openssl":
-            self.requires("openssl/1.1.1c")
+            self.requires("openssl/1.1.1l")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
