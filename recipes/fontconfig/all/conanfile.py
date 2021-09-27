@@ -153,6 +153,7 @@ class FontconfigConan(ConanFile):
             with tools.run_environment(self):
                 autotools = self._configure_autotools()
                 autotools.install()
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"), "*.conf")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.def")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
