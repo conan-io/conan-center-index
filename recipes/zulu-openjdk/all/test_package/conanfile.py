@@ -9,8 +9,8 @@ class TestPackage(ConanFile):
         pass # nothing to build, but tests should not warn
 
     def test(self):
-        if self.settings.os == "Macos" and self.arch == "armv8":
-            return 
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            return
         # if tools.cross_building(self):
         #     return
             # OK, this needs some explanation
