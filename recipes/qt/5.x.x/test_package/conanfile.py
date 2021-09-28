@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "qt", "cmake", "cmake_find_package_multi", "qmake"
 
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
