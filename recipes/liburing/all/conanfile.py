@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
-import subprocess
 import re
 
 required_conan_version = ">=1.33.0"
@@ -12,30 +11,29 @@ class LiburingConan(ConanFile):
     license = "GPL-2.0-or-later"
     homepage = "https://github.com/axboe/liburing"
     url = "https://github.com/conan-io/conan-center-index"
+    description = ("helpers to setup and teardown io_uring instances, and also a simplified interface for "
+                   "applications that don't need (or want) to deal with the full kernel side implementation.")
     settings = "os", "compiler", "build_type", "arch"
-    description = """helpers to setup and
-teardown io_uring instances, and also a simplified interface for
-applications that don't need (or want) to deal with the full kernel
-side implementation."""
     topics = ("asynchronous-io", "async", "kernel")
 
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
     }
-
     default_options = {
         "fPIC": True,
         "shared": False,
     }
-
-    exports_sources = ["patches/*"]
 
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _required_glic_version(self):
+        return "2.27"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -49,20 +47,26 @@ side implementation."""
         del self.settings.compiler.cppstd
 
     def _get_glibc_version(self):
-        with subprocess.Popen(["ldd", "--version"], stdout=subprocess.PIPE) as p:
-            output = p.stdout.read().decode("utf-8")
-            m = re.search(r'[0-9]+\.[0-9]+', output)
-            return tools.Version(m.group(0))
+        from six import StringIO
+        buffer = StringIO()
+        ldd = tools.which("ldd")
+        if not ldd:
+            raise ConanException("Could not find 'ldd' installed. Please, check your PATH.")
+        self.run("{} --version".format(ldd), output=buffer)
+        output = buffer.getvalue()
+        match = re.search(r'[0-9]+\.[0-9]+', output)
+        if not match:
+            raise ConanException("Could not parse 'ldd' version. Please, check 'ldd' command.")
+        return tools.Version(match.group(0))
 
     def validate(self):
         # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "liburing is supported only on linux")
+            raise ConanInvalidConfiguration("liburing is supported only on linux")
 
-        if tools.Version(self.version) >= "2.1" and self._get_glibc_version() < "2.27":
-            raise ConanInvalidConfiguration(
-                "glibc 2.27 or higher required to build this package")
+        if tools.Version(self.version) >= "2.1" and self._get_glibc_version() < self._required_glic_version:
+            raise ConanInvalidConfiguration("glibc {} or higher required to build this package"
+                                            .format(self._required_glic_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
