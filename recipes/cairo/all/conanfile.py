@@ -176,7 +176,16 @@ class CairoConan(ConanFile):
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       "#if HAVE_UNISTD_H", "#ifdef HAVE_UNISTD_H")
 
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
+            tools.touch(os.path.join("boilerplate", "Makefile.am.features"))
+            tools.touch(os.path.join("src", "Makefile.am.features"))
+            tools.touch("ChangeLog")
+
+            with tools.environment_append({"GTKDOCIZE": "echo"}):
+                self.run(
+                    "{} -fiv".format(tools.get_env("AUTORECONF")),
+                    run_environment=True,
+                    win_bash=tools.os_info.is_windows,
+                )
         autotools = self._configure_autotools()
         autotools.make()
 
