@@ -1135,6 +1135,15 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtxmlpatterns:
              _create_module("XmlPatterns", ["Network"])
+        
+        if self.options.qtactiveqt:
+            _create_module("AxBase", ["Gui", "Widgets"])
+            self.cpp_info.components["qtAxBase"].system_libs.extend(["ole32", "oleaut32", "user32", "gdi32", "advapi32"])
+            if self.settings.compiler == "gcc":
+                self.cpp_info.components["qtAxBase"].system_libs.append("uuid")
+            _create_module("AxContainer", ["Core", "Gui", "Widgets", "AxBase"])
+            _create_module("AxServer", ["Core", "Gui", "Widgets", "AxBase"])
+            self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
 
         if not self.options.shared:
             if self.settings.os == "Windows":
