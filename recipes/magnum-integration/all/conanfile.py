@@ -47,25 +47,6 @@ class MagnumIntegrationConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
-                              "")
-        # Casing
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
-                              "find_package(GLM REQUIRED)",
-                              "find_package(glm REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
-                              "GLM::GLM",
-                              "glm::glm")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "find_package(ImGui REQUIRED Sources)",
-                              "find_package(imgui REQUIRED Sources)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "ImGui::ImGui",
-                              "imgui::imgui")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "ImGui::Sources",
-                              "") 
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -116,6 +97,26 @@ class MagnumIntegrationConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
+                              "")
+        # Casing
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
+                              "find_package(GLM REQUIRED)",
+                              "find_package(glm REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
+                              "GLM::GLM",
+                              "glm::glm")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+                              "find_package(ImGui REQUIRED Sources)",
+                              "find_package(imgui REQUIRED Sources)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+                              "ImGui::ImGui",
+                              "imgui::imgui")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+                              "ImGui::Sources",
+                              "")
+
     def build(self):
         self._patch_sources()
 
@@ -142,7 +143,7 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["bullet"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "bullet3::bullet3"]
 
         if self.options.with_dart:
-            pass
+            raise Exception("Recipe doesn't define this component 'dart'. Please contribute it")
 
         if self.options.with_eigen:
             self.cpp_info.components["eigen"].names["cmake_find_package"] = "Eigen"
@@ -162,4 +163,4 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["imgui"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "imgui::imgui"]
 
         if self.options.with_ovr:
-            pass
+            raise Exception("Recipe doesn't define this component 'ovr'. Please contribute it")
