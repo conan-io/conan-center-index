@@ -175,7 +175,7 @@ class MagnumConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+        self._cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["BUILD_TESTS"] = False
