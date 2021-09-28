@@ -16,7 +16,6 @@ class LiburingConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     topics = ("asynchronous-io", "async", "kernel")
 
-    settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
