@@ -132,6 +132,7 @@ class QtConan(ConanFile):
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
         
+    @property    
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
