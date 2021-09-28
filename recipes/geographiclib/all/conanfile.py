@@ -27,6 +27,8 @@ class GeographiclibConan(ConanFile):
         "tools": True
     }
 
+    build_requires = ["cmake/3.21.3"]
+
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
