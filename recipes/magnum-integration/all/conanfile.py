@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 
 required_conan_version = ">=1.33.0"
@@ -143,7 +143,7 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["bullet"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "bullet3::bullet3"]
 
         if self.options.with_dart:
-            raise Exception("Recipe doesn't define this component 'dart'. Please contribute it")
+            raise ConanException("Recipe doesn't define this component 'dart'. Please contribute it")
 
         if self.options.with_eigen:
             self.cpp_info.components["eigen"].names["cmake_find_package"] = "Eigen"
@@ -163,4 +163,4 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["imgui"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "imgui::imgui"]
 
         if self.options.with_ovr:
-            raise Exception("Recipe doesn't define this component 'ovr'. Please contribute it")
+            raise ConanException("Recipe doesn't define this component 'ovr'. Please contribute it")
