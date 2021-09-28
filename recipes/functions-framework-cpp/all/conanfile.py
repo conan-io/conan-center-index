@@ -107,12 +107,13 @@ class FunctionsFrameworkCppConan(ConanFile):
         #     https://github.com/GoogleCloudPlatform/functions-framework-cpp/issues/331
         # create this manually:
         if self.settings.os != "Windows" and self.options.shared:
+            src, dst = (".so.1.0.0", ".so") if self.settings.os != "Macos" else (".1.0.0.dylib", ".dylib")
             os.link(
                 os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp.so.1.0"
+                    self.package_folder, "lib", "libfunctions_framework_cpp" + src
                 ),
                 os.path.join(
-                    self.package_folder, "lib", "libfunctions_framework_cpp.so"
+                    self.package_folder, "lib", "libfunctions_framework_cpp" + dst
                 ),
             )
 
