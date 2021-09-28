@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
-            not tools.cross_building(self.settings) and\
+            not tools.cross_building(self) and\
             not tools.os_info.is_macos and\
             not self._is_mingw()
 
