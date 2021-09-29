@@ -71,7 +71,7 @@ class AprConan(ConanFile):
         if self._autotools:
             return self._autotools
         if (self.settings.compiler == "apple-clang" and
-            tools.Version(self.settings.compiler.version) == "12" and
+            tools.Version(self.settings.compiler.version) >= "12" and
             self.version == "1.7.0"):
 
             with tools.chdir( self._source_subfolder ):
