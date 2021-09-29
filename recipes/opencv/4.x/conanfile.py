@@ -99,6 +99,10 @@ class OpenCVConan(ConanFile):
     def _has_with_tiff_option(self):
         return self.settings.os != "iOS"
 
+    @property
+    def _protobuf_version(self):
+        return "protobuf/3.17.1"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -163,7 +167,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires("protobuf/3.17.1")
+            self.requires(self._protobuf_version)
         if self.options.with_ade:
             self.requires("ade/0.1.1f")
 
@@ -178,7 +182,7 @@ class OpenCVConan(ConanFile):
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):
-            self.build_requires("protobuf/3.17.1")
+            self.build_requires(self._protobuf_version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0],
