@@ -22,7 +22,7 @@ ua_generate_nodeset_and_datatypes(
     FILE_CSV "${PROJECT_SOURCE_DIR}/FooFltModel.csv"
     FILE_BSD "${PROJECT_SOURCE_DIR}/FooFlt.Types.bsd"
     OUTPUT_DIR "${GENERATE_OUTPUT_DIR}"
-    #NAMESPACE_IDX 2  # This namespace index must match the order in which you are adding the nodeset in the source code
+    NAMESPACE_IDX 2  # This namespace index must match the order in which you are adding the nodeset in the source code
     #NAMESPACE_MAP "2:http://opcfoundation.org/UA/DI/"
     NAMESPACE_MAP "2:https://new.foo.com/zebra-compression/flattening-and-subspacefolding/UA/"
     FILE_NS "${PROJECT_SOURCE_DIR}/FooFlt.NodeSet2.xml"
