@@ -47,7 +47,7 @@ class BisonConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
         if self.settings.os != "Windows":
             self.build_requires("flex/2.6.4")
 

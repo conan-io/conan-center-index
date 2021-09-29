@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -11,9 +12,7 @@ class GTestConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
     license = "BSD-3-Clause"
-    topics = ("gtest", "testing", "google-testing", "unit-test")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    topics = ("testing", "google-testing", "unit-test")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,7 +30,9 @@ class GTestConan(ConanFile):
         "debug_postfix": "d",
         "hide_symbols": False,
     }
-    _cmake = None
+
+    exports_sources = "CMakeLists.txt", "patches/*"
+    generators = "cmake"
 
     @property
     def _source_subfolder(self):
@@ -69,10 +70,6 @@ class GTestConan(ConanFile):
                 "apple-clang": "9.1"
             }
 
-    @property
-    def _postfix(self):
-        return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -88,6 +85,9 @@ class GTestConan(ConanFile):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("gtest:shared=True with compiler=\"Visual Studio\" is not compatible with compiler.runtime=MT/MTd")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -103,24 +103,26 @@ class GTestConan(ConanFile):
                 raise ConanInvalidConfiguration("{0} requires {1} {2}. The current compiler is {1} {3}.".format(
                     self.name, self.settings.compiler, min_version, self.settings.compiler.version))
 
+    def package_id(self):
+        del self.info.options.no_main
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
+        cmake = CMake(self)
         if self.settings.build_type == "Debug":
-            self._cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
-        if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            self._cmake.definitions["gtest_force_shared_crt"] = "MD" in str(self.settings.compiler.runtime)
-        self._cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
+            cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
+        if self.settings.compiler == "Visual Studio":
+            cmake.definitions["gtest_force_shared_crt"] = "MD" in self.settings.compiler.runtime
+        cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            self._cmake.definitions["gtest_disable_pthreads"] = True
-        self._cmake.definitions["gtest_hide_internal_symbols"] = self.options.hide_symbols
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            cmake.definitions["gtest_disable_pthreads"] = True
+        cmake.definitions["gtest_hide_internal_symbols"] = self.options.hide_symbols
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -136,14 +138,16 @@ class GTestConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
-    def package_id(self):
-        del self.info.options.no_main
+    @property
+    def _postfix(self):
+        return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GTest"
         self.cpp_info.names["cmake_find_package_multi"] = "GTest"
         self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
         self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
+        self.cpp_info.components["libgtest"].names["pkg_config"] = "gtest"
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
@@ -163,10 +167,19 @@ class GTestConan(ConanFile):
         if not self.options.no_main:
             self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
             self.cpp_info.components["gtest_main"].requires = ["libgtest"]
+            self.cpp_info.components["gtest_main"].names["cmake_find_package"] = "gtest_main"
+            self.cpp_info.components["gtest_main"].names["cmake_find_package_multi"] = "gtest_main"
+            self.cpp_info.components["gtest_main"].names["pkg_config"] = "gtest_main"
 
         if self.options.build_gmock:
+            self.cpp_info.components["gmock"].names["cmake_find_package"] = "gmock"
+            self.cpp_info.components["gmock"].names["cmake_find_package_multi"] = "gmock"
+            self.cpp_info.components["gmock"].names["pkg_config"] = "gmock"
             self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
             self.cpp_info.components["gmock"].requires = ["libgtest"]
             if not self.options.no_main:
+                self.cpp_info.components["gmock_main"].names["cmake_find_package"] = "gmock_main"
+                self.cpp_info.components["gmock_main"].names["cmake_find_package_multi"] = "gmock_main"
+                self.cpp_info.components["gmock_main"].names["pkg_config"] = "gmock_main"
                 self.cpp_info.components["gmock_main"].libs = ["gmock_main{}".format(self._postfix)]
                 self.cpp_info.components["gmock_main"].requires = ["gmock"]

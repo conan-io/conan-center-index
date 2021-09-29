@@ -32,3 +32,6 @@ sources:
   "1.84.1":
     url: "https://github.com/ocornut/imgui/archive/v1.84.1.tar.gz"
     sha256: "292ab54cfc328c80d63a3315a242a4785d7c1cf7689fbb3d70da39b34db071ea"
+  "1.84.2":
+    url: "https://github.com/ocornut/imgui/archive/v1.84.2.tar.gz"
+    sha256: "35cb5ca0fb42cb77604d4f908553f6ef3346ceec4fcd0189675bdfb764f62b9b"

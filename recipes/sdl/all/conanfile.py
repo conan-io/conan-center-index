@@ -41,6 +41,7 @@ class SDLConan(ConanFile):
         "opengl": [True, False],
         "opengles": [True, False],
         "vulkan": [True, False],
+        "libunwind": [True, False],
     }
     default_options = {
         "shared": False,
@@ -69,6 +70,7 @@ class SDLConan(ConanFile):
         "opengl": True,
         "opengles": True,
         "vulkan": True,
+        "libunwind": True,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -107,6 +109,7 @@ class SDLConan(ConanFile):
             del self.options.wayland
             del self.options.directfb
             del self.options.video_rpi
+            del self.options.libunwind
         if self.settings.os != "Windows":
             del self.options.directx
 
@@ -124,6 +127,8 @@ class SDLConan(ConanFile):
                 self.requires("libalsa/1.2.4")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
+            if self.options.sndio:
+                raise ConanInvalidConfiguration("Package for 'sndio' is not available (yet)")
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
@@ -138,6 +143,8 @@ class SDLConan(ConanFile):
                 self.requires("egl/system")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
+            if self.options.libunwind:
+                self.requires("libunwind/1.5.0")
 
     def validate(self):
         if self.settings.os == "Macos" and not self.options.iconv:
@@ -187,11 +194,21 @@ class SDLConan(ConanFile):
 
                 self._cmake.definitions["ALSA"] = self.options.alsa
                 if self.options.alsa:
+                    self._cmake.definitions["ALSA_SHARED"] = self.deps_cpp_info["libalsa"].shared
                     self._cmake.definitions["HAVE_ASOUNDLIB_H"] = True
                     self._cmake.definitions["HAVE_LIBASOUND"] = True
                 self._cmake.definitions["JACK"] = self.options.jack
+                if self.options.jack:
+                    self._cmake.definitions["JACK_SHARED"] = self.deps_cpp_info["jack"].shared
+                self._cmake.definitions["ESD"] = self.options.esd
+                if self.options.esd:
+                    self._cmake.definitions["ESD_SHARED"] = self.deps_cpp_info["esd"].shared
                 self._cmake.definitions["PULSEAUDIO"] = self.options.pulse
+                if self.options.pulse:
+                    self._cmake.definitions["PULSEAUDIO_SHARED"] = self.deps_cpp_info["pulseaudio"].shared
                 self._cmake.definitions["SNDIO"] = self.options.sndio
+                if self.options.sndio:
+                    self._cmake.definitions["SNDIO_SHARED"] = self.deps_cpp_info["sndio"].shared
                 self._cmake.definitions["NAS"] = self.options.nas
                 if self.options.nas:
                     cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
@@ -230,6 +247,7 @@ class SDLConan(ConanFile):
 
                 self._cmake.definitions["VIDEO_DIRECTFB"] = self.options.directfb
                 self._cmake.definitions["VIDEO_RPI"] = self.options.video_rpi
+                self._cmake.definitions["HAVE_LIBUNWIND_H"] = self.options.libunwind
             elif self.settings.os == "Windows":
                 self._cmake.definitions["DIRECTX"] = self.options.directx
 
@@ -305,6 +323,8 @@ class SDLConan(ConanFile):
                 self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
                 self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
                 self.cpp_info.components["libsdl2"].requires.append("egl::egl")
+            if self.options.libunwind:
+                self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
         elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["libsdl2"].frameworks = [
                 "CoreVideo", "CoreAudio", "AudioToolbox",

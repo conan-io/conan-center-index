@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class RestinioConan(ConanFile):
     name = "restinio"
@@ -49,38 +51,36 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/7.1.3")
+        self.requires("fmt/8.0.1")
         self.requires("expected-lite/0.5.0")
         self.requires("optional-lite/3.4.0")
         self.requires("string-view-lite/1.6.0")
-        self.requires("variant-lite/1.2.2")
+        self.requires("variant-lite/2.0.0")
 
         if self.options.asio == "standalone":
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("asio/1.18.0")
+                self.requires("asio/1.18.1")
             else:
                 self.requires("asio/1.16.1")
         else:
             if tools.Version(self.version) >= "0.6.9":
-                self.requires("boost/1.75.0")
+                self.requires("boost/1.77.0")
             else:
                 self.requires("boost/1.73.0")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1l")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
         if self.options.with_pcre == 1:
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         elif self.options.with_pcre == 2:
-            self.requires("pcre2/10.35")
+            self.requires("pcre2/10.37")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-v." + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:

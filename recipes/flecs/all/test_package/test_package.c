@@ -12,7 +12,7 @@ int main() {
 
     ECS_COMPONENT(world, Position);
 
-    ecs_entity_t e = ecs_set(world, 0, EcsName, {"MyEntity"});
+    ecs_entity_t e = ecs_new_id(world);
     ecs_set(world, e, Position, {10.0f, 20.0f});
 
     const char *name = ecs_get_name(world, e);

@@ -34,6 +34,10 @@ class TaoCPPJSONConan(ConanFile):
     def _min_cppstd_required(self):
         return "11" if tools.Version(self.version) < "1.0.0-beta.11" else "17"
 
+    @property
+    def _requires_pegtl(self):
+        return tools.Version(self.version) >= "1.0.0-beta.13"
+
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._min_cppstd_required)
@@ -44,6 +48,10 @@ class TaoCPPJSONConan(ConanFile):
                     raise ConanInvalidConfiguration("taocpp-json requires C++17, which your compiler does not support.")
             else:
                 self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
+    def requirements(self):
+        if self._requires_pegtl:
+            self.requires("taocpp-pegtl/3.2.1")
 
     def package_id(self):
         self.info.header_only()
@@ -61,5 +69,7 @@ class TaoCPPJSONConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-json"
         self.cpp_info.names["cmake_find_package"] = "taocpp"
         self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
-        self.cpp_info.components["_taocpp-json"].names["cmake_find_package"] = "json"
-        self.cpp_info.components["_taocpp-json"].names["cmake_find_package_multi"] = "json"
+        self.cpp_info.components["json"].names["cmake_find_package"] = "json"
+        self.cpp_info.components["json"].names["cmake_find_package_multi"] = "json"
+        if self._requires_pegtl:
+            self.cpp_info.components["json"].requires = ["taocpp-pegtl::taocpp-pegtl"]

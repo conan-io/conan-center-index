@@ -42,13 +42,15 @@ class OpenColorIOConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         # TODO: add GLUT (needed for ociodisplay tool)
-        self.requires("lcms/2.11")
-        self.requires("yaml-cpp/0.6.3")
+        self.requires("lcms/2.12")
+        self.requires("yaml-cpp/0.7.0")
+        self.requires("tinyxml/2.6.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -67,12 +69,11 @@ class OpenColorIOConan(ConanFile):
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
-        self._cmake.definitions["USE_EXTERNAL_YAML"] = True
-        self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+        self._cmake.definitions["OCIO_USE_BOOST_PTR"] = False
 
-        # FIXME: OpenColorIO uses old TinyXML which doesn't have Conan package.
-        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
-        self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
+        self._cmake.definitions["USE_EXTERNAL_YAML"] = True
+        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = True
+        self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
 
         self._cmake.configure()
         return self._cmake

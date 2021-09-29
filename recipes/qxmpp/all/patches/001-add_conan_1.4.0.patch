@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 550ea39a..9ed4d825 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -8,10 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/modules")
+ 
+-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network Xml)
+-find_package(Qt${QT_VERSION_MAJOR} 5.7.0 REQUIRED COMPONENTS Core Network Xml)
++list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
++list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
++
++find_package(Qt6 COMPONENTS Core Network Xml REQUIRED)
++set(QT_VERSION_MAJOR 6)
+ 
+ set(CMAKE_AUTOMOC ON)
+ set(CMAKE_AUTORCC ON)
