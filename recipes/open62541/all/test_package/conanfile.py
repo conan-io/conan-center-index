@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def requirements(self):
-        self.requires("ua-nodeset/1.02-2021-07-21")
+        self.requires("ua-nodeset/padim-1.02-2021-07-21")
 
     def build(self):
         cmake = CMake(self)
