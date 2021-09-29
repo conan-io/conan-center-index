@@ -31,8 +31,8 @@ class AwsCdiSdkConan(ConanFile):
 
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("The aws-cdi-sdk package cannot be built on Windows.")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("The aws-cdi-sdk con only be built on Linux.")
         elif (self.settings.compiler == "gcc"
                 and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
