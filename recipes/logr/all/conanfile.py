@@ -13,7 +13,7 @@ class LogrConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    options = { "backend": ["spdlog", "glog", "log4cplus", None] }
+    options = { "backend": ["spdlog", "glog", "log4cplus", "boostlog", None] }
     default_options = { "backend": "spdlog"}
 
     _cmake = None
@@ -27,14 +27,16 @@ class LogrConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("fmt/7.1.2")
+        self.requires("fmt/8.0.1")
 
         if self.options.backend == "spdlog":
-            self.requires("spdlog/1.8.2")
+            self.requires("spdlog/1.9.2")
         elif self.options.backend == "glog":
             self.requires("glog/0.4.0")
         elif self.options.backend == "log4cplus":
             self.requires("log4cplus/2.0.5")
+        elif self.options.backend == "boostlog":
+            self.requires("boost/1.77.0")
 
     def configure(self):
         minimal_cpp_standard = "17"
@@ -67,6 +69,7 @@ class LogrConan(ConanFile):
         self._cmake.definitions["LOGR_WITH_SPDLOG_BACKEND"] = self.options.backend == "spdlog"
         self._cmake.definitions["LOGR_WITH_GLOG_BACKEND"] = self.options.backend == "glog"
         self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = self.options.backend == "log4cplus"
+        self._cmake.definitions["LOGR_WITH_BOOSTLOG_BACKEND"] = self.options.backend == "boostlog"
 
         self._cmake.definitions["LOGR_INSTALL"] = True
         self._cmake.definitions["LOGR_CONAN_PACKAGING"] = True
