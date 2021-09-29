@@ -1144,7 +1144,9 @@ Examples = bin/datadir/examples""")
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["qtAxBase"].system_libs.append("uuid")
             _create_module("AxContainer", ["Core", "Gui", "Widgets", "AxBase"])
+            self.cpp_info.components["qtAxContainer"].includedirs = [os.path.join("include", "ActiveQt")]
             _create_module("AxServer", ["Core", "Gui", "Widgets", "AxBase"])
+            self.cpp_info.components["qtAxServer"].includedirs = [os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxServer"].system_libs.append("shell32")
 
         if not self.options.shared:
