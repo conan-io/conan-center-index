@@ -1139,6 +1139,7 @@ Examples = bin/datadir/examples""")
         
         if self.options.qtactiveqt:
             _create_module("AxBase", ["Gui", "Widgets"])
+            self.cpp_info.components["qtAxBase"].includedirs = ["include", os.path.join("include", "ActiveQt")]
             self.cpp_info.components["qtAxBase"].system_libs.extend(["ole32", "oleaut32", "user32", "gdi32", "advapi32"])
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["qtAxBase"].system_libs.append("uuid")
