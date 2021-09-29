@@ -71,6 +71,8 @@ class GStPluginsBaseConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "gst-plugins-base %s does not support gcc older than 5" % self.version
             )
+        if self.options.with_gl and self.options.get_safe("with_wayland") and not self.options.get_safe("with_egl"):
+            raise ConanInvalidConfiguration("OpenGL support with Wayland requires 'with_egl' turned on!")
 
     def configure(self):
         if self.options.shared:
@@ -163,6 +165,35 @@ class GStPluginsBaseConan(ConanFile):
                 add_compiler_flag("-Dsnprintf=_snprintf")
         if self.settings.get_safe("compiler.runtime"):
             defs["b_vscrt"] = str(self.settings.compiler.runtime).lower()
+
+        gl_api = set()
+        gl_platform = set()
+        gl_winsys = set() # TODO: winrt, dispamnx, viv-fb, gbm, android
+        if self.options.get_safe("with_egl"):
+            gl_api.add("opengl")
+            gl_platform.add("egl")
+            gl_winsys.add("egl")
+        if self.options.get_safe("with_xorg"):
+            gl_api.add("opengl")
+            gl_platform.add("glx")
+            gl_winsys.add("x11")
+        if self.options.get_safe("with_wayland"):
+            gl_api.add("opengl")
+            gl_platform.add("egl")
+            gl_winsys.add("wayland")
+        if self.settings.os == "Macos":
+            gl_api.add("opengl")
+            gl_platform.add("cgl")
+            gl_winsys.add("cocoa")
+        elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
+            gl_api.add("gles2")
+            gl_platform.add("eagl")
+            gl_winsys.add("eagl")
+        elif self.settings.os == "Windows":
+            gl_api.add("opengl")
+            gl_platform.add("wgl")
+            gl_winsys.add("win32")
+
         defs["tools"] = "disabled"
         defs["examples"] = "disabled"
         defs["tests"] = "disabled"
@@ -173,6 +204,9 @@ class GStPluginsBaseConan(ConanFile):
         defs["gl-graphene"] = "enabled" if self.options.with_gl and self.options.with_graphene else "disabled"
         defs["gl-png"] = "enabled" if self.options.with_gl and self.options.with_libpng else "disabled"
         defs["gl-jpeg"] = "enabled" if self.options.with_gl and self.options.with_libjpeg else "disabled"
+        defs["gl_api"] = list(gl_api)
+        defs["gl_platform"] = list(gl_platform)
+        defs["gl_winsys"] = list(gl_winsys)
         defs["alsa"] = "enabled" if self.options.get_safe("with_libalsa") else "disabled"
         defs["cdparanoia"] = "disabled" # "enabled" if self.options.with_cdparanoia else "disabled" # TODO: cdparanoia
         defs["libvisual"] = "disabled" # "enabled" if self.options.with_libvisual else "disabled" # TODO: libvisual
@@ -503,6 +537,8 @@ class GStPluginsBaseConan(ConanFile):
         self.cpp_info.components["gstreamer-audio-1.0"].libs = ["gstaudio-1.0"]
         self.cpp_info.components["gstreamer-audio-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-tag-1.0"] # TODO: orc
         self.cpp_info.components["gstreamer-audio-1.0"].includedirs = [gst_include_path]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gstreamer-audio-1.0"].system_libs = ["m"]
 
         self.cpp_info.components["gstreamer-fft-1.0"].names["pkg_config"] = "gstreamer-fft-1.0"
         self.cpp_info.components["gstreamer-fft-1.0"].libs = ["gstfft-1.0"]
@@ -514,7 +550,22 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_gl:
             self.cpp_info.components["gstreamer-gl-1.0"].names["pkg_config"] = "gstreamer-gl-1.0"
             self.cpp_info.components["gstreamer-gl-1.0"].libs = ["gstgl-1.0"]
-            self.cpp_info.components["gstreamer-gl-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-video-1.0"]
+            self.cpp_info.components["gstreamer-gl-1.0"].requires = [
+                "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
+                "gstreamer-allocators-1.0", "gstreamer-video-1.0",
+                "glib::gmodule-no-export-2.0", "opengl::opengl"] # TODO: bcm
+            if self.options.get_safe("with_egl"):
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["egl::egl"])
+            if self.options.get_safe("with_xorg"):
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
+            if self.options.get_safe("with_wayland"):
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl"])
+            if self.settings.os == "Windows":
+                self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
+            if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
+                self.cpp_info.components["gstreamer-gl-1.0"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore", "Cocoa"]
+            if self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                self.cpp_info.components["gstreamer-gl-1.0"].frameworks.extend(["CoreGraphics", "UIkit"])
             self.cpp_info.components["gstreamer-gl-1.0"].includedirs = [os.path.join(self.package_folder, "include"), gst_include_path]
 
             self.cpp_info.components["gstreamer-gl-prototypes-1.0"].names["pkg_config"] = "gstreamer-gl-prototypes-1.0"
@@ -541,17 +592,23 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-riff-1.0"].names["pkg_config"] = "gstreamer-riff-1.0"
         self.cpp_info.components["gstreamer-riff-1.0"].libs = ["gstriff-1.0"]
-        self.cpp_info.components["gstreamer-riff-1.0"].requires = ["gstreamer::gstreamer-1.0"]
+        self.cpp_info.components["gstreamer-riff-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer-audio-1.0", "gstreamer-tag-1.0"]
         self.cpp_info.components["gstreamer-riff-1.0"].includedirs = [gst_include_path]
 
         self.cpp_info.components["gstreamer-rtp-1.0"].names["pkg_config"] = "gstreamer-rtp-1.0"
         self.cpp_info.components["gstreamer-rtp-1.0"].libs = ["gstrtp-1.0"]
-        self.cpp_info.components["gstreamer-rtp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0"]
+        self.cpp_info.components["gstreamer-rtp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
         self.cpp_info.components["gstreamer-rtp-1.0"].includedirs = [gst_include_path]
 
         self.cpp_info.components["gstreamer-rtsp-1.0"].names["pkg_config"] = "gstreamer-rtsp-1.0"
         self.cpp_info.components["gstreamer-rtsp-1.0"].libs = ["gstrtsp-1.0"]
-        self.cpp_info.components["gstreamer-rtsp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer-sdp-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gstreamer-rtsp-1.0"].requires = [
+            "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
+            "gstreamer-sdp-1.0", "glib::gio-2.0"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gstreamer-rtsp-1.0"].system_libs = ["m"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["gstreamer-rtsp-1.0"].system_libs = ["ws2_32"]
         self.cpp_info.components["gstreamer-rtsp-1.0"].includedirs = [gst_include_path]
 
         self.cpp_info.components["gstreamer-sdp-1.0"].names["pkg_config"] = "gstreamer-sdp-1.0"
@@ -561,10 +618,14 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-tag-1.0"].names["pkg_config"] = "gstreamer-tag-1.0"
         self.cpp_info.components["gstreamer-tag-1.0"].libs = ["gsttag-1.0"]
-        self.cpp_info.components["gstreamer-tag-1.0"].requires = ["gstreamer::gstreamer-1.0", "zlib::zlib"]
+        self.cpp_info.components["gstreamer-tag-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "zlib::zlib"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gstreamer-tag-1.0"].system_libs = ["m"]
         self.cpp_info.components["gstreamer-tag-1.0"].includedirs = [gst_include_path]
 
         self.cpp_info.components["gstreamer-video-1.0"].names["pkg_config"] = "gstreamer-video-1.0"
         self.cpp_info.components["gstreamer-video-1.0"].libs = ["gstvideo-1.0"]
         self.cpp_info.components["gstreamer-video-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0"] # TODO: orc
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gstreamer-video-1.0"].system_libs = ["m"]
         self.cpp_info.components["gstreamer-video-1.0"].includedirs = [gst_include_path]
