@@ -42,3 +42,7 @@ class TestPackageConan(ConanFile):
 
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
+
+        if self.settings.os == "Emscripten":
+            bin_path = os.path.join("bin", "test_package.js")
+            self.run("node {}".format(bin_path), run_environment=True)

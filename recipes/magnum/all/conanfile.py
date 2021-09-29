@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import re
 import textwrap
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -143,7 +144,7 @@ class MagnumConan(ConanFile):
         "wav_audio_importer": True,
     }
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "cmake/*"]
+    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/*"]
     
     _cmake = None
 
@@ -190,6 +191,48 @@ class MagnumConan(ConanFile):
             del self.options.windowless_windows_egl_application
             del self.options.target_headless  # Requires EGL (when used gl_info)
 
+        if self.settings.os == "Emscripten":
+            self.options.shared_plugins = False
+            self.options.target_gl = "gles3"
+
+            self.options.sdl2_application = True
+            
+            self.options.gl_info = False
+
+            del self.options.vk
+            del self.options.target_vk
+
+            self.options.audio = False
+            self.options.any_audio_importer = False
+            self.options.wav_audio_importer = False
+            self.options.al_info = False
+
+            self.options.glfw_application = False
+
+            # X11 is not available
+            del self.options.glx_context
+            del self.options.glx_application
+            del self.options.windowless_glx_application
+
+            # Some executables
+            del self.options.font_converter
+            del self.options.distance_field_converter
+            del self.options.scene_converter
+            del self.options.image_converter
+
+            # Because of OpenGLFunctionLoader.cpp (because of target_gl option?)
+            self.options.wgl_context = False
+            self.options.windowless_wgl_application = False
+            self.options.cgl_context = False
+            self.options.windowless_cgl_application = False
+
+            # FIXME: Disable EGL, Conan provides only Linux and FreeBSD (depends on build platform?)
+            self.options.egl_context = False
+            self.options.xegl_application = False
+            self.options.windowless_egl_application = False
+            self.options.windowless_windows_egl_application = False
+            self.options.target_headless = False
+
         if self.settings.os != "Android":
             del self.options.android_application
 
@@ -220,7 +263,7 @@ class MagnumConan(ConanFile):
             self.requires("openal/1.21.1")
         if self.options.gl:
             self.requires("opengl/system")
-        if self.options.vk:
+        if self.options.get_safe("vk", False):
             self.requires("vulkan-loader/1.2.190")
 
         if self.options.get_safe("egl_context", False) or \
@@ -234,7 +277,7 @@ class MagnumConan(ConanFile):
         if self.options.glfw_application:
             self.requires("glfw/3.3.4")
 
-        if self.options.sdl2_application:
+        if self.options.sdl2_application and self.settings.os != "Emscripten":
             self.requires("sdl/2.0.16")
 
     def build_requirements(self):
@@ -260,7 +303,7 @@ class MagnumConan(ConanFile):
         if self.options.target_gl in ["gles2", "gles3"] and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("OpenGL ES is not supported in Windows")        
 
-        if not self.options.vk and self.options.target_vk:
+        if not self.options.get_safe("vk", False) and self.options.get_safe("target_vk", False):
             raise ConanInvalidConfiguration("Option 'vk=True' is required")
 
         if self.options.get_safe("cgl_context", False) and not self.options.target_gl:
@@ -269,8 +312,8 @@ class MagnumConan(ConanFile):
         if self.options.get_safe("windowless_cgl_application", False) and not self.options.target_gl:
             raise ConanInvalidConfiguration("Option 'windowless_cgl_application' requires some 'target_gl'")
 
-        if self.options.al_info and not self.options.audio:
-            raise ConanInvalidConfiguration("Option 'al_info' requires 'audio=True'")
+        if (self.options.al_info or self.options.wav_audio_importer) and not self.options.audio:
+            raise ConanInvalidConfiguration("Options 'al_info' and 'wav_audio_importer' require 'audio=True'")
 
         if self.options.magnum_font_converter and not self.options.tga_image_converter:
             raise ConanInvalidConfiguration("magnum_font_converter requires tga_image_converter")
@@ -297,7 +340,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["TARGET_GLES2"] = self.options.target_gl == "gles2"
         self._cmake.definitions["TARGET_DESKTOP_GLES"] = self.options.target_gl == "desktop_gl"
         self._cmake.definitions["TARGET_HEADLESS"] = self.options.get_safe("target_headless", False)
-        self._cmake.definitions["TARGET_VK"] = self.options.target_vk
+        self._cmake.definitions["TARGET_VK"] = self.options.get_safe("target_vk", False)
 
         self._cmake.definitions["WITH_AUDIO"] = self.options.audio
         self._cmake.definitions["WITH_DEBUGTOOLS"] = self.options.debug_tools
@@ -309,7 +352,7 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_TEXT"] = self.options.text
         self._cmake.definitions["WITH_TEXTURETOOLS"] = self.options.texture_tools
         self._cmake.definitions["WITH_TRADE"] = self.options.trade
-        self._cmake.definitions["WITH_VK"] = self.options.vk
+        self._cmake.definitions["WITH_VK"] = self.options.get_safe("vk", False)
 
         self._cmake.definitions["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("android_application", False)
         self._cmake.definitions["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("emscripten_application", False)
@@ -326,7 +369,7 @@ class MagnumConan(ConanFile):
 
         self._cmake.definitions["WITH_CGLCONTEXT"] = self.options.get_safe("cgl_context", False)
         self._cmake.definitions["WITH_EGLCONTEXT"] = self.options.get_safe("egl_context", False)
-        self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.glx_context
+        self._cmake.definitions["WITH_GLXCONTEXT"] = self.options.get_safe("glx_context", False)
         self._cmake.definitions["WITH_WGLCONTEXT"] = self.options.get_safe("wgl_context", False)
 
         ##### Plugins related #####
@@ -346,9 +389,9 @@ class MagnumConan(ConanFile):
         self._cmake.definitions["WITH_GL_INFO"] = self.options.gl_info
         self._cmake.definitions["WITH_AL_INFO"] = self.options.al_info
         self._cmake.definitions["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("distance_field_converter", False)
-        self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.font_converter
-        self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.image_converter
-        self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.scene_converter
+        self._cmake.definitions["WITH_FONTCONVERTER"] = self.options.get_safe("font_converter", False)
+        self._cmake.definitions["WITH_IMAGECONVERTER"] = self.options.get_safe("image_converter", False)
+        self._cmake.definitions["WITH_SCENECONVERTER"] = self.options.get_safe("scene_converter", False)
 
         self._cmake.configure()
         return self._cmake
@@ -390,6 +433,12 @@ class MagnumConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
                               "EGL::EGL",
                               "egl::egl")
+
+        # Copy FindOpenGLES2/3.cmake to build folder
+        shutil.copy(os.path.join(self._source_subfolder, "modules", "FindOpenGLES2.cmake"), "FindOpenGLES2.cmake")
+        shutil.copy(os.path.join(self._source_subfolder, "modules", "FindOpenGLES3.cmake"), "FindOpenGLES3.cmake")
+        if self.settings.os == "Emscripten":
+            shutil.copy(os.path.join(self._source_subfolder, "modules", "FindSDL2.cmake"), "FindSDL2.cmake")
 
     def build(self):
         self._patch_sources()
@@ -433,7 +482,7 @@ class MagnumConan(ConanFile):
                         endif()
                     """.format(target=target, library=library)))
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "cmake"))
         self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
@@ -531,7 +580,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["trade"].requires = ["magnum_main", "corrade::plugin_manager"]
 
         # VK
-        if self.options.vk:
+        if self.options.get_safe("vk", False):
             self.cpp_info.components["vk"].names["cmake_find_package"] = "Vk"
             self.cpp_info.components["vk"].names["cmake_find_package_multi"] = "Vk"
             self.cpp_info.components["vk"].libs = ["MagnumVk{}".format(lib_suffix)]
@@ -543,7 +592,15 @@ class MagnumConan(ConanFile):
             raise Exception("Recipe doesn't define this component")
 
         if self.options.get_safe("emscripten_application", False):
-            raise Exception("Recipe doesn't define this component")
+            self.cpp_info.components["emscripten_application"].names["cmake_find_package"] = "EmscriptenApplication"
+            self.cpp_info.components["emscripten_application"].names["cmake_find_package_multi"] = "EmscriptenApplication"
+            self.cpp_info.components["emscripten_application"].libs = ["MagnumEmscriptenApplication{}".format(lib_suffix)]
+            self.cpp_info.components["emscripten_application"].requires = ["magnum_main", "gl"]
+            if self.options.target_gl == "gles2":
+                self.cpp_info.components["emscripten_application"].exelinkflags = ["-s FULL_ES2=1"]
+            elif self.options.target_gl == "gles3":
+                self.cpp_info.components["emscripten_application"].exelinkflags = ["-s FULL_ES3=1"]
+            
 
         if self.options.get_safe("windowless_ios_application", False):
             raise Exception("Recipe doesn't define this component")
@@ -566,9 +623,16 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["sdl2_application"].names["cmake_find_package"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].names["cmake_find_package_multi"] = "Sdl2Application"
             self.cpp_info.components["sdl2_application"].libs = ["MagnumSdl2Application{}".format(lib_suffix)]
-            self.cpp_info.components["sdl2_application"].requires = ["magnum_main", "sdl::sdl"]
+            self.cpp_info.components["sdl2_application"].requires = ["magnum_main"]
             if self.options.target_gl:
                 self.cpp_info.components["sdl2_application"].requires += ["gl"]
+            if self.settings.os != "Emscripten":
+                self.cpp_info.components["sdl2_application"].requires += ["sdl::sdl"]
+            else:
+                if self.options.target_gl == "gles2":
+                    self.cpp_info.components["sdl2_application"].exelinkflags = ["-s FULL_ES2=1"]
+                elif self.options.target_gl == "gles3":
+                    self.cpp_info.components["sdl2_application"].exelinkflags = ["-s FULL_ES3=1"]
 
         if self.options.get_safe("xegl_application", False):
             self.cpp_info.components["xegl_application"].names["cmake_find_package"] = "XEglApplication"
@@ -623,7 +687,7 @@ class MagnumConan(ConanFile):
             self.cpp_info.components["egl_context"].libs = ["MagnumEglContext{}".format(lib_suffix)]
             self.cpp_info.components["egl_context"].requires = ["gl", "egl::egl"]
 
-        if self.options.glx_context:
+        if self.options.get_safe("glx_context", False):
             self.cpp_info.components["glx_context"].names["cmake_find_package"] = "GlxContext"
             self.cpp_info.components["glx_context"].names["cmake_find_package_multi"] = "GlxContext"
             self.cpp_info.components["glx_context"].libs = ["MagnumGlxContext{}".format(lib_suffix)]

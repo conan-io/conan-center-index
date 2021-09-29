@@ -26,6 +26,10 @@ set_target_properties(${PROJECT_NAME}
         CXX_EXTENSIONS OFF
 )
 
+if(CORRADE_TARGET_EMSCRIPTEN)
+    emscripten_embed_file(${PROJECT_NAME} ${OBJ_FILE} ${OBJ_FILE})
+endif()
+
 
 # Run some executables (we can only be sure they exist if native build)
 if (EXEC_GL_INFO AND NOT CMAKE_CROSSCOMPILING)
