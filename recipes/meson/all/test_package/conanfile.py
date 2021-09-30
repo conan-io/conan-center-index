@@ -8,14 +8,15 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if not tools.cross_building(self):
-            meson = Meson(self)
-            meson.configure(build_folder="build")
-            meson.build()
+            with tools.RunEnvironment(self):
+                meson = Meson(self)
+                meson.configure(build_folder="build")
+                meson.build()
 
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("build", "test_package")
             self.run(bin_path, run_environment=True)
 
-        self.run("meson --version")
+        self.run("meson --version", run_environment=True)
 
