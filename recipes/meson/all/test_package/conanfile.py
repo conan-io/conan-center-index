@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if not tools.cross_building(self):
-            with tools.RunEnvironment(self):
+            with tools.environment_append(tools.RunEnvironment(self).vars):
                 meson = Meson(self)
                 meson.configure(build_folder="build")
                 meson.build()
