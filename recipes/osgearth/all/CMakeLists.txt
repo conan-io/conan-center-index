@@ -1,0 +1,55 @@
+cmake_minimum_required(VERSION 3.1)
+project(cmake_wrapper)
+
+include(conanbuildinfo.cmake)
+conan_basic_setup()
+
+# find_package and set the expected variables
+
+# OSG
+find_package(OpenSceneGraph REQUIRED)
+
+set(OSG_PLUGINS "osgPlugins-${OPENSCENEGRAPH_VERSION}"  CACHE STRING "" FORCE)
+set(OSG_LIBRARY ${OPENSCENEGRAPH_LIBRARIES})
+set(OSG_FOUND ${OPENSCENEGRAPH_FOUND})
+set(OSG_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS})
+set(OSG_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}/osg")
+set(OSG_GEN_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}/osg")
+
+# GEOS
+if (OSGEARTH_WITH_GEOS)
+    find_package(geos)
+endif ()
+set(GEOS_FOUND ${GEOS_LIBRARY})
+set(GEOS_LIBRARY ${GEOS_LIBS})
+
+# SQLite3
+if (OSGEARTH_WITH_SQLITE3)
+    find_package(SQLite3)
+endif ()
+set(SQLITE3_FOUND ${SQLite3_FOUND})
+set(SQLITE3_LIBRARY ${SQLite_LIBRARIES})
+set(SQLITE3_INCLUDE_DIR ${SQLite_INCLUDE_DIR})
+
+# WebP
+if (OSGEARTH_WITH_WEBP)
+    find_package(WebP)
+endif ()
+set(WEBP_FOUND ${WebP_FOUND})
+set(WEBP_LIBRARY ${WebP_LIBRARIES})
+set(WEBP_INCLUDE_DIR ${WebP_INCLUDE_DIR}})
+
+# libzip
+if (OSGEARTH_BUILD_ZIP_PLUGIN)
+    find_package(LIBZIP)
+endif ()
+set(LIBZIP_FOUND ${libzip_FOUND})
+set(LIBZIP_LIBRARY ${libzip_LIBRARIES})
+set(LIBZIP_INCLUDE_DIR ${libzip_INCLUDE_DIR}})
+
+find_package(leveldb)
+set(LEVELDB_FOUND ${leveldb_FOUND})
+set(LEVELDB_LIBRARY ${leveldb_LIBRARIES})
+set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR}})
+
+add_subdirectory(source_subfolder)
