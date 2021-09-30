@@ -1,6 +1,8 @@
 #include <mysql.h>
 #include <stdio.h>
 
+// See #4530
+#include <mysqld_error.h>
 
 int main(int argc, char **argv)
 {
