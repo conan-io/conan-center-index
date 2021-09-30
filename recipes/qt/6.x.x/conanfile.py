@@ -204,14 +204,14 @@ class QtConan(ConanFile):
             del self.options.with_libjpeg
             del self.options.with_libpng
 
-        if not self.options.qtmultimedia:
+        if not self.options.get_safe("qtmultimedia"):
             del self.options.with_libalsa
             del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
 
         if self.settings.os in ("FreeBSD", "Linux"):
-            if self.options.qtwebengine:
+            if self.options.get_safe("qtwebengine"):
                 self.options.with_fontconfig = True
 
         if self.options.multiconfiguration:
@@ -237,7 +237,7 @@ class QtConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
-        if self.options.qtwebengine:
+        if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
 
@@ -321,7 +321,7 @@ class QtConan(ConanFile):
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
@@ -338,7 +338,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires('strawberryperl/5.30.0.1')
 
-        if self.options.qtwebengine:
+        if self.options.get_safe("qtwebengine"):
             self.build_requires("ninja/1.10.2")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
