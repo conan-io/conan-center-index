@@ -238,7 +238,7 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             raise ConanInvalidConfiguration("CCI has no llvm recipe (yet)")
         if self._with_openssl():
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.7.299")
         if self.options.with_brotli:
