@@ -47,6 +47,8 @@ class AwsCCommon(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["STATIC_CRT"] = "MT" in self.settings.compiler.runtime
         self._cmake.configure()
         return self._cmake
 
