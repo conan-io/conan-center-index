@@ -19,6 +19,11 @@ sources:
       url: https://github.com/opencv/opencv/archive/4.5.2.tar.gz
     - sha256: 9f52fd3114ac464cb4c9a2a6a485c729a223afb57b9c24848484e55cef0b5c2a
       url: https://github.com/opencv/opencv_contrib/archive/4.5.2.tar.gz
+  "4.5.3":
+    - sha256: 77f616ae4bea416674d8c373984b20c8bd55e7db887fd38c6df73463a0647bab
+      url: https://github.com/opencv/opencv/archive/4.5.3.tar.gz
+    - sha256: 73da052fd10e73aaba2560eaff10cc5177e2dcc58b27f8aedf7c649e24c233bc
+      url: https://github.com/opencv/opencv_contrib/archive/4.5.3.tar.gz
 patches:
   "4.1.2":
     - patch_file: "patches/0001-jasper.patch"

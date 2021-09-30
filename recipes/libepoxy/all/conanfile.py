@@ -45,9 +45,13 @@ class EpoxyConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.os == "Windows":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds on Windows are not supported")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("meson build helper cannot cross-compile. It has to be migrated to conan.tools.meson")
 
     def config_options(self):
         if self.settings.os == "Windows":

@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class OpusFileConan(ConanFile):
     name = "opusfile"
     description = "stand-alone decoder library for .opus streams"
@@ -22,6 +23,7 @@ class OpusFileConan(ConanFile):
         "fPIC": True,
         "http": True,
     }
+
     generators = "pkg_config"
     exports_sources = "patches/*"
 
@@ -32,11 +34,15 @@ class OpusFileConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -44,7 +50,7 @@ class OpusFileConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
-    
+
     def validate(self):
         if self._is_msvc and self.options.shared:
             raise ConanInvalidConfiguration("Opusfile doesn't support building as shared with Visual Studio")
@@ -59,11 +65,12 @@ class OpusFileConan(ConanFile):
         if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_vs(self):
         includedir = os.path.abspath(os.path.join(self._source_subfolder, "include"))
@@ -114,8 +121,7 @@ class OpusFileConan(ConanFile):
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            os.remove(os.path.join(self.package_folder, "lib", "libopusfile.la"))
-            os.remove(os.path.join(self.package_folder, "lib", "libopusurl.la"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.components["libopusfile"].names["pkg_config"] = "opusfile"

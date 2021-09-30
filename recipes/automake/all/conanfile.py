@@ -13,7 +13,7 @@ class AutomakeConan(ConanFile):
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler"
 
-    exports_sources = ["patches/**"]
+    exports_sources = "patches/*"
 
     _autotools = None
 
@@ -52,7 +52,7 @@ class AutomakeConan(ConanFile):
 
     @property
     def _datarootdir(self):
-        return os.path.join(self.package_folder, "bin", "share")
+        return os.path.join(self.package_folder, "res")
 
     @property
     def _automake_libdir(self):
@@ -89,9 +89,9 @@ class AutomakeConan(ConanFile):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "doc"))
+        tools.rmdir(os.path.join(self._datarootdir, "info"))
+        tools.rmdir(os.path.join(self._datarootdir, "man"))
+        tools.rmdir(os.path.join(self._datarootdir, "doc"))
 
         if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
@@ -102,15 +102,17 @@ class AutomakeConan(ConanFile):
                 os.rename(fullpath, fullpath + ".exe")
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.output.info("Appending PATH environment variable:: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal" + bin_ext))
-        self.output.info("Setting ACLOCAL to {}".format(aclocal))
-        self.env_info.ACLOCAL = aclocal
+        self.output.info("Appending ACLOCAL environment variable with: {}".format(aclocal))
+        self.env_info.ACLOCAL.append(aclocal)
 
         automake_datadir = tools.unix_path(self._datarootdir)
         self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))

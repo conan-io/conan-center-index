@@ -42,11 +42,15 @@ class Jinja2cppConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.76.0")
         self.requires("expected-lite/0.5.0")
-        self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
         self.requires("optional-lite/3.4.0")
         self.requires("rapidjson/cci.20200410")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/2.0.0")
+        if self.version == "1.1.0":
+            self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
+        else:
+            self.requires("nlohmann_json/3.10.2")
+            self.requires("fmt/8.0.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -85,8 +89,9 @@ class Jinja2cppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if tools.Version(self.deps_cpp_info["fmt"].version) >= "7.0.0":
-            raise ConanInvalidConfiguration("jinja2cpp requires fmt < 7.0.0")
+        if self.version == "1.1.0":
+            if tools.Version(self.deps_cpp_info["fmt"].version) >= "7.0.0":
+                raise ConanInvalidConfiguration("jinja2cpp requires fmt < 7.0.0")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()

@@ -1,4 +1,10 @@
 sources:
+  "7.79.1":
+    sha256: 370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2
+    url: https://curl.se/download/curl-7.79.1.tar.gz
+  "7.79.0":
+    sha256: aff0c7c4a526d7ecc429d2f96263a85fa73e709877054d593d8af3d136858074
+    url: https://curl.se/download/curl-7.79.0.tar.gz
   "7.78.0":
     sha256: ed936c0b02c06d42cf84b39dd12bb14b62d77c7c4e875ade022280df5dcc81d7
     url: https://curl.se/download/curl-7.78.0.tar.gz
@@ -45,6 +51,9 @@ sources:
     sha256: 432d3f466644b9416bc5b649d344116a753aeaa520c8beaf024a90cba9d3d35d
     url: https://curl.haxx.se/download/curl-7.64.1.tar.gz
 patches:
+  "7.79.0":
+    - patch_file: "patches/004-no-checksrc.patch"
+      base_path: "source_subfolder"
   "7.72.0":
     - patch_file: "patches/002-add-missing-file-FindZstd.patch"
       base_path: "source_subfolder"

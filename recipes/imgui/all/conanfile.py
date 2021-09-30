@@ -12,19 +12,18 @@ class IMGUIConan(ConanFile):
     topics = ("conan", "imgui", "gui", "graphical")
     license = "MIT"
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-         "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -56,7 +55,7 @@ class IMGUIConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        backends_folder = src=os.path.join(
+        backends_folder = os.path.join(
             self._source_subfolder,
             "backends" if tools.Version(self.version) >= "1.80" else "examples"
         )
@@ -68,6 +67,7 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["imgui"]
+        self.cpp_info.defines.append("IMGUI_USER_CONFIG=\"imgui_user_config.h\"")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         self.cpp_info.srcdirs = [os.path.join("res", "bindings")]

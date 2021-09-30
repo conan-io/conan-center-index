@@ -8,8 +8,12 @@
 #include <QNetworkAccessManager>
 #include <QtConcurrent>
 #include <QDomText>
-#include <QDBusMessage>
 #include <QSqlDatabase>
+
+void f()
+{
+    qDebug() << "inside f";
+}
 
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
@@ -35,11 +39,10 @@ int main(int argc, char *argv[]){
 
     QSqlDatabase sqlTester;
 
-    QFuture<void> future = QtConcurrent::run([](){});
+    QFuture<void> future = QtConcurrent::run(::f);
+    future.waitForFinished();
 
     QDomText xmlTester;
-
-    QDBusMessage dbusTester;
 
     return app.exec();
 }

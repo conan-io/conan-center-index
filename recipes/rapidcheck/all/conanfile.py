@@ -13,18 +13,24 @@ class RapidcheckConan(ConanFile):
     homepage = "https://github.com/emil-e/rapidcheck"
     license = "BSD-2-Clause"
     topics = "quickcheck", "testing", "property-testing"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = ["cmake", "cmake_find_package"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_rtti": [True, False],
+        "enable_catch": [True, False],
+        "enable_gmock": [True, False],
+        "enable_gtest": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_rtti": True,
+        "enable_catch": False,
+        "enable_gmock": False,
+        "enable_gtest": False
     }
 
     _cmake = None
@@ -51,6 +57,12 @@ class RapidcheckConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported using Visual Studio")
 
+    def requirements(self):
+        if self.options.enable_catch:
+            self.requires("catch2/2.13.7")
+        if self.options.enable_gmock or self.options.enable_gtest:
+            self.requires("gtest/1.11.0")
+            
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -62,10 +74,17 @@ class RapidcheckConan(ConanFile):
         self._cmake.definitions["RC_ENABLE_RTTI"] = self.options.enable_rtti
         self._cmake.definitions["RC_ENABLE_TESTS"] = False
         self._cmake.definitions["RC_ENABLE_EXAMPLES"] = False
+        self._cmake.definitions["RC_ENABLE_CATCH"] = self.options.enable_catch
+        self._cmake.definitions["RC_ENABLE_GMOCK"] = self.options.enable_gmock
+        self._cmake.definitions["RC_ENABLE_GTEST"] = self.options.enable_gtest
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        if self.options.enable_gmock and not self.deps_cpp_info["gtest"].build_gmock:
+            raise ConanInvalidConfiguration("The option `rapidcheck:enable_gmock` requires gtest:build_gmock=True`")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -76,7 +95,10 @@ class RapidcheckConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {"rapidcheck": "rapidcheck::rapidcheck"}
+            {"rapidcheck": "rapidcheck::rapidcheck", 
+             "rapidcheck_catch":"rapidcheck::rapidcheck_catch", 
+             "rapidcheck_gmock": "rapidcheck::rapidcheck_gmock", 
+             "rapidcheck_gtest": "rapidcheck::rapidcheck_gtest"}
         )
 
     @staticmethod
@@ -103,13 +125,23 @@ class RapidcheckConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "rapidcheck"
         self.cpp_info.names["cmake_find_package_multi"] = "rapidcheck"
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.libs = ["rapidcheck"]
-        if tools.Version(self.version) < "20201218":
+        
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "rapidcheck")
+        self.cpp_info.components["rapidcheck_rapidcheck"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.components["rapidcheck_rapidcheck"].libs = ["rapidcheck"]
+        version = self.version[4:]
+        if tools.Version(version) < "20201218":
             if self.options.enable_rtti:
-                self.cpp_info.defines.append("RC_USE_RTTI")
+                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_USE_RTTI")
         else:
             if not self.options.enable_rtti:
-                self.cpp_info.defines.append("RC_DONT_USE_RTTI")
+                self.cpp_info.components["rapidcheck_rapidcheck"].defines.append("RC_DONT_USE_RTTI")
+                
+        if self.options.enable_catch:
+            self.cpp_info.components["rapidcheck_catch"].requires = ["rapidcheck_rapidcheck", "catch2::catch2"]
+        if self.options.enable_gmock:
+            self.cpp_info.components["rapidcheck_gmock"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
+        if self.options.enable_gtest:
+            self.cpp_info.components["rapidcheck_gtest"].requires = ["rapidcheck_rapidcheck", "gtest::gtest"]
+        

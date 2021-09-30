@@ -66,14 +66,14 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.59.0")
+        self.build_requires("meson/0.59.1")
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
-        self.requires("libffi/3.3")
+        self.requires("libffi/3.4.2")
         if self.options.with_pcre:
-            self.requires("pcre/8.44")
+            self.requires("pcre/8.45")
         if self.options.with_elf:
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):

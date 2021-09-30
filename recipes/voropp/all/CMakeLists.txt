@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.4)
+project(voro++)
+
+include(conanbuildinfo.cmake)
+conan_basic_setup()
+
+set(VOROPP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src)
+
+add_library(${PROJECT_NAME} ${VOROPP_SRC_DIR}/voro++.cc)
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+file(GLOB VOROPP_HEADERS ${VOROPP_SRC_DIR}/*.hh)
+install(FILES ${VOROPP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/voro++)

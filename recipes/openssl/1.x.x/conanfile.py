@@ -76,6 +76,8 @@ class OpenSSLConan(ConanFile):
                "no_asm": [True, False],
                "enable_weak_ssl_ciphers": [True, False],
                "386": [True, False],
+               "no_stdio": [True, False],
+               "no_tests": [True, False],
                "no_sse2": [True, False],
                "no_bf": [True, False],
                "no_cast": [True, False],
@@ -172,6 +174,12 @@ class OpenSSLConan(ConanFile):
         else:
             del self.options.fPIC
 
+        if self.settings.os == "Emscripten":
+            self.options.no_asm = True
+            self.options.no_threads = True
+            self.options.no_stdio = True
+            self.options.no_tests = True
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             if not self._win_bash:
@@ -180,7 +188,7 @@ class OpenSSLConan(ConanFile):
                 self.build_requires("nasm/2.15.05")
         if self._win_bash:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                self.build_requires("msys2/cci.latest")
 
     @property
     def _is_msvc(self):
@@ -293,6 +301,7 @@ class OpenSSLConan(ConanFile):
     def _targets(self):
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         is_1_0 = self._full_version < "1.1.0"
+        has_darwin_arm = self._full_version >= "1.1.1i" or is_1_0
         return {
             "Linux-x86-clang": ("%slinux-generic32" % self._target_prefix) if is_1_0 else "linux-x86-clang",
             "Linux-x86_64-clang": ("%slinux-x86_64" % self._target_prefix) if is_1_0 else "linux-x86_64-clang",
@@ -329,6 +338,7 @@ class OpenSSLConan(ConanFile):
             "Macos-ppc32be-*": "%sdarwin-ppc-cc" % self._target_prefix,
             "Macos-ppc64-*": "darwin64-ppc-cc",
             "Macos-ppc64be-*": "darwin64-ppc-cc",
+            "Macos-armv8-*": "darwin64-arm64-cc" if has_darwin_arm else "darwin-common",
             "Macos-*-*": "darwin-common",
             "iOS-x86_64-*": "darwin64-x86_64-cc",
             "iOS-*-*": "iphoneos-cross",
@@ -725,6 +735,9 @@ class OpenSSLConan(ConanFile):
                                     base_path=self._source_subfolder)
                     self._create_targets()
                 else:
+                    if self.settings.os == "Macos":
+                        tools.patch(patch_file=os.path.join("patches", "1.0.2u-darwin-arm64.patch"),
+                                    base_path=self._source_subfolder)
                     self._patch_configure()
                     self._patch_makefile_org()
                 with self._make_context():
@@ -842,6 +855,11 @@ class OpenSSLConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder,
                             "conan-official-{}-variables.cmake".format(self.name))
+
+    def validate(self):
+        if self.settings.os == "Emscripten":
+            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio, self.options.no_tests)):
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio,no_tests}=True")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"

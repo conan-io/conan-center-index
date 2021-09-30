@@ -13,8 +13,16 @@ class GStreamerConan(ConanFile):
     homepage = "https://gstreamer.freedesktop.org/"
     license = "GPL-2.0-only"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_introspection": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_introspection": False,
+    }
     generators = "pkg_config"
     _meson = None
 
@@ -27,7 +35,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.67.1")
+        self.requires("glib/2.69.0")
 
     @property
     def _is_msvc(self):
@@ -46,6 +54,8 @@ class GStreamerConan(ConanFile):
     def build_requirements(self):
         self.build_requires("meson/0.56.2")
         self.build_requires("pkgconf/1.7.3")
+        if self.options.with_introspection:
+            self.build_requires("gobject-introspection/1.68.0")
         if self.settings.os == 'Windows':
             self.build_requires("winflexbison/2.5.22")
         else:
@@ -70,6 +80,7 @@ class GStreamerConan(ConanFile):
         meson.options["examples"] = "disabled"
         meson.options["benchmarks"] = "disabled"
         meson.options["tests"] = "disabled"
+        meson.options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
         meson.configure(build_folder=self._build_subfolder,
                         source_folder=self._source_subfolder,
                         args=['--wrap-mode=nofallback'])

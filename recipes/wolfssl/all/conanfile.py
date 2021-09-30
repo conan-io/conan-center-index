@@ -1,6 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
 import os
 
 
@@ -13,7 +13,7 @@ class WolfSSLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.wolfssl.com/"
     description = "wolfSSL (formerly CyaSSL) is a small, fast, portable implementation of TLS/SSL for embedded devices to the cloud."
-    topics = ("conan", "wolfssl", "tls", "ssl", "iot", "fips", "secure", "cryptology", "secret")
+    topics = ("wolfssl", "tls", "ssl", "iot", "fips", "secure", "cryptology", "secret")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -54,31 +54,37 @@ class WolfSSLConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.options.opensslall and not self.options.opensslextra:
-            raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         self.build_requires("libtool/2.4.6")
 
+    def validate(self):
+        if self.options.opensslall and not self.options.opensslextra:
+            raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -139,12 +145,12 @@ class WolfSSLConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         os.unlink(os.path.join(self.package_folder, "bin", "wolfssl-config"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libwolfssl.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
-                os.path.join(self.package_folder, "lib", "wolfssl.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "wolfssl"

@@ -10,7 +10,7 @@ class LibxcryptConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/besser82/libxcrypt"
     description = "Extended crypt library for descrypt, md5crypt, bcrypt, and others"
-    topics = ("conan", "libxcypt", "hash", "password", "one-way", "bcrypt", "md5", "sha256", "sha512")
+    topics = ("libxcypt", "hash", "password", "one-way", "bcrypt", "md5", "sha256", "sha512")
     license = ("LGPL-2.1-or-later", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -60,13 +60,12 @@ class LibxcryptConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
             "--disable-werror",
         ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         if self.settings.os == "Windows":
             tools.replace_in_file("libtool", "-DPIC", "")
@@ -85,7 +84,7 @@ class LibxcryptConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libcrypt.la"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
