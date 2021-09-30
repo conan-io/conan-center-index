@@ -995,6 +995,15 @@ class QtConan(ConanFile):
             _create_plugin("QGeoPositionInfoSourceFactoryPoll", "qtposition_positionpoll", "position", [])
             _create_plugin("QGeoPositionInfoSourceFactorySerialNmea", "qtposition_serialnmea", "position", [])
 
+        if self.options.get_safe("qtsensors"):
+            _create_module("Sensors")
+            _create_plugin("genericSensorPlugin", "qtsensors_generic", "sensors", [])
+            _create_plugin("IIOSensorProxySensorPlugin", "qtsensors_iio-sensor-proxy", "sensors", [])
+            if self.settings.os == "Linux":
+                _create_plugin("LinuxSensorPlugin", "qtsensors_linuxsys", "sensors", [])
+            _create_plugin("QtSensorGesturePlugin", "qtsensorgestures_plugin", "sensorgestures", [])
+            _create_plugin("QShakeSensorGesturePlugin", "qtsensorgestures_shakeplugin", "sensorgestures", [])
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
