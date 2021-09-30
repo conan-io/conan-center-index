@@ -306,7 +306,7 @@ class QtConan(ConanFile):
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.21.0")
+            self.requires("openal/1.21.1")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.4")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
