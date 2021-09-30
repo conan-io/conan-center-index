@@ -1004,6 +1004,10 @@ class QtConan(ConanFile):
             _create_plugin("QtSensorGesturePlugin", "qtsensorgestures_plugin", "sensorgestures", [])
             _create_plugin("QShakeSensorGesturePlugin", "qtsensorgestures_shakeplugin", "sensorgestures", [])
 
+        if self.options.get_safe("qtconnectivity"):
+            _create_module("Bluetooth", ["Network"])
+            _create_module("Nfc", [])
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
