@@ -62,7 +62,7 @@ class ArmadilloConan(ConanFile):
         "mkl_library_path": "",
     }
     # Values that must be set for multiple options to be valid
-    co_dependencies = {
+    _co_dependencies = {
         "system_mkl": [
             "use_blas",
             "use_lapack",
@@ -149,10 +149,10 @@ class ArmadilloConan(ConanFile):
         # Optional requirements
         openblas = "openblas/0.3.15"
         hdf5 = "hdf5/1.12.0"
-        # atlas = "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
-        # superlu = "superlu/5.2.2" # Pending https://github.com/conan-io/conan-center-index/issues/6756
-        # arpack = "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
-        # flexiblas = "flexiblas/3.0.4" # Pending https://github.com/conan-io/conan-center-index/issues/6827
+        # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
+        # TODO: "superlu/5.2.2" # Pending https://github.com/conan-io/conan-center-index/issues/6756
+        # TODO: "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
+        # TODO: "flexiblas/3.0.4" # Pending https://github.com/conan-io/conan-center-index/issues/6827
 
         if self.options.use_hdf5 == "hdf5":
             # Use the conan dependency if the system lib isn't being used
