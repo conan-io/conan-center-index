@@ -101,6 +101,9 @@ class AndreasbuhrCppCoroConan(ConanFile):
         comp.names["cmake_find_package_multi"] = "cppcoro"
         comp.libs = ["cppcoro"]
 
+        if self.settings.os == "Linux" and self.options.shared:
+            comp.system_libs = ["pthread"]
+
         if self.settings.compiler == "Visual Studio":
             comp.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
