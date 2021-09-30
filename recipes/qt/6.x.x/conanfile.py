@@ -713,6 +713,8 @@ class QtConan(ConanFile):
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+        if self.options.get_safe("qtremoteobjects"):
+            targets.append("repc")
         for target in targets:
             exe_path = None
             for path_ in ["bin/{0}{1}".format(target, extension),
@@ -1102,6 +1104,9 @@ class QtConan(ConanFile):
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
+
+        if self.options.get_safe("qtremoteobjects"):
+            _create_module("RemoteObjects")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
