@@ -18,5 +18,4 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("build", "test_package")
             self.run(bin_path, run_environment=True)
 
-        self.run("meson --version", run_environment=True)
-
+            self.run("meson --version", run_environment=True)
