@@ -195,18 +195,6 @@ class QtConan(ConanFile):
         }
 
     def configure(self):
-        # C++ minimum standard required
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
-
-        if self.options.widgets and not self.options.gui:
-            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
-                                            "You can either disable qt:widgets or enable qt:gui")
         if not self.options.gui:
             del self.options.opengl
             del self.options.with_vulkan
@@ -222,20 +210,12 @@ class QtConan(ConanFile):
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
 
-        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
-
-        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
-            raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
-
-        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
-            raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
+        if self.settings.os in ("FreeBSD", "Linux"):
+            if self.options.qtwebengine:
+                self.options.with_fontconfig = True
 
         if self.options.multiconfiguration:
             del self.settings.build_type
-
-        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
-            raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
         def _enablemodule(mod):
             if mod != "qtbase":
@@ -246,6 +226,45 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if self.options.get_safe(module):
                 _enablemodule(module)
+
+    def validate(self):
+        # C++ minimum standard required
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
+
+        if self.options.qtwebengine:
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
+
+            if not (self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel):
+                raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative, qt:qtlocation and qt:qtwebchannel")
+
+            if tools.cross_building(self.settings, skip_x64_x86=True):
+                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
+
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
+
+        if self.options.widgets and not self.options.gui:
+            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
+                                            "You can either disable qt:widgets or enable qt:gui")
+        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
+            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
+
+        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
+            raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
+
+        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
+            raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
+
+        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
+            raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
+
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -302,6 +321,9 @@ class QtConan(ConanFile):
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
+        if self.options.qtwebengine and self.settings.os == "Linux":
+            self.requires("expat/2.4.1")
+            self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -315,6 +337,49 @@ class QtConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
             self.build_requires('strawberryperl/5.30.0.1')
+
+        if self.options.qtwebengine:
+            self.build_requires("ninja/1.10.2")
+            # gperf, bison, flex, python >= 2.7.5 & < 3
+            if self.settings.os != "Windows":
+                self.build_requires("bison/3.7.1")
+                self.build_requires("gperf/3.1")
+                self.build_requires("flex/2.6.4")
+
+            # Check if a valid python2 is available in PATH or it will failflex
+            # Start by checking if python2 can be found
+            python_exe = tools.which("python2")
+            if not python_exe:
+                # Fall back on regular python
+                python_exe = tools.which("python")
+
+            if not python_exe:
+                msg = ("Python2 must be available in PATH "
+                       "in order to build Qt WebEngine")
+                raise ConanInvalidConfiguration(msg)
+
+            # In any case, check its actual version for compatibility
+            from six import StringIO  # Python 2 and 3 compatible
+            mybuf = StringIO()
+            cmd_v = "\"{}\" --version".format(python_exe)
+            self.run(cmd_v, output=mybuf)
+            verstr = mybuf.getvalue().strip().split("Python ")[1]
+            if verstr.endswith("+"):
+                verstr = verstr[:-1]
+            version = tools.Version(verstr)
+            # >= 2.7.5 & < 3
+            v_min = "2.7.5"
+            v_max = "3.0.0"
+            if (version >= v_min) and (version < v_max):
+                msg = ("Found valid Python 2 required for QtWebengine:"
+                       " version={}, path={}".format(mybuf.getvalue(), python_exe))
+                self.output.success(msg)
+            else:
+                msg = ("Found Python 2 in path, but with invalid version {}"
+                       " (QtWebEngine requires >= {} & < "
+                       "{})\nIf you have both Python 2 and 3 installed, copy the python 2 executable to"
+                       "python2(.exe)".format(verstr, v_min, v_max))
+                raise ConanInvalidConfiguration(msg)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -332,6 +397,11 @@ class QtConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+            tools.replace_in_file(os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                  "  if (enable_precompiled_headers) {\n    if (false) {"
+                                  )
 
         tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
                               "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t)",
@@ -1024,6 +1094,14 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebchannel"):
             _create_module("WebChannel", ["Qml"])
+
+        if self.options.get_safe("qtwebengine"):
+            webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
+            if self.settings.os == "Linux":
+                webenginereqs.extend(["expat::expat", "opus::libopus"])
+            _create_module("WebEngineCore", webenginereqs)
+            _create_module("WebEngine", ["WebEngineCore"])
+            _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
