@@ -1108,6 +1108,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtremoteobjects"):
             _create_module("RemoteObjects")
 
+        if self.options.get_safe("qtwebview"):
+            _create_module("WebView", ["Core", "Gui"])
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
