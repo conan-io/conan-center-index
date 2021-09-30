@@ -44,7 +44,10 @@ class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
                    "qtwayland","qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat",
                    "qtactiveqt", "qtcharts", "qtdatavis3d", "qtlottie", "qtscxml", "qtvirtualkeyboard",
-                   "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua"]
+                   "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
+                   "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
+                   "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
+                   "qtremoteobjects"]
 
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
@@ -232,7 +235,7 @@ class QtConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.with_pcre2:
             self.requires("pcre2/10.37")
         if self.options.get_safe("with_vulkan"):
@@ -284,7 +287,7 @@ class QtConan(ConanFile):
             self.requires("dbus/1.12.20")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.20.4")
+        self.build_requires("cmake/3.21.3")
         self.build_requires("ninja/1.10.2")
         self.build_requires("pkgconf/1.7.4")
         if self.settings.compiler == "Visual Studio":
@@ -848,7 +851,7 @@ class QtConan(ConanFile):
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.qtquickcontrols2 and self.options.gui:
+        if self.options.get_safe("qtquickcontrols2") and self.options.gui:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
