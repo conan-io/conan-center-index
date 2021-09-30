@@ -80,6 +80,10 @@ class QtConan(ConanFile):
         "with_zstd": [True, False],
         "with_brotli": [True, False],
         "with_dbus": [True, False],
+        "with_libalsa": [True, False],
+        "with_openal": [True, False],
+        "with_gstreamer": [True, False],
+        "with_pulseaudio": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -115,6 +119,10 @@ class QtConan(ConanFile):
         "with_zstd": False,
         "with_brotli": True,
         "with_dbus": False,
+        "with_libalsa": False,
+        "with_openal": True,
+        "with_gstreamer": False,
+        "with_pulseaudio": False,
 
         "gui": True,
         "widgets": True,
@@ -165,6 +173,7 @@ class QtConan(ConanFile):
             del self.options.with_icu
             del self.options.with_fontconfig
             self.options.with_glib = False
+            del self.options.with_libalsa
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
@@ -206,6 +215,12 @@ class QtConan(ConanFile):
             del self.options.with_harfbuzz
             del self.options.with_libjpeg
             del self.options.with_libpng
+
+        if not self.options.qtmultimedia:
+            del self.options.with_libalsa
+            del self.options.with_openal
+            del self.options.with_gstreamer
+            del self.options.with_pulseaudio
 
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
@@ -271,6 +286,10 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.9")
+        if self.options.get_safe("with_openal", False):
+            self.requires("openal/1.21.0")
+        if self.options.get_safe("with_libalsa", False):
+            self.requires("libalsa/1.2.4")
         if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
@@ -283,6 +302,10 @@ class QtConan(ConanFile):
             self.requires("wayland/1.19.0")
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
+        if self.options.get_safe("with_gstreamer", False):
+            self.requires("gst-plugins-base/1.19.1")
+        if self.options.get_safe("with_pulseaudio", False):
+            self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
 
@@ -926,6 +949,37 @@ class QtConan(ConanFile):
             _create_module("OpcUa", ["Network"])
             _create_plugin("QOpen62541Plugin", "open62541_backend", "opcua", ["Network", "OpcUa"])
             _create_plugin("QUACppPlugin", "uacpp_backend", "opcua", ["Network", "OpcUa"])
+
+        if self.options.get_safe("qtmultimedia"):
+            multimedia_reqs = ["Network", "Gui"]
+            if self.options.get_safe("with_libalsa", False):
+                multimedia_reqs.append("libalsa::libalsa")
+            if self.options.with_openal:
+                multimedia_reqs.append("openal::openal")
+            if self.options.get_safe("with_pulseaudio", False):
+                multimedia_reqs.append("pulseaudio::pulse")
+            _create_module("Multimedia", multimedia_reqs)
+            _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
+            if self.options.qtdeclarative and self.options.gui:
+                _create_module("MultimediaQuick", ["Multimedia", "Quick"])
+            _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
+            if self.options.with_gstreamer:
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
+                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
+                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
+            if self.settings.os == "Linux":
+                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+            if self.settings.os == "Windows":
+                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
+                _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
+                _create_plugin("QWindowsAudioPlugin", "qtaudio_windows", "audio", [])
+            if self.settings.os == "Macos":
+                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
+                _create_plugin("AVFMediaPlayerServicePlugin", "qavfmediaplayer", "mediaservice", [])
+                _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
+                _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
 
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
