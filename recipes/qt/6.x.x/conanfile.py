@@ -397,11 +397,12 @@ class QtConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            tools.replace_in_file(os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                  "  if (enable_precompiled_headers) {\n    if (false) {"
-                                  )
+        if tools.Version(self.version) >= "6.2.0":
+            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+                tools.replace_in_file(os.path.join(self.source_folder, "qt6", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                      "  if (enable_precompiled_headers) {\n    if (false) {"
+                                      )
 
         tools.replace_in_file(os.path.join("qt6", "qtbase", "cmake", "QtInternalTargets.cmake"),
                               "target_compile_options(PlatformCommonInternal INTERFACE -Zc:wchar_t)",
