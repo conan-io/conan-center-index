@@ -1019,6 +1019,12 @@ class QtConan(ConanFile):
             _create_plugin("TinyCanBusPlugin", "qttinycanbus", "canbus", [])
             _create_plugin("VirtualCanBusPlugin", "qtvirtualcanbus", "canbus", [])
 
+        if self.options.get_safe("qtwebsockets"):
+            _create_module("WebSockets", ["Network"])
+
+        if self.options.get_safe("qtwebchannel"):
+            _create_module("WebChannel", ["Qml"])
+
         if self.settings.os != "Windows":
             self.cpp_info.components["qtCore"].cxxflags.append("-fPIC")
 
