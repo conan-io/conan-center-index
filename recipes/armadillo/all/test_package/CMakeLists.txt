@@ -8,3 +8,4 @@ find_package(armadillo REQUIRED)
 
 add_executable(example example.cpp)
 target_link_libraries(example armadillo::armadillo)
+set_property(TARGET example PROPERTY CXX_STANDARD 11)
