@@ -105,6 +105,7 @@ class GStPluginsBaseConan(ConanFile):
                 self.requires("egl/system")
             if self.options.get_safe("with_wayland"):
                 self.requires("wayland/1.19.0")
+                self.requires("wayland-protocols/1.23")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.6")
             if self.options.with_libpng:
