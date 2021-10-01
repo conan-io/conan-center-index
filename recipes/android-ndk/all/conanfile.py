@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class AndroidNDKConan(ConanFile):
     name = "android-ndk"
@@ -22,18 +24,10 @@ class AndroidNDKConan(ConanFile):
         return "source_subfolder"
 
     def _settings_os_supported(self):
-        try:
-            self.conan_data["sources"][self.version][str(self.settings.os)]
-            return True
-        except KeyError:
-            return False
+        return self.conan_data["sources"][self.version].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        try:
-            self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
-            return True
-        except KeyError:
-            return False
+        return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
@@ -44,6 +38,14 @@ class AndroidNDKConan(ConanFile):
     def build(self):
         tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
             destination=self._source_subfolder, strip_root=True)
+
+    def package(self):
+        self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
+        self.copy("*NOTICE", src=self._source_subfolder, dst="licenses")
+        self.copy("*NOTICE.toolchain", src=self._source_subfolder, dst="licenses")
+        self.copy("cmake-wrapper.cmd")
+        self.copy("cmake-wrapper")
+        self._fix_permissions()
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 
@@ -112,14 +114,6 @@ class AndroidNDKConan(ConanFile):
                          sig == [0xCE, 0xFA, 0xED, 0xFE]:
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
-
-    def package(self):
-        self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
-        self.copy("*NOTICE", src=self._source_subfolder, dst="licenses")
-        self.copy("*NOTICE.toolchain", src=self._source_subfolder, dst="licenses")
-        self.copy("cmake-wrapper.cmd")
-        self.copy("cmake-wrapper")
-        self._fix_permissions()
 
     @property
     def _host(self):
