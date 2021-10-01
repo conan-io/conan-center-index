@@ -86,7 +86,7 @@ class opengvConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         # Use conan's Eigen
         old = """\
             find_package(Eigen REQUIRED)
@@ -121,6 +121,8 @@ class opengvConan(ConanFile):
                             textwrap.dedent(new)
         )
 
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
