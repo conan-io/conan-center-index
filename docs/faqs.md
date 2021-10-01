@@ -286,20 +286,6 @@ instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the follo
 
 **NOTE**: These references are not availabe in ConanCenter and will be never available! it's consumer's responsibility to provide the recipes for that libraries.
 
-for instance, the following skeleton could be used as a starting point (given Intel MKL as an example):
-
-```
-from conans import ConanFile, tools
-
-class ConanMKL(ConanFile):
-    name = "intel-mkl"
-
-    def package_info(self):
-        self.cpp_info.includedirs = ["/opt/intel/mkl/include"]
-        self.cpp_info.libdirs = ["/opt/intel/mkl/lib"]
-```
-
-(most likely, the real recipe will use much more sophisticated logic to locate an existing installation, e.g. via environment variables)
 
 Since these references will be never available in ConanCenter, they will be deactivated in the consuming recipes by default:
 
