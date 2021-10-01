@@ -138,4 +138,4 @@ class SQLiteCppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
             if not self.options.omit_load_extension:
-                self.cpp_info.components["sqlite"].system_libs.append("dl")
+                self.cpp_info.system_libs.append("dl")
