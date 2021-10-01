@@ -269,6 +269,12 @@ class ArrowConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.cross_building(self.settings):
+            cmake_system_processor = {
+                "armv8": "aarch64",
+                "armv8.3": "aarch64",
+            }.get(str(self.settings.arch), str(self.settings.arch))
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = cmake_system_processor
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
