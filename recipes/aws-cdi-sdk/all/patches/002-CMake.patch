@@ -1,14 +1,14 @@
-commit d58e79a4914d8d8d8bfad3a3d059ff169cb87077
+commit 4fe441915dfd5a5e07b8a9c39bc59d64a60da633
 Author: dvirtz <dvirtz@gmail.com>
 Date:   Mon Jul 5 09:51:24 2021 +0300
 
     build standalone cmake
 
 diff --git a/aws-cpp-sdk-cdi/CMakeLists.txt b/aws-cpp-sdk-cdi/CMakeLists.txt
-index 9ca1679..193e136 100644
+index 9ca1679..3b24073 100644
 --- a/aws-cpp-sdk-cdi/CMakeLists.txt
 +++ b/aws-cpp-sdk-cdi/CMakeLists.txt
-@@ -1,4 +1,32 @@
+@@ -1,4 +1,34 @@
 -add_project(aws-cpp-sdk-cdi "C++ SDK for the AWS cdi service" aws-cpp-sdk-core)
 +find_package(AWSSDK COMPONENTS aws-sdk-cpp-core)
 +
@@ -32,6 +32,8 @@ index 9ca1679..193e136 100644
 +else()
 +    set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
 +endif()
++
++set(CPP_STANDARD "11" CACHE STRING "Flag to upgrade the C++ standard used. The default is 11. The minimum is 11.")
 +
 +include(CMakePackageConfigHelpers)
 +include(cmake/initialize_project_version.cmake)

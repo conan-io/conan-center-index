@@ -2,6 +2,7 @@ from enum import auto
 from conans import ConanFile, AutoToolsBuildEnvironment, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
+import re
 
 required_conan_version = ">=1.35.0"
 
@@ -16,6 +17,9 @@ class AwsCdiSdkConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     requires = "aws-libfabric/1.9.1amzncdi1.0", "aws-sdk-cpp/1.8.130"
+    default_options = {
+        "aws-libfabric:shared": True
+    }
 
     @property
     def _source_subfolder(self):
@@ -24,19 +28,17 @@ class AwsCdiSdkConan(ConanFile):
     _autotools = None
     _cmake = None
 
-    def configure(self):
-        self.options["aws-sdk-cpp"].monitoring = True
-        self.options["aws-sdk-cpp"].shared = True
-        self.options["aws-libfabric"].shared = True
-
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("The aws-cdi-sdk con only be built on Linux.")
+            raise ConanInvalidConfiguration("This recipe currently only supports Linux. Feel free to contribute other platforms!")
         elif (self.settings.compiler == "gcc"
                 and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
             See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
+        if not self.options["aws-libfabric"].shared:
+            raise ConanInvalidConfiguration("Cannot build with static libfabric library")
+        tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -52,9 +54,14 @@ class AwsCdiSdkConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CPP_STANDARD"] = self._cmake.definitions.get("CONAN_CMAKE_CXX_STANDARD", "11")
         self._cmake.configure()
         return self._cmake
+
+    def _detect_compilers(self):
+        cmake_cache = tools.load(os.path.join(self.build_folder, "CMakeCache.txt"))
+        cc = re.search("CMAKE_C_COMPILER:FILEPATH=(.*)", cmake_cache)[1]
+        cxx = re.search("CMAKE_CXX_COMPILER:FILEPATH=(.*)", cmake_cache)[1]
+        return cc, cxx
 
     def build(self):        
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -68,6 +75,9 @@ class AwsCdiSdkConan(ConanFile):
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
             vars = autotools.vars
+            cc, cxx = self._detect_compilers()
+            vars["CC"] = cc
+            vars["CXX"] = cxx
             # configure autotools to find aws-cpp-sdk-cdi
             vars["CXXFLAGS"] += " -I{}".format(os.path.join(self.package_folder, 'include'))
             vars["LDFLAGS"] += " -L{}".format(os.path.join(self.package_folder, 'lib'))
