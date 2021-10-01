@@ -14,8 +14,10 @@ class UsocketsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
                "with_ssl": [False, "openssl", "wolfssl"],
-               "with_libuv": [True, False]}
-    default_options = {"fPIC": True, "with_ssl": False, "with_libuv": True}
+               "eventloop": ["default", "libuv", "gcd", "asio"]}
+    default_options = {"fPIC": True,
+                       "with_ssl": False,
+                       "eventloop": "default"}
     exports_sources = "patches/**"
 
     @property
@@ -26,17 +28,77 @@ class UsocketsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _minimum_compilers_version(self, cppstd):
+        standards = {
+            "14": {
+                "Visual Studio": "15",
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "10",
+            },
+            "17": {
+                "Visual Studio": "16",
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10",
+            },
+        }
+        return standards.get(cppstd) or {}
+
+    @property
+    def _cppstd(self):
+        version = False
+        if self.options.eventloop == "asio":
+            version = "14"
+
+        # OpenSSL wrapper of uSockets uses C++17 features.
+        if self.options.with_ssl == "openssl":
+            version = "17"
+
+        return version
+
+    def validate(self):
+        if self.options.eventloop == "gcd":
+            if self.settings.os != "Linux" or self.settings.compiler != "clang" :
+                raise ConanInvalidConfiguration("gcd eventloop is only supported on Linux with clang")
+
+        if self.options.eventloop == "asio" and tools.Version(self.version) < "0.8.0":
+            raise ConanInvalidConfiguration("asio eventloop is only supported on uSockets >= 0.8.0")
+
+        cppstd = self._cppstd
+        if cppstd == False:
+            return
+        cppstd = str(cppstd)
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, cppstd)
+
+        minimum_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cppstd))
+        else:
+            self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, cppstd))
+
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        if bool(self._cppstd) == False:
+            del self.settings.compiler.cppstd
+            del self.settings.compiler.libcxx
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.6.0")
-        if self.options.with_libuv:
-            self.requires("libuv/1.41.0")
+            self.requires("wolfssl/4.8.1")
+
+        if self.options.eventloop == "default" and self.settings.os == "Windows":
+            self.requires("libuv/1.41.1")
+        elif self.options.eventloop == "libuv":
+            self.requires("libuv/1.41.1")
+        elif self.options.eventloop == "gcd":
+            self.requires("libdispatch/5.3.2")
+        elif self.options.eventloop == "asio":
+            self.requires("boost/1.77.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,9 +122,16 @@ class UsocketsConan(ConanFile):
                 args.append("WITH_OPENSSL=1")
             elif self.options.with_ssl == "wolfssl":
                 args.append("WITH_WOLFSSL=1")
-            if self.options.with_libuv:
+
+            if self.options.eventloop == "default" and self.settings.os == "Windows":
                 args.append("WITH_LIBUV=1")
-            # set CPPFLAGS, CFLAGS and LDFLAGS
+            elif self.options.eventloop == "libuv":
+                args.append("WITH_LIBUV=1")
+            elif self.options.eventloop == "gcd":
+                args.append("WITH_GCD=1")
+            elif self.options.eventloop == "asio":
+                args.append("WITH_ASIO=1")
+
             args.extend("{}={}".format(key, value) for key, value in autotools.vars.items())
             autotools.make(target="default", args=args)
 
@@ -86,11 +155,19 @@ class UsocketsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
+
         if self.options.with_ssl == "openssl":
             self.cpp_info.defines.append("LIBUS_USE_OPENSSL")
         elif self.options.with_ssl == "wolfssl":
             self.cpp_info.defines.append("LIBUS_USE_WOLFSSL")
         else:
             self.cpp_info.defines.append("LIBUS_NO_SSL")
-        if self.options.with_libuv:
+
+        if self.options.eventloop == "default" and self.settings.os == "Windows":
             self.cpp_info.defines.append("LIBUS_USE_LIBUV")
+        elif self.options.eventloop == "libuv":
+            self.cpp_info.defines.append("LIBUS_USE_LIBUV")
+        elif self.options.eventloop == "gcd":
+            self.cpp_info.defines.append("LIBUS_USE_GCD")
+        elif self.options.eventloop == "asio":
+            self.cpp_info.defines.append("LIBUS_USE_ASIO")
