@@ -272,7 +272,7 @@ There are several popular software libraries provided by Intel:
 
 these Intel libraries are widely used by the various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
 
-unfortunately, these Intel libraries cannot be accepted into ConanCenter due to the several important reasons:
+Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
 
 * they are closed-source and commercial products, ConanCenter cannot redistribute their binaries due to the license restrictions
 * registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
