@@ -270,7 +270,7 @@ There are several popular software libraries provided by Intel:
 * [Intel Integrated Performance Primitives (IPP)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/ipp.html)
 * [Intel Deep Neural Networking Library (DNN)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onednn.html)
 
-these Intel libraries are widely used by the various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
+these Intel libraries are widely used by various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
 
 Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
 
