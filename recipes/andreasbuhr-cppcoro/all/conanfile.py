@@ -103,6 +103,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
         if self.settings.os == "Linux" and self.options.shared:
             comp.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            comp.system_libs = ["synchronization"]
 
         if self.settings.compiler == "Visual Studio":
             comp.cxxflags.append("/await")
