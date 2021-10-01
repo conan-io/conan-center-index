@@ -1,5 +1,9 @@
 # Changelog
 
+### 01-October-2021 - 13:08 CEST
+
+- [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)
+
 ### 21-September-2021 - 12:09 CEST
 
 - [config] Upgrade Conan version to 1.39.0.
