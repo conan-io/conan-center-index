@@ -302,7 +302,7 @@ class ConanMKL(ConanFile):
 
 (most likely, the real recipe will use much more sophisticated logic to locate an existing installation, e.g. via environment variables)
 
-since these references will be never available in ConanCenter, they should be deactivated in the consuming recipes by default:
+Since these references will be never available in ConanCenter, they will be deactivated in the consuming recipes by default:
 
 ```
     options = {
