@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -51,6 +52,13 @@ class opengvConan(ConanFile):
                 endif()
             """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
+
+    def validate(self):
+        # Disable release windows builds since they error out.
+        # On CCI the builds report 'fatal error C1002: compiler is out of heap space in pass 2'
+        # Locally I can't reproduce it. For me it gets stuck doing nothing after some point.
+        if self.settings.os == "Windows" and self.settings.build_type == "Release":
+            raise ConanInvalidConfiguration("Release builds on Windows not supported by this recipe.")
 
     def config_options(self):
         if self.settings.os == "Windows":
