@@ -560,7 +560,9 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.get_safe("with_xorg"):
                 self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
             if self.options.get_safe("with_wayland"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl"])
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend([
+                    "wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl",
+                    "wayland-protocols::wayland-protocols"])
             if self.settings.os == "Windows":
                 self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
             if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
@@ -578,7 +580,9 @@ class GStPluginsBaseConan(ConanFile):
 
             if self.options.get_safe("with_wayland"):
                 self.cpp_info.components["gstreamer-gl-wayland-1.0"].names["pkg_config"] = "gstreamer-gl-wayland-1.0"
-                self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = ["gstreamer-gl-1.0", "wayland::wayland-client", "wayland::wayland-egl"]
+                self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = [
+                    "gstreamer-gl-1.0", "wayland::wayland-client", "wayland::wayland-egl",
+                    "wayland-protocols::wayland-protocols"]
 
             if self.options.get_safe("with_xorg"):
                 self.cpp_info.components["gstreamer-gl-x11-1.0"].names["pkg_config"] = "gstreamer-gl-x11-1.0"
