@@ -277,7 +277,6 @@ unfortunately, these Intel libraries cannot be accepted into ConanCenter due to 
 * they are closed-source and commercial products, which we're not going to re-distribute via ConanCenter due to the license restrictions
 * registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
 * they use graphical installers which are hard to automate within conan recipe
-* they are pre-built binaries, so they will never respect any custom compiler flags specified
 
 instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the following references:
 
