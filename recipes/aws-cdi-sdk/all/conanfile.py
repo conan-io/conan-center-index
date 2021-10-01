@@ -18,7 +18,8 @@ class AwsCdiSdkConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     requires = "aws-libfabric/1.9.1amzncdi1.0", "aws-sdk-cpp/1.8.130"
     default_options = {
-        "aws-libfabric:shared": True
+        "aws-libfabric:shared": True,
+        "aws-sdk-cpp:shared": True
     }
 
     @property
@@ -36,8 +37,8 @@ class AwsCdiSdkConan(ConanFile):
                 and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
             See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
-        if not self.options["aws-libfabric"].shared:
-            raise ConanInvalidConfiguration("Cannot build with static libfabric library")
+        if not self.options["aws-libfabric"].shared or self.options["aws-sdk-cpp"].shared:
+            raise ConanInvalidConfiguration("Cannot build with static dependencies")
         tools.check_min_cppstd(self, 11)
 
     def source(self):
