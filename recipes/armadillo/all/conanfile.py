@@ -72,7 +72,7 @@ class ArmadilloConan(ConanFile):
             "use_lapack",
         ],
     }
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = (
         "cmake",
         "cmake_find_package",
@@ -123,7 +123,7 @@ class ArmadilloConan(ConanFile):
                 "framework_accelerate can only be used on Macos"
             )
 
-        for value, options in self.co_dependencies.items():
+        for value, options in self._co_dependencies.items():
             options_without_value = [
                 x for x in options if getattr(self.options, x) != value
             ]
@@ -147,8 +147,6 @@ class ArmadilloConan(ConanFile):
 
     def requirements(self):
         # Optional requirements
-        openblas = "openblas/0.3.15"
-        hdf5 = "hdf5/1.12.0"
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
         # TODO: "superlu/5.2.2" # Pending https://github.com/conan-io/conan-center-index/issues/6756
         # TODO: "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
@@ -156,11 +154,11 @@ class ArmadilloConan(ConanFile):
 
         if self.options.use_hdf5 == "hdf5":
             # Use the conan dependency if the system lib isn't being used
-            self.requires(hdf5)
+            self.requires("hdf5/1.12.0")
             self.options["hdf5"].shared = self.options.shared
 
         if self.options.use_blas == "openblas":
-            self.requires(openblas)
+            self.requires("openblas/0.3.15")
             # Note that if you're relying on this to build LAPACK, you _must_ have
             # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
             # without LAPACK support, which isn't obvious.
@@ -236,107 +234,13 @@ class ArmadilloConan(ConanFile):
                 name=self.name, version=self.version
             ),
         )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindBLAS)",
-            """
-if(USE_SYSTEM_BLAS)
-  include(ARMA_FindBLAS)
-else()
-  set(BLAS_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindOpenBLAS)",
-            """
-if(USE_SYSTEM_OPENBLAS)
-  include(ARMA_FindOpenBLAS)
-elseif(USE_OPENBLAS)
-  find_package(OpenBLAS)
-else()
-  set(OpenBLAS_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindFlexiBLAS)",
-            """
-if(USE_SYSTEM_FLEXIBLAS)
-  include(ARMA_FindFlexiBLAS)
-else()
-  set(FlexiBLAS_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindMKL)",
-            """
-if(USE_SYSTEM_MKL)
-  include(ARMA_FindMKL)
-else()
-  set(MKL_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindLAPACK)",
-            """
-if(USE_SYSTEM_LAPACK)
-  include(ARMA_FindLAPACK)
-else()
-  set(LAPACK_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindARPACK)",
-            """
-if(USE_SYSTEM_ARPACK)
-  include(ARMA_FindARPACK)
-else()
-  set(ARPACK_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindSuperLU5)",
-            """
-if(USE_SYSTEM_SUPERLU)
-  include(ARMA_FindSuperLU5)
-else()
-  set(SuperLU_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "include(ARMA_FindATLAS)",
-            """
-if(USE_SYSTEM_ATLAS)
-  include(ARMA_FindATLAS)
-else()
-  set(ATLAS_FOUND NO)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "list(GET HDF5_INCLUDE_DIRS 0 ARMA_HDF5_INCLUDE_DIR)",
-            """
-if(NOT USE_SYSTEM_HDF5)
-  list(GET HDF5_INCLUDE_DIRS 1 ARMA_HDF5_INCLUDE_DIR)
-else()
-  list(GET HDF5_INCLUDE_DIRS 0 ARMA_HDF5_INCLUDE_DIR)
-endif()""",
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper1.cpp ${PROJECT_SOURCE_DIR}/src/wrapper2.cpp )",
-            """set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper1.cpp ${PROJECT_SOURCE_DIR}/src/wrapper2.cpp )
-            """,
-        )
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
