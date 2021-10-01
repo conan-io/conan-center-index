@@ -1,6 +1,6 @@
+#include <fontconfig/fontconfig.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fontconfig/fontconfig.h>
 
 int main() {
 	FcConfig* config = FcInitLoadConfigAndFonts();
