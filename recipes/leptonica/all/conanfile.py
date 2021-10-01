@@ -10,7 +10,7 @@ class LeptonicaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Library containing software that is broadly useful for " \
                   "image processing and image analysis applications."
-    topics = ("conan", "leptonica", "image", "multimedia", "format", "graphics")
+    topics = ("leptonica", "image", "multimedia", "format", "graphics")
     homepage = "http://leptonica.org"
     license = "BSD 2-Clause"
 
@@ -81,9 +81,8 @@ class LeptonicaConan(ConanFile):
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
