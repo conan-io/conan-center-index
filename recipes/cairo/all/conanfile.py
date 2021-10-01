@@ -75,14 +75,14 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.69.2")
+            self.requires("glib/2.70.0")
         self.requires("zlib/1.2.11")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.37")
