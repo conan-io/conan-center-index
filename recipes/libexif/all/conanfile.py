@@ -37,6 +37,7 @@ class LibexifConan(ConanFile):
             with tools.vcvars(self):
                 env = {
                     "CC": "cl -nologo",
+                    "AR": "lib",
                     "LD": "link -nologo",
                 }
                 with tools.environment_append(env):
@@ -67,6 +68,7 @@ class LibexifConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
+        self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
