@@ -3,6 +3,9 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
+required_conan_version = ">=1.33.0"
+
+
 class ArrowConan(ConanFile):
     name = "arrow"
     description = "Apache Arrow is a cross-language development platform for in-memory data"
@@ -259,9 +262,8 @@ class ArrowConan(ConanFile):
             self.requires("re2/20201101")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "arrow-apache-arrow-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
