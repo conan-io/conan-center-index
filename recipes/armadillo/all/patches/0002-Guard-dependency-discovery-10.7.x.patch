@@ -1,15 +1,16 @@
-From 28effec8dbc91da8e30f42d11f1d96dc636db47f Mon Sep 17 00:00:00 2001
+From 248c4a45c8b0b2c02729c93a02f81840d2a8819a Mon Sep 17 00:00:00 2001
 From: Samuel Dowling <samuel.dowling@protonmail.com>
 Date: Thu, 30 Sep 2021 23:51:35 +0930
 Subject: [PATCH] Guard dependency discovery
 
 * Add guards to prevent usage of custom cmake find package scripts.
+* Export all symbols on windows
 ---
- CMakeLists.txt | 81 ++++++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 69 insertions(+), 12 deletions(-)
+ CMakeLists.txt | 83 ++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 70 insertions(+), 13 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7857f8c..31cdb8e 100644
+index 7857f8c..00d80b0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -274,7 +274,13 @@ if(APPLE)
@@ -137,6 +138,15 @@ index 7857f8c..31cdb8e 100644
  message(STATUS "SuperLU_FOUND = ${SuperLU_FOUND}")
  
  if(SuperLU_FOUND)
+@@ -552,7 +609,7 @@ message(STATUS "CMAKE_CXX_FLAGS           = ${CMAKE_CXX_FLAGS}"          )
+ message(STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}")
+ message(STATUS "CMAKE_REQUIRED_INCLUDES   = ${CMAKE_REQUIRED_INCLUDES}"  )
+ 
+-
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper1.cpp ${PROJECT_SOURCE_DIR}/src/wrapper2.cpp )
+ target_link_libraries( armadillo ${ARMA_LIBS} )
+ # target_include_directories(armadillo INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 -- 
 2.33.0
 

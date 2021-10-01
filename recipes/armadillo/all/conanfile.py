@@ -27,7 +27,6 @@ class ArmadilloConan(ConanFile):
         "use_blas": [
             False,
             "openblas",
-            "system_openblas",
             "system_blas",
             "system_mkl",
             "system_flexiblas",
@@ -36,13 +35,12 @@ class ArmadilloConan(ConanFile):
         "use_lapack": [
             False,
             "openblas",
-            "system_openblas",
             "system_lapack",
             "system_mkl",
             "system_atlas",
             "framework_accelerate",
         ],
-        "use_hdf5": [False, "hdf5", "system_hdf5"],
+        "use_hdf5": [False, "hdf5"],
         "use_superlu": [False, "system_superlu"],
         "use_extern_rng": [True, False],
         "use_arpack": [False, "system_arpack"],
