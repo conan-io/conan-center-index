@@ -195,14 +195,10 @@ class ArmadilloConan(ConanFile):
         self._cmake.definitions["USE_SYSTEM_ATLAS"] = (
             self.options.use_lapack == "system_atlas"
         )
-        self._cmake.definitions["USE_SYSTEM_HDF5"] = (
-            self.options.use_hdf5 == "system_hdf5"
-        )
+        self._cmake.definitions["USE_SYSTEM_HDF5"] = False
         self._cmake.definitions["USE_SYSTEM_ARPACK"] = self.options.use_arpack
         self._cmake.definitions["USE_SYSTEM_SUPERLU"] = self.options.use_superlu
-        self._cmake.definitions["USE_SYSTEM_OPENBLAS"] = (
-            self.options.use_blas == "system_openblas"
-        )
+        self._cmake.definitions["USE_SYSTEM_OPENBLAS"] = False
         self._cmake.definitions["USE_SYSTEM_FLEXIBLAS"] = (
             self.options.use_blas == "system_flexiblas"
         )
@@ -214,7 +210,6 @@ class ArmadilloConan(ConanFile):
         )
         self._cmake.definitions["ALLOW_OPENBLAS_MACOS"] = (
             self.options.use_blas == "openblas"
-            or self.options.use_blas == "system_openblas"
         ) and self.settings.os == "Macos"
         self._cmake.definitions["ALLOW_BLAS_LAPACK_MACOS"] = (
             self.options.use_blas != "framework_accelerate"
@@ -270,10 +265,6 @@ class ArmadilloConan(ConanFile):
 
         if self.options.use_hdf5:
             self.cpp_info.defines.append("ARMA_USE_HDF5")
-            if self.options.use_hdf5 == "system_hdf5" and not self.options.use_wrapper:
-                self.cpp_info.system_libs.extend(
-                    ["hdf5", "hdf5_cpp", "hdf5_hl", "hdf5_hl_cpp"]
-                )
         else:
             self.cpp_info.defines.append("ARMA_DONT_USE_HDF5")
 
