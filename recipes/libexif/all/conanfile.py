@@ -62,8 +62,6 @@ class LibexifConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=self._settings_build.os == "Windows")
         autotools = self._configure_autotools()
         autotools.make()
 
