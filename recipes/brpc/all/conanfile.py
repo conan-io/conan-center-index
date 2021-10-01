@@ -6,7 +6,7 @@ from conans.tools import Version
 
 class BRPCCppConan(ConanFile):
     name = "brpc"
-    description = "Industrial-grade RPC framework used throughout Baidu, with 1,000,000+ instances and thousands kinds of services. 'brpc' means 'better RPC'."
+    description = "Industrial-grade RPC framework used throughout Baidu, with 1,000,000+ instances and thousands kinds of services. `brpc` means `better RPC`."
     url = "https://github.com/apache/incubator-brpc"
     homepage = "https://brpc.apache.org/"
     topics = ("conan", "bprc", "apache", "baidu", "rpc")
