@@ -19,11 +19,13 @@ class SQLiteCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "lint": [True, False, "deprecated"],
+        "omit_load_extension": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "lint": "deprecated",
+        "omit_load_extension": False,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/*"]
@@ -86,6 +88,7 @@ class SQLiteCppConan(ConanFile):
         self._cmake.definitions["SQLITECPP_RUN_DOXYGEN"] = False
         self._cmake.definitions["SQLITECPP_BUILD_EXAMPLES"] = False
         self._cmake.definitions["SQLITECPP_BUILD_TESTS"] = False
+        self._cmake.definitions["SQLITE_OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -133,4 +136,6 @@ class SQLiteCppConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.libs = ["SQLiteCpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "dl", "m"]
+            self.cpp_info.system_libs = ["pthread", "m"]
+            if not self.options.omit_load_extension:
+                self.cpp_info.components["sqlite"].system_libs.append("dl")
