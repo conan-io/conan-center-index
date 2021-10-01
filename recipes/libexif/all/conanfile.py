@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import contextlib
 import os
 
 required_conan_version = ">=1.33.0"
@@ -29,6 +30,19 @@ class LibexifConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self):
+                env = {
+                    "CC": "cl -nologo",
+                    "LD": "link -nologo",
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -62,13 +76,15 @@ class LibexifConan(ConanFile):
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.remove_files_by_mask(self.package_folder, "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
