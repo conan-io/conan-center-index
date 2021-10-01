@@ -140,7 +140,7 @@ class AndroidNDKInstallerConan(ConanFile):
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
         self.env_info.PATH.append(self.package_folder)
 
-        # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located. 
+        # You should use the ANDROID_NDK_ROOT environment variable to indicate where the NDK is located.
         # That's what most NDK-related scripts use (inside the NDK, and outside of it).
         # https://groups.google.com/g/android-ndk/c/qZjhOaynHXc
         self.output.info('Creating ANDROID_NDK_ROOT environment variable: %s' % self.package_folder)
@@ -162,9 +162,29 @@ class AndroidNDKInstallerConan(ConanFile):
         if not self.settings_target.os == "Android":
             return
 
+        cmake_system_processor = {
+            "x86_64": "x86_64",
+            "x86": "i686",
+            "mips": "mips",
+            "mips64": "mips64",
+        }.get(str(self.settings.arch))
+        if self.settings_target.arch == "armv8":
+            cmake_system_processor = "aarch64"
+        elif "armv7" in str(self.settings.arch):
+            cmake_system_processor = "armv7-a"
+        elif "armv6" in str(self.settings.arch):
+            cmake_system_processor = "armv6"
+        elif "armv5" in str(self.settings.arch):
+            cmake_system_processor = "armv5te"
+        if cmake_system_processor:
+            self.output.info('Creating CONAN_CMAKE_SYSTEM_PROCESSOR environment variable: %s' % cmake_system_processor)
+            self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = cmake_system_processor
+        else:
+            self.output.warn("Could not find a valid CMAKE_SYSTEM_PROCESSOR variable, supported by CMake")
+
         self.output.info('Creating NDK_ROOT environment variable: %s' % self._ndk_root)
         self.env_info.NDK_ROOT = self._ndk_root
-        
+
         self.output.info('Creating CHOST environment variable: %s' % self._llvm_triplet)
         self.env_info.CHOST = self._llvm_triplet
 
