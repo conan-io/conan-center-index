@@ -24,10 +24,10 @@ class AndroidNDKConan(ConanFile):
         return "source_subfolder"
 
     def _settings_os_supported(self):
-        return self.conan_data["sources"][self.version].get(str(self.settings.os)) is not None
+        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os)) is not None
 
     def _settings_arch_supported(self):
-        return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
+        return self.conan_data["sources"][self.version]["url"].get(str(self.settings.os), {}).get(str(self.settings.arch)) is not None
 
     def validate(self):
         if not self._settings_os_supported():
