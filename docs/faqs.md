@@ -323,7 +323,7 @@ therefore, consumers will have to activate an option (`with_intel_mkl`) explicit
 
 consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
 
-for instance, if you have a reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your conanfile:
+For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
 ```
 [requires]
 intel-mkl/2021@mycompany/stable
