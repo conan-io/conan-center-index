@@ -285,7 +285,7 @@ instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the follo
 * `intel-ipp/<version>`, e.g. `intel-ipp/2021`
 * `intel-dnn/<version>`, e.g. `intel-dnn/2021`
 
-NOTE: these references are not availabe in ConanCenter and will be never available! it's consumer's responsibility to provide the recipes for that libraries.
+**NOTE**: These references are not availabe in ConanCenter and will be never available! it's consumer's responsibility to provide the recipes for that libraries.
 
 for instance, the following skeleton could be used as a starting point (given Intel MKL as an example):
 
