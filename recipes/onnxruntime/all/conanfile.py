@@ -81,7 +81,6 @@ class OnnxRuntimeConan(ConanFile):
         if self.settings.os == "Android" or self.settings.os == "iOS":
             self.options["flatbuffers"].flatc = False
 
-        self.options["boost"].header_only = True
         self.options["boost"].without_chrono = False
         self.options["boost"].without_context = False
         self.options["boost"].without_system = False
