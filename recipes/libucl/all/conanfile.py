@@ -1,6 +1,5 @@
-from conans import CMake, ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
-import os
+from conans import CMake, ConanFile, tools
+import functools
 
 required_conan_version = ">=1.33.0"
 
@@ -59,9 +58,8 @@ class LibuclConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    @functools.lru_cache(1)
+    def _configure_cmake(self):
         cmake = CMake(self)
         on_off = lambda v: "ON" if v else "OFF"
         cmake.definitions["ENABLE_URL_INCLUDE"] = on_off(self.options.enable_url_include)
@@ -69,11 +67,17 @@ class LibuclConan(ConanFile):
         cmake.definitions["ENABLE_LUA"] = on_off(self.options.with_lua == "lua")
         cmake.definitions["ENABLE_LUAJIT"] = on_off(self.options.with_lua == "luajit")
         cmake.configure()
+        return cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
-        cmake = CMake(self)
+        cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
