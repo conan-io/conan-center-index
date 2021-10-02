@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -38,6 +39,10 @@ class AwsCCommon(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Static runtime + shared is not working for more recent releases")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
@@ -47,6 +52,8 @@ class AwsCCommon(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["STATIC_CRT"] = "MT" in self.settings.compiler.runtime
         self._cmake.configure()
         return self._cmake
 
