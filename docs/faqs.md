@@ -304,7 +304,7 @@ Since these references will be never available in ConanCenter, they will be deac
             self.requires("intel-mkl/2021")
 ```
 
-therefore, if consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
+If consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
 
 Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
 
