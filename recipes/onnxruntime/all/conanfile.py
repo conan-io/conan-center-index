@@ -46,12 +46,10 @@ class OnnxRuntimeConan(ConanFile):
         "with_bitcode": [True, False],
     }
 
-    generators = "cmake", "cmake_find_package"
-
     default_options = {k: False for k, _ in options.items()}
 
-    exports_sources = ['patches/*']
-
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -275,9 +273,8 @@ class OnnxRuntimeConan(ConanFile):
         self._cmake.definitions["ONNX_CUSTOM_PROTOC_EXECUTABLE"] = \
             tools.which('protoc')
 
-        src_folder = os.path.join(self._source_subfolder, 'cmake')
         self._cmake.configure(build_folder=self._build_subfolder,
-                              source_folder=src_folder)
+                              source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
