@@ -98,6 +98,7 @@ class BoostConan(ConanFile):
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": "ANY",
         "with_stacktrace_backtrace": [True, False],
+        "with_stacktrace_noop": [True, False],
         "buildid": "ANY",
         "python_buildid": "ANY",
     }
@@ -134,6 +135,7 @@ class BoostConan(ConanFile):
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
         "with_stacktrace_backtrace": True,
+        "with_stacktrace_noop": True,
         "buildid": None,
         "python_buildid": None,
     }
@@ -1567,7 +1569,8 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
                     self.cpp_info.components["stacktrace_backtrace"].requires.append("libbacktrace::libbacktrace")
 
-                self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
+                if self.options.with_stacktrace_noop:
+                    self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 
                 if self.settings.os == "Windows":
                     self.cpp_info.components["stacktrace_windbg"].defines.append("BOOST_STACKTRACE_USE_WINDBG")

@@ -82,8 +82,13 @@ if(NOT HEADER_ONLY)
     if(WITH_STACKTRACE)
         find_package(Boost COMPONENTS stacktrace REQUIRED)
 
-        add_executable(stacktrace_noop_exe stacktrace.cpp)
-        target_compile_definitions(stacktrace_noop_exe PRIVATE TEST_STACKTRACE_IMPL=4)
+	add_executable(stacktrace_noop_exe stacktrace.cpp)
+	if(WITH_STACKTRACE_NOOP)
+	  target_compile_definitions(stacktrace_noop_exe PRIVATE TEST_STACKTRACE_IMPL=4)
+	else()
+	  # BOOST_STACKTRACE_USE_NOOP is not defined in this case, so we set it here only for this target
+	  target_compile_definitions(stacktrace_noop_exe PRIVATE TEST_STACKTRACE_IMPL=4 PRIVATE BOOST_STACKTRACE_USE_NOOP)
+	endif()
         target_link_libraries(stacktrace_noop_exe PRIVATE Boost::stacktrace_noop)
 
         if(WIN32)
