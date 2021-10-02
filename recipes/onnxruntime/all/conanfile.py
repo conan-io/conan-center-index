@@ -272,8 +272,7 @@ class OnnxRuntimeConan(ConanFile):
         self._cmake.definitions["ONNX_CUSTOM_PROTOC_EXECUTABLE"] = \
             tools.which('protoc')
 
-        self._cmake.configure(build_folder=self._build_subfolder,
-                              source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -286,11 +285,14 @@ class OnnxRuntimeConan(ConanFile):
 
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
+        src = self._build_subfolder
         if self.options.shared:
-            self.copy(pattern="*.so", dst="lib", src=self._build_subfolder)
-            self.copy(pattern="*.dll", dst="lib", src=self._build_subfolder)
+            self.copy(pattern="*.so*", dst="lib", src=src, keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", src=src, keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", src=src, keep_path=False)
         else:
-            self.copy(pattern="*.a", dst="lib", src=self._build_subfolder)
+            self.copy(pattern="*.a", dst="lib", src=src, keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", src=src, keep_path=False)
 
         if self.options.with_tests:
             self.copy(
@@ -318,8 +320,6 @@ class OnnxRuntimeConan(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = ["onnxruntime"]
         else:
-            debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-
             onnxruntime_libs = []
 
             if self.options.with_nnapi:
