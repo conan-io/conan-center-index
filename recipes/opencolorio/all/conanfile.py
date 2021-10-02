@@ -32,6 +32,10 @@ class OpenColorIOConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,7 +54,11 @@ class OpenColorIOConan(ConanFile):
         # TODO: add GLUT (needed for ociodisplay tool)
         self.requires("lcms/2.12")
         self.requires("yaml-cpp/0.7.0")
-        self.requires("tinyxml/2.6.2")
+        if tools.Version(self.version) < "2.1.0":
+            self.requires("tinyxml/2.6.2")
+        self.requires("pystring/1.1.3")
+        self.requires("expat/2.4.1")
+        self.requires("openexr/2.5.7")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -62,25 +70,40 @@ class OpenColorIOConan(ConanFile):
 
         self._cmake = CMake(self)
 
-        self._cmake.definitions["OCIO_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["OCIO_BUILD_STATIC"] = not self.options.shared
+        if tools.Version(self.version) >= "2.1.0":
+            self._cmake.definitions["OCIO_BUILD_PYTHON"] = False
+        else:
+            self._cmake.definitions["OCIO_BUILD_SHARED"] = self.options.shared
+            self._cmake.definitions["OCIO_BUILD_STATIC"] = not self.options.shared
+            self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
+
+            self._cmake.definitions["USE_EXTERNAL_YAML"] = True
+            self._cmake.definitions["USE_EXTERNAL_TINYXML"] = True
+            self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+
         self._cmake.definitions["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
+
+        # openexr 2.x provides Half library
+        self._cmake.definitions["OCIO_USE_OPENEXR_HALF"] = True
+
         self._cmake.definitions["OCIO_BUILD_APPS"] = True
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
-        self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
+        self._cmake.definitions["OCIO_BUILD_GPU_TESTS"] = False
         self._cmake.definitions["OCIO_USE_BOOST_PTR"] = False
 
-        self._cmake.definitions["USE_EXTERNAL_YAML"] = True
-        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = True
-        self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+        # avoid downloading dependencies
+        self._cmake.definitions["OCIO_INSTALL_EXT_PACKAGE"] = ""
 
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        for module in ("expat", "lcms2", "pystring", "yaml-cpp", "Imath"):
+            tools.remove_files_by_mask(os.path.join(self._source_subfolder, "share", "cmake", "modules"), "Find"+module+".cmake")
 
     def build(self):
         self._patch_sources()
@@ -99,8 +122,10 @@ class OpenColorIOConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        os.remove(os.path.join(self.package_folder, "OpenColorIOConfig.cmake"))
+        # nop for 2.x
+        tools.remove_files_by_mask(self.package_folder, "OpenColorIOConfig*.cmake")
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
@@ -111,8 +136,12 @@ class OpenColorIOConan(ConanFile):
 
         self.cpp_info.libs = tools.collect_libs(self)
 
-        if not self.options.shared:
-            self.cpp_info.defines.append("OpenColorIO_STATIC")
+        if tools.Version(self.version) < "2.1.0":
+            if not self.options.shared:
+                self.cpp_info.defines.append("OpenColorIO_STATIC")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(["Foundation", "IOKit", "ColorSync", "CoreGraphics"])
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
