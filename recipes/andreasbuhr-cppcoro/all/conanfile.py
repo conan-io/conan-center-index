@@ -62,11 +62,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration("{} does not support clang with libstdc++. Use libc++ instead.".format(self.name))
 
-        # TODO remove once figured out why clang 11/libc++ doesn't build on CCI
-        # (due to unable to find std::experiemental::noop_coroutine, author is unable to reproduce on local machine)
-        if self.settings.compiler == "clang" and self.settings.compiler.version == "11":
-            raise ConanInvalidConfiguration("WIP: {} currently doesn't build on clang 11".format(self.name))
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
