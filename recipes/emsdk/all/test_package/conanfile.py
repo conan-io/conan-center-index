@@ -19,6 +19,8 @@ class TestPackageConan(ConanFile):
             self.build_requires("make/4.3")
 
     def build(self):
+        self.run("emcc -v", run_environment=True)
+        self.run("em++ -v", run_environment=True)
         cmake = CMake(self, generator="Unix Makefiles")
         cmake.definitions["USE_CONANBUILDINFO"] = self.settings.os == "Emscripten"
         cmake.configure()
