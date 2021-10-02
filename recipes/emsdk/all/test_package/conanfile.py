@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.build_requires("cmake/3.18.2")
         if self._settings_build.os == "Windows":
             self.build_requires("make/4.3")
 
