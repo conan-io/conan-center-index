@@ -1,0 +1,19 @@
+diff --git a/libexif/exif-loader.c b/libexif/exif-loader.c
+index bf4f97c..1587121 100644
+--- a/libexif/exif-loader.c
++++ b/libexif/exif-loader.c
+@@ -29,6 +29,14 @@
+ #include <string.h>
+ #include <stdio.h>
+ 
++#if defined _MSC_VER
++#if defined _WIN64
++#define ssize_t long long
++#else
++#define ssize_t long
++#endif
++#endif
++
+ #undef JPEG_MARKER_DCT
+ #define JPEG_MARKER_DCT  0xc0
+ #undef JPEG_MARKER_DHT

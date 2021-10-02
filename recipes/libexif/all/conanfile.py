@@ -12,6 +12,7 @@ class LibexifConan(ConanFile):
     license = "LGPL-2.1"
     description = "libexif is a library for parsing, editing, and saving EXIF data."
     topics = ("exif", "metadata", "parse", "edit")
+    exports_sources = "patches/*"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -61,6 +62,10 @@ class LibexifConan(ConanFile):
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -78,6 +83,7 @@ class LibexifConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
