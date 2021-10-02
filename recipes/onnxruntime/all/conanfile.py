@@ -64,10 +64,10 @@ class OnnxRuntimeConan(ConanFile):
 
     def build_requirements(self):
         if tools.cross_building(self) and hasattr(self, "settings_build"):
-            self.build_requires("protobuf/3.15.5")
+            self.build_requires("protobuf/3.17.1")
 
     def requirements(self):
-        self.requires("protobuf/3.15.5")
+        self.requires("protobuf/3.17.1")
         self.requires("date/3.0.0")
         self.requires("re2/20210401")
         self.requires("onnx/1.9.0")
@@ -162,8 +162,7 @@ class OnnxRuntimeConan(ConanFile):
         self._add_definition(self._cmake_rt_def, self.options.with_static_rt)
 
         self._add_definition("USE_PREINSTALLED_EIGEN", True)
-        eigen_includedir = os.path.join(self.deps_cpp_info["eigen"]
-                                        .include_paths[0], "eigen3")
+        eigen_includedir = self.deps_cpp_info["eigen"].include_paths[0]
         self._cmake.definitions["eigen_SOURCE_PATH"] = eigen_includedir
 
         self._add_definition("USE_TVM", self.options.with_tvm)
