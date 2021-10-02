@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class Nghttp2Conan(ConanFile):
     name = "libnghttp2"
     description = "HTTP/2 C Library and tools"
-    topics = ("conan", "http")
+    topics = ("http", "http2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org"
     license = "MIT"
@@ -32,15 +32,15 @@ class Nghttp2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def validate(self):
+        if self.options.with_asio and self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("gcc >= 6.0 required")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_asio and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
-        if self.settings.compiler == "gcc":
-            v = tools.Version(str(self.settings.compiler.version))
-            if v < "6.0":
-                raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -58,9 +58,8 @@ class Nghttp2Conan(ConanFile):
             self.requires("boost/1.77.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "nghttp2-{0}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
