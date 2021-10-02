@@ -40,7 +40,7 @@ class ArmadilloConan(ConanFile):
             "system_atlas",
             "framework_accelerate",
         ],
-        "use_hdf5": [False, "hdf5"],
+        "use_hdf5": [True, False],
         "use_superlu": [False, "system_superlu"],
         "use_extern_rng": [True, False],
         "use_arpack": [False, "system_arpack"],
@@ -52,7 +52,7 @@ class ArmadilloConan(ConanFile):
         "fPIC": True,
         "use_blas": "openblas",
         "use_lapack": False,
-        "use_hdf5": "hdf5",
+        "use_hdf5": True,
         "use_superlu": False,
         "use_extern_rng": False,
         "use_arpack": False,
@@ -143,6 +143,24 @@ class ArmadilloConan(ConanFile):
                 "OpenBLAS can only provide LAPACK functionality when also providing BLAS functionality. Set use_blas=openblas and try again."
             )
 
+        deprecated_opts = list(
+            set(
+                [
+                    opt
+                    for opt in [
+                        str(self.options.use_blas),
+                        str(self.options.use_lapack),
+                    ]
+                    if "system" in opt
+                ]
+            )
+        )
+
+        for opt in deprecated_opts:
+            self.output.warn(
+                f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
+            )
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -150,10 +168,9 @@ class ArmadilloConan(ConanFile):
         # TODO: "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
         # TODO: "flexiblas/3.0.4" # Pending https://github.com/conan-io/conan-center-index/issues/6827
 
-        if self.options.use_hdf5 == "hdf5":
+        if self.options.use_hdf5:
             # Use the conan dependency if the system lib isn't being used
             self.requires("hdf5/1.12.0")
-            self.options["hdf5"].shared = self.options.shared
 
         if self.options.use_blas == "openblas":
             self.requires("openblas/0.3.15")
@@ -164,7 +181,6 @@ class ArmadilloConan(ConanFile):
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
-            self.options["openblas"].shared = self.options.shared
 
     def _configure_cmake(self):
         if self._cmake:
