@@ -1,7 +1,19 @@
 sources:
   "2.2.0":
-    url: https://github.com/aws/aws-cdi-sdk/archive/refs/tags/v2.2.0.tar.gz
-    sha256: 4ee109b7fa2f683b4b0cd03028d0946857f09f34da4e89fe69a5c297cdaeb689
+    - url: https://github.com/aws/aws-cdi-sdk/archive/refs/tags/v2.2.0.tar.gz
+      sha256: 4ee109b7fa2f683b4b0cd03028d0946857f09f34da4e89fe69a5c297cdaeb689
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/cmake/compiler_settings.cmake
+      sha256: d067bc2e0446316efffb22a47e67acd1de166b46ffd2af829b1d28107c86bdd6
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/cmake/initialize_project_version.cmake
+      sha256: 63f26a56bd62ce2fc084f32ff0ef1ca6b64738d42735bd5a223ee29a2ad31ade
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/cmake/utilities.cmake
+      sha256: 44747d5cc01fc640383f2bb82305e0b113c4fab713d3f04bf585666a5b00dae6
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/toolchains/cmakeProjectConfig.cmake
+      sha256: 1bad7d1b162febe0eb5abdcde7f5f74f832a9d31129ef84cb92d51dc44579a76
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/toolchains/pkg-config.pc.in
+      sha256: 74e329abd5469c5cc5674ff1287814821d6a8e695b708747a525bbdf1ca673e1
+    - url: https://raw.githubusercontent.com/aws/aws-sdk-cpp/1.8.130/aws-cpp-sdk-core/include/aws/core/VersionConfig.h
+      sha256: 3623f6f5139a515e96fa986fb89fbdab8e90e6b76d363c5752850615930c3e52
 patches:
   "2.2.0":
     - base_path: source_subfolder

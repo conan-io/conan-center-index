@@ -37,13 +37,18 @@ class AwsCdiSdkConan(ConanFile):
                 and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
             See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
-        if not self.options["aws-libfabric"].shared or self.options["aws-sdk-cpp"].shared:
+        if not self.options["aws-libfabric"].shared or not self.options["aws-sdk-cpp"].shared:
             raise ConanInvalidConfiguration("Cannot build with static dependencies")
         tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
+        tools.get(**self.conan_data["sources"][self.version][0],
                   destination=self._source_subfolder, strip_root=True)
+        for source in self.conan_data["sources"][self.version][1:]:
+            filename = os.path.join(self._source_subfolder, 
+                                    "aws-cpp-sdk-cdi", 
+                                    source["url"].split(self.deps_cpp_info["aws-sdk-cpp"].version)[-1].lstrip("/"))
+            tools.download(**source, filename=filename)
 
     def _configure_autotools(self):
         if self._autotools:
