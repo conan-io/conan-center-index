@@ -32,7 +32,8 @@ class EmSDKConan(ConanFile):
                 raise ConanInvalidConfiguration("When using {}, target os must be Emscripten".format(self.name))
 
     def package_id(self):
-        del self.info.settings.os
+        pass
+        #del self.info.settings.os
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
