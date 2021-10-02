@@ -80,6 +80,9 @@ class LibexifConan(ConanFile):
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--disable-docs",
+            "--disable-nls",
+            "--disable-rpath",
         ]
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -95,6 +98,9 @@ class LibexifConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.rename(os.path.join(self.package_folder, "lib", "exif.dll.lib"),
+                         os.path.join(self.package_folder, "lib", "exif.lib"))
         tools.remove_files_by_mask(self.package_folder, "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
