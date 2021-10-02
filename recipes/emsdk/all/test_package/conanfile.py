@@ -19,6 +19,10 @@ class TestPackageConan(ConanFile):
             self.build_requires("make/4.3")
 
     def build(self):
+        clang = os.path.join(self.deps_cpp_info["emsdk"].rootpath, "bin", "upstream", "bin", "clang")
+        if self.settings.os == "Macos":
+            self.run("file %s" % clang)
+            self.run("otool -falh %s" % clang)
         self.run("emcc -v", run_environment=True)
         self.run("em++ -v", run_environment=True)
         cmake = CMake(self, generator="Unix Makefiles")
