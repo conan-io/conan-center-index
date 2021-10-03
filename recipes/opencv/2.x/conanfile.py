@@ -24,7 +24,7 @@ class OpenCVConan(ConanFile):
         "with_openexr": [True, False],
         "with_eigen": [True, False],
         "with_tbb": [True, False],
-        "with_gtk": [True, False]
+        "with_gtk": [True, False],
         "nonfree": [True, False],
     }
     default_options = {
