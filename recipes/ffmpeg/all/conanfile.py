@@ -131,7 +131,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_openh264:
@@ -155,7 +155,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1l")
         if self.options.get_safe("with_libalsa"):
