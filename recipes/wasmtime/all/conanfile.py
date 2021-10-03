@@ -71,7 +71,7 @@ class WasmtimeConan(ConanFile):
 
         if tools.Version(self.version) <= "0.29.0":
             if (self.settings.compiler, self.settings.os) == ("gcc", "Windows") and self.options.shared:
-                # FIXME: https://github.com/bytecodealliance/wasmtime/issues/3168
+                # https://github.com/bytecodealliance/wasmtime/issues/3168
                 raise ConanInvalidConfiguration("Shared mingw is currently not possible")
 
     def package_id(self):
