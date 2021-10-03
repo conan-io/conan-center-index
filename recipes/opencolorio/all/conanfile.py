@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import textwrap
 
 required_conan_version = ">=1.33.0"
 
@@ -94,7 +93,7 @@ class OpenColorIOConan(ConanFile):
         self._cmake.definitions["OCIO_USE_BOOST_PTR"] = False
 
         # avoid downloading dependencies
-        self._cmake.definitions["OCIO_INSTALL_EXT_PACKAGE"] = ""
+        self._cmake.definitions["OCIO_INSTALL_EXT_PACKAGE"] = "NONE"
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -130,39 +129,10 @@ class OpenColorIOConan(ConanFile):
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
-        self._create_cmake_module_alias_targets(
-           os.path.join(self.package_folder, self._module_file_rel_path),
-            {"OpenColorIO": "OpenColorIO::OpenColorIO"})
-
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
-    @property
-    def _module_subfolder(self):
-        return os.path.join("lib", "cmake")
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            "conan-official-{}-targets.cmake".format(self.name))
-
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenColorIO"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenColorIO"
         self.cpp_info.names["pkg_config"] = "OpenColorIO"
-
-        self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = tools.collect_libs(self)
 
