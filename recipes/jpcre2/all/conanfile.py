@@ -7,12 +7,10 @@ class TomlPlusPlusConan(ConanFile):
     name = "jpcre2"
     homepage = "https://github.com/jpcre2/jpcre2"
     description = "Header-only C++ wrapper for PCRE2 library."
-    topics = ("conan", "regex", "pcre2", "header-only", "single-header")
+    topics = ("regex", "pcre2", "header-only", "single-header")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "BSD"
-    settings = list()
-    options = {}
-    default_options = {}
+    license = "BSD-3-Clause"
+
     no_copy_source = True
 
     @property
