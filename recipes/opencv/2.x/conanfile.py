@@ -24,7 +24,8 @@ class OpenCVConan(ConanFile):
         "with_openexr": [True, False],
         "with_eigen": [True, False],
         "with_tbb": [True, False],
-        "with_gtk": [True, False],
+        "with_gtk": [True, False]
+        "nonfree": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_tbb": False,
         "with_gtk": True,
+        "nonfree": False,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -169,6 +171,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
         self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
