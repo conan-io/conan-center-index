@@ -1,0 +1,4 @@
+sources:
+  "4.8":
+    sha256: 4801833f86a67b8a123c2c01203e259eb81157e1e9ef144a3b6395cb2d838a42
+    url: https://github.com/Corvusoft/restbed/archive/4.8.tar.gz
