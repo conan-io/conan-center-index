@@ -20,10 +20,7 @@ class TomlPlusPlusConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("pcre2/[>=10.21]")
-
-    def configure(self):
-        pass
+        self.requires("pcre2/10.37")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
