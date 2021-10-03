@@ -6,11 +6,11 @@ required_conan_version = ">=1.33.0"
 
 class LibuclConan(ConanFile):
     name = "libucl"
-    description = "Universal configuration library parser "
+    description = "Universal configuration library parser"
     license = "BSD-2-Clause"
-    homepage = "https://github.com/libusb/libusb"
+    homepage = "https://github.com/vstakhov/libucl"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "libusb", "usb", "device")
+    topics = ("universal", "configuration", "language", "parser", "ucl")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
