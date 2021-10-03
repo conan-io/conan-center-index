@@ -66,7 +66,7 @@ class UsocketsConan(ConanFile):
             raise ConanInvalidConfiguration("asio eventloop is only supported on uSockets >= 0.8.0")
 
         cppstd = self._cppstd
-        if cppstd == False:
+        if not cppstd:
             return
         cppstd = str(cppstd)
 
