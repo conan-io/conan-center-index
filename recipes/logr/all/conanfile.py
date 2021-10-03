@@ -32,7 +32,7 @@ class LogrConan(ConanFile):
         if self.options.backend == "spdlog":
             self.requires("spdlog/1.9.2")
         elif self.options.backend == "glog":
-            self.requires("glog/0.4.0")
+            self.requires("glog/0.5.0")
         elif self.options.backend == "log4cplus":
             self.requires("log4cplus/2.0.5")
         elif self.options.backend == "boostlog":
@@ -98,3 +98,19 @@ class LogrConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "logr"
         self.cpp_info.names["cmake_find_package_multi"] = "logr"
+
+        self.cpp_info.components["logr_base"].includedirs = ["include"]
+        self.cpp_info.components["logr_base"].requires = ["fmt::fmt"]
+
+        if self.options.backend == "spdlog":
+            self.cpp_info.components["logr_spdlog"].includedirs = []
+            self.cpp_info.components["logr_spdlog"].requires = ["logr_base", "spdlog::spdlog"]
+        elif self.options.backend == "glog":
+            self.cpp_info.components["logr_glog"].includedirs = []
+            self.cpp_info.components["logr_glog"].requires = ["logr::logr_base", "glog::glog"]
+        elif self.options.backend == "log4cplus":
+            self.cpp_info.components["logr_log4cplus"].includedirs = []
+            self.cpp_info.components["logr_log4cplus"].requires = ["logr::logr_base", "log4cplus::log4cplus"]
+        elif self.options.backend == "boostlog":
+            self.cpp_info.components["logr_boostlog"].includedirs = []
+            self.cpp_info.components["logr_boostlog"].requires = ["logr::logr_base", "Boost::log"]
