@@ -41,7 +41,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
-        "detect_cpu_baseline": [True, False]
+        "detect_cpu_baseline": [True, False],
+        "nonfree": [True, False],
     }
     default_options = {
         "shared": False,
@@ -70,7 +71,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": False,
         "neon": True,
         "dnn": True,
-        "detect_cpu_baseline": False
+        "detect_cpu_baseline": False,
+        "nonfree": False,
     }
 
     short_paths = True
@@ -341,6 +343,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        self._cmake.definitions["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
         if self.options.detect_cpu_baseline:
             self._cmake.definitions["CPU_BASELINE"] = "DETECT"
