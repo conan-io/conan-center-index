@@ -6,7 +6,7 @@ import os
 required_conan_version = ">=1.32.1"
 
 class HsmConan(ConanFile):
-    name = "hsm"
+    name = "erikzenker-hsm"
     license = "MIT"
     homepage = "https://github.com/erikzenker/hsm.git"
     url = "https://github.com/conan-io/conan-center-index"
