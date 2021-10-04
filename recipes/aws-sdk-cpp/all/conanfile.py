@@ -312,6 +312,10 @@ class AwsSdkCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _use_aws_crt_cpp(self):
+        return tools.Version(self.version) >= "1.9"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -326,7 +330,7 @@ class AwsSdkCppConan(ConanFile):
             and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
-        if (tools.Version(self.version) < "1.9"
+        if (not self._use_aws_crt_cpp
             and self.settings.os == "Macos"
             and self.settings.arch == "armv8"):
             raise ConanInvalidConfiguration("""This version doesn't support arm8
@@ -334,14 +338,14 @@ class AwsSdkCppConan(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.6.9")
-        if tools.Version(self.version) >= "1.9":
+        if self._use_aws_crt_cpp:
             self.requires("aws-crt-cpp/0.14.3")
         else:
             self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
             self.requires("openssl/1.1.1l")
             self.requires("libcurl/7.78.0")
-        if self.settings.os in["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
 
@@ -410,7 +414,7 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
-        if tools.Version(self.version) >= "1.9":
+        if self._use_aws_crt_cpp:
             self.cpp_info.components["core"].requires.append("aws-crt-cpp::aws-crt-cpp-lib")
         else:
             self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
@@ -444,7 +448,7 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
-        if self.settings.os in["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
