@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.33.0"
@@ -95,6 +94,10 @@ class OpenColorIOConan(ConanFile):
         # avoid downloading dependencies
         self._cmake.definitions["OCIO_INSTALL_EXT_PACKAGE"] = "NONE"
 
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            # define any value because ifndef is used
+            self._cmake.definitions["OpenColorIO_SKIP_IMPORTS"] = True
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -143,8 +146,8 @@ class OpenColorIOConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["Foundation", "IOKit", "ColorSync", "CoreGraphics"])
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines.append("OpenColorIO_EXPORTS")
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            self.cpp_info.defines.append("OpenColorIO_SKIP_IMPORTS")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
