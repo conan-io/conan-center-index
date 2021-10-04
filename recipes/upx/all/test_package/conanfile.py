@@ -25,6 +25,9 @@ class TestPackageConan(ConanFile):
 
             packed_size = os.stat(bin_path).st_size
 
+            # Run the packed executable to see whether it still works
+            self.run(bin_path, run_environment=True)
+
             self.output.info(f"File: {bin_path}")
             self.output.info(f"Original size: {original_size:>9}")
             self.output.info(f"Packed size:   {packed_size:>9}")
