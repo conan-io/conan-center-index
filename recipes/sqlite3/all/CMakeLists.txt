@@ -37,9 +37,14 @@ set(MAX_BLOB_SIZE CACHE STRING "Set the maximum number of bytes in a string or B
 option(DISABLE_DEFAULT_VFS "Disable default VFS implementation")
 
 add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
-if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-endif(MSVC AND BUILD_SHARED_LIBS)
+set_target_properties(${PROJECT_NAME} PROPERTIES C_VISIBILITY_PRESET hidden)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${PROJECT_NAME}
+        PRIVATE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllexport)">
+        INTERFACE $<$<BOOL:${WIN32}>:"SQLITE_API=__declspec(dllimport)">
+        PUBLIC $<$<NOT:$<BOOL:${WIN32}>>:"SQLITE_API=__attribute__((visibility(\"default\")))">
+    )
+endif()
 if(ENABLE_JSON1)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SQLITE_ENABLE_JSON1)
 endif()

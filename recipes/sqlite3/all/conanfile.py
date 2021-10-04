@@ -187,6 +187,9 @@ class ConanSqlite3(ConanFile):
                 self.cpp_info.components["sqlite"].system_libs.append("dl")
             if self.options.enable_fts5 or self.options.get_safe("enable_math_functions"):
                 self.cpp_info.components["sqlite"].system_libs.append("m")
+        elif self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.components["sqlite"].defines.append("SQLITE_API=__declspec(dllimport)")
 
         if self.options.build_executable:
             bin_path = os.path.join(self.package_folder, "bin")
