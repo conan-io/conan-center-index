@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
 
-required_conan_version = ">=1.32.1"
+required_conan_version = ">=1.33.0"
 
 class HsmConan(ConanFile):
     name = "erikzenker-hsm"
