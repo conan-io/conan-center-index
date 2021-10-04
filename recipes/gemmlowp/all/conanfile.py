@@ -32,6 +32,10 @@ class GemmlowpConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("shared is not supported on Windows")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
