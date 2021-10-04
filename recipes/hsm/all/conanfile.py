@@ -11,7 +11,7 @@ class HsmConan(ConanFile):
     homepage = "https://github.com/erikzenker/hsm.git"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The hana state machine (hsm) is a finite state machine library based on the boost hana meta programming library. It follows the principles of the boost msm and boost sml libraries, but tries to reduce own complex meta programming code to a minimum."
-    topics = ("state machine", "template meta programming")
+    topics = ("state-machine", "template-meta-programming")
     requires = "boost/1.72.0"
     no_copy_source = True
     generators = "cmake"
