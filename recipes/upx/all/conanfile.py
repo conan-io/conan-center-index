@@ -38,8 +38,10 @@ class UPXConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("upx.exe", src=self._source_subfolder, dst="bin")
-        self.copy("upx", src=self._source_subfolder, dst="bin")
+        if self.settings.os == "Windows":
+            self.copy("upx.exe", src=self._source_subfolder, dst="bin")
+        else:
+            self.copy("upx", src=self._source_subfolder, dst="bin")
 
     def package_info(self):
         self.cpp_info.libdirs = []
