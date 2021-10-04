@@ -37,12 +37,14 @@ class LibBsdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+    
+    def validate(self):
         if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("libbsd-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _configure_autotools(self):
         if self._autotools:
