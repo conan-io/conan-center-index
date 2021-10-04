@@ -1,5 +1,14 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
+@@ -162,7 +192,7 @@
+     if (UNICORN_HAS_SPARC)
+         set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-DUNICORN_HAS_SPARC ")
+     endif()
+-    set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-fPIC -fvisibility=hidden")
++    set (EXTRA_CFLAGS "${EXTRA_CFLAGS}-fPIC -fvisibility=hidden ${CMAKE_C_FLAGS}")
+ 
+     set(TARGET_LIST "--target-list=")
+     if (UNICORN_HAS_X86)
 @@ -185,10 +185,28 @@
      endif()
      set (TARGET_LIST "${TARGET_LIST} ")
