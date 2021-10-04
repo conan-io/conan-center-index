@@ -130,6 +130,8 @@ class OpenColorIOConan(ConanFile):
         # nop for 2.x
         tools.remove_files_by_mask(self.package_folder, "OpenColorIOConfig*.cmake")
 
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
