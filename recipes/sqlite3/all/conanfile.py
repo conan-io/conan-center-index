@@ -177,7 +177,7 @@ class ConanSqlite3(ConanFile):
         self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
         self.cpp_info.components["sqlite"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
+        self.cpp_info.components["sqlite"].libs = ["sqlite3"]
         if self.options.omit_load_extension:
             self.cpp_info.components["sqlite"].defines.append("SQLITE_OMIT_LOAD_EXTENSION")
         if self.settings.os in ["Linux", "FreeBSD"]:
