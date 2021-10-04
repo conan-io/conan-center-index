@@ -14,10 +14,10 @@ class UsocketsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
                "with_ssl": [False, "openssl", "wolfssl"],
-               "eventloop": ["default", "libuv", "gcd", "asio"]}
+               "eventloop": ["syscall", "libuv", "gcd", "boost"]}
     default_options = {"fPIC": True,
                        "with_ssl": False,
-                       "eventloop": "default"}
+                       "eventloop": "syscall"}
     exports_sources = "patches/**"
 
     @property
@@ -27,6 +27,7 @@ class UsocketsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.eventloop = "libuv"
 
     def _minimum_compilers_version(self, cppstd):
         standards = {
@@ -48,7 +49,7 @@ class UsocketsConan(ConanFile):
     @property
     def _cppstd(self):
         version = False
-        if self.options.eventloop == "asio":
+        if self.options.eventloop == "boost":
             version = "14"
 
         # OpenSSL wrapper of uSockets uses C++17 features.
@@ -58,17 +59,22 @@ class UsocketsConan(ConanFile):
         return version
 
     def validate(self):
+        if self.options.eventloop == "syscall" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("syscall is not supported on Windows")
+
         if self.options.eventloop == "gcd":
             if self.settings.os != "Linux" or self.settings.compiler != "clang" :
                 raise ConanInvalidConfiguration("gcd eventloop is only supported on Linux with clang")
 
-        if self.options.eventloop == "asio" and tools.Version(self.version) < "0.8.0":
-            raise ConanInvalidConfiguration("asio eventloop is only supported on uSockets >= 0.8.0")
+        if tools.Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
+            raise ConanInvalidConfiguration(f"eventloop={self.options.eventloop} is not supported with {self.name}/{self.version}")
+
+        if tools.Version(self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
+            raise ConanInvalidConfiguration(f"eventloop={self.options.with_ssl} is not supported with {self.name}/{self.version}. https://github.com/uNetworking/uSockets/issues/147")
 
         cppstd = self._cppstd
         if not cppstd:
             return
-        cppstd = str(cppstd)
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, cppstd)
@@ -91,13 +97,11 @@ class UsocketsConan(ConanFile):
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.8.1")
 
-        if self.options.eventloop == "default" and self.settings.os == "Windows":
-            self.requires("libuv/1.41.1")
-        elif self.options.eventloop == "libuv":
+        if self.options.eventloop == "libuv":
             self.requires("libuv/1.41.1")
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
-        elif self.options.eventloop == "asio":
+        elif self.options.eventloop == "boost":
             self.requires("boost/1.77.0")
 
     def source(self):
@@ -123,13 +127,11 @@ class UsocketsConan(ConanFile):
             elif self.options.with_ssl == "wolfssl":
                 args.append("WITH_WOLFSSL=1")
 
-            if self.options.eventloop == "default" and self.settings.os == "Windows":
-                args.append("WITH_LIBUV=1")
-            elif self.options.eventloop == "libuv":
+            if self.options.eventloop == "libuv":
                 args.append("WITH_LIBUV=1")
             elif self.options.eventloop == "gcd":
                 args.append("WITH_GCD=1")
-            elif self.options.eventloop == "asio":
+            elif self.options.eventloop == "boost":
                 args.append("WITH_ASIO=1")
 
             args.extend("{}={}".format(key, value) for key, value in autotools.vars.items())
@@ -163,11 +165,9 @@ class UsocketsConan(ConanFile):
         else:
             self.cpp_info.defines.append("LIBUS_NO_SSL")
 
-        if self.options.eventloop == "default" and self.settings.os == "Windows":
-            self.cpp_info.defines.append("LIBUS_USE_LIBUV")
-        elif self.options.eventloop == "libuv":
+        if self.options.eventloop == "libuv":
             self.cpp_info.defines.append("LIBUS_USE_LIBUV")
         elif self.options.eventloop == "gcd":
             self.cpp_info.defines.append("LIBUS_USE_GCD")
-        elif self.options.eventloop == "asio":
+        elif self.options.eventloop == "boost":
             self.cpp_info.defines.append("LIBUS_USE_ASIO")
