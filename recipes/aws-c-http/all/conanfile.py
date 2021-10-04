@@ -39,8 +39,8 @@ class AwsCHttp(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-compression/0.2.13")
-        self.requires("aws-c-io/0.10.5")
+        self.requires("aws-c-compression/0.2.14")
+        self.requires("aws-c-io/0.10.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
