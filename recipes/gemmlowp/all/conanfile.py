@@ -64,3 +64,5 @@ class GemmlowpConan(ConanFile):
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package_multi"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].libs = ["eight_bit_int_gemm"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["eight_bit_int_gemm"].system_libs.extend(["pthread"])
