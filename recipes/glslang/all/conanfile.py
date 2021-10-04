@@ -58,7 +58,7 @@ class GlslangConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_optimizer:
-            self.requires("spirv-tools/2020.5")
+            self.requires("spirv-tools/2021.2")
 
     def validate(self):
         if self.options.enable_optimizer and self.options["spirv-tools"].shared:
