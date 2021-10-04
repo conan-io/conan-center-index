@@ -5,7 +5,7 @@ import os
 required_conan_version = ">=1.33.0"
 
 
-class TomlPlusPlusConan(ConanFile):
+class Jpcre2Conan(ConanFile):
     name = "jpcre2"
     homepage = "https://github.com/jpcre2/jpcre2"
     description = "Header-only C++ wrapper for PCRE2 library."
