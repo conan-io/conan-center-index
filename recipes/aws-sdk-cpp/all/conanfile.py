@@ -339,6 +339,7 @@ class AwsSdkCppConan(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.6.9")
         if self._use_aws_crt_cpp:
+            self.requires("aws-c-cal/0.5.12")
             self.requires("aws-crt-cpp/0.14.3")
         else:
             self.requires("aws-c-event-stream/0.1.5")
@@ -415,7 +416,10 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
         if self._use_aws_crt_cpp:
-            self.cpp_info.components["core"].requires.append("aws-crt-cpp::aws-crt-cpp-lib")
+            self.cpp_info.components["core"].requires.extend([
+                "aws-c-cal::aws-c-cal-lib",
+                "aws-crt-cpp::aws-crt-cpp-lib",
+            ])
         else:
             self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
 
