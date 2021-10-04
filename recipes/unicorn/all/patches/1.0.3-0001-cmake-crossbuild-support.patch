@@ -34,7 +34,7 @@
      execute_process(COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/qemu/configure
          ${EXTRA_CFLAGS}
          ${TARGET_LIST}
-+        ${CPU_ARG} --cpu=${CMAKE_C_COMPILER}
++        ${CPU_ARG} --cc=${CMAKE_C_COMPILER}
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
      )
      execute_process(COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/qemu/scripts/create_config

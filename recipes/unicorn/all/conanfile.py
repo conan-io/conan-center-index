@@ -94,6 +94,9 @@ class UnicornConan(ConanFile):
         cmake.definitions["UNICORN_INSTALL"] = True
         cmake.definitions["UNICORN_BUILD_SAMPLES"] = False
         cmake.definitions["UNICORN_ARCH"] = " ".join(self._supported_archs)
+        if tools.is_apple_os(self.settings.os):
+            if self.settings.arch == "armv8":
+                cmake.definitions["CMAKE_C_FLAGS"] = "-arch arm64"
         if tools.cross_building(self, skip_x64_x86=True):
             # FIXME: this needs conan support (https://github.com/conan-io/conan/pull/8026)
             cmake.definitions["CMAKE_SYSTEM_NAME"] = {
