@@ -17,10 +17,12 @@ class AwsCCommon(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "cpu_extensions": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "cpu_extensions": True,
     }
 
     _cmake = None
@@ -32,6 +34,8 @@ class AwsCCommon(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "0.6.11":
+            del self.options.cpu_extensions
 
     def configure(self):
         if self.options.shared:
@@ -54,6 +58,7 @@ class AwsCCommon(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+        self._cmake.definitions["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
         self._cmake.configure()
         return self._cmake
 
