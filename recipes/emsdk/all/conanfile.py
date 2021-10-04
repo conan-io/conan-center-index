@@ -26,15 +26,6 @@ class EmSDKConan(ConanFile):
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
 
-    def validate(self):
-        if hasattr(self, "settings_target") and self.settings_target:
-            if self.settings_target.os != "Emscripten":
-                raise ConanInvalidConfiguration("When using {}, target os must be Emscripten".format(self.name))
-
-    def package_id(self):
-        pass
-        #del self.info.settings.os
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -122,6 +113,12 @@ class EmSDKConan(ConanFile):
 
         self.output.info("Creating EM_CACHE environment variable: %s" % em_cache)
         self.env_info.EM_CACHE = em_cache
+
+        # If we are not building for Emscripten, probably we don't want to inject following environment variables,
+        #   but it might be legit use cases... until we find them, let's be conservative.
+        if not hasattr(self, "settings_target") or self.settings_target.os != "Emscripten":
+            self.output.warn("You've added {}/{} as a build requirement, while os={} != Android".format(self.name, self.version, self.settings_target.os))
+            return
 
         self.output.info("Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: %s" % toolchain)
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = toolchain

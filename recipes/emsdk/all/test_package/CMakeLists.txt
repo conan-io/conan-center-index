@@ -1,14 +1,8 @@
-cmake_minimum_required(VERSION 3.18.2)
+cmake_minimum_required(VERSION 3.0)
 project(test_package)
 
-option(USE_CONANBUILDINFO "Use conanbuildinfo.cmake")
-
-if(USE_CONANBUILDINFO)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
-else()
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-endif()
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME})
