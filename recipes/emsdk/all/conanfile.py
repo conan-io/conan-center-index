@@ -116,7 +116,10 @@ class EmSDKConan(ConanFile):
 
         # If we are not building for Emscripten, probably we don't want to inject following environment variables,
         #   but it might be legit use cases... until we find them, let's be conservative.
-        if not hasattr(self, "settings_target") or self.settings_target.os != "Emscripten":
+        if not hasattr(self, "settings_target"):
+            return
+
+        if self.settings_target.os != "Emscripten":
             self.output.warn("You've added {}/{} as a build requirement, while os={} != Android".format(self.name, self.version, self.settings_target.os))
             return
 
