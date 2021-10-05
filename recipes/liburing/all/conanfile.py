@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration, ConanException
 import os
-import re
 
 required_conan_version = ">=1.33.0"
 
@@ -13,9 +12,9 @@ class LiburingConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = ("helpers to setup and teardown io_uring instances, and also a simplified interface for "
                    "applications that don't need (or want) to deal with the full kernel side implementation.")
-    settings = "os", "compiler", "build_type", "arch"
     topics = ("asynchronous-io", "async", "kernel")
 
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -43,6 +42,9 @@ class LiburingConan(ConanFile):
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("linux-headers-generic/5.13.9")
 
     def validate(self):
         # FIXME: use kernel version of build/host machine.
