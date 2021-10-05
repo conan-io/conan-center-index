@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -36,8 +37,13 @@ class AndroidNDKConan(ConanFile):
             raise ConanInvalidConfiguration(f"os,arch={self.settings.os},{self.settings.arch} is not supported by {self.name} (no binaries are available)")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
-            destination=self._source_subfolder, strip_root=True)
+        if self.version in ['r23']:
+            data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
+            unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
+        else:
+            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)])
+            extracted_folder = "android-ndk-{0}".format(self.version)
+            os.rename(extracted_folder, self._source_subfolder)
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
@@ -248,3 +254,40 @@ class AndroidNDKConan(ConanFile):
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_LIBRARY = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_INCLUDE = "BOTH"
         self.env_info.CMAKE_FIND_ROOT_PATH_MODE_PACKAGE = "BOTH"
+
+
+def unzip_fix_symlinks(url, target_folder, sha256):
+    # Python's built-in module 'zipfile' won't handle symlinks (https://bugs.python.org/issue37921)
+    # Most of the logic borrowed from this PR https://github.com/conan-io/conan/pull/8100
+
+    filename = "android_sdk.zip"
+    tools.download(url, filename)
+    tools.check_sha256(filename, sha256)
+    tools.unzip(filename, destination=target_folder, strip_root=True)
+
+    def is_symlink_zipinfo(zi):
+        return (zi.external_attr >> 28) == 0xA
+
+    full_path = os.path.normpath(target_folder)
+    import zipfile
+    with zipfile.ZipFile(filename, "r") as z:
+        zip_info = z.infolist()
+        
+        names = [n.replace("\\", "/") for n in z.namelist()]
+        common_folder = os.path.commonprefix(names).split("/", 1)[0]
+
+        for file_ in zip_info:
+            if is_symlink_zipinfo(file_):
+                rel_path = os.path.relpath(file_.filename, common_folder)
+                full_name = os.path.join(full_path, rel_path)
+                target = tools.load(full_name)
+                os.unlink(full_name)
+
+                try:
+                    os.symlink(target, full_name)
+                except OSError:
+                    if not os.path.isabs(target):
+                        target = os.path.normpath(os.path.join(os.path.dirname(full_name), target))
+                    shutil.copy2(target, full_name)
+
+    os.unlink(filename)
