@@ -16,10 +16,6 @@ class WglextConan(ConanFile):
     requires = "opengl/system"
     settings = "os",
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("wglext is only supported on Windows")
