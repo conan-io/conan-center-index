@@ -1,4 +1,7 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/silentbicycle/greatest/archive/v1.5.0.tar.gz"
+    sha256: "33e4c93b1b7f631fec173b8675582d1739b1238a5440b7f4ad50582f0cf38c34"
   "1.4.2":
     url: "https://github.com/silentbicycle/greatest/archive/v1.4.2.tar.gz"
     sha256: "9adea2add921513a9106b7197d82e608f96ad37be808a4def3342cf8e7445998"

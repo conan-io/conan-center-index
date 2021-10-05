@@ -1,14 +1,36 @@
 sources:
   "11.0.8":
-    Windows: {
-      url: "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-win_x64.zip",
-      sha256: "3602ed7bae52898c540c2d3ae3230c081cf061b219d14fb9ac15a47f4226d307",
+    "Windows": {
+      "url": "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-win_x64.zip",
+      "sha256": "3602ed7bae52898c540c2d3ae3230c081cf061b219d14fb9ac15a47f4226d307",
     }
-    Linux: {
-      url: "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-linux_x64.tar.gz",
-      sha256: "f8aee4ab30ca11ab3c8f401477df0e455a9d6b06f2710b2d1b1ddcf06067bc79",
+    "Linux": {
+      "url": "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-linux_x64.tar.gz",
+      "sha256": "f8aee4ab30ca11ab3c8f401477df0e455a9d6b06f2710b2d1b1ddcf06067bc79",
     }
-    Macos: {
-      url: "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-macosx_x64.tar.gz",
-      sha256: "1ed070ea9a27030bcca4d7c074dec1d205d3f3506166d36faf4d1b9e083ab365",
+    "Macos": {
+      "url": "https://cdn.azul.com/zulu/bin/zulu11.41.23-ca-jdk11.0.8-macosx_x64.tar.gz",
+      "sha256": "1ed070ea9a27030bcca4d7c074dec1d205d3f3506166d36faf4d1b9e083ab365",
     }
+
+  "11.0.12":
+    "Windows":
+      "x86_64": {
+        "url": "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-win_x64.zip",
+        "sha256": "42ae65e75d615a3f06a674978e1fa85fdf078cad94e553fee3e779b2b42bb015",
+      }
+    "Linux":
+      "x86_64": {
+        "url": "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-linux_x64.tar.gz",
+        "sha256": "b8e8a63b79bc312aa90f3558edbea59e71495ef1a9c340e38900dd28a1c579f3",
+      }
+    "Macos":
+      "x86_64": {
+        "url": "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-macosx_x64.tar.gz",
+        "sha256": "0b8c8b7cf89c7c55b7e2239b47201d704e8d2170884875b00f3103cf0662d6d7",
+      }
+      "armv8" : {
+        "url": "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-macosx_aarch64.tar.gz",
+        "sha256": "e908a0b4c0da08d41c3e19230f819b364ff2e5f1dafd62d2cf991a85a34d3a17",
+      }
+

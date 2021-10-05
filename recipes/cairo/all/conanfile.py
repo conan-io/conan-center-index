@@ -75,14 +75,14 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.93")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.69.2")
+            self.requires("glib/2.70.0")
         self.requires("zlib/1.2.11")
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.37")
@@ -176,7 +176,16 @@ class CairoConan(ConanFile):
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       "#if HAVE_UNISTD_H", "#ifdef HAVE_UNISTD_H")
 
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
+            tools.touch(os.path.join("boilerplate", "Makefile.am.features"))
+            tools.touch(os.path.join("src", "Makefile.am.features"))
+            tools.touch("ChangeLog")
+
+            with tools.environment_append({"GTKDOCIZE": "echo"}):
+                self.run(
+                    "{} -fiv".format(tools.get_env("AUTORECONF")),
+                    run_environment=True,
+                    win_bash=tools.os_info.is_windows,
+                )
         autotools = self._configure_autotools()
         autotools.make()
 

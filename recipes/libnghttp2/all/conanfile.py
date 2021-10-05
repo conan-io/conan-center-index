@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class Nghttp2Conan(ConanFile):
     name = "libnghttp2"
     description = "HTTP/2 C Library and tools"
-    topics = ("conan", "http")
+    topics = ("http", "http2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org"
     license = "MIT"
@@ -32,35 +32,34 @@ class Nghttp2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def validate(self):
+        if self.options.with_asio and self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("gcc >= 6.0 required")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_asio and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
-        if self.settings.compiler == "gcc":
-            v = tools.Version(str(self.settings.compiler.version))
-            if v < "6.0":
-                raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_app:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
             self.requires("c-ares/1.17.1")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.9.10")
+            self.requires("libxml2/2.9.12")
         if self.options.with_hpack:
-            self.requires("jansson/2.13.1")
+            self.requires("jansson/2.14")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.2.1")
         if self.options.with_asio:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.77.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "nghttp2-{0}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -94,12 +93,13 @@ class Nghttp2Conan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        # tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
-        #                       "set_target_properties(nghttp2_static ",
-        #                       "target_include_directories(nghttp2_static INTERFACE\n"
-        #                       "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
-        #                       "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n"
-        #                       "set_target_properties(nghttp2_static ")
+        if not self.options.shared:
+            # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
+            tools.save(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+                       "target_include_directories(nghttp2_static INTERFACE\n"
+                       "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
+                       "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n",
+                       append=True)
         target_libnghttp2 = "nghttp2" if self.options.shared else "nghttp2_static"
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "\n"
