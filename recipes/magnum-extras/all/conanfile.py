@@ -125,10 +125,11 @@ class MagnumExtrasConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "MagnumExtras"
         self.cpp_info.names["cmake_find_package_multi"] = "MagnumExtras"
 
+        lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
         if self.options.ui:
             self.cpp_info.components["ui"].names["cmake_find_package"] = "Ui"
             self.cpp_info.components["ui"].names["cmake_find_package_multi"] = "Ui"
-            self.cpp_info.components["ui"].libs = ["MagnumUi"]
+            self.cpp_info.components["ui"].libs = ["MagnumUi{}".format(lib_suffix)]
             self.cpp_info.components["ui"].requires = ["corrade::interconnect", "magnum::magnum_main", "magnum::gl", "magnum::text"]
 
         if self.options.player or self.options.ui_gallery:
