@@ -16,7 +16,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             if self.options["magnum-extras"].player:
-                self.run("magnum-player --help")
+                assert os.path.exists(os.path.join(self.deps_cpp_info["magnum-extras"].rootpath, "bin", "magnum-player"))
+                # (Cannot run in headless mode) self.run("magnum-player --help")
             if self.options["magnum-extras"].ui_gallery:
                 assert os.path.exists(os.path.join(self.deps_cpp_info["magnum-extras"].rootpath, "bin", "magnum-ui-gallery"))
                 # (Cannot run in headless mode) self.run("magnum-ui-gallery --help")
