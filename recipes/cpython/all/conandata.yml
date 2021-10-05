@@ -8,9 +8,9 @@ sources:
   "3.8.12":
     url: "https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz"
     sha256: "316aa33f3b7707d041e73f246efedb297a70898c4b91f127f66dc8d80c596f1a"
-  "3.7.11":
-    url: "https://www.python.org/ftp/python/3.7.11/Python-3.7.11.tgz"
-    sha256: "b4fba32182e16485d0a6022ba83c9251e6a1c14676ec243a9a07d3722cd4661a"
+  "3.7.12":
+    url: "https://www.python.org/ftp/python/3.7.12/Python-3.7.12.tgz"
+    sha256: "33b4daaf831be19219659466d12645f87ecec6eb21d4d9f9711018a7b66cce46"
   "2.7.18":
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
@@ -52,7 +52,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.7.11":
+  "3.7.12":
     - patch_file: "patches/3.7.9-0001-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/3.7.9-0002-setup.py-pass-CFLAGS-CPPFLAGS.patch"
