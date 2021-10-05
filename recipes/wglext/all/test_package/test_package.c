@@ -69,6 +69,6 @@ int main()
     if (!wglGetExtensionsStringARB)
         return EXIT_SUCCESS; // ignore headless CI failures
     const char* ext = wglGetExtensionsStringARB(hDC);
-	printf("wglGetExtensionsStringARB: %s\n", ext ? ext : "(null)");
+    printf("wglGetExtensionsStringARB: %s\n", ext ? ext : "(null)");
     return EXIT_SUCCESS;
 }
