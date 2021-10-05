@@ -33,10 +33,6 @@ class LiburingConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _required_glic_version(self):
-        return "2.27"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,27 +44,12 @@ class LiburingConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def _get_glibc_version(self):
-        from six import StringIO
-        buffer = StringIO()
-        ldd = tools.which("ldd")
-        if not ldd:
-            raise ConanException("Could not find 'ldd' installed. Please, check your PATH.")
-        self.run("{} --version".format(ldd), output=buffer)
-        output = buffer.getvalue()
-        match = re.search(r'[0-9]+\.[0-9]+', output)
-        if not match:
-            raise ConanException("Could not parse 'ldd' version. Please, check 'ldd' command.")
-        return tools.Version(match.group(0))
-
     def validate(self):
-        # FIXME: use kernel version of build/host machine. kernel version should be encoded in profile
+        # FIXME: use kernel version of build/host machine.
+        # kernel version should be encoded in profile
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("liburing is supported only on linux")
-
-        if tools.Version(self.version) >= "2.1" and self._get_glibc_version() < self._required_glic_version:
-            raise ConanInvalidConfiguration("glibc {} or higher required to build this package"
-                                            .format(self._required_glic_version))
+            raise ConanInvalidConfiguration(
+                "liburing is supported only on linux")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
