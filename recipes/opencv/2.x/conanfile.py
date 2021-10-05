@@ -25,6 +25,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": [True, False],
         "with_tbb": [True, False],
         "with_gtk": [True, False],
+        "nonfree": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class OpenCVConan(ConanFile):
         "with_eigen": True,
         "with_tbb": False,
         "with_gtk": True,
+        "nonfree": False,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -169,6 +171,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
         self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        self._cmake.definitions["BUILD_opencv_nonfree"] = self.options.nonfree
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
@@ -239,6 +242,9 @@ class OpenCVConan(ConanFile):
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
+        def nonfree():
+            return ["opencv_nonfree"] if self.options.nonfree else []
+
         opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + tbb()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + tbb()},
@@ -252,13 +258,15 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_highgui"] + tbb()},
             {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
             {"target": "opencv_gpu",        "lib": "gpu",        "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo"] + tbb()},
-            {"target": "opencv_nonfree",    "lib": "nonfree",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()},
-            {"target": "opencv_contrib",    "lib": "contrib",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu", "opencv_nonfree"] + tbb()},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu", "opencv_nonfree"] + tbb()},
+            {"target": "opencv_contrib",    "lib": "contrib",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + nonfree() + tbb()},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + nonfree() + tbb()},
             {"target": "opencv_superres",   "lib": "superres",   "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()},
             {"target": "opencv_ts",         "lib": "ts",         "requires": ["opencv_core", "opencv_flann", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_video"] + tbb()},
             {"target": "opencv_videostab",  "lib": "videostab",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()}
         ]
+        if self.options.nonfree:
+            opencv_components.append({"target": "opencv_nonfree", "lib": "nonfree", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()})
+
         return opencv_components
 
     def package_info(self):
