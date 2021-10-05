@@ -33,4 +33,7 @@ class TestPackgeConan(ConanFile):
             return str(self.settings.compiler)
 
     def test(self):
+        tools.save(
+            "jamroot.jam",
+            'ECHO "info:" Success loading project jamroot.jam file. ;')
         self.run("b2 --debug-configuration toolset=%s" % self._toolset, run_environment=True)
