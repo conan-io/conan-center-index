@@ -8,8 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class AndroidNDKConan(ConanFile):
     name = "android-ndk"
-    description = "The Android NDK is a toolset that lets you implement parts of your app in " \
-                  "native code, using languages such as C and C++"
+    description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
     topics = ("android", "NDK", "toolchain", "compiler")
@@ -41,9 +40,8 @@ class AndroidNDKConan(ConanFile):
             data = self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)]
             unzip_fix_symlinks(url=data["url"], target_folder=self._source_subfolder, sha256=data["sha256"])
         else:
-            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)])
-            extracted_folder = "android-ndk-{0}".format(self.version)
-            os.rename(extracted_folder, self._source_subfolder)
+            tools.get(**self.conan_data["sources"][self.version]["url"][str(self.settings.os)][str(self.settings.arch)],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("*", src=self._source_subfolder, dst=".", keep_path=True, symlinks=True)
