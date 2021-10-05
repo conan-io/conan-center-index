@@ -78,6 +78,9 @@ class GameNetworkingSocketsConan(ConanFile):
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
 
+    def build_requirements(self):
+        self.build_requires("protobuf/3.17.1")
+
     def requirements(self):
         self.requires("protobuf/3.17.1")
         if self.options.encryption == "openssl":
