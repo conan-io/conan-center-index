@@ -337,7 +337,7 @@ class AwsSdkCppConan(ConanFile):
                 See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-common/0.6.7")
         if self._use_aws_crt_cpp:
             self.requires("aws-c-cal/0.5.12")
             self.requires("aws-c-io/0.10.5")
