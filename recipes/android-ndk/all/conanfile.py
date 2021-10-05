@@ -46,6 +46,7 @@ class AndroidNDKConan(ConanFile):
         self.copy("cmake-wrapper.cmd")
         self.copy("cmake-wrapper")
         self._fix_permissions()
+        self._fix_broken_symlinks()
 
     # from here on, everything is assumed to run in 2 profile mode, using this android-ndk recipe as a build requirement
 
@@ -115,9 +116,18 @@ class AndroidNDKConan(ConanFile):
                         self.output.info(f"chmod on Mach-O file: '{filename}'")
                         self._chmod_plus_x(filename)
 
+    def _fix_broken_symlinks(self):
+         if self.version == "r23":
+            ndk_bin = os.path.join(self._ndk_root, "bin")
+            src, dst, dst1 = (os.path.join(ndk_bin, "clang-12"), os.path.join(ndk_bin, "clang"), os.path.join(ndk_bin, "clang++"))
+            os.remove(dst)
+            os.remove(dst1)
+            os.link(src, dst)
+            os.link(src, dst1)
+
     @property
     def _host(self):
-        return f"{self._platform}_{self.settings.arch}"
+        return f"{self._platform}-{self.settings.arch}"
 
     @property
     def _ndk_root(self):
