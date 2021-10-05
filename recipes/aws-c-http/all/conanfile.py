@@ -39,6 +39,7 @@ class AwsCHttp(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
+        self.requires("aws-c-common/0.6.9")
         self.requires("aws-c-compression/0.2.14")
         self.requires("aws-c-io/0.10.9")
 
@@ -72,4 +73,8 @@ class AwsCHttp(ConanFile):
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].names["cmake_find_package_multi"] = "aws-c-http"
         self.cpp_info.components["aws-c-http-lib"].libs = ["aws-c-http"]
-        self.cpp_info.components["aws-c-http-lib"].requires = ["aws-c-compression::aws-c-compression-lib", "aws-c-io::aws-c-io-lib"]
+        self.cpp_info.components["aws-c-http-lib"].requires = [
+            "aws-c-common::aws-c-common-lib",
+            "aws-c-compression::aws-c-compression-lib",
+            "aws-c-io::aws-c-io-lib"
+        ]
