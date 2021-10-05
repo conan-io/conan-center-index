@@ -56,7 +56,7 @@ class MagnumExtrasConan(ConanFile):
             self.options.application = "emscripten"
             # FIXME: Requires 'magnum:basis_importer=True' 
             self.options.player = False
-            # #FIXME: Fails to compile
+            # FIXME: Fails to compile
             self.options.ui_gallery = False
 
     def configure(self):
