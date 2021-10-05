@@ -16,7 +16,7 @@ class TestPackgeConan(ConanFile):
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin"
         elif self.settings.compiler == "apple-clang":
-            return "clang-darwin"
+            return "clang"
         elif self.settings.os == "Android" and self.settings.compiler == "clang":
             return "clang-linux"
         elif self.settings.compiler in ["clang", "gcc"]:
