@@ -46,7 +46,35 @@ class GameNetworkingSocketsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            # "Visual Studio": "16", 
+            # "clang": "11", 
+            # "apple-clang": "11"
+        }
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
     def validate(self):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+
+        if minimum_version is None:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+                self.name, self.settings.compiler))
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("{}/{} requires C++{} with {}, "
+                                            "which is not supported by {} {}.".format(
+                self.name, self.version, self._minimum_cpp_standard,
+                self.settings.compiler, self.settings.compiler,
+                self.settings.compiler.version))
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
 
