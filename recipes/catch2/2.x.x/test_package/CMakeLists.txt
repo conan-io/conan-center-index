@@ -15,4 +15,10 @@ target_link_libraries(test_package PRIVATE Catch2::Catch2)
 if(WITH_MAIN)
   add_executable(standalone 200-standalone.cpp)
   target_link_libraries(standalone PRIVATE Catch2::Catch2WithMain)
+  if(WITH_BENCHMARK)
+    add_executable(benchmark 300-benchmark.cpp)
+    target_link_libraries(benchmark PRIVATE Catch2::Catch2WithMain)
+  endif()
 endif()
+
+
