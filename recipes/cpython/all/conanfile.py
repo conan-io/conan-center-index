@@ -702,7 +702,7 @@ class CPythonConan(ConanFile):
             pythonhome = os.path.join(self.package_folder, "lib", "python{}.{}".format(version.major, version.minor))
         self.user_info.pythonhome = pythonhome
 
-        pythonhome_required = self.settings.compiler == "Visual Studio" # or tools.is_apple_os(self.settings.os)
+        pythonhome_required = self.settings.compiler == "Visual Studio"
         self.user_info.module_requires_pythonhome = pythonhome_required
 
         if self.settings.compiler == "Visual Studio":
