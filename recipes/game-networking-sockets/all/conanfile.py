@@ -15,6 +15,7 @@ class GameNetworkingSocketsConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     options = {
         "shared": [True, False],
@@ -90,16 +91,16 @@ class GameNetworkingSocketsConan(ConanFile):
         elif self.options.encryption == "bcrypt":
             # self.requires("libxcrypt/4.4.25")
             pass
-    
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "configure_msvc_runtime()",
-            "# configure_msvc_runtime()"
-        )
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -107,6 +108,8 @@ class GameNetworkingSocketsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = "OFF"
         self._cmake.definitions["Protobuf_USE_STATIC_LIBS"] = not self.options["protobuf"].shared

@@ -1,0 +1,21 @@
+diff --git a/src/CMakeLists.txt b/tmp/src/CMakeLists.txt
+index 2106722..7f9d834 100644
+--- a/src/CMakeLists.txt
++++ b/tmp/src/CMakeLists.txt
+@@ -322,11 +322,11 @@ install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GameNetwor
+ 
+ # Export doesn't work if we're using WebRTC and the Abseil dependency came from the submodule
+ if(NOT (USE_STEAMWEBRTC AND STEAMWEBRTC_ABSL_SOURCE STREQUAL submodule))
+-	install(
+-		EXPORT GameNetworkingSockets
+-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GameNetworkingSockets
+-		NAMESPACE GameNetworkingSockets::
+-		)
++	# install(
++	# 	EXPORT GameNetworkingSockets
++	# 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GameNetworkingSockets
++	# 	NAMESPACE GameNetworkingSockets::
++	# 	)
+ 
+ 	include(CMakePackageConfigHelpers)
+ 
