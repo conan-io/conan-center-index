@@ -75,6 +75,9 @@ class UnicornConan(ConanFile):
         if unsupported_archs:
             self.output.info(f"Valid supported architectures are: {self._all_supported_archs}")
             raise ConanInvalidConfiguration(f"Invalid arch(s) in supported_archs option: {unsupported_archs}")
+        if "arm" in self.settings.arch:
+            # FIXME: will/should be fixed with unicorn 2 (https://github.com/unicorn-engine/unicorn/issues/1379)
+            raise ConanInvalidConfiguration("arm builds of unicorn are currently unsupported")
 
     def package_id(self):
         # normalize the supported_archs option (sorted+comma separated)
@@ -94,15 +97,6 @@ class UnicornConan(ConanFile):
         cmake.definitions["UNICORN_INSTALL"] = True
         cmake.definitions["UNICORN_BUILD_SAMPLES"] = False
         cmake.definitions["UNICORN_ARCH"] = " ".join(self._supported_archs)
-        if tools.is_apple_os(self.settings.os):
-            if self.settings.arch == "armv8":
-                cmake.definitions["CMAKE_C_FLAGS"] = "-arch arm64"
-        if tools.cross_building(self, skip_x64_x86=True):
-            # FIXME: this needs conan support (https://github.com/conan-io/conan/pull/8026)
-            cmake.definitions["CMAKE_SYSTEM_NAME"] = {
-                "Macos": "Darwin",
-            }.get(str(self.settings.os), str(self.settings.os))
-            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         if self._needs_jwasm:
             cmake.definitions["CMAKE_ASM_MASM_COMPILER"] = self._jwasm_wrapper
             if self.settings.arch == "x86_64":
