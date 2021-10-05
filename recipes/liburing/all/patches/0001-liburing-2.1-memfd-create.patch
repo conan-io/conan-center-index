@@ -1,0 +1,206 @@
+diff --git a/.github/workflows/build_with_clang.yml b/.github/workflows/build_with_clang.yml
+new file mode 100644
+index 0000000..28b0e08
+--- /dev/null
++++ b/.github/workflows/build_with_clang.yml
+@@ -0,0 +1,37 @@
++name: Build with Clang
++
++on:
++  push:
++    branches: [ master ]
++  pull_request:
++    branches: [ master ]
++    
++jobs:
++  main:
++    name: Build with Clang
++    strategy:
++      fail-fast: false
++
++    runs-on: ubuntu-latest
++    steps:
++    - uses: actions/checkout@v2
++
++    - name: Install Toolchains
++      run: |
++        sudo apt install -y man git clang make && \
++        git --version && \
++        clang --version && \
++        clang++ --version && \
++        make --version;
++
++    - name: Build
++      run: |
++        make -j$(nproc) V=1 \
++        CFLAGS="-Werror -Wno-unused-command-line-argument" \
++        CPPFLAGS="-Werror -Wno-unused-command-line-argument" \
++        CXXFLAGS="-Werror -Wno-unused-command-line-argument" \
++        CC=clang \
++        CXX=clang++;
++
++    - name: Test install command
++      run: sudo make install;
+diff --git a/.github/workflows/build_with_gcc.yml b/.github/workflows/build_with_gcc.yml
+new file mode 100644
+index 0000000..63a99ce
+--- /dev/null
++++ b/.github/workflows/build_with_gcc.yml
+@@ -0,0 +1,32 @@
++name: Build with GCC
++
++on:
++  push:
++    branches: [ master ]
++  pull_request:
++    branches: [ master ]
++    
++jobs:
++  main:
++    name: Build with GCC
++    strategy:
++      fail-fast: false
++
++    runs-on: ubuntu-latest
++    steps:
++    - uses: actions/checkout@v2
++
++    - name: Install Toolchains
++      run: |
++        sudo apt install -y man git gcc g++ make && \
++        git --version && \
++        gcc --version && \
++        g++ --version && \
++        make --version;
++
++    - name: Build
++      run: |
++        make -j$(nproc) V=1 CFLAGS="-Werror" CPPFLAGS="-Werror" CXXFLAGS="-Werror" CC=gcc CXX=g++;
++
++    - name: Test install command
++      run: sudo make install;
+diff --git a/configure b/configure
+index afccef1..a7caa07 100755
+--- a/configure
++++ b/configure
+@@ -338,6 +338,23 @@ if compile_prog "" "" "has_ucontext"; then
+ fi
+ print_config "has_ucontext" "$has_ucontext"
+ 
++##########################################
++# check for memfd_create(2)
++has_memfd_create="no"
++cat > $TMPC << EOF
++#define _GNU_SOURCE
++#include <sys/mman.h>
++int main(int argc, char **argv)
++{
++  int memfd = memfd_create("test", 0);
++  return 0;
++}
++EOF
++if compile_prog "-Werror=implicit-function-declaration" "" "has_memfd_create"; then
++  has_memfd_create="yes"
++fi
++print_config "has_memfd_create" "$has_memfd_create"
++
+ 
+ #############################################################################
+ 
+@@ -365,6 +382,9 @@ fi
+ if test "$array_bounds" = "yes"; then
+   output_sym "CONFIG_HAVE_ARRAY_BOUNDS"
+ fi
++if test "$has_memfd_create" = "yes"; then
++  output_sym "CONFIG_HAVE_MEMFD_CREATE"
++fi
+ 
+ echo "CC=$cc" >> $config_host_mak
+ print_config "CC" "$cc"
+diff --git a/liburing.spec b/liburing.spec
+index 0268d23..7eb5731 100644
+--- a/liburing.spec
++++ b/liburing.spec
+@@ -1,5 +1,5 @@
+ Name: liburing
+-Version: 2.0
++Version: 2.1
+ Release: 1%{?dist}
+ Summary: Linux-native io_uring I/O access library
+ License: (GPLv2 with exceptions and LGPLv2+) or MIT
+diff --git a/test/file-register.c b/test/file-register.c
+index e7aa870..bd15408 100644
+--- a/test/file-register.c
++++ b/test/file-register.c
+@@ -9,6 +9,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <fcntl.h>
++#include <sys/resource.h>
+ 
+ #include "helpers.h"
+ #include "liburing.h"
+@@ -494,6 +495,18 @@ static int test_fixed_read_write(struct io_uring *ring, int index)
+ 	return 0;
+ }
+ 
++static void adjust_nfiles(int want_files)
++{
++	struct rlimit rlim;
++
++	if (getrlimit(RLIMIT_NOFILE, &rlim) < 0)
++		return;
++	if (rlim.rlim_cur >= want_files)
++		return;
++	rlim.rlim_cur = want_files;
++	setrlimit(RLIMIT_NOFILE, &rlim);
++}
++
+ /*
+  * Register 8K of sparse files, update one at a random spot, then do some
+  * file IO to verify it works.
+@@ -503,6 +516,8 @@ static int test_huge(struct io_uring *ring)
+ 	int *files;
+ 	int ret;
+ 
++	adjust_nfiles(16384);
++
+ 	files = open_files(0, 8192, 0);
+ 	ret = io_uring_register_files(ring, files, 8192);
+ 	if (ret) {
+diff --git a/test/io_uring_register.c b/test/io_uring_register.c
+index da7bc0d..b8a4ea5 100644
+--- a/test/io_uring_register.c
++++ b/test/io_uring_register.c
+@@ -31,6 +31,17 @@ static int pagesize;
+ static rlim_t mlock_limit;
+ static int devnull;
+ 
++#if !defined(CONFIG_HAVE_MEMFD_CREATE)
++#include <sys/syscall.h>
++#include <linux/memfd.h>
++
++static int memfd_create(const char *name, unsigned int flags)
++{
++	return (int)syscall(SYS_memfd_create, name, flags);
++}
++#endif
++
++
+ int
+ expect_fail(int fd, unsigned int opcode, void *arg,
+ 	    unsigned int nr_args, int error)
+diff --git a/test/runtests.sh b/test/runtests.sh
+index a5c33a4..bc9978f 100755
+--- a/test/runtests.sh
++++ b/test/runtests.sh
+@@ -101,8 +101,8 @@ run_test()
+ 	# Run the test
+ 	T_START=$(date +%s)
+ 	timeout -s INT -k $TIMEOUT $TIMEOUT "${test_exec[@]}"
+-	T_END=$(date +%s)
+ 	local status=$?
++	T_END=$(date +%s)
+ 
+ 	if [ -e ./core ]; then
+ 		mv core "core-$test_name"
