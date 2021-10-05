@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <Windows.h>
+#include <windows.h>
 #include <GL/gl.h>
 #include <GL/wglext.h>
 
