@@ -18,7 +18,8 @@ class TestPackageConan(ConanFile):
             if self.options["magnum-extras"].player:
                 self.run("magnum-player --help")
             if self.options["magnum-extras"].ui_gallery:
-                self.run("magnum-ui-gallery --help")
+                assert os.path.exists(os.path.join(self.deps_cpp_info["magnum-extras"].rootpath, "bin", "magnum-ui-gallery"))
+                # (Cannot run in headless mode) self.run("magnum-ui-gallery --help")
             if self.options["magnum-extras"].ui:
                 bin_path = os.path.join("bin", "test_package")
                 self.run(bin_path, run_environment=True)
