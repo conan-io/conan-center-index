@@ -22,5 +22,4 @@ int main() {
 
     auto padding = plane.padding();
     Magnum::Debug{&std::cout} << padding;
-
 }
