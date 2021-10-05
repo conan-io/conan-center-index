@@ -21,7 +21,7 @@ class TestPackgeConan(ConanFile):
             else:
                 self.run("ndk-build --version", run_environment=True)
 
-        # Run the project that was built using emsdk
+        # Run the project that was built using Android NDK
         if self.settings.os == "Android":
             test_file = os.path.join("bin", "test_package")
             assert os.path.exists(test_file)
