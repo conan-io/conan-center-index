@@ -53,18 +53,25 @@ class BRPCCppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_source(self):
-       cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
-       tools.replace_in_file(cmake_path,
+        cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmake_path,
+            ('''find_library(PROTOC_LIB NAMES protoc)\n'''
+             '''if(NOT PROTOC_LIB)\n'''
+             '''    message(FATAL_ERROR "Fail to find protoc lib")\n'''
+             '''endif()'''), '')
+        tools.replace_in_file(cmake_path,
                     ("find_package(GFLAGS REQUIRED)"), "find_package(gflags REQUIRED)") 
-       tools.replace_in_file(cmake_path,
+        tools.replace_in_file(cmake_path,
                     ("GFLAGS_INCLUDE_PATH"), "gflags_INCLUDE_DIR") 
-       tools.replace_in_file(cmake_path,
+        tools.replace_in_file(cmake_path,
                     ("GFLAGS_LIBRARY"), "gflags_LIBS") 
-       tools.replace_in_file(cmake_path,
+        tools.replace_in_file(cmake_path,
                     ("PROTOBUF_INCLUDE"), "protobuf_INCLUDE") 
-       tools.replace_in_file(cmake_path,
+        tools.replace_in_file(cmake_path,
                     ("PROTOBUF_LIBRARIES"), "protobuf_LIBS") 
-       tools.replace_in_file(cmake_path,
+        tools.replace_in_file(cmake_path,
+                    ("PROTOC_LIB"), "protobuf_libprotoc_LIBS") 
+        tools.replace_in_file(cmake_path,
                     ("set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)"), "set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)") 
 
     def _configure_cmake(self):
