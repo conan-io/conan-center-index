@@ -1,5 +1,6 @@
-import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import contextlib
+import os
 
 required_conan_version = ">=1.33.0"
 
@@ -37,6 +38,21 @@ class LibGphoto2(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libgphoto2 does not support Windows")
+
+    @contextlib.contextmanager
+    def _build_context(self):
+        if self.settings.os == "Linux" and not self.options["libtool"].shared:
+            env = {
+                "LIBLTDL": "-lltdl -ldl",
+            }
+            with tools.environment_append(env):
+                yield
+        else:
+            yield
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -45,9 +61,9 @@ class LibGphoto2(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.4")
-        self.build_requires("libtool/2.4.6")
 
     def requirements(self):
+        self.requires("libtool/2.4.6")
         if self.options.with_libusb:
             self.requires("libusb/1.0.24")
         if self.options.with_libcurl:
@@ -68,28 +84,40 @@ class LibGphoto2(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self)
         self._autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
+        auto_no = lambda v: "auto" if v else "no"
         args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-libcurl={}".format(yes_no(self.options.with_libcurl)),
-            "--with-libexif={}".format(yes_no(self.options.with_libexif)),
-            "--with-libxml-2.0={}".format(yes_no(self.options.with_libxml2)),
+            "--with-libcurl={}".format(auto_no(self.options.with_libcurl)),
+            "--with-libexif={}".format(auto_no(self.options.with_libexif)),
+            "--with-libxml-2.0={}".format(auto_no(self.options.with_libxml2)),
             "--disable-nls",
+            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
         ]
         if not self.options.with_libjpeg:
-            args.extend(["--without-jpeg"])
-
+            args.append("--without-jpeg")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        autotools = self._configure_autotools()
-        autotools.install()
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
+        tools.remove_files_by_mask(self.package_folder, "*.la")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         self.copy("print-camera-list", "bin", "packaging/generic/.libs")
 
     def package_info(self):
         self.cpp_info.libs = ["gphoto2", "gphoto2_port"]
+        self.cpp_info.names["pkg_config"] = "libgphoto2"
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
+
