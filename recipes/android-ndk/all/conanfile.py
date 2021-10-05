@@ -123,7 +123,7 @@ class AndroidNDKConan(ConanFile):
 
     @property
     def _host(self):
-        return f"{self._platform}_{self.settings.arch}"
+        return f"{self._platform}-{self.settings.arch}"
 
     @property
     def _ndk_root(self):
