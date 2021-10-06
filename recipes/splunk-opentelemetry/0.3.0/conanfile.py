@@ -26,6 +26,10 @@ class SplunkOpentelemetryConan(ConanFile):
       "SplunkOpenTelemetryConfig.cmake.in"
     ]
 
+    def config(self):
+        if "libcxx" in self.settings.compiler.fields:
+            self.settings.compiler.libcxx.remove("libstdc++")
+
     @property
     def _source_subfolder(self):
         return "sources"
