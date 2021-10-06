@@ -9,7 +9,7 @@ class LevelDBCppConan(ConanFile):
     description = "LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/leveldb"
-    topics = ("conan", "leveldb", "google", "db")
+    topics = ("leveldb", "google", "db")
     license = ("BSD-3-Clause",)
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
@@ -54,7 +54,7 @@ class LevelDBCppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
