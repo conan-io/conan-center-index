@@ -48,9 +48,9 @@ class ArmToolchainConan(ConanFile):
     def config_options(self):
         default_arch = "armv8"
         default_os = "Linux"
-        if hasattr(self, "settings_target"):
-            self.options.target_arch = getattr(self.settings_target, "arch", default_arch)
-            self.options.target_os = getattr(self.settings_target, "os", default_os)
+        if hasattr(self, "settings_target") and self.settings_target:
+            self.options.target_arch = self.settings_target.arch
+            self.options.target_os = self.settings_target.os
         else:
             self.options.target_arch = default_arch
             self.options.target_os = "Linux"
@@ -62,7 +62,7 @@ class ArmToolchainConan(ConanFile):
             self.build_requires("tar/1.32.90")
 
     def validate(self):
-        if hasattr(self, "settings_target"):
+        if hasattr(self, "settings_target") and self.settings_target:
             if (self.options.target_arch, self.options.target_os) != (str(self.settings_target.arch), str(self.settings_target.os)):
                 raise ConanInvalidConfiguration("arm-toolchain:{target_arch={} target_os={}} does not match settings_target.{arch={} os={}}".format(
                     self.options.target_arch, self.options.target_os, self.settings_target.arch, self.settings_target.os, "gcc"))
