@@ -33,10 +33,10 @@ class FlexConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def requirements(self):
-        self.requires("m4/1.4.18")
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
-        self.build_requires("m4/1.4.18")
+        self.build_requires("m4/1.4.19")
         if hasattr(self, "settings_build") and tools.cross_building(self):
             self.build_requires(f"{self.name}/{self.version}")
 
