@@ -26,10 +26,6 @@ class SplunkOpentelemetryConan(ConanFile):
       "SplunkOpenTelemetryConfig.cmake.in"
     ]
 
-    def config(self):
-        if "libcxx" in self.settings.compiler.fields:
-            self.settings.compiler.libcxx.remove("libstdc++")
-
     @property
     def _source_subfolder(self):
         return "sources"
@@ -48,6 +44,12 @@ class SplunkOpentelemetryConan(ConanFile):
           self.deps_cpp_info["protobuf"].rootpath,
         ]
 
+        # Is there a better way?
+        include_dirs = [
+          "-isystem {}".format(os.path.join(self.deps_cpp_info["abseil"].rootpath, "include")),
+          "-isystem {}".format(os.path.join(self.deps_cpp_info["grpc"].rootpath, "include"))
+        ]
+
         defs = {
           "CMAKE_PREFIX_PATH": ";".join(prefix_paths),
           "WITH_OTLP": True,
@@ -55,7 +57,8 @@ class SplunkOpentelemetryConan(ConanFile):
           "WITH_JAEGER": False,
           "WITH_ABSEIL": False,
           "BUILD_TESTING": False,
-          "WITH_EXAMPLES": False
+          "WITH_EXAMPLES": False,
+          "CMAKE_CXX_FLAGS": " ".join(include_dirs)
         }
         cmake.configure(
           source_folder=os.path.join(
@@ -89,6 +92,7 @@ class SplunkOpentelemetryConan(ConanFile):
           "protobuf::protobuf",
           "libcurl::libcurl"
         ]
+
         self.cpp_info.components["opentelemetry-cpp"].libs = [
           "libhttp_client_curl",
           "libopentelemetry_common",
@@ -101,7 +105,6 @@ class SplunkOpentelemetryConan(ConanFile):
           "libopentelemetry_version",
           "libopentelemetry_zpages"
         ]
-
         self.cpp_info.components["SplunkOpenTelemetry"].requires = [
           "opentelemetry-cpp"
         ]
