@@ -310,6 +310,7 @@ Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/c
 
 For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
 
+```
 [requires]
 intel-mkl/2021@mycompany/stable
 ```
