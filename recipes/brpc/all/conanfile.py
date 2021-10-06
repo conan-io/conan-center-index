@@ -29,11 +29,13 @@ class BRPCCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
+    def validate(self):
+        if (self.settings.os == "Windows" or
+                self.settings.compiler == 'Visual Studio'):
             raise ConanInvalidConfiguration("bprc not supported Windows.")
 
-        if self.settings.compiler.libcxx == "libc++":
+        if (self.settings.compiler == 'clang' and
+                self.settings.compiler.libcxx == "libc++"):
             raise ConanInvalidConfiguration("bprc not supported libc++.")
 
     def configure(self):
