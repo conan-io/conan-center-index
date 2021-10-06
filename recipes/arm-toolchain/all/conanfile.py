@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans import __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
+import lzma
 import os
 import glob
 
@@ -88,11 +89,15 @@ class ArmToolchainConan(ConanFile):
         tools.rename(glob.glob("gcc-*")[0], self._source_subfolder)
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            compressed_patch = patch["patch_file"] + ".lzma"
+            if os.path.exists(compressed_patch):
+                open(patch["patch_file"], "wb").write(lzma.decompress(open(compressed_patch, "rb").read()))
             tools.patch(**patch)
 
     def package(self):
         self.copy("EULA", src=self._source_subfolder, dst="licenses")
         self.copy("*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "bin"))
+        tools.rmdir(os.path.join(self.package_folder, "bin", "share"))
         for fn in glob.glob(os.path.join(self.package_folder, "*.txt")):
             os.unlink(fn)
 
@@ -133,6 +138,7 @@ class ArmToolchainConan(ConanFile):
         self.env_info.CPP = prefix + "cpp"
         self.env_info.AR = prefix + "ar"
         self.env_info.AS = prefix + "as"
+        self.env_info.FC = prefix + "gfortran"
         self.env_info.GDB = prefix + "gdb"
         self.env_info.NM = prefix + "nm"
         self.env_info.OBJCOPY = prefix + "objcopy"
