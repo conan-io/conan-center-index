@@ -1,0 +1,4 @@
+sources:
+  "20.1":
+    url: https://github.com/google/perfetto/archive/refs/tags/v20.1.tar.gz
+    sha256: d681bb76e2b73e6ba46db53c1502f31f4f16c36cd6e91d4ae839a3b44272f646
