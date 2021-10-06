@@ -134,13 +134,8 @@ class UnicornConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        try:
-            cmake = self._configure_cmake()
-            cmake.build()
-        except:
-            log = tools.load("config.log")
-            self.output.info(log)
-            raise
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
