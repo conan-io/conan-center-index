@@ -91,12 +91,13 @@ class ArmToolchainConan(ConanFile):
             tools.patch(**patch)
 
     def package(self):
-        self.copy("*", src=self._source_subfolder, dst=self.package_folder)
+        self.copy("EULA", src=self._source_subfolder, dst="licenses")
+        self.copy("*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "bin"))
         for fn in glob.glob(os.path.join(self.package_folder, "*.txt")):
             os.unlink(fn)
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
+        bin_path = os.path.join(self.package_folder, "bin", "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.path.append(bin_path)
 
