@@ -1,7 +1,4 @@
 sources:
-  "0.9.6":
-    sha256: b872ca844999e0ba768acd823b409761f126590fb34cb0183da915a595161446
-    url: https://github.com/apache/incubator-brpc/archive/refs/tags/0.9.6.tar.gz
-  "0.9.7":
-    sha256: 722cd342baf3b05189ca78ecf6c56ea6ffec22e62fc2938335e4e5bab545a49c
-    url: https://github.com/apache/incubator-brpc/archive/refs/tags/0.9.7.tar.gz
+  "1.0.0-rc02":
+    sha256: c0168d22205724bfa1939c9ad79bd9f74a98e0bd05be9e8f5cc504ef44c676a1
+    url: https://github.com/apache/incubator-brpc/archive/refs/tags/1.0.0-rc02.tar.gz
