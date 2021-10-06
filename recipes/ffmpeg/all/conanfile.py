@@ -527,6 +527,7 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_audiotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
+            self.cpp_info.components["avdevice"].frameworks.append("AudioToolbox")
 
         if self.options.get_safe("with_videotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("VideoToolbox")
