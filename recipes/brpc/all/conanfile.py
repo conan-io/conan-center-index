@@ -33,6 +33,9 @@ class BRPCCppConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("bprc not supported Windows.")
 
+        if self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration("bprc not supported libc++.")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
