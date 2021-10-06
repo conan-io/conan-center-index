@@ -42,7 +42,7 @@ class LevelDBCppConan(ConanFile):
             del self.options.fPIC
 
     # FIXME: tcmalloc is also conditionally included in leveldb, but
-    # there is no "official" conan package yet; when those is available, we
+    # there is no "official" conan package yet; when that is available, we
     # can add similar with options for those
 
     def requirements(self):
