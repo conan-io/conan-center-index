@@ -63,13 +63,11 @@ class FlexConan(ConanFile):
             "--disable-bootstrap",
             "HELP2MAN=/bin/true",
             "M4=m4",
-        ]
-
-        if self.settings.os == "Linux":
             # https://github.com/westes/flex/issues/247
-            configure_args.extend(["ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes"])
+            "ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes",
             # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
-            configure_args.append("ac_cv_func_reallocarray=no")
+            "ac_cv_func_reallocarray=no",
+        ]
 
         autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return autotools
