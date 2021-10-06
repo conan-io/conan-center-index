@@ -6,8 +6,7 @@ class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry"
     version = "0.3.0"
     license = "Apache 2.0"
-    author = "Splunk"
-    url = "https://github.com/signalfx/splunk-otel-cpp"
+    homepage = "https://github.com/signalfx/splunk-otel-cpp"
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
     settings = "os", "compiler", "build_type", "arch"
@@ -23,39 +22,42 @@ class SplunkOpentelemetryConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-      return "sources"
+        return "sources"
 
     def source(self):
-      tools.get(
-        "https://github.com/signalfx/splunk-otel-cpp/releases/download/v0.3.0/splunk-opentelemetry-cpp.tar.gz",
-        strip_root=True,
-        sha256="e8d192d3c850e22f6f43d89243027df4e683fdc3504574116035d744f8e696a4",
-        destination=self._source_subfolder
-      )
+        tools.get(
+            "https://github.com/signalfx/splunk-otel-cpp/releases/download/v0.3.0/splunk-opentelemetry-cpp.tar.gz",
+            strip_root=True,
+            sha256="e8d192d3c850e22f6f43d89243027df4e683fdc3504574116035d744f8e696a4",
+            destination=self._source_subfolder
+        )
 
     def _build_otel_cpp(self):
-      cmake = CMake(self)
-      prefix_paths = [
-        self.deps_cpp_info["grpc"].rootpath,
-        self.deps_cpp_info["protobuf"].rootpath,
-      ]
+        cmake = CMake(self)
+        prefix_paths = [
+          self.deps_cpp_info["grpc"].rootpath,
+          self.deps_cpp_info["protobuf"].rootpath,
+        ]
 
-      defs = {
-        "CMAKE_PREFIX_PATH": ";".join(prefix_paths),
-        "WITH_OTLP": True,
-        "WITH_OTLP_HTTP": False,
-        "WITH_JAEGER": False,
-        "WITH_ABSEIL": False,
-        "BUILD_TESTING": False,
-        "WITH_EXAMPLES": False
-      }
-      cmake.configure(
-        source_folder=os.path.join(self._source_subfolder, "opentelemetry-cpp"),
-        defs=defs,
-        build_folder="otelcpp_build"
-      )
-      cmake.build()
-      cmake.install()
+        defs = {
+          "CMAKE_PREFIX_PATH": ";".join(prefix_paths),
+          "WITH_OTLP": True,
+          "WITH_OTLP_HTTP": False,
+          "WITH_JAEGER": False,
+          "WITH_ABSEIL": False,
+          "BUILD_TESTING": False,
+          "WITH_EXAMPLES": False
+        }
+        cmake.configure(
+          source_folder=os.path.join(
+            self._source_subfolder,
+            "opentelemetry-cpp"
+          ),
+          defs=defs,
+          build_folder="otelcpp_build"
+        )
+        cmake.build()
+        cmake.install()
 
     def build(self):
         self._build_otel_cpp()
@@ -91,7 +93,9 @@ class SplunkOpentelemetryConan(ConanFile):
           "libopentelemetry_zpages"
         ]
 
-        self.cpp_info.components["SplunkOpenTelemetry"].requires = ["opentelemetry-cpp"]
+        self.cpp_info.components["SplunkOpenTelemetry"].requires = [
+          "opentelemetry-cpp"
+        ]
         self.cpp_info.components["SplunkOpenTelemetry"].libs = [
           "libSplunkOpenTelemetry"
         ]
