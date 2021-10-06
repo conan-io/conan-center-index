@@ -27,7 +27,8 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
-  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)<!-- endToc -->
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
+  * [How to package libraries that depend on Intel MKL, IPP or DNN libraries?](#how-to-package-libraries-that-depend-on-intel-mkl-ipp-or-dnn-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -260,3 +261,56 @@ In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 arch
 
 There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
  as we don't test all the possible combinations (and probably will never be). Patches are welcomed if problems are found.
+
+## How to package libraries that depend on proprietary closed-source libraries?
+
+There are several popular software libraries provided by Intel:
+
+* [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html)
+* [Intel Integrated Performance Primitives (IPP)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/ipp.html)
+* [Intel Deep Neural Networking Library (DNN)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onednn.html)
+
+these Intel libraries are widely used by various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
+
+Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
+
+* they are closed-source and commercial products, ConanCenter cannot redistribute their binaries due to the license restrictions
+* registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
+* they use graphical installers which are hard to automate within conan recipe
+
+instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the following references:
+
+* `intel-mkl/<version>`, e.g. `intel-mkl/2021`
+* `intel-ipp/<version>`, e.g. `intel-ipp/2021`
+* `intel-dnn/<version>`, e.g. `intel-dnn/2021`
+
+**NOTE**: These references are not available in ConanCenter and will likely never be! it's the consumer's responsibility to provide the recipes for these libraries.
+
+
+Since these references will be never available in ConanCenter, they will be deactivated in the consuming recipes by default:
+
+```python
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_intel_mkl": [True, False]}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_intel_mkl": False}
+
+    def requirements(self):
+        if self.options.with_intel_mkl:
+            self.requires("intel-mkl/2021")
+```
+
+If consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
+
+Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
+
+For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
+
+```
+[requires]
+intel-mkl/2021@mycompany/stable
+```
