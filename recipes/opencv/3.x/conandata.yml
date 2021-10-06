@@ -4,3 +4,8 @@ sources:
       url: https://github.com/opencv/opencv/archive/3.4.12.tar.gz
     - sha256: b207024589674dd2efc7c25740ef192ee4f3e0783e773e2d49a198c37e3e7570
       url: https://github.com/opencv/opencv_contrib/archive/3.4.12.tar.gz
+  "3.4.3":
+    - sha256: 4eef85759d5450b183459ff216b4c0fa43e87a4f6aa92c8af649f89336f002ec
+      url: https://github.com/opencv/opencv/archive/3.4.3.tar.gz
+    - sha256: 6dfb51326f3dfeb659128df952edecd45683626a965aa4a8e1e9c970c40fb636
+      url: https://github.com/opencv/opencv_contrib/archive/3.4.3.tar.gz
