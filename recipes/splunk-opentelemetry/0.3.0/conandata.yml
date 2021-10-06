@@ -1,0 +1,4 @@
+sources:
+  0.3.0:
+    url: "https://github.com/signalfx/splunk-otel-cpp/releases/download/v0.3.0/splunk-opentelemetry-cpp.tar.gz"
+    sha256: "e8d192d3c850e22f6f43d89243027df4e683fdc3504574116035d744f8e696a4"

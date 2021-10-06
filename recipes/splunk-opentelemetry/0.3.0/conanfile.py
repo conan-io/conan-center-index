@@ -10,7 +10,12 @@ class SplunkOpentelemetryConan(ConanFile):
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = {
+      "os": "Linux",
+      "compiler": None,
+      "build_type": None,
+      "arch": ["x86_64"]
+    }
     generators = "cmake_find_package"
     requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
     exports_sources = [
@@ -27,9 +32,8 @@ class SplunkOpentelemetryConan(ConanFile):
 
     def source(self):
         tools.get(
-            "https://github.com/signalfx/splunk-otel-cpp/releases/download/v0.3.0/splunk-opentelemetry-cpp.tar.gz",
+            **self.conan_data["sources"][self.version],
             strip_root=True,
-            sha256="e8d192d3c850e22f6f43d89243027df4e683fdc3504574116035d744f8e696a4",
             destination=self._source_subfolder
         )
 
