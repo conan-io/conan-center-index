@@ -46,11 +46,13 @@ class ArmToolchainConan(ConanFile):
             return None
 
     def config_options(self):
+        default_arch = "armv8"
+        default_os = "Linux"
         if hasattr(self, "settings_target"):
-            self.options.target_arch = str(self.settings_target.arch)
-            self.options.target_os = str(self.settings_target.os)
+            self.options.target_arch = getattr(self.settings_target, "arch", default_arch)
+            self.options.target_os = getattr(self.settings_target, "os", default_os)
         else:
-            self.options.target_arch = "armv8"
+            self.options.target_arch = default_arch
             self.options.target_os = "Linux"
 
     def build_requirements(self):
