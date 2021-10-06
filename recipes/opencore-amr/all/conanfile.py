@@ -91,6 +91,11 @@ class OpencoreAmrConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def _library_name(self, lib):
+        if self._settings_build.os == "Windows" and self.options.shared:
+            return "{}.dll".format(lib)
+        return lib
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "opencore-amr"
         self.cpp_info.names["cmake_find_package_multi"] = "opencore-amr"
@@ -98,5 +103,5 @@ class OpencoreAmrConan(ConanFile):
             self.cpp_info.components[lib].names["pkg_config"] = lib
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
-            self.cpp_info.components[lib].libs = [lib]
+            self.cpp_info.components[lib].libs = [self._library_name(lib)]
             self.cpp_info.components[lib].includedirs = ["include"]
