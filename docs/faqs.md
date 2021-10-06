@@ -262,7 +262,7 @@ In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 arch
 There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
  as we don't test all the possible combinations (and probably will never be). Patches are welcomed if problems are found.
 
-## How to package libraries that depend on Intel MKL, IPP or DNN libraries?
+## How to package libraries that depend on proprietary closed-source libraries?
 
 There are several popular software libraries provided by Intel:
 
