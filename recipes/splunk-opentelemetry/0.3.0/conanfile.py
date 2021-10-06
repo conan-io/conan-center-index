@@ -6,6 +6,7 @@ class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry"
     version = "0.3.0"
     license = "Apache 2.0"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
