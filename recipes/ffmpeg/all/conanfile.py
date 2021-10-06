@@ -355,37 +355,53 @@ class FFMpegConan(ConanFile):
         self.cpp_info.components["avdevice"].libs = ["avdevice"]
         self.cpp_info.components["avdevice"].requires = ["avfilter", "swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avdevice"].names["pkg_config"] = "libavdevice"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["avdevice"].version = self.conan_data["component_versions"][self.version]["avdevice"]
 
         self.cpp_info.components["avfilter"].libs = ["avfilter"]
         self.cpp_info.components["avfilter"].requires = ["swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avfilter"].names["pkg_config"] = "libavfilter"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["avfilter"].version = self.conan_data["component_versions"][self.version]["avfilter"]
 
         self.cpp_info.components["avformat"].libs = ["avformat"]
         self.cpp_info.components["avformat"].requires = ["avcodec", "swresample", "avutil"]
         self.cpp_info.components["avformat"].names["pkg_config"] = "libavformat"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["avformat"].version = self.conan_data["component_versions"][self.version]["avformat"]
 
         self.cpp_info.components["avcodec"].libs = ["avcodec"]
         self.cpp_info.components["avcodec"].requires = ["swresample", "avutil"]
         self.cpp_info.components["avcodec"].names["pkg_config"] = "libavcodec"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["avcodec"].version = self.conan_data["component_versions"][self.version]["avcodec"]
 
         self.cpp_info.components["swscale"].libs = ["swscale"]
         self.cpp_info.components["swscale"].requires = ["avutil"]
         self.cpp_info.components["swscale"].names["pkg_config"] = "libswscale"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["swscale"].version = self.conan_data["component_versions"][self.version]["swscale"]
 
         self.cpp_info.components["swresample"].libs = ["swresample"]
         self.cpp_info.components["swresample"].names["pkg_config"] = "libswresample"
         self.cpp_info.components["swresample"].requires = ["avutil"]
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["swresample"].version = self.conan_data["component_versions"][self.version]["swresample"]
 
         if self.options.postproc:
             self.cpp_info.components["postproc"].libs = ["postproc"]
             self.cpp_info.components["postproc"].requires = ["avutil"]
             self.cpp_info.components["postproc"].names["pkg_config"] = "libpostproc"
+            if self.conan_data["component_versions"][self.version] is not None:
+                self.cpp_info.components["postproc"].version = self.conan_data["component_versions"][self.version]["postproc"]
 
             self.cpp_info.components["avfilter"].requires.append("postproc")
             self.cpp_info.components["avdevice"].requires.append("postproc")
 
         self.cpp_info.components["avutil"].libs = ["avutil"]
         self.cpp_info.components["avutil"].names["pkg_config"] = "libavutil"
+        if self.conan_data["component_versions"][self.version] is not None:
+            self.cpp_info.components["avutil"].version = self.conan_data["component_versions"][self.version]["avutil"]
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["avutil"].system_libs = ["pthread", "m", "dl"]

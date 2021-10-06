@@ -2,3 +2,16 @@ sources:
   "4.2.1":
     url: "https://ffmpeg.org/releases/ffmpeg-4.2.1.tar.bz2"
     sha256: "682a9fa3f6864d7f0dbf224f86b129e337bc60286e0d00dffcd710998d521624"
+  "4.4":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.4.tar.bz2"
+    sha256: "42093549751b582cf0f338a21a3664f52e0a9fbe0d238d3c992005e493607d0e"
+component_versions:
+  "4.4":
+      avutil: "56.70.100"
+      avcodec: "58.134.100"
+      avformat: "58.76.100"
+      avdevice: "58.13.100"
+      avfilter: "7.110.100"
+      swscale: "5.9.100"
+      swresample: "3.9.100"
+      postproc: "55.9.100"
