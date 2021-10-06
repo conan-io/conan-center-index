@@ -28,7 +28,7 @@ This section gathers the most common questions from the community related to pac
   * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
   * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
   * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
-  * [How to package libraries that depend on Intel MKL, IPP or DNN libraries?](#how-to-package-libraries-that-depend-on-intel-mkl-ipp-or-dnn-libraries)<!-- endToc -->
+  * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
