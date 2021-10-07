@@ -66,7 +66,6 @@ class CoConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         if not self.options.shared:
             self._cmake.definitions["FPIC"] = self.options.fPIC
         self._cmake.definitions["STATIC_VS_CRT"] = self.options.static_vs_crt
