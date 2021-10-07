@@ -6,11 +6,11 @@ required_conan_version = ">=1.33.0"
 
 class CoConan(ConanFile):
     name = "co"
-    description = "A go-style coroutine library in C++11 and more."
-    topics = ("co", "coroutine", "c++11")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/idealvin/co"
     license = "MIT"
+    description = "A go-style coroutine library in C++11 and more."
+    topics = ("co", "coroutine", "c++11")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
