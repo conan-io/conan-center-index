@@ -45,93 +45,93 @@
     <Alias Alias="HasEncoding">i=38</Alias>
     <Alias Alias="HasDescription">i=39</Alias>
   </Aliases>
-  <UAObjectType NodeId="ns=1;i=15001" BrowseName="1:ApeType">
+  <UAObjectType NodeId="ns=1;i=1" BrowseName="1:ApeType">
     <DisplayName>ApeType</DisplayName>
     <Description>The Automatic Surface Tabulator. It represents a single hardware unit.</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;i=2</Reference>
       <Reference ReferenceType="HasProperty">ns=1;i=3</Reference>
-      <Reference ReferenceType="HasComponent">ns=1;i=15029</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;i=4</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=2" BrowseName="1:Name" ParentNodeId="ns=1;i=15001" DataType="String">
+  <UAVariable NodeId="ns=1;i=2" BrowseName="1:Name" ParentNodeId="ns=1;i=1" DataType="String">
     <DisplayName>Name</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=3" BrowseName="1:Number" ParentNodeId="ns=1;i=15001" DataType="Double">
+  <UAVariable NodeId="ns=1;i=3" BrowseName="1:Number" ParentNodeId="ns=1;i=1" DataType="Double">
     <DisplayName>Number</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15029" BrowseName="1:MyVariable" ParentNodeId="ns=1;i=15001" DataType="Double">
+  <UAVariable NodeId="ns=1;i=4" BrowseName="1:MyVariable" ParentNodeId="ns=1;i=1" DataType="Double">
     <DisplayName>MyVariable</DisplayName>
     <References>
-      <Reference ReferenceType="HasProperty">ns=1;i=15033</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=8</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
-      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15033" BrowseName="EURange" ParentNodeId="ns=1;i=15029" DataType="i=884">
+  <UAVariable NodeId="ns=1;i=8" BrowseName="EURange" ParentNodeId="ns=1;i=4" DataType="i=884">
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15029</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=4</Reference>
     </References>
   </UAVariable>
-  <UAVariableType NodeId="ns=1;i=15102" BrowseName="1:FooAnalogItemType" DataType="Number" ValueRank="-2">
+  <UAVariableType NodeId="ns=1;i=10" BrowseName="1:FooAnalogItemType" DataType="Number" ValueRank="-2">
     <DisplayName>FooAnalogItemType</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2368</Reference>
     </References>
   </UAVariableType>
-  <UAObject NodeId="ns=1;i=15111" BrowseName="1:Ape">
+  <UAObject NodeId="ns=1;i=16" BrowseName="1:Ape">
     <DisplayName>Ape</DisplayName>
     <Description>Instance of the APE.</Description>
     <References>
-      <Reference ReferenceType="HasProperty">ns=1;i=4</Reference>
-      <Reference ReferenceType="HasProperty">ns=1;i=5</Reference>
-      <Reference ReferenceType="HasComponent">ns=1;i=15139</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=17</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=18</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;i=19</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
-      <Reference ReferenceType="HasTypeDefinition">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasTypeDefinition">ns=1;i=1</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=4" BrowseName="1:Name" ParentNodeId="ns=1;i=15111" DataType="String">
+  <UAVariable NodeId="ns=1;i=17" BrowseName="1:Name" ParentNodeId="ns=1;i=16" DataType="String">
     <DisplayName>Name</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15111</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=16</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=5" BrowseName="1:Number" ParentNodeId="ns=1;i=15111" DataType="Double">
+  <UAVariable NodeId="ns=1;i=18" BrowseName="1:Number" ParentNodeId="ns=1;i=16" DataType="Double">
     <DisplayName>Number</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15111</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=16</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15139" BrowseName="1:MyVariable" ParentNodeId="ns=1;i=15111" DataType="Double">
+  <UAVariable NodeId="ns=1;i=19" BrowseName="1:MyVariable" ParentNodeId="ns=1;i=16" DataType="Double">
     <DisplayName>MyVariable</DisplayName>
     <References>
-      <Reference ReferenceType="HasProperty">ns=1;i=15143</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=23</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
-      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15111</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=16</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15143" BrowseName="EURange" ParentNodeId="ns=1;i=15139" DataType="i=884">
+  <UAVariable NodeId="ns=1;i=23" BrowseName="EURange" ParentNodeId="ns=1;i=19" DataType="i=884">
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15139</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=19</Reference>
     </References>
   </UAVariable>
 </UANodeSet>
