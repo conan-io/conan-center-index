@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(test_package)
+project(test_package CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
