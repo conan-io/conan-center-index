@@ -26,10 +26,6 @@ class SplunkOpentelemetryConan(ConanFile):
       "CMakeLists.txt"
     ]
 
-    def config(self):
-        if "libcxx" in self.settings.compiler.fields:
-            self.settings.compiler.libcxx.remove("libstdc++")
-
     @property
     def _source_subfolder(self):
         return "sources"
@@ -51,6 +47,12 @@ class SplunkOpentelemetryConan(ConanFile):
             destination=self._source_subfolder
         )
 
+    def _cxxabi_compiler_opt(self):
+      if self.settings.compiler.libcxx == "libstdc++":
+        return "-D_GLIBCXX_USE_CXX11_ABI=0"
+
+      return "-D_GLIBCXX_USE_CXX11_ABI=1"
+
     def _build_otel_cpp(self):
         cmake = CMake(self)
         prefix_paths = [
@@ -58,10 +60,11 @@ class SplunkOpentelemetryConan(ConanFile):
           self.deps_cpp_info["protobuf"].rootpath,
         ]
 
-        # Is there a better way?
-        include_dirs = [
+        # Is there a better way for includes?
+        cxx_flags = [
           "-isystem {}".format(os.path.join(self.deps_cpp_info["abseil"].rootpath, "include")),
-          "-isystem {}".format(os.path.join(self.deps_cpp_info["grpc"].rootpath, "include"))
+          "-isystem {}".format(os.path.join(self.deps_cpp_info["grpc"].rootpath, "include")),
+          self._cxxabi_compiler_opt(),
         ]
 
         defs = {
@@ -72,7 +75,7 @@ class SplunkOpentelemetryConan(ConanFile):
           "WITH_ABSEIL": False,
           "BUILD_TESTING": False,
           "WITH_EXAMPLES": False,
-          "CMAKE_CXX_FLAGS": " ".join(include_dirs)
+          "CMAKE_CXX_FLAGS": " ".join(cxx_flags)
         }
         cmake.configure(
           source_folder=os.path.join(
@@ -91,6 +94,7 @@ class SplunkOpentelemetryConan(ConanFile):
         defs = {
           "SPLUNK_CPP_WITH_JAEGER_EXPORTER": False,
           "SPLUNK_CPP_EXAMPLES": False,
+          "CMAKE_CXX_FLAGS": self._cxxabi_compiler_opt(),
         }
         cmake.configure(source_folder=self._source_subfolder, defs=defs)
         cmake.build()
