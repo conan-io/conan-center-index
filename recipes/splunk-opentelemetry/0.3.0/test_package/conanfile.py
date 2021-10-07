@@ -9,7 +9,8 @@ class TestPackageConan(ConanFile):
         if self.settings.compiler.libcxx == "libstdc++":
             return "-D_GLIBCXX_USE_CXX11_ABI=0"
 
-        if self.settings.compiler.libcxx == "libc++":
+        if (self.settings.compiler == "clang" and
+            self.settings.compiler.libcxx == "libc++"):
             return "-stdlib=libc++"
 
         return ""
