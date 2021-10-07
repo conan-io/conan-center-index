@@ -99,7 +99,4 @@ class OpencoreAmrConan(ConanFile):
     def package_info(self):
         for lib in ("opencore-amrwb", "opencore-amrnb"):
             self.cpp_info.components[lib].names["pkg_config"] = lib
-            self.cpp_info.components[lib].names["cmake_find_package"] = lib
-            self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
-            self.cpp_info.components[lib].libs = [self._library_name(lib)]
-            self.cpp_info.components[lib].includedirs = ["include"]
+            self.cpp_info.components[lib].libs = [lib]
