@@ -98,8 +98,6 @@ class OpencoreAmrConan(ConanFile):
         return lib
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "opencore-amr"
-        self.cpp_info.names["cmake_find_package_multi"] = "opencore-amr"
         for lib in ("opencore-amrwb", "opencore-amrnb"):
             self.cpp_info.components[lib].names["pkg_config"] = lib
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
