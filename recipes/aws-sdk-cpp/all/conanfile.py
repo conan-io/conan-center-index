@@ -358,11 +358,8 @@ class AwsSdkCppConan(ConanFile):
                     setattr(self.info.options, internal_requirement, True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-        # Keeping these unused folders make the source copy fail on Windows
-        tools.rmdir(os.path.join(self._source_subfolder, "code-generation", "generator"))
-        tools.rmdir(os.path.join(self._source_subfolder, "aws-cpp-sdk-core-tests"))
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
