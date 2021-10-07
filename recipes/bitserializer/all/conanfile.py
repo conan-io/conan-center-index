@@ -1,5 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, tools, __version__ as conan_version
+from conans.tools import Version
 import glob
 import os
 
@@ -20,13 +22,21 @@ class BitserializerConan(ConanFile):
         "with_pugixml": [True, False]
     }
     default_options = {
-        "with_cpprestsdk": True,
-        "with_rapidjson": True,
-        "with_pugixml": True
+        "with_cpprestsdk": False,
+        "with_rapidjson": False,
+        "with_pugixml": False
     }
 
     @property
     def _supported_compilers(self):
+        if conan_version >= Version("0.44"):
+            return {
+                "gcc": "8",
+                "clang": "8",
+                "Visual Studio": "15",
+                "apple-clang": "12",
+            }
+
         return {
             "gcc": "8",
             "clang": "7",
@@ -38,7 +48,8 @@ class BitserializerConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
+    def validate(self):
+        # Check compiler for supporting C++ 17
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
         try:
@@ -48,11 +59,19 @@ class BitserializerConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
+        # Check stdlib ABI compatibility
+        compiler_name = str(self.settings.compiler)
+        if compiler_name == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
+        elif compiler_name == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
+                                            ' or "compiler.libcxx=libc++"' % self.name)
+
     def requirements(self):
         if self.options.with_cpprestsdk:
             self.requires("cpprestsdk/2.10.16")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/cci.20200410")
         if self.options.with_pugixml:
             self.requires("pugixml/1.10")
 
