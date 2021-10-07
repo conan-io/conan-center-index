@@ -5,17 +5,19 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_paths", "cmake_find_package"
 
-    def _cxxabi_compiler_opt(self):
-      if self.settings.compiler.libcxx == "libstdc++":
-        return "-D_GLIBCXX_USE_CXX11_ABI=0"
+    def _cxxflags(self):
+        if self.settings.compiler.libcxx == "libstdc++":
+            return "-D_GLIBCXX_USE_CXX11_ABI=0"
 
-      return ""
+        if self.settings.compiler.libcxx == "libc++":
+            return "-stdlib=libc++"
 
+        return ""
 
     def build(self):
         cmake = CMake(self)
         defs = {
-          "CMAKE_CXX_FLAGS": self._cxxabi_compiler_opt()
+          "CMAKE_CXX_FLAGS": self._cxxflags()
         }
         cmake.configure(defs=defs)
         cmake.build()

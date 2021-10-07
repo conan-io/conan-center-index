@@ -47,11 +47,14 @@ class SplunkOpentelemetryConan(ConanFile):
             destination=self._source_subfolder
         )
 
-    def _cxxabi_compiler_opt(self):
-      if self.settings.compiler.libcxx == "libstdc++":
-        return "-D_GLIBCXX_USE_CXX11_ABI=0"
+    def _cxxflags(self):
+        if self.settings.compiler.libcxx == "libstdc++":
+            return "-D_GLIBCXX_USE_CXX11_ABI=0"
 
-      return ""
+        if self.settings.compiler.libcxx == "libc++":
+            return "-stdlib=libc++"
+
+        return ""
 
     def _build_otel_cpp(self):
         cmake = CMake(self)
@@ -64,7 +67,7 @@ class SplunkOpentelemetryConan(ConanFile):
         cxx_flags = [
           "-isystem {}".format(os.path.join(self.deps_cpp_info["abseil"].rootpath, "include")),
           "-isystem {}".format(os.path.join(self.deps_cpp_info["grpc"].rootpath, "include")),
-          self._cxxabi_compiler_opt(),
+          self._cxxflags(),
         ]
 
         defs = {
@@ -94,7 +97,7 @@ class SplunkOpentelemetryConan(ConanFile):
         defs = {
           "SPLUNK_CPP_WITH_JAEGER_EXPORTER": False,
           "SPLUNK_CPP_EXAMPLES": False,
-          "CMAKE_CXX_FLAGS": self._cxxabi_compiler_opt(),
+          "CMAKE_CXX_FLAGS": self._cxxflags(),
         }
         cmake.configure(source_folder=self._source_subfolder, defs=defs)
         cmake.build()
