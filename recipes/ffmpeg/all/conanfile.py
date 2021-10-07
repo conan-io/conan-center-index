@@ -352,7 +352,7 @@ class FFMpegConan(ConanFile):
                     for lib in glob.glob("*.a"):
                         tools.rename(lib, lib[3:-2] + ".lib")
 
-    def read_component_version(self, component_name):
+    def _read_component_version(self, component_name):
         result = dict()
         version_file_name = os.path.join(self.package_folder,
                                          "include", "lib%s" % component_name,
@@ -371,8 +371,8 @@ class FFMpegConan(ConanFile):
         else:
             return None
 
-    def set_component_version(self, component_name):
-        version = self.read_component_version(component_name)
+    def _set_component_version(self, component_name):
+        version = self._read_component_version(component_name)
         if version is not None:
             self.cpp_info.components[component_name].version = version
         else:
@@ -383,45 +383,45 @@ class FFMpegConan(ConanFile):
         self.cpp_info.components["avdevice"].libs = ["avdevice"]
         self.cpp_info.components["avdevice"].requires = ["avfilter", "swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avdevice"].names["pkg_config"] = "libavdevice"
-        self.set_component_version("avdevice")
+        self._set_component_version("avdevice")
 
         self.cpp_info.components["avfilter"].libs = ["avfilter"]
         self.cpp_info.components["avfilter"].requires = ["swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avfilter"].names["pkg_config"] = "libavfilter"
-        self.set_component_version("avfilter")
+        self._set_component_version("avfilter")
 
         self.cpp_info.components["avformat"].libs = ["avformat"]
         self.cpp_info.components["avformat"].requires = ["avcodec", "swresample", "avutil"]
         self.cpp_info.components["avformat"].names["pkg_config"] = "libavformat"
-        self.set_component_version("avformat")
+        self._set_component_version("avformat")
 
         self.cpp_info.components["avcodec"].libs = ["avcodec"]
         self.cpp_info.components["avcodec"].requires = ["swresample", "avutil"]
         self.cpp_info.components["avcodec"].names["pkg_config"] = "libavcodec"
-        self.set_component_version("avcodec")
+        self._set_component_version("avcodec")
 
         self.cpp_info.components["swscale"].libs = ["swscale"]
         self.cpp_info.components["swscale"].requires = ["avutil"]
         self.cpp_info.components["swscale"].names["pkg_config"] = "libswscale"
-        self.set_component_version("swscale")
+        self._set_component_version("swscale")
 
         self.cpp_info.components["swresample"].libs = ["swresample"]
         self.cpp_info.components["swresample"].names["pkg_config"] = "libswresample"
         self.cpp_info.components["swresample"].requires = ["avutil"]
-        self.set_component_version("swresample")
+        self._set_component_version("swresample")
 
         if self.options.postproc:
             self.cpp_info.components["postproc"].libs = ["postproc"]
             self.cpp_info.components["postproc"].requires = ["avutil"]
             self.cpp_info.components["postproc"].names["pkg_config"] = "libpostproc"
-            self.set_component_version("postproc")
+            self._set_component_version("postproc")
 
             self.cpp_info.components["avfilter"].requires.append("postproc")
             self.cpp_info.components["avdevice"].requires.append("postproc")
 
         self.cpp_info.components["avutil"].libs = ["avutil"]
         self.cpp_info.components["avutil"].names["pkg_config"] = "libavutil"
-        self.set_component_version("avutil")
+        self._set_component_version("avutil")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["avutil"].system_libs = ["pthread", "m", "dl"]
