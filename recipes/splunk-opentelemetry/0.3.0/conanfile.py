@@ -13,6 +13,7 @@ class SplunkOpentelemetryConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package"
     requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
+    exports_sources = "CMakeLists.txt"
 
     def validate(self):
       if self.settings.os != "Linux":
@@ -26,14 +27,8 @@ class SplunkOpentelemetryConan(ConanFile):
         return "sources"
 
     def _remove_unnecessary_package_files(self):
-        cmake_pattern = os.path.join(self.package_folder, "lib", "cmake", "*", "*.cmake")
-        pkgconfig_pattern = os.path.join(self.package_folder, "lib", "pkgconfig", "*.pc")
-
-        for path in glob.glob(cmake_pattern):
-            os.remove(path)
-
-        for path in glob.glob(pkgconfig_pattern):
-            os.remove(path)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def source(self):
         tools.get(
