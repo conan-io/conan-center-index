@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
       if self.settings.compiler.libcxx == "libstdc++":
         return "-D_GLIBCXX_USE_CXX11_ABI=0"
 
-      return "-D_GLIBCXX_USE_CXX11_ABI=1"
+      return ""
 
 
     def build(self):
