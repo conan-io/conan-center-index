@@ -289,10 +289,6 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, "without_{}".format(dep_name))
 
-        if self.settings.compiler == "Visual Studio":
-            # Shared builds of numa do not link on Visual Studio due to missing symbols
-            self.options.numa = False
-
         if tools.Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
             # ==> disable it by default for older compilers or c++ standards
@@ -394,8 +390,6 @@ class BoostConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self._shared:
             if "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
-            if self.options.get_safe("numa"):
-                raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -793,6 +787,10 @@ class BoostConan(ConanFile):
         tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "tools", "build", "src", "tools", "gcc.jam"),
                               "local no-threading = android beos haiku sgi darwin vxworks ;",
                               "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
+                              strict=False)
+        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "fiber", "build", "Jamfile.v2"),
+                              "    <conditional>@numa",
+                              "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
                               strict=False)
 
         if self.options.header_only:
@@ -1513,6 +1511,13 @@ class BoostConan(ConanFile):
                 if set(module_libraries).difference(all_detected_libraries):
                     incomplete_components.append(module)
 
+                # Starting v1.69.0 Boost.System is header-only. A stub library is
+                # still built for compatibility, but linking to it is no longer
+                # necessary.
+                # https://www.boost.org/doc/libs/1_75_0/libs/system/doc/html/system.html#changes_in_boost_1_69
+                if module == "system":
+                    module_libraries = []
+
                 self.cpp_info.components[module].libs = module_libraries
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
@@ -1565,10 +1570,10 @@ class BoostConan(ConanFile):
                 self.cpp_info.components["stacktrace_noop"].defines.append("BOOST_STACKTRACE_USE_NOOP")
 
                 if self.settings.os == "Windows":
-                    self.cpp_info.components["stacktrace_windb"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
-                    self.cpp_info.components["stacktrace_windb"].system_libs.extend(["ole32", "dbgeng"])
-                    self.cpp_info.components["stacktrace_windb_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
-                    self.cpp_info.components["stacktrace_windb_cached"].system_libs.extend(["ole32", "dbgeng"])
+                    self.cpp_info.components["stacktrace_windbg"].defines.append("BOOST_STACKTRACE_USE_WINDBG")
+                    self.cpp_info.components["stacktrace_windbg"].system_libs.extend(["ole32", "dbgeng"])
+                    self.cpp_info.components["stacktrace_windbg_cached"].defines.append("BOOST_STACKTRACE_USE_WINDBG_CACHED")
+                    self.cpp_info.components["stacktrace_windbg_cached"].system_libs.extend(["ole32", "dbgeng"])
                 elif tools.is_apple_os(self.settings.os) or self.settings.os == "FreeBSD":
                     self.cpp_info.components["stacktrace"].defines.append("BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED")
 

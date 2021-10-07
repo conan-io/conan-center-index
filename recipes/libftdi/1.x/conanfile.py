@@ -14,12 +14,18 @@ class LibFtdiConan(ConanFile):
     generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-            "shared": [True, False], 
-            "fPIC": [True, False]
+            "shared"             : [True, False], 
+            "fPIC"               : [True, False],
+            "enable_cpp_wrapper" : [True, False],
+            "build_eeprom_tool"  : [True, False],
+            "use_streaming"      : [True, False],
     }
     default_options = {
             "shared": False, 
-            "fPIC": True
+            "fPIC": True,
+            "enable_cpp_wrapper": True,
+            "build_eeprom_tool" : False,
+            "use_streaming"     : True,
     }
     _cmake = None
 
@@ -35,16 +41,12 @@ class LibFtdiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio":
+                self.options.use_streaming = False
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Building with Visual Studio is not supported")
-
-    def build_requirements(self):
-        if not tools.which("pkg-config"):
-            self.build_requires("pkgconf/1.7.3")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -54,9 +56,10 @@ class LibFtdiConan(ConanFile):
         options = {
             "BUILD_TESTS": False,
             "EXAMPLES": False,
-            "FTDI_EEPROM": False,
-            "FTDIPP" : True,
-            "STATICLIBS": not self.options.shared
+            "FTDI_EEPROM": self.options.build_eeprom_tool,
+            "FTDIPP" : self.options.enable_cpp_wrapper,
+            "STATICLIBS": not self.options.shared,
+            "ENABLE_STREAMING": self.options.use_streaming,
         }
         self._cmake.definitions.update(options)
         self._cmake.configure()
@@ -65,6 +68,10 @@ class LibFtdiConan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.24")
         self.requires("boost/1.75.0")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.use_streaming:
+            raise ConanInvalidConfiguration("VS doesn't not compile with enabled option use_streaming")
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -79,7 +86,6 @@ class LibFtdiConan(ConanFile):
         lib_folder = os.path.join(self.package_folder, "lib",)
         tools.rmdir(os.path.join(lib_folder, "cmake"))
         tools.rmdir(os.path.join(lib_folder, "pkgconfig"))
-        os.unlink(os.path.join(self.package_folder, "bin", "libftdi1-config"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "LibFTDI1"

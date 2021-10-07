@@ -1,0 +1,207 @@
+--- bison/src/config.h
++++ bison/src/config.h
+@@ -1,3 +1,4 @@
++#pragma once
+ #define PACKAGE_BUGREPORT "http://sourceforge.net/p/winflexbison/tickets"
+ #define VERSION "3.5.0"
+ #define PACKAGE_COPYRIGHT_YEAR 2019
+--- bison/src/conflicts.c
++++ bison/src/conflicts.c
+@@ -29,7 +29,7 @@
+ #include "getargs.h"
+ #include "gram.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "print-xml.h"
+ #include "reader.h"
+ #include "state.h"
+--- bison/src/lalr.c
++++ bison/src/lalr.c
+@@ -33,7 +33,7 @@
+ #include "getargs.h"
+ #include "gram.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "muscle-tab.h"
+ #include "nullable.h"
+ #include "reader.h"
+--- bison/src/LR0.c
++++ bison/src/LR0.c
+@@ -32,7 +32,7 @@
+ #include "getargs.h"
+ #include "gram.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "reader.h"
+ #include "reduce.h"
+ #include "state.h"
+--- bison/src/main.c
++++ bison/src/main.c
+@@ -40,7 +40,7 @@
+ #include "gram.h"
+ #include "ielr.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "muscle-tab.h"
+ #include "nullable.h"
+ #include "output.h"
+--- bison/src/print.c
++++ bison/src/print.c
+@@ -29,7 +29,7 @@
+ #include "getargs.h"
+ #include "gram.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "muscle-tab.h"
+ #include "print.h"
+ #include "reader.h"
+--- bison/src/print-graph.c
++++ bison/src/print-graph.c
+@@ -31,7 +31,7 @@
+ #include "gram.h"
+ #include "graphviz.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "reader.h"
+ #include "state.h"
+ #include "symtab.h"
+--- bison/src/print-xml.c
++++ bison/src/print-xml.c
+@@ -32,7 +32,7 @@
+ #include "getargs.h"
+ #include "gram.h"
+ #include "lalr.h"
+-#include "lr0.h"
++#include "LR0.h"
+ #include "print.h"
+ #include "reader.h"
+ #include "reduce.h"
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -3,24 +3,24 @@
+ project (winflexbison)
+ 
+ if(NOT MSVC)
+-   message( FATAL_ERROR "Visual Studio Build supported only" )
++#   message( FATAL_ERROR "Visual Studio Build supported only" )
+ endif()
+ 
+ # Output Variables
+ set(OUTPUT_DEBUG "${CMAKE_CURRENT_LIST_DIR}/bin/Debug")
+ set(OUTPUT_RELEASE "${CMAKE_CURRENT_LIST_DIR}/bin/Release")
+-
++if(MSVC)
+ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+-
++endif()
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DEBUG}")
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_RELEASE}")
+ 
+ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+   add_definitions(-D_DEBUG)
+ endif()
+ 
+-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W3 /MD /Od /Zi /EHsc")
+-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W3 /GL /Od /Oi /Gy /Zi /EHsc")
++#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W3 /MD /Od /Zi /EHsc")
++#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W3 /GL /Od /Oi /Gy /Zi /EHsc")
+ 
+ # Define Release by default.
+ if(NOT CMAKE_BUILD_TYPE)
+--- common/CMakeLists.txt
++++ common/CMakeLists.txt
+@@ -4,6 +4,12 @@
+ 
+ project(${PROJECT_NAME} C)
+ 
++include(CheckSymbolExists)
++check_symbol_exists(nanouptime "sys/time.h" HAVE_NANOUPTIME)
++check_symbol_exists(clock_gettime "time.h" HAVE_CLOCK_GETTIME)
++check_symbol_exists(microuptime "sys/time.h" HAVE_MICROUPTIME)
++check_symbol_exists(timespec_get "time.h" HAVE_TIMESPEC_GET)
++
+ # Definition of Macros
+ add_definitions(-D_LIB)
+ 
+@@ -27,6 +33,12 @@
+ add_library(${PROJECT_NAME} STATIC
+    ${SOURCE_FILES}
+ )
++target_compile_definitions(${PROJECT_NAME} PRIVATE
++    $<$<BOOL:${HAVE_NANOUPTIME}>:HAVE_NANOUPTIME=1>
++    $<$<BOOL:${HAVE_CLOCK_GETTIME}>:HAVE_CLOCK_GETTIME=1>
++    $<$<BOOL:${HAVE_MICROUPTIME}>:HAVE_MICROUPTIME=1>
++    $<$<BOOL:${HAVE_TIMESPEC_GET}>:HAVE_TIMESPEC_GET=1>
++)
+ 
+ target_include_directories(${PROJECT_NAME} PUBLIC "misc")
+ target_include_directories(${PROJECT_NAME} PUBLIC "m4")
+--- common/m4/lib/clean-temp.h
++++ common/m4/lib/clean-temp.h
+@@ -107,7 +107,7 @@
+    Return 0 upon success, or -1 if there was some problem.  */
+ extern int cleanup_temp_dir (struct temp_dir *dir);
+-
+-typedef int mode_t;
+-
++#if defined _MSC_VER
++typedef int mode_t;
++#endif
+ /* Open a temporary file in a temporary directory.
+    Registers the resulting file descriptor to be closed.  */
+--- common/misc/gethrxtime.c
++++ common/misc/gethrxtime.c
+@@ -27,6 +27,6 @@
+-//#include <sys/time.h>
+ #include "timespec.h"
+-
++#if HAVE_CLOCK_GETTIME
++#include <pthread_time.h>
++#endif
+ /* Get the current time, as a count of the number of nanoseconds since
+    an arbitrary epoch (e.g., the system boot time).  Prefer a
+-   high-resolution clock that is not subject to resetting or
+@@ -49,8 +49,8 @@
+     if (clock_gettime (CLOCK_MONOTONIC, &ts) == 0)
+       return xtime_make (ts.tv_sec, ts.tv_nsec);
+   }
+-#  endif
+-
++#  
++#  else
+ #  if HAVE_MICROUPTIME
+   {
+     struct timeval tv;
+@@ -69,6 +69,6 @@
+   }
+ #  endif
+ # endif
++# endif
+ }
+-
+ #endif
+--- flex/CMakeLists.txt
++++ flex/CMakeLists.txt
+@@ -22,4 +22,4 @@
+ 
+ target_include_directories(${PROJECT_NAME} PRIVATE "src")
+ 
+-target_link_libraries(${PROJECT_NAME} common_lib kernel32.lib user32.lib Ws2_32.lib)
++target_link_libraries(${PROJECT_NAME} common_lib kernel32 user32 ws2_32)
+--- flex/src/tables.c
++++ flex/src/tables.c
+@@ -36,7 +36,7 @@
+ #include "flexdef.h"
+ #include "tables.h"
+ 
+-#include <Winsock2.h>
++#include <winsock2.h>
+ 
+ /** Convert size_t to t_flag.
+  *  @param n in {1,2,4}

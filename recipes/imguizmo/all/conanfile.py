@@ -14,7 +14,6 @@ class ImGuizmoConan(ConanFile):
 
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    requires = "imgui/1.82"
 
     options = {
         "shared": [True, False],
@@ -43,6 +42,12 @@ class ImGuizmoConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("ImGuizmo-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
+
+    def requirements(self):
+        if self.version == "cci.20210223":
+            self.requires("imgui/1.82")
+        else:
+            self.requires("imgui/1.83")
 
     def _configure_cmake(self):
         if self._cmake:

@@ -288,12 +288,13 @@ class AwsSdkCppConan(ConanFile):
                 }
             }
     default_options = {key: False for key in options.keys()}
-    default_options["fPIC"] = True
     default_options["access-management"] = True
+    default_options["fPIC"] = True
     default_options["identity-management"] = True
+    default_options["monitoring"] = True
     default_options["queues"] = True
-    default_options["transfer"] = True
     default_options["s3-encryption"] = True
+    default_options["transfer"] = True
     default_options["text-to-speech"] = True
     _internal_requirements = {
             "access-management": ["iam", "cognito-identity"],
@@ -364,6 +365,11 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
+        if tools.cross_building(self):
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         self._cmake.configure()
         return self._cmake
 

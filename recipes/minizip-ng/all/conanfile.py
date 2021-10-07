@@ -80,7 +80,7 @@ class MinizipNgConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.4.8")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.settings.os != "Windows":
             if self.options.get_safe("with_iconv"):
                 self.requires("libiconv/1.16")

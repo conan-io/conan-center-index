@@ -1,0 +1,8 @@
+sources:
+  "cci.20181216":
+    url: "https://gitlab.gnome.org/GNOME/gtk-doc-stub/-/archive/d26c9b8343540661080eccbff393ee5709a673f4/gtk-doc-stub-d26c9b8343540661080eccbff393ee5709a673f4.tar.gz"
+    sha256: "50da38b540d9cf8a865b4c9a10d45f09471d29f7dd946dd63cfc94b44fee8479"
+patches:
+  "cci.20181216":
+    - patch_file: "patches/0001-relocatable-gtkdocize.patch"
+      base_path: "source_subfolder"
