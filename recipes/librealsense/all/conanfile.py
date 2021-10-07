@@ -1,0 +1,122 @@
+from conans import ConanFile, CMake, tools
+import os
+
+
+class LibrealsenseConan(ConanFile):
+    name = "librealsense"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/IntelRealSense/librealsense"
+    description = "Intel(R) RealSense(tm) Cross Platform API for accessing Intel RealSense cameras."
+    topics = ("usb", "camera")
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
+    short_paths = True
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("libusb/1.0.24")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+
+        self._cmake.definitions["CHECK_FOR_UPDATES"] = False
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = False
+        self._cmake.definitions["BUILD_EASYLOGGINGPP"] = True
+        self._cmake.definitions["BUILD_TOOLS"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_GLSL_EXTENSIONS"] = False
+        self._cmake.definitions["BUILD_GRAPHICAL_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_INTERNAL_UNIT_TESTS"] = False
+        self._cmake.definitions["BUILD_NETWORK_DEVICE"] = False
+        self._cmake.definitions["BUILD_UNIT_TESTS"] = False
+        self._cmake.definitions["BUILD_WITH_CUDA"] = False
+        self._cmake.definitions["BUILD_WITH_OPENMP"] = False
+        self._cmake.definitions["BUILD_WITH_TM2"] = False
+        self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
+        self._cmake.definitions["BUILD_PYTHON_DOCS"] = False
+        self._cmake.definitions["BUILD_NODEJS_BINDINGS"] = False
+        self._cmake.definitions["BUILD_CV_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_DLIB_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_OPENVINO_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_OPEN3D_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = False
+        self._cmake.definitions["BUILD_PCL_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_UNITY_BINDINGS"] = False
+        self._cmake.definitions["BUILD_CSHARP_BINDINGS"] = False
+        self._cmake.definitions["BUILD_OPENNI2_BINDINGS"] = False
+        self._cmake.definitions["BUILD_CV_KINFU_EXAMPLE"] = False
+
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        self._patch_sources()
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "realsense2"
+        self.cpp_info.names["cmake_find_package_multi"] = "realsense2"
+
+        self.cpp_info.components["fw"].libs = ["fw"]
+        self.cpp_info.components["file"].libs = ["realsense-file"]
+        self.cpp_info.components["realsense2"].libs = ["realsense2"]
+        self.cpp_info.components["realsense2"].requires = ["file", "fw", "libusb::libusb"]
+        self.cpp_info.components["realsense2"].names["pkg_config"] = "realsense2"
+        if self.settings.os == "Linux":
+            self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["realsense2"].system_libs.extend([
+                "cfgmgr32", "setupapi",
+                "Sensorsapi", "PortableDeviceGuids",
+                "winusb",
+                "Shlwapi", "mf", "mfplat", "mfreadwrite", "mfuuid"
+            ])
