@@ -82,7 +82,6 @@ class FFMpegConan(ConanFile):
         "with_appkit": True,
         "with_avfoundation": True,
         "with_coreimage": True,
-        "with_coreaudio": True,
         "with_audiotoolbox": True,
         "with_videotoolbox": True,
     }
@@ -112,7 +111,6 @@ class FFMpegConan(ConanFile):
             del self.options.with_appkit
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
             del self.options.with_coreimage
-            del self.options.with_coreaudio
             del self.options.with_audiotoolbox
             del self.options.with_videotoolbox
         if not tools.is_apple_os(self.settings.os):
@@ -529,8 +527,6 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_audiotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
-
-        if self.options.get_safe("with_coreaudio"):
             self.cpp_info.components["avdevice"].frameworks.append("CoreAudio")
 
         if self.options.get_safe("with_videotoolbox"):
