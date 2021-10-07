@@ -4,10 +4,10 @@ import os
 
 
 class LightPcapNgConan(ConanFile):
-    name = "LightPcapNg"
+    name = "lightpcapng"
     homepage = "https://github.com/woidpointer/LightPcapNg"
     description = "Library for general-purpose tracing based on PCAPNG file format"
-    topics = ("conan", "pcapng", "pcap")
+    topics = ("pcapng", "pcap")
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
     license = "MIT"
@@ -15,9 +15,11 @@ class LightPcapNgConan(ConanFile):
     options = {
         "shared": [True, False],
         "with_zstd": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "with_zstd": True,
     }
     generators = "cmake", "cmake_paths", "cmake_find_package"
@@ -30,6 +32,18 @@ class LightPcapNgConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        # No cpp files: Handle KP011
+        del self.settings.compiler.libcxx
+        # Handle KP022
+        del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.with_zstd:
@@ -58,10 +72,14 @@ class LightPcapNgConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "light_pcapng"
         self.cpp_info.names["cmake_find_package_multi"] = "light_pcapng"
-        if not self.settings.os == "Windows":
-            self.cpp_info.libs = ["liblight_pcapng.a"] if not self.options.shared else ["liblight_pcapng.so"]
-        else:
-            self.cpp_info.libs = ["light_pcapng.lib"]
+        self.cpp_info.components["liblight_pcapng"].names["cmake_find_package"] = "light_pcapng"
+        self.cpp_info.components["liblight_pcapng"].names["cmake_find_package_multi"] = "light_pcapng"
+        self.cpp_info.components["liblight_pcapng"].libs = ["light_pcapng"]
+
+        if self.options.with_zstd:
+            self.cpp_info.components["liblight_pcapng"].requires = ["zstd::zstd"]
+
+
 
 
 
