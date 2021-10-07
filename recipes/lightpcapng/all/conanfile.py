@@ -5,7 +5,7 @@ import os
 
 class LightPcapNgConan(ConanFile):
     name = "lightpcapng"
-    homepage = "https://github.com/woidpointer/LightPcapNg"
+    homepage = "https://github.com/Technica-Engineering/LightPcapNg"
     description = "Library for general-purpose tracing based on PCAPNG file format"
     topics = ("pcapng", "pcap")
     url = "https://github.com/conan-io/conan-center-index"
