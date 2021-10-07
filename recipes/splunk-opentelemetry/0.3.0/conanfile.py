@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import glob
 
 
 class SplunkOpentelemetryConan(ConanFile):
@@ -22,13 +23,22 @@ class SplunkOpentelemetryConan(ConanFile):
       "src*",
       "include*",
       "opentelemetry-cpp*",
-      "CMakeLists.txt",
-      "SplunkOpenTelemetryConfig.cmake.in"
+      "CMakeLists.txt"
     ]
 
     @property
     def _source_subfolder(self):
         return "sources"
+
+    def _remove_unnecessary_package_files(self):
+        cmake_pattern = os.path.join(self.package_folder, "lib", "cmake", "*", "*.cmake")
+        pkgconfig_pattern = os.path.join(self.package_folder, "lib", "pkgconfig", "*.pc")
+
+        for path in glob.glob(cmake_pattern):
+            os.remove(path)
+
+        for path in glob.glob(pkgconfig_pattern):
+            os.remove(path)
 
     def source(self):
         tools.get(
@@ -82,32 +92,38 @@ class SplunkOpentelemetryConan(ConanFile):
         cmake.build()
         cmake.install()
 
+        self._remove_unnecessary_package_files()
+
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src="src")
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "SplunkOpenTelemetry"
         self.cpp_info.components["opentelemetry-cpp"].requires = [
           "grpc::grpc",
           "protobuf::protobuf",
           "libcurl::libcurl"
         ]
 
-        self.cpp_info.components["opentelemetry-cpp"].libs = [
-          "libhttp_client_curl",
-          "libopentelemetry_common",
-          "libopentelemetry_exporter_ostream_span",
-          "libopentelemetry_proto",
-          "libopentelemetry_otlp_recordable",
-          "libopentelemetry_exporter_otlp_grpc",
-          "libopentelemetry_resources",
-          "libopentelemetry_trace",
-          "libopentelemetry_version",
-          "libopentelemetry_zpages"
+        otel_libs = [
+          "opentelemetry_version",
+          "opentelemetry_exporter_otlp_grpc",
+          "opentelemetry_otlp_recordable",
+          "opentelemetry_proto",
+          "opentelemetry_exporter_ostream_span",
+          "opentelemetry_zpages",
+          "opentelemetry_trace",
+          "opentelemetry_resources",
+          "opentelemetry_common",
+          "http_client_curl",
         ]
+
+        self.cpp_info.components["opentelemetry-cpp"].libs = otel_libs
         self.cpp_info.components["SplunkOpenTelemetry"].requires = [
           "opentelemetry-cpp"
         ]
         self.cpp_info.components["SplunkOpenTelemetry"].libs = [
-          "libSplunkOpenTelemetry"
+          "SplunkOpenTelemetry"
         ]
