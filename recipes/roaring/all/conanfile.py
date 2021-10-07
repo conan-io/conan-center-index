@@ -19,10 +19,16 @@ class RoaringConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_avx": [True, False],
+        "with_neon": [True, False],
+        "native_optimization": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_avx": True,
+        "with_neon": True,
+        "native_optimization": False,
     }
 
     exports_sources = ["CMakeLists.txt"]
@@ -40,6 +46,10 @@ class RoaringConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ("x86", "x86_64"):
+            del self.options.with_avx
+        if not str(self.settings.arch).startswith("arm"):
+            del self.options.with_neon
 
     def configure(self):
         if self.options.shared:
@@ -60,7 +70,9 @@ class RoaringConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ROARING_DISABLE_NATIVE"] = True
+        self._cmake.definitions["ROARING_DISABLE_AVX"] = not self.options.get_safe("with_avx", False)
+        self._cmake.definitions["ROARING_DISABLE_NEON"] = not self.options.get_safe("with_avx", False)
+        self._cmake.definitions["ROARING_DISABLE_NATIVE"] = not self.options.native_optimization
         self._cmake.definitions["ROARING_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_ROARING_TESTS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
