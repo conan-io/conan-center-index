@@ -1,7 +1,7 @@
 <opc:TypeDictionary
   xmlns:opc="http://opcfoundation.org/BinarySchema/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:ua="Q "
+  xmlns:ua="http://opcfoundation.org/UA/"
   xmlns:tns="https://new.foo.com/zebra-compression/flattening-and-subspacefolding/UA/"
   DefaultByteOrder="LittleEndian"
   TargetNamespace="https://new.foo.com/zebra-compression/flattening-and-subspacefolding/UA/"
