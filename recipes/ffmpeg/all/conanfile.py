@@ -132,7 +132,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_openh264:
@@ -156,7 +156,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1l")
         if self.options.get_safe("with_libalsa"):
@@ -440,6 +440,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avfilter"].system_libs = ["m", "pthread"]
             self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
+            self.cpp_info.components["avcodec"].system_libs = ["Mfplat", "Mfuuid"]
             self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):

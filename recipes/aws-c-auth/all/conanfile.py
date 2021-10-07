@@ -40,10 +40,10 @@ class AwsCAuth(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.7")
-        self.requires("aws-c-cal/0.5.11")
-        self.requires("aws-c-io/0.10.5")
-        self.requires("aws-c-http/0.6.5")
+        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-cal/0.5.12")
+        self.requires("aws-c-io/0.10.9")
+        self.requires("aws-c-http/0.6.7")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

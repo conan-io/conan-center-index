@@ -66,7 +66,7 @@ class GoogleCloudCppConan(ConanFile):
 
     def requirements(self):
         self.requires('protobuf/3.17.1')
-        self.requires('grpc/1.38.0')
+        self.requires('grpc/1.39.1')
         self.requires('nlohmann_json/3.10.2')
         self.requires('crc32c/1.1.1')
         self.requires('abseil/20210324.2')
