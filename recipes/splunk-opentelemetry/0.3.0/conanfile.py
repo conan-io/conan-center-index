@@ -5,26 +5,21 @@ import glob
 
 class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry"
-    version = "0.3.0"
     license = "Apache 2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
-    settings = {
-      "os": "Linux",
-      "compiler": None,
-      "build_type": None,
-      "arch": ["x86_64"]
-    }
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package"
     requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
-    exports_sources = [
-      "src*",
-      "include*",
-      "opentelemetry-cpp*",
-      "CMakeLists.txt"
-    ]
+
+    def validate(self):
+      if self.settings.os != "Linux":
+        raise ConanInvalidConfiguration("OS not supported")
+
+      if self.settings.arch != "x86_64":
+        raise ConanInvalidConfiguration("Architecture not supported")
 
     @property
     def _source_subfolder(self):
