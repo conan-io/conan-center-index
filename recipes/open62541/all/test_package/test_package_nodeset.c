@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
         UA_NodeId testInstanceId = UA_NODEID_NUMERIC(nsIdx, UA_FOO_FLTID_APE);
         UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "The Ape has ns=%d;id=%d",
                     testInstanceId.namespaceIndex, testInstanceId.identifier.numeric);
-        UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 500., NULL);
+        UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 100., NULL);
         retval = UA_Server_run(server, &running);
     }
     UA_Server_delete(server);
