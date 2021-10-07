@@ -8,4 +8,8 @@
 >
   <opc:Import Namespace="http://opcfoundation.org/UA/" Location=".BinarySchema.bsd"/>
 
+  <opc:StructuredType Name="TestDataType" BaseType="ua:ExtensionObject">
+    <opc:Field Name="testInt" TypeName="opc:Int32" />
+  </opc:StructuredType>
+
 </opc:TypeDictionary>
