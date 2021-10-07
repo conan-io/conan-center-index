@@ -330,11 +330,14 @@ class AwsSdkCppConan(ConanFile):
             and tools.Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
-        if (not self._use_aws_crt_cpp
-            and self.settings.os == "Macos"
-            and self.settings.arch == "armv8"):
-            raise ConanInvalidConfiguration("""This version doesn't support arm8
-                See https://github.com/aws/aws-sdk-cpp/issues/1542""")
+        if self._use_aws_crt_cpp:
+            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
+        else:
+            if (self.settings.os == "Macos"
+                    and self.settings.arch == "armv8"):
+                raise ConanInvalidConfiguration("""This version doesn't support arm8
+                    See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
         self.requires("aws-c-common/0.6.9")
