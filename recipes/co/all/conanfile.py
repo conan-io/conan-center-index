@@ -11,7 +11,7 @@ class CoConan(ConanFile):
     license = "MIT"
     description = "A go-style coroutine library in C++11 and more."
     topics = ("co", "coroutine", "c++11")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
