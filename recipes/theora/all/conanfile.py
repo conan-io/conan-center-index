@@ -1,6 +1,7 @@
 import os
 import shutil
 import stat
+import re
 from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
 
 required_conan_version = ">=1.33.0"
@@ -76,15 +77,20 @@ class TheoraConan(ConanFile):
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="2"', 'RuntimeLibrary="0"')
             tools.replace_in_file(vcproj_path, 'RuntimeLibrary="3"', 'RuntimeLibrary="1"')
 
+        properties = {
+            # Enable LTO when CFLAGS contains -GL
+            "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+        }
+
         with tools.chdir(vcproj_dir):
             msbuild = MSBuild(self)
             try:
                 # upgrade .vcproj
-                msbuild.build(vcproj, platforms={"x86": "Win32", "x86_64": "x64"})
+                msbuild.build(vcproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
             except:
                 # build .vcxproj
                 vcxproj = "{}_{}.vcxproj".format(project, config)
-                msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"})
+                msbuild.build(vcxproj, platforms={"x86": "Win32", "x86_64": "x64"}, properties=properties)
 
     def _configure_autotools(self):
         if not self._autotools:
