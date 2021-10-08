@@ -20,7 +20,6 @@ class CoConan(ConanFile):
         "fPIC": [True, False],
         "with_libcurl": [True, False],
         "with_openssl": [True, False],
-        "static_vs_crt": [True, False],
     }
     default_options = {
         "shared": False,
