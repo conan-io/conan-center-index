@@ -49,7 +49,7 @@ class GameNetworkingSocketsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "6",
+            "gcc": "5",
             # "Visual Studio": "16", 
             # "clang": "11", 
             # "apple-clang": "11"
