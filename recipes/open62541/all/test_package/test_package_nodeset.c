@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 
     UA_Server *server = UA_Server_new();
     UA_ServerConfig_setDefault(UA_Server_getConfig(server));
-    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), 4841, nullptr);
+    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), 4841, NULL);
 
     UA_StatusCode retval;
     /* create nodes from nodeset */
