@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
@@ -7,7 +7,7 @@ conan_basic_setup(TARGETS)
 find_package(open62541 REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} open62541::open62541 Threads::Threads)
 
 find_package(PythonInterp REQUIRED)
@@ -32,7 +32,7 @@ ua_generate_nodeset_and_datatypes(
 add_executable(${PROJECT_NAME}_nodeset
     ${UA_NODESET_FOO_FLT_SOURCES}
     ${UA_TYPES_FOO_FLT_SOURCES}
-    test_package_nodeset.cpp
+    test_package_nodeset.c
 )
 # Make sure the nodeset compiler is executed before compiling the main file
 add_dependencies(${PROJECT_NAME}_nodeset ${PROJECT_NAME}-ns-foo_flt)
