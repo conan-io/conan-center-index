@@ -131,19 +131,25 @@ class TheoraConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "theora_full_package" # to avoid conflicts with _theora component
+
+        self.cpp_info.components["_theora"].names["pkg_config"] = "theora"
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["libtheora" if self.options.shared else "libtheora_static"]
+            self.cpp_info.components["_theora"].libs = ["libtheora" if self.options.shared else "libtheora_static"]
         else:
-            self.cpp_info.names["pkg_config"] = "theora_full_package" # to avoid conflicts with _theora component
-
-            self.cpp_info.components["_theora"].names["pkg_config"] = "theora"
             self.cpp_info.components["_theora"].libs = ["theora"]
-            self.cpp_info.components["_theora"].requires = ["ogg::ogg"]
+        self.cpp_info.components["_theora"].requires = ["ogg::ogg"]
 
-            self.cpp_info.components["theoradec"].names["pkg_config"] = "theoradec"
+        self.cpp_info.components["theoradec"].names["pkg_config"] = "theoradec"
+        self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["theoradec"].requires.append("_theora")
+        else:
             self.cpp_info.components["theoradec"].libs = ["theoradec"]
-            self.cpp_info.components["theoradec"].requires = ["ogg::ogg"]
 
-            self.cpp_info.components["theoraenc"].names["pkg_config"] = "theoraenc"
+        self.cpp_info.components["theoraenc"].names["pkg_config"] = "theoraenc"
+        self.cpp_info.components["theoraenc"].requires = ["theoradec", "ogg::ogg"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["theoradec"].requires.append("_theora")
+        else:
             self.cpp_info.components["theoraenc"].libs = ["theoraenc"]
-            self.cpp_info.components["theoraenc"].requires = ["theoradec", "ogg::ogg"]
