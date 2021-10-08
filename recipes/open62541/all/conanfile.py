@@ -150,11 +150,6 @@ class Open62541Conan(ConanFile):
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
-        if tools.Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{0} {1} doesn't properly support shared lib on Windows".format(self.name,
-                                                                                                            self.version))
-
         if self.options.subscription == "With Events":
             self.output.warning("`{name}:subscription=With Events` is deprecated. Use `{name}:subscription=events` instead".format(name=self.name))  # Deprecated in 1.2.2
             self.options.subscription = "events"
