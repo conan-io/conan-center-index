@@ -77,6 +77,9 @@ class GameNetworkingSocketsConan(ConanFile):
 
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
+        
+        if self.options.encryption == "openssl" and "openssl" in self.deps_cpp_info.deps and tools.Version(self.deps_cpp_info["openssl"].version) < "1.1.1":
+            raise ConanInvalidConfiguration("{} requires OpenSSL 1.1.1 or newer".format(self.name))
 
     def build_requirements(self):
         self.build_requires("protobuf/3.17.1")
@@ -84,7 +87,7 @@ class GameNetworkingSocketsConan(ConanFile):
     def requirements(self):
         self.requires("protobuf/3.17.1")
         if self.options.encryption == "openssl":
-            self.requires("openssl/1.1.1l") # >=1.1.1
+            self.requires("openssl/1.1.1l")
         elif self.options.encryption == "libsodium":
             self.requires("libsodium/1.0.18")
 
