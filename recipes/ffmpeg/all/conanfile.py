@@ -366,10 +366,8 @@ class FFMpegConan(ConanFile):
             if match:
                 version[match[1]] = match[2]
         if "MAJOR" in version and "MINOR" in version and "MICRO" in version:
-            return "%s.%s.%s" % (
-                version["MAJOR"], version["MINOR"], version["MICRO"])
-        else:
-            return None
+            return f"{version["MAJOR"]}.{version["MINOR"]}.{version["MICRO"]}"
+        return None
 
     def _set_component_version(self, component_name):
         version = self._read_component_version(component_name)
