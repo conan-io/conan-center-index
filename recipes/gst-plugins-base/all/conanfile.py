@@ -96,6 +96,8 @@ class GStPluginsBaseConan(ConanFile):
             del self.options.with_xorg
 
     def requirements(self):
+        if self.settings.os == "Windows":
+            self.requires("wglext/cci.20200813")
         self.requires("zlib/1.2.11")
         self.requires("glib/2.70.0")
         self.requires("gstreamer/1.19.1")
