@@ -96,8 +96,6 @@ class GStPluginsBaseConan(ConanFile):
             del self.options.with_xorg
 
     def requirements(self):
-        if self.settings.os == "Windows":
-            self.requires("wglext/cci.20200813")
         self.requires("zlib/1.2.11")
         self.requires("glib/2.70.0")
         self.requires("gstreamer/1.19.1")
@@ -107,6 +105,8 @@ class GStPluginsBaseConan(ConanFile):
             self.requires("xorg/system")
         if self.options.with_gl:
             self.requires("opengl/system")
+            if self.settings.os == "Windows":
+                self.requires("wglext/cci.20200813")
             if self.options.get_safe("with_egl"):
                 self.requires("egl/system")
             if self.options.get_safe("with_wayland"):
@@ -604,6 +604,7 @@ class GStPluginsBaseConan(ConanFile):
                     "wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl",
                     "wayland-protocols::wayland-protocols"])
             if self.settings.os == "Windows":
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.append("wglext::wglext")
                 self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
             if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["gstreamer-gl-1.0"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore", "Cocoa"]
