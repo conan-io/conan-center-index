@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
 
     UA_Server *server = UA_Server_new();
     UA_ServerConfig_setDefault(UA_Server_getConfig(server));
+    UA_ServerConfig_setMinimal(UA_Server_getConfig(server), 4841, nullptr);
+
     UA_StatusCode retval;
     /* create nodes from nodeset */
     if(namespace_foo_flt_generated(server) != UA_STATUSCODE_GOOD) {
@@ -45,7 +47,7 @@ int main(int argc, char** argv) {
         UA_NodeId testInstanceId = UA_NODEID_NUMERIC(nsIdx, UA_FOO_FLTID_APE);
         UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "The Ape has ns=%d;id=%d",
                     testInstanceId.namespaceIndex, testInstanceId.identifier.numeric);
-        UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 200., NULL);
+        UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 150., NULL);
         retval = UA_Server_run(server, &running);
     }
     UA_Server_delete(server);

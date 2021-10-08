@@ -19,7 +19,7 @@ int main(void) {
     UA_Server *server = UA_Server_new();
     UA_ServerConfig_setDefault(UA_Server_getConfig(server));
     UA_StatusCode return_code;
-    UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 200., NULL);
+    UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 150., NULL);
     return_code = UA_Server_run(server, &running);
     UA_Server_delete(server);
     return return_code == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
