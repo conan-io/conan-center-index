@@ -148,7 +148,7 @@ class GameNetworkingSocketsConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32", "crypt32"]
+            self.cpp_info.system_libs = ["ws2_32", "crypt32", "winmm"]
             if self.options.encryption == "bcrypt":
                 self.cpp_info.system_libs += ["bcrypt"]
         
