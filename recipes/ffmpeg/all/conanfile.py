@@ -376,7 +376,7 @@ class FFMpegConan(ConanFile):
         if version is not None:
             self.cpp_info.components[component_name].version = version
         else:
-            print("Warning: cannot determine version of "
+            self.output.warn("cannot determine version of "
                   "lib%s packaged with ffmpeg!" % component_name)
 
     def package_info(self):
