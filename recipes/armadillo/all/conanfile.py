@@ -27,6 +27,7 @@ class ArmadilloConan(ConanFile):
         "use_blas": [
             False,
             "openblas",
+            "intel_mkl",
             "system_blas",
             "system_mkl",
             "system_flexiblas",
@@ -35,6 +36,7 @@ class ArmadilloConan(ConanFile):
         "use_lapack": [
             False,
             "openblas",
+            "intel_mkl",
             "system_lapack",
             "system_mkl",
             "system_atlas",
@@ -61,6 +63,10 @@ class ArmadilloConan(ConanFile):
     }
     # Values that must be set for multiple options to be valid
     _co_dependencies = {
+        "intel_mkl": [
+            "use_blas",
+            "use_lapack",
+        ],
         "system_mkl": [
             "use_blas",
             "use_lapack",
@@ -161,6 +167,9 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
+        if self.options.use_blas == "intel_mkl":
+            self.output.warn("NOTE: The intel-mkl package does not exist in CCI. To use an Intel MKL package, override this requirement with your own recipe.")
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -181,6 +190,12 @@ class ArmadilloConan(ConanFile):
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
+        if self.options.use_blas == "intel_mkl":
+            # This will also be used for lapack
+            # Consumers can override this requirement with their own by using
+            # self.requires("intel-mkl/version@user/channel, override=True) in their consumer
+            # conanfile.py
+            self.requires("intel-mkl/2021.4")
 
     def _configure_cmake(self):
         if self._cmake:
