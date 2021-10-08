@@ -8,16 +8,6 @@ index 9f5666611..2ca5625ce 100644
  
 -install(CODE "execute_process(COMMAND ldconfig)")
 +# install(CODE "execute_process(COMMAND ldconfig)")
-diff --git a/CMake/libusb_config.cmake b/CMake/libusb_config.cmake
-index ca221ca66..06ab07468 100644
---- a/CMake/libusb_config.cmake
-+++ b/CMake/libusb_config.cmake
-@@ -1,4 +1,4 @@
--if (NOT TARGET usb)
-+if (0)
-     find_library(LIBUSB_LIB usb-1.0)
-     find_path(LIBUSB_INC libusb.h HINTS PATH_SUFFIXES libusb-1.0)
-     include(FindPackageHandleStandardArgs)
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 0c15d9510..2c55dbe7b 100644
 --- a/CMakeLists.txt
