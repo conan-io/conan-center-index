@@ -18,19 +18,6 @@ index ca221ca66..06ab07468 100644
      find_library(LIBUSB_LIB usb-1.0)
      find_path(LIBUSB_INC libusb.h HINTS PATH_SUFFIXES libusb-1.0)
      include(FindPackageHandleStandardArgs)
-diff --git a/CMake/windows_config.cmake b/CMake/windows_config.cmake
-index 3207df979..fa83f9642 100644
---- a/CMake/windows_config.cmake
-+++ b/CMake/windows_config.cmake
-@@ -32,7 +32,7 @@ macro(os_set_flags)
-         # built in debug mode. In this Windows user can compile, build and install the
-         # library in both Release and Debug configuration avoiding naming clashes in the
-         # installation directories.
--        set(CMAKE_DEBUG_POSTFIX "d")
-+        # set(CMAKE_DEBUG_POSTFIX "d")
- 
-         # build with multiple cores
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 0c15d9510..2c55dbe7b 100644
 --- a/CMakeLists.txt
@@ -44,75 +31,3 @@ index 0c15d9510..2c55dbe7b 100644
  
  #Deprecation message, should be removed in future releases
  if(${FORCE_LIBUVC} OR ${FORCE_WINUSB_UVC} OR ${ANDROID_USB_HOST_UVC})
-diff --git a/src/ethernet/CMakeLists.txt b/src/ethernet/CMakeLists.txt
-index 22dbc7ad8..be131dad8 100644
---- a/src/ethernet/CMakeLists.txt
-+++ b/src/ethernet/CMakeLists.txt
-@@ -128,4 +128,4 @@ install(FILES "${CMAKE_BINARY_DIR}/config/realsense2-net.pc"
-     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
- )
- 
--install(CODE "execute_process(COMMAND ldconfig)")
-+# install(CODE "execute_process(COMMAND ldconfig)")
-diff --git a/src/gl/CMakeLists.txt b/src/gl/CMakeLists.txt
-index 5f229805f..6122058b1 100644
---- a/src/gl/CMakeLists.txt
-+++ b/src/gl/CMakeLists.txt
-@@ -122,4 +122,4 @@ install(FILES "${CMAKE_BINARY_DIR}/config/realsense2-gl.pc"
-         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
- )
- 
--install(CODE "execute_process(COMMAND ldconfig)")
-+# install(CODE "execute_process(COMMAND ldconfig)")
-diff --git a/src/libuvc/CMakeLists.txt b/src/libuvc/CMakeLists.txt
-index 13e71224b..442054e7f 100644
---- a/src/libuvc/CMakeLists.txt
-+++ b/src/libuvc/CMakeLists.txt
-@@ -9,7 +9,7 @@ target_sources(${LRS_TARGET}
- )
- 
- include(libusb_config)
--target_link_libraries(${LRS_TARGET} PRIVATE usb)
-+target_link_libraries(${LRS_TARGET} PRIVATE libusb::libusb)
- if(USE_EXTERNAL_USB)
-     add_dependencies(${LRS_TARGET} libusb)
- endif()
-diff --git a/src/linux/CMakeLists.txt b/src/linux/CMakeLists.txt
-index 62f0bcd72..6afaa9bc8 100644
---- a/src/linux/CMakeLists.txt
-+++ b/src/linux/CMakeLists.txt
-@@ -9,7 +9,7 @@ target_sources(${LRS_TARGET}
- )
- 
- include(libusb_config)
--target_link_libraries(${LRS_TARGET} PRIVATE usb)
-+target_link_libraries(${LRS_TARGET} PRIVATE libusb::libusb)
- if(USE_EXTERNAL_USB)
-     add_dependencies(${LRS_TARGET} libusb)
- endif()
-diff --git a/src/win7/CMakeLists.txt b/src/win7/CMakeLists.txt
-index e71c9e894..766780d50 100644
---- a/src/win7/CMakeLists.txt
-+++ b/src/win7/CMakeLists.txt
-@@ -9,7 +9,7 @@ target_sources(${LRS_TARGET}
- )
- 
- include(libusb_config)
--target_link_libraries(${LRS_TARGET} PRIVATE usb)
-+target_link_libraries(${LRS_TARGET} PRIVATE libusb::libusb)
- if(USE_EXTERNAL_USB)
-     add_dependencies(${LRS_TARGET} libusb)
- endif()
-diff --git a/wrappers/python/CMakeLists.txt b/wrappers/python/CMakeLists.txt
-index 7947c03ea..1f3848167 100644
---- a/wrappers/python/CMakeLists.txt
-+++ b/wrappers/python/CMakeLists.txt
-@@ -163,7 +163,7 @@ pybind11_add_module(pybackend2 SHARED ${RAW_RS})
- if(USE_EXTERNAL_USB)
-     add_dependencies(pybackend2 libusb)
- endif()
--target_link_libraries(pybackend2 PRIVATE usb ${CMAKE_THREAD_LIBS_INIT})
-+target_link_libraries(pybackend2 PRIVATE libusb::libusb ${CMAKE_THREAD_LIBS_INIT})
- set_target_properties(pybackend2 PROPERTIES
-                         VERSION     ${REALSENSE_VERSION_STRING}
-                         SOVERSION   ${REALSENSE_VERSION_MAJOR})

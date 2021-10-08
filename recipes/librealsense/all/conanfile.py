@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import glob
 
 
 class LibrealsenseConan(ConanFile):
@@ -12,11 +13,13 @@ class LibrealsenseConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "tools": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "tools": True
     }
     short_paths = True
     generators = "cmake", "cmake_find_package"
@@ -60,10 +63,9 @@ class LibrealsenseConan(ConanFile):
         self._cmake = CMake(self)
 
         self._cmake.definitions["CHECK_FOR_UPDATES"] = False
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = False
-        self._cmake.definitions["BUILD_EASYLOGGINGPP"] = True
-        self._cmake.definitions["BUILD_TOOLS"] = False
+        self._cmake.definitions["BUILD_EASYLOGGINGPP"] = False
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_GLSL_EXTENSIONS"] = False
         self._cmake.definitions["BUILD_GRAPHICAL_EXAMPLES"] = False
@@ -72,7 +74,7 @@ class LibrealsenseConan(ConanFile):
         self._cmake.definitions["BUILD_UNIT_TESTS"] = False
         self._cmake.definitions["BUILD_WITH_CUDA"] = False
         self._cmake.definitions["BUILD_WITH_OPENMP"] = False
-        self._cmake.definitions["BUILD_WITH_TM2"] = False
+        self._cmake.definitions["BUILD_WITH_TM2"] = True
         self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
         self._cmake.definitions["BUILD_PYTHON_DOCS"] = False
         self._cmake.definitions["BUILD_NODEJS_BINDINGS"] = False
@@ -99,24 +101,37 @@ class LibrealsenseConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.options.shared:
+            for path in glob.glob(os.path.join(self.package_folder, "lib", "libfw.*")):
+                os.unlink(path)
+            for path in glob.glob(os.path.join(self.package_folder, "lib", "librealsense-file.*")):
+                os.unlink(path)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        postfix = ""
+        if self.settings.compiler == "Visual Studio" and self.setings.build_type == "Debug":
+            postfix = "d"
+
         self.cpp_info.names["cmake_find_package"] = "realsense2"
         self.cpp_info.names["cmake_find_package_multi"] = "realsense2"
 
-        self.cpp_info.components["fw"].libs = ["fw"]
-        self.cpp_info.components["file"].libs = ["realsense-file"]
-        self.cpp_info.components["realsense2"].libs = ["realsense2"]
-        self.cpp_info.components["realsense2"].requires = ["file", "fw", "libusb::libusb"]
+        if not self.options.shared:
+            self.cpp_info.components["fw"].libs = ["fw" + postfix]
+            self.cpp_info.components["file"].libs = ["realsense-file" + postfix]
+
+        self.cpp_info.components["realsense2"].libs = ["realsense2" + postfix]
+        self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
+        if not self.options.shared:
+            self.cpp_info.components["realsense2"].requires.extend(["file", "fw"])
         self.cpp_info.components["realsense2"].names["pkg_config"] = "realsense2"
         if self.settings.os == "Linux":
             self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["realsense2"].system_libs.extend([
                 "cfgmgr32", "setupapi",
-                "Sensorsapi", "PortableDeviceGuids",
+                "sensorsapi", "PortableDeviceGuids",
                 "winusb",
-                "Shlwapi", "mf", "mfplat", "mfreadwrite", "mfuuid"
+                "shlwapi", "mf", "mfplat", "mfreadwrite", "mfuuid"
             ])
