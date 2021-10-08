@@ -87,9 +87,6 @@ class GameNetworkingSocketsConan(ConanFile):
             self.requires("openssl/1.1.1l") # >=1.1.1
         elif self.options.encryption == "libsodium":
             self.requires("libsodium/1.0.18")
-        elif self.options.encryption == "bcrypt":
-            # self.requires("libxcrypt/4.4.25")
-            pass
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
