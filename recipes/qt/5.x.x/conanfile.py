@@ -363,7 +363,6 @@ class QtConan(ConanFile):
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
-            raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
