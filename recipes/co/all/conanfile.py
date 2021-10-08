@@ -70,7 +70,7 @@ class CoConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         if not self.options.shared:
-            self._cmake.definitions["FPIC"] = self.options.fPIC
+            self._cmake.definitions["FPIC"] = self.options.get_safe("fPIC", False)
         self._cmake.definitions["STATIC_VS_CRT"] = self.options.static_vs_crt
         self._cmake.definitions["WITH_LIBCURL"] = self.options.with_libcurl
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
