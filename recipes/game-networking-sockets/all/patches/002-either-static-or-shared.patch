@@ -1,8 +1,8 @@
-diff --git a/src/CMakeLists.txt b/tmp/src/CMakeLists.txt
-index 8847df6..2106722 100644
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7040ab3..c75897e 100644
 --- a/src/CMakeLists.txt
-+++ b/tmp/src/CMakeLists.txt
-@@ -283,28 +283,40 @@ macro(gamenetworkingsockets_common GNS_TARGET)
++++ b/src/CMakeLists.txt
+@@ -282,28 +282,38 @@ macro(gamenetworkingsockets_common GNS_TARGET)
  
  endmacro()
  
@@ -20,7 +20,6 @@ index 8847df6..2106722 100644
 +	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +)
 +endif()
-+
 +
 +if (BUILD_STATIC)
  add_library(GameNetworkingSockets_s STATIC "")
@@ -45,7 +44,6 @@ index 8847df6..2106722 100644
 +endif()
 +
 +# Install rules
-+
  
  install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GameNetworkingSockets)
  
