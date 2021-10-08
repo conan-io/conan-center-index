@@ -71,7 +71,9 @@ class CoConan(ConanFile):
         self._cmake = CMake(self)
         if not self.options.shared:
             self._cmake.definitions["FPIC"] = self.options.get_safe("fPIC", False)
-        self._cmake.definitions["STATIC_VS_CRT"] = self.options.static_vs_crt
+        runtime = self.settings.get_safe("compiler.runtime")
+        if runtime:
+            self._cmake.definitions["STATIC_VS_CRT"] = "MT" in runtime
         self._cmake.definitions["WITH_LIBCURL"] = self.options.with_libcurl
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.configure(build_folder=self._build_subfolder)
