@@ -30,7 +30,6 @@ class LibUDEVConan(ConanFile):
         cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
         defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
 
-        self.output.warn("LIBS: {}".format(libs))
         self.cpp_info.system_libs = libs
         self.cpp_info.libdirs = lib_dirs
         self.cpp_info.sharedlinkflags = ldflags
