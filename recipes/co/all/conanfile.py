@@ -26,7 +26,6 @@ class CoConan(ConanFile):
         "fPIC": True,
         "with_libcurl": False,
         "with_openssl": False,
-        "static_vs_crt": True,
     }
 
     _cmake = None
