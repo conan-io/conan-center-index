@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
 import shutil
 
@@ -53,7 +52,7 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration("Windows shared builds are not supported")
         if self.settings.compiler not in ["Visual Studio", "gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration("Unsupported compiler {}.".format(self.settings.compiler))
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
+        if self.settings.os == "Macos" and self.settings.arch == "armv8" and tools.Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
 
     @property
