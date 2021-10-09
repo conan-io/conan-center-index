@@ -128,7 +128,7 @@ class grpcConan(ConanFile):
 
         # GCC 11 now defaults to C++17, so abseil will be built using C++17
         # gRPC will force C++11 if CMAKE_CXX_STANDARD is not defined
-        # So, if settings.compiler.cppstd is not defined there will a mismatch
+        # So, if settings.compiler.cppstd is not defined there will be a mismatch
         if (
             self.settings.compiler == "gcc"
             and tools.Version(self.settings.compiler.version) >= "11"
