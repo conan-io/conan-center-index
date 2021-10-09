@@ -59,7 +59,7 @@ class LiquidDspConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self.settings.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("mingw-w64/8.1")
