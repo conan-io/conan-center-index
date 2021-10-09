@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import glob
+import urllib
 
 
 class LibrealsenseConan(ConanFile):
@@ -53,8 +54,9 @@ class LibrealsenseConan(ConanFile):
     def source(self):
         sources = self.conan_data["sources"][self.version]
         tools.get(**sources["source"], strip_root=True, destination=self._source_subfolder)
-        for entry in sources["firmware"]:
-            tools.download(**entry)
+        for firmware in sources["firmware"]:
+            filename = os.path.basename(urllib.parse.urlparse(firmware["url"]).path)
+            tools.download(filename=filename, **firmware)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
