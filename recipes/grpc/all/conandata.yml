@@ -16,17 +16,17 @@ sources:
     sha256: "c2dc8e876ea12052d6dd16704492fd8921df8c6d38c70c4708da332cf116df22"
 patches:
   "1.39.1":
-    - patch_file: "patches/001-use-cxx_std_11-feature.patch"
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
   "1.38.1":
-    - patch_file: "patches/001-use-cxx_std_11-feature.patch"
+    - patch_file: "patches/v1.38.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
   "1.38.0":
-    - patch_file: "patches/001-use-cxx_std_11-feature.patch"
+    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
   "1.37.1":
-    - patch_file: "patches/001-use-cxx_std_11-feature.patch"
+    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
   "1.37.0":
-    - patch_file: "patches/001-use-cxx_std_11-feature.patch"
+    - patch_file: "patches/v1.37.x/001-disable-cppstd-override.patch"
       base_path: "source_subfolder"
