@@ -86,3 +86,11 @@ class CoConan(ConanFile):
         self.cpp_info.libs = ["co"]
         self.cpp_info.names["cmake_find_package"] = "CO"
         self.cpp_info.names["cmake_find_package_multi"] = "CO"
+
+    def validate(self):
+        if self.options.with_libcurl and not self.options.with_openssl:
+            raise ConanInvalidConfiguration(f"{self.name} requires with_openssl=True when using with_libcurl=True")
+        if self.options["libcurl"].with_ssl != "openssl":
+            raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_ssl='openssl' to be enabled")
+        if not self.options["libcurl"].with_zlib:
+            raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
