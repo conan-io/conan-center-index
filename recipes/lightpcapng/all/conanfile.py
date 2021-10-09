@@ -38,9 +38,9 @@ class LightPcapNgConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # No cpp files: Handle KP011
+        if self.options.with_zstd:
+            self.options["zstd"].shared = self.options.shared
         del self.settings.compiler.libcxx
-        # Handle KP022
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
