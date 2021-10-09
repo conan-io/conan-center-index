@@ -51,10 +51,12 @@ class CoConan(ConanFile):
             self.requires("libcurl/7.79.1")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1l")
+
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             #  The OSX_ARCHITECTURES target property is now respected for the ASM language
             self.build_requires("cmake/3.20.1")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
@@ -90,9 +92,10 @@ class CoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "CO"
 
     def validate(self):
-        if self.options.with_libcurl and not self.options.with_openssl:
-            raise ConanInvalidConfiguration(f"{self.name} requires with_openssl=True when using with_libcurl=True")
-        if self.options["libcurl"].with_ssl != "openssl":
-            raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_ssl='openssl' to be enabled")
-        if not self.options["libcurl"].with_zlib:
-            raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
+        if self.options.with_libcurl:
+            if not self.options.with_openssl:
+                raise ConanInvalidConfiguration(f"{self.name} requires with_openssl=True when using with_libcurl=True")
+            if self.options["libcurl"].with_ssl != "openssl":
+                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_ssl='openssl' to be enabled")
+            if not self.options["libcurl"].with_zlib:
+                raise ConanInvalidConfiguration(f"{self.name} requires libcurl:with_zlib=True to be enabled")
