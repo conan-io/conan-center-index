@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
@@ -63,6 +64,10 @@ class LiquidDspConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("mingw-w64/8.1")
             self.build_requires("automake/1.16.3")
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            raise ConanInvalidConfiguration("Static builds aren't supported on MSVC")
 
     def source(self):
         tools.get(
