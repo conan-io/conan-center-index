@@ -47,6 +47,8 @@ class CoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        if self.options.with_libcurl:
+            self.requires("libcurl/7.79.1")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1l")
     def build_requirements(self):
