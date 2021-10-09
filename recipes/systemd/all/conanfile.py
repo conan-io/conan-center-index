@@ -35,6 +35,7 @@ class SystemdConan(ConanFile):
     }
     generators = "pkg_config"
     exports_sources = "patches/**"
+    _meson = None
 
     @property
     def _source_subfolder(self):
@@ -133,33 +134,39 @@ class SystemdConan(ConanFile):
             meson_build, """relative_source_path = run_command('realpath',
                                    '--relative-to=@0@'.format(project_build_root),
                                    project_source_root).stdout().strip()""",
-            "relative_source_path = '../{}'".format(self._source_subfolder))
+            f"relative_source_path = '../{self._source_subfolder}'")
         tools.replace_in_file(meson_build, "if not cc.has_header('sys/capability.h')",
                                            "libcap = dependency('libcap')\nif not cc.has_header('sys/capability.h', dependencies:libcap)")
         tools.replace_in_file(meson_build, "have = libselinux.found()",
                                            "cc.has_header('selinux/selinux.h',dependencies:libselinux)\n    have = libselinux.found()")
         tools.replace_in_file(meson_build, "link_whole : libudev_basic,\n        dependencies : [threads]",
                               "link_whole : libudev_basic,\n        dependencies : [threads, libselinux]")
-        tools.replace_in_file(meson_build, "link_depends : libudev_sym,\n        dependencies : libshared_deps + [libmount]",
-                              "link_depends : libudev_sym,\n        dependencies : libshared_deps + [libmount, libselinux]")
+
+    def _configure_meson(self):
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
+        self._meson.configure(source_folder=self._source_subfolder)
+        return self._meson
 
     def build(self):
         self._patch_sources()
-        meson = Meson(self)
-        meson.configure(source_folder=self._source_subfolder)
-        meson.build("--verbose")
+        meson = self._configure_meson()
+        meson.build("systemd_static")
 
     def package(self):
-        # TODO: meson.install works?
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", os.path.join("include", "systemd"), os.path.join(self._source_subfolder, "src", "systemd"))
+        meson = self._configure_meson()
+        meson.install()
 
-        if self.options.shared:
-            self.copy("libsystemd.so*", "lib", self._build_subfolder)
-            self.copy("liudev.so.*", "lib", self._build_subfolder)
-        else:
-            self.copy("libsystemd.a", "lib", self._build_subfolder)
-            self.copy("libudev.a", "lib", self._build_subfolder)
+        #self.copy("*.h", os.path.join("include", "systemd"), os.path.join(self._source_subfolder, "src", "systemd"))
+        #
+        #if self.options.shared:
+        #    self.copy("libsystemd.so*", "lib", self._build_subfolder)
+        #    self.copy("liudev.so.*", "lib", self._build_subfolder)
+        #else:
+        #    self.copy("libsystemd.a", "lib", self._build_subfolder)
+        #    self.copy("libudev.a", "lib", self._build_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = ["systemd", "udev"]
