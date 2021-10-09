@@ -1,0 +1,4 @@
+sources:
+  "0.2.11":
+    sha256: 7fbf30c2f184decf3987f4e177d0fb29a72adc86160e43907b18f0d93c935b36
+    url: https://github.com/pybind/pybind11_json/archive/refs/tags/0.2.11.tar.gz

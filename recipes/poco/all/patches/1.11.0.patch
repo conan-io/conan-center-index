@@ -68,8 +68,28 @@ index 92f37a9..49ad7b4 100644
 +	BUNDLE DESTINATION bin
  	INCLUDES DESTINATION include
  )
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4e0527296..f6ceb699d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -204,6 +204,15 @@ endif()
+ 
+ include(DefinePlatformSpecifc)
+ 
++# Disable fork exec
++option(POCO_NO_FORK_EXEC
++	"Set to OFF|ON (default is OFF) to control disable fork exec" OFF)
++
++if(POCO_NO_FORK_EXEC)
++	add_definitions(-DPOCO_NO_FORK_EXEC=1)
++	message(STATUS "Building with fork exec disabled")
++endif()
++
+ # Collect the built libraries and include dirs, the will be used to create the PocoConfig.cmake file
+ set(Poco_COMPONENTS "")
+ 
 diff --git a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
-index 038779e..879dd56 100644
+index 038779ec9..fa7afdb1b 100644
 --- a/cmake/PocoMacros.cmake
 +++ b/cmake/PocoMacros.cmake
 @@ -40,7 +40,7 @@ if(WIN32)
@@ -77,7 +97,7 @@ index 038779e..879dd56 100644
  		endif(X64)
  	endif()
 -	find_program(CMAKE_MC_COMPILER mc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
-+ find_program(CMAKE_MC_COMPILER NAMES mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
++	find_program(CMAKE_MC_COMPILER NAMES mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
  		DOC "path to message compiler")
  	if(NOT CMAKE_MC_COMPILER)
  		message(FATAL_ERROR "message compiler not found: required to build")

@@ -1,4 +1,8 @@
 sources:
-  "5.7.28":
-    url: "https://github.com/htacg/tidy-html5/archive/refs/tags/5.7.28.tar.gz"
-    sha256: "5caa2c769204f506e24ea4986a45abe23f71d14f0fe968314f20065f342ffdba"
+  "5.8.0":
+    url: "https://github.com/htacg/tidy-html5/archive/refs/tags/5.8.0.tar.gz"
+    sha256: "59c86d5b2e452f63c5cdb29c866a12a4c55b1741d7025cf2f3ce0cde99b0660e"
+patches:
+  "5.8.0":
+    - patch_file: "patches/0001-robust-install-pdb.patch"
+      base_path: "source_subfolder"

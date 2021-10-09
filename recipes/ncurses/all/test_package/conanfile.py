@@ -8,11 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             with tools.environment_append({"TERM": "dumb"}):
                 self.run(os.path.join("bin", "test_package"), run_environment=True)

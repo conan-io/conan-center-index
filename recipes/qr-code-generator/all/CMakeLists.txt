@@ -24,19 +24,13 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD TRUE)
 endif()
 
-set(SRC
-    source_subfolder/cpp/QrCode.cpp
-)
+include(files.cmake)
 
-add_library(qrcodegen ${SRC})
+add_library(${LIBRARY_NAME} ${SRC})
 
-INSTALL(TARGETS qrcodegen
+INSTALL(TARGETS ${LIBRARY_NAME}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
-
-set(HEADERS
-    source_subfolder/cpp/QrCode.hpp
-)
 
 INSTALL(FILES ${HEADERS} DESTINATION include/qrcodegen)

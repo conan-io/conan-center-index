@@ -63,6 +63,7 @@ class CppcheckConan(ConanFile):
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst=os.path.join("bin","cfg"), src=os.path.join(self._source_subfolder,"cfg"))
+        self.copy("cppcheck-htmlreport", dst=os.path.join("bin"), src=os.path.join(self._source_subfolder,"htmlreport"))
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -71,3 +72,5 @@ class CppcheckConan(ConanFile):
         bin_folder = os.path.join(self.package_folder, "bin")
         self.output.info("Append %s to environment variable PATH" % bin_folder)
         self.env_info.PATH.append(bin_folder)
+        # This is required to run the python script on windows, as we cannot simply add it to the PATH
+        self.env_info.CPPCHECK_HTMLREPORT = os.path.join(bin_folder, "cppcheck-htmlreport")

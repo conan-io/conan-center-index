@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             xls_path = os.path.join(self.source_folder, "simple2003_21.xls")
             bin_path = os.path.join("bin", "test_package")
             self.run("{0} {1}".format(bin_path, xls_path), run_environment=True)

@@ -1,5 +1,7 @@
-import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class AutomakeConan(ConanFile):
@@ -8,10 +10,11 @@ class AutomakeConan(ConanFile):
     homepage = "https://www.gnu.org/software/automake/"
     description = "Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards."
     topics = ("conan", "automake", "configure", "build")
-    exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-
     settings = "os", "arch", "compiler"
+
+    exports_sources = "patches/*"
+
     _autotools = None
 
     @property
@@ -23,6 +26,10 @@ class AutomakeConan(ConanFile):
         [major, minor, _] = self.version.split(".", 2)
         return '{}.{}'.format(major, minor)
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
@@ -31,21 +38,21 @@ class AutomakeConan(ConanFile):
         self.requires("autoconf/2.71")
         # automake requires perl-Thread-Queue package
 
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
     def package_id(self):
         del self.info.settings.arch
         del self.info.settings.compiler
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _datarootdir(self):
-        return os.path.join(self.package_folder, "bin", "share")
+        return os.path.join(self.package_folder, "res")
 
     @property
     def _automake_libdir(self):
@@ -82,9 +89,9 @@ class AutomakeConan(ConanFile):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "doc"))
+        tools.rmdir(os.path.join(self._datarootdir, "info"))
+        tools.rmdir(os.path.join(self._datarootdir, "man"))
+        tools.rmdir(os.path.join(self._datarootdir, "doc"))
 
         if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
@@ -95,15 +102,17 @@ class AutomakeConan(ConanFile):
                 os.rename(fullpath, fullpath + ".exe")
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.output.info("Appending PATH environment variable:: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "aclocal" + bin_ext))
-        self.output.info("Setting ACLOCAL to {}".format(aclocal))
-        self.env_info.ACLOCAL = aclocal
+        self.output.info("Appending ACLOCAL environment variable with: {}".format(aclocal))
+        self.env_info.ACLOCAL.append(aclocal)
 
         automake_datadir = tools.unix_path(self._datarootdir)
         self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))

@@ -5,6 +5,9 @@ sources:
   "1.5":
     url: "https://github.com/bombela/backward-cpp/archive/v1.5.tar.gz"
     sha256: "faf7d4fe7ca65117ed4fe7be9bff9628927bd95b49f71df63d5f99af233d1915"
+  "1.6":
+    url: "https://github.com/bombela/backward-cpp/archive/v1.6.tar.gz"
+    sha256: "c654d0923d43f1cea23d086729673498e4741fb2457e806cfaeaea7b20c97c10"
 patches:
   "1.4":
     - patch_file: "patches/backward-cpp-1.4.patch"
@@ -22,4 +25,9 @@ patches:
     - patch_file: "patches/backward-cpp-1.5-74dd7d6733d1ab6b79994f4acbc1ad86ba950d23.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/backward-cpp-1.5-add-iterator-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/backward-cpp-1.5-mingw.patch"
+      base_path: "source_subfolder"
+  "1.6":
+    - patch_file: "patches/backward-cpp-1.5.patch"
       base_path: "source_subfolder"

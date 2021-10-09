@@ -1,0 +1,32 @@
+--- bin/aclocal.in
++++ bin/aclocal.in
+@@ -1,1 +1,1 @@
+-#!@PERL@
++#!/usr/bin/perl
+--- bin/automake.in
++++ bin/automake.in
+@@ -1,1 +1,1 @@
+-#!@PERL@
++#!/usr/bin/perl
+--- Makefile.in
++++ Makefile.in
+@@ -527,7 +527,7 @@
+ PACKAGE_URL = @PACKAGE_URL@
+ PACKAGE_VERSION = @PACKAGE_VERSION@
+ PATH_SEPARATOR = @PATH_SEPARATOR@
+-PERL = @PERL@
++PERL = /usr/bin/perl
+ RELEASE_YEAR = @RELEASE_YEAR@
+ SET_MAKE = @SET_MAKE@
+ SHELL = @SHELL@
+--- t/ax/test-defs.in
++++ t/ax/test-defs.in
+@@ -97,7 +97,7 @@
+ # User can override various tools used.  Prefer overriding specific for
+ # that automake testsuite, if they are available.
+ AWK=${AM_TESTSUITE_AWK-${AWK-'@AWK@'}}
+-PERL=${AM_TESTSUITE_PERL-${PERL-'@PERL@'}}
++PERL=${AM_TESTSUITE_PERL-${PERL-'/usr/bin/perl'}}
+ MAKE=${AM_TESTSUITE_MAKE-${MAKE-'make'}}
+ YACC=${AM_TESTSUITE_YACC-${YACC-'@YACC@'}}
+ LEX=${AM_TESTSUITE_LEX-${LEX-'@LEX@'}}

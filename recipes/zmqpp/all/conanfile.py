@@ -1,8 +1,6 @@
-import os
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class ZmqppConan(ConanFile):
@@ -36,23 +34,15 @@ class ZmqppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zeromq/4.3.3")
+        self.requires("zeromq/4.3.4")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("zmqpp-%s" % (self.version), self._source_subfolder)
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        # Link to CMake targets, far more robust since zeromq may have dependencies
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_STATIC}", "CONAN_PKG::zeromq")
-        tools.replace_in_file(cmakelists, "${ZEROMQ_LIBRARY_SHARED}", "CONAN_PKG::zeromq")
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -68,7 +58,8 @@ class ZmqppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

@@ -1,0 +1,8 @@
+sources:
+  "3.0.3":
+    url: "https://github.com/mattiasflodin/reckless/archive/refs/tags/v3.0.3.tar.gz"
+    sha256: "522656ded4aa72d2c465e48d43b9378c66108339fe3be4324ea0e601bf0537f9"
+patches:
+  "3.0.3":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      base_path: "source_subfolder"

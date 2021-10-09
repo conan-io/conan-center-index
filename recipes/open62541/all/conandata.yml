@@ -14,6 +14,9 @@ sources:
   "1.1.6":
     url: "https://github.com/open62541/open62541/archive/v1.1.6.tar.gz"
     sha256: "005bb336ba52f2c0add479bb46de8aa4216efa7f2bfd8b1c24a0271494edbd3f"
+  "1.2.2":
+    url: "https://github.com/open62541/open62541/archive/v1.2.2.tar.gz"
+    sha256: "9b5bfd811ee523be601f11abc514a93c67fe5c6e957cd6c36fe6ea4f28e009bb"
 patches:
   "1.0.3":
     - patch_file: "patches/1_0_x.patch"
@@ -35,4 +38,9 @@ patches:
     - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-disable-sanitizers-1_1_6.patch"
+      base_path: "source_subfolder"
+  "1.2.2":
+    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
       base_path: "source_subfolder"

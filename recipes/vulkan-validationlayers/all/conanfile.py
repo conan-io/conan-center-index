@@ -57,14 +57,15 @@ class VulkanValidationLayersConan(ConanFile):
         }.get(str(self.version), False)
 
     def requirements(self):
-        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=True)
+        # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
+        self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not hasattr(self, "settings_build"))
         self.requires("vulkan-headers/{}".format(self.version))
         if tools.Version(self.version) >= "1.2.173":
-            self.requires("robin-hood-hashing/3.11.1")
+            self.requires("robin-hood-hashing/3.11.3")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.18.0")
+            self.requires("wayland/1.19.0")
 
     def validate(self):
         if self.options["spirv-tools"].shared:

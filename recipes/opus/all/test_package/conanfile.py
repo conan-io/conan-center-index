@@ -12,6 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        pcm_path = os.path.join(self.source_folder, "test.pcm")
-        bin_path = os.path.join("bin", "test_package")
-        self.run("%s %s out.pcm" % (bin_path, pcm_path), run_environment=True)
+        if not tools.cross_building(self):
+            pcm_path = os.path.join(self.source_folder, "test.pcm")
+            bin_path = os.path.join("bin", "test_package")
+            self.run("{} {} out.pcm".format(bin_path, pcm_path), run_environment=True)

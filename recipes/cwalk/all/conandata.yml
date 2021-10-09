@@ -11,3 +11,16 @@ sources:
   "1.0.0":
     url: "https://github.com/likle/cwalk/archive/v1.0.0.zip"
     sha256: "9ff6d85f88e7fe4877698afb40745d301491c1d3fca96f08d1622f5fe3494182"
+patches:
+  "1.2.5":
+    - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+      base_path: "source_subfolder"
+  "1.2.2":
+    - patch_file: "patches/0001-fix-cmake-1.2.2.patch"
+      base_path: "source_subfolder"
+  "1.1.0":
+    - patch_file: "patches/0001-fix-cmake-1.1.0.patch"
+      base_path: "source_subfolder"
+  "1.0.0":
+    - patch_file: "patches/0001-fix-cmake-1.0.0.patch"
+      base_path: "source_subfolder"

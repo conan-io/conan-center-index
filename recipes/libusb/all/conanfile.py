@@ -1,5 +1,9 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.33.0"
+
 
 class LibUSBConan(ConanFile):
     name = "libusb"
@@ -9,8 +13,16 @@ class LibUSBConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "libusb", "usb", "device")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "enable_udev": True, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "enable_udev": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_udev": True,
+    }
     _autotools = None
 
     @property
@@ -25,32 +37,38 @@ class LibUSBConan(ConanFile):
     def _is_msvc(self):
         return self.settings.os == "Windows" and self.settings.compiler == "Visual Studio"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os not in ["Linux", "Android"]:
+            del self.options.enable_udev
+        # FIXME: enable_udev should be True for Android, but libudev recipe is missing
+        if self.settings.os == "Android":
+            self.options.enable_udev = False
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Android":
-            self.options.enable_udev = False
 
-    def config_options(self):
-        if self.settings.os not in  ["Linux", "Android"]:
-            del self.options.enable_udev
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def validate(self):
+        if self.options.get_safe("enable_udev"):
+            if self.settings.os == "Android":
+                raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
+            if self.settings.os == "Linux" and self._settings_build.os != "Linux":
+                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling to Linux from a non-Linux machine")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def system_requirements(self):
-        if self.settings.os == "Linux":
+        if self._settings_build.os == "Linux" and self.settings.os == "Linux":
             if self.options.enable_udev:
                 package_tool = tools.SystemPackageTool(conanfile=self)
                 libudev_name = ""
@@ -67,6 +85,10 @@ class LibUSBConan(ConanFile):
                     self.output.warn("Could not install libudev: Undefined package name for current platform.")
                     return
                 package_tool.install(packages=libudev_name, update=True)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
@@ -136,9 +158,7 @@ class LibUSBConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            la_file = os.path.join(self.package_folder, "lib", "libusb-1.0.la")
-            if os.path.isfile(la_file):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb-1.0"

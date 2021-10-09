@@ -1,0 +1,10 @@
+--- configure.ac
++++ configure.ac
+@@ -80,6 +80,6 @@
+ # Output.
+ #
+ AC_CONFIG_HEADERS([xml/config.h xml/details/config.h])
+-AC_CONFIG_FILES([ doc/Makefile examples/hybrid/Makefile examples/inheritance/Makefile examples/Makefile examples/performance/Makefile examples/persistence/Makefile examples/processing/Makefile examples/roundtrip/Makefile libstudxml.pc Makefile tester tests/Makefile tests/parser/Makefile tests/roundtrip/Makefile tests/serializer/Makefile xml/Makefile])
++AC_CONFIG_FILES([ libstudxml.pc Makefile xml/Makefile])
+ AC_CONFIG_COMMANDS([tester-mode], [chmod +x tester])
+ AC_OUTPUT

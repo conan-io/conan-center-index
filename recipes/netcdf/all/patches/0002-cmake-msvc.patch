@@ -1,11 +1,20 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -615,7 +615,7 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -614,7 +614,7 @@ IF(USE_HDF5 OR ENABLE_NETCDF_4)
      # examples, even though the previous version of what we
      # had worked.
      #####
 -    IF(MSVC)
-+    IF(0)#MSVC)
++    IF(0)
        SET(SEARCH_PACKAGE_NAME ${HDF5_PACKAGE_NAME})
        FIND_PACKAGE(HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS C HL CONFIG REQUIRED ${NC_HDF5_LINK_TYPE})
      ELSE(MSVC)
+@@ -1828,7 +1828,7 @@ ADD_SUBDIRECTORY(docs)
+ # install them in the binary dir. Grab all of the .libs, put them
+ # in the libdir.
+ ##
+-IF(MSVC)
++IF(0)
+   FILE(GLOB COPY_FILES ${CMAKE_PREFIX_PATH}/lib/*.lib)
+   INSTALL(FILES ${COPY_FILES}
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}

@@ -1,0 +1,4 @@
+sources:
+  "1.19.1":
+    url: "https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/-/archive/1.19.1/gst-plugins-base-1.19.1.tar.bz2"
+    sha256 : "b39338e306502570b49043a9b9df5704043e02c8a2ccba3a5a4f1f6ea410d4b1"

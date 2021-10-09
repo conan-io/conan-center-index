@@ -1,6 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
-from contextlib import contextmanager
+import contextlib
 
 required_conan_version = ">=1.33.0"
 
@@ -17,11 +17,11 @@ class LibdisasmConan(ConanFile):
     exports_sources = "patches/**"
     options = {
         "fPIC": [True, False],
-        "shared": [True, False]
+        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "shared": False
+        "shared": False,
     }
 
     _autotools = None
@@ -29,6 +29,14 @@ class LibdisasmConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,23 +50,23 @@ class LibdisasmConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         env = {}
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env.update({
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "CPP": "cl -E -nologo",
-                    "AR": "{} lib".format(self.deps_user_info["automake"].ar_lib.replace("\\", "/")),
+                    "AR": "{} lib".format(self._user_info_build["automake"].ar_lib.replace("\\", "/")),
                     "LD": "link -nologo",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
