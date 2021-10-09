@@ -12,7 +12,7 @@ class CoConan(ConanFile):
     description = "A go-style coroutine library in C++11 and more."
     topics = ("co", "coroutine", "c++11")
     exports_sources = "CMakeLists.txt", "patches/*"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
