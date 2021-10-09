@@ -48,7 +48,7 @@ class CoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.0")
+            self.requires("openssl/1.1.1l")
     def build_requirements(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             #  The OSX_ARCHITECTURES target property is now respected for the ASM language
