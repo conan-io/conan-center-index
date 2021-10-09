@@ -132,16 +132,16 @@ class LibVPXConan(ConanFile):
                 if not self.options.get_safe(name):
                     args.append('--disable-%s' % name)
         with tools.vcvars(self.settings) if self.settings.compiler == 'Visual Studio' else tools.no_op():
-            env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
             if self.settings.compiler == "Visual Studio":
                 # gen_msvs_vcxproj.sh doesn't like custom flags
-                env_build.cxxflags = []
-                env_build.flags = []
+                self._autotools.cxxflags = []
+                self._autotools.flags = []
             if tools.is_apple_os(self.settings.os) and self.settings.get_safe("compiler.libcxx") == "libc++":
                 # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
-                env_build.link_flags.append("-stdlib=libc++")
-            env_build.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
-        return env_build
+                self._autotools.link_flags.append("-stdlib=libc++")
+            self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=False, build=False, target=False)
+        return self._autotools
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
