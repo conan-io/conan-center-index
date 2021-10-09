@@ -51,7 +51,10 @@ class LibrealsenseConan(ConanFile):
             tools.check_min_cppstd(self, 14)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        sources = self.conan_data["sources"][self.version]
+        tools.get(**sources["source"], strip_root=True, destination=self._source_subfolder)
+        for entry in sources["firmware"]:
+            tools.download(**entry)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
