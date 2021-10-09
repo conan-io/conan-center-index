@@ -49,7 +49,7 @@ class LibUDEVConan(ConanFile):
             elif tools.os_info.with_pacman:
                 packages = ["systemd-libs"]
             elif tools.os_info.with_zypper:
-                packages = ["libudev0"]
+                packages = ["libudev-devel"]
             else:
                 self.output.warn("Don't know how to install %s for your distro." % self.name)
         if packages:
