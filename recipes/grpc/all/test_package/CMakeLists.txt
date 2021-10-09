@@ -7,6 +7,13 @@ conan_basic_setup()
 if(WIN32)
   add_definitions(-D_WIN32_WINNT=0x600)
 endif()
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+else()
+  if (CMAKE_CXX_STANDARD LESS 11)
+    message(FATAL_ERROR "CMAKE_CXX_STANDARD is less than 11, please specify at least SET(CMAKE_CXX_STANDARD 11)")
+  endif()
+endif()
 
 # Find Protobuf installation
 
