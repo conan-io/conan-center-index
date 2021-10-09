@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5fd8d55579..55a9029afe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -191,17 +191,2 @@ endif()
+ 
+-# Add c++11 flags
+-if (NOT DEFINED CMAKE_CXX_STANDARD)
+-  set(CMAKE_CXX_STANDARD 11)
+-else()
+-  if (CMAKE_CXX_STANDARD LESS 11)
+-    message(FATAL_ERROR "CMAKE_CXX_STANDARD is less than 11, please specify at least SET(CMAKE_CXX_STANDARD 11)")
+-  endif()
+-endif()
+-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
+-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-endif()
+-if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
+-  set(CMAKE_CXX_EXTENSIONS OFF)
+-endif()
+-
+ if (NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+@@ -275,2 +260,7 @@ endif()
+ 
++add_library(_cxx_std_11_feature INTERFACE IMPORTED)
++target_compile_features(_cxx_std_11_feature INTERFACE cxx_std_11)
++set(_gRPC_ALLTARGETS_LIBRARIES ${_gRPC_ALLTARGETS_LIBRARIES} _cxx_std_11_feature)
++
++
+ if(WIN32)
