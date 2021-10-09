@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 98283aa..54f9f71 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,7 +75,7 @@ ENDIF(PROJECT_OS_LINUX)
+ ######################################################################################
+ 
+ # Find packages needed to build library
+-find_package(libusb-1.0 REQUIRED)
++find_package(libusb REQUIRED)
+ 
+ # Check the endianness of the system
+ include (TestBigEndian)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 841873a..5013d90 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -3,7 +3,7 @@
+ ######################################################################################
+ 
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+-include_directories(${LIBUSB_1_INCLUDE_DIRS})
++# include_directories(${LIBUSB_1_INCLUDE_DIRS})
+ 
+ # Audio Firmware
+ include(FindPythonInterp)
+@@ -36,8 +36,8 @@ ENDIF()
+ install (TARGETS freenectstatic
+   DESTINATION "${PROJECT_LIBRARY_INSTALL_DIR}")
+ 
+-target_link_libraries (freenect ${LIBUSB_1_LIBRARIES})
+-target_link_libraries (freenectstatic ${LIBUSB_1_LIBRARIES})
++target_link_libraries (freenect libusb::libusb)
++target_link_libraries (freenectstatic libusb::libusb)
+ 
+ # Install the header files
+ install (FILES "../include/libfreenect.h" "../include/libfreenect_registration.h" "../include/libfreenect_audio.h"
