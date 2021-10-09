@@ -7,7 +7,6 @@ conan_basic_setup()
 if(WIN32)
   add_definitions(-D_WIN32_WINNT=0x600)
 endif()
-set(CMAKE_CXX_STANDARD 11)
 
 # Find Protobuf installation
 

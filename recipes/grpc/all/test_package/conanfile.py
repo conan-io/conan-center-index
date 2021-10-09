@@ -12,6 +12,14 @@ class TestPackageConan(ConanFile):
             
     def build(self):
         cmake = CMake(self)
+
+        if (
+            self.settings.compiler == "gcc"
+            and tools.Version(self.settings.compiler.version) >= "11"
+            and not self.settings.compiler.get_safe("cppstd")
+        ):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = "17"
+
         cmake.configure()
         cmake.build()
 
