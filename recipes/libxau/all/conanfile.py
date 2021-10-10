@@ -7,7 +7,7 @@ class LibXauConan(ConanFile):
     topics = "x11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.x.org"
-    license = "???"
+    license = "MIT"
 
     generators = "pkg_config"
 
@@ -67,4 +67,4 @@ class LibXauConan(ConanFile):
         env_build.install()
 
     def package_info(self):
-        self.cpp_info.name = "xau"
+        self.cpp_info.names["pkg_config"] = "xau"
