@@ -8,6 +8,9 @@ sources:
   "2.3.4":
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.4.tar.gz"
     sha256: "B1B2322DE0CA55A16495666E3FBDA8ACA32B888BBFAECDA29F2FFC4B072EF7AC"
+  "2.4.0":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.4.0.tar.gz"
+    sha256: "77270B5AB8CCC3143ACC88DCCD3BF9C30F316A4712A420CDFAD8EAD18207CAAF"
 patches:
   "2.3.2":
     - base_path: "source_subfolder"

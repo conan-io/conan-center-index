@@ -91,8 +91,9 @@ class FastDDSConan(ConanFile):
         return "source_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if int(self.version.split('.')[1]) < 4:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def configure(self):
         if self.options.shared:
@@ -116,8 +117,10 @@ class FastDDSConan(ConanFile):
         self.requires("tinyxml2/7.1.0")
         self.requires("asio/1.18.2")
         self.requires("fast-cdr/1.0.21")
-        self.requires("foonathan-memory/0.7.0")
-        self.options["foonathan-memory"].with_sizecheck = False
+        if self.version == "2.4.0":
+            self.requires("foonathan-memory/0.7.1")
+        else:
+            self.requires("foonathan-memory/0.7.0")
         self.requires("boost/1.73.0")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1k")
