@@ -35,7 +35,7 @@ class GStreamerConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("glib/2.69.0")
+        self.requires("glib/2.70.0")
 
     @property
     def _is_msvc(self):
