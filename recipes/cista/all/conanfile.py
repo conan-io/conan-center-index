@@ -41,6 +41,9 @@ class CistaConan(ConanFile):
                 "{} {} requires C++17, which your compiler does not support.".format(self.name, self.version)
             )
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         for file in self.conan_data["sources"][self.version]:
             filename = os.path.basename(file["url"])
