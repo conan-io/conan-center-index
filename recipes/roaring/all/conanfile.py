@@ -71,7 +71,7 @@ class RoaringConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["ROARING_DISABLE_AVX"] = not self.options.get_safe("with_avx", False)
-        self._cmake.definitions["ROARING_DISABLE_NEON"] = not self.options.get_safe("with_avx", False)
+        self._cmake.definitions["ROARING_DISABLE_NEON"] = not self.options.get_safe("with_neon", False)
         self._cmake.definitions["ROARING_DISABLE_NATIVE"] = not self.options.native_optimization
         self._cmake.definitions["ROARING_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_ROARING_TESTS"] = False
