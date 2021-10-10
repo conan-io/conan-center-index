@@ -88,8 +88,8 @@ class CoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["co"]
-        self.cpp_info.names["cmake_find_package"] = "CO"
-        self.cpp_info.names["cmake_find_package_multi"] = "CO"
+        self.cpp_info.names["cmake_find_package"] = "co"
+        self.cpp_info.names["cmake_find_package_multi"] = "co"
 
     def validate(self):
         if self.options.with_libcurl:
