@@ -1,0 +1,4 @@
+sources:
+  "1.14":
+    url: "https://xcb.freedesktop.org/dist/xcb-proto-1.14.tar.gz"
+    sha256: "1c3fa23d091fb5e4f1e9bf145a902161cec00d260fabf880a7a248b02ab27031"
