@@ -79,16 +79,11 @@ class LibfreenectConan(ConanFile):
         self.copy("GPL", src=self._source_subfolder, dst="licenses", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        if self.options.shared:
-            for ext in [".a", ".lib"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*freenect*" + ext)
-        else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*freenect*.dll")
-            for ext in [".so", ".dylib"]:
-                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*freenect*" + ext + "*")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libfreenect"
         self.cpp_info.libs = ["freenect"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
