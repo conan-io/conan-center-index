@@ -41,7 +41,10 @@ class ArgparseConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
+        if tools.Version(self.version) <= "2.1":
+            self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "argparse"))
+        else:
+            self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
 
     def package_id(self):
         self.info.header_only()
@@ -50,3 +53,5 @@ class ArgparseConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "argparse"
         self.cpp_info.names["cmake_find_package_multi"] = "argparse"
         self.cpp_info.names["pkg_config"] = "argparse"
+        if tools.Version(self.version) <= "2.1":
+            self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
