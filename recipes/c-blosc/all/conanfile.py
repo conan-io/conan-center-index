@@ -2,6 +2,8 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.33.0"
+
 class CbloscConan(ConanFile):
     name = "c-blosc"
     description = "An extremely fast, multi-threaded, meta-compressor library."
@@ -64,8 +66,7 @@ class CbloscConan(ConanFile):
             self.requires("zstd/1.5.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         self._patch_sources()
