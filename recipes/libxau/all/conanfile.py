@@ -73,3 +73,5 @@ class LibXauConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xau"
+
+        self.cpp_info.libs = ["Xau"]
