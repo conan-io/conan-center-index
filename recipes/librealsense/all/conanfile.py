@@ -15,12 +15,14 @@ class LibrealsenseConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tools": [True, False]
+        "tools": [True, False],
+        "rsusb_backend": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "tools": True
+        "tools": True,
+        "rsusb_backend": True, # TODO: change to False when CI gets MSVC ATL support
     }
     short_paths = True
     generators = "cmake", "cmake_find_package"
@@ -39,6 +41,8 @@ class LibrealsenseConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.rsusb_backend
 
     def configure(self):
         if self.options.shared:
@@ -93,6 +97,8 @@ class LibrealsenseConan(ConanFile):
         self._cmake.definitions["BUILD_CSHARP_BINDINGS"] = False
         self._cmake.definitions["BUILD_OPENNI2_BINDINGS"] = False
         self._cmake.definitions["BUILD_CV_KINFU_EXAMPLE"] = False
+        if self.settings.os == "Windows":
+            self._cmake.definitions["FORCE_RSUSB_BACKEND"] = self.options.rsusb_backend
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -107,17 +113,16 @@ class LibrealsenseConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         if self.options.shared:
-            for path in glob.glob(os.path.join(self.package_folder, "lib", "libfw.*")):
+            postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
+            for path in glob.glob(os.path.join(self.package_folder, "lib", "libfw{}.*".format(postfix))):
                 os.unlink(path)
-            for path in glob.glob(os.path.join(self.package_folder, "lib", "librealsense-file.*")):
+            for path in glob.glob(os.path.join(self.package_folder, "lib", "librealsense-file{}.*".format(postfix))):
                 os.unlink(path)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        postfix = ""
-        if self.settings.compiler == "Visual Studio" and self.setings.build_type == "Debug":
-            postfix = "d"
+        postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
 
         self.cpp_info.names["cmake_find_package"] = "realsense2"
         self.cpp_info.names["cmake_find_package_multi"] = "realsense2"
