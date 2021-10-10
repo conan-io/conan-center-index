@@ -104,3 +104,7 @@ class Libfreenect2Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "freenect2"
         self.cpp_info.names["pkg_config"] = "freenect2"
         self.cpp_info.libs = ["freenect2"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.frameworks.append("VideoToolbox")
