@@ -74,6 +74,7 @@ class LibXauConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
