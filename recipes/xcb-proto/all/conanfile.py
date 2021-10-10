@@ -8,7 +8,7 @@ class XCBProtoConan(ConanFile):
     topics = "x11", "xcb"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xcb.freedesktop.org/"
-    license = "???"
+    license = "MIT"
 
     no_copy_source = True
 
