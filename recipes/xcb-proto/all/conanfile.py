@@ -10,6 +10,8 @@ class XCBProtoConan(ConanFile):
     homepage = "https://xcb.freedesktop.org/"
     license = "???"
 
+    no_copy_source = True
+
     _autotools = None
 
     @property
