@@ -2,12 +2,14 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class ArgparseConan(ConanFile):
     name = "argparse"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/argparse"
-    topics = ("conan", "argparse", "argument", "parsing")
+    topics = ("argparse", "argument", "parsing")
     license = "MIT"
     description = "Argument Parser for Modern C++"
     settings = "compiler"
@@ -35,15 +37,16 @@ class ArgparseConan(ConanFile):
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("argparse-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst=os.path.join("include", "argparse"))
+        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include")
 
     def package_id(self):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
+        self.cpp_info.names["cmake_find_package"] = "argparse"
+        self.cpp_info.names["cmake_find_package_multi"] = "argparse"
+        self.cpp_info.names["pkg_config"] = "argparse"
