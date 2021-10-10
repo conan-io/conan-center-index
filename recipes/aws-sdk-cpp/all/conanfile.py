@@ -381,7 +381,7 @@ class AwsSdkCppConan(ConanFile):
         self._cmake.definitions["BUILD_DEPS"] = False
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
-        if self.settings.compiler == "Visual Studio" and !_self._use_aws_crt_cpp:
+        if self.settings.compiler == "Visual Studio" and not _self._use_aws_crt_cpp:
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
         if tools.cross_building(self):
@@ -466,3 +466,4 @@ class AwsSdkCppConan(ConanFile):
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
             self.cpp_info.components["core"].system_libs.append(lib_stdcpp)
+
