@@ -58,7 +58,7 @@ class XCBProtoConan(ConanFile):
                   os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1]))
 
     def package_info(self):
-        self.cpp_info.name = "xcb-proto"
+        self.cpp_info.names["pkg_config"] = "xcb-proto"
 
         xcbincludedir = os.path.join(self.package_folder, "share", "xcb")
         pythondir = os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1], "site-packages")
