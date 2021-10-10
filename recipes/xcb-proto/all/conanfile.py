@@ -54,7 +54,8 @@ class XCBProtoConan(ConanFile):
         env_build = self._configre_autotools()
         env_build.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        os.rename(os.path.join(self.package_folder, "lib", "python%d.%d" % sys.version_info[:2]),
+        tools.rename(self,
+            os.path.join(self.package_folder, "lib", "python%d.%d" % sys.version_info[:2]),
                   os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1]))
 
     def package_info(self):
