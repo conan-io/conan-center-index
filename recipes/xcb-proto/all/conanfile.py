@@ -57,6 +57,7 @@ class XCBProtoConan(ConanFile):
         tools.rename(self,
             os.path.join(self.package_folder, "lib", "python%d.%d" % sys.version_info[:2]),
                   os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1]))
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "xcb-proto"
