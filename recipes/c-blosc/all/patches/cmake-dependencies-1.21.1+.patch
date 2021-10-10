@@ -13,7 +13,7 @@ index f5eff9e..92b35f2 100644
      if(PREFER_EXTERNAL_LZ4)
 -        find_package(LZ4)
 +        ### find_package(LZ4)
-+        set((LZ4_FOUND TRUE))
++        set(LZ4_FOUND TRUE)
      else()
          message(STATUS "Using LZ4 internal sources.")
      endif(PREFER_EXTERNAL_LZ4)
