@@ -1,6 +1,6 @@
-From aa36bba0f67988cb3f2838760028adfd9c75bcbe Mon Sep 17 00:00:00 2001
+From d446f8cf36cf9e1232210038ec09a8590e8ab79e Mon Sep 17 00:00:00 2001
 From: Samuel Dowling <samuel.dowling@protonmail.com>
-Date: Thu, 30 Sep 2021 23:51:35 +0930
+Date: Sun, 10 Oct 2021 16:35:30 +1030
 Subject: [PATCH] Guard dependency discovery
 
 * Add guards to prevent usage of custom cmake find package scripts.
@@ -9,7 +9,7 @@ Subject: [PATCH] Guard dependency discovery
  1 file changed, 61 insertions(+), 12 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7857f8c..dcd7652 100644
+index 7857f8c..77e2d46 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -274,7 +274,11 @@ if(APPLE)
@@ -53,8 +53,8 @@ index 7857f8c..dcd7652 100644
 -  include(ARMA_FindATLAS)
 -  include(ARMA_FindBLAS)
 -  include(ARMA_FindLAPACK)
-+  if(USE_SYSTEM_MKL)
-+    include(ARMA_FindMKL)
++  if(USE_MKL)
++      find_package(MKL)
 +  else()
 +    set(MKL_FOUND NO)
 +  endif()

@@ -29,7 +29,6 @@ class ArmadilloConan(ConanFile):
             "openblas",
             "intel_mkl",
             "system_blas",
-            "system_mkl",
             "system_flexiblas",
             "framework_accelerate",
         ],
@@ -38,7 +37,6 @@ class ArmadilloConan(ConanFile):
             "openblas",
             "intel_mkl",
             "system_lapack",
-            "system_mkl",
             "system_atlas",
             "framework_accelerate",
         ],
@@ -47,7 +45,6 @@ class ArmadilloConan(ConanFile):
         "use_extern_rng": [True, False],
         "use_arpack": [False, "system_arpack"],
         "use_wrapper": [True, False],
-        "mkl_library_path": "ANY",
     }
     default_options = {
         "shared": False,
@@ -59,15 +56,10 @@ class ArmadilloConan(ConanFile):
         "use_extern_rng": False,
         "use_arpack": False,
         "use_wrapper": False,
-        "mkl_library_path": "",
     }
     # Values that must be set for multiple options to be valid
     _co_dependencies = {
         "intel_mkl": [
-            "use_blas",
-            "use_lapack",
-        ],
-        "system_mkl": [
             "use_blas",
             "use_lapack",
         ],
@@ -102,19 +94,6 @@ class ArmadilloConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-        # Use default MKL path or throw error if no default path exists
-        if self.options.use_blas == "system_mkl" and not self.options.mkl_library_path:
-            if self.settings.os == "Linux":
-                self.options.mkl_library_path = "/opt/intel/mkl/lib/intel64"
-            elif self.settings.os == "Windows":
-                self.options.mkl_library_path = (
-                    "C:/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64"
-                )
-            else:
-                raise ConanInvalidConfiguration(
-                    "A default mkl_library_path value for your operating system is not available. Please specify a value for mkl_library_path"
-                )
 
     def validate(self):
         tools.check_min_cppstd(self, "11")
@@ -167,9 +146,6 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
-        if self.options.use_blas == "intel_mkl":
-            self.output.warn("NOTE: The intel-mkl package does not exist in CCI. To use an Intel MKL package, override this requirement with your own recipe.")
-
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -190,11 +166,20 @@ class ArmadilloConan(ConanFile):
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
-        if self.options.use_blas == "intel_mkl":
-            # This will also be used for lapack
+        if (
+            self.options.use_blas == "intel_mkl"
+            and self.options.use_lapack == "intel_mkl"
+        ):
             # Consumers can override this requirement with their own by using
             # self.requires("intel-mkl/version@user/channel, override=True) in their consumer
             # conanfile.py
+            if (
+                self.options.use_blas == "intel_mkl"
+                or self.options.use_lapack == "intel_mkl"
+            ):
+                self.output.warn(
+                    "The intel-mkl package does not exist in CCI. To use an Intel MKL package, override this requirement with your own recipe."
+                )
             self.requires("intel-mkl/2021.4")
 
     def _configure_cmake(self):
@@ -217,6 +202,10 @@ class ArmadilloConan(ConanFile):
         ) and self.settings.os == "Macos"
         self._cmake.definitions["DETECT_HDF5"] = self.options.use_hdf5
         self._cmake.definitions["USE_OPENBLAS"] = self.options.use_blas == "openblas"
+        self._cmake.definitions["USE_MKL"] = (
+            self.options.use_blas == "intel_mkl"
+            and self.options.use_lapack == "intel_mkl"
+        )
         self._cmake.definitions["USE_SYSTEM_LAPACK"] = (
             self.options.use_lapack == "system_lapack"
         )
@@ -232,9 +221,6 @@ class ArmadilloConan(ConanFile):
         self._cmake.definitions["USE_SYSTEM_OPENBLAS"] = False
         self._cmake.definitions["USE_SYSTEM_FLEXIBLAS"] = (
             self.options.use_blas == "system_flexiblas"
-        )
-        self._cmake.definitions["USE_SYSTEM_MKL"] = (
-            self.options.use_blas == "system_mkl"
         )
         self._cmake.definitions["ALLOW_FLEXIBLAS_LINUX"] = (
             self.options.use_blas == "system_flexiblas" and self.settings.os == "Linux"
@@ -279,10 +265,6 @@ class ArmadilloConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.names["pkg_config"] = "armadillo"
-
-        if self.options.use_blas == "system_mkl":
-            self.cpp_info.libs.extend(["mkl_rt"])
-            self.cpp_info.libdirs.append(str(self.options.mkl_library_path))
 
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")
