@@ -88,6 +88,14 @@ class FoonathanMemory(ConanFile):
                 endif()
             """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
+    
+    def validate(self):
+        # quick fix since combination leads to library which can bring runtime errors 
+        # cmake build just gives a warning and fast-dds examples which uses memory library 
+        # crashed on runtime 
+        # later will look for better solution 
+        if self.options.with_tools and tools.cross_building(self.settings):
+            raise ConanInvalidConfiguration("Option with_tools currently not allowed when cross build")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
