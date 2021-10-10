@@ -56,7 +56,7 @@ class XCBProtoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rename(self,
             os.path.join(self.package_folder, "lib", "python%d.%d" % sys.version_info[:2]),
-                  os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1]))
+            os.path.join(self.package_folder, "lib", "python%d" % sys.version_info[:1]))
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
@@ -68,4 +68,3 @@ class XCBProtoConan(ConanFile):
         self.cpp_info.set_property(
             "pkg_config_custom_content",
             "xcbincludedir={}\npythondir={}".format(xcbincludedir, pythondir))
-        
