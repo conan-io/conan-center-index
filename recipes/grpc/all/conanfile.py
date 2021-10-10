@@ -11,7 +11,7 @@ class grpcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "cmake/*"]
+    exports_sources = ["CMakeLists.txt", "cmake/*", "patches/**"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     short_paths = True
 
@@ -77,6 +77,9 @@ class grpcConan(ConanFile):
             if compiler_version < 14:
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
         # Fix the protoc search path for cross compiling
@@ -126,10 +129,21 @@ class grpcConan(ConanFile):
         self._cmake.definitions["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
         self._cmake.definitions["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
+        # Some compilers will start defaulting to C++17, so abseil will be built using C++17
+        # gRPC will force C++11 if CMAKE_CXX_STANDARD is not defined
+        # So, if settings.compiler.cppstd is not defined there will be a mismatch
+        if not tools.valid_min_cppstd(self, 11):
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
