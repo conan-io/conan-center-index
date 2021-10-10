@@ -107,4 +107,4 @@ class Libfreenect2Conan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.append("VideoToolbox")
+            self.cpp_info.frameworks.extend(["VideoToolbox", "CoreFoundation", "CoreMedia", "CoreVideo"])
