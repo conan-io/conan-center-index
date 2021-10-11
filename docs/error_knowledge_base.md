@@ -306,10 +306,6 @@ The method `self.options.remove()` was introduced in Conan 0.x, however, Conan 1
 
 The CMake definition CMAKE_VERBOSE_MAKEFILE helps for debugging when developing, however, for regular CI build, it increases the log size and it's only required when problems occur and need to be verified.
 
-#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
-
-According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
-
 #### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
 
 The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake_minimum_required(VERSION 3.1)`. The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if `CMAKE_CXX_STANDARD` or `CXX_STANDARD` is explicit, CMake 3.1 is mandatory.
@@ -379,3 +375,12 @@ When cross building, conan needs to compare `self.settings` and `self.settings_b
 #### **<a name="KB-H064">#KB-H064</a>: "INVALID TOPICS"**
 
 An invalid topic has been detected. Remove or rename it.
+
+# Deprecated errors
+
+The following errors from the hooks are deprecated and no longer reported:
+
+#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
+
+According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
+
