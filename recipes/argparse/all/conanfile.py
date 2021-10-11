@@ -38,7 +38,7 @@ class ArgparseConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
-        if tools.Version(self.version) > "2.1" and self.settings.compiler == "clang":
+        if tools.Version(self.version) > "2.1" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration("This recipe does not permit >2.1 with clang and stdlibc++. There may be an infrastructure issue in CCI.")
 
     def source(self):
