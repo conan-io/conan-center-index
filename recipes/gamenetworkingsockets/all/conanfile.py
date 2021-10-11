@@ -84,8 +84,8 @@ class GameNetworkingSocketsConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = "OFF"
+        self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = False
         self._cmake.definitions["Protobuf_USE_STATIC_LIBS"] = not self.options["protobuf"].shared
         crypto = {"openssl": "OpenSSL", "libsodium": "libsodium", "bcrypt": "BCrypt"}
         self._cmake.definitions["USE_CRYPTO"] = crypto[str(self.options.encryption)]
