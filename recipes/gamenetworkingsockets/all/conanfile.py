@@ -52,7 +52,6 @@ class GameNetworkingSocketsConan(ConanFile):
 
         if self.options.encryption == "bcrypt" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("bcrypt is only valid on Windows")
-        
 
     def build_requirements(self):
         self.build_requires("protobuf/3.17.1")
@@ -72,9 +71,6 @@ class GameNetworkingSocketsConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.encryption == "openssl" and "openssl" in self.deps_cpp_info.deps and tools.Version(self.deps_cpp_info["openssl"].version) < "1.1.1":
-            raise ConanInvalidConfiguration("{} requires OpenSSL 1.1.1 or newer".format(self.name))
-
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
