@@ -1,21 +1,20 @@
-
-import glob
-import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class Embree(ConanFile):
     name = "embree3"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "embree", "raytracing", "rendering")
+    topics = ("embree", "raytracing", "rendering")
     description = "Intel's collection of high-performance ray tracing kernels."
-    generators = "cmake"
     homepage = "https://embree.github.io/"
-    exports_sources = "CMakeLists.txt"
-    settings = "os", "compiler", "build_type", "arch"
 
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -47,8 +46,11 @@ class Embree(ConanFile):
         "backface_culling": False,
         "ignore_invalid_rays": False,
     }
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -60,26 +62,25 @@ class Embree(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
-    def configure(self):
+
+    def validate(self):
         version = tools.Version(self.settings.compiler.version)
         if self.settings.compiler == "clang" and version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
         elif self.settings.compiler == "Visual Studio" and version < "15":
             raise ConanInvalidConfiguration("Visual Studio < 15 is not supported")
 
-        if self._is_linux_clang_libcxx:
+        if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration("conan recipe for Embree v{0} \
                 cannot be built with clang libc++, use libstdc++ instead".format(self.version))
 
-        elif self._is_mac_apple_clang_static:
+        if self.settings.compiler == "apple-clang" and not self.options.shared:
             raise ConanInvalidConfiguration("Embree cannot be built into static library with apple-clang,\
                 try shared library instead")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        target_name = "{0}-{1}".format("embree", self.version)
-        os.rename(target_name, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -116,19 +117,15 @@ class Embree(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        for command_file in glob.glob(os.path.join(self.package_folder, "*.command")):
-            os.remove(command_file)
-        for cmake_file in glob.glob(os.path.join(self.package_folder, "*.cmake")):
-            os.remove(cmake_file)
-
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder), "*.command")
+        tools.remove_files_by_mask(os.path.join(self.package_folder), "*.cmake")
 
-        if self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
-                    os.remove(dll_to_remove)
+                tools.remove_files_by_mask(os.path.join(self.package_folder), dll_pattern_to_remove)
         else:
             tools.rmdir(os.path.join(self.package_folder, "bin"))
 
@@ -136,19 +133,3 @@ class Embree(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
-
-    @property
-    def _is_linux_clang_libcxx(self):
-        return (
-            self.settings.os == 'Linux' and
-            self.settings.compiler == 'clang' and
-            self.settings.compiler.libcxx == 'libc++'
-        )
-
-    @property
-    def _is_mac_apple_clang_static(self):
-        return (
-            self.settings.os == 'Macos' and
-            self.settings.compiler == 'apple-clang' and
-            self.options.shared == False
-        )    
