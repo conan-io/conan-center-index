@@ -94,7 +94,7 @@ class UsocketsConan(ConanFile):
             del self.settings.compiler.libcxx
 
         if self.options.with_libuv != "deprecated":
-            self.output.warn("with_libuv is deprecated, do not use anymore.")
+            self.output.warn("with_libuv is deprecated, use 'eventloop' instead.")
             if self.options.with_libuv == True:
                 self.options.eventloop = "libuv"
             else:
