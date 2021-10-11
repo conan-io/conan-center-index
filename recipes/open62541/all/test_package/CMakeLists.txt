@@ -7,9 +7,6 @@ conan_basic_setup(TARGETS)
 find_package(open62541 REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
-# add_executable(${PROJECT_NAME} test_package.c)
-# target_link_libraries(${PROJECT_NAME} open62541::open62541 Threads::Threads)
-
 find_package(PythonInterp REQUIRED)
 
 # Output directory for Nodeset Compiler
