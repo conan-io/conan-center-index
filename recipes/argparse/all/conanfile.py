@@ -19,7 +19,7 @@ class ArgparseConan(ConanFile):
     def _compiler_required_cpp17(self):
         return {
             "gcc": "7" if tools.Version(self.version) <= "2.1" else "8",
-            "clang": "5" if tools.Version(self.version) <= "2.1" else "7",
+            "clang": "5" if tools.Version(self.version) <= "2.1" else "11",
             "Visual Studio": "15",
             "apple-clang": "10",
         }
