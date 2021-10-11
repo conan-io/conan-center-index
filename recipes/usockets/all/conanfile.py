@@ -14,9 +14,11 @@ class UsocketsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
                "with_ssl": [False, "openssl", "wolfssl"],
+               "with_libuv": [True, False, "deprecated"],
                "eventloop": ["syscall", "libuv", "gcd", "boost"]}
     default_options = {"fPIC": True,
                        "with_ssl": False,
+                       "with_libuv": "deprecated",
                        "eventloop": "syscall"}
     exports_sources = "patches/**"
 
@@ -91,6 +93,13 @@ class UsocketsConan(ConanFile):
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
 
+        if self.options.with_libuv != "deprecated":
+            self.output.warn("with_libuv is deprecated, do not use anymore.")
+            if self.options.with_libuv == True:
+                self.options.eventloop = "libuv"
+            else:
+                self.options.eventloop = "syscall"
+
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1l")
@@ -154,6 +163,10 @@ class UsocketsConan(ConanFile):
         self.copy(pattern="*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         # drop internal headers
         tools.rmdir(os.path.join(self.package_folder, "include", "internal"))
+
+    def package_id(self):
+        # Deprecated options
+        del self.info.options.with_libuv
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
