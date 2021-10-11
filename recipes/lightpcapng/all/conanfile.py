@@ -9,7 +9,6 @@ class LightPcapNgConan(ConanFile):
     description = "Library for general-purpose tracing based on PCAPNG file format"
     topics = ("pcapng", "pcap")
     url = "https://github.com/conan-io/conan-center-index"
-    no_copy_source = True
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -23,6 +22,7 @@ class LightPcapNgConan(ConanFile):
         "with_zstd": True,
     }
     generators = "cmake", "cmake_paths", "cmake_find_package"
+    exports_sources = "CMakeLists.txt"
     _cmake = None
 
     @property
@@ -61,7 +61,7 @@ class LightPcapNgConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["LIGHT_USE_ZSTD"] = self.options.with_zstd
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def package(self):
