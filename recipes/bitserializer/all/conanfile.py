@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import glob
 import os
 
