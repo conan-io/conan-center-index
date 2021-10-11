@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 
 class GameNetworkingSocketsConan(ConanFile):
-    name = "game-networking-sockets"
+    name = "gamenetworkingsockets"
     description = "GameNetworkingSockets is a basic transport layer for games."
     topics = ("networking", "game-development")
     url = "https://github.com/conan-io/conan-center-index"
