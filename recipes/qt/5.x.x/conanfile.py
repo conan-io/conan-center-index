@@ -1194,7 +1194,9 @@ Examples = bin/datadir/examples""")
         mkspecs_dir_begin = qt5core_config_extras_mkspec_dir_cmake.find("mkspecs/")
         mkspecs_dir_end = qt5core_config_extras_mkspec_dir_cmake.find("\"", mkspecs_dir_begin)
         mkspecs_dir = qt5core_config_extras_mkspec_dir_cmake[mkspecs_dir_begin:mkspecs_dir_end].split('/')
-        self.cpp_info.components["qtCore"].includedirs.append(os.path.join("bin", "archdatadir", *mkspecs_dir))
+        mkspecs_path = os.path.join("bin", "archdatadir", *mkspecs_dir)
+        assert os.path.exists(mkspecs_path)
+        self.cpp_info.components["qtCore"].includedirs.append(mkspecs_path)
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
