@@ -29,7 +29,7 @@ class BitserializerConan(ConanFile):
 
     @property
     def _supported_compilers(self):
-        if conan_version >= Version("0.44"):
+        if tools.Version(self.version) >= "0.44":
             return {
                 "gcc": "8",
                 "clang": "8",
