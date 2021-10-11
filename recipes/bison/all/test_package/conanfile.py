@@ -37,8 +37,15 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
 
+            print("m4 (1): ", tools.which("m4"))
+
             # verify bison works without M4 environment variables
             with tools.environment_append({"M4": None}):
+                print("m4 (2): ", tools.which("m4"))
+                self.run("m4 --version", run_environment=True)
+                if self.settings.os == "Macos":
+                    print(tools.which("bison"))
+                    self.run("strings %s | grep m4" % tools.which("bison"))
                 self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
 
             # verify bison works without BISON_PKGDATADIR and M4 environment variables
