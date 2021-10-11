@@ -80,7 +80,3 @@ class LightPcapNgConan(ConanFile):
         if self.options.with_zstd:
             self.cpp_info.components["liblight_pcapng"].requires = ["zstd::zstd"]
 
-
-
-
-
