@@ -69,11 +69,14 @@ class Embree(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        version = tools.Version(self.settings.compiler.version)
-        if self.settings.compiler == "clang" and version < "4":
+        compiler_version = tools.Version(self.settings.compiler.version)
+        if self.settings.compiler == "clang" and compiler_version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
-        elif self.settings.compiler == "Visual Studio" and version < "15":
+        elif self.settings.compiler == "Visual Studio" and compiler_version < "15":
             raise ConanInvalidConfiguration("Visual Studio < 15 is not supported")
+
+        if not (self.settings.arch in ["x86", "x86_64"] or ("arm" in self.settings.arch and tools.Version(self.version) >= "3.13.0")):
+            raise ConanInvalidConfiguration("Embree {} doesn't support {}".format(self.version, self.settings.arch))
 
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration("conan recipe for Embree v{0} \
@@ -169,7 +172,9 @@ class Embree(ConanFile):
         self.cpp_info.libs = ["embree3"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
-            for lib in ["embree_sse42", "embree_avx", "embree_avx2", "embree_avx512knl", "embree_avx512skx"]:
+            simd_libs = ["embree_sse42", "embree_avx", "embree_avx2"]
+            simd_libs.extend(["embree_avx512knl", "embree_avx512skx"] if tools.Version(self.version) < "3.12.2" else ["embree_avx512"])
+            for lib in simd_libs:
                 if _lib_exists(lib):
                     self.cpp_info.libs.append(lib)
 
