@@ -41,7 +41,7 @@ class LibnameConan(ConanFile):
     
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.67.6")
+            self.requires("glib/2.70.0")
 
     def configure(self):
         if self.options.shared:
