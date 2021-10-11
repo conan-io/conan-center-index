@@ -5,9 +5,9 @@
  - [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
  - [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
  - [feature] Skip stale pull-requests from automatic review requests.
- - [feature] Add node-pool with more resources. It allow the CI to delegate certains builds that require higher RAM limits to it (configured manually).
+ - [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
  - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere 
- - [fix] Improved checks for infrastructure and configuratioin. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
+ - [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
  - [job] New job to remove dead branches from CI
  
 ### 01-October-2021 - 13:08 CEST
