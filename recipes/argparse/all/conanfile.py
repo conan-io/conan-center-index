@@ -16,8 +16,8 @@ class ArgparseConan(ConanFile):
     no_copy_source = True
 
     _compiler_required_cpp17 = {
-        "gcc": "7",
-        "clang": "5",
+        "gcc": "7" if tools.Version(self.version) <= "2.1" else "8",
+        "clang": "5" if tools.Version(self.version) <= "2.1" else "7",
         "Visual Studio": "15",
         "apple-clang": "10",
     }
