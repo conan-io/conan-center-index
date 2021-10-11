@@ -63,6 +63,10 @@ class Embree(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         version = tools.Version(self.settings.compiler.version)
         if self.settings.compiler == "clang" and version < "4":
