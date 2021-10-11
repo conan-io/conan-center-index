@@ -95,16 +95,16 @@ class EmbreeConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         if not self._has_sse_avx:
             del self.options.sse2
             del self.options.sse42
             del self.options.avx
             del self.options.avx2
             del self.options.avx512
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def validate(self):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
