@@ -11,11 +11,11 @@
  * /src_generated directory by CMake */
 #include "foo_flt_nodeids.h"
 #include "namespace_foo_flt_generated.h"
-
+#include <open62541/plugin/network.h>
 #include <signal.h>
 #include <stdlib.h>
 
-UA_Boolean running = true;
+UA_Boolean running = false;
 
 static void server_stop_callback(UA_Server *server, void *data) {
     UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "stopping server due to timer");
@@ -24,10 +24,12 @@ static void server_stop_callback(UA_Server *server, void *data) {
 
 int main(void) {
     UA_Server *server = UA_Server_new();
+    running = true;
+    UA_StatusCode return_code;
     UA_UInt16 portNumber = 4840;
     UA_ServerConfig_setMinimal(UA_Server_getConfig(server), portNumber, NULL);
+    UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 500., NULL);
 
-    UA_StatusCode return_code;
     /* create nodes from nodeset */
     if(namespace_foo_flt_generated(server) != UA_STATUSCODE_GOOD) 
     {
@@ -43,17 +45,16 @@ int main(void) {
         UA_NodeId testInstanceId = UA_NODEID_NUMERIC(nsIdx, UA_FOO_FLTID_APE);
         UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "The Ape has ns=%d;id=%d",
                     testInstanceId.namespaceIndex, testInstanceId.identifier.numeric);
-
-        UA_Server_addRepeatedCallback(server, server_stop_callback, NULL, 150., NULL);
-
+                    
         return_code = UA_Server_run(server, &running);
+        
         while(return_code == UA_STATUSCODE_BADCOMMUNICATIONERROR)
         {   
-
+            running = false;
             portNumber = portNumber + 1;
-            UA_ConnectionConfig config = UA_ConnectionConfig_default; 
-            UA_Server_getConfig(server)->networkLayers[0] = UA_ServerNetworkLayerTCP(config, portNumber, 0);
-            
+            UA_Server_getConfig(server)->networkLayersSize = 0;
+            UA_ServerConfig_addNetworkLayerTCP(UA_Server_getConfig(server), portNumber, 0, 0);
+            running = true;
             return_code = UA_Server_run(server, &running);
 
             if(return_code == UA_STATUSCODE_GOOD)
@@ -66,9 +67,9 @@ int main(void) {
                 printf("ports from 4840 to 4850 are not avilable");
                 break;
             }
-
         }
     }
+    running = false;
     UA_Server_delete(server);
     return return_code == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
 }
