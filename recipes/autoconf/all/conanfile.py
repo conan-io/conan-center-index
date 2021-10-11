@@ -27,7 +27,7 @@ class AutoconfConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("m4/1.4.18")
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
