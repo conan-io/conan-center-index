@@ -4,6 +4,7 @@
 #include <open62541/plugin/log_stdout.h>
 #include <open62541/server.h>
 #include <open62541/server_config_default.h>
+#include <open62541/network_tcp.h>
 #endif
 
 /* Files namespace_foo_flt_generated.h and namespace_foo_flt_generated.c are created from FooFlt.NodeSet2.xml in the
@@ -50,9 +51,11 @@ int main(void) {
         {   
 
             portNumber = portNumber + 1;
-            UA_Server_getConfig(server)->networkLayers[0].handle.port = portNumber;
+            UA_ConnectionConfig config = UA_ConnectionConfig_default; 
+            UA_Server_getConfig(server)->networkLayers[0] = UA_ServerNetworkLayerTCP(config, portNumber, 0);
             
             return_code = UA_Server_run(server, &running);
+
             if(return_code == UA_STATUSCODE_GOOD)
             {
                 printf("free port found");
