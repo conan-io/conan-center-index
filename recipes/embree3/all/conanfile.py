@@ -79,10 +79,6 @@ class Embree(ConanFile):
             raise ConanInvalidConfiguration("conan recipe for Embree v{0} \
                 cannot be built with clang libc++, use libstdc++ instead".format(self.version))
 
-        if self.settings.compiler == "apple-clang" and not self.options.shared:
-            raise ConanInvalidConfiguration("Embree cannot be built into static library with apple-clang,\
-                try shared library instead")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
@@ -167,6 +163,15 @@ class Embree(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "m", "pthread"]
+        def _lib_exists(name):
+            return True if glob.glob(os.path.join(self.package_folder, "lib", "*{}.*".format(name))) else False
+
+        self.cpp_info.libs = ["embree3"]
+        if not self.options.shared:
+            self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
+            for lib in ["embree_sse42", "embree_avx", "embree_avx2", "embree_avx512knl", "embree_avx512skx"]:
+                if _lib_exists(lib):
+                    self.cpp_info.libs.append(lib)
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
