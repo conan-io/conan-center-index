@@ -50,10 +50,10 @@ class Libfreenect2Conan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.24")
         self.requires("libjpeg-turbo/2.1.1")
-        if self.options.get_safe("with_opencl"):
+        if self.options.with_opencl:
             self.requires("opencl-headers/2021.04.29")
             self.requires("opencl-icd-loader/2021.04.29")
-        if self.options.get_safe("with_opengl"):
+        if self.options.with_opengl:
             self.requires("opengl/system")
             self.requires("glfw/3.3.4")
         if self.options.get_safe("with_vaapi"):
@@ -77,9 +77,9 @@ class Libfreenect2Conan(ConanFile):
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_OPENNI2_DRIVER"] = False
         self._cmake.definitions["ENABLE_CXX11"] = True
-        self._cmake.definitions["ENABLE_OPENCL"] = self.options.get_safe("with_opencl", False)
+        self._cmake.definitions["ENABLE_OPENCL"] = self.options.with_opencl
         self._cmake.definitions["ENABLE_CUDA"] = False # TODO: CUDA
-        self._cmake.definitions["ENABLE_OPENGL"] = self.options.get_safe("with_opengl", False)
+        self._cmake.definitions["ENABLE_OPENGL"] = self.options.with_opengl
         self._cmake.definitions["ENABLE_VAAPI"] = self.options.get_safe("with_vaapi", False)
         self._cmake.definitions["ENABLE_TEGRAJPEG"] = False # TODO: TegraJPEG
         self._cmake.definitions["ENABLE_PROFILING"] = False
