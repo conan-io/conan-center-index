@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 import os
-import glob
 import urllib
 
 
@@ -114,10 +113,8 @@ class LibrealsenseConan(ConanFile):
         cmake.install()
         if self.options.shared:
             postfix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
-            for path in glob.glob(os.path.join(self.package_folder, "lib", "libfw{}.*".format(postfix))):
-                os.unlink(path)
-            for path in glob.glob(os.path.join(self.package_folder, "lib", "librealsense-file{}.*".format(postfix))):
-                os.unlink(path)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libfw{}.*".format(postfix))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "librealsense-file{}.*".format(postfix))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
