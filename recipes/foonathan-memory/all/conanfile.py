@@ -63,9 +63,8 @@ class FoonathanMemory(ConanFile):
         return "source_subfolder"
 
     def _patch_sources(self):
-        if self.version == "0.7.0":
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if not self._cmake:
