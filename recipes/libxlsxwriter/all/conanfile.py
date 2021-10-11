@@ -2,6 +2,8 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
+
 class LibxlsxwriterConan(ConanFile):
     name = "libxlsxwriter"
     license = "BSD-2-Clause"
@@ -19,7 +21,7 @@ class LibxlsxwriterConan(ConanFile):
         "dtoa": [True, False],
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True,
         "tmpfile": False,
         "md5": "openwall",
@@ -58,8 +60,7 @@ class LibxlsxwriterConan(ConanFile):
             self.requires("openssl/1.1.1l")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxlsxwriter-RELEASE_{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
