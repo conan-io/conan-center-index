@@ -81,10 +81,6 @@ class LibfreenectConan(ConanFile):
         self.copy("GPL", src=self._source_subfolder, dst="licenses", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        with tools.chdir(self.package_folder):
-            os.makedirs("bin")
-            for dll in glob.glob(os.path.join("lib", "*.dll")):
-                shutil.move(dll, "bin")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
