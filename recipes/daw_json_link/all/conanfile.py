@@ -17,8 +17,8 @@ class DawJsonLinkConan(ConanFile):
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
         "gcc": "8",
-        "clang": "6",
-        "apple-clang": "10",
+        "clang": "7",
+        "apple-clang": "12.0",
     }
 
     @property
