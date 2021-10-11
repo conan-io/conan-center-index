@@ -79,7 +79,7 @@ class PkgConfConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        meson = self._meson
+        meson = self._configure_meson()
         meson.install()
 
         if self.settings.compiler == "Visual Studio":
