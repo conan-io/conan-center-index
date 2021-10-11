@@ -1,32 +1,49 @@
-#include <cstdlib>
-#include <iostream>
-#include <vector>
-
 #include <embree3/rtcore.h>
-RTC_NAMESPACE_OPEN
 
-#include <immintrin.h>
+#include <limits>
+#include <iostream>
 
-#if !defined(_MM_SET_DENORMALS_ZERO_MODE)
-#define _MM_DENORMALS_ZERO_ON (0x0040)
-#define _MM_DENORMALS_ZERO_OFF (0x0000)
-#define _MM_DENORMALS_ZERO_MASK (0x0040)
-#define _MM_SET_DENORMALS_ZERO_MODE(x)                                         \
-    (_mm_setcsr((_mm_getcsr() & ~_MM_DENORMALS_ZERO_MASK) | (x)))
-#endif
+int main()
+{
+    RTCDevice device = rtcNewDevice(NULL);
+    RTCScene scene   = rtcNewScene(device);
+    RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
-int main(int p_arg_count, char **p_arg_vector) {
-    std::cout << "'Embree package test (compilation, linking, and execution)."
-              << std::endl;
+    float* vb = (float*) rtcSetNewGeometryBuffer(geom,
+        RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3*sizeof(float), 3);
+    vb[0] = 0.f; vb[1] = 0.f; vb[2] = 0.f; // 1st vertex
+    vb[3] = 1.f; vb[4] = 0.f; vb[5] = 0.f; // 2nd vertex
+    vb[6] = 0.f; vb[7] = 1.f; vb[8] = 0.f; // 3rd vertex
 
-    _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-    _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+    unsigned* ib = (unsigned*) rtcSetNewGeometryBuffer(geom,
+        RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3*sizeof(unsigned), 1);
+    ib[0] = 0; ib[1] = 1; ib[2] = 2;
 
-    std::cout << "Creating a new Embree device ..." << std::endl;
-    RTCDevice device = rtcNewDevice("verbose=1");
-    std::cout << "Releasing the Embree device ..." << std::endl;
+    rtcCommitGeometry(geom);
+    rtcAttachGeometry(scene, geom);
+    rtcReleaseGeometry(geom);
+    rtcCommitScene(scene);
+
+    RTCRayHit rayhit;
+    rayhit.ray.org_x  = 0.f; rayhit.ray.org_y = 0.f; rayhit.ray.org_z = -1.f;
+    rayhit.ray.dir_x  = 0.f; rayhit.ray.dir_y = 0.f; rayhit.ray.dir_z =  1.f;
+    rayhit.ray.tnear  = 0.f;
+    rayhit.ray.tfar   = std::numeric_limits<float>::infinity();
+    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+
+    RTCIntersectContext context;
+    rtcInitIntersectContext(&context);
+
+    rtcIntersect1(scene, &context, &rayhit);
+
+    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+        std::cout << "Intersection at t = " << rayhit.ray.tfar << std::endl;
+    } else {
+        std::cout << "No Intersection" << std::endl;
+    }
+
+    rtcReleaseScene(scene);
     rtcReleaseDevice(device);
 
-    std::cout << "'Embree package works!" << std::endl;
-    return EXIT_SUCCESS;
+    return 0;
 }
