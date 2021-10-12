@@ -9,7 +9,7 @@ class CertifyConan(ConanFile):
     description = "Platform-specific TLS keystore abstraction for use with Boost.ASIO and OpenSSL"
     topics = ("conan", "boost", "asio", "tls", "ssl", "https")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://djarek.github.io/certify/"
+    homepage = "https://github.com/djarek/certify"
     license = "BSL-1.0"
     settings = "compiler"
     generators = "cmake", "cmake_find_package"
