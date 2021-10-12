@@ -8,3 +8,4 @@ find_package(libgphoto2 REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} libgphoto2::libgphoto2)
+

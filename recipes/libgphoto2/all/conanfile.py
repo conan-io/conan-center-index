@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
@@ -7,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class LibGphoto2(ConanFile):
     name = "libgphoto2"
-    url = "https://github.com/gphoto/libgphoto2"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "The libgphoto2 camera access and control library."
     homepage = "http://www.gphoto.org/"
     license = "LGPL-2.1"
@@ -23,7 +24,7 @@ class LibGphoto2(ConanFile):
         "with_libjpeg": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_libusb": True,
         "with_libcurl": True,
@@ -39,6 +40,8 @@ class LibGphoto2(ConanFile):
         return "source_subfolder"
 
     def validate(self):
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("building libgphoto2 as a static library is not supported")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("libgphoto2 does not support Windows")
 
@@ -93,6 +96,8 @@ class LibGphoto2(ConanFile):
             "--with-libxml-2.0={}".format(auto_no(self.options.with_libxml2)),
             "--disable-nls",
             "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "udevscriptdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "utilsdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
         ]
         if not self.options.with_libjpeg:
             args.append("--without-jpeg")
@@ -111,7 +116,7 @@ class LibGphoto2(ConanFile):
             autotools.install()
         tools.remove_files_by_mask(self.package_folder, "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        self.copy("print-camera-list", "bin", "packaging/generic/.libs")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gphoto2", "gphoto2_port"]
