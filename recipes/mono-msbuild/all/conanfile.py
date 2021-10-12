@@ -31,8 +31,8 @@ class MonoConan(ConanFile):
 
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("mono cannot be built on Windows")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("This recipe does not support Visual Studio builds")
 
     def configure(self):
         # C++ minimum standard required
