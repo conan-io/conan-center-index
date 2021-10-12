@@ -39,7 +39,7 @@ class BitserializerConan(ConanFile):
             "gcc": "8",
             "clang": "7",
             "Visual Studio": "15",
-            "apple-clang": "10",
+            "apple-clang": "12",
         }
 
     @property
