@@ -35,6 +35,7 @@ class OpenCVConan(ConanFile):
         "with_cublas": [True, False],
         "with_cufft": [True, False],
         "with_v4l": [True, False],
+        "with_ffmpeg": [True, False],
         "with_imgcodec_hdr": [True, False],
         "with_imgcodec_pfm": [True, False],
         "with_imgcodec_pxm": [True, False],
@@ -65,6 +66,7 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
+        "with_ffmpeg": False,
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
@@ -154,6 +156,8 @@ class OpenCVConan(ConanFile):
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
+        if self.options.with_ffmpeg:
+            self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
         if self.options.with_webp:
@@ -290,7 +294,26 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_ARAVIS"] = False
         self._cmake.definitions["WITH_CLP"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
-        self._cmake.definitions["WITH_FFMPEG"] = False
+
+        self._cmake.definitions['WITH_FFMPEG'] = self.options.with_ffmpeg
+        if self.options.with_ffmpeg:
+            self._cmake.definitions['HAVE_FFMPEG'] = True
+            self._cmake.definitions['HAVE_FFMPEG_WRAPPER'] = False
+            self._cmake.definitions['OPENCV_FFMPEG_SKIP_BUILD_CHECK'] = True
+            self._cmake.definitions['OPENCV_FFMPEG_SKIP_DOWNLOAD'] = True
+            self._cmake.definitions['OPENCV_FFMPEG_USE_FIND_PACKAGE'] = False
+            self._cmake.definitions['OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT'] = False
+
+            for lib in ['avcodec', 'avformat', 'avutil', 'swscale', 'avresample']:
+                self._cmake.definitions['FFMPEG_lib%s_VERSION' % lib] = (
+                    self.deps_cpp_info['ffmpeg'].components[lib].version)
+
+            self._cmake.definitions['FFMPEG_LIBRARIES'] = (
+                ';'.join(self.deps_cpp_info['ffmpeg'].libs))
+
+            self._cmake.definitions['FFMPEG_INCLUDE_DIRS'] = (
+                ';'.join(self.deps_cpp_info['ffmpeg'].include_paths))
+
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
         self._cmake.definitions["WITH_HPX"] = False
@@ -499,6 +522,18 @@ class OpenCVConan(ConanFile):
         def xfeatures2d():
             return ["opencv_xfeatures2d"] if self.options.contrib else []
 
+        def ffmpeg():
+            if self.options.with_ffmpeg:
+                return [
+                        "ffmpeg::avcodec",
+                        "ffmpeg::avfilter",
+                        "ffmpeg::avformat",
+                        "ffmpeg::avutil",
+                        "ffmpeg::swresample",
+                        "ffmpeg::swscale" ]
+            else:
+                return [ ]
+
         opencv_components = [
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + parallel() + eigen()},
             {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + eigen()},
@@ -507,7 +542,9 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
             {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc"] + eigen()},
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc", "zlib::zlib"] + eigen() + imageformats_deps()},
-            {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen()},
+            {"target": "opencv_videoio",    "lib": "videoio",    "requires": (
+                ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"]
+                + eigen() + ffmpeg())},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen()},
             {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk()},
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc()},
@@ -518,7 +555,6 @@ class OpenCVConan(ConanFile):
             opencv_components.extend([
                 {"target": "opencv_dnn", "lib": "dnn", "requires": ["opencv_core", "opencv_imgproc"] + protobuf()}
             ])
-
         if self.options.contrib:
             opencv_components.extend([
                 {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
