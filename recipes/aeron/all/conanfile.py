@@ -68,6 +68,8 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
             )
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
