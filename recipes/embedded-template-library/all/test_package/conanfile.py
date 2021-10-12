@@ -17,4 +17,7 @@ class EmbeddedTemplateLibraryTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            if tools.detected_os() == "Windows":
+                self.run("example")
+            else:
+                self.run(".%sexample" % os.sep)
