@@ -10,6 +10,5 @@ class TestPackageConan(ConanFile):
         pass
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            self.output.info("Version:")
+        if not tools.cross_building(self):
             self.run("msbuild --version", run_environment=True)
