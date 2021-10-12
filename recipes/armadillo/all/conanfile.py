@@ -96,7 +96,8 @@ class ArmadilloConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
