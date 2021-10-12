@@ -24,8 +24,8 @@ class CertifyConan(ConanFile):
         return "17"
 
     def requirements(self):
-        self.requires("boost/1.76.0")
-        self.requires("openssl/1.1.1k")
+        self.requires("boost/1.77.0")
+        self.requires("openssl/1.1.1l")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
