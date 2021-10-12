@@ -52,7 +52,7 @@ class DawJsonLinkConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
