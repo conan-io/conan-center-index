@@ -1,4 +1,4 @@
 sources:
-  "0.1":
-    url: "https://github.com/jhabermas/certify/archive/refs/tags/v0.1.tar.gz"
-    sha256: 75cd7f0d606dd583ccc4f86e0e952073ff57f131e2793cb11a7c087c52a3e12c
+  "20201114":
+    url: "https://github.com/djarek/certify/archive/a1bd27f2e86ba73d6a64f289f030ec65250edceb.zip"
+    sha256: f9606583c29bea5537427e5c37a8c67874e64bea7e49b30c03b80b0ac60f66e4
