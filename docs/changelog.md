@@ -1,5 +1,15 @@
 # Changelog
 
+### 11-October-2021 - 12:14 CEST
+ - [configs] Configurable Github statuses to check
+ - [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
+ - [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
+ - [feature] Skip stale pull-requests from automatic review requests.
+ - [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
+ - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere 
+ - [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
+ - [job] New job to remove dead branches from CI
+ 
 ### 01-October-2021 - 13:08 CEST
 
 - [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)
