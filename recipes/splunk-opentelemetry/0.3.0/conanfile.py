@@ -12,19 +12,19 @@ class SplunkOpentelemetryConan(ConanFile):
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
     requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
     exports_sources = "CMakeLists.txt"
 
     def validate(self):
-      if self.settings.os != "Linux":
-        raise ConanInvalidConfiguration("OS not supported")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("OS not supported")
 
-      if self.settings.arch != "x86_64":
-        raise ConanInvalidConfiguration("Architecture not supported")
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Architecture not supported")
 
     @property
-    def _source_subfolder(self):
+    def _source_subdir(self):
         return "sources"
 
     def _remove_unnecessary_package_files(self):
@@ -35,48 +35,33 @@ class SplunkOpentelemetryConan(ConanFile):
         tools.get(
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self._source_subfolder
+            destination=self._source_subdir
         )
 
-    def _cxxflags(self):
-        if self.settings.compiler.libcxx == "libstdc++":
-            return "-D_GLIBCXX_USE_CXX11_ABI=0"
-
-        if (self.settings.compiler == "clang" and
-            self.settings.compiler.libcxx == "libc++"):
-            return "-stdlib=libc++"
-
-        return ""
-
     def _build_otel_cpp(self):
+        otel_cpp_srcdir = os.path.join(
+            self._source_subdir,
+            "opentelemetry-cpp"
+        )
+        tools.replace_in_file(
+            os.path.join(otel_cpp_srcdir, "CMakeLists.txt"),
+            "project(opentelemetry-cpp)",
+            """project(opentelemetry-cpp)
+               include({}/conanbuildinfo.cmake)
+               conan_basic_setup()""".format(self.build_folder)
+        )
         cmake = CMake(self)
-        prefix_paths = [
-          self.deps_cpp_info["grpc"].rootpath,
-          self.deps_cpp_info["protobuf"].rootpath,
-        ]
-
-        # Is there a better way for includes?
-        cxx_flags = [
-          "-isystem {}".format(os.path.join(self.deps_cpp_info["abseil"].rootpath, "include")),
-          "-isystem {}".format(os.path.join(self.deps_cpp_info["grpc"].rootpath, "include")),
-          self._cxxflags(),
-        ]
 
         defs = {
-          "CMAKE_PREFIX_PATH": ";".join(prefix_paths),
           "WITH_OTLP": True,
           "WITH_OTLP_HTTP": False,
           "WITH_JAEGER": False,
           "WITH_ABSEIL": False,
           "BUILD_TESTING": False,
-          "WITH_EXAMPLES": False,
-          "CMAKE_CXX_FLAGS": " ".join(cxx_flags)
+          "WITH_EXAMPLES": False
         }
         cmake.configure(
-          source_folder=os.path.join(
-            self._source_subfolder,
-            "opentelemetry-cpp"
-          ),
+          source_folder=otel_cpp_srcdir,
           defs=defs,
           build_folder="otelcpp_build"
         )
@@ -88,22 +73,22 @@ class SplunkOpentelemetryConan(ConanFile):
         cmake = CMake(self)
         defs = {
           "SPLUNK_CPP_WITH_JAEGER_EXPORTER": False,
-          "SPLUNK_CPP_EXAMPLES": False,
-          "CMAKE_CXX_FLAGS": self._cxxflags(),
+          "SPLUNK_CPP_EXAMPLES": False
         }
-        cmake.configure(source_folder=self._source_subfolder, defs=defs)
+        cmake.configure(defs=defs)
         cmake.build()
         cmake.install()
 
         self._remove_unnecessary_package_files()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subdir)
         self.copy("*.h", dst="include", src="src")
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SplunkOpenTelemetry"
+        self.cpp_info.names["cmake_find_package_multi"] = "SplunkOpenTelemetry"
         self.cpp_info.components["opentelemetry-cpp"].requires = [
           "grpc::grpc",
           "protobuf::protobuf",
