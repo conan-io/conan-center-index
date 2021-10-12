@@ -9,7 +9,7 @@ class CertifyConan(ConanFile):
     description = "Platform-specific TLS keystore abstraction for use with Boost.ASIO and OpenSSL"
     topics = ("boost", "asio", "tls", "ssl", "https")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://djarek.github.io/certify/"
+    homepage = "https://github.com/djarek/certify"
     license = "BSL-1.0"
     settings = "compiler"
     generators = "cmake", "cmake_find_package"
@@ -47,4 +47,5 @@ class CertifyConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "certify"
         self.cpp_info.names["cmake_find_package_multi"] = "certify"
-        self.cpp_info.names["pkg_config"] = "certify"
+        self.cpp_info.components["core"].names["cmake_find_package"] = "core"
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
