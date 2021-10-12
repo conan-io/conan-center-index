@@ -25,6 +25,7 @@ class FoonathanMemory(ConanFile):
         "with_sizecheck":    True
     }
     generators = "cmake"
+    short_paths = True
     exports_sources =  ["patches/**","CMakeLists.txt"]
     _cmake = None
 
