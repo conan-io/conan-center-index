@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 find_package(daw-header-libraries CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} daw::daw-header-libraries)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
