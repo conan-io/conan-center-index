@@ -10,7 +10,7 @@ required_conan_version = ">=1.33.0"
 class MonoConan(ConanFile):
     name = "mono-msbuild"
     description = "The Microsoft Build Engine (MSBuild) is the build platform for .NET and Visual Studio."
-    url = "https://github.com/mono/mono"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mono/msbuild"
     license = "MIT, BSD"
     exports_sources = "patches/**"
