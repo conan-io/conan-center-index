@@ -7,7 +7,7 @@ import yaml
 required_conan_version = ">=1.33.0"
 
 
-class MonoConan(ConanFile):
+class MonoMsbuildConan(ConanFile):
     name = "mono-msbuild"
     description = "The Microsoft Build Engine (MSBuild) is the build platform for .NET and Visual Studio."
     url = "https://github.com/conan-io/conan-center-index"
@@ -15,7 +15,6 @@ class MonoConan(ConanFile):
     license = "MIT, BSD"
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config"
     topics = "mono", "dotnet"
 
     requires = ["mono/6.12.0.122"]
@@ -83,9 +82,6 @@ class MonoConan(ConanFile):
 
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "msbuild"
-        self.cpp_info.names["cmake_find_package_multi"] = "msbuild"
-        self.cpp_info.names["pkg_config"] = "msbuild"
         self.cpp_info.libs = tools.collect_libs(self)
         self.env_info.MSBUILD_ROOT_DIR = self.package_folder
 
