@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/gl.h>
+
+#ifdef __APPLE__
+#  include <OpenGL/OpenGL.h>
+#  include <OpenGL/gl.h>
+#else
+#  include <GL/gl.h>
+#endif
 #include <GL/glext.h>
 
 int main()
