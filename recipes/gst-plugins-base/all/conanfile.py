@@ -107,6 +107,7 @@ class GStPluginsBaseConan(ConanFile):
             self.requires("opengl/system")
             if self.settings.os == "Windows":
                 self.requires("wglext/cci.20200813")
+                self.requires('glext/cci.20210420')
             if self.options.get_safe("with_egl"):
                 self.requires("egl/system")
             if self.options.get_safe("with_wayland"):
