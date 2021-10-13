@@ -7,7 +7,7 @@ import glob
 class LibpqConan(ConanFile):
     name = "libpq"
     description = "The library used by all the standard PostgreSQL tools."
-    topics = "libpq", "postgresql", "database", "db"
+    topics = ("libpq", "postgresql", "database", "db")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
@@ -72,7 +72,7 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1k")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
