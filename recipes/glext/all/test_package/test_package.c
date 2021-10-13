@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#  include <windows.h>
+#endif
 #ifdef __APPLE__
 #  include <OpenGL/OpenGL.h>
 #  include <OpenGL/gl.h>
