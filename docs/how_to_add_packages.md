@@ -23,6 +23,8 @@ When pull requests are merged, the CI will upload the generated packages to the 
       * [Components](#components-1)
     * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)
+    * [Verifying Dependency Version](#verifying-dependency-version)
+    * [Verifying Dependency Options](#verifying-dependency-options)
   * [Test the recipe locally](#test-the-recipe-locally)
     * [Updating conan hooks on your machine](#updating-conan-hooks-on-your-machine)
   * [Debugging failed builds](#debugging-failed-builds)<!-- endToc -->
