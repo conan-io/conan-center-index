@@ -4,4 +4,4 @@ sources:
             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20210725.tar.xz",
             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210725.tar.xz",
     ]
-    sha256: "7e055b71306e64192e2612f959f54ae99a5cf57186206ac702d113ef00ba35c0"
+    sha256: "4013a9d5e51b448343efc24fc6a324cc999bb96b4c01b13a6bd3c661bb5c8a82"
