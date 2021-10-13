@@ -10,7 +10,7 @@ class GlextConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.khronos.org/registry/OpenGL/index_gl.php"
-    description = "GL extension interfaces"
+    description = "OpenGL 1.2 and above compatibility profile and extension interfaces"
     topics = ("opengl", "gl", "glext")
     no_copy_source = True
 
