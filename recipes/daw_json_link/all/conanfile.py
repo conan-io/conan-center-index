@@ -57,3 +57,12 @@ class DawJsonLinkConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "daw-header-libraries"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "daw-header-libraries"
+        self.cpp_info.names["cmake_find_package"] = "daw"
+        self.cpp_info.names["cmake_find_package_multi"] = "daw"
+        self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-header-libraries"
+        self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-header-libraries"
+
