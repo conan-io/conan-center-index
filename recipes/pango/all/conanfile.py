@@ -75,7 +75,7 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             self.requires("cairo/1.17.4")
         self.requires("harfbuzz/2.7.4")
-        self.requires("glib/2.67.6")
+        self.requires("glib/2.70.0")
         self.requires("fribidi/1.0.9")
 
     def source(self):
