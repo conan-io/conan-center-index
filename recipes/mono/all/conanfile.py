@@ -83,7 +83,10 @@ class MonoConan(ConanFile):
         # which is set in the package_info step
         # The find code before sed is filtering to only replace in text files and skip binary files
         # Source: https://stackoverflow.com/a/13659891
-        self.run('find {2} -type f -exec grep -Iq . {{}} \\; -print | xargs sed -i "s@{0}/@{1}/@g" '.format(self.package_folder, "\\${MONO_CONAN_ROOT_DIR}", os.path.join(self.package_folder, "bin")))
+
+        # Not sure why, but this command fails on Macos
+        if self.settings.os != "Macos":
+            self.run('find {2} -type f -exec grep -Iq . {{}} \\; -print | xargs sed -i "s@{0}/@{1}/@g" '.format(self.package_folder, "\\${MONO_CONAN_ROOT_DIR}", os.path.join(self.package_folder, "bin")))
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         # Note: the etc folder is needed, otherwise some of the mono scripts do not properly work
