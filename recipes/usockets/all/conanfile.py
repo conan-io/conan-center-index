@@ -98,6 +98,8 @@ class UsocketsConan(ConanFile):
             if self.options.with_libuv == True:
                 self.options.eventloop = "libuv"
             else:
+                if self.settings.os == "Windows":
+                    raise ConanInvalidConfiguration("uSockets in Windows uses libuv by default. After 0.8.0, you can choose boost.asio by eventloop option.")
                 self.options.eventloop = "syscall"
 
     def requirements(self):
