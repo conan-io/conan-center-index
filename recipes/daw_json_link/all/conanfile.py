@@ -45,9 +45,7 @@ class DawJsonLinkConan(ConanFile):
         return cmake
 
     def package(self):
-        licenses = ["LICENSE", "LICENSE_Dragonbox"]
-        for license_file in licenses:
-            self.copy(license_file, dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE*", "licenses", self._source_subfolder)
 
         cmake = self._configure_cmake()
         cmake.install()
@@ -65,4 +63,3 @@ class DawJsonLinkConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-header-libraries"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-header-libraries"
-
