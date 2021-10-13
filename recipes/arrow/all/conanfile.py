@@ -388,7 +388,7 @@ class ArrowConan(ConanFile):
             return "{}".format(name)
 
     def package_id(self):
-        self.options.with_jemalloc = self._with_jemalloc()
+        self.info.options.with_jemalloc = self._with_jemalloc()
         self.info.options.with_gflags = self._with_gflags()
         self.info.options.with_protobuf = self._with_protobuf()
         self.info.options.with_re2 = self._with_re2()
