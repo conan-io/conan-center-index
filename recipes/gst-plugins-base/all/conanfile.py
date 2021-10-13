@@ -606,6 +606,7 @@ class GStPluginsBaseConan(ConanFile):
                     "wayland-protocols::wayland-protocols"])
             if self.settings.os == "Windows":
                 self.cpp_info.components["gstreamer-gl-1.0"].requires.append("wglext::wglext")
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(['glext::glext'])
                 self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
             if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["gstreamer-gl-1.0"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore", "Cocoa"]
