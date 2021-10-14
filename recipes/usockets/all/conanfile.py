@@ -64,15 +64,20 @@ class UsocketsConan(ConanFile):
         if self.options.eventloop == "syscall" and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("syscall is not supported on Windows")
 
-        if self.options.eventloop == "gcd":
-            if self.settings.os != "Linux" or self.settings.compiler != "clang" :
-                raise ConanInvalidConfiguration("gcd eventloop is only supported on Linux with clang")
+        if self.options.eventloop == "gcd" and (self.settings.os != "Linux" or self.settings.compiler != "clang"):
+            raise ConanInvalidConfiguration("eventloop=gcd is only supported on Linux with clang")
 
         if tools.Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
             raise ConanInvalidConfiguration(f"eventloop={self.options.eventloop} is not supported with {self.name}/{self.version}")
 
         if tools.Version(self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
-            raise ConanInvalidConfiguration(f"eventloop={self.options.with_ssl} is not supported with {self.name}/{self.version}. https://github.com/uNetworking/uSockets/issues/147")
+            raise ConanInvalidConfiguration(f"with_ssl={self.options.with_ssl} is not supported with {self.name}/{self.version}. https://github.com/uNetworking/uSockets/issues/147")
+
+        if self.options.with_ssl == "wolfssl" and not self.options["wolfssl"].opensslextra:
+            raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
+
+        if not self.options.with_libuv and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("uSockets in Windows uses libuv by default. After 0.8.0, you can choose boost.asio by eventloop=boost.")
 
         cppstd = self._cppstd
         if not cppstd:
@@ -98,8 +103,6 @@ class UsocketsConan(ConanFile):
             if self.options.with_libuv == True:
                 self.options.eventloop = "libuv"
             else:
-                if self.settings.os == "Windows":
-                    raise ConanInvalidConfiguration("uSockets in Windows uses libuv by default. After 0.8.0, you can choose boost.asio by eventloop option.")
                 self.options.eventloop = "syscall"
 
     def requirements(self):
@@ -149,9 +152,6 @@ class UsocketsConan(ConanFile):
             autotools.make(target="default", args=args)
 
     def build(self):
-        if self.options.with_ssl == "wolfssl":
-            if not self.options["wolfssl"].opensslextra:
-                raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
