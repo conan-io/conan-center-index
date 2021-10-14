@@ -44,7 +44,7 @@ class ConanFileDefault(ConanFile):
         cmake.build()
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if hasattr(self, "settings_build") and self.settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.6")
