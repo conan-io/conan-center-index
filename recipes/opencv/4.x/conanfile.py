@@ -295,24 +295,24 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CLP"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
 
-        self._cmake.definitions['WITH_FFMPEG'] = self.options.with_ffmpeg
+        self._cmake.definitions["WITH_FFMPEG"] = self.options.with_ffmpeg
         if self.options.with_ffmpeg:
-            self._cmake.definitions['HAVE_FFMPEG'] = True
-            self._cmake.definitions['HAVE_FFMPEG_WRAPPER'] = False
-            self._cmake.definitions['OPENCV_FFMPEG_SKIP_BUILD_CHECK'] = True
-            self._cmake.definitions['OPENCV_FFMPEG_SKIP_DOWNLOAD'] = True
-            self._cmake.definitions['OPENCV_FFMPEG_USE_FIND_PACKAGE'] = False
-            self._cmake.definitions['OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT'] = False
+            self._cmake.definitions["HAVE_FFMPEG"] = True
+            self._cmake.definitions["HAVE_FFMPEG_WRAPPER"] = False
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
+            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = False
+            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
 
-            for lib in ['avcodec', 'avformat', 'avutil', 'swscale', 'avresample']:
-                self._cmake.definitions['FFMPEG_lib%s_VERSION' % lib] = (
-                    self.deps_cpp_info['ffmpeg'].components[lib].version)
+            for lib in ["avcodec", "avformat", "avutil", "swscale", "avresample"]:
+                self._cmake.definitions["FFMPEG_lib%s_VERSION" % lib] = (
+                    self.deps_cpp_info["ffmpeg"].components[lib].version)
 
-            self._cmake.definitions['FFMPEG_LIBRARIES'] = (
-                ';'.join(self.deps_cpp_info['ffmpeg'].libs))
+            self._cmake.definitions["FFMPEG_LIBRARIES"] = (
+                ";".join(self.deps_cpp_info["ffmpeg"].libs))
 
-            self._cmake.definitions['FFMPEG_INCLUDE_DIRS'] = (
-                ';'.join(self.deps_cpp_info['ffmpeg'].include_paths))
+            self._cmake.definitions["FFMPEG_INCLUDE_DIRS"] = (
+                ";".join(self.deps_cpp_info["ffmpeg"].include_paths))
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
