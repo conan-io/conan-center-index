@@ -614,7 +614,8 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [module_rel_path]
                 self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [module_rel_path]
                 self.cpp_info.components[conan_component].libs = [lib_name]
-                self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
+                if self.settings.os != "Windows":
+                    self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
                 self.cpp_info.components[conan_component].requires = requires
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
