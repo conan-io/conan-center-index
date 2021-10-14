@@ -10,10 +10,10 @@ int main() {
       boost::asio::ssl::context context{
       boost::asio::ssl::context_base::method::tls_client};
       boost::asio::ssl::stream<boost::asio::ip::tcp::socket> stream{ioc, context};
-      boost::string_view hostname = "example.com";
+      constexpr auto hostname = "example.com";
 
       BOOST_TEST(boost::certify::sni_hostname(stream).empty());
-      boost::certify::sni_hostname(stream, static_cast<std::string>(hostname));
+      boost::certify::sni_hostname(stream, hostname);
       BOOST_TEST(boost::certify::sni_hostname(stream) == hostname);
       std::cout << boost::report_errors();
 
