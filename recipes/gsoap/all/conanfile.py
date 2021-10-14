@@ -45,14 +45,14 @@ class ConanFileDefault(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows:
-            self.build_requires("winflexbison/2.5.22")
+            self.build_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.6")
             self.build_requires("flex/2.6.4")
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1l")
             self.requires("zlib/1.2.11")
 
     def _configure_cmake(self):
