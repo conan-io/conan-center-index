@@ -35,5 +35,7 @@ class OpenTelemetryProtoConan(ConanFile):
         include_dir = os.path.join(self.package_folder, "include")
         tools.mkdir(include_dir)
         for proto in Path(self._source_subfolder).rglob('*.proto'):
-            print(f"FILE: {proto}")
             self.run(f"protoc -I={self._source_subfolder} --cpp_out={include_dir} {proto}", run_environment=True)
+
+    def package_info(self):
+        self.user_info.proto_root = os.path.join(self.package_folder, "res")
