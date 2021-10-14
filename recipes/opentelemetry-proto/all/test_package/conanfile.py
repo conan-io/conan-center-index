@@ -1,11 +1,8 @@
-import os.path
-
-from conans import ConanFile, CMake, tools
+import os
+from conans import ConanFile
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
 
     def test(self):
         res_folder = self.deps_cpp_info["opentelemetry-proto"].res_paths[0]
