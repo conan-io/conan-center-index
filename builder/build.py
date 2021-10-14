@@ -53,8 +53,9 @@ def collect_dependencies(branch_name):
         subprocess.check_call(['git', 'checkout', branch_name])
         subprocess.check_call(['git', 'branch'])
         conan_req_data = ConanfileReqInfo(
-            Path(environ['CONAN_TXT']).resolve(),
-            Path(environ['CONAN_PROFILE']).resolve())
+            conanfile=Path(environ['CONAN_TXT']).resolve(),
+            conanprofile=Path(environ['CONAN_PROFILE']).resolve(),
+            conanfile_required=(branch_name != 'master'))
     print(f'Collected {len(conan_req_data.packages)} packages:')
     for _, found_pkg in conan_req_data.packages.items():
         print(found_pkg)
