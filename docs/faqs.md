@@ -155,7 +155,7 @@ default_options = {"foobar": "deprecated"}
 
 def configure(self):
     if self.options.foobar != "deprecated":
-        self.out.warn("foobar option is deprecated, do not use anymore.")
+        self.output.warn("foobar option is deprecated, do not use anymore.")
 
 def package_id(self):
     del self.info.options.foobar
