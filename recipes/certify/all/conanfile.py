@@ -47,5 +47,4 @@ class CertifyConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "certify"
         self.cpp_info.names["cmake_find_package_multi"] = "certify"
-        self.cpp_info.components["core"].names["cmake_find_package"] = "core"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
+        self.cpp_info.names["pkg_config"] = "certify"
