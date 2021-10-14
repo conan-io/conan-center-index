@@ -1,7 +1,11 @@
 %{
 #include <iostream>
 
-int yylex();int yyerror(const char *p) { std::cerr << "Error: " << p << std::endl; return 42; }
+int yylex();
+int yyerror(const char *p) {
+    std::cerr << "Error: " << p << std::endl;
+    return 42;
+}
 %}
 
 %union {
