@@ -18,10 +18,12 @@ class CppUTestConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "with_extensions": [True, False],
+        "with_leak_detection": [True, False],
     }
     default_options = {
         "fPIC": True,
         "with_extensions": True,
+        "with_leak_detection": True,
     }
 
     _cmake = None
@@ -53,7 +55,7 @@ class CppUTestConan(ConanFile):
         self._cmake.definitions["STD_C"] = "ON"
         self._cmake.definitions["STD_CPP"] = "ON"
         self._cmake.definitions["C++11"] = "ON"
-        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = "ON"
+        self._cmake.definitions["MEMORY_LEAK_DETECTION"] = self.options.with_leak_detection
         self._cmake.definitions["EXTENSIONS"] = self.options.with_extensions
         self._cmake.definitions["LONGLONG"] = "ON"
         self._cmake.definitions["COVERAGE"] = "OFF"

@@ -8,6 +8,7 @@ class OpenCVTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["built_with_ade"] = self.options["opencv"].with_ade
         cmake.configure()
         cmake.build()
 

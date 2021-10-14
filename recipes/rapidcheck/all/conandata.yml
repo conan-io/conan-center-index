@@ -1,7 +1,20 @@
 sources:
-  "20200131":
-    url: "https://github.com/emil-e/rapidcheck/archive/258d907da00a0855f92c963d8f76eef115531716.zip"
-    sha256: "87bfbdceaa09e7aaaf70b2efd0078e93323dd8abdad48c57e9f23bfd84174a75"
-  "20210107":
+  "cci.20210702":
+    url: "https://github.com/emil-e/rapidcheck/archive/33d15a858e3125f5af61a655f390f1cbc2f272ba.zip"
+    sha256: "521c9b163f0018ea6379513e0c674d520b9da66fdb8df73a7a98b04ea2358e69"
+  "cci.20210107":
     url: "https://github.com/emil-e/rapidcheck/archive/37bcab858dfc398634d409c973363088703ba96e.zip"
     sha256: "35433d0417fb945abe2b56b720b03d6d92da1188e760c50662c243dac42a6717"
+  "cci.20200131":
+    url: "https://github.com/emil-e/rapidcheck/archive/258d907da00a0855f92c963d8f76eef115531716.zip"
+    sha256: "87bfbdceaa09e7aaaf70b2efd0078e93323dd8abdad48c57e9f23bfd84174a75"
+patches:
+  "cci.20210702":
+    - patch_file: "patches/0001-gtest-catch-integration.patch"
+      base_path: "source_subfolder"
+  "cci.20210107":
+    - patch_file: "patches/0001-gtest-catch-integration-20210107.patch"
+      base_path: "source_subfolder"
+  "cci.20200131":
+    - patch_file: "patches/0001-gtest-catch-integration-20200131.patch"
+      base_path: "source_subfolder"

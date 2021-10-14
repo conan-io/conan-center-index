@@ -19,12 +19,14 @@ class NngConan(ConanFile):
         "fPIC": [True, False],
         "nngcat": [True, False],
         "http": [True, False],
+        "tls": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "nngcat": False,
         "http": True,
+        "tls": False,
     }
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -38,6 +40,10 @@ class NngConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        if self.options.tls:
+            self.requires("mbedtls/2.25.0")
 
     def configure(self):
         if self.options.shared:
@@ -60,7 +66,7 @@ class NngConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["NNG_TESTS"] = False
-        self._cmake.definitions["NNG_ENABLE_TLS"] = False
+        self._cmake.definitions["NNG_ENABLE_TLS"] = self.options.tls
         self._cmake.definitions["NNG_ENABLE_NNGCAT"] = self.options.nngcat
         self._cmake.definitions["NNG_ENABLE_HTTP"] = self.options.http
         self._cmake.configure()

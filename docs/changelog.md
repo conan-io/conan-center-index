@@ -1,5 +1,39 @@
 # Changelog
 
+### 11-October-2021 - 12:14 CEST
+ - [configs] Configurable Github statuses to check
+ - [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
+ - [feature] Early(iest) stop after failure: ignore any extra messages. It provides faster feedback for users.
+ - [feature] Skip stale pull-requests from automatic review requests.
+ - [feature] Add node-pool with more resources. It allows the CI to delegate certain builds that require higher RAM limits to it (configured manually).
+ - [fix] Removed EAP, now it should be named _"Access requests"_ everywhere 
+ - [fix] Improved checks for infrastructure and configuration. It also fixes the auto-generated documentation for _"Supported platforms and configurations"_.
+ - [job] New job to remove dead branches from CI
+ 
+### 01-October-2021 - 13:08 CEST
+
+- [hotfix] Apply patch for https://github.com/conan-io/conan/issues/9695 (Added root certificate for Let's encrypt)
+
+### 21-September-2021 - 12:09 CEST
+
+- [config] Upgrade Conan version to 1.39.0.
+
+### 7-September-2021 - 16:49 CEST
+
+- [configs] Remove Visual Studio 2015
+- [configs] Remove Macos apple-clang 10
+- [configs] Remove Linux GCC 4.9
+- [configs] Linux Clang: keep only latest versions 10 and 11
+- [feature] Rename EAP to Access Request.
+- [feature] Display merge error in pull-requests.
+
+### 6-September-2021 - 11:15 CEST
+
+- [feature] Display useful CI status notifications in Github pull requests.
+- [feature] Upgrade Conan client version to 1.38.0.
+- [feature] Move the Conan and Artifactory configuration out of the Jenkins library.
+- [feature] Use separated files for the different profile configurations.
+
 ### 3-August-2021 - 13:29 CEST
 
 - [feature] BuildSingleReference: Create packages for apple-clang armv8 (Apple M1) in pull-requests' builds.

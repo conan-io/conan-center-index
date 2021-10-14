@@ -51,7 +51,7 @@ class LibsystemdConan(ConanFile):
 
     def build_requirements(self):
         if tools.Version(self.version) >= "248.3":
-            self.build_requires("meson/0.58.1")
+            self.build_requires("meson/0.59.1")
         else:
             # incompatible change in meson/0.57.2:
             # https://github.com/mesonbuild/meson/pull/8526
@@ -61,7 +61,7 @@ class LibsystemdConan(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def requirements(self):
-        self.requires("libcap/2.50")
+        self.requires("libcap/2.58")
         self.requires("libmount/2.36.2")
         if self.options.with_selinux:
             self.requires("libselinux/3.2")

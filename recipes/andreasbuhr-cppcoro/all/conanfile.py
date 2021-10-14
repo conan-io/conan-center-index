@@ -77,6 +77,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if self.settings.os == "Windows" and self.options.shared:
+                self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
             self._cmake.configure()
         return self._cmake
 
@@ -99,10 +101,17 @@ class AndreasbuhrCppCoroConan(ConanFile):
         comp = self.cpp_info.components["cppcoro"]
         comp.names["cmake_find_package"] = "cppcoro"
         comp.names["cmake_find_package_multi"] = "cppcoro"
+        comp.libs = ["cppcoro"]
+
+        if self.settings.os == "Linux" and self.options.shared:
+            comp.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            comp.system_libs = ["synchronization"]
 
         if self.settings.compiler == "Visual Studio":
             comp.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
             comp.cxxflags.append("-fcoroutines")
+            comp.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
         elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
             comp.cxxflags.append("-fcoroutines-ts")

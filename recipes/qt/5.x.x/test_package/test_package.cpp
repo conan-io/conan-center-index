@@ -10,6 +10,13 @@
 #include <QDomText>
 #include <QSqlDatabase>
 
+#include <qplatformdefs.h>
+
+void f()
+{
+    qDebug() << "inside f";
+}
+
 int main(int argc, char *argv[]){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Application Example");
@@ -30,11 +37,14 @@ int main(int argc, char *argv[]){
     qDebug() << "Resource content:" << f.readAll();
     f.close();
 
+    qDebug() << W_OK;
+
     QNetworkAccessManager networkTester;
 
     QSqlDatabase sqlTester;
 
-    QFuture<void> future = QtConcurrent::run([](){});
+    QFuture<void> future = QtConcurrent::run(::f);
+    future.waitForFinished();
 
     QDomText xmlTester;
 

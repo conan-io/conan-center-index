@@ -63,12 +63,16 @@ class Libxml2Conan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     @property
-    def _is_mingw(self):
-        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
+    def _is_mingw_windows(self):
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,10 +95,10 @@ class Libxml2Conan(ConanFile):
             self.requires("icu/69.1")
 
     def build_requirements(self):
-        if not self._is_msvc:
+        if not (self._is_msvc or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
                 self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -151,7 +155,7 @@ class Libxml2Conan(ConanFile):
                                           "LIBS = $(LIBS) %s" % ' '.join(libs))
 
             fix_library(self.options.zlib, 'zlib', 'zlib.lib')
-            fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
+            fix_library(self.options.lzma, "xz_utils", "liblzma.lib")
             fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
@@ -161,13 +165,68 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc utils")
 
-
     def _package_msvc(self):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install-libs")
 
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc install-dist")
+
+    @contextmanager
+    def _mingw_build_environment(self):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
+                yield
+
+    def _build_mingw(self):
+        with self._mingw_build_environment():
+            # configuration
+            yes_no = lambda v: "yes" if v else "no"
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=mingw",
+                "prefix={}".format(self.package_folder),
+                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
+                "static={}".format(yes_no(not self.options.shared)),
+                "include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)),
+                "lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)),
+            ]
+
+            for name in self._option_names:
+                cname = {
+                    "mem-debug": "mem_debug",
+                    "run-debug": "run_debug",
+                    "docbook": "docb",
+                }.get(name, name)
+                args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
+            configure_command = " ".join(args)
+            self.output.info(configure_command)
+            self.run(configure_command)
+
+            # build
+            def fix_library(option, package, old_libname):
+                if option:
+                    tools.replace_in_file(
+                        "Makefile.mingw",
+                        "LIBS += -l{}".format(old_libname),
+                        "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
+                    )
+
+            fix_library(self.options.iconv, "libiconv", "iconv")
+            fix_library(self.options.zlib, "zlib", "z")
+            fix_library(self.options.lzma, "xz_utils", "lzma")
+
+            self.run("mingw32-make -j{} -f Makefile.mingw libxml libxmla".format(tools.cpu_count()))
+            if self.options.include_utils:
+                self.run("mingw32-make -j{} -f Makefile.mingw utils".format(tools.cpu_count()))
+
+    def _package_mingw(self):
+        with self._mingw_build_environment():
+            tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
+            self.run("mingw32-make -f Makefile.mingw install-libs")
+            if self.options.include_utils:
+                self.run("mingw32-make -f Makefile.mingw install-dist")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -204,6 +263,8 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
+        elif self._is_mingw_windows:
+            self._build_mingw()
         else:
             autotools = self._configure_autotools()
             autotools.make(["libxml2.la"])
@@ -222,6 +283,15 @@ class Libxml2Conan(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        elif self._is_mingw_windows:
+            self._package_mingw()
+            if self.options.shared:
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
+                tools.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                             os.path.join(self.package_folder, "lib", "libxml2.dll.a"))
+            else:
+                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])

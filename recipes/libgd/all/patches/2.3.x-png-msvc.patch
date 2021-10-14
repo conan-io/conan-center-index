@@ -1,0 +1,54 @@
+--- src/webpng.c
++++ src/webpng.c
+@@ -19,7 +19,7 @@
+ 
+ /* Bring in the gd library functions */
+ #include "gd.h"
+-
++#include <getopt.h>
+ #define KEEP_TRANS (-100)
+ 
+ static const char argv0[] = "webpng";
+@@ -64,7 +64,7 @@
+ 	FILE *in;
+ 	FILE *out;
+ 	const char *infile;
+-	char *tmpfile;
++	char *tmppath;
+ 	int i;
+ 	int use_stdin_stdout = 0;
+ 
+@@ -258,19 +258,24 @@
+ 		size_t len = filelen + 8;
+ 		int outfd;
+ 
+-		tmpfile = malloc(len);
+-		if (tmpfile == NULL)
++#ifdef _MSC_VER
++        out = tmpfile();
++		if (out == NULL)
++			err("could not create temporary file");
++#else
++		tmppath = malloc(len);
++		if (tmppath == NULL)
+ 			err("could not create a tempfile");
+-		memcpy(tmpfile, infile, filelen);
+-		strcpy(tmpfile + filelen, ".XXXXXX");
+-
+-		outfd = mkstemp(tmpfile);
++		memcpy(tmppath, infile, filelen);
++		strcpy(tmppath + filelen, ".XXXXXX");
++		tmpnam(tmppath);
++		outfd = mkstemp(tmppath);
+ 		if (outfd == -1)
+-			err("could not open %s", tmpfile);
+-
++			err("could not open %s", tmppath);
+ 		out = fdopen(outfd, "wb");
+ 		if (!out)
+-			err("could not open %s", tmpfile);
++			err("could not open %s", tmppath);
++#endif
+ 	}
+ 
+ 	/* Write the new PNG. */

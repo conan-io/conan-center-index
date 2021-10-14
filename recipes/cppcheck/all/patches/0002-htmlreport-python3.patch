@@ -1,0 +1,10 @@
+diff --git a/htmlreport/cppcheck-htmlreport b/htmlreport/cppcheck-htmlreport
+index 97a3af50d..b45cebf31 100755
+--- a/htmlreport/cppcheck-htmlreport
++++ b/htmlreport/cppcheck-htmlreport
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ from __future__ import unicode_literals
+ 

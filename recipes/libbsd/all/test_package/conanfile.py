@@ -8,7 +8,10 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package", "pkg_config"
 
     def build(self):
-        for f in ("libbsd", "libbsd-overlay", "libbsd-ctor"):
+        pcfiles =  ["libbsd", "libbsd-overlay"]
+        if self.settings.compiler != "apple-clang":
+            pcfiles.append("libbsd-ctor")
+        for f in pcfiles:
             pc = "{}.pc".format(f)
             if not os.path.isfile(pc):
                 raise ConanException("{} not created by pkg_config generator".format(pc))
