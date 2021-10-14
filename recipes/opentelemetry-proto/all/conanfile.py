@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from conans import ConanFile, tools
 
 
@@ -16,7 +17,10 @@ class OpenTelemetryProtoConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
+
+    def build_requirements(self):
+        self.build_requires("protobuf/3.17.1")
 
     def package_id(self):
         self.info.header_only()
@@ -28,3 +32,8 @@ class OpenTelemetryProtoConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.proto", dst="res", src=self._source_subfolder)
+        include_dir = os.path.join(self.package_folder, "include")
+        tools.mkdir(include_dir)
+        for proto in Path(self._source_subfolder).rglob('*.proto'):
+            print(f"FILE: {proto}")
+            self.run(f"protoc -I={self._source_subfolder} --cpp_out={include_dir} {proto}", run_environment=True)
