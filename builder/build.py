@@ -124,17 +124,17 @@ if __name__ == '__main__':
 
     conan_req_data_master = collect_dependencies('master')
     if 'GITHUB_HEAD_REF' in environ and environ['GITHUB_HEAD_REF'] != '':
-        conan_req_data_txt_head = \
+        conan_req_data_head = \
             collect_dependencies(environ['GITHUB_HEAD_REF'])
     else:
-        conan_req_data_txt_head = conan_req_data_master
+        conan_req_data_head = conan_req_data_master
 
     print_section('Ensure recipe changes accompanied with version bump')
-    detect_updated_packages(conan_req_data_master, conan_req_data_txt_head)
+    detect_updated_packages(conan_req_data_master, conan_req_data_head)
 
     print_section(f"Exporting all package recipes \
         referenced in {environ['CONAN_TXT']}")
-    for _, package in conan_req_data_master.packages.items():
+    for _, package in conan_req_data_head.packages.items():
         package.export()
 
     print_section(f"Building packages from {environ['CONAN_TXT']} \
@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
     print_section(f"Ensure all packages have mention \
         in {environ['CONAN_TXT']}")
-    detect_dependency_lock(installed, conan_req_data_txt_head)
+    detect_dependency_lock(installed, conan_req_data_head)
 
     print_section('Uploading packages')
     if installed:
