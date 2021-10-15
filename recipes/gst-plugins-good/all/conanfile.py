@@ -53,6 +53,7 @@ class GStPluginsGoodConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         self.options['gstreamer'].shared = self.options.shared
+        self.options['gst-plugins-base'].shared = self.options.shared
 
     def config_options(self):
         if self.settings.os == 'Windows':
