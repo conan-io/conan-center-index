@@ -11,7 +11,7 @@ class ConanFileDefault(ConanFile):
     homepage = "https://sourceforge.net/projects/gsoap2"
     license = ("gSOAP-1.3b", "GPL-2.0-or-later")
     exports_sources = ["CMakeLists.txt", "src/*.cmake", "src/*.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     short_paths = True
 
     _cmake = None
@@ -44,6 +44,9 @@ class ConanFileDefault(ConanFile):
         cmake.build()
 
     def build_requirements(self):
+        if tools.cross_building(self, skip_x64_x86=True) and hasattr(self, 'settings_build'):
+            self.build_requires("gsoap/{}".format(self.version))
+
         if hasattr(self, "settings_build") and self.settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
