@@ -54,7 +54,7 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zstd:
             self.requires("zstd/1.5.0")
         if self.options.ssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
 
