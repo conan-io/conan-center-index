@@ -45,7 +45,7 @@ class FmtConan(ConanFile):
         return tools.Version(self.version) >= "7.0.0"
 
     def config_options(self):
-        if self.settings.get_safe("os") == "Windows":
+        if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_with_os_api_option:
             del self.options.with_os_api
@@ -59,8 +59,8 @@ class FmtConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.get_safe("shared") and self.settings.get_safe("compiler") == "Visual Studio" and \
-           "MT" in self.settings.get_safe("compiler.runtime"):
+        if self.options.get_safe("shared") and self.settings.compiler == "Visual Studio" and \
+           "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def package_id(self):
@@ -113,8 +113,7 @@ class FmtConan(ConanFile):
             if self.options.with_fmt_alias:
                 self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
         else:
-            postfix = "d" if self.settings.get_safe(
-                "build_type") == "Debug" else ""
+            postfix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.libs = ["fmt" + postfix]
             if self.options.with_fmt_alias:
                 self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
