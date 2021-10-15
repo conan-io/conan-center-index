@@ -130,7 +130,8 @@ class PackageReference():
 class ConanfileReqInfo:
     def __init__(self,
                  conanfile: Path,
-                 conanprofile: Path):
+                 conanprofile: Path,
+                 conanfile_required: bool):
         self.all_packages = {}
         if conanfile.exists() and conanprofile.exists():
             conanprofile, _ = read_profile(str(conanprofile), '.', '.')
@@ -141,7 +142,7 @@ class ConanfileReqInfo:
             with open(str(conanfile), encoding='utf8') as txt_file:
                 for strline in txt_file.read().splitlines():
                     self.add_package(strline)
-        else:
+        elif conanfile_required:
             raise RuntimeError(f'File {conanfile} or \
                 {conanprofile} does not exist')
 
