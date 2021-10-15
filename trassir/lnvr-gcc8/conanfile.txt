@@ -8,7 +8,7 @@ automake/1.16.1
 b2/4.2.0
 bison/3.5.3
 flex/2.6.4
-gperf/3.1
+gperf/3.1.dssl1
 gtk/system
 libtool/2.4.6
 ninja/1.9.0

@@ -13,6 +13,13 @@ class GperfConan(ConanFile):
     _autotools = None
 
     @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
@@ -27,11 +34,14 @@ class GperfConan(ConanFile):
             # when conan built gperf and checking condition, msys2 won't be used for building.
             # if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                if self.settings.arch_build == 'x86':
+                    self.build_requires("msys2/20200517")
+                else:
+                    self.build_requires("msys2/20210725")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = self.name + "-" + self.original_version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_autotools(self):
