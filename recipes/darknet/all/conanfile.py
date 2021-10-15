@@ -77,9 +77,10 @@ class DarknetConan(ConanFile):
     def build(self):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
-            args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.make(args=args)
+            with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
+                args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
+                env_build = AutoToolsBuildEnvironment(self)
+                env_build.make(args=args)
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
