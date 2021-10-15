@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from os import environ
+
 from conan_tools import conan_run
 
 
@@ -27,6 +28,9 @@ def prepare_environment():
     conan_run(['config', 'install',
                '-sf', 'config',
                'https://github.com/trassir/conan-config.git'])
+
+    conan_run(['config', 'install',
+               'https://github.com/conan-io/conanclientcert.git'])
 
     conan_run(['remote', 'clean'])
 
