@@ -104,8 +104,11 @@ class OpenSceneGraphConanFile(ConanFile):
             del self.options.with_png
             del self.options.with_dcmtk
 
+    def validate(self):
         if self.options.get_safe("with_asio", False):
             raise ConanInvalidConfiguration("ASIO support in OSG is broken, see https://github.com/openscenegraph/OpenSceneGraph/issues/921")
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("openscenegraph recipe cannot be cross-built yet. Contributions are welcome.")
 
     def requirements(self):
         if self.options.enable_windowing_system and self.settings.os == "Linux":
