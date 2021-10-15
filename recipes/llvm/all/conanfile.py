@@ -111,7 +111,7 @@ class Llvm(ConanFile):
                     shutil.rmtree(ignore_path)
 
     def validate(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("Compiler version too low for this package.")
 
         if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16.4":
