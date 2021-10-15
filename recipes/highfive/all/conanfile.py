@@ -72,10 +72,6 @@ class HighFiveConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "HighFive"
         self.cpp_info.names["cmake_find_package_multi"] = "HighFive"
-        self.cpp_info.names["pkg_config"] = "highfive"
-        self.cpp_info.components["highfive"].names["cmake_find_package"] = "HighFive"
-        self.cpp_info.components["highfive"].names["cmake_find_package_multi"] = "HighFive"
-        self.cpp_info.components["highfive"].includedirs = ["include"]
-        self.cpp_info.components["highfive"].requires = ["hdf5::hdf5_cpp"]
+        self.cpp_info.requires = ["hdf5::hdf5_cpp"]
         if self.options.with_boost:
-            self.cpp_info.components["highfive"].requires.append("boost::headers")
+            self.cpp_info.requires.append("boost::headers")
