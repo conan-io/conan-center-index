@@ -19,7 +19,7 @@ class DarknetConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_opencv": False,
+        "with_opencv": True,
     }
     exports_sources = ['patches/*']
     generators = "pkg_config"
