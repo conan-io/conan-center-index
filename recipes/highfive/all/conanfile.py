@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 
 class HighFiveConan(ConanFile):
-    name = "HighFive"
+    name = "highfive"
     description = "HighFive is a modern header-only C++11 friendly interface for libhdf5."
     license = "Boost Software License 1.0"
     topics = ("conan", "hdf5", "hdf", "data")
