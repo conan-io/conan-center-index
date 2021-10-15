@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index da3aa68..2bbb00a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,16 +64,6 @@ if (WITH_EXAMPLES)
+     add_subdirectory(example)
+ endif ()
+ 
+-# pkg-config file
+-configure_file(cmocka.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/cmocka.pc)
+-install(
+-  FILES
+-    ${CMAKE_CURRENT_BINARY_DIR}/cmocka.pc
+-  DESTINATION
+-  ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+-  COMPONENT
+-    pkgconfig
+-)
+ 
+ # cmake config files
+ if (WIN32)
+@@ -95,15 +85,6 @@ write_basic_package_version_file(${PROJECT_NAME}-config-version.cmake
+                                  COMPATIBILITY
+                                      AnyNewerVersion)
+ 
+-install(
+-    FILES
+-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+-    DESTINATION
+-        ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+-    COMPONENT
+-        devel
+-)
+ 
+ # Add 'make dist' target which makes sure to invoke cmake before
+ add_custom_target(dist
