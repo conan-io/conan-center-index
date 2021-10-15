@@ -14,7 +14,7 @@ libtool/2.4.6
 ninja/1.9.0
 meson/0.53.2
 m4/1.4.18
-nasm/2.14
+nasm/2.14.dssl1
 pkgconf/1.7.4
 ruby/2.3.7
 

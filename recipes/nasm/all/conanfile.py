@@ -16,6 +16,13 @@ class NASMConan(ConanFile):
     _autotools = None
 
     @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -25,11 +32,11 @@ class NASMConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os_build == "Windows" and not tools.which("perl"):
-            self.build_requires.add("strawberryperl/5.30.0.1")
+            self.build_requires("strawberryperl/5.30.0.1")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "nasm-" + self.version
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = "nasm-" + self.original_version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _build_vs(self):
