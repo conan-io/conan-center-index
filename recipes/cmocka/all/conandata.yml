@@ -6,5 +6,3 @@ patches:
     "1.1.5":
         - patch_file: "patches/build_either_static_or_shared.patch"
           base_path: "source_subfolder"
-        - patch_file: "patches/fix_cmake_install.patch"
-          base_path: "source_subfolder"
