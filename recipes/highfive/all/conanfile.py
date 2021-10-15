@@ -31,7 +31,7 @@ class HighFiveConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("hdf5/1.10.6")
+        self.requires("hdf5/1.12.0")
         if self.options.with_boost:
             self.requires("boost/1.77.0")
 
