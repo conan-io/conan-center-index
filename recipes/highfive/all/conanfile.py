@@ -1,8 +1,4 @@
-import os
-import textwrap
-
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import CMake, ConanFile, tools
 
 required_conan_version = ">=1.33.0"
 

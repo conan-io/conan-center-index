@@ -1,6 +1,5 @@
+from conans import CMake, ConanFile
 import os.path
-
-from conans import ConanFile, CMake
 
 
 class HighFiveTestConan(ConanFile):
