@@ -52,8 +52,8 @@ class CmockaConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["WITH_STATIC_LIB"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["WITH_EXAMPLES"] = "OFF"
+        self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["WITH_EXAMPLES"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
