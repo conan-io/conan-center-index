@@ -37,7 +37,7 @@ class HighFiveConan(ConanFile):
     def requirements(self):
         self.requires("hdf5/1.10.6")
         if self.options.with_boost:
-            self.requires("boost/1.75.0")
+            self.requires("boost/1.77.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
