@@ -1,0 +1,15 @@
+include(conanprofile.common)
+
+[settings]
+compiler=Visual Studio
+compiler.version=16
+compiler.runtime=MD
+arch=x86_64
+arch_build=x86_64
+os=Windows
+os_build=Windows
+build_type=Release
+
+[env]
+CC=cl
+CXX=cl
