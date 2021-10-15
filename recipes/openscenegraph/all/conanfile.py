@@ -8,7 +8,7 @@ required_conan_version = ">=1.29.1"
 class OpenSceneGraphConanFile(ConanFile):
     name = "openscenegraph"
     description = "OpenSceneGraph is an open source high performance 3D graphics toolkit"
-    topics = "conan", "openscenegraph", "graphics"
+    topics = ("conan", "openscenegraph", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openscenegraph.org"
     license = "LGPL-2.1-only", "WxWindows-exception-3.1"
@@ -113,7 +113,7 @@ class OpenSceneGraphConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
