@@ -1,5 +1,3 @@
 versions:
-  "1.5.3":
-    folder: 1.5.3
-  "1.5.3.dssl3":
-    folder: 1.5.3.dssl3
+  "1.5.3.dssl4":
+    folder: all

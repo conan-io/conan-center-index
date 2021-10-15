@@ -8,12 +8,12 @@ endif()
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 
 include_directories(
-	"${CMAKE_SOURCE_DIR}/crypto" 
+	"${CMAKE_SOURCE_DIR}/crypto"
 	"${CMAKE_SOURCE_DIR}/ssl"
 	"${CMAKE_SOURCE_DIR}/config"
 )
 
-set(CRYPTO_SOURCES 
+set(CRYPTO_SOURCES
 	"${CMAKE_SOURCE_DIR}/crypto/aes.c"
 	"${CMAKE_SOURCE_DIR}/crypto/bigint.c"
 	"${CMAKE_SOURCE_DIR}/crypto/crypto_misc.c"
@@ -27,7 +27,7 @@ set(CRYPTO_SOURCES
 	"${CMAKE_SOURCE_DIR}/crypto/sha512.c"
 )
 
-set(SSL_SOURCES 
+set(SSL_SOURCES
 	"${CMAKE_SOURCE_DIR}/ssl/asn1.c"
 	"${CMAKE_SOURCE_DIR}/ssl/gen_cert.c"
 	"${CMAKE_SOURCE_DIR}/ssl/loader.c"
@@ -45,7 +45,7 @@ set_target_properties (axtls PROPERTIES VERSION 1.5 SOVERSION 1)
 
 if (WIN32)
 	set(c_flags "/nologo /W3 /FD")
-	set(ld_flags "/nologo /subsystem:console /machine:I386")
+	set(ld_flags "/nologo /subsystem:console")
 	set(defines WIN32 _MBCS _CONSOLE _CRT_SECURE_NO_DEPRECATE)
 	if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
 		set(c_flags "${c_flags} /Zi /Od")
@@ -67,20 +67,20 @@ elseif(UNIX)
 	endif()
 endif()
 
-set_target_properties(axtls PROPERTIES 
+set_target_properties(axtls PROPERTIES
 	LINK_FLAGS "${ld_flags}"
 	COMPILE_FLAGS "${c_flags}"
 	COMPILE_DEFINITIONS "${defines}"
 )
 
-set(headers 
-	"crypto/bigint.h"  
+set(headers
+	"crypto/bigint.h"
 	"crypto/bigint_impl.h"
-	"crypto/crypto.h"  
+	"crypto/crypto.h"
 	"crypto/os_int.h"
 	"ssl/crypto_misc.h"
 	"ssl/ssl.h"
-	"ssl/tls1.h"  
+	"ssl/tls1.h"
 	"ssl/version.h"
 	"config/config.h"
 )

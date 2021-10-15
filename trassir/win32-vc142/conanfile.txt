@@ -13,7 +13,7 @@ strawberryperl/5.30.0.1
 winflexbison/2.5.22
 
 [requires]
-axtls/1.5.3.dssl3
+axtls/1.5.3.dssl4
 boost/1.69.0.dssl1
 bzip2/1.0.8
 c-ares/1.15.0.dssl1
