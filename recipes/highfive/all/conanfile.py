@@ -64,11 +64,6 @@ class HighFiveConan(ConanFile):
     def package_id(self):
         self.info.header_only()
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
