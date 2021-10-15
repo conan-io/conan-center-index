@@ -145,8 +145,8 @@ class OpenSceneGraphConanFile(ConanFile):
             self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("OpenSceneGraph-OpenSceneGraph-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):
