@@ -1,0 +1,8 @@
+sources:
+  "20210725":
+    url: [
+            "https://github.com/msys2/msys2-installer/releases/download/2021-07-25/msys2-base-x86_64-20210725.tar.xz",
+            "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20210725.tar.xz",
+            "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20210725.tar.xz",
+    ]
+    sha256: "4013a9d5e51b448343efc24fc6a324cc999bb96b4c01b13a6bd3c661bb5c8a82"
