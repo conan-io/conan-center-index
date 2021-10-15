@@ -181,7 +181,7 @@ class OpenSSLConan(ConanFile):
             self.options.no_tests = True
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows":
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
@@ -205,6 +205,10 @@ class OpenSSLConan(ConanFile):
     @property
     def _use_nmake(self):
         return self._is_clangcl or self._is_msvc
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _full_version(self):
@@ -434,29 +438,29 @@ class OpenSSLConan(ConanFile):
         configure = os.path.join(self._source_subfolder, "Configure")
         tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
 
+    def _adjust_path(self, path):
+        return path.replace("\\", "/") if self._settings_build.os == "Windows" else path
+
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
-        def adjust_path(path):
-            return path.replace("\\", "/") if tools.os_info.is_windows else path
-
         makefile_org = os.path.join(self._source_subfolder, "Makefile.org")
         env_build = self._get_env_build()
         with tools.environment_append(env_build.vars):
             if not "CROSS_COMPILE" in os.environ:
                 cc = os.environ.get("CC", "cc")
-                tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (adjust_path(cc), os.environ["CFLAGS"]))
+                tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), os.environ["CFLAGS"]))
                 if "AR" in os.environ:
-                    tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
+                    tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
                 if "RANLIB" in os.environ:
-                    tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
+                    tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
                 rc = os.environ.get("WINDRES", os.environ.get("RC"))
                 if rc:
-                    tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
+                    tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
                 if "NM" in os.environ:
-                    tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
+                    tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
                 if "AS" in os.environ:
-                    tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
+                    tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
 
     def _get_env_build(self):
         if not self._env_build:
@@ -513,10 +517,9 @@ class OpenSSLConan(ConanFile):
                     lib_path = "%s/%s.lib" % (zlib_info.lib_paths[0], zlib_info.libs[0])
                 else:
                     lib_path = zlib_info.lib_paths[0]  # Just path, linux will find the right file
-                if tools.os_info.is_windows:
-                    # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
-                    include_path = include_path.replace('\\', '/')
-                    lib_path = lib_path.replace('\\', '/')
+                # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
+                include_path = self._adjust_path(include_path)
+                lib_path = self._adjust_path(lib_path)
 
                 if zlib_info.shared:
                     args.append("zlib-dynamic")
@@ -636,7 +639,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _perl(self):
-        if tools.os_info.is_windows and not self._win_bash:
+        if self._settings_build.os == "Windows" and not self._win_bash:
             # enforce strawberry perl, otherwise wrong perl could be used (from Git bash, MSYS, etc.)
             if "strawberryperl" in self.deps_cpp_info.deps:
                 return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
@@ -754,7 +757,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and \
+        return self._settings_build.os == "Windows" and \
                not self._use_nmake and \
                (self._is_mingw or self._cross_building)
 
@@ -763,7 +766,7 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             return "nmake"
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which('mingw32-make'))
-        make_program = tools.unix_path(make_program) if tools.os_info.is_windows else make_program
+        make_program = tools.unix_path(make_program) if self._settings_build.os == "Windows" else make_program
         if not make_program:
             raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
         return make_program
