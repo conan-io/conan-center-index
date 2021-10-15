@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 class CmockaConan(ConanFile):
     name = "cmocka"
-    license = "Apache License 2.0"
+    license = "Apache-2.0"
     homepage = "https://cmocka.org"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A unit testing framework for C"
