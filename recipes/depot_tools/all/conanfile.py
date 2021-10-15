@@ -8,11 +8,10 @@ class DepotToolsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://chromium.googlesource.com/chromium/tools/depot_tools"
     description = "Tools for working with Chromium development."
-    topics = ("conan", "depot_tools", "chromium")
+    topics = ("depot_tools", "chromium")
     license = "BSD-3-Clause"
-    no_copy_source = True
     short_paths = True
-    settings = "os_build"
+    settings = "os", "arch", "build_type", "compiler"
     exports_sources = ["patches/**"]
 
 
@@ -27,7 +26,7 @@ class DepotToolsConan(ConanFile):
         `OSError: Invalid argument` rather than actually following the symlinks.
         Therefore, this workaround simply copies the destination file over the symlink
         """
-        if self.settings.os_build != "Windows":
+        if self.settings.os != "Windows":
             return
 
         for root, dirs, files in os.walk(self._source_subfolder):
@@ -38,7 +37,7 @@ class DepotToolsConan(ConanFile):
                 shutil.copy(os.path.join(root, dest), symlink, follow_symlinks=False)
                 self.output.info("Replaced symlink '%s' with its destination file '%s'" % (symlink, dest))
 
-    def source(self):
+    def build(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
         self._dereference_symlinks()
 
@@ -55,7 +54,7 @@ class DepotToolsConan(ConanFile):
         def chmod_plus_x(name):
             os.chmod(name, os.stat(name).st_mode | 0o111)
 
-        if self.settings.os_build != "Windows":
+        if self.settings.os != "Windows":
             for root, _, files in os.walk(self.package_folder):
                 for file_it in files:
                     filename = os.path.join(root, file_it)
