@@ -42,11 +42,15 @@ class TestPackageConan(ConanFile):
         if not system_cc:
             system_cc = self._default_cc.get(str(self.settings.compiler))
         return system_cc
+    
+    @property
+    def _user_info(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
 
     def _build_scripts(self):
         """Test compile script of automake"""
-        compile_script = self.deps_user_info["automake"].compile
-        ar_script = self.deps_user_info["automake"].ar_lib
+        compile_script = self._user_info["automake"].compile
+        ar_script = self._user_info["automake"].ar_lib
         assert os.path.isfile(ar_script)
         assert os.path.isfile(compile_script)
 
