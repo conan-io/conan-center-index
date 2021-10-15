@@ -72,5 +72,5 @@ int main(void)
 		std::cerr << err.what() << std::endl;
 	}
 
-	return EXIT_SUCCESS; // successfully terminated
+	return 0; // successfully terminated
 }
