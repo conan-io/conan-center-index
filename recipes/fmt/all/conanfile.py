@@ -52,7 +52,6 @@ class FmtConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            self.settings.clear()
             del self.options.fPIC
             del self.options.shared
             del self.options.with_os_api
@@ -121,3 +120,7 @@ class FmtConan(ConanFile):
                 self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
                 self.cpp_info.defines.append("FMT_SHARED")
+
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
