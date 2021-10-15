@@ -16,9 +16,15 @@ class HighFiveConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boost": [True, False],
+        "with_eigen": [True, False],
+        "with_xtensor": [True, False],
+        "with_opencv": [True, False],
     }
     default_options = {
-        "with_boost": False,
+        "with_boost": True,
+        "with_eigen": True,
+        "with_xtensor": True,
+        "with_opencv": True,
     }
 
     _cmake = None
@@ -35,6 +41,12 @@ class HighFiveConan(ConanFile):
         self.requires("hdf5/1.12.0")
         if self.options.with_boost:
             self.requires("boost/1.77.0")
+        if self.options.with_eigen:
+            self.requires("eigen/3.4.0")
+        if self.options.with_xtensor:
+            self.requires("xtensor/0.23.10")
+        if self.options.with_opencv:
+            self.requires("opencv/4.5.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
@@ -48,9 +60,9 @@ class HighFiveConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["USE_BOOST"] = self.options.with_boost
-        self._cmake.definitions["USE_EIGEN"] = "OFF"
-        self._cmake.definitions["USE_XTENSOR"] = "OFF"
-        self._cmake.definitions["USE_OPENCV"] = "OFF"
+        self._cmake.definitions["USE_EIGEN"] = self.options.with_eigen
+        self._cmake.definitions["USE_XTENSOR"] = self.options.with_xtensor
+        self._cmake.definitions["USE_OPENCV"] = self.options.with_opencv
         self._cmake.definitions["HIGHFIVE_UNIT_TESTS"] = "OFF"
         self._cmake.definitions["HIGHFIVE_EXAMPLES"] = "OFF"
         self._cmake.definitions["HIGHFIVE_BUILD_DOCS"] = "OFF"
@@ -70,6 +82,12 @@ class HighFiveConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "HighFive"
         self.cpp_info.names["cmake_find_package_multi"] = "HighFive"
-        self.cpp_info.requires = ["hdf5::hdf5_cpp"]
+        self.cpp_info.requires = ["hdf5::hdf5"]
         if self.options.with_boost:
             self.cpp_info.requires.append("boost::headers")
+        if self.options.with_eigen:
+            self.cpp_info.requires.append("eigen::eigen")
+        if self.options.with_xtensor:
+            self.cpp_info.requires.append("xtensor::xtensor")
+        if self.options.with_opencv:
+            self.cpp_info.requires.append("opencv::opencv")
