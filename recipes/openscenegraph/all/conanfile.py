@@ -1,10 +1,11 @@
 from conans import CMake, ConanFile, tools
-import glob, os
+from conans.errors import ConanInvalidConfiguration
+import glob, os, errno
 
 required_conan_version = ">=1.29.1"
 
 
-class ConanFile(ConanFile):
+class OpenSceneGraphConanFile(ConanFile):
     name = "openscenegraph"
     description = "OpenSceneGraph is an open source high performance 3D graphics toolkit"
     topics = "conan", "openscenegraph", "graphics"
