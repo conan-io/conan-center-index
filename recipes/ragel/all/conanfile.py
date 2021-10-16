@@ -9,12 +9,11 @@ class RagelConan(ConanFile):
     homepage = "http://www.colm.net/open-source/ragel"
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-2.0-or-later"
-    topics = ("conan", "ragel", "FSM", "regex", "fsm-compiler")
+    topics = ("ragel", "FSM", "regex", "fsm-compiler")
     exports_sources = ["CMakeLists.txt", "config.h", "patches/*"]
     generators = "cmake"
-
-    settings = "os", "arch", "compiler"
-
+    settings = "os", "arch", "compiler", "build_type"
+    _cmake = None
     _autotools = None
 
     @property
@@ -22,9 +21,8 @@ class RagelConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
+                  strip_root=True)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -33,12 +31,14 @@ class RagelConan(ConanFile):
         return self._autotools
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"].get(self.version, []):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         if self.settings.os == "Windows":
