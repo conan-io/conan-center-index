@@ -11,6 +11,7 @@ class DepotToolsConan(ConanFile):
     topics = ("depot_tools", "chromium")
     license = "BSD-3-Clause"
     short_paths = True
+    no_copy_source = True
     settings = "os", "arch", "build_type", "compiler"
     exports_sources = ["patches/**"]
 
@@ -37,7 +38,7 @@ class DepotToolsConan(ConanFile):
                 shutil.copy(os.path.join(root, dest), symlink, follow_symlinks=False)
                 self.output.info("Replaced symlink '%s' with its destination file '%s'" % (symlink, dest))
 
-    def build(self):
+    def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
         self._dereference_symlinks()
 
@@ -77,6 +78,11 @@ class DepotToolsConan(ConanFile):
                                 sig == [0xCE, 0xFA, 0xED, 0xFE]:
                             self.output.info('chmod on Mach-O file %s' % file_it)
                             chmod_plus_x(filename)
+
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.build_type
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
