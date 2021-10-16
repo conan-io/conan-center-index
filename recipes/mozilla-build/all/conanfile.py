@@ -30,6 +30,10 @@ class MozillaBuildConan(ConanFile):
         self.copy("LICENSE", dst="licenses")
         self.copy("nsinstall.exe", src="bin", dst="bin")
 
+    def package_id(self):
+        del self.info.settings.build_type
+        del self.info.settings.compiler
+
     def package_info(self):
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Adding to PATH: {}".format(binpath))
