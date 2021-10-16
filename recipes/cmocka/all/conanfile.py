@@ -71,3 +71,4 @@ class CmockaConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "CMocka"
         self.cpp_info.names["cmake_find_package_multi"] = "CMocka"
+        self.cpp_info.names["pkg_config"] = "cmocka"
