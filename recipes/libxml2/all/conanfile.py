@@ -119,15 +119,19 @@ class Libxml2Conan(ConanFile):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 
-            args = ["cscript",
-                    "configure.js",
-                    "compiler=msvc",
-                    "prefix=%s" % self.package_folder,
-                    "cruntime=/%s" % self.settings.compiler.runtime,
-                    "debug=%s" % debug,
-                    "static=%s" % static,
-                    'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=msvc",
+                "prefix={}".format(self.package_folder),
+                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "debug={}".format(debug),
+                "static={}".format(static),
+            ]
+            if self.deps_cpp_info.include_paths:
+                args.append("include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)))
+            if self.deps_cpp_info.lib_paths:
+                args.append("lib=\"{}\"".format(";".join(self.deps_cpp_info.lib_paths)))
 
             for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
@@ -189,9 +193,11 @@ class Libxml2Conan(ConanFile):
                 "prefix={}".format(self.package_folder),
                 "debug={}".format(yes_no(self.settings.build_type == "Debug")),
                 "static={}".format(yes_no(not self.options.shared)),
-                "include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)),
-                "lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)),
             ]
+            if self.deps_cpp_info.include_paths:
+                args.append("include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)))
+            if self.deps_cpp_info.lib_paths:
+                args.append("lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)))
 
             for name in self._option_names:
                 cname = {
