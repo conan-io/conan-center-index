@@ -38,11 +38,15 @@ class DawUtfRangeConan(ConanFile):
         else:
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+    def requirements(self):
+        self.requires("daw_header_libraries/1.29.7")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["DAW_USE_PACKAGE_MANAGEMENT"] = True
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
@@ -64,3 +68,4 @@ class DawUtfRangeConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
         self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-utf-range"
         self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-utf-range"
+        self.cpp_info.components["daw"].requires = ["daw_header_libraries::daw"]
