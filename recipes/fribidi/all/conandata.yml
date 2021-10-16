@@ -1,4 +1,7 @@
 sources:
+  "1.0.11":
+    url: "https://github.com/fribidi/fribidi/archive/v1.0.11.tar.gz"
+    sha256: "0e6d631c184e1012fb3ae86e80adabf26e46b4ffee2332e679eb308edd337398"
   "1.0.10":
     url: "https://github.com/fribidi/fribidi/releases/download/v1.0.10/fribidi-1.0.10.tar.xz"
     sha256: "7f1c687c7831499bcacae5e8675945a39bacbad16ecaa945e9454a32df653c01"
