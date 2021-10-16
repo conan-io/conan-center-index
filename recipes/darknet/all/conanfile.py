@@ -80,6 +80,7 @@ class DarknetConan(ConanFile):
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 args = ["OPENCV={}".format("1" if self.options.with_opencv else "0")]
                 env_build = AutoToolsBuildEnvironment(self)
+                env_build.fpic = self.options.get_safe("fPIC", True)
                 env_build.make(args=args)
 
     def package(self):
