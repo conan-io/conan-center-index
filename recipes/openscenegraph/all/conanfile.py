@@ -10,7 +10,7 @@ required_conan_version = ">=1.29.1"
 class OpenSceneGraphConanFile(ConanFile):
     name = "openscenegraph"
     description = "OpenSceneGraph is an open source high performance 3D graphics toolkit"
-    topics = ("conan", "openscenegraph", "graphics")
+    topics = ("openscenegraph", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openscenegraph.org"
     license = "LGPL-2.1-only", "WxWindows-exception-3.1"
