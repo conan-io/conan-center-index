@@ -6,12 +6,12 @@ from conans import ConanFile, CMake, tools
 required_conan_version = ">=1.33.0"
 
 class DawUtfRangeConan(ConanFile):
-    name = "daw_header_libraries"
+    name = "daw_utf_range"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Various header libraries mostly future std lib, replacements for(e.g. visit), or some misc"
-    topics = ("algorithms", "helpers", "data-structures")
-    homepage = "https://github.com/beached/header_libraries"
+    description = "Range operations on character arrays "
+    topics = ("utf", "validator", "iterator")
+    homepage = "https://github.com/beached/utf_range/"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     no_copy_source = True
