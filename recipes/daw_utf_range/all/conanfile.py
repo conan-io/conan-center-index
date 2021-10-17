@@ -9,7 +9,7 @@ class DawUtfRangeConan(ConanFile):
     name = "daw_utf_range"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Range operations on character arrays "
+    description = "Range operations on character arrays"
     topics = ("utf", "validator", "iterator")
     homepage = "https://github.com/beached/utf_range/"
     settings = "os", "compiler", "build_type", "arch"
