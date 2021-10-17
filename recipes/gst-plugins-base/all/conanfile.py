@@ -550,6 +550,8 @@ class GStPluginsBaseConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["gstreamer-plugins-base-1.0"].defines.append("GST_PLUGINS_BASE_STATIC")
             self.cpp_info.components["gstreamer-plugins-base-1.0"].requires.extend(gst_plugins)
+        else:
+            self.cpp_info.components["gstreamer-plugins-base-1.0"].bindirs.append(gst_plugin_path)
         self.cpp_info.components["gstreamer-plugins-base-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-allocators-1.0"].names["pkg_config"] = "gstreamer-allocators-1.0"
