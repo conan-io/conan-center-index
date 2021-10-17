@@ -85,7 +85,9 @@ class AwsCCommon(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32", "shlwapi"]
+            self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
+            if tools.Version(self.version) >= "0.6.13":
+                self.cpp_info.components["aws-c-common-lib"].system_libs.append("shlwapi")
         if not self.options.shared:
             if tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]
