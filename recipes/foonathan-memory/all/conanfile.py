@@ -90,7 +90,7 @@ class FoonathanMemory(ConanFile):
         tools.save(module_file, content)
     
     def validate(self):
-        # jenkins servers throw error with this combination 
+        # FIXME: jenkins servers throw error with this combination 
         # quick fix until somebody can reproduce
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("package currently do not support cross build to Macos armv8")
