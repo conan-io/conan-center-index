@@ -1170,6 +1170,9 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
+                if self.options.widgets:
+                    self.cpp_info.components["qtWidgets"].system_libs.append("UxTheme")
+                    self.cpp_info.components["qtWidgets"].system_libs.append("dwmapi")
                 if self.options.qtwinextras:
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
 
