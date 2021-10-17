@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
@@ -50,6 +51,11 @@ class GStreamerConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+
+    def validate(self):
+        if self.options.shared != self.options["glib"].shared:
+            # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
+            raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
 
     def build_requirements(self):
         self.build_requires("meson/0.56.2")
@@ -113,6 +119,9 @@ class GStreamerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
+
+    def package_id(self):
+        self.info.requires["glib"].full_package_mode()
 
     def package_info(self):
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
