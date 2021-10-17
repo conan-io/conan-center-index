@@ -51,6 +51,7 @@ class FFMpegConan(ConanFile):
         "with_coreimage": [True, False],
         "with_audiotoolbox": [True, False],
         "with_videotoolbox": [True, False],
+        "with_programs": [True, False],
     }
     default_options = {
         "shared": False,
@@ -84,6 +85,7 @@ class FFMpegConan(ConanFile):
         "with_coreimage": True,
         "with_audiotoolbox": True,
         "with_videotoolbox": True,
+        "with_programs": True,
     }
 
     generators = "pkg_config"
@@ -234,7 +236,6 @@ class FFMpegConan(ConanFile):
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
-            "--disable-programs",
             opt_enable_disable("cross-compile", tools.cross_building(self)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
@@ -312,6 +313,8 @@ class FFMpegConan(ConanFile):
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
                 extra_cflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
                 extra_ldflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
+        if not self.options.with_programs:
+            args.append("--disable-programs")
 
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
