@@ -55,7 +55,7 @@ class GStreamerConan(ConanFile):
     def validate(self):
         if self.options.shared != self.options["glib"].shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
-            raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
+            raise ConanInvalidConfiguration("GLib and GStreamer must be either all shared, or all static")
 
     def build_requirements(self):
         self.build_requires("meson/0.56.2")
