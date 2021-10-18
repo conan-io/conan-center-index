@@ -68,8 +68,10 @@ class LibcurlConan(ConanFile):
 
     @property
     def original_version(self):
-        original_version = self.version.split('.')
-        return '.'.join(original_version[:3])
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
 
     @property
     def _source_subfolder(self):
@@ -149,7 +151,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1d.dssl2")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.6.0")
         if self.options.with_nghttp2:
@@ -180,7 +182,10 @@ class LibcurlConan(ConanFile):
             self.build_requires("libtool/2.4.6")
             self.build_requires("pkgconf/1.7.4")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/20200517")
+                if self.settings.arch == "x86":
+                    self.build_requires("msys2/20200517")
+                else:
+                    self.build_requires("msys2/20210725")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.original_version],

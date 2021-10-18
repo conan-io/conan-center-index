@@ -31,7 +31,7 @@ intel_media_sdk/2018R2_1
 jansson/2.12
 jsoncpp/1.8.3
 leveldb/1.22
-libcurl/7.64.1.dssl1
+libcurl/7.64.1.dssl2
 libjpeg/9d.dssl2
 libpng/1.6.37
 libpq/11.5.dssl1
