@@ -1,3 +1,4 @@
+import itertools
 import os
 from conans import ConanFile, CMake, tools
 
@@ -23,7 +24,7 @@ class SoxrConan(ConanFile):
         "with_lsr_bindings": True
     }
     generators = "cmake"
-    exports_sources = ["patches/**", "licenses/**"]
+    exports_sources = "patches/**"
 
     _cmake = None
 
@@ -69,9 +70,17 @@ class SoxrConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _extract_pffft_license(self):
+        # extract license header from pffft.c and store it in the package folder
+        with open(os.path.join(self._source_subfolder, "src", "pffft.c"), "r") as f:
+            # the license header starts in line 3 and ends in line 55
+            lines = map(lambda line: line.lstrip("/* "), itertools.islice(f, 3, 55))
+            with open(os.path.join(self.package_folder, "licenses", "pffft"), "w") as f2:
+                f2.writelines(lines)
+
     def package(self):
         self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
-        self.copy("licenses/pffft", dst="licenses", keep_path=False)
+        self._extract_pffft_license()
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "doc"))
