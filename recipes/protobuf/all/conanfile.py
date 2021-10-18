@@ -37,8 +37,10 @@ class ProtobufConan(ConanFile):
 
     @property
     def original_version(self):
-        original_version = self.version.split('.')
-        return '.'.join(original_version[:3])
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
 
     @property
     def _source_subfolder(self):

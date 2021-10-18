@@ -22,8 +22,20 @@ class ProtocConanFile(ConanFile):
 
     settings = "os_build", "arch_build", "compiler", "arch"
 
+    @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+    
     def build_requirements(self):
-        self.build_requires("protobuf/{}".format(self.version.split(".dssl")[0]))
+        try:
+            protobuf_ver = self.deps_cpp_info['protobuf'].version
+            self.output.output("protoc: protobuf version protobuf_ver")
+        except:
+            protobuf_ver = self.version
+        self.build_requires("protobuf/{}".format(protobuf_ver))
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -40,8 +52,8 @@ class ProtocConanFile(ConanFile):
         cmake.build()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self._base_name + "-" + self.version.split(".dssl")[0]
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = self._base_name + "-" + self.original_version
         os.rename(extracted_dir, self._source_subfolder)
 
     def imports(self):

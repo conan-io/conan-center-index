@@ -12,6 +12,8 @@ libcurl/7.64.1.dssl2
 libjpeg/9d.dssl2
 openssl/1.1.1d.dssl2
 openh264/1.7.0.dssl2
+protobuf/3.9.1.dssl2
+protoc/3.9.1.dssl2
 xz_utils/5.2.4.dssl2
 zlib/1.2.11
 
