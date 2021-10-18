@@ -121,7 +121,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_libalsa": False,
         "with_openal": True,
-        "with_gstreamer": False,
+        "with_gstreamer": True,
         "with_pulseaudio": False,
 
         "gui": True,
@@ -264,6 +264,9 @@ class QtConan(ConanFile):
 
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
+           
+        if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
+            raise ConanInvlidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
 
 
     def requirements(self):
@@ -1037,7 +1040,7 @@ class QtConan(ConanFile):
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
                 _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
