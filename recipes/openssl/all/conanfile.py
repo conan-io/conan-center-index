@@ -177,10 +177,13 @@ class OpenSSLConan(ConanFile):
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
-                self.build_requires("nasm/2.14")
+                self.build_requires("nasm/2.14.dssl1")
         if self._win_bash:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                if self.settings.arch == 'x86':
+                    self.build_requires("msys2/20200517")
+                else:
+                    self.build_requires("msys2/20210725")
 
     @property
     def _is_msvc(self):
@@ -199,18 +202,19 @@ class OpenSSLConan(ConanFile):
         return self._is_clangcl or self._is_msvc
 
     @property
-    def _orig_version(self):
-        orig_version = self.version.split('.')
-        orig_version = '.'.join(orig_version[:3])
-        return orig_version
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
 
     @property
     def _full_version(self):
-        return OpenSSLVersion(self._orig_version)
+        return OpenSSLVersion(self.original_version)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self._orig_version])
-        extracted_folder = "openssl-" + self._orig_version
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_folder = "openssl-" + self.original_version
         os.rename(extracted_folder, self._source_subfolder)
 
     def configure(self):

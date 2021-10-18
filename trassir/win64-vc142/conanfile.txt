@@ -5,6 +5,7 @@ virtualenv
 
 [requires]
 axtls/1.5.3.dssl4
+openssl/1.1.1d.dssl2
 openh264/1.7.0.dssl2
 xz_utils/5.2.4.dssl1
 openh264/1.7.0.dssl2

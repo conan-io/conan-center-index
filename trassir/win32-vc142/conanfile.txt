@@ -44,7 +44,7 @@ openal/1.20.1
 openblas/0.3.7.dssl1
 opencv/2.4.13.7
 openh264/1.7.0.dssl2
-openssl/1.1.1d.dssl1
+openssl/1.1.1d.dssl2
 pjsip/2.9
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
