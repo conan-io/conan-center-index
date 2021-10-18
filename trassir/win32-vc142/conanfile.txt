@@ -11,6 +11,7 @@ msys2/20200517
 nasm/2.14.dssl1
 strawberryperl/5.30.0.1
 winflexbison/2.5.22
+yasm/1.3.0.dssl1
 
 [requires]
 axtls/1.5.3.dssl4
@@ -19,7 +20,7 @@ bzip2/1.0.8
 c-ares/1.15.0.dssl1
 caffe/1.0.windows.dssl1
 dlib/19.4
-ffmpeg/3.3.1
+ffmpeg/3.3.1.dssl1
 freetype/2.10.1
 gflags/2.2.2
 glog/0.4.0

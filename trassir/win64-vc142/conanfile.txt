@@ -5,10 +5,14 @@ virtualenv
 
 [requires]
 axtls/1.5.3.dssl4
+bzip2/1.0.8
+ffmpeg/3.3.1.dssl1
+intel_media_sdk/2018R2_1
 libjpeg/9d.dssl2
 openssl/1.1.1d.dssl2
 openh264/1.7.0.dssl2
-xz_utils/5.2.4.dssl1
+xz_utils/5.2.4.dssl2
+zlib/1.2.11
 
 [options]
 Tevian:shared=True

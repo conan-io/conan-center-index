@@ -9,12 +9,12 @@ import shutil
 
 class FFMpegConan(ConanFile):
     name = "ffmpeg"
-    version = "3.3.1"
     url = "https://github.com/bincrafters/conan-ffmpeg"
     description = "A complete, cross-platform solution to record, convert and stream audio and video"
     # https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
     license = "LGPL-2.1-or-later", "GPL-2.0-or-later"
     homepage = "https://ffmpeg.org/"
+
     author = "Bincrafters <bincrafters@gmail.com>"
     topics = "ffmpeg", "multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",\
              "transcoding", "multiplexer", "demultiplexer", "streaming"
@@ -90,6 +90,13 @@ class FFMpegConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
+    @property
     def _is_mingw_windows(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'gcc' and os.name == 'nt'
 
@@ -98,8 +105,8 @@ class FFMpegConan(ConanFile):
         return self.settings.compiler == 'Visual Studio'
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = self.name + "-" + self.original_version
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
@@ -126,9 +133,12 @@ class FFMpegConan(ConanFile):
             self.options.remove("qsv")
 
     def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
+        self.build_requires("yasm/1.3.0.dssl1")
         if self.settings.os == 'Windows' and "CONAN_MSYS_PATH" not in os.environ:
-            self.build_requires("msys2/20200517")
+            if self.settings.arch == 'x86':
+                self.build_requires("msys2/20200517")
+            else:
+                self.build_requires("msys2/20210725")
 
     def requirements(self):
         if self.options.zlib:
