@@ -1,4 +1,4 @@
-from conans import CMake, ConanFile
+from conans import CMake, ConanFile, tools
 import os.path
 
 
@@ -12,5 +12,6 @@ class HighFiveTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_package")
-        self.run(bin_path, run_environment=True)
+        if tools.cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)

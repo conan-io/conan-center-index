@@ -50,6 +50,8 @@ class HighFiveConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMake", "HighFiveTargetDeps.cmake"),
             "find_package(Eigen3 NO_MODULE)",
@@ -61,7 +63,6 @@ class HighFiveConan(ConanFile):
             "Eigen3_INCLUDE_DIRS",
         )
 
-    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -73,10 +74,10 @@ class HighFiveConan(ConanFile):
         self._cmake.definitions["USE_EIGEN"] = self.options.with_eigen
         self._cmake.definitions["USE_XTENSOR"] = self.options.with_xtensor
         self._cmake.definitions["USE_OPENCV"] = self.options.with_opencv
-        self._cmake.definitions["HIGHFIVE_UNIT_TESTS"] = "OFF"
-        self._cmake.definitions["HIGHFIVE_EXAMPLES"] = "OFF"
-        self._cmake.definitions["HIGHFIVE_BUILD_DOCS"] = "OFF"
-        self._cmake.definitions["HIGHFIVE_USE_INSTALL_DEPS"] = "OFF"
+        self._cmake.definitions["HIGHFIVE_UNIT_TESTS"] = False
+        self._cmake.definitions["HIGHFIVE_EXAMPLES"] = False
+        self._cmake.definitions["HIGHFIVE_BUILD_DOCS"] = False
+        self._cmake.definitions["HIGHFIVE_USE_INSTALL_DEPS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
