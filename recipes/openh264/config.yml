@@ -1,3 +1,7 @@
 versions:
   "1.7.0":
     folder: all
+  "1.7.0.dssl1":
+    folder: all 
+  "1.7.0.dssl2":
+    folder: all

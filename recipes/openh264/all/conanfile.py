@@ -26,10 +26,13 @@ class OpenH264Conan(ConanFile):
         return '.'.join(original_version[:-1])
 
     def build_requirements(self):
-        self.build_requires("nasm/2.14")
+        self.build_requires("nasm/2.14.dssl1")
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires("msys2/20200517")
+                if self.settings.arch == 'x86':
+                    self.build_requires("msys2/20200517")
+                else:
+                    self.build_requires("msys2/20210725")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.original_version])

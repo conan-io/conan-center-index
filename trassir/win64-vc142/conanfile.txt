@@ -5,6 +5,7 @@ virtualenv
 
 [requires]
 axtls/1.5.3.dssl4
+openh264/1.7.0.dssl2
 
 [options]
 Tevian:shared=True
