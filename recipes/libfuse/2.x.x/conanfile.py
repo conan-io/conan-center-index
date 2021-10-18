@@ -24,10 +24,6 @@ class LibfuseConan(ConanFile):
     _autotools = None
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -70,6 +66,8 @@ class LibfuseConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.remove_files_by_mask(self.package_folder, "*.la")
+        # remove ulockmgr stuff lib and header file
+        tools.remove_files_by_mask(self.package_folder, "*ulockmgr*")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
