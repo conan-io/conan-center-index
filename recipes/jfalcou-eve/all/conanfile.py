@@ -32,6 +32,7 @@ class JfalcouEveConan(ConanFile):
             "gcc": "11",
             "Visual Studio": "16.9",
             "clang": "12",
+            "apple-clang": "12",
         }
 
     def validate(self):
