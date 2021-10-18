@@ -54,7 +54,7 @@ qtwebkit/5.212.0-alpha4.dssl2
 sqlite3/3.31.0.dssl1
 sip/4.19.3.dssl1
 snappy/1.1.8.dssl1
-xz_utils/5.2.4
+xz_utils/5.2.4.dssl1
 zlib/1.2.11
 
 [options]

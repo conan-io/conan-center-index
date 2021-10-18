@@ -89,7 +89,7 @@ xkeyboard-config/2.28 # GHA: noexport
 xorgproto/2019.1 # GHA: noexport
 xproto/7.0.31 # GHA: noexport
 xtrans/1.4.0 # GHA: noexport
-xz_utils/5.2.4
+xz_utils/5.2.4.dssl1
 zlib/1.2.11
 
 

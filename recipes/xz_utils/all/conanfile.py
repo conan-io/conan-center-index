@@ -16,6 +16,13 @@ class XZUtils(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -26,7 +33,10 @@ class XZUtils(ConanFile):
     def build_requirements(self):
         if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            if self.settings.arch == 'x86':
+                self.build_requires("msys2/20200517")
+            else:
+                self.build_requires("msys2/20210725t")
 
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
@@ -49,8 +59,8 @@ class XZUtils(ConanFile):
                               "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("xz-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.original_version])
+        os.rename("xz-" + self.original_version, self._source_subfolder)
         self._apply_patches()
 
     def _build_msvc(self):
