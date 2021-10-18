@@ -11,8 +11,9 @@ class DawJsonLinkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/daw_json_link"
     topics = ("json", "parse", "json-parser", "serialization", "constexpr", "header-only")
-    settings = "os", "compiler"
+    settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _compiler_required_cpp17 = {
         "Visual Studio": "16",
@@ -24,6 +25,10 @@ class DawJsonLinkConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def requirements(self):
+        self.requires("daw_header_libraries/1.29.7")
+        self.requires("daw_utf_range/2.2.0")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -41,6 +46,7 @@ class DawJsonLinkConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["DAW_USE_PACKAGE_MANAGEMENT"] = True
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
@@ -57,9 +63,10 @@ class DawJsonLinkConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "daw-header-libraries"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "daw-header-libraries"
+        self.cpp_info.filenames["cmake_find_package"] = "daw-json-link"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "daw-json-link"
         self.cpp_info.names["cmake_find_package"] = "daw"
         self.cpp_info.names["cmake_find_package_multi"] = "daw"
-        self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-header-libraries"
-        self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-header-libraries"
+        self.cpp_info.components["daw"].names["cmake_find_package"] = "daw-json-link"
+        self.cpp_info.components["daw"].names["cmake_find_package_multi"] = "daw-json-link"
+        self.cpp_info.components["daw"].requires = ["daw_header_libraries::daw", "daw_utf_range::daw"]
