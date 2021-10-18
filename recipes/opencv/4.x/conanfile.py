@@ -66,7 +66,7 @@ class OpenCVConan(ConanFile):
         "with_cublas": False,
         "with_cufft": False,
         "with_v4l": False,
-        "with_ffmpeg": False,
+        "with_ffmpeg": True,
         "with_imgcodec_hdr": False,
         "with_imgcodec_pfm": False,
         "with_imgcodec_pxm": False,
@@ -104,6 +104,10 @@ class OpenCVConan(ConanFile):
         return self.settings.os != "iOS"
 
     @property
+    def _has_with_ffmpeg_option(self):
+        return self.settings.os != "iOS" and self.settings.os != "WindowsStore"
+
+    @property
     def _protobuf_version(self):
         return "protobuf/3.17.1"
 
@@ -113,6 +117,15 @@ class OpenCVConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_gtk
             del self.options.with_v4l
+
+        if self._has_with_ffmpeg_option:
+            # Following the packager choice, ffmpeg is enabled by default when
+            # supported, except on Android. See
+            # https://github.com/opencv/opencv/blob/39c3334147ec02761b117f180c9c4518be18d1fa/CMakeLists.txt#L266-L268
+            self.options.with_ffmpeg = self.settings.os != "Android"
+        else:
+            del self.options.with_ffmpeg
+
         if "arm" not in self.settings.arch:
             del self.options.neon
         if not self._has_with_jpeg2000_option:
@@ -156,7 +169,7 @@ class OpenCVConan(ConanFile):
             self.requires("libtiff/4.3.0")
         if self.options.with_eigen:
             self.requires("eigen/3.3.9")
-        if self.options.with_ffmpeg:
+        if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/4.4")
         if self.options.parallel == "tbb":
             self.requires("tbb/2020.3")
@@ -295,8 +308,8 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CLP"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
 
-        self._cmake.definitions["WITH_FFMPEG"] = self.options.with_ffmpeg
-        if self.options.with_ffmpeg:
+        self._cmake.definitions["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
+        if self.options.get_safe("with_ffmpeg"):
             self._cmake.definitions["HAVE_FFMPEG"] = True
             self._cmake.definitions["HAVE_FFMPEG_WRAPPER"] = False
             self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
@@ -523,7 +536,7 @@ class OpenCVConan(ConanFile):
             return ["opencv_xfeatures2d"] if self.options.contrib else []
 
         def ffmpeg():
-            if self.options.with_ffmpeg:
+            if self.options.get_safe("with_ffmpeg"):
                 return [
                         "ffmpeg::avcodec",
                         "ffmpeg::avfilter",
