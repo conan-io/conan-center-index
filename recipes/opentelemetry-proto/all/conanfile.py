@@ -32,9 +32,6 @@ class OpenTelemetryProtoConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.proto", dst="res", src=self._source_subfolder)
-
-    def package_info(self):
-        self.user_info.proto_root = os.path.join(self.package_folder, "res")
         include_dir = os.path.join(self.package_folder, "include")
         tools.mkdir(include_dir)
         for proto in Path(self._source_subfolder).rglob('*.proto'):
