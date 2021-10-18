@@ -89,6 +89,8 @@ class SoxrConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["soxr"]
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["m"]
         if not self.options.shared and self.options.with_openmp:
             if self.settings.compiler in ("Visual Studio", "msvc"):
                 openmp_flags = ["/openmp"]
