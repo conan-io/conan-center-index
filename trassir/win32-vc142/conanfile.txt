@@ -31,7 +31,7 @@ jansson/2.12
 jsoncpp/1.8.3
 leveldb/1.22
 libcurl/7.64.1.dssl1
-libjpeg/9d.dssl1
+libjpeg/9d.dssl2
 libpng/1.6.37
 libpq/11.5.dssl1
 libwebp/1.1.0
@@ -48,9 +48,9 @@ openssl/1.1.1d.dssl2
 pjsip/2.9
 protobuf/3.9.1.dssl1
 protoc/3.9.1.dssl1
-signalr-qt/0.1.dssl2
-qt/5.14.1.dssl2
-qtwebkit/5.212.0-alpha4.dssl2
+#signalr-qt/0.1.dssl2
+#qt/5.14.1.dssl2
+#qtwebkit/5.212.0-alpha4.dssl2
 sqlite3/3.31.0.dssl1
 sip/4.19.3.dssl1
 snappy/1.1.8.dssl1

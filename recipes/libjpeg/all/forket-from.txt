@@ -1,0 +1,2 @@
+https://github.com/conan-io/conan-center-index
+2231396587e52c618c53759f47b4077c0f6e5918 (branch: master)
