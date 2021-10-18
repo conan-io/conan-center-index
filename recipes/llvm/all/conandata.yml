@@ -1,4 +1,4 @@
 sources:
-  13.0.0:
+  "13.0.0":
     url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-13.0.0.tar.gz
     sha256: a1131358f1f9f819df73fa6bff505f2c49d176e9eef0a3aedd1fdbce3b4630e8
