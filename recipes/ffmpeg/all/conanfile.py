@@ -4,6 +4,7 @@ import os
 import contextlib
 import glob
 import shutil
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -131,7 +132,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.11.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_openh264:
@@ -155,7 +156,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libfdk_aac:
             self.requires("libfdk_aac/2.0.2")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1l")
         if self.options.get_safe("with_libalsa"):
@@ -351,41 +352,74 @@ class FFMpegConan(ConanFile):
                     for lib in glob.glob("*.a"):
                         tools.rename(lib, lib[3:-2] + ".lib")
 
+    def _read_component_version(self, component_name):
+        result = dict()
+        version_file_name = os.path.join(self.package_folder,
+                                         "include", "lib%s" % component_name,
+                                         "version.h")
+        version_file = open(version_file_name, "r")
+        pattern = "define LIB%s_VERSION_(MAJOR|MINOR|MICRO)[ \t]+(\\d+)" % (
+                  component_name.upper())
+        version = dict()
+        for line in version_file:
+            match = re.search(pattern, line)
+            if match:
+                version[match[1]] = match[2]
+        if "MAJOR" in version and "MINOR" in version and "MICRO" in version:
+            return f"{version['MAJOR']}.{version['MINOR']}.{version['MICRO']}"
+        return None
+
+    def _set_component_version(self, component_name):
+        version = self._read_component_version(component_name)
+        if version is not None:
+            self.cpp_info.components[component_name].version = version
+        else:
+            self.output.warn("cannot determine version of "
+                  "lib%s packaged with ffmpeg!" % component_name)
+
     def package_info(self):
         self.cpp_info.components["avdevice"].libs = ["avdevice"]
         self.cpp_info.components["avdevice"].requires = ["avfilter", "swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avdevice"].names["pkg_config"] = "libavdevice"
+        self._set_component_version("avdevice")
 
         self.cpp_info.components["avfilter"].libs = ["avfilter"]
         self.cpp_info.components["avfilter"].requires = ["swscale", "avformat", "avcodec", "swresample", "avutil"]
         self.cpp_info.components["avfilter"].names["pkg_config"] = "libavfilter"
+        self._set_component_version("avfilter")
 
         self.cpp_info.components["avformat"].libs = ["avformat"]
         self.cpp_info.components["avformat"].requires = ["avcodec", "swresample", "avutil"]
         self.cpp_info.components["avformat"].names["pkg_config"] = "libavformat"
+        self._set_component_version("avformat")
 
         self.cpp_info.components["avcodec"].libs = ["avcodec"]
         self.cpp_info.components["avcodec"].requires = ["swresample", "avutil"]
         self.cpp_info.components["avcodec"].names["pkg_config"] = "libavcodec"
+        self._set_component_version("avcodec")
 
         self.cpp_info.components["swscale"].libs = ["swscale"]
         self.cpp_info.components["swscale"].requires = ["avutil"]
         self.cpp_info.components["swscale"].names["pkg_config"] = "libswscale"
+        self._set_component_version("swscale")
 
         self.cpp_info.components["swresample"].libs = ["swresample"]
         self.cpp_info.components["swresample"].names["pkg_config"] = "libswresample"
         self.cpp_info.components["swresample"].requires = ["avutil"]
+        self._set_component_version("swresample")
 
         if self.options.postproc:
             self.cpp_info.components["postproc"].libs = ["postproc"]
             self.cpp_info.components["postproc"].requires = ["avutil"]
             self.cpp_info.components["postproc"].names["pkg_config"] = "libpostproc"
+            self._set_component_version("postproc")
 
             self.cpp_info.components["avfilter"].requires.append("postproc")
             self.cpp_info.components["avdevice"].requires.append("postproc")
 
         self.cpp_info.components["avutil"].libs = ["avutil"]
         self.cpp_info.components["avutil"].names["pkg_config"] = "libavutil"
+        self._set_component_version("avutil")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["avutil"].system_libs = ["pthread", "m", "dl"]
@@ -404,6 +438,7 @@ class FFMpegConan(ConanFile):
             self.cpp_info.components["avfilter"].system_libs = ["m", "pthread"]
             self.cpp_info.components["avdevice"].system_libs = ["m"]
         elif self.settings.os == "Windows":
+            self.cpp_info.components["avcodec"].system_libs = ["Mfplat", "Mfuuid"]
             self.cpp_info.components["avdevice"].system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             self.cpp_info.components["avutil"].system_libs = ["user32", "bcrypt"]
         elif tools.is_apple_os(self.settings.os):
@@ -491,6 +526,7 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_audiotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("AudioToolbox")
+            self.cpp_info.components["avdevice"].frameworks.append("CoreAudio")
 
         if self.options.get_safe("with_videotoolbox"):
             self.cpp_info.components["avcodec"].frameworks.append("VideoToolbox")

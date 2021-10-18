@@ -1,13 +1,13 @@
 sources:
   "2.8.103":
     sha256: "7ddafb1aa016bf5cedde689267b4149f68a48ee848f712bbda92947cecf6d6c4"
-    url: "https://github.com/conan-io/cci-sources-backup/raw/main/gsoap/gsoap2-code-r186.zip"
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap2-code-r186.zip"
   "2.8.104":
     sha256: "2ed385f2aeb753f0a17007f0e6fdb08770185ad7cd2f531ae051cc322411abcc"
-    url: "https://github.com/conan-io/cci-sources-backup/raw/main/gsoap/gsoap2-code-r187.zip"
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap2-code-r187.zip"
   "2.8.105":
     sha256: "c60b973a1c23574ca673da86f018bd36b38fc810f1fa23b0fae2430889c9be4c"
-    url: "https://github.com/conan-io/cci-sources-backup/raw/main/gsoap/gsoap2-code-r188.zip"
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap2-code-r188.zip"
   "2.8.106":
     sha256: "be001b765be9ad2ad0a560d64d84ae10a30a961a2904bfe86f9f57f49a5555d7"
-    url: "https://github.com/conan-io/cci-sources-backup/raw/main/gsoap/gsoap2-code-r189.zip"
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap2-code-r189.zip"

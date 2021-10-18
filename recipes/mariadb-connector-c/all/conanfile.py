@@ -97,9 +97,9 @@ class MariadbConnectorcConan(ConanFile):
         self._cmake.definitions["WITH_EXTERNAL_ZLIB"] = True
         self._cmake.definitions["WITH_CURL"] = self.options.with_curl
         self._cmake.definitions["WITH_SSL"] = self.options.with_ssl
-        self._cmake.definitions["INSTALL_BINDIR"] = os.path.join(self.package_folder, "bin").replace("\\", "/")
-        self._cmake.definitions["INSTALL_LIBDIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
-        self._cmake.definitions["INSTALL_PLUGINDIR"] = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
+        self._cmake.definitions["INSTALL_BINDIR"] = "bin"
+        self._cmake.definitions["INSTALL_LIBDIR"] = "lib"
+        self._cmake.definitions["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
         self._cmake.configure()
         return self._cmake
 

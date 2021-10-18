@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
 import os
+import re
 import shutil
 
 required_conan_version = ">=1.33.0"
@@ -72,9 +73,13 @@ class LcmsConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "12"
+            properties = {
+                # Enable LTO when CFLAGS contains -GL
+                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+            }
             # run build
             msbuild = MSBuild(self)
-            msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
+            msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project, properties=properties)
 
     def _configure_autotools(self):
         if self._autotools:

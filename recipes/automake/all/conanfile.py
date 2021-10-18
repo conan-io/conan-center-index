@@ -77,7 +77,7 @@ class AutomakeConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
                                                "          $map_traced_defs{$arg1} = $file;",
                                                "          $file = `cygpath -u $file`;\n"
-                                               "          $file =~ s/^\s+|\s+$//g;\n"
+                                               "          $file =~ s/^\\s+|\\s+$//g;\n"
                                                "          $map_traced_defs{$arg1} = $file;")
 
     def build(self):

@@ -1,0 +1,11 @@
+sources:
+  "16.0.1":
+    Windows:
+      url: "https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_windows-x64_bin.zip"
+      sha256: "733b45b09463c97133d70c2368f1b9505da58e88f2c8a84358dd4accfd06a7a4"
+    Linux:
+      url: "https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_linux-x64_bin.tar.gz"
+      sha256: "b1198ffffb7d26a3fdedc0fa599f60a0d12aa60da1714b56c1defbce95d8b235"
+    Macos:
+      url: "https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_osx-x64_bin.tar.gz"
+      sha256: "6098f839954439d4916444757c542c1b8778a32461706812d41cc8bbefce7f2f"

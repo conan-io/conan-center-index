@@ -1,0 +1,4 @@
+sources:
+  "cci.20210420":
+    url: "https://github.com/KhronosGroup/OpenGL-Registry/raw/8e729daa702d45597ccffa0c964bba1eca10a9e6/api/GL/glext.h"
+    sha256: "d19f1fd288d7e997eb797b11700e96f42344d22163a67bcae8e8747fcc5cc6b7"

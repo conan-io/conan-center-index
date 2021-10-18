@@ -2,7 +2,19 @@ sources:
   "2.2.7.0":
     url: "https://github.com/OpenImageIO/oiio/archive/Release-2.2.7.0.tar.gz"
     sha256: "857ac83798d6d2bda5d4d11a90618ff19486da2e5a4c4ff022c5976b5746fe8c"
+  "2.2.18.0":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.2.18.0.tar.gz"
+    sha256: "72597619f09b60cc2afc18f378b40fbec62701112957f43cff162dd9a52a26ce"
+  "2.3.7.2":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.3.7.2.tar.gz"
+    sha256: "829c05d17610f1156c2a777310f4709b81f3a302fd11e3999ea4a865a5b4a5d3"
 patches:
   "2.2.7.0":
     - patch_file: "patches/2.2.7.0-cmake-targets.patch"
+      base_path: "source_subfolder"
+  "2.2.18.0":
+    - patch_file: "patches/2.2.18.0-cmake-targets.patch"
+      base_path: "source_subfolder"
+  "2.3.7.2":
+    - patch_file: "patches/2.3.7.2-cmake-targets.patch"
       base_path: "source_subfolder"

@@ -41,7 +41,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": [True, False],
         "neon": [True, False],
         "dnn": [True, False],
-        "detect_cpu_baseline": [True, False]
+        "detect_cpu_baseline": [True, False],
+        "nonfree": [True, False],
     }
     default_options = {
         "shared": False,
@@ -70,7 +71,8 @@ class OpenCVConan(ConanFile):
         "with_imgcodec_sunraster": False,
         "neon": True,
         "dnn": True,
-        "detect_cpu_baseline": False
+        "detect_cpu_baseline": False,
+        "nonfree": False,
     }
 
     short_paths = True
@@ -98,6 +100,10 @@ class OpenCVConan(ConanFile):
     @property
     def _has_with_tiff_option(self):
         return self.settings.os != "iOS"
+
+    @property
+    def _protobuf_version(self):
+        return "protobuf/3.17.1"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -163,7 +169,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.dnn:
-            self.requires("protobuf/3.17.1")
+            self.requires(self._protobuf_version)
         if self.options.with_ade:
             self.requires("ade/0.1.1f")
 
@@ -178,7 +184,7 @@ class OpenCVConan(ConanFile):
 
     def build_requirements(self):
         if self.options.dnn and hasattr(self, "settings_build"):
-            self.build_requires("protobuf/3.17.1")
+            self.build_requires(self._protobuf_version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0],
@@ -337,6 +343,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
+        self._cmake.definitions["OPENCV_ENABLE_NONFREE"] = self.options.nonfree
 
         if self.options.detect_cpu_baseline:
             self._cmake.definitions["CPU_BASELINE"] = "DETECT"
@@ -607,7 +614,8 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [module_rel_path]
                 self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [module_rel_path]
                 self.cpp_info.components[conan_component].libs = [lib_name]
-                self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
+                if self.settings.os != "Windows":
+                    self.cpp_info.components[conan_component].includedirs.append(os.path.join("include", "opencv4"))
                 self.cpp_info.components[conan_component].requires = requires
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]

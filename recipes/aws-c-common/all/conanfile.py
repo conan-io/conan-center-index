@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
 
@@ -16,10 +17,12 @@ class AwsCCommon(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "cpu_extensions": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "cpu_extensions": True,
     }
 
     _cmake = None
@@ -31,12 +34,18 @@ class AwsCCommon(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "0.6.11":
+            del self.options.cpu_extensions
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Static runtime + shared is not working for more recent releases")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -47,6 +56,9 @@ class AwsCCommon(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["STATIC_CRT"] = "MT" in self.settings.compiler.runtime
+        self._cmake.definitions["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
         self._cmake.configure()
         return self._cmake
 
@@ -74,6 +86,8 @@ class AwsCCommon(ConanFile):
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["dl", "m", "pthread", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
+            if tools.Version(self.version) >= "0.6.13":
+                self.cpp_info.components["aws-c-common-lib"].system_libs.append("shlwapi")
         if not self.options.shared:
             if tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]

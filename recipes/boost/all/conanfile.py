@@ -6,6 +6,7 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import glob
 import os
+import re
 import sys
 import shlex
 import shutil
@@ -814,7 +815,10 @@ class BoostConan(ConanFile):
         full_command += ' --debug-configuration --build-dir="%s"' % self.build_folder
         self.output.warn(full_command)
 
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        # If sending a user-specified toolset to B2, setting the vcvars
+        # interferes with the compiler selection.
+        use_vcvars = self._is_msvc and not self.settings.compiler.get_safe("toolset", default="")
+        with tools.vcvars(self.settings) if use_vcvars else tools.no_op():
             with tools.chdir(sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
@@ -1224,13 +1228,10 @@ class BoostConan(ConanFile):
     @property
     def _toolset_version(self):
         if self._is_msvc:
-            compiler_version = str(self.settings.compiler.version)
-            if Version(compiler_version) >= "16":
-                return "14.2"
-            elif Version(compiler_version) >= "15":
-                return "14.1"
-            else:
-                return "%s.0" % compiler_version
+            toolset = tools.msvs_toolset(self)
+            match = re.match(r'v(\d+)(\d)$', toolset)
+            if match:
+                return "%s.%s" % (match.group(1), match.group(2))
         return ""
 
     @property
