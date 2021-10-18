@@ -288,6 +288,8 @@ class FFMpegConan(ConanFile):
                 "--disable-stripping",
                 "--enable-debug",
             ])
+        if not self.options.with_programs:
+            args.append("--disable-programs")
         # since ffmpeg"s build system ignores CC and CXX
         if tools.get_env("AS"):
             args.append("--as={}".format(tools.get_env("AS")))
@@ -313,8 +315,6 @@ class FFMpegConan(ConanFile):
                 apple_arch = tools.to_apple_arch(str(self.settings.arch))
                 extra_cflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
                 extra_ldflags.extend(["-arch {}".format(apple_arch), "-isysroot {}".format(xcrun.sdk_path)])
-        if not self.options.with_programs:
-            args.append("--disable-programs")
 
         args.append("--extra-cflags={}".format(" ".join(extra_cflags)))
         args.append("--extra-ldflags={}".format(" ".join(extra_ldflags)))
