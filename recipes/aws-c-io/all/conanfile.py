@@ -40,6 +40,10 @@ class AwsCIO(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-cal/0.5.12")
+        if tools.Version(self.version) < "0.10.10":
+            self.requires("aws-c-common/0.6.11")
+        else:
+            self.requires("aws-c-common/0.6.14")
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.requires("s2n/1.1.0")
 
@@ -73,7 +77,7 @@ class AwsCIO(ConanFile):
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package"] = "aws-c-io"
         self.cpp_info.components["aws-c-io-lib"].names["cmake_find_package_multi"] = "aws-c-io"
         self.cpp_info.components["aws-c-io-lib"].libs = ["aws-c-io"]
-        self.cpp_info.components["aws-c-io-lib"].requires = ["aws-c-cal::aws-c-cal-lib"]
+        self.cpp_info.components["aws-c-io-lib"].requires = ["aws-c-common::aws-c-common-lib", "aws-c-cal::aws-c-cal-lib"]
 
         if self.settings.os == "Macos":
             self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
