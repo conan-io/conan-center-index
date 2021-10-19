@@ -832,6 +832,9 @@ class QtConan(ConanFile):
         _create_module("Core", core_reqs)
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["qtCore"].exelinkflags.append("-ENTRY:mainCRTStartup")
+            if tools.Version(self.version) >= "6.2.0":
+                self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
+                self.cpp_info.components["qtCore"].system_libs.append("synchronization")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         if tools.Version(self.version) < "6.1.0":
