@@ -384,6 +384,9 @@ class QtConan(ConanFile):
                        "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
+        if self.options.qtwayland:
+            self.build_requires("wayland/1.19.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
