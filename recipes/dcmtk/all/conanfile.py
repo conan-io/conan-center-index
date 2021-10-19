@@ -12,7 +12,7 @@ class DCMTKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://dicom.offis.de/dcmtk"
     license = "BSD-3-Clause"
-    topics = "conan", "dcmtk", "dicom", "image"
+    topics = ("dcmtk", "dicom", "image")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
