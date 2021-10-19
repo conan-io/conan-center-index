@@ -1,34 +1,44 @@
-From 83239ac6a546383b67c0326025ef2e594e96c7d9 Mon Sep 17 00:00:00 2001
+From a7a3443e88e4bdf3c4895365883e5731eb5cc672 Mon Sep 17 00:00:00 2001
 From: atom <tomasiche@gmail.com>
-Date: Mon, 18 Oct 2021 12:56:02 +0300
+Date: Tue, 19 Oct 2021 11:52:54 +0300
 Subject: [PATCH] Patch
 
 ---
- CMakeLists.txt             | 93 ++++++++++++++++++--------------------
- backend/CMakeLists.txt     | 25 ++++++----
- backend_qt/CMakeLists.txt  | 15 ++++--
- backend_qt/qzint.h         |  2 +-
- frontend/CMakeLists.txt    |  4 +-
- frontend/main.c            |  2 +-
- frontend_qt/CMakeLists.txt | 10 ++--
- getopt/CMakeLists.txt      |  9 +++-
- 8 files changed, 89 insertions(+), 71 deletions(-)
+ CMakeLists.txt               | 94 +++++++++++++++++-------------------
+ backend/CMakeLists.txt       | 45 ++++++-----------
+ backend/tests/CMakeLists.txt |  2 +-
+ backend_qt/CMakeLists.txt    | 12 +++--
+ backend_qt/qzint.h           |  2 +-
+ frontend/CMakeLists.txt      |  4 +-
+ frontend/main.c              |  2 +-
+ frontend_qt/CMakeLists.txt   | 10 ++--
+ getopt/CMakeLists.txt        |  9 +++-
+ 9 files changed, 87 insertions(+), 93 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c378a75..b40b227 100644
+index c378a75..097f98d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -15,7 +15,8 @@ set(ZINT_VERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}.${ZINT_VERSION_REL
+@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.5)
+ project(zint-package)
+ 
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++
+ 
+ set(ZINT_VERSION_MAJOR 2)
+ set(ZINT_VERSION_MINOR 10)
+@@ -15,17 +17,15 @@ set(ZINT_VERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}.${ZINT_VERSION_REL
  
  add_definitions(-DZINT_VERSION=\"${ZINT_VERSION}\")
  
 -set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-+#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
  
  option(ZINT_DEBUG    "Set debug compile flags"         OFF)
  option(ZINT_SANITIZE "Set sanitize compile/link flags" OFF)
-@@ -25,7 +26,7 @@ option(ZINT_STATIC   "Build static library"            OFF)
+ option(ZINT_TEST     "Set test compile flag"           OFF)
+ option(ZINT_COVERAGE "Set code coverage flags"         OFF)
+-option(ZINT_STATIC   "Build static library"            OFF)
  option(ZINT_USE_PNG  "Build with PNG support"          ON)
  option(ZINT_USE_QT   "Build with QT support"           ON)
  
@@ -37,7 +47,7 @@ index c378a75..b40b227 100644
  
  include(CheckCXXCompilerFlag)
  include(CheckFunctionExists)
-@@ -130,63 +131,57 @@ if(NOT HAVE_GETOPT)
+@@ -130,63 +130,57 @@ if(NOT HAVE_GETOPT)
  endif()
  
  add_subdirectory(backend)
@@ -143,10 +153,10 @@ index c378a75..b40b227 100644
  # This needs to be run very last so other parts of the scripts can take
  # advantage of this.
 diff --git a/backend/CMakeLists.txt b/backend/CMakeLists.txt
-index c79eabe..b1f04ec 100644
+index c79eabe..1f73419 100644
 --- a/backend/CMakeLists.txt
 +++ b/backend/CMakeLists.txt
-@@ -13,11 +13,7 @@ set(zint_TWODIM_SRCS code16k.c codablock.c dmatrix.c pdf417.c qr.c maxicode.c co
+@@ -13,25 +13,7 @@ set(zint_TWODIM_SRCS code16k.c codablock.c dmatrix.c pdf417.c qr.c maxicode.c co
  set(zint_OUTPUT_SRCS vector.c ps.c svg.c emf.c bmp.c pcx.c gif.c png.c tif.c raster.c output.c)
  set(zint_SRCS ${zint_OUTPUT_SRCS} ${zint_COMMON_SRCS} ${zint_ONEDIM_SRCS} ${zint_POSTAL_SRCS} ${zint_TWODIM_SRCS})
  
@@ -155,12 +165,50 @@ index c79eabe..b1f04ec 100644
 -if(ZINT_STATIC)
 -    add_library(zint-static STATIC ${zint_SRCS})
 -endif()
+-
+-function(zint_target_link_libraries library)
+-    target_link_libraries(zint ${library})
+-    if(ZINT_STATIC)
+-        target_link_libraries(zint-static ${library})
+-    endif()
+-endfunction()
+-
+-function(zint_target_compile_definitions scope definition)
+-    target_compile_definitions(zint ${scope} ${definition})
+-    if(ZINT_STATIC)
+-        target_compile_definitions(zint-static ${scope} ${definition})
+-    endif()
+-endfunction()
 +add_library(zint ${zint_SRCS})
  
- function(zint_target_link_libraries library)
-     target_link_libraries(zint ${library})
-@@ -59,12 +55,21 @@ if(MSVC)
-     target_compile_definitions(zint PRIVATE DLL_EXPORT)
+ set_target_properties(zint PROPERTIES   SOVERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}"
+                                         VERSION ${ZINT_VERSION})
+@@ -41,30 +23,33 @@ if(ZINT_USE_PNG)
+ endif()
+ 
+ if(ZINT_USE_PNG AND PNG_FOUND)
+-    zint_target_link_libraries(PNG::PNG)
++    target_link_libraries(${PROJECT_NAME} PNG::PNG)
+ else()
+-    zint_target_compile_definitions(PUBLIC NO_PNG)
++    target_compile_definitions(${PROJECT_NAME} PUBLIC NO_PNG)
+ endif()
+ 
+ if(ZINT_TEST)
+-    zint_target_compile_definitions(PUBLIC ZINT_TEST)
++    target_compile_definitions(${PROJECT_NAME} PUBLIC ZINT_TEST)
+ endif()
+ 
+ if(NOT MSVC)
+     # Link with standard C math library.
+-    zint_target_link_libraries(m)
++    target_link_libraries(${PROJECT_NAME} m)
+ endif()
+ 
+-if(MSVC)
+-    target_compile_definitions(zint PRIVATE DLL_EXPORT)
++if(MSVC AND BUILD_SHARED_LIBS)
++    target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
  endif()
  
 -install(TARGETS zint ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -168,12 +216,6 @@ index c79eabe..b1f04ec 100644
 -    install(TARGETS zint-static ${INSTALL_TARGETS_DEFAULT_ARGS})
 -endif()
 -install(FILES zint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
-+#install(TARGETS zint ${INSTALL_TARGETS_DEFAULT_ARGS})
-+#if(ZINT_STATIC)
-+#    install(TARGETS zint-static ${INSTALL_TARGETS_DEFAULT_ARGS})
-+#endif()
-+#install(FILES zint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
-+
 +target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
  
  if(ZINT_TEST)
@@ -186,11 +228,24 @@ index c79eabe..b1f04ec 100644
 +        PUBLIC_HEADER
 +          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 +)
+diff --git a/backend/tests/CMakeLists.txt b/backend/tests/CMakeLists.txt
+index 68bc659..dd2a63a 100644
+--- a/backend/tests/CMakeLists.txt
++++ b/backend/tests/CMakeLists.txt
+@@ -28,7 +28,7 @@ if(NOT HAVE_GETOPT)
+     target_link_libraries(testcommon zint_bundled_getopt)
+ endif()
+ 
+-if(ZINT_STATIC)
++if(NOT BUILD_SHARED_LIBS)
+     add_library(testcommon-static ${testcommon_SRCS})
+     target_link_libraries(testcommon-static zint-static)
+     target_include_directories(testcommon-static PUBLIC ${zint_backend_tests_SOURCE_DIR})
 diff --git a/backend_qt/CMakeLists.txt b/backend_qt/CMakeLists.txt
-index 953cae8..e3f77b2 100644
+index 953cae8..5633db1 100644
 --- a/backend_qt/CMakeLists.txt
 +++ b/backend_qt/CMakeLists.txt
-@@ -12,15 +12,22 @@ else()
+@@ -12,15 +12,19 @@ else()
      qt5_wrap_cpp(QZint_SRCS qzint.h)
  endif()
  
@@ -201,7 +256,6 @@ index 953cae8..e3f77b2 100644
                                          VERSION ${ZINT_VERSION})
  
 -target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/backend")
-+#target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/backend")
  
  target_link_libraries(${PROJECT_NAME} zint Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui)
  
@@ -209,8 +263,6 @@ index 953cae8..e3f77b2 100644
  
 -install(TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
 -install(FILES qzint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
-+#install(TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
-+#install(FILES qzint.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 +set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER qzint.h)
 +include(GNUInstallDirs)
 +install(TARGETS ${PROJECT_NAME}

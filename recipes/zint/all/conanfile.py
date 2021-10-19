@@ -93,10 +93,9 @@ class ZintConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared:
-           self.cpp_info.defines.append("ZINT_STATIC")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Dwmapi", "UxTheme"]
+        if self.options.with_qt:
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["Dwmapi", "UxTheme"]
 
         self.cpp_info.filenames["cmake_find_package"] = "zint"
         self.cpp_info.filenames["cmake_find_package_multi"] = "zint"
