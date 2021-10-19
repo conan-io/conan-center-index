@@ -1,5 +1,10 @@
 # Changelog
 
+### 18-October-2021 - 17:05 CEST
+ - [config] Upgrade Conan version to 1.40.4
+ - [fix] Replace `Unauthorized User` label by `User-approval pending`
+ - [feat] Remove `os_build` and `arch_build` from generated profiles 
+
 ### 11-October-2021 - 12:14 CEST
  - [configs] Configurable Github statuses to check
  - [configs] Pairing between configurations and workers (docker images, win/macos servers,...) is configurable in runtime.
