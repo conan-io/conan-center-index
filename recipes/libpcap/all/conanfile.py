@@ -117,6 +117,7 @@ class LibPcapConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libpcap"
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["pcap"] if self.options.shared else ["pcap_static"]
+            self.cpp_info.bindirs = ["bin/x64"]
             self.cpp_info.libdirs = ["lib/x64"]
             self.cpp_info.system_libs = ["ws2_32"]
         else:
