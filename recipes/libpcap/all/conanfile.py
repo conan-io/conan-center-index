@@ -93,9 +93,8 @@ class LibPcapConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Windows":
-            self.options.shared = True  # Build requires shared libs
             cmake = self._configure_cmake()
-            cmake.build(target="pcap_static")
+            cmake.build()
         else:
             autotools = self._configure_autotools()
             autotools.make()
