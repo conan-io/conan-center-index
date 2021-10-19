@@ -9,5 +9,7 @@ conan_basic_setup(TARGETS)
 
 find_package(AWSSDK REQUIRED CONFIG)
 
+add_subdirectory(aws-sdk-cpp-plugin)
+
 add_executable(example example.cpp)
-target_link_libraries(example AWS::aws-sdk-cpp-s3)
+target_link_libraries(example PRIVATE aws-sdk-cpp-plugin)

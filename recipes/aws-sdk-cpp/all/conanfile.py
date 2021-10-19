@@ -1,6 +1,10 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
+
+from conan.tools.files import rename
+from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
+
 
 class AwsSdkCppConan(ConanFile):
     name = "aws-sdk-cpp"
@@ -401,6 +405,65 @@ class AwsSdkCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @property
+    def _res_folder(self):
+        return "res"
+
+    def _create_project_cmake_module(self):
+        # package files needed to build other components (e.g. aws-cdi-sdk) with this SDK
+        for file in [
+            "cmake/compiler_settings.cmake",
+            "cmake/initialize_project_version.cmake",
+            "cmake/utilities.cmake",
+            "toolchains/cmakeProjectConfig.cmake",
+            "toolchains/pkg-config.pc.in",
+            "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
+        ]:
+            self.copy(file, src=self._source_subfolder, dst=self._res_folder)
+            tools.replace_in_file(os.path.join(self.package_folder, self._res_folder, file), "CMAKE_CURRENT_SOURCE_DIR", "AWS_NATIVE_SDK_ROOT", strict=False)
+
+        # avoid getting error from hook
+        with tools.chdir(os.path.join(self.package_folder, self._res_folder)):
+            rename(self, os.path.join("toolchains", "cmakeProjectConfig.cmake"), os.path.join("toolchains", "cmakeProjectConf.cmake"))
+            tools.replace_in_file(os.path.join("cmake", "utilities.cmake"), "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake")
+
+        # create a cmake module to load the files above
+        contents = textwrap.dedent("""
+        get_filename_component(AWS_NATIVE_SDK_ROOT ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
+        set(SIMPLE_INSTALL TRUE)
+
+        if (CMAKE_INSTALL_BINDIR)
+            set(BINARY_DIRECTORY "${CMAKE_INSTALL_BINDIR}")
+        endif()
+
+        if (CMAKE_INSTALL_LIBDIR)
+            set(LIBRARY_DIRECTORY "${CMAKE_INSTALL_LIBDIR}")
+        endif()
+
+        if (CMAKE_INSTALL_INCLUDEDIR)
+            set(INCLUDE_DIRECTORY "${CMAKE_INSTALL_INCLUDEDIR}")
+        endif()
+
+        if(BUILD_SHARED_LIBS)
+            set(ARCHIVE_DIRECTORY "${BINARY_DIRECTORY}")
+        else()
+            set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
+        endif()
+
+        if(DEFINED CMAKE_CXX_STANDARD)
+            set(STANDARD_DEFAULT ${CMAKE_CXX_STANDARD})
+        else()
+            set(STANDARD_DEFAULT "11")
+        endif()
+        set(CPP_STANDARD ${STANDARD_DEFAULT} CACHE STRING "Flag to upgrade the C++ standard used. The default is 11. The minimum is 11.")
+
+        include(CMakePackageConfigHelpers)
+        include(initialize_project_version)
+        include(utilities)
+        include(compiler_settings)
+        """)
+        tools.save(os.path.join(self.package_folder, self._res_folder, "cmake", "add_project.cmake"), content=contents)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
@@ -411,6 +474,8 @@ class AwsSdkCppConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        self._create_project_cmake_module()
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
@@ -474,3 +539,8 @@ class AwsSdkCppConan(ConanFile):
         if lib_stdcpp:
             self.cpp_info.components["core"].system_libs.append(lib_stdcpp)
 
+        self.cpp_info.components["plugin_scripts"].requires = ["core"]
+        self.cpp_info.components["plugin_scripts"].builddirs.extend([
+            os.path.join(self._res_folder, "cmake"),
+            os.path.join(self._res_folder, "toolchains")])
+        self.cpp_info.components["plugin_scripts"].build_modules.append(os.path.join(self._res_folder, "cmake", "add_project.cmake"))
