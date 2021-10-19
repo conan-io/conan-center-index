@@ -18,6 +18,7 @@ openssl/1.1.1d.dssl2
 openh264/1.7.0.dssl2
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
+sdl/2.0.16
 sqlite3/3.31.0.dssl1
 qt/5.14.1.dssl3
 xz_utils/5.2.4.dssl2
