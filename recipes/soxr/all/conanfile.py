@@ -75,7 +75,7 @@ class SoxrConan(ConanFile):
         pffft_c = tools.load(os.path.join(self._source_subfolder, "src", "pffft.c"))
         license_header = re.search(r"/\* (Copyright.*?)\*/", pffft_c, re.DOTALL).group(1)
         license_header = "\n".join(line.lstrip() for line in license_header.splitlines())
-        tools.save(license_header, os.path.join(self.package_folder, "licenses", "pffft"))
+        tools.save(os.path.join(self.package_folder, "licenses", "pffft"), license_header)
 
     def package(self):
         self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
