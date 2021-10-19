@@ -5,7 +5,6 @@ import platform
 
 class QtWebKitConan(ConanFile):
     name = "qtwebkit"
-    version = "5.212.0-alpha4.dssl2"
     original_version = "5.212.0-alpha4"
     license = "LGPL-2.0-or-later, LGPL-2.1-or-later, BSD-2-Clause"
     homepage = "https://github.com/qtwebkit/qtwebkit"
@@ -41,12 +40,12 @@ class QtWebKitConan(ConanFile):
     }
 
     requires = [
-        "qt/5.14.1.dssl1",
-        "libjpeg/9d",
+        "qt/5.14.1.dssl2",
+        "libjpeg/9d.dssl2",
         "libpng/1.6.37",
         "libwebp/1.1.0",
-        "sqlite3/3.31.0",
-        "icu/64.2",
+        "sqlite3/3.31.0.dssl2",
+        "icu/64.2.dssl2",
         "libxml2/2.9.9",
         "libxslt/1.1.33",
         "zlib/1.2.11"
@@ -61,9 +60,10 @@ class QtWebKitConan(ConanFile):
                 self.build_requires("bison/3.5.3")
             if not tools.which("flex"):
                 self.build_requires("flex/2.6.4")
-
+        if not tools.which('perl') and tools.os_info.is_windows:
+            self.build_requires('strawberryperl/5.30.0.1')
         if not tools.which("gperf"):
-            self.build_requires("gperf/3.1")
+            self.build_requires("gperf/3.1.dssl1")
         if not tools.which("ruby"):
             self.build_requires("ruby/2.3.7")
 

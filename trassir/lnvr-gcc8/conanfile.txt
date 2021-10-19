@@ -74,10 +74,10 @@ pjsip/2.9
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
 qt/5.14.1.dssl3
-#qtwebkit/5.212.0-alpha4.dssl2
+qtwebkit/5.212.0-alpha4.dssl3
 sdl/2.0.16
 #sip/4.19.3
-#signalr-qt/0.1.dssl2
+signalr-qt/0.1.dssl2
 sqlite3/3.31.0.dssl1
 util-macros/1.19.2 # GHA: noexport
 xcb-proto/1.13 # GHA: noexport

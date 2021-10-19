@@ -4,4 +4,5 @@
 &: msys2/20210725
 &: nasm/2.14.dssl1
 &: strawberryperl/5.30.0.1
+&: winflexbison/2.5.22
 &: yasm/1.3.0.dssl1
