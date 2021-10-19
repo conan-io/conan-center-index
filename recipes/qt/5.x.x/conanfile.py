@@ -182,6 +182,9 @@ class QtConan(ConanFile):
                        "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
+        if self.options.qtwayland:
+            self.build_requires("wayland/1.19.0")
+
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.with_icu
