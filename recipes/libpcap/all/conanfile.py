@@ -1,4 +1,4 @@
-from conans import AutoToolsBuildEnvironment, tools, ConanFile
+from conans import AutoToolsBuildEnvironment, tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -26,6 +26,7 @@ class LibPcapConan(ConanFile):
         "enable_universal": True
     }
     _autotools = None
+    _cmake = None
 
     # TODO: Add dbus-glib when available
     # TODO: Add libnl-genl when available
@@ -47,13 +48,13 @@ class LibPcapConan(ConanFile):
             self.requires("libusb/1.0.24")
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libpcap is not supported on Windows.")
         if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
 
     def build_requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os == "Windows":
+            self.build_requires("winflexbison/2.5.24")
+        else:
             self.build_requires("bison/3.7.1")
             self.build_requires("flex/2.6.4")
 
@@ -82,19 +83,42 @@ class LibPcapConan(ConanFile):
             self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_REMOTE"] = False
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
+
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        if self.settings.os == "Windows":
+            self.options.shared = True  # Build requires shared libs
+            cmake = self._configure_cmake()
+            cmake.build(target="pcap_static")
+        else:
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.install()
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            if self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"]= "libpcap"
-        self.cpp_info.libs = ["pcap"]
+        self.cpp_info.names["pkg_config"] = "libpcap"
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["pcap_static"]
+            self.cpp_info.libdirs = ["lib/x64"]
+        else:
+            self.cpp_info.libs = ["pcap"]
+            self.cpp_info.libdirs = ["lib"]
