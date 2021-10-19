@@ -50,6 +50,7 @@ pjsip/2.9
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
 signalr-qt/0.1.dssl2
+#sip/4.19.3 need to port tech1scripts
 sdl/2.0.16
 qt/5.14.1.dssl3
 qtwebkit/5.212.0-alpha4.dssl3
@@ -102,6 +103,7 @@ pjsip:shared=False
 protobuf:shared=False
 qt:shared=True
 signalr-qt:shared=True
+sdl:shared=True
 zlib:shared=True
 libxml2:iconv=False
 libxml2:shared=True
