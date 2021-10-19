@@ -5,11 +5,17 @@ virtualenv
 
 [requires]
 axtls/1.5.3.dssl4
+boost/1.69.0.dssl1
 bzip2/1.0.8
+caffe/1.0.windows.dssl2
 ffmpeg/3.3.1.dssl1
 freetype/2.10.1
+gflags/2.2.2
+glog/0.4.0
+hdf5/1.10.6
 icu/64.2.dssl2
 intel_media_sdk/2018R2_1
+leveldb/1.22
 libcurl/7.64.1.dssl2
 libjpeg/9d.dssl2
 libpng/1.6.37
@@ -17,12 +23,16 @@ libpq/11.5.dssl1
 libwebp/1.1.0
 libxml2/2.9.9
 libxslt/1.1.33
+lmdb/0.9.28.dssl1
+openblas/0.3.7.dssl1
+opencv/2.4.13.7
 openssl/1.1.1d.dssl2
 openh264/1.7.0.dssl2
 protobuf/3.9.1.dssl2
 protoc/3.9.1.dssl2
 signalr-qt/0.1.dssl2
 sdl/2.0.16
+snappy/1.1.8.dssl1
 sqlite3/3.31.0.dssl1
 qt/5.14.1.dssl3
 qtwebkit/5.212.0-alpha4.dssl3

@@ -40,6 +40,13 @@ class CaffeConan(ConanFile):
                        "gpu_arch_ptx": ""
                        }
 
+    @property
+    def original_version(self):
+        if 'dssl' in self.version:
+            v = self.version.split('.')
+            return '.'.join(v[:-1])
+        return self.version
+
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -72,11 +79,11 @@ class CaffeConan(ConanFile):
 
 
     def build_requirements(self):
-        self.build_requires("protoc/3.9.1.dssl1")
+        self.build_requires("protoc/3.9.1.dssl2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version].get("url")).split(".tar.gz")[0]
+        tools.get(**self.conan_data["sources"][self.original_version])
+        extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.original_version].get("url")).split(".tar.gz")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -121,8 +128,8 @@ class CaffeConan(ConanFile):
             if os.path.exists('Find'+module+'.cmake'):
                 os.unlink('Find'+module+'.cmake')
         # patch sources
-        if self.conan_data["patches"].get(self.version):
-            for patch in self.conan_data["patches"][self.version]:
+        if self.conan_data["patches"].get(self.original_version):
+            for patch in self.conan_data["patches"][self.original_version]:
                 tools.patch(**patch)
 
     def build(self):
