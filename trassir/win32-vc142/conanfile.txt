@@ -26,7 +26,7 @@ gflags/2.2.2
 glog/0.4.0
 hdf5/1.10.6
 hidapi/0.10.1
-icu/64.2.dssl1
+icu/64.2.dssl2
 intel_media_sdk/2018R2_1
 jansson/2.12
 jsoncpp/1.8.3
