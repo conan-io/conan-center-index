@@ -1,5 +1,5 @@
-import itertools
 import os
+import re
 from conans import ConanFile, CMake, tools
 
 
@@ -72,11 +72,10 @@ class SoxrConan(ConanFile):
 
     def _extract_pffft_license(self):
         # extract license header from pffft.c and store it in the package folder
-        with open(os.path.join(self._source_subfolder, "src", "pffft.c"), "r") as f:
-            # the license header starts in line 3 and ends in line 55
-            lines = map(lambda line: line.lstrip("/* "), itertools.islice(f, 3, 55))
-            with open(os.path.join(self.package_folder, "licenses", "pffft"), "w") as f2:
-                f2.writelines(lines)
+        pffft_c = tools.load(os.path.join(self._source_subfolder, "src", "pffft.c"))
+        license_header = re.search(r"/\* (Copyright.*?)\*/", pffft_c, re.DOTALL).group(1)
+        license_header = "\n".join(map(lambda line: line.lstrip(), license_header.splitlines()))
+        tools.save(license_header, os.path.join(self.package_folder, "licenses", "pffft"))
 
     def package(self):
         self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
