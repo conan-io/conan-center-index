@@ -81,12 +81,11 @@ class GlewConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
-        self.cpp_info.names["cmake_find_package"] = "GLEW"
-        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = "glew" if self.options.shared else "glew_s"
+        self.cpp_info.set_property("cmake_file_name", "GLEW", "cmake_find_package")
+        self.cpp_info.set_property("cmake_target_name", "GLEW")
+        self.cpp_info.components["glewlib"].set_property("cmake_target_name", "GLEW", "cmake_find_package")
+        glewlib_target_name = "glew" if self.options.shared else "glew_s"
+        self.cpp_info.components["glewlib"].set_property("cmake_target_name", glewlib_target_name)
         self.cpp_info.components["glewlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
