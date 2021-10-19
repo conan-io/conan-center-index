@@ -53,7 +53,7 @@ class QtConan(ConanFile):
         "not_used": "-no-",
         "qt": "-qt-",
         "system": "-system-"
-    }  
+    }
 
     library_sources = list(library_source.keys())
 
@@ -153,7 +153,7 @@ class QtConan(ConanFile):
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 self.build_requires("bison/3.7.1")
-                self.build_requires("gperf/3.1")
+                self.build_requires("gperf/3.1.dssl1")
                 self.build_requires("flex/2.6.4")
 
             # Check if a valid python2 is available in PATH or it will failflex
@@ -997,7 +997,7 @@ Examples = bin/datadir/examples""")
         def _create_module(module, requires=[]):
             def _make_public_include_dirs(module_name):
                 return [
-                    os.path.join('include'), 
+                    os.path.join('include'),
                     os.path.join('include', f'Qt{module_name}'),
                 ]
 
