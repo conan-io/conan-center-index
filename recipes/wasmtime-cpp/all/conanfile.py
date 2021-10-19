@@ -29,7 +29,7 @@ class WasmtimeCppConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("wasmtime/" + self.version)
+        self.requires(f"wasmtime/{self.version}")
 
     def validate(self):
         compiler = self.settings.compiler
