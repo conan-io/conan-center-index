@@ -25,6 +25,7 @@ class ICUBase(ConanFile):
         "silent": [True, False],
         "with_dyload": [True, False],
         "dat_package_file": "ANY",
+        "with_icuio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,6 +35,7 @@ class ICUBase(ConanFile):
         "silent": True,
         "with_dyload": True,
         "dat_package_file": "None",
+        "with_icuio": True,
     }
 
     exports_sources = "patches/*.patch"
@@ -193,6 +195,9 @@ class ICUBase(ConanFile):
 
         if not self._enable_icu_tools:
             args.append("--disable-tools")
+        
+        if not self.options.with_icuio:
+            args.append("--disable-icuio")
 
         env_build = self._configure_autotools()
         if tools.cross_building(self, skip_x64_x86=True):
@@ -338,11 +343,12 @@ class ICUBase(ConanFile):
         self.cpp_info.components["icu-i18n-alias"].requires = ["icu-i18n"]
 
         # icuio
-        self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
-        self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
-        self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
-        self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
-        self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
+        if self.options.with_icuio:
+            self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
+            self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
+            self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
+            self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
+            self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
 
         if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
