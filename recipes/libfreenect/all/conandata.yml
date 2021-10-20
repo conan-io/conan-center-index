@@ -1,0 +1,8 @@
+sources:
+  "0.6.2":
+    url: "https://github.com/OpenKinect/libfreenect/archive/refs/tags/v0.6.2.tar.gz"
+    sha256: "e135f5e60ae290bf1aa403556211f0a62856a9e34f12f12400ec593620a36bfa"
+patches:
+  "0.6.2":
+    - patch_file: "patches/0.6.2-fix-cmake.patch"
+      base_path: "source_subfolder"
