@@ -247,9 +247,6 @@ class QtConan(ConanFile):
             if tools.cross_building(self.settings, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
-
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
