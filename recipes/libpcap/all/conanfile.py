@@ -113,6 +113,7 @@ class LibPcapConan(ConanFile):
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()
             cmake.install()
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         else:
             autotools = self._configure_autotools()
             autotools.install()
