@@ -24,6 +24,7 @@ class ICUBase(ConanFile):
         "with_unit_tests": [True, False],
         "silent": [True, False],
         "with_dyload": [True, False],
+        "dat_package_file": "ANY",
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class ICUBase(ConanFile):
         "with_unit_tests": False,
         "silent": True,
         "with_dyload": True,
+        "dat_package_file": "None",
     }
 
     exports_sources = "patches/*.patch"
@@ -96,6 +98,9 @@ class ICUBase(ConanFile):
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
         del self.info.options.silent  # Verbosity doesn't affect package's ID
+        if self.info.options.dat_package_file:
+            dat_package_file_sha256 = tools.sha256sum(str(self.info.options.dat_package_file))
+            self.info.options.dat_package_file = dat_package_file_sha256
 
     @property
     def _settings_build(self):
@@ -110,6 +115,10 @@ class ICUBase(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        if self.options.dat_package_file:
+            dat_package_file = glob.glob(os.path.join(self.source_folder, self._source_subfolder, "source", "data", "in", "*.dat"))
+            if dat_package_file:
+                shutil.copy(str(self.options.dat_package_file), dat_package_file[0])
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
