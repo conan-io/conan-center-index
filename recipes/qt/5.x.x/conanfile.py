@@ -363,7 +363,6 @@ class QtConan(ConanFile):
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
-            raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
@@ -1101,7 +1100,7 @@ Examples = bin/datadir/examples""")
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
                 _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
