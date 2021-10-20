@@ -23,7 +23,20 @@ class LibcurlConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
+        "with_file": [True, False],
+        "with_ftp": [True, False],
+        "with_http": [True, False],
         "with_ldap": [True, False],
+        "with_rtsp": [True, False],
+        "with_dict": [True, False],
+        "with_telnet": [True, False],
+        "with_tftp": [True, False],
+        "with_pop3": [True, False],
+        "with_imap": [True, False],
+        "with_smb": [True, False],
+        "with_smtp": [True, False],
+        "with_gopher": [True, False],
+        "with_mqtt": [True, False],
         "with_libssh2": [True, False],
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
@@ -36,16 +49,34 @@ class LibcurlConan(ConanFile):
         "with_zstd": [True, False],
         "with_c_ares": [True, False],
         "with_proxy": [True, False],
-        "with_rtsp": [True, False],
         "with_crypto_auth": [True, False],
         "with_ntlm": [True, False],
         "with_ntlm_wb": [True, False],
+        "with_cookies": [True, False],
+        "with_ipv6": [True, False],
+        "with_docs": [True, False],
+        "with_verbose_debug": [True, False],
+        "with_symbol_hiding": [True, False],
+        "with_unix_sockets": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": "openssl",
+        "with_dict": True,
+        "with_file": True,
+        "with_ftp": True,
+        "with_gopher": True,
+        "with_http": True,
+        "with_imap": True,
         "with_ldap": False,
+        "with_mqtt": True,
+        "with_pop3": True,
+        "with_rtsp": True,
+        "with_smb": True,
+        "with_smtp": True,
+        "with_telnet": True,
+        "with_tftp": True,
         "with_libssh2": False,
         "with_libidn": False,
         "with_librtmp": False,
@@ -58,10 +89,15 @@ class LibcurlConan(ConanFile):
         "with_zstd": False,
         "with_c_ares": False,
         "with_proxy": True,
-        "with_rtsp": True,
         "with_crypto_auth": True,
         "with_ntlm": True,
         "with_ntlm_wb": True,
+        "with_cookies": True,
+        "with_ipv6": True,
+        "with_docs": False,
+        "with_verbose_debug": True,
+        "with_symbol_hiding": False,
+        "with_unix_sockets": True,
     }
 
     _autotools = None
@@ -265,10 +301,29 @@ class LibcurlConan(ConanFile):
             "--with-brotli={}".format(yes_no(self.options.with_brotli)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-dict={}".format(yes_no(self.options.with_dict)),
+            "--enable-file={}".format(yes_no(self.options.with_file)),
+            "--enable-ftp={}".format(yes_no(self.options.with_ftp)),
+            "--enable-gopher={}".format(yes_no(self.options.with_gopher)),
+            "--enable-http={}".format(yes_no(self.options.with_http)),
+            "--enable-imap={}".format(yes_no(self.options.with_imap)),
             "--enable-ldap={}".format(yes_no(self.options.with_ldap)),
+            "--enable-mqtt={}".format(yes_no(self.options.with_mqtt)),
+            "--enable-pop3={}".format(yes_no(self.options.with_pop3)),
+            "--enable-rtsp={}".format(yes_no(self.options.with_rtsp)),
+            "--enable-smb={}".format(yes_no(self.options.with_smb)),
+            "--enable-smtp={}".format(yes_no(self.options.with_smtp)),
+            "--enable-telnet={}".format(yes_no(self.options.with_telnet)),
+            "--enable-tftp={}".format(yes_no(self.options.with_tftp)),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--enable-ares={}".format(yes_no(self.options.with_c_ares)),
             "--enable-threaded-resolver={}".format(yes_no(self.options.with_c_ares)),
+            "--enable-cookies={}".format(yes_no(self.options.with_cookies)),
+            "--enable-ipv6={}".format(yes_no(self.options.with_ipv6)),
+            "--enable-manual={}".format(yes_no(self.options.with_docs)),
+            "--enable-verbose={}".format(yes_no(self.options.with_verbose_debug)),
+            "--enable-symbol-hiding={}".format(yes_no(self.options.with_symbol_hiding)),
+            "--enable-unix-sockets={}".format(yes_no(self.options.with_unix_sockets)),
         ]
         if self.options.with_ssl == "openssl":
             params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
@@ -299,10 +354,10 @@ class LibcurlConan(ConanFile):
 
         if self._has_metalink_option:
             params.append("--with-libmetalink={}".format(yes_no(self.options.with_libmetalink)))
-        
+
         if not self.options.with_proxy:
             params.append("--disable-proxy")
-       
+
         if not self.options.with_rtsp:
             params.append("--disable-rtsp")
 
