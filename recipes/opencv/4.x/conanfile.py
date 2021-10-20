@@ -308,27 +308,16 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CLP"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
 
-        self._cmake.definitions["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
-        if self.options.get_safe("with_ffmpeg"):
-            self._cmake.definitions["HAVE_FFMPEG"] = True
-            self._cmake.definitions["HAVE_FFMPEG_WRAPPER"] = False
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
-            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = False
-            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
-            ffmpegLibs = []
-            ffmpegIncludes = []
-            for lib in self.deps_cpp_info["ffmpeg"].components:
-                self._cmake.definitions["FFMPEG_lib%s_VERSION" % lib] = \
-                    self.deps_cpp_info["ffmpeg"].components[lib].version
-                ffmpegLibs += self.deps_cpp_info["ffmpeg"].components[lib].libs
-                ffmpegIncludes += \
-                    self.deps_cpp_info["ffmpeg"].components[lib].include_paths
+        self._cmake.definitions["WITH_FFMPEG"] =\
+                "ON" if self.options.get_safe("with_ffmpeg") else "OFF"
 
-            self._cmake.definitions["FFMPEG_LIBRARIES"] = \
-                ";".join(list(set(ffmpegLibs)))
-            self._cmake.definitions["FFMPEG_INCLUDE_DIRS"] = \
-                ";".join(list(set(ffmpegIncludes)))
+        if self.options.get_safe("with_ffmpeg"):
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = "ON"
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = "ON"
+            # opencv will not search for ffmpeg package, but for
+            # libavcodec;libavformat;libavutil;libswscale modules
+            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "OFF"
+            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = "OFF"
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
