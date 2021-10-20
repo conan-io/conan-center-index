@@ -51,6 +51,7 @@ class FFMpegConan(ConanFile):
         "with_coreimage": [True, False],
         "with_audiotoolbox": [True, False],
         "with_videotoolbox": [True, False],
+        "with_programs": [True, False],
     }
     default_options = {
         "shared": False,
@@ -84,6 +85,7 @@ class FFMpegConan(ConanFile):
         "with_coreimage": True,
         "with_audiotoolbox": True,
         "with_videotoolbox": True,
+        "with_programs": True,
     }
 
     generators = "pkg_config"
@@ -234,7 +236,6 @@ class FFMpegConan(ConanFile):
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
-            "--disable-programs",
             opt_enable_disable("cross-compile", tools.cross_building(self)),
             # Libraries
             opt_enable_disable("shared", self.options.shared),
@@ -287,6 +288,8 @@ class FFMpegConan(ConanFile):
                 "--disable-stripping",
                 "--enable-debug",
             ])
+        if not self.options.with_programs:
+            args.append("--disable-programs")
         # since ffmpeg"s build system ignores CC and CXX
         if tools.get_env("AS"):
             args.append("--as={}".format(tools.get_env("AS")))
