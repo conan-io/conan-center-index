@@ -40,7 +40,7 @@ class LibPcapConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -54,6 +54,8 @@ class LibPcapConan(ConanFile):
     def validate(self):
         if tools.Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("libpcap {} can not be built as shared on OSX.".format(self.version))
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("libpcap can not be built on OSX/armv8.".format(self.version))
 
     def build_requirements(self):
         if self.settings.os == "Windows":
