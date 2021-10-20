@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 class ZintConan(ConanFile):
     name = "zint"
     description = "Zint Barcode Generator"
@@ -40,10 +42,14 @@ class ZintConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.37")
         if self.options.with_qt:
-            self.options["qt"].widgets = True
-            self.options["qt"].gui = True
-            self.options["qt"].qttools = True
             self.requires("qt/5.15.2")
+    
+    def validate(self):
+    
+        if self.options.with_qt:
+            if not all((self.options["qt"].widgets, self.options["qt"].gui, self.options["qt"].qttools)):
+                raise ConanInvalidConfiguration(f"{self.name} needs qt:{{widgets,gui,qttools}}=True")
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,13 +60,9 @@ class ZintConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version + "-src"
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+            destination=self._source_subfolder, strip_root=True)
         
-        print(self.conan_data["patches"][self.version])
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
 
 
     def _configure_cmake(self):
@@ -73,7 +75,8 @@ class ZintConan(ConanFile):
         return self._cmake
 
     def build(self):
-
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
  
         cmake.build()
@@ -84,7 +87,26 @@ class ZintConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["libzint"].libs = ["zint"]
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+                self.cpp_info.components["libzint"].libs.append("zint_bundled_getopt")
+        self.cpp_info.components["libzint"].names["cmake_find_package"] = "Zint"
+        self.cpp_info.components["libzint"].names["cmake_find_package_multi"] = "Zint"
+        self.cpp_info.components["libzint"].requires = ["zlib::zlib"]
+        
+        if self.options.with_libpng:
+            self.cpp_info.components["libzint"].requires.append("libpng::libpng")
+            
+        if self.options.with_qt:
+            self.cpp_info.components["libqzint"].libs = ["QZint"]
+            self.cpp_info.components["libqzint"].names["cmake_find_package"] = "QZint"
+            self.cpp_info.components["libqzint"].names["cmake_find_package_multi"] = "QZint"
+            self.cpp_info.components["libqzint"].requires.extend([
+                "libzint",
+                "qt::gui", 
+                "qt::widgets",
+                "qt::qttools"
+            ])
         if self.options.with_qt:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["dwmapi", "uxtheme"]
