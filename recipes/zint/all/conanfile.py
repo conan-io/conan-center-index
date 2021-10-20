@@ -87,6 +87,8 @@ class ZintConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Zint"
+        self.cpp_info.names["cmake_find_package_multi"] = "Zint"
         self.cpp_info.components["libzint"].libs = ["zint"]
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
                 self.cpp_info.components["libzint"].libs.append("zint_bundled_getopt")
@@ -111,5 +113,3 @@ class ZintConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["dwmapi", "uxtheme"]
 
-        self.cpp_info.filenames["cmake_find_package"] = "Zint"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Zint"
