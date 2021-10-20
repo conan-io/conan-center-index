@@ -2,6 +2,9 @@ sources:
   "2.2.0":
     url: "https://github.com/PDAL/PDAL/releases/download/2.2.0/PDAL-2.2.0-src.tar.bz2"
     sha256: "7f6406d8f6536701f28f215d7b77c2c476f2fa100c1a391ebbcc868210114273"
+  "2.3.0":
+    url: "https://github.com/PDAL/PDAL/releases/download/2.3.0/PDAL-2.3.0-src.tar.bz2"
+    sha256: "63d8d4fee491675f0fa3dca58c26d57fb2afcaa37c24b10f595b3fbff174996e"
 patches:
   "2.2.0":
     - patch_file: "patches/0001-cmakelists.patch"
@@ -15,4 +18,9 @@ patches:
     - patch_file: "patches/0005-vendor-nanoflann.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0006-pointview.patch"
+      base_path: "source_subfolder"
+  "2.3.0":
+    - patch_file: "patches/0001-cmakelists.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-vendor-nanoflann.patch"
       base_path: "source_subfolder"
