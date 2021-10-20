@@ -9,7 +9,7 @@ class ZintConan(ConanFile):
     license = "GPL-3.0"
     topics = ("conan", "barcode", "qt")
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake_find_package_multi", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False], 
@@ -67,16 +67,8 @@ class ZintConan(ConanFile):
         if self._cmake:
             return self._cmake   
         self._cmake = CMake(self)
-        if self.options.shared:
-            self._cmake.definitions["BUILD_SHARED_LIBS"] = "ON" 
-        if self.options.with_qt:
-            self._cmake.definitions["ZINT_USE_QT"] = "ON"
-        else:
-            self._cmake.definitions["ZINT_USE_QT"] = "OFF"
-        if self.options.with_libpng:
-            self._cmake.definitions["ZINT_USE_PNG"] = "ON" 
-        else:
-            self._cmake.definitions["ZINT_USE_PNG"] = "OFF"
+        self._cmake.definitions["ZINT_USE_QT"] = self.options.with_qt
+        self._cmake.definitions["ZINT_USE_PNG"] = self.options.with_libpng
         self._cmake.configure()
         return self._cmake
 
@@ -95,9 +87,7 @@ class ZintConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.with_qt:
             if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["Dwmapi", "UxTheme"]
+                self.cpp_info.system_libs = ["dwmapi", "uxtheme"]
 
-        self.cpp_info.filenames["cmake_find_package"] = "zint"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "zint"
-        self.cpp_info.names["cmake_find_package"] = "zint"
-        self.cpp_info.names["cmake_find_package_multi"] = "zint"
+        self.cpp_info.filenames["cmake_find_package"] = "Zint"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Zint"
