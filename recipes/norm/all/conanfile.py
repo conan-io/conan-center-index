@@ -42,6 +42,10 @@ class NormConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
