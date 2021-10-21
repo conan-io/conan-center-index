@@ -66,7 +66,7 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration("libpcap can not be built static on Windows below version 1.10.1.")
 
     def build_requirements(self):
-        if self.settings.os == "Windows":
+        if tools.os_info.is_windows:
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.1")
