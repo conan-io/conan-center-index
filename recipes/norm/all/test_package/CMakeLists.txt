@@ -7,4 +7,5 @@ conan_basic_setup()
 find_package(norm REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} norm::norm)
+  target_link_libraries(${PROJECT_NAME} norm::norm)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
