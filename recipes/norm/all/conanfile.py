@@ -5,7 +5,7 @@ import os
 class NormConan(ConanFile):
     name = "norm"
     description = "A reliable multicast transport protocol"
-    topics = ("conan", "norm", "multicast", "transport protocol")
+    topics = ("norm", "multicast", "transport protocol", "nack-oriented reliable multicast")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
     exports_sources = "CMakeLists.txt", "patches/**"
