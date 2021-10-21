@@ -65,4 +65,4 @@ class SigslotConan(ConanFile):
             self.cpp_info.components["_sigslot"].system_libs.append("pthread")
         if self.settings.os == "Windows":
             if self.settings.compiler in ("Visual Studio", "clang"):
-                self.cpp_info.components["_sigslot"].exelinkflags.append('/OPT:NOICF')
+                self.cpp_info.components["_sigslot"].exelinkflags.append('-OPT:NOICF')
