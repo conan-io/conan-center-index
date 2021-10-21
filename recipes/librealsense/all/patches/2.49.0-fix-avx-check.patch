@@ -1,0 +1,13 @@
+diff --git a/src/proc/color-formats-converter.cpp b/src/proc/color-formats-converter.cpp
+index cc0146a04..920b06c31 100644
+--- a/src/proc/color-formats-converter.cpp
++++ b/src/proc/color-formats-converter.cpp
+@@ -18,7 +18,7 @@
+ #include <tmmintrin.h> // For SSSE3 intrinsics
+ #endif
+ 
+-#if defined (ANDROID) || (defined (__linux__) && !defined (__x86_64__))
++#if defined (ANDROID) || !(defined (_M_IX86) || defined (__i386__))
+ 
+ bool has_avx() { return false; }
+ 
