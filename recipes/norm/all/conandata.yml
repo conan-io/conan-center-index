@@ -1,10 +1,7 @@
 sources:
-  "1.5.9":4f6f663671df8b435b6e3da84e7a5df1ec4f9c11
+  "1.5.9":
     url: "https://github.com/USNavalResearchLaboratory/norm/releases/download/v1.5.9/src-norm-1.5.9.tgz"
     sha256: ef6d7bbb7b278584e057acefe3bc764d30122e83fa41d41d8211e39f25b6e3fa
-  "1.5.9":
-    url: "https://github.com/USNavalResearchLaboratory/norm/archive/4f6f663671df8b435b6e3da84e7a5df1ec4f9c11.tar.gz"
-    sha256: 75ad93c6ad817f9eac041de2bcc6a4f849e2eed481b2dcb80a75b1a04413d880
 patches:
   "1.5.9":
     - base_path: "source_subfolder/protolib"
