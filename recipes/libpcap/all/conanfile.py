@@ -42,6 +42,10 @@ class LibPcapConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.enable_libusb
+        if self.settings.os != "Macos":
+            del self.options.enable_universal
 
     def configure(self):
         if self.options.shared:
@@ -50,7 +54,7 @@ class LibPcapConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.options.enable_libusb:
+        if self.options.get_safe("enable_libusb"):
             self.requires("libusb/1.0.24")
 
     def validate(self):
