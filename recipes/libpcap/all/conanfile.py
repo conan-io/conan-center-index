@@ -1,6 +1,8 @@
 from conans import AutoToolsBuildEnvironment, tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
+import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -114,6 +116,19 @@ class LibPcapConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+            if self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "pcap_static.lib")
+
+            def flatten_filetree(folder):
+                for file in glob.glob(folder + "/**/*"):
+                    shutil.move(file, folder + os.sep)
+                for subdir in [dir[0] for dir in os.walk(folder) if dir[0] != folder]:
+                    os.rmdir(subdir)
+
+            # libpcap installs into a subfolder like x64 or amd64
+            with tools.chdir(self.package_folder):
+                flatten_filetree("bin")
+                flatten_filetree("lib")
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -126,9 +141,6 @@ class LibPcapConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libpcap"
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["pcap"] if self.options.shared else ["pcap_static"]
-            subfolder = "amd64" if tools.Version(self.version) < "1.10.0" else "x64"
-            self.cpp_info.bindirs = ["bin/" + subfolder]
-            self.cpp_info.libdirs = ["lib/" + subfolder]
             self.cpp_info.system_libs = ["ws2_32"]
         else:
             self.cpp_info.libs = ["pcap"]
