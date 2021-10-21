@@ -80,8 +80,8 @@ class LibPcapConan(ConanFile):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
             configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
-            configure_args.append("--disable-universal" if not self.options.enable_universal else "")
-            configure_args.append("--enable-usb" if self.options.enable_libusb else "--disable-usb")
+            configure_args.append("--disable-universal" if not self.options.get_safe("enable_universal") else "")
+            configure_args.append("--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb")
             configure_args.extend([
                 "--without-libnl",
                 "--disable-bluetooth",
