@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        hook: ["yaml_linter"]
+        hook: ["yaml_linter", "recipe_linter"]
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: "3.8"
 
-      - run: "pip3 install conan yamllint packaging"
+      - run: "pip3 install conan yamllint packaging pylint==2.10.2 astroid"
 
       - name: install hook
         run: |
