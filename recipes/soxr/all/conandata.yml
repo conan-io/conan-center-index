@@ -6,3 +6,5 @@ patches:
   "0.1.3":
     - base_path: source_subfolder
       patch_file: "patches/findpackage-openmp.patch"
+    - base_path: source_subfolder
+      patch_file: "patches/cmake-source-dir.patch"

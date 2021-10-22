@@ -24,7 +24,7 @@ class SoxrConan(ConanFile):
         "with_lsr_bindings": True
     }
     generators = "cmake"
-    exports_sources = "patches/**"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
 
@@ -61,7 +61,7 @@ class SoxrConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False   
         self._cmake.definitions["WITH_OPENMP"] = self.options.with_openmp
         self._cmake.definitions["WITH_LSR_BINDINGS"] = self.options.with_lsr_bindings
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
