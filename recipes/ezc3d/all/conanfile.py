@@ -48,14 +48,14 @@ class Ezc3dConan(ConanFile):
                               "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
         # fix install
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER Lib)",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib)")
+                              "set(${PROJECT_NAME}_LIB_FOLDER Lib",
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME})",
-                              "set(${PROJECT_NAME}_LIB_FOLDER lib)")
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib/${PROJECT_NAME}",
+                              "set(${PROJECT_NAME}_LIB_FOLDER lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME})",
-                              "set(${PROJECT_NAME}_BIN_FOLDER bin)")
+                              "set(${PROJECT_NAME}_BIN_FOLDER lib/${PROJECT_NAME}",
+                              "set(${PROJECT_NAME}_BIN_FOLDER bin")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -80,6 +80,7 @@ class Ezc3dConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "CMake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
