@@ -11,8 +11,7 @@ class CcclTestConan(ConanFile):
         return getattr(self, "settings_build", self.setitngs)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
     def build(self):
