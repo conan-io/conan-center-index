@@ -83,7 +83,6 @@ The list includes only official Conan developers:
 - [@danimtb](https://github.com/danimtb)
 - [@jgsogo](https://github.com/jgsogo)
 - [@czoido](https://github.com/czoido)
-- [@solvingj](https://github.com/solvingj)
 - [@sse4](https://github.com/sse4)
 - [@uilianries](https://github.com/uilianries)
 
@@ -101,6 +100,7 @@ The list includes conan-center-index contributors who are very active and proven
 - [@gocarlos](https://github.com/gocarlos)
 - [@mathbunnyru](https://github.com/mathbunnyru)
 - [@ericriff](https://github.com/ericriff)
+- [@toge](https://github.com/toge)
 
 The list is not constant and will change periodically based on contribution.
 That also means you can be included in this list as well - submit PRs and provide reviews, and in time you may be added as a trusted contributor.
