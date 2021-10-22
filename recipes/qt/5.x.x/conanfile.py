@@ -182,6 +182,9 @@ class QtConan(ConanFile):
                        "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
+        if self.options.qtwayland:
+            self.build_requires("wayland/1.19.0")
+
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.with_icu
@@ -198,6 +201,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_mysql = False
             self.options.opengl = "dynamic"
+        if self.settings.os != "Linux":
+            self.options.qtwayland = False
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -368,6 +373,8 @@ class QtConan(ConanFile):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+        if self.options.qtwayland:
+            self.requires("wayland/1.19.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
