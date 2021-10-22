@@ -57,6 +57,9 @@ class CoinLemonConan(ConanFile):
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["emon"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["lemon"]
+        else:
+            self.cpp_info.libs = ["emon"]
         self.cpp_info.filenames["cmake_find_package"] = "coin-lemon"
         self.cpp_info.filenames["cmake_find_package_multi"] = "coin-lemon"
