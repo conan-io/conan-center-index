@@ -26,6 +26,7 @@ class TestPackageConan(ConanFile):
         content = tools.load(cmake_find_package_multi_filename)
         target_name = "glew" if self.options["glew"].shared else "glew_s"
         assert "GLEW::{}".format(target_name) in content
+        assert "GLEW::GLEW" in content  # Still there is a global target with this name
 
     def test(self):
         self._test_generators()
