@@ -10,17 +10,15 @@ class XsimdTestConan(ConanFile):
     def build(self):
         cmake = CMake(self)
 
-        cflags = cmake.definitions.get("CONAN_C_FLAGS", "")
-
+        cxxflags = cmake.definitions.get("CONAN_CXX_FLAGS", "")
         arch = str(self.settings.arch)
         if arch.startswith("x86"):
-            cflags += " -DXSIMD_FORCE_X86_INSTR_SET"
+            cxxflags += " -DXSIMD_FORCE_X86_INSTR_SET"
         elif arch.startswith("ppc"):
-            cflags += " -DXSIMD_FORCE_PPC_INSTR_SET"
+            cxxflags += " -DXSIMD_FORCE_PPC_INSTR_SET"
         elif arch.startswith("arm"):
-            cflags += " -DXSIMD_FORCE_ARM_INSTR_SET"
-
-        cmake.definitions["CONAN_C_FLAGS"] = cflags
+            cxxflags += " -DXSIMD_FORCE_ARM_INSTR_SET"
+        cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
 
         cmake.configure()
         cmake.build()
