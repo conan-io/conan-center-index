@@ -1,0 +1,53 @@
+commit 5439777f1929ed24a8861063ce46b4d333f25baa
+Author: Andrei Malashkin <andrei.malashkin@reactivereality.com>
+Date:   Thu Oct 21 15:31:40 2021 +0200
+
+    remove warning as error
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 29347cc1..261a554e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -292,42 +292,6 @@ foreach(REL_CONFIG ${RELEASE_CONFIGURATIONS})
+ 	target_compile_definitions(Diligent-BuildSettings INTERFACE "$<$<CONFIG:${REL_CONFIG}>:NDEBUG>")
+ endforeach()
+ 
+-
+-if(MSVC)
+-    # For msvc, enable level 4 warnings and treat warnings as errors, except for
+-    # - w4100 - unreferenced formal parameter
+-    # - w4201 - nonstandard extension used: nameless struct/union
+-    # - w4505 - unreferenced local function has been removed
+-    target_compile_options(Diligent-BuildSettings INTERFACE /W4 /WX /wd4100 /wd4201 /wd4505 /MP)
+-    # In all release modes also:
+-    # - disable w4189 - local variable is initialized but not referenced
+-    # - Disable RTTI (/GR-)
+-    # - Enable whole program optimization (/GL)
+-    # - Enable string pooling (/GF)
+-    set(MSVC_ALL_RELEASE_COMPILE_OPTIONS /wd4189 /GR- /GL /GF)
+-    #target_compile_options(Diligent-BuildSettings INTERFACE "$<$<CONFIG:RELEASE>:/wd4189 /Ot")
+-    # In RELEASE mode:
+-    # - Set favor fast code option (/Ot)
+-    # - Enable intrinsic functions (/Oi)
+-	# - Maximize Speed (/O2)
+-    # - Inline any suitable function (/Ob2)
+-    set(MSVC_RELEASE_COMPILE_OPTIONS ${MSVC_ALL_RELEASE_COMPILE_OPTIONS} /Ot /Oi /Ob2 /O2)
+-    set(MSVC_RELWITHDEBINFO_COMPILE_OPTIONS ${MSVC_RELEASE_COMPILE_OPTIONS})
+-    # In MINSIZEREL mode set favor small code option (/Os)
+-    set(MSVC_MINSIZEREL_COMPILE_OPTIONS ${MSVC_ALL_RELEASE_COMPILE_OPTIONS} /Os)
+-    target_compile_options(Diligent-BuildSettings INTERFACE "$<$<CONFIG:RELEASE>:${MSVC_RELEASE_COMPILE_OPTIONS}>")
+-    target_compile_options(Diligent-BuildSettings INTERFACE "$<$<CONFIG:MINSIZEREL>:${MSVC_MINSIZEREL_COMPILE_OPTIONS}>")
+-    target_compile_options(Diligent-BuildSettings INTERFACE "$<$<CONFIG:RELWITHDEBINFO>:${MSVC_RELWITHDEBINFO_COMPILE_OPTIONS}>")
+-    # !!!NOTE!!! For some reason above is the only form of generator expression that works
+-    # For instance, this way
+-    # target_compile_options(Diligent-BuildSettings INTERFACE "$<$<CONFIG:RELEASE>:/Ot>")
+-    # does not work as expected
+-else()
+-    # Todo: use __attribute__((always_inline)), but it needs to be defined in a header file
+-    target_compile_definitions(Diligent-BuildSettings INTERFACE __forceinline=inline)
+-endif(MSVC)
+-
+-
+ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+     CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+     if(PLATFORM_APPLE)

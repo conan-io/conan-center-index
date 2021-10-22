@@ -1,0 +1,146 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -427,7 +429,7 @@ add_subdirectory(Primitives)
+ add_subdirectory(Platforms)
+ add_subdirectory(Common)
+ add_subdirectory(Graphics)
+-add_subdirectory(Tests)
++#add_subdirectory(Tests)
+ 
+ 
+ # Installation instructions
+diff --git a/Graphics/GraphicsEngineVulkan/CMakeLists.txt b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
+index 387b3b01..e760513d 100644
+--- a/Graphics/GraphicsEngineVulkan/CMakeLists.txt
++++ b/Graphics/GraphicsEngineVulkan/CMakeLists.txt
+@@ -170,7 +170,7 @@ set(PRIVATE_DEPENDENCIES
+ if (${DILIGENT_NO_HLSL})
+     message("HLSL support is disabled. Vulkan backend will not be able to consume SPIRV bytecode generated from HLSL.")
+ else()
+-    list(APPEND PRIVATE_DEPENDENCIES SPIRV-Tools-opt)
++    list(APPEND PRIVATE_DEPENDENCIES CONAN_PKG::spirv-tools)
+ endif()
+ 
+ # Use DirectX shader compiler for SPIRV.
+diff --git a/Graphics/ShaderTools/CMakeLists.txt b/Graphics/ShaderTools/CMakeLists.txt
+index 00e63426..d3423d22 100644
+--- a/Graphics/ShaderTools/CMakeLists.txt
++++ b/Graphics/ShaderTools/CMakeLists.txt
+@@ -133,26 +133,26 @@ endif()
+ if(ENABLE_SPIRV)
+     target_link_libraries(Diligent-ShaderTools
+     PRIVATE
+-        spirv-cross-core
++        CONAN_PKG::spirv-cross
+     )
+ 
+     if (${USE_SPIRV_TOOLS})
+         target_link_libraries(Diligent-ShaderTools
+         PRIVATE
+-            SPIRV-Tools-opt
++            CONAN_PKG::spirv-tools
+         )
+     endif()
+ 
+     if (${USE_GLSLANG})
+         target_link_libraries(Diligent-ShaderTools
+         PRIVATE
+-            SPIRV
+-            glslang
++            CONAN_PKG::spirv-tools
++            CONAN_PKG::glslang
+         )
+ 
+         target_include_directories(Diligent-ShaderTools
+         PRIVATE
+-            ../../ThirdParty/glslang
++            ${CONAN_INCLUDE_DIRS_GLSLANG}/glslang/
+         )
+     endif()
+ endif()
+diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
+index e329495f..37e37a20 100644
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -23,9 +23,6 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+     # do not really need any target from the project.
+     #add_subdirectory(SPIRV-Headers)
+     #set_directory_root_folder("SPIRV-Headers" "ThirdParty/DiligentCore/SPIRV-Headers")
+-    install(FILES SPIRV-Headers/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Headers-License.txt)
+-
+-    install(FILES Vulkan-Headers/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Vulkan-Headers-License.txt)
+ 
+     option(DILIGENT_NO_GLSLANG "Do NOT build glslang compiler" OFF)
+     option(DILIGENT_IMPROVE_SPIRV_TOOLS_DEBUG_PERF "Enable some optimizations for SPIRV-Tools, glslang, SPIRV-Cross and related projects in debug build to improve performance" ON)
+@@ -41,15 +38,10 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+             set(SPIRV_CHECK_CONTEXT OFF CACHE BOOL "Do not check if the IR context is in a valid state")
+         endif()
+         set(CMAKE_MACOSX_RPATH TRUE)
+-        add_subdirectory(SPIRV-Tools)
+-        set_directory_root_folder("SPIRV-Tools" "DiligentCore/ThirdParty/SPIRV-Tools")
+         # We only need SPIRV-Tools-opt for glslang that also depends on SPIRV-Tools-static.
+         # Exclude all other targets from the build to save build time
+-        set(SPIRV_TOOLS_EXCLUDE_TARGETS SPIRV-Tools-link SPIRV-Tools-reduce SPIRV-Tools-shared)
+-        set_target_properties(${SPIRV_TOOLS_EXCLUDE_TARGETS} PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+ 
+-        set(THIRD_PARTY_LIBS SPIRV-Tools-static SPIRV-Tools-opt)
+-        install(FILES SPIRV-Tools/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Tools-License.txt)
++        #set(THIRD_PARTY_LIBS CONAN_PKG::spirv-tools)
+     endif()
+ 
+     if(NOT ${DILIGENT_NO_GLSLANG})
+@@ -57,14 +49,9 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+         set(ENABLE_SPVREMAPPER OFF CACHE BOOL "Do not build SPIRV remapper")
+         set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip glslang installation")
+         set(ENABLE_CTEST OFF CACHE BOOL "Disable testing")
+-        add_subdirectory(glslang)
+-        set_directory_root_folder("glslang" "DiligentCore/ThirdParty/glslang")
+ 
+         # glslang "kindly" sets global CMAKE_DEBUG_POSTFIX to "d", which we have to unset now
+         unset(CMAKE_DEBUG_POSTFIX CACHE)
+-
+-        list(APPEND THIRD_PARTY_LIBS GenericCodeGen glslang OGLCompiler OSDependent SPIRV HLSL MachineIndependent)
+-        install(FILES glslang/LICENSE.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME GLSLang-License.txt)
+     endif()
+ 
+     set(SPIRV_CROSS_CLI OFF CACHE BOOL "Build the CLI binary. Requires SPIRV_CROSS_STATIC.")
+@@ -80,29 +67,8 @@ if(VULKAN_SUPPORTED OR METAL_SUPPORTED)
+     set(SPIRV_CROSS_FORCE_PIC ON CACHE BOOL "Force position-independent code.")
+     set(SPIRV_CROSS_SKIP_INSTALL ON CACHE BOOL "Skip SPIRV-Cross installation.")
+     set(SPIRV_CROSS_NAMESPACE_OVERRIDE diligent_spirv_cross CACHE STRING "Override the namespace used in the C++ API.")
+-    add_subdirectory(SPIRV-Cross)
+-    set_directory_root_folder("SPIRV-Cross" "DiligentCore/ThirdParty/SPIRV-Cross")
+-
+-    list(APPEND THIRD_PARTY_LIBS spirv-cross-core)
+-    if(METAL_SUPPORTED)
+-        list(APPEND THIRD_PARTY_LIBS spirv-cross-msl spirv-cross-glsl)
+-    endif()
+-    install(FILES SPIRV-Cross/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME SPIRV-Cross-License.txt)
+-
+-    if(DILIGENT_INSTALL_CORE)
+-        install(TARGETS ${THIRD_PARTY_LIBS}
+-                ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-                RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${DILIGENT_CORE_DIR}/$<CONFIG>"
+-        )
+-    endif()
+ 
+-    if(${DILIGENT_IMPROVE_SPIRV_TOOLS_DEBUG_PERF} AND MSVC)
+-        # Enable function inlining (/Ob1) in Debug build to improve shader compilation performance
+-        foreach(TARGET ${THIRD_PARTY_LIBS}) 
+-            target_compile_options(${TARGET} PRIVATE "$<$<CONFIG:DEBUG>:/Ob1>")
+-        endforeach()
+-    endif()
++    list(APPEND THIRD_PARTY_LIBS CONAN_PKG::spirv-tools CONAN_PKG::spirv-cross CONAN_PKG::glslang)
+ 
+     # Make sure that symbols do not leak out when third-party
+     # libs are linked into shared libraries
+@@ -126,7 +92,6 @@ if(${DILIGENT_BUILD_GOOGLE_TEST})
+      )
+ endif()
+ 
+-install(FILES googletest/LICENSE DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME googletest-License.txt)
+ install(FILES stb/stb_image_write_license.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}")
+ install(FILES volk/LICENSE.md DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Volk-License.md)
+ install(FILES DirectXShaderCompiler/LICENSE.TXT DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-License.txt)

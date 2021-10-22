@@ -1,0 +1,12 @@
+sources:
+  "2.5.1":
+    url: "https://github.com/DiligentGraphics/DiligentCore.git"
+    sha256: "dc70fb24231ac4c06e813a0489ff911dd5c48f844b75856b1e753ac8dbd64772"
+patches:
+  "2.5.1":
+    - patch_file: "patches/0001-remove_warning_as_error.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-use_conan_dependencies.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-use_volk_from_conan.patch"
+      base_path: "source_subfolder"
