@@ -143,8 +143,11 @@ class BoostConan(ConanFile):
 
     short_paths = True
     no_copy_source = True
-    exports_sources = ['patches/*']
     _cached_dependencies = None
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def export(self):
         self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
