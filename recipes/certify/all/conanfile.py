@@ -20,6 +20,15 @@ class CertifyConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15.7",
+            "clang": "7",
+            "apple-clang": "11",
+        }
+
+    @property
     def _min_cppstd(self):
         return "17"
 
