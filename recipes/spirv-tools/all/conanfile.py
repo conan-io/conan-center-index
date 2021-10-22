@@ -17,11 +17,13 @@ class SpirvtoolsConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "build_executables": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "build_executables": True
     }
 
     short_paths = True
@@ -97,6 +99,7 @@ class SpirvtoolsConan(ConanFile):
         cmake.definitions["SPIRV_SKIP_TESTS"] = True
         cmake.definitions["SPIRV_CHECK_CONTEXT"] = False
         cmake.definitions["SPIRV_BUILD_FUZZER"] = False
+        cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = not self.options.build_executables
 
         cmake.configure(build_folder=self._build_subfolder)
         self._cmake = cmake
