@@ -17,7 +17,7 @@ class XsimdTestConan(ConanFile):
         elif arch.startswith("ppc"):
             cxxflags += " -DXSIMD_FORCE_PPC_INSTR_SET=20000000"
         elif arch.startswith("arm"):
-            cxxflags += " -DXSIMD_FORCE_ARM_INSTR_SET=70000000"
+            cxxflags += " -DXSIMD_FORCE_ARM_INSTR_SET=81000000"
         cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
 
         cmake.configure()
