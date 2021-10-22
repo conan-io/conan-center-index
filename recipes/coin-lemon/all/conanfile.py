@@ -3,15 +3,20 @@ import os
 
 class CoinLemonConan(ConanFile):
     name = "coin-lemon"
-    version = "1.3.1"
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of CoinLemon here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    license = "Boost 1.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://lemon.cs.elte.hu"
+    description = "LEMON stands for Library for Efficient Modeling and Optimization in Networks."
+    topics = ("data structures", "algorithms", "graphs", "network")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     @property
@@ -34,11 +39,6 @@ class CoinLemonConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
-
-        # Explicit way:
-        # self.run('cmake %s/hello %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
