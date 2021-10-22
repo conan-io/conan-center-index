@@ -1,14 +1,8 @@
-commit 5439777f1929ed24a8861063ce46b4d333f25baa
-Author: Andrei Malashkin <andrei.malashkin@reactivereality.com>
-Date:   Thu Oct 21 15:31:40 2021 +0200
-
-    remove warning as error
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 29347cc1..261a554e 100644
+index c8fa3c2a..d92d7dd6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -292,42 +292,6 @@ foreach(REL_CONFIG ${RELEASE_CONFIGURATIONS})
+@@ -290,42 +290,6 @@ foreach(REL_CONFIG ${RELEASE_CONFIGURATIONS})
  	target_compile_definitions(Diligent-BuildSettings INTERFACE "$<$<CONFIG:${REL_CONFIG}>:NDEBUG>")
  endforeach()
  

@@ -1,7 +1,7 @@
 sources:
   "2.5.1":
-    url: "https://github.com/DiligentGraphics/DiligentCore.git"
-    sha256: "dc70fb24231ac4c06e813a0489ff911dd5c48f844b75856b1e753ac8dbd64772"
+    url: "https://github.com/DiligentGraphics/DiligentCore/archive/refs/tags/v2.5.1.zip"
+    sha256: "46a1d75b6f60f9498fdea13a9bc5bfb3219b95ad0631a0aa1cb861784673c531"
 patches:
   "2.5.1":
     - patch_file: "patches/0001-remove_warning_as_error.patch"
