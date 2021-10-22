@@ -128,5 +128,5 @@ class Ezc3dConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "ezc3d"))
         lib_suffix = {"Debug": "_debug"}.get(str(self.settings.build_type), "")
         self.cpp_info.libs = ["ezc3d" + lib_suffix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
