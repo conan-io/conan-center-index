@@ -32,7 +32,7 @@ that have future-proof scalability"""
 
     @property
     def _settings_build(self):
-        return getattr(self, "settings_build", self.setings)
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
