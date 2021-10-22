@@ -8,7 +8,7 @@ class CcclTestConan(ConanFile):
 
     @property
     def _settings_build(self):
-        return getattr(self, "settings_build", self.setings)
+        return getattr(self, "settings_build", self.setitngs)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ and \
