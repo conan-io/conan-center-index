@@ -94,7 +94,8 @@ class GslConan(ConanFile):
             self._autotools.defines.extend(["HAVE_WIN_IEEE_INTERFACE", "WIN32"])
             if self.options.shared:
                 self._autotools.defines.append("GSL_DLL")
-        elif self.settings.os == "Linux":
+
+        if self.settings.os == "Linux" and "x86" in self.settings.arch:
             self._autotools.defines.append("HAVE_GNUX86_IEEE_INTERFACE")
 
         if self.settings.compiler == "Visual Studio":
