@@ -34,6 +34,7 @@ class OpenTelemetryCppConan(ConanFile):
     }
     exports_sources = "CMakeLists.txt"
 
+    short_paths = True
     _cmake = None
 
     def validate(self):
