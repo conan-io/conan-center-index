@@ -46,7 +46,7 @@ class CoinLemonConan(ConanFile):
             cxxflags += " /MD" if self.options.shared else " /MT"
             self._cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
 
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
