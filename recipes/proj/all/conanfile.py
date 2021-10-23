@@ -8,11 +8,10 @@ class ProjConan(ConanFile):
     name = "proj"
     description = "Cartographic Projections and Coordinate Transformations Library."
     license = "MIT"
-    topics = ("conan", "dsp", "proj", "proj4", "projections", "gis", "geospatial")
+    topics = ("dsp", "proj", "proj4", "projections", "gis", "geospatial")
     homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,7 +19,7 @@ class ProjConan(ConanFile):
         "threadsafe": [True, False],
         "with_tiff": [True, False],
         "with_curl": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,10 +27,16 @@ class ProjConan(ConanFile):
         "threadsafe": True,
         "with_tiff": True,
         "with_curl": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
