@@ -90,6 +90,8 @@ class OpenTelemetryCppConan(ConanFile):
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "unrecognized target processor configuration",
             "unrecognized target processor configuration: ${CMAKE_SYSTEM_PROCESSOR}")
+
+        tools.rmdir(os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
         cmake = self._configure_cmake()
         cmake.build()
 
