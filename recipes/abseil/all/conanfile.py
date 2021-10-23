@@ -8,18 +8,11 @@ required_conan_version = ">=1.33.0"
 
 class ConanRecipe(ConanFile):
     name = "abseil"
-
     description = "Abseil Common Libraries (C++) from Google"
     topics = ("algorithm", "container", "google", "common", "utility")
-
     homepage = "https://github.com/abseil/abseil-cpp"
     url = "https://github.com/conan-io/conan-center-index"
-
     license = "Apache-2.0"
-
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,7 +24,14 @@ class ConanRecipe(ConanFile):
         "fPIC": True,
     }
 
+    short_paths = True
+    generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
