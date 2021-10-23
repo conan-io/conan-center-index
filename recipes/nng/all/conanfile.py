@@ -29,9 +29,13 @@ class NngConan(ConanFile):
         "tls": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
