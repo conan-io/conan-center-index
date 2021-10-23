@@ -49,12 +49,12 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.4")
         self.requires("sqlite3/3.36.0")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.77.0")
+            self.requires("libcurl/7.79.1")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
