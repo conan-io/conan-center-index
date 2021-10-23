@@ -41,15 +41,18 @@ class NngConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        if self.options.tls:
-            self.requires("mbedtls/2.25.0")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.tls:
+            if tools.Version(self.version) < "1.5.2":
+                self.requires("mbedtls/2.25.0")
+            else:
+                self.requires("mbedtls/3.0.0")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
