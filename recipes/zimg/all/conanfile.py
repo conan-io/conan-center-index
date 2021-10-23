@@ -142,6 +142,7 @@ class ZimgConan(ConanFile):
             self._package_autotools()
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "zimg"
         self.cpp_info.libs = ["zimg"]
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
