@@ -21,3 +21,9 @@ class EmbeddedTemplateLibraryConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "etl"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "etl"
+        self.cpp_info.names["cmake_find_package"] = "etl"
+        self.cpp_info.names["cmake_find_package_multi"] = "etl"
