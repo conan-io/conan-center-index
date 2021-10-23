@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class RapidcsvConan(ConanFile):
     name = "rapidcsv"
     description = "C++ CSV parser library"
-    topics = ("conan", "rapidcsv", "csv", "parser")
+    topics = ("csv", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/d99kris/rapidcsv"
     license = "BSD-3-Clause"
