@@ -149,17 +149,22 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
+            build = host = "{}-w64-mingw32-msvc".format(self.settings.arch)
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
                 "ac_cv_func_setvbuf_reversed=no",
             ])
-            build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
             autotools.cxx_flags.append("-EHsc")
             if tools.Version(self.settings.compiler.version) >= 12:
                 autotools.flags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
             autotools.libs.extend(["mingwex", "ssp"])
+        if build:
+            conf_args.append(f"ac_cv_build={build}")
+        if host:
+            conf_args.append(f"ac_cv_host={host}")
+            conf_args.append(f"ac_cv_target={host}")
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
         return autotools
 
