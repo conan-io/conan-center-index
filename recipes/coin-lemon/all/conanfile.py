@@ -19,6 +19,8 @@ class CoinLemonConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -35,13 +37,20 @@ class CoinLemonConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+
+        if self.settings.compiler == "Visual Studio":
+            cxxflags = self._cmake.definitions.get("CONAN_CXX_FLAGS", "")
+            cxxflags += " /MD" if self.options.shared else " /MT"
+            self._cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
+
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
-        cmake.configure()
         cmake.build()
 
     def package(self):
