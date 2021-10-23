@@ -85,15 +85,6 @@ class ProjConan(ConanFile):
         tools.replace_in_file(cmakelists,
                               "find_program(EXE_SQLITE3 sqlite3)",
                               "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe_build_context_paths))
-        # Fix executables installation on iOS
-        # might be fixed upstream by https://github.com/OSGeo/PROJ/pull/2764
-        execs = ["cct", "cs2cs", "geod", "gie", "proj", "projinfo"]
-        if tools.Version(self.version) >= "7.0.0":
-            execs.append("projsync")
-        for exec in execs:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "bin_{}.cmake".format(exec)),
-                                  "RUNTIME DESTINATION ${BINDIR}",
-                                  "DESTINATION ${BINDIR}")
         # unvendor nlohmann_json
         if tools.Version(self.version) < "8.1.0":
             tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
@@ -123,6 +114,7 @@ class ProjConan(ConanFile):
             self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
         if tools.Version(self.version) >= "8.1.0":
             self._cmake.definitions["NLOHMANN_JSON_ORIGIN"] = "external"
+        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         self._cmake.configure()
         return self._cmake
 
