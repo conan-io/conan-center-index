@@ -159,12 +159,12 @@ class NCursesConan(ConanFile):
                 autotools.flags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
-            autotools.libs.append("ssp")
+            autotools.libs.extend(["mingwex", "ssp"])
         autotools.configure(args=conf_args, configure_dir=self._source_subfolder, host=host, build=build)
         return autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     @contextlib.contextmanager
