@@ -45,6 +45,10 @@ class OpenTelemetryCppConan(ConanFile):
            tools.Version(self.settings.compiler.version) < "16"):
             raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
