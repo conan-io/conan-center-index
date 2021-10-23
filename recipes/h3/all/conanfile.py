@@ -8,26 +8,31 @@ class H3Conan(ConanFile):
     name = "h3"
     description = "Hexagonal hierarchical geospatial indexing system."
     license = "Apache-2.0"
-    topics = ("conan", "h3", "hierarchical", "geospatial", "indexing")
+    topics = ("h3", "hierarchical", "geospatial", "indexing")
     homepage = "https://github.com/uber/h3"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "build_filters": [True, False],
-        "h3_prefix": "ANY"
+        "h3_prefix": "ANY",
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_filters": True,
-        "h3_prefix": ""
+        "h3_prefix": "",
     }
 
+    generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
