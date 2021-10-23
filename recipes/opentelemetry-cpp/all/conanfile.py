@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.33.0"
@@ -34,6 +35,10 @@ class OpenTelemetryCppConan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     _cmake = None
+
+    def validate(self):
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Architecture not supported")
 
     @property
     def _source_subfolder(self):
