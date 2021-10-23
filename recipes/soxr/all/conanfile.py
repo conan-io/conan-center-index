@@ -89,12 +89,13 @@ class SoxrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "soxr"
-        self.cpp_info.libs = ["soxr"]
+        # core component
+        self.cpp_info.components["core"].names["pkg_config"] = "soxr"
+        self.cpp_info.components["core"].libs = ["soxr"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["core"].system_libs = ["m"]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("SOXR_DLL")
+            self.cpp_info.components["core"].defines.append("SOXR_DLL")
         if not self.options.shared and self.options.with_openmp:
             if self.settings.compiler in ("Visual Studio", "msvc"):
                 openmp_flags = ["-openmp"]
@@ -104,5 +105,12 @@ class SoxrConan(ConanFile):
                 openmp_flags = ["-Xpreprocessor", "-fopenmp"]
             else:
                 openmp_flags = []
-            self.cpp_info.exelinkflags = openmp_flags
-            self.cpp_info.sharedlinkflags = openmp_flags
+            self.cpp_info.components["core"].exelinkflags = openmp_flags
+            self.cpp_info.components["core"].sharedlinkflags = openmp_flags
+        # lsr component
+        if self.options.with_lsr_bindings:
+            self.cpp_info.components["lsr"].names["pkg_config"] = "soxr-lsr"
+            self.cpp_info.components["lsr"].libs = ["soxr-lsr"]
+            if self.settings.os == "Windows" and self.options.shared:
+                self.cpp_info.components["lsr"].defines.append("SOXR_DLL")
+            self.cpp_info.components["lsr"].requires = ["core"]

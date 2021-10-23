@@ -12,5 +12,10 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            # core component
+            bin_path = os.path.join("bin", "test_package_core")
             self.run(bin_path, run_environment=True)
+            # lsr component
+            if self.options["soxr"].with_lsr_bindings:
+                bin_path = os.path.join("bin", "test_package_lsr")
+                self.run(bin_path, run_environment=True)
