@@ -134,7 +134,7 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--disable-pc-files",
         ]
         build = None
@@ -315,7 +315,7 @@ class NCursesConan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
 
-        terminfo = os.path.join(self.package_folder, "bin", "share", "terminfo")
+        terminfo = os.path.join(self.package_folder, "res", "terminfo")
         self.output.info("Setting TERMINFO environment variable: {}".format(terminfo))
         self.env_info.TERMINFO = terminfo
 
