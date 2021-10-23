@@ -1,6 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 import re
-from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.33.0"
 
 
 class SoxrConan(ConanFile):
@@ -87,17 +89,20 @@ class SoxrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "soxr"
         self.cpp_info.libs = ["soxr"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("SOXR_DLL")
         if not self.options.shared and self.options.with_openmp:
             if self.settings.compiler in ("Visual Studio", "msvc"):
-                openmp_flags = ["/openmp"]
+                openmp_flags = ["-openmp"]
             elif self.settings.compiler in ("gcc", "clang"):
                 openmp_flags = ["-fopenmp"]
             elif self.settings.compiler == "apple-clang":
                 openmp_flags = ["-Xpreprocessor", "-fopenmp"]
             else:
                 openmp_flags = []
-            self.cpp_info.cxxflags = openmp_flags
+            self.cpp_info.exelinkflags = openmp_flags
             self.cpp_info.sharedlinkflags = openmp_flags
