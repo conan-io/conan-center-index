@@ -66,6 +66,7 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-tools/diligent-2.5.1@andrei/test")
         self.requires("glslang/diligent-2.5.1@andrei/testing")
         self.requires("vulkan-headers/diligent-2.5.1@andrei/testing")
+        self.requires("volk/1.2.190")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
