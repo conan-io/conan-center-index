@@ -20,6 +20,10 @@
 
 #include <boost/fiber/detail/thread_barrier.hpp>
 
+#if defined(BOOST_NAMESPACE)
+namespace boost = BOOST_NAMESPACE;
+#endif
+
 static std::size_t fiber_count{ 0 };
 static std::mutex mtx_count{};
 static boost::fibers::condition_variable_any cnd_count{};

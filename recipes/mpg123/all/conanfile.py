@@ -2,6 +2,8 @@ from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class Mpg123Conan(ConanFile):
     name = "mpg123"
@@ -60,13 +62,6 @@ class Mpg123Conan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
-        try:
-            int(self.options.seektable)
-        except ValueError:
-            raise ConanInvalidConfiguration("seektable must be an integer")
-        if self.settings.os != "Windows":
-            if self.options == "win32":
-                raise ConanInvalidConfiguration("win32 is an invalid module for non-Windows os'es")
 
     def requirements(self):
         if self.options.module == "libalsa":
@@ -74,15 +69,30 @@ class Mpg123Conan(ConanFile):
         if self.options.module == "tinyalsa":
             self.requires("tinyalsa/1.1.1")
 
+    def validate(self):
+        try:
+            int(self.options.seektable)
+        except ValueError:
+            raise ConanInvalidConfiguration("seektable must be an integer")
+        if self.settings.os != "Windows":
+            if self.options.module == "win32":
+                raise ConanInvalidConfiguration("win32 is an invalid module for non-Windows os'es")
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
-        self.build_requires("yasm/1.3.0")
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        self.build_requires("pkgconf/1.7.4")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.build_requires("yasm/1.3.0")
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mpg123-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _audio_module(self):
@@ -150,12 +160,11 @@ class Mpg123Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             cmake = self._configure_cmake()
             cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
-
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -189,3 +198,7 @@ class Mpg123Conan(ConanFile):
             self.cpp_info.components["libout123"].requires.append("tinyalsa::tinyalsa")
         if self.options.module == "win32":
             self.cpp_info.components["libout123"].system_libs.append("winmm")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

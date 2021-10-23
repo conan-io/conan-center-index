@@ -1,5 +1,8 @@
-import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import contextlib
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class AutoconfConan(ConanFile):
@@ -7,32 +10,37 @@ class AutoconfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/autoconf/"
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
-    topics = ("conan", "autoconf", "configure", "build")
+    topics = ("autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-    exports_sources = "patches/**"
     settings = "os", "arch", "compiler"
+
+    exports_sources = "patches/*"
+
     _autotools = None
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def requirements(self):
-        self.requires("m4/1.4.18")
-
-    def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.compiler
-        # The m4 requirement does not change the contents of this package
-        self.info.requires.clear()
+        self.requires("m4/1.4.19")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if hasattr(self, "settings_build"):
+            self.build_requires("m4/1.4.19")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
+
+    def package_id(self):
+        self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _datarootdir(self):
@@ -62,25 +70,24 @@ class AutoconfConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        with tools.environment_append(tools.RunEnvironment(self).vars):
+            yield
+
     def build(self):
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
-
-        if self.settings.os == "Windows":
-            binpath = os.path.join(self.package_folder, "bin")
-            for filename in os.listdir(binpath):
-                fullpath = os.path.join(binpath, filename)
-                if not os.path.isfile(fullpath):
-                    continue
-                os.rename(fullpath, fullpath + ".exe")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
@@ -91,27 +98,19 @@ class AutoconfConan(ConanFile):
         self.output.info("Setting AC_MACRODIR to {}".format(ac_macrodir))
         self.env_info.AC_MACRODIR = ac_macrodir
 
-        autoconf = os.path.join(self.package_folder, "bin", "autoconf")
-        if self.settings.os == "Windows":
-            autoconf = tools.unix_path(autoconf) + ".exe"
+        autoconf = tools.unix_path(os.path.join(self.package_folder, "bin", "autoconf"))
         self.output.info("Setting AUTOCONF to {}".format(autoconf))
         self.env_info.AUTOCONF = autoconf
 
-        autoreconf = os.path.join(self.package_folder, "bin", "autoreconf")
-        if self.settings.os == "Windows":
-            autoreconf = tools.unix_path(autoreconf) + ".exe"
+        autoreconf = tools.unix_path(os.path.join(self.package_folder, "bin", "autoreconf"))
         self.output.info("Setting AUTORECONF to {}".format(autoreconf))
         self.env_info.AUTORECONF = autoreconf
 
-        autoheader = os.path.join(self.package_folder, "bin", "autoheader")
-        if self.settings.os == "Windows":
-            autoheader = tools.unix_path(autoheader) + ".exe"
+        autoheader = tools.unix_path(os.path.join(self.package_folder, "bin", "autoheader"))
         self.output.info("Setting AUTOHEADER to {}".format(autoheader))
         self.env_info.AUTOHEADER = autoheader
 
-        autom4te = os.path.join(self.package_folder, "bin", "autom4te")
-        if self.settings.os == "Windows":
-            autom4te = tools.unix_path(autom4te) + ".exe"
+        autom4te = tools.unix_path(os.path.join(self.package_folder, "bin", "autom4te"))
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
 

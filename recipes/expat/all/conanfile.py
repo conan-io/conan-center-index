@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class ExpatConan(ConanFile):
     name = "expat"
     description = "Fast streaming XML parser written in C."
-    topics = ("conan", "expat", "xml", "parsing")
+    topics = ("expat", "xml", "parsing")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
     license = "MIT"
@@ -17,13 +17,24 @@ class ExpatConan(ConanFile):
         "fPIC": [True, False],
         "char_type": ["char", "wchar_t", "ushort"],
     }
-    default_options = {"shared": False, "fPIC": True, "char_type": "char"}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "char_type": "char",
+    }
+
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    exports_sources = "CMakeLists.txt", "patches/*"
 
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,6 +74,8 @@ class ExpatConan(ConanFile):
             self._cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
             # EXPAT_CHAR_TYPE was added in 2.2.8
             self._cmake.definitions["EXPAT_CHAR_TYPE"] = self.options.char_type
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["EXPAT_MSVC_STATIC_CRT"] = "MT" in self.settings.compiler.runtime
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -87,7 +100,7 @@ class ExpatConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]
-        if self.options.get_safe("char_type") in ["wchar_t", "ushort"]:
+        if self.options.get_safe("char_type") in ("wchar_t", "ushort"):
             self.cpp_info.defines.append("XML_UNICODE")
-        if self.options.get_safe("char_type") == "wchar_t":
+        elif self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")

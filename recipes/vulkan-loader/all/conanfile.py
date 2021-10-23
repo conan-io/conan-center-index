@@ -1,13 +1,14 @@
-import os
-import glob
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+import os
+
+required_conan_version = ">=1.33.0"
 
 
 class VulkanLoaderConan(ConanFile):
     name = "vulkan-loader"
     description = "Khronos official Vulkan ICD desktop loader for Windows, Linux, and MacOS."
-    topics = ("conan", "vulkan", "loader", "desktop", "gpu")
+    topics = ("vulkan", "loader", "desktop", "gpu")
     homepage = "https://github.com/KhronosGroup/Vulkan-Loader"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
@@ -22,7 +23,7 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
@@ -50,15 +51,21 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
             del self.options.with_wsi_directfb
-        # default shared on non-Apple OS
-        if not tools.is_apple_os(self.settings.os):
-            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("vulkan-headers/{}".format(self.version))
+        if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
+            self.requires("xorg/system")
+        if self.options.get_safe("with_wsi_wayland"):
+            self.requires("wayland/1.19.0")
+
+    def validate(self):
         if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
@@ -68,23 +75,16 @@ class VulkanLoaderConan(ConanFile):
             # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
             raise ConanInvalidConfiguration("Visual Studio < 2017 not yet supported in this recipe")
 
-    def requirements(self):
-        self.requires("vulkan-headers/{}".format(self.version))
-        if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
-            self.requires("xorg/system")
-        if self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.18.0")
-
     def build_requirements(self):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
            self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
         if self._is_mingw:
             self.build_requires("jwasm/2.13")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("Vulkan-Loader-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

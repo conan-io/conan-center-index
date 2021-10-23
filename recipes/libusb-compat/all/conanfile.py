@@ -4,6 +4,9 @@ from contextlib import contextmanager
 import os
 import re
 import shlex
+import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class LibUSBCompatConan(ConanFile):
@@ -34,10 +37,6 @@ class LibUSBCompatConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libusb-compat-{}".format(self.version), self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,16 +48,24 @@ class LibUSBCompatConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("libusb/1.0.23")
+        self.requires("libusb/1.0.24")
         if self.settings.compiler == "Visual Studio":
             self.requires("dirent/1.23.2")
 
+    @property
+    def _settings_build(self):
+        return self.settings_build if hasattr(self, "settings_build") else self.settings
+
     def build_requirements(self):
+        self.build_requires("gnu-config/cci.20201022")
         self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
-        if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        self.build_requires("pkgconf/1.7.4")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _iterate_lib_paths_win(self, lib):
         """Return all possible library paths for lib"""
@@ -143,8 +150,12 @@ class LibUSBCompatConan(ConanFile):
         return sources, headers
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                    os.path.join(self._source_subfolder, "config.sub"))
+        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                    os.path.join(self._source_subfolder, "config.guess"))
         if self.settings.os == "Windows":
             api = "__declspec(dllexport)" if self.options.shared else ""
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
@@ -154,6 +165,10 @@ class LibUSBCompatConan(ConanFile):
             # This will override this and add the dependency
             tools.replace_in_file(os.path.join(self._source_subfolder, "ltmain.sh"),
                                   "droppeddeps=yes", "droppeddeps=no && func_append newdeplibs \" $a_deplib\"")
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def build(self):
         self._patch_sources()

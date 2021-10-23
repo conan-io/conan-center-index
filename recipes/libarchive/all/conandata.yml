@@ -1,4 +1,7 @@
 sources:
+  "3.5.2":
+    url: "https://github.com/libarchive/libarchive/archive/v3.5.2.tar.gz"
+    sha256: "126058cb4cf50e36bcf83307f5d987bde2ecebabcae985b6a153116362d25b7b"
   "3.5.1":
     url: "https://github.com/libarchive/libarchive/releases/download/3.5.1/libarchive-3.5.1.tar.gz"
     sha256: "9015d109ec00bb9ae1a384b172bf2fc1dff41e2c66e5a9eeddf933af9db37f5a"

@@ -1,9 +1,7 @@
-#include <msdfgen/msdfgen.h>
-#include <msdfgen/msdfgen-ext.h>
+#include <msdfgen.h>
+#include <msdfgen-ext.h>
 
 #include <iostream>
-
-using namespace msdfgen;
 
 int main(int argc, char **argv) {
     if (argc < 2) {

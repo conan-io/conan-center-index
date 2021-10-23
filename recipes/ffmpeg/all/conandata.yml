@@ -1,0 +1,10 @@
+sources:
+  "4.4":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.4.tar.bz2"
+    sha256: "42093549751b582cf0f338a21a3664f52e0a9fbe0d238d3c992005e493607d0e"
+  "4.3.2":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.3.2.tar.bz2"
+    sha256: "ab3a6d6a70358ba0a5f67f37f91f6656b7302b02e98e5b8c846c16763c99913a"
+  "4.2.1":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.2.1.tar.bz2"
+    sha256: "682a9fa3f6864d7f0dbf224f86b129e337bc60286e0d00dffcd710998d521624"

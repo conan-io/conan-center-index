@@ -1,4 +1,11 @@
+#if LIB_VERSION == 2
 #include "coap2/coap.h"
+#elif LIB_VERSION == 3
+#include "coap3/coap.h"
+#else
+#error "Version not supported"
+#endif
+
 #include <iostream>
 
 int main() {

@@ -10,3 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/export-extern-symbols-for-msvc.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/minizip-no-crypt-header.patch"
+      base_path: "source_subfolder"

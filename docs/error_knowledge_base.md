@@ -287,7 +287,7 @@ Since the entire community is maintaining all CCI recipes, putting just one name
 
 #### **<a name="KB-H040">#KB-H040</a>: "NO TARGET NAME"**
 
-According the Conan issue [#6269](https://github.com/conan-io/conan/issues/6269), the attribute `cpp_info.name` should be avoided for Conan Center Index in favor of `cpp_info.names["cmake_find_package"]` and `cpp_info.names["cmake_find_multi_package"]`.
+According the Conan issue [#6269](https://github.com/conan-io/conan/issues/6269), the attribute `cpp_info.name` should be avoided for Conan Center Index in favor of `cpp_info.names["cmake_find_package"]` and `cpp_info.names["cmake_find_package_multi"]`.
 
 #### **<a name="KB-H041">#KB-H041</a>: "NO FINAL ENDLINE"**
 
@@ -305,10 +305,6 @@ The method `self.options.remove()` was introduced in Conan 0.x, however, Conan 1
 #### **<a name="KB-H046">#KB-H046</a>: "CMAKE VERBOSE MAKEFILE"**
 
 The CMake definition CMAKE_VERBOSE_MAKEFILE helps for debugging when developing, however, for regular CI build, it increases the log size and it's only required when problems occur and need to be verified.
-
-#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
-
-According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
 
 #### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
 
@@ -348,6 +344,11 @@ The duality creates a heterogeneous way of solving dependencies, making it diffi
 Public Domain is not a license by itself, but consists of all the creative work to which no exclusive intellectual property rights apply.
 If a project is under Public Domain and there is no license listed, the [Unlicense](https://spdx.org/licenses/Unlicense) should be used.
 
+#### **<a name="KB-H057">#KB-H057</a>: "TOOLS RENAME"**
+
+The [rename()](https://docs.conan.io/en/latest/reference/conanfile/tools/files.html#conan-tools-rename) method will be the standard for Conan 2.0, and
+also, it uses [robocopy](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy), which is safer on Windows.
+
 #### **<a name="KB-H058">#KB-H058</a>: "ILLEGAL CHARACTERS"**
 
 Windows [naming conventions](https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions) and [reserved](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) characters must be avoided for file naming, otherwise the will not be supported on Windows.
@@ -365,3 +366,21 @@ The .gitattribute file lists which files should be converted to LF when commit. 
     > git config --local core.eol lf
 
 The `core.autocrlf` disabled means that git will not convert from CRLF to LF on commit. The `core.eol` sets the specific line ending to be used for every commit.
+
+#### **<a name="KB-H062">#KB-H062</a>: "TOOLS CROSS BUILDING"**
+
+Replace all occurrences of `tools.cross_building(self.settings)` with `tools.cross_building(self)`.
+When cross building, conan needs to compare `self.settings` and `self.settings_build`, which are attributes of `self`.
+
+#### **<a name="KB-H064">#KB-H064</a>: "INVALID TOPICS"**
+
+An invalid topic has been detected. Remove or rename it.
+
+# Deprecated errors
+
+The following errors from the hooks are deprecated and no longer reported:
+
+#### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
+
+According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
+

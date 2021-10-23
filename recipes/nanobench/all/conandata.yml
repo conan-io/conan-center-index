@@ -5,3 +5,6 @@ sources:
   "4.3.0":
     url: "https://github.com/martinus/nanobench/archive/v4.3.0.tar.gz"
     sha256: 6cf97e940eca42394f64d4e9d341e72804c92575247269695beb24f7e2539e82
+  "4.3.5":
+    url: "https://github.com/martinus/nanobench/archive/v4.3.5.tar.gz"
+    sha256: "205e6cf0ea901f64af971335bfe8011c1f6bd66f6ae678c616da0eddfbe70437"

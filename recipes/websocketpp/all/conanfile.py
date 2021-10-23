@@ -19,12 +19,12 @@ class WebsocketPPConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
+        self.requires("openssl/1.1.1k")
         self.requires("zlib/1.2.11")
         if self.options.asio == "standalone":
-            self.requires("asio/1.16.1")
+            self.requires("asio/1.19.2")
         else:
-            self.requires("boost/1.74.0")
+            self.requires("boost/1.76.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

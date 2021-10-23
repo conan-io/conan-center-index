@@ -2,13 +2,15 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 import os
 import shutil
 
+required_conan_version = ">=1.33.0"
+
 
 class YASMConan(ConanFile):
     name = "yasm"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
     description = "Yasm is a complete rewrite of the NASM assembler under the 'new' BSD License"
-    topics = ("conan", "yasm", "installer", "assembler")
+    topics = ("yasm", "installer", "assembler")
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -18,19 +20,26 @@ class YASMConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "yasm-%s" % self.version
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.download("https://raw.githubusercontent.com/yasm/yasm/bcc01c59d8196f857989e6ae718458c296ca20e3/YASM-VERSION-GEN.bat",
-                       os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
+        tools.get(**self.conan_data["sources"][self.version][0],
+                  destination=self._source_subfolder, strip_root=True)
+        tools.download(**self.conan_data["sources"][self.version][1],
+                       filename=os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
 
     @property
     def _msvc_subfolder(self):
@@ -38,14 +47,13 @@ class YASMConan(ConanFile):
 
     def _build_vs(self):
         with tools.chdir(self._msvc_subfolder):
-            with tools.vcvars(self.settings, force=True):
-                msbuild = MSBuild(self)
-                if self.settings.arch == "x86":
-                    msbuild.build_env.link_flags.append("/MACHINE:X86")
-                elif self.settings.arch == "x86_64":
-                    msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
-                msbuild.build(project_file="yasm.sln",
-                              targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
+            msbuild = MSBuild(self)
+            if self.settings.arch == "x86":
+                msbuild.build_env.link_flags.append("/MACHINE:X86")
+            elif self.settings.arch == "x86_64":
+                msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
+            msbuild.build(project_file="yasm.sln",
+                          targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
 
     def _configure_autotools(self):
         if self._autotools:

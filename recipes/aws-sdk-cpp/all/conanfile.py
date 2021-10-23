@@ -288,12 +288,13 @@ class AwsSdkCppConan(ConanFile):
                 }
             }
     default_options = {key: False for key in options.keys()}
-    default_options["fPIC"] = True
     default_options["access-management"] = True
+    default_options["fPIC"] = True
     default_options["identity-management"] = True
+    default_options["monitoring"] = True
     default_options["queues"] = True
-    default_options["transfer"] = True
     default_options["s3-encryption"] = True
+    default_options["transfer"] = True
     default_options["text-to-speech"] = True
     _internal_requirements = {
             "access-management": ["iam", "cognito-identity"],
@@ -311,6 +312,10 @@ class AwsSdkCppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _use_aws_crt_cpp(self):
+        return tools.Version(self.version) >= "1.9"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -318,16 +323,34 @@ class AwsSdkCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if (self.settings.compiler == "gcc"
-                    and tools.Version(self.settings.compiler.version) < "6.0"):
-                raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
+
+    def validate(self):
+        if (self.options.shared
+            and self.settings.compiler == "gcc"
+            and tools.Version(self.settings.compiler.version) < "6.0"):
+            raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
                 See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
+        if self._use_aws_crt_cpp:
+            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
+        else:
+            if (self.settings.os == "Macos"
+                    and self.settings.arch == "armv8"):
+                raise ConanInvalidConfiguration("""This version doesn't support arm8
+                    See https://github.com/aws/aws-sdk-cpp/issues/1542""")
 
     def requirements(self):
-        self.requires("aws-c-event-stream/0.1.5")
+        self.requires("aws-c-common/0.6.9")
+        if self._use_aws_crt_cpp:
+            self.requires("aws-c-cal/0.5.12")
+            self.requires("aws-c-io/0.10.9")
+            self.requires("aws-crt-cpp/0.14.3")
+        else:
+            self.requires("aws-c-event-stream/0.1.5")
         if self.settings.os != "Windows":
-            self.requires("libcurl/7.74.0")
-        if self.settings.os == "Linux":
+            self.requires("openssl/1.1.1l")
+            self.requires("libcurl/7.78.0")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
 
@@ -338,11 +361,8 @@ class AwsSdkCppConan(ConanFile):
                     setattr(self.info.options, internal_requirement, True)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
-        # Keeping these unused folders make the source copy fail on Windows
-        tools.rmdir(os.path.join(self._source_subfolder, "code-generation", "generator"))
-        tools.rmdir(os.path.join(self._source_subfolder, "aws-cpp-sdk-core-tests"))
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -355,15 +375,20 @@ class AwsSdkCppConan(ConanFile):
                 build_only.append(sdk)
         self._cmake.definitions["BUILD_ONLY"] = ";".join(build_only)
 
-        self._cmake.definitions["BUILD_DEPS"] = False
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.definitions["AUTORUN_UNIT_TESTS"] = False
+        self._cmake.definitions["BUILD_DEPS"] = False
 
         self._cmake.definitions["MINIMIZE_SIZE"] = self.options.min_size
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio" and not self._use_aws_crt_cpp:
             self._cmake.definitions["FORCE_SHARED_CRT"] = "MD" in self.settings.compiler.runtime
 
+        if tools.cross_building(self):
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_H2_EXITCODE__TRYRUN_OUTPUT"] = ""
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE"] = "0"
+            self._cmake.definitions["CURL_HAS_TLS_PROXY_EXITCODE__TRYRUN_OUTPUT"] = ""
         self._cmake.configure()
         return self._cmake
 
@@ -377,6 +402,9 @@ class AwsSdkCppConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.compiler == 'Visual Studio':
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.lib")
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -390,7 +418,15 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].names["pkg_config"] = "aws-sdk-cpp-core"
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = ["aws-c-event-stream::aws-c-event-stream-lib"]
+        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
+        if self._use_aws_crt_cpp:
+            self.cpp_info.components["core"].requires.extend([
+                "aws-c-io::aws-c-io-lib",
+                "aws-c-cal::aws-c-cal-lib",
+                "aws-crt-cpp::aws-crt-cpp-lib",
+            ])
+        else:
+            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
 
         enabled_sdks = [sdk for sdk in self._sdks if getattr(self.options, sdk)]
         for hl_comp in self._internal_requirements.keys():
@@ -419,9 +455,9 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].system_libs.append("winmm")
         else:
-            self.cpp_info.components["core"].requires.append("libcurl::curl")
+            self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
@@ -433,3 +469,4 @@ class AwsSdkCppConan(ConanFile):
         lib_stdcpp = tools.stdcpp_library(self)
         if lib_stdcpp:
             self.cpp_info.components["core"].system_libs.append(lib_stdcpp)
+

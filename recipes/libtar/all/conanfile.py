@@ -1,7 +1,8 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class LibTarConan(ConanFile):
@@ -29,28 +30,30 @@ class LibTarConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("libtar does not support Visual Studio")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("libtar does not support Windows")
+
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(glob.glob("libtar-*")[0], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -76,7 +79,7 @@ class LibTarConan(ConanFile):
     def build(self):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 

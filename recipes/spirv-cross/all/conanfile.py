@@ -14,13 +14,13 @@ class SpirvCrossConan(ConanFile):
     topics = ("conan", "spirv-cross", "reflection", "disassembler", "spirv", "spir-v", "glsl", "hlsl")
     homepage = "https://github.com/KhronosGroup/SPIRV-Cross"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "build_executable": [True, False],
+        "exceptions": [True, False],
         "glsl": [True, False],
         "hlsl": [True, False],
         "msl": [True, False],
@@ -34,6 +34,7 @@ class SpirvCrossConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "build_executable": True,
+        "exceptions": True,
         "glsl": True,
         "hlsl": True,
         "msl": True,
@@ -44,6 +45,8 @@ class SpirvCrossConan(ConanFile):
         "namespace": "spirv_cross",
     }
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -86,7 +89,7 @@ class SpirvCrossConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"] = False
+        self._cmake.definitions["SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"] = not self.options.exceptions
         self._cmake.definitions["SPIRV_CROSS_SHARED"] = self.options.shared
         self._cmake.definitions["SPIRV_CROSS_STATIC"] = not self.options.shared
         self._cmake.definitions["SPIRV_CROSS_CLI"] = self.options.build_executable and self._are_proper_binaries_available_for_executable

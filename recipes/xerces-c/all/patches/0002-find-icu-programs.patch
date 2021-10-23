@@ -1,0 +1,12 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1146,6 +1146,9 @@ if(XERCES_USE_MSGLOADER_ICU)
+   list(APPEND libxerces_c_SOURCES ${msgicu_sources} ${msgicu_nodist_sources})
+   list(APPEND libxerces_c_HEADERS ${msgicu_headers})
+   list(APPEND libxerces_c_DEPS ICU::uc ICU::data)
++  find_program(ICU_GENCMN_EXECUTABLE gencmn PATHS ENV PATH NO_DEFAULT_PATH)
++  find_program(ICU_GENRB_EXECUTABLE genrb PATHS ENV PATH NO_DEFAULT_PATH)
++  find_program(ICU_GENCCODE_EXECUTABLE genccode PATHS ENV PATH NO_DEFAULT_PATH)
+ 
+   # Resource shortname
+   set(PKGNAME xercesc_messages_${INTERFACE_VERSION_U})

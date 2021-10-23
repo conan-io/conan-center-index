@@ -23,7 +23,12 @@ This section gathers the most common questions from the community related to pac
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [Why is a `tools.check_min_cppstd` call not enough?](#why-is-a-toolscheck_min_cppstd-call-not-enough)
-  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)<!-- endToc -->
+  * [What is the policy for adding older versions of a package?](#what-is-the-policy-for-adding-older-versions-of-a-package)
+  * [What is the policy for removing older versions of a package?](#what-is-the-policy-for-removing-older-versions-of-a-package)
+  * [Can I install packages from the system package manager?](#can-i-install-packages-from-the-system-package-manager)
+  * [Why ConanCenter does not build and execute tests in recipes](#why-conancenter-does-not-build-and-execute-tests-in-recipes)
+  * [What is the policy for supported python versions?](#what-is-the-policy-for-supported-python-versions)
+  * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -150,7 +155,7 @@ default_options = {"foobar": "deprecated"}
 
 def configure(self):
     if self.options.foobar != "deprecated":
-        self.out.warn("foobar option is deprecated, do not use anymore.")
+        self.output.warn("foobar option is deprecated, do not use anymore.")
 
 def package_id(self):
     del self.info.options.foobar
@@ -200,3 +205,112 @@ As a result, all calls to `tools.check_min_cppstd` must be guarded by a check fo
 
 We defer adding older versions without a direct requirement. We love to hear why in the opening description of the PR.
 This is for historical reasons, when older versions were permitted the overwhelming majority received zero downloads and were never used by the community while still increasing the burden on the build system.
+
+## What is the policy for removing older versions of a package?
+
+Keeping many older versions can be a problem, as over time they may become incompatible with newer versions of the package's Python code and/or dependencies. They also become downloaded less often than newer versions, and yet continue to consume CI resources during Pull Requests.
+
+Given a technical limitations and/or incompatibilities emerging from infrastructure changes, removing older versions from `config.yml` and `conandata.yml` may be permitted. The respective recipes and binary packages will not be removed from Conan Center, but they will not receive new updates, as they are not listed to be built.
+
+There is no strict rule for keeping older versions, but we recommend keeping only the latest version of each old major release. For the latest major version available, the last patch version of each minor version should be available. As example, we can list the [CMake](https://github.com/conan-io/conan-center-index/blob/master/recipes/cmake/config.yml) package.
+
+## Can I install packages from the system package manager?
+
+It depends. You can not mix both regular projects with system packages, but you can provide package wrappers for system packages. However, Conan can not track system packages, like their version and options, which creates a fragile situation where affects libraries and binaries built in your package but can not be totally reproduced.
+Also, system package managers require administrator permission to install packages, which is not always possible and may break limited users. Moreover, more than one Conan package may require the same system package and there is no way to track their mutual usage.
+
+The hook [KB-H032](error_knowledge_base.md#KB-H032) does not allow `system_requirement` nor `SystemPackageTool` in recipes, to avoid mixing both regular projects with
+system packages at same recipe.
+
+There are exceptions where some projects are closer to system drivers or hardware and packaging as a regular library could result
+in an incompatible Conan package. To deal with those cases, you are allowed to provide an exclusive Conan package which only installs system packages, see the [How-to](https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md#system-packages) for more.
+
+## Why ConanCenter does **not** build and execute tests in recipes
+
+<!-- ref https://github.com/conan-io/conan-center-index/pull/5405#issuecomment-854618305 -->
+
+There are different motivations
+- time and resources: adding the build time required by the test suite plus execution time can increase our building times significantly across the 100+ configurations.
+- ConanCenter is a service that builds binaries for the community for existing library versions, this is not an integration system to test the libraries.
+
+## What is the policy for supported python versions?
+
+`Python 2.7` and earlier is not supported by the ConanCenter, as it's already [EOL](https://www.python.org/doc/sunset-python-2/).
+
+`Python 3.5` and earlier is also not supported by the ConanCenter, as it's already [EOL](https://www.python.org/dev/peps/pep-0478/).
+
+Versions `Python 3.6+` onwards are currently supported by the infrastructure and the recipes.
+
+Our [docker images](https://github.com/conan-io/conan-docker-tools) use `Python 3.7.5+` ATM.
+
+Windows agents currently use `Python 3.6.7+`. macOS agents use version `Python 3.7.3+`.
+
+The version run by our agents and docker images is a subject to change, as security updates to the Python are released, or they enter EOL.
+
+Additional concerns about supported versions within conan ecosystem (not just ConanCenter, but client itself and other tools) are documented in [tribe](https://github.com/conan-io/tribe/pull/3).
+
+For ConanCenter, besides security, there are various concerns about critical features provided by the Python interpreter, include its syntax and the standard library, e.g.:
+
+- LZMA compression support
+- Unicode awareness
+- long-path awareness
+
+Right now, only the [CPython](https://github.com/python/cpython) flavor of the interpreter is supported (e.g. we never tested recipes work with IronPython, JPython, Cython, etc.).
+
+In addition, we support only 64-bit builds of the interpreter (amd64/x86_64 architecture) - 32-bit builds (x86) are not supported and not installed on the agents.
+
+There are no guarantees that recipes will work correctly in future Python versions having breaking changes to the interpreter,
+ as we don't test all the possible combinations (and probably will never be). Patches are welcomed if problems are found.
+
+## How to package libraries that depend on proprietary closed-source libraries?
+
+There are several popular software libraries provided by Intel:
+
+* [Intel Math Kernel Library (MKL)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html)
+* [Intel Integrated Performance Primitives (IPP)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/ipp.html)
+* [Intel Deep Neural Networking Library (DNN)](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onednn.html)
+
+these Intel libraries are widely used by various well-known open-source projects (e.g. [OpenCV](https://opencv.org/) or [TensorFlow](https://www.tensorflow.org/)).
+
+Unfortunately, these Intel libraries cannot be accepted into ConanCenter due to several important reasons:
+
+* they are closed-source and commercial products, ConanCenter cannot redistribute their binaries due to the license restrictions
+* registration on the Intel portal is required in order to dowload the libraries, there are no permanent public direct download links
+* they use graphical installers which are hard to automate within conan recipe
+
+instead, the libraries that depend on *MKL*, *IPP* or *DNN* should use the following references:
+
+* `intel-mkl/<version>`, e.g. `intel-mkl/2021`
+* `intel-ipp/<version>`, e.g. `intel-ipp/2021`
+* `intel-dnn/<version>`, e.g. `intel-dnn/2021`
+
+**NOTE**: These references are not available in ConanCenter and will likely never be! it's the consumer's responsibility to provide the recipes for these libraries.
+
+
+Since these references will be never available in ConanCenter, they will be deactivated in the consuming recipes by default:
+
+```python
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_intel_mkl": [True, False]}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_intel_mkl": False}
+
+    def requirements(self):
+        if self.options.with_intel_mkl:
+            self.requires("intel-mkl/2021")
+```
+
+If consumers activate the option explicitly (`with_intel_mkl=True`), Conan will fail because of the unknown reference.
+
+Consumers may use an [override](https://docs.conan.io/en/latest/using_packages/conanfile_txt.html#overriding-requirements) facility in order to use their own private references for Intel MKL, IPP or DNN libraries.
+
+For instance, if you have a private reference `intel-mkl/2021@mycompany/stable`, then you may use the following override in your `conanfile.txt`:
+
+```
+[requires]
+intel-mkl/2021@mycompany/stable
+```

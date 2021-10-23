@@ -2,10 +2,8 @@ from conans import ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
-
-    settings = "arch_build", "os_build"
+    settings = "os", "arch"
 
     def test(self):
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
-        if not tools.cross_building(self.settings):
-            self.run("gperf{} --version".format(bin_ext))
+        if not tools.cross_building(self):
+            self.run("gperf --version")

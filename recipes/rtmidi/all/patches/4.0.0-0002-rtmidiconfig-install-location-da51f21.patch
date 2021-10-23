@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 28ee1f8..eb428ec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -247,7 +247,7 @@ endif()
+ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/RtMidiConfig.cmake "include(\${CMAKE_CURRENT_LIST_DIR}/RtMidiTargets.cmake)")
+ 
+ # Install CMake configuration export file.
+-install(FILES ${CMAKE_BINARY_DIR}/RtMidiConfig.cmake
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/RtMidiConfig.cmake
+         DESTINATION ${RTMIDI_CMAKE_DESTINATION})
+ 
+ # Export library target (build-tree).

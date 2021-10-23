@@ -16,9 +16,8 @@ class CLI11Conan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.upper() + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -29,6 +28,9 @@ class CLI11Conan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # since 2.1.1
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         self.info.header_only()
@@ -36,3 +38,4 @@ class CLI11Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CLI11"
         self.cpp_info.names["cmake_find_package_multi"] = "CLI11"
+        self.cpp_info.names["pkg_config"] = "CLI11"

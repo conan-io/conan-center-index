@@ -1,5 +1,3 @@
-/*!re2c re2c:flags:i = 1; */
-
 #include <stdio.h>
 
 /*!max:re2c*/

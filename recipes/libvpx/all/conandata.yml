@@ -2,6 +2,12 @@ sources:
   "1.9.0":
     url: "https://github.com/webmproject/libvpx/archive/v1.9.0.tar.gz"
     sha256: "d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
+  "1.10.0":
+    url: "https://github.com/webmproject/libvpx/archive/v1.10.0.tar.gz"
+    sha256: "85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a"
+  "1.11.0":
+    url: "https://github.com/webmproject/libvpx/archive/v1.11.0.tar.gz"
+    sha256: "965e51c91ad9851e2337aebcc0f517440c637c506f3a03948062e3d5ea129a83"
 patches:
   "1.9.0":
     - patch_file: "patches/msvc_conan_build.patch"

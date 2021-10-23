@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             arg_path1 = os.path.abspath(os.path.join(os.path.dirname(__file__), "sign1-tmpl.xml"))
             arg_path2 = os.path.abspath(os.path.join(os.path.dirname(__file__), "rsakey.pem"))

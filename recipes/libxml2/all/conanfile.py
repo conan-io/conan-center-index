@@ -63,12 +63,16 @@ class Libxml2Conan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     @property
-    def _is_mingw(self):
-        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
+    def _is_mingw_windows(self):
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows" and self._settings_build.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,10 +95,10 @@ class Libxml2Conan(ConanFile):
             self.requires("icu/69.1")
 
     def build_requirements(self):
-        if not self._is_msvc:
+        if not (self._is_msvc or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
                 self.build_requires("pkgconf/1.7.4")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
@@ -115,15 +119,19 @@ class Libxml2Conan(ConanFile):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 
-            args = ["cscript",
-                    "configure.js",
-                    "compiler=msvc",
-                    "prefix=%s" % self.package_folder,
-                    "cruntime=/%s" % self.settings.compiler.runtime,
-                    "debug=%s" % debug,
-                    "static=%s" % static,
-                    'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=msvc",
+                "prefix={}".format(self.package_folder),
+                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "debug={}".format(debug),
+                "static={}".format(static),
+            ]
+            if self.deps_cpp_info.include_paths:
+                args.append("include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)))
+            if self.deps_cpp_info.lib_paths:
+                args.append("lib=\"{}\"".format(";".join(self.deps_cpp_info.lib_paths)))
 
             for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
@@ -151,7 +159,7 @@ class Libxml2Conan(ConanFile):
                                           "LIBS = $(LIBS) %s" % ' '.join(libs))
 
             fix_library(self.options.zlib, 'zlib', 'zlib.lib')
-            fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
+            fix_library(self.options.lzma, "xz_utils", "liblzma.lib")
             fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
@@ -161,13 +169,70 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc utils")
 
-
     def _package_msvc(self):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install-libs")
 
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc install-dist")
+
+    @contextmanager
+    def _mingw_build_environment(self):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            with tools.environment_append(AutoToolsBuildEnvironment(self).vars):
+                yield
+
+    def _build_mingw(self):
+        with self._mingw_build_environment():
+            # configuration
+            yes_no = lambda v: "yes" if v else "no"
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=mingw",
+                "prefix={}".format(self.package_folder),
+                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
+                "static={}".format(yes_no(not self.options.shared)),
+            ]
+            if self.deps_cpp_info.include_paths:
+                args.append("include=\"{}\"".format(" -I".join(self.deps_cpp_info.include_paths)))
+            if self.deps_cpp_info.lib_paths:
+                args.append("lib=\"{}\"".format(" -L".join(self.deps_cpp_info.lib_paths)))
+
+            for name in self._option_names:
+                cname = {
+                    "mem-debug": "mem_debug",
+                    "run-debug": "run_debug",
+                    "docbook": "docb",
+                }.get(name, name)
+                args.append("{}={}".format(cname, yes_no(getattr(self.options, name))))
+            configure_command = " ".join(args)
+            self.output.info(configure_command)
+            self.run(configure_command)
+
+            # build
+            def fix_library(option, package, old_libname):
+                if option:
+                    tools.replace_in_file(
+                        "Makefile.mingw",
+                        "LIBS += -l{}".format(old_libname),
+                        "LIBS += -l{}".format(" -l".join(self.deps_cpp_info[package].libs)),
+                    )
+
+            fix_library(self.options.iconv, "libiconv", "iconv")
+            fix_library(self.options.zlib, "zlib", "z")
+            fix_library(self.options.lzma, "xz_utils", "lzma")
+
+            self.run("mingw32-make -j{} -f Makefile.mingw libxml libxmla".format(tools.cpu_count()))
+            if self.options.include_utils:
+                self.run("mingw32-make -j{} -f Makefile.mingw utils".format(tools.cpu_count()))
+
+    def _package_mingw(self):
+        with self._mingw_build_environment():
+            tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
+            self.run("mingw32-make -f Makefile.mingw install-libs")
+            if self.options.include_utils:
+                self.run("mingw32-make -f Makefile.mingw install-dist")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -204,6 +269,8 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
+        elif self._is_mingw_windows:
+            self._build_mingw()
         else:
             autotools = self._configure_autotools()
             autotools.make(["libxml2.la"])
@@ -222,6 +289,15 @@ class Libxml2Conan(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
             os.remove(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        elif self._is_mingw_windows:
+            self._package_mingw()
+            if self.options.shared:
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
+                tools.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                             os.path.join(self.package_folder, "lib", "libxml2.dll.a"))
+            else:
+                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
@@ -241,22 +317,31 @@ class Libxml2Conan(ConanFile):
                       dst=os.path.join("include", "libxml2"), keep_path=False)
 
         self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            tools.Version(self.version)
+            os.path.join(self.package_folder, self._module_file_rel_path)
         )
 
     @staticmethod
-    def _create_cmake_module_variables(module_file, version):
+    def _create_cmake_module_variables(module_file):
         # FIXME: also define LIBXML2_XMLLINT_EXECUTABLE variable
         content = textwrap.dedent("""\
-            set(LIBXML2_FOUND TRUE)
-            set(LIBXML2_INCLUDE_DIR $<TARGET_PROPERTY:LibXml2::LibXml2,INTERFACE_INCLUDE_DIRECTORIES>)
-            set(LIBXML2_INCLUDE_DIRS ${{LIBXML2_INCLUDE_DIR}})
-            set(LIBXML2_LIBRARIES $<LINK_ONLY:LibXml2::LibXml2>)
-            set(LIBXML2_LIBRARY ${{LIBXML2_LIBRARIES}})
-            set(LIBXML2_DEFINITIONS $<TARGET_PROPERTY:LibXml2::LibXml2,INTERFACE_COMPILE_DEFINITIONS>)
-            set(LIBXML2_VERSION_STRING "{major}.{minor}.{patch}")
-        """.format(major=version.major, minor=version.minor, patch=version.patch))
+            if(DEFINED LibXml2_FOUND)
+                set(LIBXML2_FOUND ${LibXml2_FOUND})
+            endif()
+            if(DEFINED LibXml2_INCLUDE_DIR)
+                set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
+                set(LIBXML2_INCLUDE_DIRS ${LibXml2_INCLUDE_DIR})
+            endif()
+            if(DEFINED LibXml2_LIBRARIES)
+                set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
+                set(LIBXML2_LIBRARY ${LibXml2_LIBRARIES})
+            endif()
+            if(DEFINED LibXml2_DEFINITIONS)
+                set(LIBXML2_DEFINITIONS ${LibXml2_DEFINITIONS})
+            endif()
+            if(DEFINED LibXml2_VERSION)
+                set(LIBXML2_VERSION_STRING ${LibXml2_VERSION})
+            endif()
+        """)
         tools.save(module_file, content)
 
     @property
@@ -293,4 +378,3 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

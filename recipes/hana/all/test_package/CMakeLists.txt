@@ -7,5 +7,5 @@ conan_basic_setup(TARGETS)
 find_package(Hana REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} hana::hana) # TODO: remove hana:: namespace when fixed in conanfile.py of hana
+target_link_libraries(${PROJECT_NAME} hana)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)

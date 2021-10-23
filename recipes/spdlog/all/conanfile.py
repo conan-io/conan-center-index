@@ -51,7 +51,9 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def requirements(self):
-        if Version(self.version) >= "1.7.0":
+        if Version(self.version) >= "1.9.0":
+            self.requires("fmt/8.0.1")
+        elif Version(self.version) >= "1.7.0":
             self.requires("fmt/7.1.3")
         elif Version(self.version) >= "1.5.0":
             self.requires("fmt/6.2.1")

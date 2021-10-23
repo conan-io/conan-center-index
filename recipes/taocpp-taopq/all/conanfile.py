@@ -1,9 +1,10 @@
 import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.28.0"
+
+required_conan_version = ">=1.33.0"
+
 
 class TaoCPPTaopqConan(ConanFile):
     name = "taocpp-taopq"
@@ -44,6 +45,8 @@ class TaoCPPTaopqConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
         min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
@@ -54,12 +57,10 @@ class TaoCPPTaopqConan(ConanFile):
             self.output.warn("taocpp-taopq requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def requirements(self):
-        self.requires("libpq/12.2")
+        self.requires("libpq/13.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("taopq-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _configure_cmake(self):
         if not self._cmake:

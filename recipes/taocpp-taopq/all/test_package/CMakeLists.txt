@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package LANGUAGES CXX)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGET)
 
 find_package(taopq REQUIRED CONFIG)
 

@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">= 1.33.0"
@@ -42,11 +43,15 @@ class PkgConfConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not implemented in the recipe")
 
     def build_requirements(self):
-        self.build_requires("meson/0.58.1")
+        self.build_requires("meson/0.59.2")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     @property
     def _sharedstatedir(self):
@@ -62,7 +67,7 @@ class PkgConfConan(ConanFile):
         return self._meson
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if not self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
@@ -79,7 +84,7 @@ class PkgConfConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        meson = self._meson
+        meson = self._configure_meson()
         meson.install()
 
         if self.settings.compiler == "Visual Studio":
