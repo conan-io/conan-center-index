@@ -74,7 +74,7 @@ class OpenTelemetryCppConan(ConanFile):
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "find_package(absl CONFIG REQUIRED)",
             "find_package(absl REQUIRED)")
-        protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0]
+        protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
