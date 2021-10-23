@@ -100,7 +100,7 @@ class NngConan(ConanFile):
         self.cpp_info.libs = ["nng"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
 
         if self.options.shared:
