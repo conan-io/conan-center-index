@@ -81,7 +81,7 @@ class OpenTelemetryCppConan(ConanFile):
                 "cmake",
                 "opentelemetry-proto.cmake"),
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-            f"set(PROTO_PATH {protos_path})")
+            f"set(PROTO_PATH \"{protos_path}\")")
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "unrecognized target processor configuration",
