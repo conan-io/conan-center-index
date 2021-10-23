@@ -30,7 +30,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "fPIC": False,
+        "fPIC": True,
     }
     exports_sources = "CMakeLists.txt"
 
