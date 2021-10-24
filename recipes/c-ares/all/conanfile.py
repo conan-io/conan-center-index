@@ -1,7 +1,7 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.33.0"
 
 
 class CAresConan(ConanFile):
@@ -9,23 +9,28 @@ class CAresConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A C library for asynchronous DNS requests"
-    topics = ("conan", "c-ares", "dns")
+    topics = ("c-ares", "dns")
     homepage = "https://c-ares.haxx.se/"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tools": [True, False]
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "tools": True
+        "tools": True,
     }
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
 
+    generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -46,8 +51,8 @@ class CAresConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("c-ares-cares-{}".format(self.version.replace(".", "_")), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _cmake_configure(self):
         if self._cmake:
