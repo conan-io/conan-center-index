@@ -3,16 +3,19 @@ import os
 
 required_conan_version = ">=1.33.0"
 
+
 class SpirvheadersConan(ConanFile):
     name = "spirv-headers"
     homepage = "https://github.com/KhronosGroup/SPIRV-Headers"
     description = "Header files for the SPIRV instruction set."
-    topics = ("conan", "spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
+    license = "MIT-KhronosGroup"
+    topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "compiler", "arch", "build_type"
+
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os", "compiler", "arch", "build_type"
-    license = "MIT-KhronosGroup"
     _cmake = None
 
     @property
