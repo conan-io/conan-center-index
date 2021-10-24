@@ -12,7 +12,7 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} xsimd)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
-foreach(flag "-march=native" "-mtune=native")
+foreach(flag "-march=native" "-mtune=native", "/arch:AVX")
   CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_MARCH_NATIVE)
   if(COMPILER_SUPPORTS_MARCH_NATIVE)
     target_compile_options(${PROJECT_NAME} PRIVATE ${flag})
