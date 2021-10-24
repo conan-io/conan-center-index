@@ -9,17 +9,8 @@ class XsimdTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-
-        cxxflags = cmake.definitions.get("CONAN_CXX_FLAGS", "")
-        arch = str(self.settings.arch)
-        if arch.startswith("x86"):
-            cxxflags += " -DXSIMD_FORCE_X86_INSTR_SET=50000000"
-        elif arch.startswith("ppc"):
-            cxxflags += " -DXSIMD_FORCE_PPC_INSTR_SET=20000000"
-        elif arch.startswith("arm"):
-            cxxflags += " -DXSIMD_FORCE_ARM_INSTR_SET=81000000"
-        cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
-
+        if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         cmake.configure()
         cmake.build()
 
