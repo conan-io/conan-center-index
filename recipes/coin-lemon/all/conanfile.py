@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.33.0"
+
 class CoinLemonConan(ConanFile):
     name = "coin-lemon"
     license = "Boost 1.0"
@@ -17,6 +19,7 @@ class CoinLemonConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
@@ -40,12 +43,6 @@ class CoinLemonConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
-        if self.settings.compiler == "Visual Studio":
-            cxxflags = self._cmake.definitions.get("CONAN_CXX_FLAGS", "")
-            cxxflags += " /MD" if self.options.shared else " /MT"
-            self._cmake.definitions["CONAN_CXX_FLAGS"] = cxxflags
-
         self._cmake.configure()
         return self._cmake
 
