@@ -1,6 +1,8 @@
 import os
 
+from conan.tools.files import rename
 from conans import ConanFile, CMake, tools
+
 
 class DracoConan(ConanFile):
     name = "draco"
@@ -8,7 +10,8 @@ class DracoConan(ConanFile):
                   "geometric meshes and point clouds. It is intended to " \
                   "improve the storage and transmission of 3D graphics."
     license = "Apache-2.0"
-    topics = ("conan", "draco", "3d", "graphics", "mesh", "compression", "decompression")
+    topics = ("draco", "3d", "graphics", "mesh",
+              "compression", "decompression")
     homepage = "https://google.github.io/draco/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -54,10 +57,12 @@ class DracoConan(ConanFile):
         if not self.options.enable_mesh_compression:
             del self.options.enable_standard_edgebreaker
             del self.options.enable_predictive_edgebreaker
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        rename(self, self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -113,16 +118,22 @@ class DracoConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "src"))
-        self.copy(pattern="*.h", dst=os.path.join("include", "draco"), src=os.path.join(self._build_subfolder, "draco"))
+        self.copy(pattern="*.h", dst="include",
+                  src=os.path.join(self._source_subfolder, "src"))
+        self.copy(pattern="*.h", dst=os.path.join("include", "draco"),
+                  src=os.path.join(self._build_subfolder, "draco"))
 
         build_lib_dir = os.path.join(self._build_subfolder, "lib")
         build_bin_dir = os.path.join(self._build_subfolder, "bin")
         self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib",
+                  src=build_lib_dir, keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib",
+                  src=build_lib_dir, keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir,
+                  keep_path=False, symlinks=True)
+        self.copy(pattern="*.dll", dst="bin",
+                  src=build_bin_dir, keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Draco"
