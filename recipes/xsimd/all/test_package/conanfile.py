@@ -9,8 +9,6 @@ class XsimdTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        if tools.is_apple_os(self.settings.os) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
-            cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "aarch64"
         cmake.configure()
         cmake.build()
 
