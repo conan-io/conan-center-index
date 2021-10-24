@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.43.0"
 
 
 class TaoCPPPEGTLConan(ConanFile):
@@ -14,7 +14,7 @@ class TaoCPPPEGTLConan(ConanFile):
     topics = ("peg", "header-only", "cpp",
               "parsing", "cpp17", "cpp11", "grammar")
     no_copy_source = True
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "boost_filesystem": [True, False],
     }
@@ -70,12 +70,18 @@ class TaoCPPPEGTLConan(ConanFile):
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "pegtl")
+        self.cpp_info.set_property("cmake_target_name", "taocpp::pegtl")
+        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        if self.options.boost_filesystem:
+            self.cpp_info.components["_taocpp-pegtl"].requires.append("boost::filesystem")
+            self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_BOOST_FILESYSTEM")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "pegtl"
         self.cpp_info.filenames["cmake_find_package_multi"] = "pegtl"
         self.cpp_info.names["cmake_find_package"] = "taocpp"
         self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
         self.cpp_info.components["_taocpp-pegtl"].names["cmake_find_package"] = "pegtl"
         self.cpp_info.components["_taocpp-pegtl"].names["cmake_find_package_multi"] = "pegtl"
-        if self.options.boost_filesystem:
-            self.cpp_info.components["_taocpp-pegtl"].requires.append("boost::filesystem")
-            self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_BOOST_FILESYSTEM")
+        self.cpp_info.components["_taocpp-pegtl"].set_property("cmake_target_name", "taocpp::pegtl")
