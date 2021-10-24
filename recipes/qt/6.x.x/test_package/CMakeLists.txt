@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(CMAKE_CXX_STANDARD 17)
-
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -14,5 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h example.qrc)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${PROJECT_NAME} Qt6::Core Qt6::Network Qt6::Sql Qt6::Concurrent Qt6::Xml)
