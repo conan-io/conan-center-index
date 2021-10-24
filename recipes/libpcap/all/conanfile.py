@@ -39,6 +39,10 @@ class LibPcapConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -66,7 +70,7 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration("libpcap can not be built static on Windows below version 1.10.1.")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("bison/3.7.1")
