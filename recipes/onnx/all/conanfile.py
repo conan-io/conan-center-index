@@ -10,7 +10,7 @@ class OnnxConan(ConanFile):
     name = "onnx"
     description = "Open standard for machine learning interoperability."
     license = "Apache-2.0"
-    topics = ("conan", "onnx", "machine-learning", "deep-learning", "neural-network")
+    topics = ("machine-learning", "deep-learning", "neural-network")
     homepage = "https://github.com/onnx/onnx"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -24,9 +24,13 @@ class OnnxConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -43,13 +47,15 @@ class OnnxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("protobuf/3.17.1")
+
+    def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
-
-    def requirements(self):
-        self.requires("protobuf/3.17.1")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
