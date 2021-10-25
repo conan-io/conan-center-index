@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
@@ -68,6 +69,9 @@ class GodotCppConan(ConanFile):
         self.requires("godot_headers/{}".format(self.version))
 
     def configure(self):
+        if self.settings.os != "Macos":
+            raise ConanInvalidConfiguration("Testing python version")
+
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -96,9 +100,12 @@ class GodotCppConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def build(self):
+        self.output.info("sys.version: {}".format(sys.version))
+
         self.run("python  --version")
         if self.settings.os == "Macos":
             self.run("which python")
+
         self.run("scons  --version")
         self.run(
             " ".join([
