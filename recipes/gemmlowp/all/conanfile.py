@@ -65,6 +65,7 @@ class GemmlowpConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.components["eight_bit_int_gemm"].includedirs = [os.path.join("include", "gemmlowp")]
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].names["cmake_find_package_multi"] = "eight_bit_int_gemm"
         self.cpp_info.components["eight_bit_int_gemm"].libs = ["eight_bit_int_gemm"]
