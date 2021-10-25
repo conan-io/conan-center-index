@@ -73,6 +73,22 @@ class DiligentCoreConan(ConanFile):
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.3.0")        
 
+    def diligent_platform(self):
+        if self.settings.os == "Windows":
+            return "PLATFORM_WIN32"
+        elif self.settings.os == "Macos":
+            return "PLATFORM_MACOS"
+        elif self.settings.os == "Linux":
+            return "PLATFORM_LINUX"
+        elif self.settings.os == "Android":
+            return "PLATFORM_ANDROID"
+        elif self.settings.os == "iOS":
+            return "PLATFORM_IOS"
+        elif self.settings.os == "Emscripten":
+            return "PLATFORM_EMSCRIPTEN"
+        elif self.settings.os == "watchOS":
+            return "PLATFORM_TVOS"
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -87,50 +103,33 @@ class DiligentCoreConan(ConanFile):
 
         self._cmake.definitions["ENABLE_RTTI"] = True
         self._cmake.definitions["ENABLE_EXCEPTIONS"] = True
+
+        self._cmake.definitions[self.diligent_platform()] = True
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
-        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("License.txt", dst="licenses", src=self._source_subfolder)
-        
-        #self.copy("*.h", src="ThirdParty/")
-        self.copy("*.hpp", src="ThirdParty/", dst="ThirdParty/")
-        self.copy("*.h", src="ThirdParty/", dst="ThirdParty/")
 
     def package_info(self):
         if self.settings.build_type == "Debug":
-            self.cpp_info.libdirs.append("lib/Debug")
+            self.cpp_info.libdirs.append("lib/source_subfolder/Debug")
         if self.settings.build_type == "Release":
-            self.cpp_info.libdirs.append("lib/Release")
+            self.cpp_info.libdirs.append("lib/source_subfolder/Release")
 
-        self.cpp_info.includedirs.append('include')
-        self.cpp_info.includedirs.append('ThirdParty')
-        self.cpp_info.includedirs.append('ThirdParty/glslang')
-
-        self.cpp_info.includedirs.append('ThirdParty/SPIRV-Headers/include/')
-        self.cpp_info.includedirs.append('ThirdParty/SPIRV-Cross/')
-        self.cpp_info.includedirs.append('ThirdParty/SPIRV-Cross/include')
-        self.cpp_info.includedirs.append('ThirdParty/SPIRV-Tools/include')
-        self.cpp_info.includedirs.append('ThirdParty/Vulkan-Headers/include')
-        
-        if self.settings.os == "Windows":
-            if self.settings.build_type == "Debug":
-                self.cpp_info.libs = ['GraphicsEngineVk_64d', 'GraphicsEngineOpenGL_64d', 'DiligentCore', 'MachineIndependentd', 'glslangd', 'HLSLd', 'OGLCompilerd', 'OSDependentd', 'spirv-cross-cored', 'SPIRVd', 'SPIRV-Tools-opt', 'SPIRV-Tools', 'glew-static', 'GenericCodeGend']
-            if self.settings.build_type == "Release":
-                self.cpp_info.libs = ['GraphicsEngineVk_64r', 'GraphicsEngineOpenGL_64r', 'DiligentCore', 'MachineIndependent', 'glslang', 'HLSL', 'OGLCompiler', 'OSDependent', 'spirv-cross-core', 'SPIRV', 'SPIRV-Tools-opt', 'SPIRV-Tools', 'glew-static', 'GenericCodeGen']
-        elif self.settings.os == "Macos" or self.settings.os == "Linux":
-            self.cpp_info.libs = ['DiligentCore', 'MachineIndependent', 'glslang', 'HLSL', 'OGLCompiler', 'OSDependent', 'spirv-cross-core', 'SPIRV', 'SPIRV-Tools-opt', 'SPIRV-Tools', 'glew-static', 'GenericCodeGen']
-        else:
-            self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs.append(os.path.join("include", "source_subfolder"))
 
         self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE=diligent_spirv_cross")
+        self.cpp_info.defines.append("{}=1".format(self.diligent_platform()))
+
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]
         if self.settings.os == 'Macos':
