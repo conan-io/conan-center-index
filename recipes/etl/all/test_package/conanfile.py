@@ -14,5 +14,5 @@ class EmbeddedTemplateLibraryTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "example")
-            self.run(bin_path, run_environment=True)
+            os.chdir("bin")
+            self.run("example", run_environment=False)
