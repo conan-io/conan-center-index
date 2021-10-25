@@ -4,7 +4,7 @@ from conans import ConanFile, tools
 
 
 class EmbeddedTemplateLibraryConan(ConanFile):
-    name = "embedded-template-library"
+    name = "etl"
     license = "MIT"
     homepage = "https://www.etlcpp.com/"
     url = "https://github.com/conan-io/conan-center-index"
