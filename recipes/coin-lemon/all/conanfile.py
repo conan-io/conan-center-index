@@ -57,14 +57,11 @@ class CoinLemonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-        self.copy("*.h", dst=os.path.join("include", "lemon"), src=os.path.join(self._source_subfolder, "lemon"))
-        self.copy("config.h", dst=os.path.join("include", "lemon"), src="lemon")
+        cmake = self._configure_cmake()
+        cmake.install()
 
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so*", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         if self.settings.os == "Windows":
