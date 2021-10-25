@@ -43,6 +43,10 @@ class CoinLemonConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["LEMON_ENABLE_GLPK"] = False
+        self._cmake.definitions["LEMON_ENABLE_ILOG"] = False
+        self._cmake.definitions["LEMON_ENABLE_COIN"] = False
+        self._cmake.definitions["LEMON_ENABLE_SOPLEX"] = False
         self._cmake.configure()
         return self._cmake
 
