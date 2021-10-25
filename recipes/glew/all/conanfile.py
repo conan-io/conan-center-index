@@ -2,7 +2,7 @@ import os
 import glob
 from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.36.0"
 
 class GlewConan(ConanFile):
     name = "glew"
