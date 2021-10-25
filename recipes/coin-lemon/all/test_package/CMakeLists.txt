@@ -4,8 +4,8 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(coin-lemon CONFIG REQUIRED)
+find_package(LEMON CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} coin-lemon::coin-lemon)
+target_link_libraries(${PROJECT_NAME} LEMON::LEMON)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
