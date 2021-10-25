@@ -34,6 +34,10 @@ class SConsConan(ConanFile):
     @property
     def _python_executable(self):
         return "python"
+    
+    @property
+    def _scons_pythonpath(self):
+        return os.path.join(self.package_folder, "lib", "site-packages", "scons")
 
     def build(self):
         with tools.chdir(self._source_subfolder):
@@ -54,7 +58,8 @@ class SConsConan(ConanFile):
         tools.save(os.path.join(include_dir, "__nop.h"), "")
 
         with tools.chdir(self._source_subfolder):
-            self.run("{} setup.py install --no-compile --prefix={}".format(self._python_executable, self.package_folder))
+            with tools.environment_append({"PYTHONPATH": [self._scons_pythonpath]}):
+                self.run("{} setup.py install --no-compile --prefix={}".format(self._python_executable, self.package_folder))
 
         tools.rmdir(os.path.join(self.package_folder, "man"))
 
@@ -88,6 +93,5 @@ class SConsConan(ConanFile):
         self.output.info("Appending PATH environment var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        scons_pythonpath = os.path.join(self.package_folder, "lib", "site-packages", "scons")
-        self.output.info("Appending PYTHONPATH environment var: {}".format(scons_pythonpath))
-        self.env_info.PYTHONPATH.append(os.path.join(self.package_folder, "lib", "site-packages", "scons"))
+        self.output.info("Appending PYTHONPATH environment var: {}".format(self._scons_pythonpath))
+        self.env_info.PYTHONPATH.append(self._scons_pythonpath)
