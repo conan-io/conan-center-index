@@ -5,7 +5,7 @@ import os
 class MesonInstallerConan(ConanFile):
     name = "meson"
     description = "Meson is a project to create the best possible next-generation build system"
-    topics = ("conan", "meson", "mesonbuild", "build-system")
+    topics = ("meson", "mesonbuild", "build-system")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
@@ -27,9 +27,7 @@ exec "$meson_dir/meson.py" "$@"
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "meson-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # create wrapper scripts
         with open(os.path.join(self._source_subfolder, "meson.cmd"), "w") as f:
