@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -24,7 +23,7 @@ class OpenTelemetryCppConan(ConanFile):
         "thrift/0.14.2"
     ]
     topics = ("opentelemetry", "telemetry", "tracing", "metrics", "logs")
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -79,10 +78,6 @@ class OpenTelemetryCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "find_package(absl CONFIG REQUIRED)",
-            "find_package(absl REQUIRED)")
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
         tools.replace_in_file(
             os.path.join(
