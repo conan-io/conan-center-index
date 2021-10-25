@@ -97,6 +97,8 @@ class GodotCppConan(ConanFile):
 
     def build(self):
         self.run("python  --version")
+        if self.settings.os == "Macos":
+            self.run("which python")
         self.run("scons  --version")
         self.run(
             " ".join([
