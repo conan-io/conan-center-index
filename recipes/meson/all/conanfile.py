@@ -12,13 +12,6 @@ class MesonInstallerConan(ConanFile):
     no_copy_source = True
 
     _source_subfolder = "source_subfolder"
-    _meson_cmd = """@echo off
-CALL python %~dp0/meson.py %*
-"""
-    _meson_sh = """#!/usr/bin/env bash
-meson_dir=$(dirname "$0")
-exec "$meson_dir/meson.py" "$@"
-"""
 
     def requirements(self):
         self.requires("ninja/1.10.2")
@@ -30,10 +23,13 @@ exec "$meson_dir/meson.py" "$@"
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
         # create wrapper scripts
-        with open(os.path.join(self._source_subfolder, "meson.cmd"), "w") as f:
-            f.write(self._meson_cmd)
-        with open(os.path.join(self._source_subfolder, "meson"), "w") as f:
-            f.write(self._meson_sh)
+        tools.save(os.path.join(self._source_subfolder, "meson.cmd"), """@echo off
+CALL python %~dp0/meson.py %*
+""")
+        tools.save(os.path.join(self._source_subfolder, "meson"), """#!/usr/bin/env bash
+meson_dir=$(dirname "$0")
+exec "$meson_dir/meson.py" "$@"
+""")
 
     @staticmethod
     def _chmod_plus_x(filename):
