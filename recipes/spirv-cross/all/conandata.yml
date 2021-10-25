@@ -1,4 +1,7 @@
 sources:
+  "diligent.2.5.1":
+    url: "https://github.com/DiligentGraphics/SPIRV-Cross/archive/f61a33c8f4bbea37ac6fb3c1710288127dbc7e15.zip"
+    sha256: "00205d618b7367916d9f0486e1d76a0e28a723c78c8021f46b2a31af9edd40f4"
   "cci.20210621":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/9cdeefb5e322fc26b5fed70795fe79725648df1f.tar.gz"
     sha256: "3742c24e7ccc09fce10e9d88c2f9a2e85f5142cc742be6df5cc3ba3f96defa92"
