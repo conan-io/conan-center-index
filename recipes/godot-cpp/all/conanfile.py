@@ -102,6 +102,9 @@ class GodotCppConan(ConanFile):
     def build(self):
         self.output.info("sys.version: {}".format(sys.version))
 
+        self.run("echo $PATH")
+        self.run("echo $PATH", run_environment=True)
+        
         self.run("python -c \"import sys; print(sys.version)\"")
         self.run("python -c \"import sys; print(sys.version)\"", run_environment=True)
         if self.settings.os == "Macos":
