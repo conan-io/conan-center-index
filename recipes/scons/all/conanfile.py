@@ -1,9 +1,7 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
-import io
 import os
 import shutil
-import sys
+import textwrap
 
 
 class SConsConan(ConanFile):
@@ -21,77 +19,63 @@ class SConsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def configure(self):
-        # Detect availability of a python interpreter
-        # FIXME: add a python build requirement
-        if not tools.which("python"):
-            raise ConanInvalidConfiguration("This recipe requires a python interpreter.")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
 
-    @property
-    def _python_executable(self):
-        return "python"
-    
-    @property
-    def _scons_pythonpath(self):
-        return os.path.join(self.package_folder, "lib", "site-packages", "scons")
+    def _chmod_x(self, path):
+        if os.name == "posix":
+            os.chmod(path, 0o755)
 
-    def build(self):
-        with tools.chdir(self._source_subfolder):
-            output = io.StringIO()
-            self.run("{} setup.py --requires".format(self._python_executable), output=output)
-            # Workaround for log.print_run_commands = True/False
-            # This requires log.run_to_output = True
-            if not (output.getvalue().strip().splitlines() or ["-"])[-1].startswith("-"):
-                raise ConanException("scons has a requirement")
-            self.run("{} setup.py build".format(self._python_executable))
+    @property
+    def _scons_sh(self):
+        return os.path.join(self.package_folder, "bin", "scons")
+
+    @property
+    def _scons_bat(self):
+        return os.path.join(self.package_folder, "bin", "scons.bat")
 
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
+
+        if tools.Version(self.version) < 4:
+            shutil.copytree(os.path.join(self._source_subfolder, "engine", "SCons"),
+                            os.path.join(self.package_folder, "res", "SCons"))
+        else:
+            shutil.copytree(os.path.join(self._source_subfolder, "SCons"),
+                            os.path.join(self.package_folder, "res", "SCons"))
+
+        tools.save(self._scons_sh, textwrap.dedent("""\
+            #!/bin/bash
+
+            currentdir="$(dirname "$(readlink -f "$0")")"
+
+            export PYTHONPATH="$currentdir/../res:$PYTHONPATH"
+            exec ${PYTHON:-python} "$currentdir/../res/SCons/__main__.py" $*
+        """))
+        self._chmod_x(self._scons_sh)
+
+        tools.save(self._scons_bat, textwrap.dedent(r"""
+            @echo off
+            set currentdir=%~dp0
+            if not defined PYTHON (
+                set PYTHON=python
+            )
+            %PYTHON% "%currentdir%\\..\\res\\SCons\\__main__.py" %*
+            exit /B %ERRORLEVEL%
+        """))
 
         # Mislead CI and create an empty header in the include directory
         include_dir = os.path.join(self.package_folder, "include")
         os.mkdir(include_dir)
         tools.save(os.path.join(include_dir, "__nop.h"), "")
 
-        with tools.chdir(self._source_subfolder):
-            with tools.environment_append({"PYTHONPATH": [self._scons_pythonpath]}):
-                self.run("{} setup.py install --no-compile --prefix={}".format(self._python_executable, self.package_folder))
-
-        tools.rmdir(os.path.join(self.package_folder, "man"))
-
-        if tools.os_info.is_windows:
-            # On Windows, scons installs the scripts in the folders `Scripts" and `Lib".
-            # Move these to the directories "bin" and "lib".
-            shutil.move(os.path.join(self.package_folder, "Scripts"),
-                        os.path.join(self.package_folder, "bin"))
-            # Windows has case-insensitive paths, so do Lib -> lib2 -> lib
-            shutil.move(os.path.join(self.package_folder, "Lib"),
-                        os.path.join(self.package_folder, "lib2"))
-            shutil.move(os.path.join(self.package_folder, "lib2"),
-                        os.path.join(self.package_folder, "lib"))
-
-        # Check for compiled python sources
-        for root, _, files in os.walk(self.package_folder):
-            for file in files:
-                for ext in (".pyc", ".pyo", "pyd"):
-                    if ext in file:
-                        fullpath = os.path.join(root, file)
-                        os.unlink(fullpath)
-                        self.output.warn("Found compiled python code: {}".format(fullpath))
-                if file.endswith(".egg-info"):
-                    os.unlink(os.path.join(root, file))
-
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
+        self._chmod_x(self._scons_sh)
+
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-
-        self.output.info("Appending PYTHONPATH environment var: {}".format(self._scons_pythonpath))
-        self.env_info.PYTHONPATH.append(self._scons_pythonpath)
