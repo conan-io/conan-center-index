@@ -31,6 +31,6 @@ class TestPackageConan(ConanFile):
         self.run("scons {}".format(" ".join(scons_args)), run_environment=True)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
             self.run(bin_path, run_environment=True)

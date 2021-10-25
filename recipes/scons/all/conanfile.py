@@ -12,7 +12,7 @@ class SConsConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://scons.org"
-    topics = ("conan", "scons", "build", "configuration", "development")
+    topics = ("scons", "build", "configuration", "development")
     settings = "os"  # Added to let the CI test this package on all os'es
 
     _autotools = None
@@ -28,8 +28,8 @@ class SConsConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe requires a python interpreter.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("scons-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     @property
     def _python_executable(self):
