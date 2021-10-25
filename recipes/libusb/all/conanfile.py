@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import re
 
 required_conan_version = ">=1.33.0"
 
@@ -106,8 +107,12 @@ class LibUSBConan(ConanFile):
 
             solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
             platforms = {"x86":"Win32"}
+            properties = {
+                # Enable LTO when CFLAGS contains -GL
+                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+            }
             msbuild = MSBuild(self)
-            msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
+            msbuild.build(solution_file, platforms=platforms, upgrade_project=False, properties=properties)
 
     def _configure_autotools(self):
         if not self._autotools:
