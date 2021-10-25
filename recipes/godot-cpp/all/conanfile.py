@@ -96,6 +96,8 @@ class GodotCppConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def build(self):
+        self.run("python  --version")
+        self.run("scons  --version")
         self.run(
             " ".join([
                 "scons",
