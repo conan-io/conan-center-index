@@ -54,13 +54,13 @@ class MSYS2Conan(ConanFile):
         "packages": "base-devel,binutils,gcc",
         "additional_packages": None
     }
-    settings = "os", "arch"
+    settings = "os", "arch_build"
 
 
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if self.settings.arch != "x86_64":
+        if self.settings.arch_build != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
 
