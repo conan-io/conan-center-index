@@ -54,15 +54,14 @@ class SConsConan(ConanFile):
             exec ${PYTHON:-python} "$currentdir/../res/SCons/__main__.py" $*
         """))
         self._chmod_x(self._scons_sh)
-
         tools.save(self._scons_bat, textwrap.dedent(r"""
             @echo off
             set currentdir=%~dp0
             if not defined PYTHON (
                 set PYTHON=python
             )
-            %PYTHON% "%currentdir%\\..\\res\\SCons\\__main__.py" %*
-            exit /B %ERRORLEVEL%
+            set PYTHONPATH=%currentdir%\\..\\res;%PYTHONPATH%
+            CALL %PYTHON% %currentdir%\\..\\res\\SCons\\__main__.py %*
         """))
 
         # Mislead CI and create an empty header in the include directory
@@ -79,3 +78,11 @@ class SConsConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        if self.settings.os == "Windows":
+            scons_bin = os.path.join(bindir, "scons.bat")
+        else:
+            scons_bin = os.path.join(bindir, "scons")
+        self.user_info.scons = scons_bin
+        self.output.info("Setting SCONS environment variable: {}".format(scons_bin))
+        self.env_info.SCONS = scons_bin

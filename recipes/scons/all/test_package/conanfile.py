@@ -5,12 +5,11 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     generators = "scons"
 
     def build(self):
-
-        scons_path = tools.which("scons")
+        scons_path = self.deps_user_info["scons"].scons
         if not scons_path:
             raise ConanException("scons could not be found")
         if not scons_path.replace("\\", "/").startswith(self.deps_cpp_info["scons"].rootpath.replace("\\", "/")):
