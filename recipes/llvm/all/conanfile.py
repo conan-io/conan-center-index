@@ -78,7 +78,7 @@ class Llvm(ConanFile):
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_BINDINGS': False,
                 'LLVM_PARALLEL_LINK_JOBS': 1,
-                'LLVM_PARALLEL_COMPILE_JOBS': 2,
+                'LLVM_PARALLEL_COMPILE_JOBS': 1,
             },
             source_folder = os.path.join(self._source_subfolder, 'llvm')
         )
