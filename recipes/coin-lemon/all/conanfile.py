@@ -19,7 +19,6 @@ class CoinLemonConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
@@ -35,6 +34,11 @@ class CoinLemonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(patch["patch_file"])
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
