@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #define NOMINMAX
-#include <gemmlowp/public/gemmlowp.h>
+#include <public/gemmlowp.h>
 
 int main()
 {
