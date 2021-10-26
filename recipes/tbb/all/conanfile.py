@@ -41,6 +41,10 @@ that have future-proof scalability"""
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
         if self.settings.os == "Macos" and \
            self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) < "8.0":
