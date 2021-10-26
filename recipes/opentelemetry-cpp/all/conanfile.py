@@ -53,6 +53,10 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
