@@ -53,7 +53,7 @@ class GStreamerConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.shared != self.options["glib"].shared:
+        if self.options["glib"].static and self.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration("GLib and GStreamer must be either all shared, or all static")
 
