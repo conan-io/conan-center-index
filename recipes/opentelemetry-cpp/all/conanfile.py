@@ -27,11 +27,9 @@ class OpenTelemetryCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "shared": False,
     }
     exports_sources = "CMakeLists.txt"
 
@@ -48,10 +46,6 @@ class OpenTelemetryCppConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
     @property
@@ -85,21 +79,14 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build(self):
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
-        proto_cmake_path = os.path.join(
-            self._source_subfolder,
-            "cmake",
-            "opentelemetry-proto.cmake")
         tools.replace_in_file(
-            proto_cmake_path,
+            os.path.join(
+                self._source_subfolder,
+                "cmake",
+                "opentelemetry-proto.cmake"),
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
             f"set(PROTO_PATH \"{protos_path}\")")
         tools.rmdir(os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
-
-        if self.options.shared:
-            tools.replace_in_file(
-                proto_cmake_path,
-                "opentelemetry_proto STATIC",
-                "opentelemetry_proto SHARED")
         cmake = self._configure_cmake()
         cmake.build()
 
