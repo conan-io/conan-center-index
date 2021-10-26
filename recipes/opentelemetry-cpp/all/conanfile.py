@@ -109,6 +109,8 @@ class OpenTelemetryCppConan(ConanFile):
     def package_info(self):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
 
         # Note: tools.collect_libs will produce the wrong lib order
         self.cpp_info.libs = [
