@@ -46,7 +46,11 @@ class AwsCCal(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        # TODO: When aws-c-cal is upgraded in the future, add another condition.
+        if self.version == "0.5.12-common-0.6.14":
+            self.requires("aws-c-common/0.6.14")
+        else:
+            self.requires("aws-c-common/0.6.9")
         if self._needs_openssl:
             self.requires("openssl/1.1.1l")
 
