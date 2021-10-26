@@ -46,12 +46,8 @@ class OpenTelemetryCppConan(ConanFile):
            tools.Version(self.settings.compiler.version) < "16"):
             raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
 
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("Building as shared libraries is not supported on MacOS")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration("Building shared libraries is only supported on Linux")
 
     def configure(self):
         if self.options.shared:
@@ -109,8 +105,6 @@ class OpenTelemetryCppConan(ConanFile):
     def package_info(self):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
 
         # Note: tools.collect_libs will produce the wrong lib order
         self.cpp_info.libs = [
