@@ -43,8 +43,8 @@ versions:
     folder: all
   # "0.58.0":
   #   folder: all
-  # "0.58.1":
-  #   folder: all
+  "0.58.1":
+    folder: all
   # "0.59.0":
   #   folder: all
   # "0.59.1":
