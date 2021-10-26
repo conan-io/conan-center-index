@@ -68,7 +68,7 @@ class CoinLemonConan(ConanFile):
             self.cpp_info.libs = ["lemon"]
         else:
             self.cpp_info.libs = ["emon"]
-        self.cpp_info.names["pkg_config"] = "LEMON"
+        self.cpp_info.names["pkg_config"] = "lemon"
         self.cpp_info.names["cmake_find_package"] = "LEMON"
         self.cpp_info.names["cmake_find_package_multi"] = "LEMON"
         self.cpp_info.filenames["cmake_find_package"] = "LEMON"
