@@ -21,7 +21,7 @@ class DracoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "target": ["draco", "draco_static", "encode_and_decode", "encode_only", "decode_only"],
+        "target": ["draco", "encode_and_decode", "encode_only", "decode_only"],
         "enable_point_cloud_compression": [True, False],
         "enable_mesh_compression": [True, False],
         "enable_standard_edgebreaker": [True, False],
@@ -31,7 +31,7 @@ class DracoConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "target": "encode_and_decode",
+        "target": "draco",
         "enable_point_cloud_compression": True,
         "enable_mesh_compression": True,
         "enable_standard_edgebreaker": True,
@@ -70,25 +70,18 @@ class DracoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build(target=self._get_target())
 
-    def _version_conversion(self):
-        return list(map(int, self.version.split('.')))
-
     def _configure_cmake(self):
-        # use different cmake definitions based on package version
-        print("DEBUG: self.version: {}", self.version)
-        
-        major_version, minor_version, sub_version = self._version_conversion()
-
         cmake = CMake(self)
 
-        if major_version <= 1 and minor_version < 4:
+        # use different cmake definitions based on package version
+        if tools.Version(self.version) < "1.4.0":
             cmake.definitions["ENABLE_POINT_CLOUD_COMPRESSION"] = self.options.enable_point_cloud_compression
             cmake.definitions["ENABLE_MESH_COMPRESSION"] = self.options.enable_mesh_compression
             if self.options.enable_mesh_compression:
                 cmake.definitions["ENABLE_STANDARD_EDGEBREAKER"] = self.options.enable_standard_edgebreaker
                 cmake.definitions["ENABLE_PREDICTIVE_EDGEBREAKER"] = self.options.enable_predictive_edgebreaker
             cmake.definitions["ENABLE_BACKWARDS_COMPATIBILITY"] = self.options.enable_backwards_compatibility
-    
+
             # BUILD_FOR_GLTF is not needed, it is equivalent to:
             # - enable_point_cloud_compression=False
             # - enable_mesh_compression=True
@@ -96,11 +89,11 @@ class DracoConan(ConanFile):
             # - enable_predictive_edgebreaker=False
             # - enable_backwards_compatibility=False
             cmake.definitions["BUILD_FOR_GLTF"] = False
-    
+
             cmake.definitions["BUILD_UNITY_PLUGIN"] = False
             cmake.definitions["BUILD_MAYA_PLUGIN"] = False
             cmake.definitions["BUILD_USD_PLUGIN"] = False
-    
+
             cmake.definitions["ENABLE_CCACHE"] = False
             cmake.definitions["ENABLE_DISTCC"] = False
             cmake.definitions["ENABLE_EXTRA_SPEED"] = False
@@ -120,38 +113,32 @@ class DracoConan(ConanFile):
             if self.options.enable_mesh_compression:
                 cmake.definitions["DRACO_STANDARD_EDGEBREAKER"] = self.options.enable_standard_edgebreaker
                 cmake.definitions["DRACO_PREDICTIVE_EDGEBREAKER"] = self.options.enable_predictive_edgebreaker
-            cmake.definitions["DRACO_BACKWARDS_COMPATIBILITY"] = self.options.enable_backwards_compatibility
-    
-            # DRACO_GLTF is not needed, it is equivalent to:
-            # - enable_point_cloud_compression=False
-            # - enable_mesh_compression=True
-            # - enable_standard_edgebreaker=True
-            # - enable_predictive_edgebreaker=False
-            # - enable_backwards_compatibility=False
-            cmake.definitions["DRACO_GLTF"] = False
-    
-            cmake.definitions["DRACO_UNITY_PLUGIN"] = False
-            cmake.definitions["DRACO_MAYA_PLUGIN"] = False
             cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-    
-            cmake.definitions["DRACO_FAST"] = False
-            cmake.definitions["DRACO_JS_GLUE"] = False
-            cmake.definitions["DRACO_DECODER_ATTRIBUTE_DEDUPLICATION"] = False
-            cmake.definitions["DRACO_TESTS"] = False
-            cmake.definitions["DRACO_WASM"] = False
             cmake.definitions["DRACO_ANIMATION_ENCODING"] = False
+            cmake.definitions["DRACO_BACKWARDS_COMPATIBILITY"] = self.options.enable_backwards_compatibility
+            cmake.definitions["DRACO_DECODER_ATTRIBUTE_DEDUPLICATION"] = False
+            cmake.definitions["DRACO_FAST"] = False
+            # DRACO_GLTF True overrides options by enabling
+            #   DRACO_MESH_COMPRESSION_SUPPORTED,
+            #   DRACO_NORMAL_ENCODING_SUPPORTED,
+            #   DRACO_STANDARD_EDGEBREAKER_SUPPORTED
+            cmake.definitions["DRACO_GLTF"] = False
+            cmake.definitions["DRACO_JS_GLUE"] = False
+            cmake.definitions["DRACO_MAYA_PLUGIN"] = False
+            cmake.definitions["DRACO_TESTS"] = False
+            cmake.definitions["DRACO_UNITY_PLUGIN"] = False
+            cmake.definitions["DRACO_WASM"] = False
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def _get_target(self):
-        major_version, minor_version, sub_version = self._version_conversion()
-
-        if major_version <=1 and minor_version < 4:
+        if tools.Version(self.version) < "1.4.0":
             return {
+                "decode_only": "dracodec",
+                "draco": "draco",
                 "encode_and_decode": "draco",
-                "encode_only": "dracoenc",
-                "decode_only": "dracodec"
+                "encode_only": "dracoenc"
             }.get(str(self.options.target))
         if self.options.shared:
             return "draco_shared"
