@@ -46,8 +46,8 @@ class OpenTelemetryCppConan(ConanFile):
            tools.Version(self.settings.compiler.version) < "16"):
             raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
 
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("Building as shared libraries is not supported on MacOS")
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration("Building as shared libraries is only supported on Linux")
 
     def config_options(self):
         if self.settings.os == "Windows":
