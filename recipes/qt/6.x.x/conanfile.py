@@ -52,7 +52,7 @@ class QtConan(ConanFile):
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
-    topics = ("conan", "qt", "ui")
+    topics = ("qt", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
@@ -842,6 +842,8 @@ class QtConan(ConanFile):
             if tools.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
+            if tools.Version(self.version) >= "6.2.1":
+                self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         if tools.Version(self.version) < "6.1.0":
