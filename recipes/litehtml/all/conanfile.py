@@ -56,8 +56,6 @@ class LitehtmlConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["LITEHTML_UTF8"] = True
-        self._cmake.definitions["WIN32"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
