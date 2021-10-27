@@ -6,5 +6,5 @@ conan_basic_setup(TARGETS)
 
 find_package(libxshmfence REQUIRED)
 
-add_executable(${PROJECT_NAME} example.c)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} libxshmfence::libxshmfence)
