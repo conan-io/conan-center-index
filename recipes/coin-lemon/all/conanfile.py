@@ -17,7 +17,7 @@ class CoinLemonConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
