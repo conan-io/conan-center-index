@@ -1,7 +1,7 @@
 sources:
   "1.10.2":
     url: "https://github.com/onnx/onnx/archive/refs/tags/v1.10.2.tar.gz"
-    sha256: "41367f27d44e599d774c952ca89c87fdea913a312fb785dc429f97be27eb530c"
+    sha256: "520b3aa34272cc215e2eb41385f58adf01750d88858d4722563edca8410c5dc9"
   "1.9.0":
     url: "https://github.com/onnx/onnx/archive/v1.9.0.tar.gz"
     sha256: "61d459a5f30604cabec352574119a6685dfd43bfa757cfbff52be9471d5b8ea0"
