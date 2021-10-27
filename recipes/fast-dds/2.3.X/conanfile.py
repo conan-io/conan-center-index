@@ -94,6 +94,12 @@ class FastDDSConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def validate(self):
+        # FIXME: Foonathan dependency currently not proper working with cross compile 
+        # see https://github.com/conan-io/conan-center-index/pull/7632#discussion_r730445887
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome.")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
