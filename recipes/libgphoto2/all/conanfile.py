@@ -13,6 +13,7 @@ class LibGphoto2(ConanFile):
     homepage = "http://www.gphoto.org/"
     license = "LGPL-2.1"
     topics = ("gphoto2", "libgphoto2", "libgphoto", "photo")
+    exports_sources = "patches/*"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -38,6 +39,10 @@ class LibGphoto2(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def validate(self):
         if not self.options.shared:
@@ -105,6 +110,7 @@ class LibGphoto2(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
