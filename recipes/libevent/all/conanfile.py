@@ -16,13 +16,15 @@ class LibeventConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
-        "disable_threads": [True, False]
+        "disable_threads": [True, False],
+        "enable_getrandom": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": True,
-        "disable_threads": False
+        "disable_threads": False,
+        "enable_getrandom": False,
     }
     generators = "cmake", "cmake_find_package"
     short_paths = True
@@ -40,12 +42,16 @@ class LibeventConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "2.1.12" or self.settings.os != "Linux":
+            del self.options.enable_getrandom
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.enable_getrandom:
+            self.output.warn("libevent:enable_getrandom requires glibc >=2.25")
 
     def requirements(self):
         if self.options.with_openssl:
@@ -68,6 +74,7 @@ class LibeventConan(ConanFile):
         self._cmake.definitions["EVENT__DISABLE_TESTS"] = True
         self._cmake.definitions["EVENT__DISABLE_REGRESS"] = True
         self._cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
+        self._cmake.definitions["EVENT__HAVE_GETRANDOM"] = self.options.get_safe("enable_getrandom", False)
         # libevent uses static runtime (MT) for static builds by default
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = str(self.settings.compiler.runtime).startswith("MT")
@@ -77,6 +84,7 @@ class LibeventConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "getrandom", "")
         cmake = self._configure_cmake()
         cmake.build()
 
