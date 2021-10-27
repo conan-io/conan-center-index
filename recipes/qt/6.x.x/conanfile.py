@@ -324,6 +324,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
+            self.requires("xorg-proto/2021.4")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -340,11 +341,14 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebengine"):
             self.build_requires("ninja/1.10.2")
+            self.build_requires("nodejs/16.3.0")
+            self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 self.build_requires("bison/3.7.1")
-                self.build_requires("gperf/3.1")
                 self.build_requires("flex/2.6.4")
+            else:
+                self.build_requires("winflexbison/2.5.24")
 
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
@@ -842,7 +846,7 @@ class QtConan(ConanFile):
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
-                gui_reqs.append("DBus")
+                gui_reqs.append("DBus", ["dbus::dbus"])
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
