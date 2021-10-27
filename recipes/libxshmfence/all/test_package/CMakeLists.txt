@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example example.c)
-target_link_libraries(example ${CONAN_LIBS})
+find_package(libxshmfence REQUIRED)
 
-# CTest is a testing tool that can be used to test your project.
-# enable_testing()
-# add_test(NAME example
-#          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-#          COMMAND example)
+add_executable(${PROJECT_NAME} example.c)
+target_link_libraries(${PROJECT_NAME} libxshmfence::libxshmfence)
