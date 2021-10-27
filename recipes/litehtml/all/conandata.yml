@@ -1,6 +1,6 @@
 sources:
   "cci.27102021":
-    url: "https://github.com/litehtml/litehtml/archive/c64c0c40f452b00deba4379f65934a2afc311e31.tar.gz"
+    url: "https://github.com/litehtml/litehtml/archive/fb276993c2a04e2307e6f740b8d32c69a75c5f94.tar.gz"
     sha256: "67ee54d15572c7a19ba4e75e5978edd4f8601a322c30cea7563c72a55495a92c"
 patches:
   "cci.27102021":
