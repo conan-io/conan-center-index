@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.4)
 project(perfetto CXX)
 
 include(conanbuildinfo.cmake)
@@ -34,4 +34,6 @@ if (MSVC)
   target_compile_options(perfetto PRIVATE "/bigobj")
   # The perfetto library needs permissive flag on MSVC
   target_compile_options(perfetto PRIVATE "/permissive-")
+  # The perfetto library doesn't export symbols by default
+  set_target_properties(perfetto PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif (MSVC)
