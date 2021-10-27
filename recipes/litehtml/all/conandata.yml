@@ -1,8 +1,8 @@
 sources:
-  "cci-27102021":
+  "cci.27102021":
     url: "https://github.com/litehtml/litehtml/archive/5fe0b82789da8b5e3231777e14eada57fa1b240a.tar.gz"
     sha256: "80ae98aa7d204af55c2da4a5780059a90f98c82ab465c89e6620c2b2461bba3f"
 patches:
-  "cci-27102021":
+  "cci.27102021":
     - patch_file: "patches/0001-disable_tests.patch"
       base_path: "source_subfolder"
