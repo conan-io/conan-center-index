@@ -2,17 +2,25 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import contextlib
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class LibxshmfenceConan(ConanFile):
     name = "libxshmfence"
     license = "X11"
     homepage = "https://gitlab.freedesktop.org/xorg/lib/libxshmfence"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "<Description of Libxshmfence here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    description = "Shared memory 'SyncFence' synchronization primitive"
+    topics = ("shared", "memory", "SyncFence", "synchronization", "interprocess")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     generators = "pkg_config"
 
@@ -30,6 +38,10 @@ class LibxshmfenceConan(ConanFile):
     def _user_info_build(self):
         return getattr(self, "user_info_build", self.deps_user_info)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+    
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -37,7 +49,7 @@ class LibxshmfenceConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.3")
+        self.build_requires("automake/1.16.4")
         self.build_requires("pkgconf/1.7.4")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
@@ -45,17 +57,14 @@ class LibxshmfenceConan(ConanFile):
     def requirements(self):
         self.requires("xorg-proto/2021.4")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], 
+                  destination=self._source_subfolder, strip_root=True)
 
     @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "CC": "{} cl -nologo".format(self._user_info_build["automake"].compile).replace("\\", "/"),
                 }
@@ -69,11 +78,11 @@ class LibxshmfenceConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
         self._autotools.libs = []
-        configure_args = []
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            configure_args.extend(["--enable-static", "--disable-shared"])
+        yes_no = lambda v: "yes" if v else "no"
+        configure_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -94,4 +103,4 @@ class LibxshmfenceConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["xshmfence"]
-        self.cpp_info.names["pkg_config"] = ["xshmfence"]
+        self.cpp_info.names["pkg_config"] = "xshmfence"
