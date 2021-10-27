@@ -46,8 +46,6 @@ class PerfettoConan(ConanFile):
             raise ConanInvalidConfiguration ("perfetto misses dllexport and cannot be build shared on windows")
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration ("perfetto requires gcc >= 7")
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
-            raise ConanInvalidConfiguration ("perfetto cannot be built with libc++ runtime")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 

@@ -22,9 +22,6 @@ install(
 )
 
 if (WIN32)
-  # The perfetto library contains many symbols, so it needs the big object
-  # format.
-  target_compile_options(perfetto PRIVATE "/bigobj")
   # Disable legacy features in windows.h.
   add_definitions(-DWIN32_LEAN_AND_MEAN -DNOMINMAX)
   # On Windows we should link to WinSock2.
@@ -32,5 +29,9 @@ if (WIN32)
 endif (WIN32)
 
 if (MSVC)
+  # The perfetto library contains many symbols, so it needs the big object
+  # format.
+  target_compile_options(perfetto PRIVATE "/bigobj")
+  # The perfetto library needs permissive flag on MSVC
   target_compile_options(perfetto PRIVATE "/permissive-")
 endif (MSVC)
