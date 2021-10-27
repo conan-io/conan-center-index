@@ -1,0 +1,71 @@
+diff --git a/configure b/configure
+index afccef1..a7caa07 100755
+--- a/configure
++++ b/configure
+@@ -338,6 +338,23 @@ if compile_prog "" "" "has_ucontext"; then
+ fi
+ print_config "has_ucontext" "$has_ucontext"
+ 
++##########################################
++# check for memfd_create(2)
++has_memfd_create="no"
++cat > $TMPC << EOF
++#define _GNU_SOURCE
++#include <sys/mman.h>
++int main(int argc, char **argv)
++{
++  int memfd = memfd_create("test", 0);
++  return 0;
++}
++EOF
++if compile_prog "-Werror=implicit-function-declaration" "" "has_memfd_create"; then
++  has_memfd_create="yes"
++fi
++print_config "has_memfd_create" "$has_memfd_create"
++
+ 
+ #############################################################################
+ 
+@@ -365,6 +382,9 @@ fi
+ if test "$array_bounds" = "yes"; then
+   output_sym "CONFIG_HAVE_ARRAY_BOUNDS"
+ fi
++if test "$has_memfd_create" = "yes"; then
++  output_sym "CONFIG_HAVE_MEMFD_CREATE"
++fi
+ 
+ echo "CC=$cc" >> $config_host_mak
+ print_config "CC" "$cc"
+diff --git a/liburing.spec b/liburing.spec
+index 0268d23..7eb5731 100644
+--- a/liburing.spec
++++ b/liburing.spec
+@@ -1,5 +1,5 @@
+ Name: liburing
+-Version: 2.0
++Version: 2.1
+ Release: 1%{?dist}
+ Summary: Linux-native io_uring I/O access library
+ License: (GPLv2 with exceptions and LGPLv2+) or MIT
+diff --git a/test/io_uring_register.c b/test/io_uring_register.c
+index da7bc0d..b8a4ea5 100644
+--- a/test/io_uring_register.c
++++ b/test/io_uring_register.c
+@@ -31,6 +31,17 @@ static int pagesize;
+ static rlim_t mlock_limit;
+ static int devnull;
+ 
++#if !defined(CONFIG_HAVE_MEMFD_CREATE)
++#include <sys/syscall.h>
++#include <linux/memfd.h>
++
++static int memfd_create(const char *name, unsigned int flags)
++{
++	return (int)syscall(SYS_memfd_create, name, flags);
++}
++#endif
++
++
+ int
+ expect_fail(int fd, unsigned int opcode, void *arg,
+ 	    unsigned int nr_args, int error)
