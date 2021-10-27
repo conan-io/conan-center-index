@@ -1,4 +1,0 @@
-sources:
-  "2.4.0":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.4.0.tar.gz"
-    sha256: "77270B5AB8CCC3143ACC88DCCD3BF9C30F316A4712A420CDFAD8EAD18207CAAF"
