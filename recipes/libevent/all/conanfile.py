@@ -50,7 +50,7 @@ class LibeventConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.enable_getrandom:
+        if self.options.get_safe("enable_getrandom", False):
             self.output.warn("libevent:enable_getrandom requires glibc >=2.25")
 
     def requirements(self):
