@@ -72,14 +72,39 @@ class LitehtmlConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"litehtml": "litehtml::litehtml", 
+             "gumbo":"litehtml::gumbo"}
+        )
 
+    @staticmethod
+    def _create_cmake_module_alias_targets(module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        tools.save(module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-targets.cmake".format(self.name))
     def package_info(self):
-        self.cpp_info.components["litehtml_core"].names["cmake_find_package"] = "litehtml"
-        self.cpp_info.components["litehtml_core"].names["cmake_find_package_multi"] = "litehtml"
-        self.cpp_info.components["litehtml_core"].libs = ["litehtml"]
-        self.cpp_info.components["litehtml_core"].requires = ["gumbo"]
+        self.cpp_info.components["litehtml_litehtml"].set_property("cmake_target_name", "litehtml")
+        self.cpp_info.components["litehtml_litehtml"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["litehtml_litehtml"].set_property("cmake_build_modules", [self._module_file_rel_path])
+        self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
+        self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
         
-        self.cpp_info.components["gumbo"].names["cmake_find_package"] = "gumbo"
-        self.cpp_info.components["gumbo"].names["cmake_find_package_multi"] = "gumbo"
+        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "gumbo")
         self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
