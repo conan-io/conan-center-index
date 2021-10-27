@@ -56,7 +56,6 @@ class QtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
-    exports = ["patches/*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -164,6 +163,10 @@ class QtConan(ConanFile):
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s not in self._submodules" % m
 
         return self._submodules_tree
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
