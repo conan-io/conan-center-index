@@ -1111,7 +1111,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine"):
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
-                webenginereqs.extend(["expat::expat", "opus::libopus"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
