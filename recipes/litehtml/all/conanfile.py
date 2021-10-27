@@ -33,6 +33,14 @@ class LitehtmlConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _min_cppstd(self):
+        return "11"
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._min_cppstd)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
