@@ -3,12 +3,13 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
+required_conan_version = ">=1.33.0"
+
 
 class ProtobufConan(ConanFile):
     name = "protobuf"
     description = "Protocol Buffers - Google's data interchange format"
-    topics = ("conan", "protobuf", "protocol-buffers",
-              "protocol-compiler", "serialization", "rpc", "protocol-compiler")
+    topics = ("protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
@@ -31,9 +32,13 @@ class ProtobufConan(ConanFile):
 
     short_paths = True
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -61,8 +66,13 @@ class ProtobufConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-            if str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
-                raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
+    def requirements(self):
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+
+    def validate(self):
+        if self.options.shared and str(self.settings.compiler.get_safe("runtime")) in ["MT", "MTd", "static"]:
+            raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < "14":
@@ -73,14 +83,9 @@ class ProtobufConan(ConanFile):
            if tools.Version(self.version) >= "3.15.4" and tools.Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration("protobuf {} doesn't support clang < 4".format(self.version))
 
-    def requirements(self):
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     @property
     def _cmake_install_base_path(self):
@@ -185,8 +190,8 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
-        os.rename(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
-                  os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
+        tools.rename(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
+                     os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
 
         if not self.options.lite:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
