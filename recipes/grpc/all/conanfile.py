@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
 
 
@@ -52,16 +51,22 @@ class grpcConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _protobuf_version(self):
+        if tools.Version(self.version) > '1.39.1':
+            return '3.17.3'
+
+        return '3.17.1'
+
     def requirements(self):
+        self.requires('protobuf/{}'.format(self._protobuf_version()))
         self.requires('zlib/1.2.11')
         self.requires('openssl/1.1.1l')
-        self.requires('protobuf/3.17.3')
         self.requires('c-ares/1.17.1')
         self.requires('abseil/20210324.2')
         self.requires('re2/20210601')
 
     def build_requirements(self):
-        self.build_requires('protobuf/3.17.3')
+        self.build_requires('protobuf/{}'.format(self._protobuf_version()))
 
         #when cross compiling we need pre compiled grpc plugins for protoc
         if hasattr(self, "settings_build") and tools.cross_building(self):
