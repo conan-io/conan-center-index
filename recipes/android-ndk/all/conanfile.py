@@ -239,10 +239,10 @@ class AndroidNDKConan(ConanFile):
 
         self.env_info.CC = self._define_tool_var("CC", "clang")
         self.env_info.CXX = self._define_tool_var("CXX", "clang++")
-        self.env_info.AS = self._define_tool_var("AS", "as")
         if self.version == 'r23':
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar", True)
+            self.env_info.AS = self._define_tool_var("AS", "as", True)
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", True)
             self.env_info.STRIP = self._define_tool_var("STRIP", "strip", True)
             self.env_info.ADDR2LINE = self._define_tool_var("ADDR2LINE", "addr2line", True)
@@ -250,10 +250,11 @@ class AndroidNDKConan(ConanFile):
             self.env_info.OBJCOPY = self._define_tool_var("OBJCOPY", "objcopy", True)
             self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump", True)
             self.env_info.READELF = self._define_tool_var("READELF", "readelf", True)
-            self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
+            # there doesn't seem to be an 'elfedit' included anymore.
         else:
             self.env_info.LD = self._define_tool_var("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar")
+            self.env_info.AS = self._define_tool_var("AS", "as")
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
             self.env_info.STRIP = self._define_tool_var("STRIP", "strip")
             self.env_info.ADDR2LINE = self._define_tool_var("ADDR2LINE", "addr2line")
