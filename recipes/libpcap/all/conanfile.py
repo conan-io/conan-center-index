@@ -153,3 +153,7 @@ class LibPcapConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32"]
         else:
             self.cpp_info.libs = ["pcap"]
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
