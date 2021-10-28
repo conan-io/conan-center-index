@@ -140,8 +140,13 @@ class DracoConan(ConanFile):
                 "encode_and_decode": "draco",
                 "encode_only": "dracoenc"
             }.get(str(self.options.target))
+
+        if self.settings.os == "Windows":
+            return "draco"
+
         if self.options.shared:
             return "draco_shared"
+
         return "draco_static"
 
     def package(self):
