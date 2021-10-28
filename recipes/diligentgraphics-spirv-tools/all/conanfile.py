@@ -12,6 +12,7 @@ class SpirvtoolsConan(ConanFile):
     description = "Diligent fork. Create and optimize SPIRV shaders"
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+    provides = "spirv-tools"
     license = "Apache-2.0"
 
     settings = "os", "compiler", "arch", "build_type"
@@ -56,7 +57,7 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _get_compatible_spirv_headers_version(self):
         return {
-            "cci-20211008": "cci.20211006",
+            "cci.20211008": "cci.20211006",
         }.get(str(self.version), False)
 
     def validate(self):
