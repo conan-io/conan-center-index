@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import contextlib
 import os
 
@@ -47,6 +48,10 @@ class LibxshmfenceConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+    
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported by libxshmfence recipe. Contributions are welcome")
 
     def build_requirements(self):
         self.build_requires("automake/1.16.4")
