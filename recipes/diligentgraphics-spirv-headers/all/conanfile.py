@@ -11,6 +11,7 @@ class SpirvheadersConan(ConanFile):
     license = "MIT-KhronosGroup"
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+    provides = "spirv-headers"
 
     settings = "os", "compiler", "arch", "build_type"
 
