@@ -1,4 +1,6 @@
 import os
+import textwrap
+
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -33,6 +35,14 @@ class TensorflowLiteConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
 
     @property
     def _source_subfolder(self):
@@ -96,14 +106,28 @@ class TensorflowLiteConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    @staticmethod
+    def _create_cmake_module_alias_target(module_file):
+        aliased = "tensorflowlite::tensorflowlite"
+        alias = "tensorflow::tensorflowlite"
+        content = textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        tools.save(module_file, content)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=os.path.join("include", "tensorflow", "lite"), src=os.path.join(self._source_subfolder, "tensorflow", "lite"))
         self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
+        self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_subfolder, self._module_file))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
         self.cpp_info.set_property("cmake_target_name", "tensorflowlite")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._module_subfolder, self._module_file)])
         defines = []
         if not self.options.shared:
             defines.append("TFL_STATIC_LIBRARY_BUILD")
@@ -111,4 +135,7 @@ class TensorflowLiteConan(ConanFile):
             defines.append("TFLITE_WITH_RUY")
 
         self.cpp_info.defines = defines
+        self.cpp_info.builddirs.append(self._module_subfolder)
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("dl")
