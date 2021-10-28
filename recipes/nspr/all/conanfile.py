@@ -75,7 +75,7 @@ class NsprConan(ConanFile):
         conf_args = [
             "--with-mozilla" if self.options.with_mozilla else "--without-mozilla",
             "--disable-cplus",
-            "--enable-64bit" if self.settings.arch in self.settings.arch in ("armv8", "x86_64") else "--disable-64bit",
+            "--enable-64bit" if self.settings.arch in ("armv8", "x86_64") else "--disable-64bit",
             "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]
