@@ -46,9 +46,22 @@ class SConsConan(ConanFile):
                             os.path.join(self.package_folder, "res", "SCons"))
 
         tools.save(self._scons_sh, textwrap.dedent("""\
-            #!/bin/bash
+            #!/bin/sh
 
-            currentdir="$(dirname "$(readlink -f "$0")")"
+            realpath() (
+              local startpwd=$PWD
+              cd "$(dirname "$1")"
+              local ourlink=$(readlink "$(basename "$1")")
+              while [ "$ourlink" ]; do
+                cd "$(dirname "$ourlink")"
+                local ourlink=$(readlink "$(basename "$1")")
+              done
+              local ourrealpath="$PWD/$(basename "$1")"
+              cd "$startpwd"
+              echo "$ourrealpath"
+            )
+
+            currentdir="$(dirname "$(realpath "$0")")"
 
             export PYTHONPATH="$currentdir/../res:$PYTHONPATH"
             exec ${PYTHON:-python} "$currentdir/../res/SCons/__main__.py" $*
