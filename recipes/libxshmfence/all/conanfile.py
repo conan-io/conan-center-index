@@ -5,7 +5,6 @@ import os
 
 required_conan_version = ">=1.33.0"
 
-
 class LibxshmfenceConan(ConanFile):
     name = "libxshmfence"
     license = "X11"
