@@ -1,0 +1,4 @@
+sources:
+  "3.71":
+    url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_71_RTM/src/nss-3.71.tar.gz"
+    sha256: "99acd315d9af35419cda4a6960f00a7d446bd231bd407174a7b07cb3dba0c253"
