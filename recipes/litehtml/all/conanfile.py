@@ -56,8 +56,6 @@ class LitehtmlConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -65,6 +63,7 @@ class LitehtmlConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
