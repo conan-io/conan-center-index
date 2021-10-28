@@ -17,7 +17,7 @@ class GemmlowpConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     _cmake = None
 
@@ -31,10 +31,6 @@ class GemmlowpConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("shared is not supported on Windows")
 
     def configure(self):
         if self.options.shared:
@@ -53,6 +49,8 @@ class GemmlowpConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
