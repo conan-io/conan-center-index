@@ -104,14 +104,11 @@ class TensorflowLiteConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "tensorflowlite")
         self.cpp_info.set_property("cmake_target_name", "tensorflowlite")
-        cxxflags = []
+        defines = []
         if not self.options.shared:
-            cxxflags.append("-DTFL_STATIC_LIBRARY_BUILD")
+            defines.append("TFL_STATIC_LIBRARY_BUILD")
         if self.options.get_safe("with_ruy", False):
-            cxxflags.append("-DTFLITE_WITH_RUY")
+            defines.append("TFLITE_WITH_RUY")
 
-        self.cpp_info.cxxflags = cxxflags
+        self.cpp_info.defines = defines
         self.cpp_info.libs = tools.collect_libs(self)
-        # necessary because gemmlowp is packaged as a shared library
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("dl")
