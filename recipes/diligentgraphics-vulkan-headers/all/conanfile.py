@@ -7,9 +7,10 @@ class VulkanHeadersConan(ConanFile):
     name = "diligentgraphics-vulkan-headers"
     description = "Diligent fork of Vulkan Header files."
     license = "Apache-2.0"
-    topics = ("conan", "vulkan-headers", "vulkan")
+    topics = ("vulkan-headers", "vulkan")
     homepage = "https://github.com/KhronosGroup/Vulkan-Headers"
     url = "https://github.com/conan-io/conan-center-index"
+    provides = "vulkan-headers"
     no_copy_source = True
 
     @property
