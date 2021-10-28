@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class GdalConan(ConanFile):
@@ -11,7 +11,7 @@ class GdalConan(ConanFile):
     description = "GDAL is an open source X/MIT licensed translator library " \
                   "for raster and vector geospatial data formats."
     license = "MIT"
-    topics = ("conan", "gdal", "osgeo", "geospatial", "raster", "vector")
+    topics = ("osgeo", "geospatial", "raster", "vector")
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -145,7 +145,6 @@ class GdalConan(ConanFile):
         "with_heif": False,
     }
 
-    exports_sources = "patches/**"
     generators = "pkg_config"
     _autotools= None
     _nmake_args = None
@@ -165,6 +164,10 @@ class GdalConan(ConanFile):
     @property
     def _has_with_heif_option(self):
         return tools.Version(self.version) >= "3.2.0"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -830,9 +833,9 @@ class GdalConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "GDAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
-        self.cpp_info.names["pkg_config"] = "gdal"
+        self.cpp_info.set_property("cmake_file_name", "GDAL")
+        self.cpp_info.set_property("cmake_target_name", "GDAL")
+        self.cpp_info.set_property("pkg_config_name", "gdal")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
