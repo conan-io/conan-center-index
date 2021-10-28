@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.37.0"
+required_conan_version = ">=1.33.0"
 
 class GemmlowpConan(ConanFile):
     name = "gemmlowp"
@@ -18,7 +18,7 @@ class GemmlowpConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -31,6 +31,10 @@ class GemmlowpConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
@@ -59,8 +63,6 @@ class GemmlowpConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["eight_bit_int_gemm"].includedirs.append(os.path.join("include", "gemmlowp"))
