@@ -86,7 +86,7 @@ class OpenTelemetryCppConan(ConanFile):
         self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
         protos_cmake_path = os.path.join(
             self._source_subfolder,
@@ -97,6 +97,9 @@ class OpenTelemetryCppConan(ConanFile):
             "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
             f"set(PROTO_PATH \"{protos_path}\")")
         tools.rmdir(os.path.join(self._source_subfolder, "api", "include", "opentelemetry", "nostd", "absl"))
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -110,7 +113,6 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
 
-        # Note: tools.collect_libs will produce the wrong lib order
         self.cpp_info.libs = [
           "opentelemetry_version",
           "opentelemetry_exporter_otlp_grpc",
