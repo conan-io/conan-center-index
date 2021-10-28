@@ -169,6 +169,7 @@ class CairoConan(ConanFile):
         meson.install()
         self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
