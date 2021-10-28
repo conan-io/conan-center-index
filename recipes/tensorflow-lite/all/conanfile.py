@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.36.0"
 
@@ -40,6 +41,10 @@ class TensorflowLiteConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def validate(self):
+        if self.options.shared and not self.options["ruy"].shared:
+            raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} with shared=True requires ruy.shared=True")
 
     def config_options(self):
         if self.settings.os == "Windows":
