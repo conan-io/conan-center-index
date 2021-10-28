@@ -532,8 +532,8 @@ class BoostConan(ConanFile):
         :return: output of the python script execution, or None, if script has failed
         """
         output = StringIO()
-        command = '"%s" -c "%s"' % (self._python_executable, script)
-        self.output.info("running {}'.format(command))
+        command = '"{}" -c "{}"'.format(self._python_executable, script)
+        self.output.info("running {}".format(command))
         try:
             self.run(command=command, output=output)
         except ConanException:
@@ -556,7 +556,7 @@ class BoostConan(ConanFile):
         # https://docs.python.org/2.7/library/sysconfig.html
         return self._run_python_script("from __future__ import print_function; "
                                        "import sysconfig; "
-                                       "print(sysconfig.get_path('%s'))" % name)
+                                       "print(sysconfig.get_path('{}'))".format(name))
 
     def _get_python_sc_var(self, name):
         """
@@ -566,7 +566,7 @@ class BoostConan(ConanFile):
         """
         return self._run_python_script("from __future__ import print_function; "
                                        "import sysconfig; "
-                                       "print(sysconfig.get_config_var('%s'))" % name)
+                                       "print(sysconfig.get_config_var('{}'))".format(name))
 
     def _get_python_du_var(self, name):
         """
@@ -577,7 +577,7 @@ class BoostConan(ConanFile):
         """
         return self._run_python_script("from __future__ import print_function; "
                                        "import distutils.sysconfig as du_sysconfig; "
-                                       "print(du_sysconfig.get_config_var('%s'))" % name)
+                                       "print(du_sysconfig.get_config_var('{}'))".format(name))
 
     def _get_python_var(self, name):
         """
@@ -594,7 +594,7 @@ class BoostConan(ConanFile):
         """
         return self._run_python_script("from __future__ import print_function; "
                                        "import sys; "
-                                       "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
+                                       "print('{}.{}'.format((sys.version_info[0], sys.version_info[1]))"))
 
 
     @property
@@ -699,14 +699,16 @@ class BoostConan(ConanFile):
 
     def _clean(self):
         src = os.path.join(self.source_folder, self._source_subfolder)
-        clean_dirs = [os.path.join(self.build_folder, "bin.v2"),
-                      os.path.join(self.build_folder, "architecture"),
-                      os.path.join(self.source_folder, self._bcp_dir),
-                      os.path.join(src, "dist", "bin"),
-                      os.path.join(src, "stage"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bootstrap"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86_64")]
+        clean_dirs = [
+            os.path.join(self.build_folder, "bin.v2"),
+            os.path.join(self.build_folder, "architecture"),
+            os.path.join(self.source_folder, self._bcp_dir),
+            os.path.join(src, "dist", "bin"),
+            os.path.join(src, "stage"),
+            os.path.join(src, "tools", "build", "src", "engine", "bootstrap"),
+            os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86"),
+            os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86_64"),
+        ]
         for d in clean_dirs:
             if os.path.isdir(d):
                 self.output.warn("removing '%s'".format(d))
@@ -1497,9 +1499,9 @@ class BoostConan(ConanFile):
                         new_name = new_name.replace("boost_", str(self.options.namespace) + "_")
                     if name.startswith("boost_python") or name.startswith("boost_numpy"):
                         if self.options.python_buildid:
-                            new_name += '-%s' % self.options.python_buildid
+                            new_name += "-{}".format(self.options.python_buildid)
                     if self.options.buildid:
-                        new_name += '-%s' % self.options.buildid
+                        new_name += "-{}".format(self.options.buildid)
                     libs.append(new_name)
                 return libs
 
