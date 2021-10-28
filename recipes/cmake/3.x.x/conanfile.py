@@ -7,7 +7,7 @@ required_conan_version = ">=1.33.0"
 class CMakeConan(ConanFile):
     name = "cmake"
     description = "Conan installer for CMake"
-    topics = ("conan", "cmake", "build", "installer")
+    topics = ("cmake", "build", "installer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
