@@ -182,6 +182,9 @@ class QtConan(ConanFile):
                        "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
+        if self.options.qtwayland:
+            self.build_requires("wayland/1.19.0")
+
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.with_icu
@@ -198,6 +201,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_mysql = False
             self.options.opengl = "dynamic"
+        if self.settings.os != "Linux":
+            self.options.qtwayland = False
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -363,12 +368,13 @@ class QtConan(ConanFile):
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
-            raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+        if self.options.qtwayland:
+            self.requires("wayland/1.19.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -774,6 +780,8 @@ Examples = bin/datadir/examples""")
         tools.save(os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
 
         def _create_private_module(module, dependencies=[]):
+            if "Core" not in dependencies:
+                dependencies.append("Core")
             dependencies_string = ';'.join('Qt5::%s' % dependency for dependency in dependencies)
             contents = textwrap.dedent("""\
             if(NOT TARGET Qt5::{0}Private)
@@ -792,10 +800,13 @@ Examples = bin/datadir/examples""")
 
             tools.save(os.path.join(self.package_folder, self._cmake_qt5_private_file(module)), contents)
 
-        _create_private_module("Core", ["Core"])
+        _create_private_module("Core")
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
+
+        if self.options.widgets:
+            _create_private_module("Widgets", ["CorePrivate", "Gui", "GuiPrivate"])
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
@@ -898,6 +909,8 @@ Examples = bin/datadir/examples""")
             if self.options.with_libjpeg == "libjpeg":
                 gui_reqs.append("libjpeg::libjpeg")
             _create_module("Gui", gui_reqs)
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
+            self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
             if self.settings.os == "Windows":
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
@@ -939,6 +952,8 @@ Examples = bin/datadir/examples""")
         _create_module("Test")
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Widgets"))
+            self.cpp_info.components["qtWidgets"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Widgets"))
         if self.options.gui and self.options.widgets:
             _create_module("PrintSupport", ["Gui", "Widgets"])
         if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
@@ -1092,7 +1107,7 @@ Examples = bin/datadir/examples""")
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
                 _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
@@ -1161,6 +1176,9 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")  # qtcore requires "WSAStartup " which is in "Ws2_32.Lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")  # qtnetwork from qtbase requires "DnsFree" which is in "Dnsapi.lib" library
                 self.cpp_info.components["qtNetwork"].system_libs.append("iphlpapi")
+                if self.options.widgets:
+                    self.cpp_info.components["qtWidgets"].system_libs.append("UxTheme")
+                    self.cpp_info.components["qtWidgets"].system_libs.append("dwmapi")
                 if self.options.qtwinextras:
                     self.cpp_info.components["qtWinExtras"].system_libs.append("dwmapi")  # qtwinextras requires "DwmGetColorizationColor" which is in "dwmapi.lib" library
 
@@ -1177,9 +1195,6 @@ Examples = bin/datadir/examples""")
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_executables_file)
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Core"))
         self.cpp_info.components["qtCore"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Core"))
-
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package"].append(self._cmake_qt5_private_file("Gui"))
-        self.cpp_info.components["qtGui"].build_modules["cmake_find_package_multi"].append(self._cmake_qt5_private_file("Gui"))
 
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)

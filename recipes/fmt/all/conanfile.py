@@ -52,7 +52,6 @@ class FmtConan(ConanFile):
 
     def configure(self):
         if self.options.header_only:
-            self.settings.clear()
             del self.options.fPIC
             del self.options.shared
             del self.options.with_os_api

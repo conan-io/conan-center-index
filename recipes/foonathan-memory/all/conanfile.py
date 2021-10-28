@@ -21,10 +21,11 @@ class FoonathanMemory(ConanFile):
     default_options = {
         "shared":            False,
         "fPIC":              True,
-        "with_tools":        False,
-        "with_sizecheck":    False
+        "with_tools":        True,
+        "with_sizecheck":    True
     }
     generators = "cmake"
+    short_paths = True
     exports_sources =  ["patches/**","CMakeLists.txt"]
     _cmake = None
 
@@ -63,7 +64,7 @@ class FoonathanMemory(ConanFile):
         return "source_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def _configure_cmake(self):
@@ -87,6 +88,13 @@ class FoonathanMemory(ConanFile):
                 endif()
             """.format(alias=alias, aliased=aliased))
         tools.save(module_file, content)
+    
+    def validate(self):
+        # FIXME: jenkins servers throw error with this combination 
+        # quick fix until somebody can reproduce
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+            raise ConanInvalidConfiguration("package currently do not support cross build to Macos armv8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,

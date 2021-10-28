@@ -1,0 +1,60 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 98283aa..c95fd4e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,7 +75,7 @@ ENDIF(PROJECT_OS_LINUX)
+ ######################################################################################
+ 
+ # Find packages needed to build library
+-find_package(libusb-1.0 REQUIRED)
++find_package(libusb REQUIRED)
+ 
+ # Check the endianness of the system
+ include (TestBigEndian)
+@@ -106,6 +106,7 @@ endif (MSVC)
+ 
+ set(C_CXX_FLAGS_DEFAULT "${C_FLAGS_WARNING} -O2")
+ 
++if (0)
+ # These defaults can be overriden by -DCMAKE_C_FLAGS=""
+ set(CMAKE_C_FLAGS "${C_CXX_FLAGS_DEFAULT} ${CMAKE_C_FLAGS}")
+ # C Configurations
+@@ -119,6 +120,7 @@ set(CMAKE_CXX_FLAGS "${C_CXX_FLAGS_DEFAULT} ${CMAKE_CXX_FLAGS}")
+ SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS} -O0 -g -DDEBUG=1")
+ SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS}")
+ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
++endif ()
+ 
+ # Pretty much everyone is going to need the main includes
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 841873a..08a3bb5 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -21,13 +21,15 @@ ENDIF()
+ 
+ LIST(APPEND SRC core.c tilt.c cameras.c flags.c usb_libusb10.c registration.c audio.c loader.c)
+ 
+-add_library (freenect SHARED ${SRC})
++add_library (freenect ${SRC})
++target_link_libraries (freenect libusb::libusb)
+ set_target_properties ( freenect PROPERTIES
+   VERSION ${PROJECT_VER}
+   SOVERSION ${PROJECT_APIVER})	
+-install (TARGETS freenect
+-  DESTINATION "${PROJECT_LIBRARY_INSTALL_DIR}")
++install (TARGETS freenect)
++
+ 
++if (0)
+ add_library (freenectstatic STATIC ${SRC})
+ set_target_properties (freenectstatic PROPERTIES OUTPUT_NAME freenect)
+ IF(UNIX AND NOT APPLE)
+@@ -38,6 +40,7 @@ install (TARGETS freenectstatic
+ 
+ target_link_libraries (freenect ${LIBUSB_1_LIBRARIES})
+ target_link_libraries (freenectstatic ${LIBUSB_1_LIBRARIES})
++endif ()
+ 
+ # Install the header files
+ install (FILES "../include/libfreenect.h" "../include/libfreenect_registration.h" "../include/libfreenect_audio.h"

@@ -8,3 +8,6 @@ sources:
   "3.3.2":
     url: "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-3.3.2-stable.zip"
     sha256: "0297aa9d0eb4374ecb82eb844f588343c6efbc39028473b96de12ca703aa1834"
+  "3.3.4":
+    url: "https://github.com/godotengine/godot-headers/archive/godot-3.3.4-stable.tar.gz"
+    sha256: "14cff754199cc48dcf29b326ad4758c0bc71613acea9942de780815903a0d5a5"

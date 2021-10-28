@@ -143,8 +143,11 @@ class BoostConan(ConanFile):
 
     short_paths = True
     no_copy_source = True
-    exports_sources = ['patches/*']
     _cached_dependencies = None
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def export(self):
         self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
@@ -766,7 +769,7 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
-        if tools.cross_building(self.settings, skip_x64_x86=True):
+        if tools.cross_building(self, skip_x64_x86=True):
             # When cross building, do not attempt to run the test-executable (assume they work)
             tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "libs", "stacktrace", "build", "Jamfile.v2"),
                                   "$(>) > $(<)",
@@ -1085,7 +1088,7 @@ class BoostConan(ConanFile):
     @property
     def _build_cross_flags(self):
         flags = []
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self):
             return flags
         arch = self.settings.get_safe('arch')
         self.output.info("Cross building, detecting compiler...")

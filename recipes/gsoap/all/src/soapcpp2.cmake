@@ -22,26 +22,26 @@ add_custom_target(create-generated-folder ALL
 if(WIN32)
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
-        COMMAND ${CONAN_WINFLEXBISON_ROOT}/bin/win_bison.exe -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
+        COMMAND win_bison.exe -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
         COMMENT "Run BISON on soapcpp2"
     )
 
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
-        COMMAND ${CONAN_WINFLEXBISON_ROOT}/bin/win_flex.exe -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
+        COMMAND win_flex.exe -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
         COMMENT "Run FLEX on soapcpp2"
     )
 
 else()
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
-        COMMAND ${CONAN_BISON_ROOT}/bin/yacc -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
+        COMMAND yacc -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
         COMMENT "Run YACC on soapcpp2"
     )
 
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
-        COMMAND ${CONAN_FLEX_ROOT}/bin/flex -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
+        COMMAND flex -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
         COMMENT "Run FLEX on soapcpp2"
     )
 endif()
@@ -55,6 +55,10 @@ add_custom_target(FLEXBISON_GENERATORS
 add_dependencies(FLEXBISON_GENERATORS create-generated-folder)
 
 add_executable(soapcpp2 ${SRC_CPP})
+if(${WITH_OPENSSL})
+    target_compile_definitions(soapcpp2 PUBLIC WITH_OPENSSL WITH_GZIP)
+    target_link_libraries(soapcpp2 PUBLIC OpenSSL::OpenSSL)
+endif()
 target_include_directories(soapcpp2 PRIVATE ${STDCPP2_PATH})
 set_source_files_properties(${SRC_CPP} PROPERTIES LANGUAGE C)
 add_dependencies(soapcpp2 FLEXBISON_GENERATORS)

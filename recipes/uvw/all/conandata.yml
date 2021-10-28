@@ -8,3 +8,6 @@ sources:
   "2.9.0":
     url: "https://github.com/skypjack/uvw/archive/v2.9.0_libuv_v1.41.tar.gz"
     sha256: "dd610cb1626b8a7779ed251584bcc0362fb98fcee13e699680f61828a1ba55de"
+  "2.10.0":
+    url: "https://github.com/skypjack/uvw/archive/v2.10.0_libuv_v1.42.tar.gz"
+    sha256: "30b0ba97a94d5e652490c6b1b32c95e608263f21cf3bc606308d09b3e3a114bf"

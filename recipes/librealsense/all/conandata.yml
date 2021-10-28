@@ -1,0 +1,24 @@
+sources:
+  "2.49.0":
+    source:
+      url: "https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.49.0.tar.gz"
+      sha256: "2578ea0e75546aeebd908da732f52e0122bf37750d5a45f3adf92945a673aefd"
+    firmware:
+      - url: "https://librealsense.intel.com/Releases/RS4xx/FW/D4XX_FW_Image-5.12.15.50.bin"
+        sha256: "1030c06e0d266fd5a2704ba38d8615c88a86758034750e58e1656b90156a2d16"
+      - url: "https://librealsense.intel.com/Releases/SR300/FW/SR3XX_FW_Image-3.26.1.0.bin"
+        sha256: "c4ac2144df13c3a64fca9d16c175595c903e6e45f02f0f238630a223b07c14d1"
+      - url: "https://librealsense.intel.com/Releases/TM2/FW/target/0.2.0.951/target-0.2.0.951.mvcmd"
+        sha256: "0265fd111611908b822cdaf4a3fe5b631c50539b2805d2f364c498aa71c007c0"
+      - url: "https://librealsense.intel.com/Releases/L5xx/FW/L51X_FW_Image-1.5.8.1.bin"
+        sha256: "87a9a91b613d9d807b2bfc424abe9cac63cad75dfc04718592c44777cb0b4452"
+      - url: "https://librealsense.intel.com/Releases/L5xx/FW/L53X_FW_Image-3.5.5.1.bin"
+        sha256: "b837b2cff2b270b89eed3c0b212ab4108389a20b6e07c19dd5957918ff9ce7e0"
+patches:
+  "2.49.0":
+    - patch_file: "patches/2.49.0-fix-cmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.49.0-fix-avx-check.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/2.49.0-atlstr-removal.patch"
+      base_path: "source_subfolder"
