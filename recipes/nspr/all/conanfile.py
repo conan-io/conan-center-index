@@ -51,7 +51,7 @@ class NsprConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True)
-        conan.tools.files.rename("nspr", self._source_subfolder)
+        conan.tools.files.rename(self, "nspr", self._source_subfolder)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" :
