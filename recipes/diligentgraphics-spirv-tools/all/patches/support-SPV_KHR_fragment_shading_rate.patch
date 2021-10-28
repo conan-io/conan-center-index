@@ -1,0 +1,243 @@
+Patch from 2 PR:
+https://github.com/KhronosGroup/SPIRV-Tools/pull/3943
+https://github.com/KhronosGroup/SPIRV-Tools/pull/4014
+Mandatory in v2020.5 with spirv-headers 1.5.4, otherwise compilation fails
+with 'SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE': undeclared identifier
+--- a/include/spirv-tools/libspirv.h
++++ b/include/spirv-tools/libspirv.h
+@@ -182,6 +182,7 @@ typedef enum spv_operand_type_t {
+   SPV_OPERAND_TYPE_LOOP_CONTROL,       // SPIR-V Sec 3.23
+   SPV_OPERAND_TYPE_FUNCTION_CONTROL,   // SPIR-V Sec 3.24
+   SPV_OPERAND_TYPE_MEMORY_ACCESS,      // SPIR-V Sec 3.26
++  SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE,  // SPIR-V Sec 3.FSR
+ 
+ // The remaining operand types are only used internally by the assembler.
+ // There are two categories:
+--- a/source/operand.cpp
++++ b/source/operand.cpp
+@@ -208,6 +208,8 @@ const char* spvOperandTypeStr(spv_operand_type_t type) {
+     case SPV_OPERAND_TYPE_MEMORY_ACCESS:
+     case SPV_OPERAND_TYPE_OPTIONAL_MEMORY_ACCESS:
+       return "memory access";
++    case SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE:
++      return "shading rate";
+     case SPV_OPERAND_TYPE_SCOPE_ID:
+       return "scope ID";
+     case SPV_OPERAND_TYPE_GROUP_OPERATION:
+@@ -360,6 +362,7 @@ bool spvOperandIsConcreteMask(spv_operand_type_t type) {
+     case SPV_OPERAND_TYPE_LOOP_CONTROL:
+     case SPV_OPERAND_TYPE_FUNCTION_CONTROL:
+     case SPV_OPERAND_TYPE_MEMORY_ACCESS:
++    case SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE:
+     case SPV_OPERAND_TYPE_DEBUG_INFO_FLAGS:
+     case SPV_OPERAND_TYPE_CLDEBUG100_DEBUG_INFO_FLAGS:
+       return true;
+--- a/source/val/validate_builtins.cpp
++++ b/source/val/validate_builtins.cpp
+@@ -230,6 +230,12 @@ class BuiltInsValidator {
+   spv_result_t ValidateComputeI32InputAtDefinition(const Decoration& decoration,
+                                                    const Instruction& inst);
+ 
++  spv_result_t ValidatePrimitiveShadingRateAtDefinition(
++      const Decoration& decoration, const Instruction& inst);
++
++  spv_result_t ValidateShadingRateAtDefinition(const Decoration& decoration,
++                                               const Instruction& inst);
++
+   // The following section contains functions which are called when id defined
+   // by |referenced_inst| is
+   // 1. referenced by |referenced_from_inst|
+@@ -383,6 +389,16 @@ class BuiltInsValidator {
+       const Instruction& referenced_inst,
+       const Instruction& referenced_from_inst);
+ 
++  spv_result_t ValidatePrimitiveShadingRateAtReference(
++      const Decoration& decoration, const Instruction& built_in_inst,
++      const Instruction& referenced_inst,
++      const Instruction& referenced_from_inst);
++
++  spv_result_t ValidateShadingRateAtReference(
++      const Decoration& decoration, const Instruction& built_in_inst,
++      const Instruction& referenced_inst,
++      const Instruction& referenced_from_inst);
++
+   // Validates that |built_in_inst| is not (even indirectly) referenced from
+   // within a function which can be called with |execution_model|.
+   //
+@@ -3314,6 +3330,142 @@ spv_result_t BuiltInsValidator::ValidateSMBuiltinsAtReference(
+   return SPV_SUCCESS;
+ }
+ 
++spv_result_t BuiltInsValidator::ValidatePrimitiveShadingRateAtDefinition(
++    const Decoration& decoration, const Instruction& inst) {
++  if (spvIsVulkanEnv(_.context()->target_env)) {
++    if (spv_result_t error = ValidateI32(
++            decoration, inst,
++            [this, &inst,
++             &decoration](const std::string& message) -> spv_result_t {
++              return _.diag(SPV_ERROR_INVALID_DATA, &inst)
++                     << _.VkErrorID(4486)
++                     << "According to the Vulkan spec BuiltIn "
++                     << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                                      decoration.params()[0])
++                     << " variable needs to be a 32-bit int scalar. "
++                     << message;
++            })) {
++      return error;
++    }
++  }
++
++  // Seed at reference checks with this built-in.
++  return ValidatePrimitiveShadingRateAtReference(decoration, inst, inst, inst);
++}
++
++spv_result_t BuiltInsValidator::ValidatePrimitiveShadingRateAtReference(
++    const Decoration& decoration, const Instruction& built_in_inst,
++    const Instruction& referenced_inst,
++    const Instruction& referenced_from_inst) {
++  if (spvIsVulkanEnv(_.context()->target_env)) {
++    const SpvStorageClass storage_class = GetStorageClass(referenced_from_inst);
++    if (storage_class != SpvStorageClassMax &&
++        storage_class != SpvStorageClassOutput) {
++      return _.diag(SPV_ERROR_INVALID_DATA, &referenced_from_inst)
++             << _.VkErrorID(4485) << "Vulkan spec allows BuiltIn "
++             << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                              decoration.params()[0])
++             << " to be only used for variables with Output storage class. "
++             << GetReferenceDesc(decoration, built_in_inst, referenced_inst,
++                                 referenced_from_inst)
++             << " " << GetStorageClassDesc(referenced_from_inst);
++    }
++
++    for (const SpvExecutionModel execution_model : execution_models_) {
++      switch (execution_model) {
++        case SpvExecutionModelVertex:
++        case SpvExecutionModelGeometry:
++        case SpvExecutionModelMeshNV:
++          break;
++        default: {
++          return _.diag(SPV_ERROR_INVALID_DATA, &referenced_from_inst)
++                 << _.VkErrorID(4484) << "Vulkan spec allows BuiltIn "
++                 << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                                  decoration.params()[0])
++                 << " to be used only with Vertex, Geometry, or MeshNV "
++                    "execution models. "
++                 << GetReferenceDesc(decoration, built_in_inst, referenced_inst,
++                                     referenced_from_inst, execution_model);
++        }
++      }
++    }
++  }
++
++  if (function_id_ == 0) {
++    // Propagate this rule to all dependant ids in the global scope.
++    id_to_at_reference_checks_[referenced_from_inst.id()].push_back(
++        std::bind(&BuiltInsValidator::ValidatePrimitiveShadingRateAtReference,
++                  this, decoration, built_in_inst, referenced_from_inst,
++                  std::placeholders::_1));
++  }
++
++  return SPV_SUCCESS;
++}
++
++spv_result_t BuiltInsValidator::ValidateShadingRateAtDefinition(
++    const Decoration& decoration, const Instruction& inst) {
++  if (spvIsVulkanEnv(_.context()->target_env)) {
++    if (spv_result_t error = ValidateI32(
++            decoration, inst,
++            [this, &inst,
++             &decoration](const std::string& message) -> spv_result_t {
++              return _.diag(SPV_ERROR_INVALID_DATA, &inst)
++                     << _.VkErrorID(4492)
++                     << "According to the Vulkan spec BuiltIn "
++                     << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                                      decoration.params()[0])
++                     << " variable needs to be a 32-bit int scalar. "
++                     << message;
++            })) {
++      return error;
++    }
++  }
++
++  // Seed at reference checks with this built-in.
++  return ValidateShadingRateAtReference(decoration, inst, inst, inst);
++}
++
++spv_result_t BuiltInsValidator::ValidateShadingRateAtReference(
++    const Decoration& decoration, const Instruction& built_in_inst,
++    const Instruction& referenced_inst,
++    const Instruction& referenced_from_inst) {
++  if (spvIsVulkanEnv(_.context()->target_env)) {
++    const SpvStorageClass storage_class = GetStorageClass(referenced_from_inst);
++    if (storage_class != SpvStorageClassMax &&
++        storage_class != SpvStorageClassInput) {
++      return _.diag(SPV_ERROR_INVALID_DATA, &referenced_from_inst)
++             << _.VkErrorID(4491) << "Vulkan spec allows BuiltIn "
++             << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                              decoration.params()[0])
++             << " to be only used for variables with Input storage class. "
++             << GetReferenceDesc(decoration, built_in_inst, referenced_inst,
++                                 referenced_from_inst)
++             << " " << GetStorageClassDesc(referenced_from_inst);
++    }
++
++    for (const SpvExecutionModel execution_model : execution_models_) {
++      if (execution_model != SpvExecutionModelFragment) {
++        return _.diag(SPV_ERROR_INVALID_DATA, &referenced_from_inst)
++               << _.VkErrorID(4490) << "Vulkan spec allows BuiltIn "
++               << _.grammar().lookupOperandName(SPV_OPERAND_TYPE_BUILT_IN,
++                                                decoration.params()[0])
++               << " to be used only with the Fragment execution model. "
++               << GetReferenceDesc(decoration, built_in_inst, referenced_inst,
++                                   referenced_from_inst, execution_model);
++      }
++    }
++  }
++
++  if (function_id_ == 0) {
++    // Propagate this rule to all dependant ids in the global scope.
++    id_to_at_reference_checks_[referenced_from_inst.id()].push_back(std::bind(
++        &BuiltInsValidator::ValidateShadingRateAtReference, this, decoration,
++        built_in_inst, referenced_from_inst, std::placeholders::_1));
++  }
++
++  return SPV_SUCCESS;
++}
++
+ spv_result_t BuiltInsValidator::ValidateSingleBuiltInAtDefinition(
+     const Decoration& decoration, const Instruction& inst) {
+   const SpvBuiltIn label = SpvBuiltIn(decoration.params()[0]);
+@@ -3515,6 +3667,12 @@ spv_result_t BuiltInsValidator::ValidateSingleBuiltInAtDefinition(
+       // No validation rules (for the moment).
+       break;
+     }
++    case SpvBuiltInPrimitiveShadingRateKHR: {
++      return ValidatePrimitiveShadingRateAtDefinition(decoration, inst);
++    }
++    case SpvBuiltInShadingRateKHR: {
++      return ValidateShadingRateAtDefinition(decoration, inst);
++    }
+   }
+   return SPV_SUCCESS;
+ }
+--- a/source/val/validation_state.cpp
++++ b/source/val/validation_state.cpp
+@@ -1517,6 +1517,18 @@ std::string ValidationState_t::VkErrorID(uint32_t id,
+       return VUID_WRAP(VUID-WorkgroupSize-WorkgroupSize-04426);
+     case 4427:
+       return VUID_WRAP(VUID-WorkgroupSize-WorkgroupSize-04427);
++    case 4484:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04484);
++    case 4485:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04485);
++    case 4486:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04486);
++    case 4490:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04490);
++    case 4491:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04491);
++    case 4492:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04492);
+     default:
+       return "";  // unknown id
+   };
