@@ -31,6 +31,10 @@ class NsprConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,17 +48,15 @@ class NsprConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = os.path.join("nspr-" + self.version, "nspr")
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.rmdir(os.path.join("nspr-" + self.version))
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True)
+        tools.rename(self, "nspr", self._source_subfolder)
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows" :
             self.build_requires("mozilla-build/3.3")
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/cci.latest")
+            if not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):
