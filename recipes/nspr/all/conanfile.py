@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import conan.tools.files
 from contextlib import contextmanager
 import os
 
