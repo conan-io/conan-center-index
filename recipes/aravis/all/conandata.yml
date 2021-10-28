@@ -1,0 +1,8 @@
+sources:
+  "0.8.19":
+    url: "https://github.com/AravisProject/aravis/releases/download/0.8.19/aravis-0.8.19.tar.xz"
+    sha256: "ddadf4fcc253ca2d8eb765f6a365f2d5dbcff9cd7a431b07eb978dff3b9b1034"
+patches:
+  "0.8.19":
+    - patch_file: "patches/0.8.19-gst-shared-lib.patch"
+      base_path: "source_subfolder"
