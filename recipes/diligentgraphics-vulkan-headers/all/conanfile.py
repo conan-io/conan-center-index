@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 import glob
 import os
 
+required_conan_version = ">=1.33"
+
 
 class VulkanHeadersConan(ConanFile):
     name = "diligentgraphics-vulkan-headers"
@@ -21,9 +23,8 @@ class VulkanHeadersConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("Vulkan-Headers-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
