@@ -32,8 +32,8 @@ class SConsConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "scons")
 
     @property
-    def _scons_bat(self):
-        return os.path.join(self.package_folder, "bin", "scons.bat")
+    def _scons_cmd(self):
+        return os.path.join(self.package_folder, "bin", "scons.cmd")
 
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
@@ -67,7 +67,7 @@ class SConsConan(ConanFile):
             exec ${PYTHON:-python} "$currentdir/../res/SCons/__main__.py" $*
         """))
         self._chmod_x(self._scons_sh)
-        tools.save(self._scons_bat, textwrap.dedent(r"""
+        tools.save(self._scons_cmd, textwrap.dedent(r"""
             @echo off
             set currentdir=%~dp0
             if not defined PYTHON (
