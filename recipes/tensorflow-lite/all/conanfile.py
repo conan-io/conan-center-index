@@ -43,6 +43,8 @@ class TensorflowLiteConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 14)
         if self.options.shared and not self.options["ruy"].shared:
             raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} with shared=True requires ruy.shared=True")
 
