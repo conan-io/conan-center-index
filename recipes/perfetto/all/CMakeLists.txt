@@ -6,7 +6,6 @@ conan_basic_setup()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-find_package(Threads)
 
 set(PUBLIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/sdk/perfetto.h)
 
