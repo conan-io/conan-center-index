@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 import shutil
 
@@ -92,6 +92,11 @@ class AndroidNDKConan(ConanFile):
         abi = "androideabi" if self.settings_target.arch == "armv7" else "android"
         return f"{arch}-linux-{abi}"
 
+    @property
+    def _ndk_version(self):
+        assert self.version[0] == "r"
+        return self.version[1:]
+
     def _fix_permissions(self):
         if os.name != "posix":
             return
@@ -159,12 +164,16 @@ class AndroidNDKConan(ConanFile):
     def _define_tool_var(self, name, value, bare = False):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, self._tool_name(value, bare))
+        if not os.path.isfile(path):
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
     def _define_tool_var_naked(self, name, value):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, value)
+        if not os.path.isfile(path):
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
@@ -239,7 +248,9 @@ class AndroidNDKConan(ConanFile):
 
         self.env_info.CC = self._define_tool_var("CC", "clang")
         self.env_info.CXX = self._define_tool_var("CXX", "clang++")
-        if self.version == 'r23':
+        if tools.Version(self._ndk_version) >= 23:
+            # Versions greater than 23 had the naming convention
+            # changed to no longer include the triplet.
             self.env_info.LD = self._define_tool_var_naked("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar", True)
             self.env_info.AS = self._define_tool_var("AS", "as", True)
