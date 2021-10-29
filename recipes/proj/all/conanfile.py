@@ -8,11 +8,10 @@ class ProjConan(ConanFile):
     name = "proj"
     description = "Cartographic Projections and Coordinate Transformations Library."
     license = "MIT"
-    topics = ("conan", "dsp", "proj", "proj4", "projections", "gis", "geospatial")
+    topics = ("dsp", "proj", "proj4", "projections", "gis", "geospatial")
     homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,7 +19,7 @@ class ProjConan(ConanFile):
         "threadsafe": [True, False],
         "with_tiff": [True, False],
         "with_curl": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
@@ -28,10 +27,16 @@ class ProjConan(ConanFile):
         "threadsafe": True,
         "with_tiff": True,
         "with_curl": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -49,12 +54,12 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.4")
         self.requires("sqlite3/3.36.0")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.2.0")
+            self.requires("libtiff/4.3.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.77.0")
+            self.requires("libcurl/7.79.1")
 
     def build_requirements(self):
         if hasattr(self, "settings_build"):
@@ -80,15 +85,6 @@ class ProjConan(ConanFile):
         tools.replace_in_file(cmakelists,
                               "find_program(EXE_SQLITE3 sqlite3)",
                               "find_program(EXE_SQLITE3 sqlite3 PATHS {} NO_DEFAULT_PATH)".format(sqlite3_exe_build_context_paths))
-        # Fix executables installation on iOS
-        # might be fixed upstream by https://github.com/OSGeo/PROJ/pull/2764
-        execs = ["cct", "cs2cs", "geod", "gie", "proj", "projinfo"]
-        if tools.Version(self.version) >= "7.0.0":
-            execs.append("projsync")
-        for exec in execs:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "bin_{}.cmake".format(exec)),
-                                  "RUNTIME DESTINATION ${BINDIR}",
-                                  "DESTINATION ${BINDIR}")
         # unvendor nlohmann_json
         if tools.Version(self.version) < "8.1.0":
             tools.rmdir(os.path.join(self._source_subfolder, "include", "proj", "internal", "nlohmann"))
@@ -118,6 +114,7 @@ class ProjConan(ConanFile):
             self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
         if tools.Version(self.version) >= "8.1.0":
             self._cmake.definitions["NLOHMANN_JSON_ORIGIN"] = "external"
+        self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         self._cmake.configure()
         return self._cmake
 
