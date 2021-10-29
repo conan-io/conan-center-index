@@ -9,7 +9,7 @@ required_conan_version = ">=1.33.0"
 class LitehtmlConan(ConanFile):
     name = "litehtml"
     description = "litehtml is the lightweight HTML rendering engine with CSS2/CSS3 support."
-    license = "BSD3"
+    license = "BSD-3-Clause"
     topics = ("render engine", "html", "parser")
     homepage = "https://github.com/litehtml/litehtml"
     url = "https://github.com/conan-io/conan-center-index"
