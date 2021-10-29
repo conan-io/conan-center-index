@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -65,6 +65,10 @@ class UTConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "ut")
+        self.cpp_info.set_property("cmake_target_namespace", "boost")
+        self.cpp_info.components["ut"].set_property("cmake_target_name", "ut")
+
         self.cpp_info.names["cmake_find_package"] = "boost"
         self.cpp_info.names["cmake_find_package_multi"] = "boost"
         self.cpp_info.filenames["cmake_find_package"] = "ut"
