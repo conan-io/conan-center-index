@@ -33,7 +33,7 @@ class NSSConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("nspr/4.29")
+        self.requires("nspr/4.32")
         self.requires("sqlite3/3.36.0")
         self.requires("zlib/1.2.11")
 
