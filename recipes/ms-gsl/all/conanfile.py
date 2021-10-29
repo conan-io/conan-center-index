@@ -70,6 +70,9 @@ class MicrosoftGslConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package"] = "GSL"
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package_multi"] = "GSL"
+        self.cpp_info.set_property("cmake_file_name", "Microsoft.GSL")
+        self.cpp_info.set_property("cmake_target_namespace", "Microsoft.GSL")
+        self.cpp_info.components["_ms-gsl"].set_property("cmake_target_name", "GSL")
         if tools.Version(self.version) < "3.0.0":
             self.cpp_info.components["_ms-gsl"].defines = [
                 self._contract_map[str(self.options.on_contract_violation)]
