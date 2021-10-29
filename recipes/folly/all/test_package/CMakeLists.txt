@@ -8,4 +8,10 @@ find_package(folly CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} Folly::folly)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+
+
+if (${FOLLY_VERSION} VERSION_LESS "2021.10.25.00")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+else()
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+endif()
