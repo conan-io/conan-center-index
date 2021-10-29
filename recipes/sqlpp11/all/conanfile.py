@@ -33,12 +33,12 @@ class Sqlpp11Conan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*", dst="scripts", src=os.path.join(self._source_subfolder, "scripts"))
+        self.copy("*", dst="bin", src=os.path.join(self._source_subfolder, "scripts"))
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "Sqlpp11"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Sqlpp11"
 
-        scriptsdir = os.path.join(self.package_folder, "scripts")
-        self.output.info("Appending PATH environment variable: {}".format(scriptsdir))
-        self.env_info.PATH.append(scriptsdir)
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
