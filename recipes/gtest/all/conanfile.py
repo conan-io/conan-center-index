@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class GTestConan(ConanFile):
@@ -143,15 +143,10 @@ class GTestConan(ConanFile):
         return self.options.debug_postfix if self.settings.build_type == "Debug" else ""
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "GTest"
-        self.cpp_info.names["cmake_find_package_multi"] = "GTest"
         self.cpp_info.set_property("cmake_file_name", "GTest")
-        self.cpp_info.set_property("cmake_target_namespace", "GTest")
-        self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
-        self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
-        self.cpp_info.components["libgtest"].names["pkg_config"] = "gtest"
-        self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
+        self.cpp_info.set_property("cmake_target_name", "GTest")
         self.cpp_info.components["libgtest"].set_property("cmake_target_name", "gtest")
+        self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
 
@@ -168,21 +163,15 @@ class GTestConan(ConanFile):
                     self.cpp_info.components["libgtest"].defines.append("GTEST_HAS_TR1_TUPLE=0")
 
         if not self.options.no_main:
+            self.cpp_info.components["gtest_main"].set_property("cmake_target_name", "gtest_main")
             self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
             self.cpp_info.components["gtest_main"].requires = ["libgtest"]
-            self.cpp_info.components["gtest_main"].names["cmake_find_package"] = "gtest_main"
-            self.cpp_info.components["gtest_main"].names["cmake_find_package_multi"] = "gtest_main"
-            self.cpp_info.components["gtest_main"].names["pkg_config"] = "gtest_main"
 
         if self.options.build_gmock:
-            self.cpp_info.components["gmock"].names["cmake_find_package"] = "gmock"
-            self.cpp_info.components["gmock"].names["cmake_find_package_multi"] = "gmock"
-            self.cpp_info.components["gmock"].names["pkg_config"] = "gmock"
+            self.cpp_info.components["gmock"].set_property("cmake_target_name", "gmock")
             self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
             self.cpp_info.components["gmock"].requires = ["libgtest"]
             if not self.options.no_main:
-                self.cpp_info.components["gmock_main"].names["cmake_find_package"] = "gmock_main"
-                self.cpp_info.components["gmock_main"].names["cmake_find_package_multi"] = "gmock_main"
-                self.cpp_info.components["gmock_main"].names["pkg_config"] = "gmock_main"
+                self.cpp_info.components["gmock_main"].set_property("cmake_target_name", "gmock_main")
                 self.cpp_info.components["gmock_main"].libs = ["gmock_main{}".format(self._postfix)]
                 self.cpp_info.components["gmock_main"].requires = ["gmock"]
