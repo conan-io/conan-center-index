@@ -2,6 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.36.0"
+
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
@@ -66,12 +68,5 @@ class UTConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ut")
-        self.cpp_info.set_property("cmake_target_namespace", "boost")
+        self.cpp_info.set_property("cmake_target_name", "boost")
         self.cpp_info.components["ut"].set_property("cmake_target_name", "ut")
-
-        self.cpp_info.names["cmake_find_package"] = "boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "boost"
-        self.cpp_info.filenames["cmake_find_package"] = "ut"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
-        self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
-        self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
