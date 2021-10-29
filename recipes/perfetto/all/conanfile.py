@@ -8,12 +8,11 @@ required_conan_version = ">=1.33.0"
 
 class PerfettoConan(ConanFile):
     name = "perfetto"
-    version = "20.1"
-    license = "Apache-2"
+    license = "Apache-2.0"
     homepage = "https://perfetto.dev"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Performance instrumentation and tracing for Android, Linux and Chrome"
-    topics = ("linux", "profiling")
+    topics = ("linux", "profiling", "tracing")
     settings = "os", "compiler", "build_type", "arch"
     options = {
             "shared": [True, False],
