@@ -145,10 +145,13 @@ class GTestConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GTest"
         self.cpp_info.names["cmake_find_package_multi"] = "GTest"
+        self.cpp_info.set_property("cmake_file_name", "GTest")
+        self.cpp_info.set_property("cmake_target_namespace", "GTest")
         self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
         self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
         self.cpp_info.components["libgtest"].names["pkg_config"] = "gtest"
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
+        self.cpp_info.components["libgtest"].set_property("cmake_target_name", "gtest")
         if self.settings.os == "Linux":
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
 
