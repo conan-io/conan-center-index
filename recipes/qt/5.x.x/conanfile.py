@@ -186,7 +186,7 @@ class QtConan(ConanFile):
             self.build_requires("wayland/1.19.0")
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
             del self.options.with_libalsa
@@ -356,7 +356,7 @@ class QtConan(ConanFile):
             self.requires("openal/1.21.1")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.4")
-        if self.options.gui and self.settings.os == "Linux":
+        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.3.0")
@@ -364,7 +364,7 @@ class QtConan(ConanFile):
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.0")
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
@@ -672,7 +672,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_linux and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
                      "-system-webengine-opus"]
 
@@ -1027,7 +1027,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtwebengine:
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 webenginereqs.extend(["expat::expat", "opus::libopus"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
