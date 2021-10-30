@@ -26,7 +26,7 @@ class UTConan(ConanFile):
             "Visual Studio": "16",
             "gcc": "9",
             "clang": "9",
-            "apple-clang": "11",
+            "apple-clang": "12",
         }
 
     @property
