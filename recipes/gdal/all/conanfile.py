@@ -836,7 +836,13 @@ class GdalConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "GDAL")
         self.cpp_info.set_property("cmake_target_name", "GDAL")
         self.cpp_info.set_property("pkg_config_name", "gdal")
-        self.cpp_info.libs = tools.collect_libs(self)
+        lib_suffix = ""
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared:
+                lib_suffix += "_i"
+            if self.settings.build_type == "Debug":
+                lib_suffix += "_d"
+        self.cpp_info.libs = ["gdal{}".format(lib_suffix)]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
             if self.options.threadsafe:
