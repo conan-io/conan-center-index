@@ -1,8 +1,8 @@
-from enum import auto
-from conans import ConanFile, AutoToolsBuildEnvironment, tools, CMake
-from conans.errors import ConanInvalidConfiguration
 import os
 import re
+
+from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.35.0"
 
@@ -16,7 +16,6 @@ class AwsCdiSdkConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
-    requires = "aws-libfabric/1.9.1amzncdi1.0", "aws-sdk-cpp/1.8.130"
     default_options = {
         "aws-libfabric:shared": True,
         "aws-sdk-cpp:shared": True
@@ -29,16 +28,17 @@ class AwsCdiSdkConan(ConanFile):
     _autotools = None
     _cmake = None
 
+    def requirements(self):
+        self.requires("aws-libfabric/1.9.1amzncdi1.0")
+        self.requires("aws-sdk-cpp/1.8.130")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This recipe currently only supports Linux. Feel free to contribute other platforms!")
-        elif (self.settings.compiler == "gcc"
-                and tools.Version(self.settings.compiler.version) < "6.0"):
-            raise ConanInvalidConfiguration("""Doesn't support gcc5 / shared.
-            See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744""")
         if not self.options["aws-libfabric"].shared or not self.options["aws-sdk-cpp"].shared:
             raise ConanInvalidConfiguration("Cannot build with static dependencies")
+        if not getattr(self.options["aws-sdk-cpp"], "monitoring"):
+            raise ConanInvalidConfiguration("This package requires the monitoring AWS SDK")
         tools.check_min_cppstd(self, 11)
 
     def source(self):
@@ -76,23 +76,29 @@ class AwsCdiSdkConan(ConanFile):
         # build aws-cpp-sdk-cdi
         cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
 
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
+            # configure autotools to find aws-cpp-sdk-cdi
+            autotools.include_paths.append(os.path.join(self.build_folder, self._source_subfolder, "aws-cpp-sdk-cdi", "include"))
+            autotools.library_paths.append(os.path.join(self.build_folder, "lib"))
+            autotools.libs.append("aws-cpp-sdk-cdi")
+
             vars = autotools.vars
             cc, cxx = self._detect_compilers()
             vars["CC"] = cc
             vars["CXX"] = cxx
-            # configure autotools to find aws-cpp-sdk-cdi
-            vars["CXXFLAGS"] += " -I{}".format(os.path.join(self.package_folder, 'include'))
-            vars["LDFLAGS"] += " -L{}".format(os.path.join(self.package_folder, 'lib'))
-            vars["LIBS"] += ' -laws-cpp-sdk-cdi'
             if self.settings.build_type == 'Debug':
                 vars["DEBUG"] = 'y'
-            autotools.make(target='lib', vars=vars)
+
+            args = ["require_aws_sdk=no"]
+
+            autotools.make(target='libsdk', vars=vars, args=args)
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
+
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         config = "debug" if self.settings.build_type == "Debug" else "release"
