@@ -843,7 +843,7 @@ class GdalConan(ConanFile):
             if self.settings.build_type == "Debug":
                 lib_suffix += "_d"
         self.cpp_info.libs = ["gdal{}".format(lib_suffix)]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
