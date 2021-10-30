@@ -151,11 +151,13 @@ class LibMysqlClientCConan(ConanFile):
     def build(self):
         self._patch_files()
         cmake = self._configure_cmake()
-        cmake.build()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
-        cmake.install()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake.install()
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         tools.rename(os.path.join(self.package_folder, "LICENSE"), os.path.join(self.package_folder, "licenses", "LICENSE"))
         os.remove(os.path.join(self.package_folder, "README"))
