@@ -14,7 +14,7 @@ class ReplxxConan(ConanFile):
     topics = ("readline", "libedit", "UTF-8")
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
