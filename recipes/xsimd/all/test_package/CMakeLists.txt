@@ -4,7 +4,7 @@ project(test_package CXX)
 include(CheckCXXCompilerFlag)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(xsimd REQUIRED CONFIG)
 
