@@ -26,7 +26,7 @@ class UTConan(ConanFile):
             "Visual Studio": "16",
             "gcc": "9",
             "clang": "9",
-            "apple-clang": "12",
+            "apple-clang": "11" if tools.Version(self.version) < "1.1.8" else "12",
         }
 
     @property
