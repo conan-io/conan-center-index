@@ -108,6 +108,6 @@ class LitehtmlConan(ConanFile):
         self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
         self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
         
-        self.cpp_info.components["rapidcheck_rapidcheck"].set_property("cmake_target_name", "gumbo")
+        self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
         self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
