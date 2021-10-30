@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 
 class SpirvheadersConan(ConanFile):
     name = "diligentgraphics-spirv-headers"
-    homepage = "https://github.com/DiligentGraphics/"
+    homepage = "https://github.com/DiligentGraphics/SPIRV-Headers"
     description = "Diligent fork of header files for the SPIRV instruction set."
     license = "MIT-KhronosGroup"
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
