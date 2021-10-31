@@ -61,6 +61,10 @@ class LitehtmlConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/69.1")
 
+    def build_requirements(self):
+        # FIXME: add unconditional xxd build requirement
+        pass
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
