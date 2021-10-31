@@ -58,6 +58,7 @@ class LitehtmlConan(ConanFile):
             raise ConanInvalidConfiguration("litehtml must be built as a static library on windows")
 
     def requirements(self):
+        # FIXME: add gumbo requirement (it is vendored right now)
         if self.options.with_icu:
             self.requires("icu/69.1")
 
