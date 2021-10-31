@@ -27,7 +27,6 @@ class LitehtmlConan(ConanFile):
         "fPIC": True,
         "utf8": False,
         "with_icu": False,
-        "external_gumbo": False,
     }
 
     _cmake = None
