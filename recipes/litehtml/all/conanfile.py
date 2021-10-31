@@ -65,11 +65,6 @@ class LitehtmlConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.external_xxd == None:
-            if self.settings.os == "Windows":
-                self.options.external_xxd = False
-            else:
-                self.options.external_xxd = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
