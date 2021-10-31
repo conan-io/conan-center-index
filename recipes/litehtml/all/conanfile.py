@@ -44,6 +44,14 @@ class LitehtmlConan(ConanFile):
     def _min_cppstd(self):
         return "11"
 
+    @property
+    def _with_xxd(self):
+        # FIXME: create cci package for cci, and use it unconditionally (returning False means cross build doesn't work)
+        if self.settings.os == "Windows":
+            return False
+        else:
+            return True
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
