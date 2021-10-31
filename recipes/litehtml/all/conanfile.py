@@ -19,10 +19,17 @@ class LitehtmlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "utf8": [True, False],
+        "with_icu": [True, False],
+        "external_gumbo": [True, False],
+        "external_xxd": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "utf8": False,
+        "with_icu": False,
+        "external_gumbo": False,
     }
 
     _cmake = None
@@ -45,6 +52,10 @@ class LitehtmlConan(ConanFile):
         if self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("litehtml must be built as static on windows")
 
+    def requirements(self):
+        if self.options.with_icu:
+            self.requires("icu/69.1")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,11 +65,18 @@ class LitehtmlConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.external_xxd == None:
+            if self.settings.os == "Windows":
+                self.options.external_xxd = False
+            else:
+                self.options.external_xxd = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -67,6 +85,10 @@ class LitehtmlConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["LITEHTML_UTF8"] = self.options.utf8
+        self._cmake.definitions["USE_ICU"] = self.options.with_icu
+        self._cmake.definitions["EXTERNAL_GUMBO"] = self.options.external_gumbo
+        self._cmake.definitions["EXTERNAL_XXD"] = self.options.external_xxd
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -107,7 +129,10 @@ class LitehtmlConan(ConanFile):
         self.cpp_info.components["litehtml_litehtml"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
         self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
+        if self.options.with_icu:
+            self.cpp_info.components["litehtml_litehtml"].requires.append("icu::icu")
         
-        self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
-        self.cpp_info.components["gumbo"].libs = ["gumbo"]
+        if not self.options.external_gumbo:
+            self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
+            self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
