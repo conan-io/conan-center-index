@@ -57,6 +57,10 @@ class LibsamplerateConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def build_requirements(self):
+        if self.settings.os == "Macos" and tools.Version(self.version) >= "0.2.2":
+            self.build_requires("cmake/3.21.3")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
