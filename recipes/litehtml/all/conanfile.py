@@ -50,7 +50,7 @@ class LitehtmlConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._min_cppstd)
         if self.options.shared and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("litehtml must be built as static on windows")
+            raise ConanInvalidConfiguration("litehtml must be built as a static library on windows")
 
     def requirements(self):
         if self.options.with_icu:
