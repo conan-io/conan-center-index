@@ -137,7 +137,7 @@ class LitehtmlConan(ConanFile):
         if self.options.with_icu:
             self.cpp_info.components["litehtml_litehtml"].requires.append("icu::icu")
         
-        if not self.options.external_gumbo:
+        if True: # FIXME: remove once we use a vendored gumbo library
             self.cpp_info.components["gumbo"].set_property("cmake_target_name", "gumbo")
             self.cpp_info.components["gumbo"].libs = ["gumbo"]
 
