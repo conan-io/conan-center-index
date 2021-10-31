@@ -23,10 +23,11 @@ class UTConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
-            "gcc": "9",
-            "clang": "9",
             "apple-clang": "11" if tools.Version(self.version) < "1.1.8" else "12",
+            "clang": "9",
+            "gcc": "9",
+            "msvc": "19",
+            "Visual Studio": "16",
         }
 
     @property
