@@ -21,8 +21,6 @@ class LitehtmlConan(ConanFile):
         "fPIC": [True, False],
         "utf8": [True, False],
         "with_icu": [True, False],
-        "external_gumbo": [True, False],
-        "external_xxd": [True, False]
     }
     default_options = {
         "shared": False,
