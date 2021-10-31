@@ -18,7 +18,7 @@ class UTConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17 if self.settings.os == "Linux" else 20
+        return 17 if self.settings.compiler in ["clang", "gcc"] else 20
 
     @property
     def _minimum_compilers_version(self):
