@@ -91,8 +91,8 @@ class LitehtmlConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["LITEHTML_UTF8"] = self.options.utf8
         self._cmake.definitions["USE_ICU"] = self.options.with_icu
-        self._cmake.definitions["EXTERNAL_GUMBO"] = self.options.external_gumbo
-        self._cmake.definitions["EXTERNAL_XXD"] = self.options.external_xxd
+        self._cmake.definitions["EXTERNAL_GUMBO"] = False # FIXME: add cci recipe, and use it unconditionally (option value should be True)
+        self._cmake.definitions["EXTERNAL_XXD"] = self._with_xxd  # FIXME: should be True unconditionally
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
