@@ -45,7 +45,7 @@ class LitehtmlConan(ConanFile):
 
     @property
     def _with_xxd(self):
-        # FIXME: create cci package for cci, and use it unconditionally (returning False means cross build doesn't work)
+        # FIXME: create conan recipe for xxd, and use it unconditionally (returning False means cross build doesn't work)
         if self.settings.os == "Windows":
             return False
         else:
