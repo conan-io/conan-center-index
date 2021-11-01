@@ -850,7 +850,7 @@ class QtConan(ConanFile):
         if self.options.gui:
             gui_reqs = []
             if self.options.with_dbus:
-                gui_reqs.append("DBus", ["dbus::dbus"])
+                gui_reqs.append("DBus")
             if self.options.with_freetype:
                 gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
@@ -922,7 +922,7 @@ class QtConan(ConanFile):
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
         if self.options.with_dbus:
-            _create_module("DBus")
+            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
