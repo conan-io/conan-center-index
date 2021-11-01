@@ -153,7 +153,20 @@ main(int argc, char** argv)
         }
   
   F.print("F:");
-  
+
+  // Test that the result of the use_extern_rng option in the conan recipe
+#ifdef ARMA_USE_EXTERN_RNG
+  cout << "ARMA_USE_EXTERN_RNG set." << endl;
+#else
+  cout << "ARMA_USE_EXTERN_RNG not set." << endl;
+#endif
+
+  arma::vec v2{1,2,3,4};
+  v2.print("v2 (before randn)");
+
+  arma::arma_rng::set_seed(1237);
+  v2.randn();
+  v2.print("v2 (after randn)");
+
   return 0;
   }
-
