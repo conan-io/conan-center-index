@@ -19,12 +19,12 @@ class SpirvtoolsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
     short_paths = True
