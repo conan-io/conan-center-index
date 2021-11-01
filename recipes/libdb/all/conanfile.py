@@ -10,12 +10,12 @@ required_conan_version = ">=1.33.0"
 class LibdbConan(ConanFile):
     name = "libdb"
     description = "Berkeley DB is a family of embedded key-value database libraries providing scalable high-performance data management services to applications"
-    topics = ("conan", "gdbm", "dbm", "hash", "database")
+    topics = ("gdbm", "dbm", "hash", "database")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.oracle.com/database/berkeley-db"
     license = ("BSD-3-Clause")
-    exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -40,6 +40,18 @@ class LibdbConan(ConanFile):
     @property
     def _mingw_build(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -70,16 +82,12 @@ class LibdbConan(ConanFile):
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
             self.build_requires("gnu-config/cci.20201022")
-            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/cci.latest")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", None) or self.deps_user_info
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
