@@ -15,11 +15,14 @@ class tinycborConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": False}
-    topics = ("conan", "CBOR", "encoder", "decoder")
-    exports_sources = ["patches/*"]
+    topics = ("CBOR", "encoder", "decoder")
     _source_subfolder = "source_subfolder"
     _env_build = None
     _env_vars = []
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,6 +92,6 @@ class tinycborConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs = ["include", os.path.join("include","tinycbor")]
