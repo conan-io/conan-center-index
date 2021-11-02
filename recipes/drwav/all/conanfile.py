@@ -14,11 +14,15 @@ class DrwavConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False], 
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "no_conversion_api": [True, False],
+        "no_stdio": [True, False]
     }
     default_options = {
         "shared": False, 
-        "fPIC": True
+        "fPIC": True,
+        "no_conversion_api": False,
+        "no_stdio": False
     }
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "dr_wav.c"]
@@ -54,6 +58,8 @@ class DrwavConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["NO_CONVERSION_API"] = self.options.no_conversion_api
+        self._cmake.definitions["NO_STDIO"] = self.options.no_stdio
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
