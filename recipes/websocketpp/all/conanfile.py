@@ -13,10 +13,16 @@ class WebsocketPPConan(ConanFile):
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*"]
-    options = {"asio": ["boost", "standalone", "none"],
-               "openssl": [True, False],
-               "zlib": [True, False]}
-    default_options = {"asio": "boost", "openssl": True, "zlib": True}
+    options = {
+        "asio": ["boost", "standalone", False],
+        "with_openssl": [True, False],
+        "with_zlib": [True, False],
+    }
+    default_options = {
+        "asio": "boost",
+        "with_openssl": True,
+        "with_zlib": True,
+    }
 
     @property
     def _source_subfolder(self):
