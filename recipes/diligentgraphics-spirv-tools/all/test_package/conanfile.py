@@ -15,6 +15,6 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path_c = os.path.join("bin", "test_package_c")
             self.run(bin_path_c, run_environment=True)
-            if not self.options["spirv-tools"].shared:
+            if not self.options["diligentgraphics-spirv-tools"].shared:
                 bin_path_cpp = os.path.join("bin", "test_package_cpp")
                 self.run(bin_path_cpp, run_environment=True)

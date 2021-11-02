@@ -131,14 +131,14 @@ class SpirvtoolsConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*SPIRV-Tools-shared*")
 
         if self.options.shared:
-            targets = {"SPIRV-Tools-shared": "spirv-tools::SPIRV-Tools"}
+            targets = {"SPIRV-Tools-shared": "diligentgraphics-spirv-tools::SPIRV-Tools"}
         else:
             targets = {
-                "SPIRV-Tools": "spirv-tools::SPIRV-Tools", # before 2020.5, kept for conveniency
-                "SPIRV-Tools-static": "spirv-tools::SPIRV-Tools",
-                "SPIRV-Tools-opt": "spirv-tools::SPIRV-Tools-opt",
-                "SPIRV-Tools-link": "spirv-tools::SPIRV-Tools-link",
-                "SPIRV-Tools-reduce": "spirv-tools::SPIRV-Tools-reduce",
+                "SPIRV-Tools": "diligentgraphics-spirv-tools::SPIRV-Tools", # before 2020.5, kept for conveniency
+                "SPIRV-Tools-static": "diligentgraphics-spirv-tools::SPIRV-Tools",
+                "SPIRV-Tools-opt": "diligentgraphics-spirv-tools::SPIRV-Tools-opt",
+                "SPIRV-Tools-link": "diligentgraphics-spirv-tools::SPIRV-Tools-link",
+                "SPIRV-Tools-reduce": "diligentgraphics-spirv-tools::SPIRV-Tools-reduce",
             }
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -172,19 +172,19 @@ class SpirvtoolsConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools"
 
         # SPIRV-Tools
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].names["cmake_find_package"] = "SPIRV-Tools"
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].names["cmake_find_package_multi"] = "SPIRV-Tools"
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].libs = ["SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools"]
-        self.cpp_info.components["diligentgraphics-spirv-tools-core"].requires = ["diligentgraphics-spirv-headers::diligentgraphics-spirv-headers"]
+        self.cpp_info.components["spirv-tools-core"].names["cmake_find_package"] = "SPIRV-Tools"
+        self.cpp_info.components["spirv-tools-core"].names["cmake_find_package_multi"] = "SPIRV-Tools"
+        self.cpp_info.components["spirv-tools-core"].builddirs.append(self._module_subfolder)
+        self.cpp_info.components["spirv-tools-core"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["spirv-tools-core"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.components["spirv-tools-core"].libs = ["SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools"]
+        self.cpp_info.components["spirv-tools-core"].requires = ["diligentgraphics-spirv-headers::diligentgraphics-spirv-headers"]
         if self.options.shared:
-            self.cpp_info.components["diligentgraphics-spirv-tools-core"].defines = ["SPIRV_TOOLS_SHAREDLIB"]
+            self.cpp_info.components["spirv-tools-core"].defines = ["SPIRV_TOOLS_SHAREDLIB"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["diligentgraphics-spirv-tools-core"].system_libs.extend(["m", "rt"])
+            self.cpp_info.components["spirv-tools-core"].system_libs.extend(["m", "rt"])
         if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.components["diligentgraphics-spirv-tools-core"].system_libs.append(tools.stdcpp_library(self))
+            self.cpp_info.components["spirv-tools-core"].system_libs.append(tools.stdcpp_library(self))
 
         # FIXME: others components should have their own CMake config file
         if not self.options.shared:
@@ -195,7 +195,7 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-opt"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-opt"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-opt"].libs = ["SPIRV-Tools-opt"]
-            self.cpp_info.components["spirv-tools-opt"].requires = ["diligentgraphics-spirv-tools-core", "diligentgraphics-spirv-headers::diligentgraphics-spirv-headers"]
+            self.cpp_info.components["spirv-tools-opt"].requires = ["spirv-tools-core", "diligentgraphics-spirv-headers::diligentgraphics-spirv-headers"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["spirv-tools-opt"].system_libs.append("m")
             # SPIRV-Tools-link
@@ -205,7 +205,7 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-link"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-link"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-link"].libs = ["SPIRV-Tools-link"]
-            self.cpp_info.components["spirv-tools-link"].requires = ["diligentgraphics-spirv-tools-core", "spirv-tools-opt"]
+            self.cpp_info.components["spirv-tools-link"].requires = ["spirv-tools-core", "spirv-tools-opt"]
             # SPIRV-Tools-reduce
             self.cpp_info.components["spirv-tools-reduce"].names["cmake_find_package"] = "SPIRV-Tools-reduce"
             self.cpp_info.components["spirv-tools-reduce"].names["cmake_find_package_multi"] = "SPIRV-Tools-reduce"
@@ -213,7 +213,7 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-reduce"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-reduce"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-reduce"].libs = ["SPIRV-Tools-reduce"]
-            self.cpp_info.components["spirv-tools-reduce"].requires = ["diligentgraphics-spirv-tools-core", "spirv-tools-opt"]
+            self.cpp_info.components["spirv-tools-reduce"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: %s" % bin_path)
