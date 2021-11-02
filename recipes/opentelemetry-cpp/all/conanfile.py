@@ -34,7 +34,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = "CMakeLists.txt"
 
     short_paths = True
     _cmake = None
@@ -61,17 +61,12 @@ class OpenTelemetryCppConan(ConanFile):
     @staticmethod
     def _create_cmake_module_variables(module_file):
         content = textwrap.dedent("""\
-            set(OPENTELEMETRY_CPP_FOUND TRUE)
             set(OPENTELEMETRY_CPP_INCLUDE_DIRS ${opentelemetry-cpp_INCLUDE_DIRS}
                                                ${opentelemetry-cpp_INCLUDE_DIRS_RELEASE}
                                                ${opentelemetry-cpp_INCLUDE_DIRS_RELWITHDEBINFO}
                                                ${opentelemetry-cpp_INCLUDE_DIRS_MINSIZEREL}
                                                ${opentelemetry-cpp_INCLUDE_DIRS_DEBUG})
-            set(OPENTELEMETRY_CPP_LIBRARIES ${opentelemetry-cpp_LIBRARIES}
-                                            ${opentelemetry-cpp_LIBRARIES_RELEASE}
-                                            ${opentelemetry-cpp_LIBRARIES_RELWITHDEBINFO}
-                                            ${opentelemetry-cpp_LIBRARIES_MINSIZEREL}
-                                            ${opentelemetry-cpp_LIBRARIES_DEBUG})
+            set(OPENTELEMETRY_CPP_LIBRARIES opentelemetry-cpp::opentelemetry-cpp)
         """)
         tools.save(module_file, content)
 
@@ -105,8 +100,6 @@ class OpenTelemetryCppConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
         protos_cmake_path = os.path.join(
             self._source_subfolder,
@@ -177,6 +170,7 @@ class OpenTelemetryCppConan(ConanFile):
         self.cpp_info.components["http_client_curl"].requires.extend(["libcurl::libcurl"])
 
         self.cpp_info.components["opentelemetry_common"].requires.extend(["abseil::abseil"])
+        self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_ABSEIL")
 
         self.cpp_info.components["opentelemetry_exporter_ostream_span"].requires.extend([
             "opentelemetry_trace"
