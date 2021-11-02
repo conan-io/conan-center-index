@@ -30,7 +30,7 @@ class WebsocketPPConan(ConanFile):
             self.requires("zlib/1.2.11")
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.19.2")
+            self.requires("asio/1.20.0")
         elif self.options.asio == "boost":
             self.requires("boost/1.77.0")
 
