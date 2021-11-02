@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, tools
-import conan.tools.files
+
+required_conan_version = ">=1.33.0"
+
 
 class WebsocketPPConan(ConanFile):
     name = "websocketpp"
