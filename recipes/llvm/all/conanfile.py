@@ -62,7 +62,6 @@ class Llvm(ConanFile):
 
     def build_requirements(self):
         self.build_requires("cmake/3.21.3")
-        self.build_requires("ninja/1.10.2")
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
