@@ -35,7 +35,6 @@ class WebsocketPPConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
-        conan.tools.files.rename(self, src = extracted_dir, dst = self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
