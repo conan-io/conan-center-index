@@ -1,4 +1,5 @@
 import os
+import textwrap
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -33,7 +34,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
 
     short_paths = True
     _cmake = None
@@ -56,6 +57,23 @@ class OpenTelemetryCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    @staticmethod
+    def _create_cmake_module_variables(module_file):
+        content = textwrap.dedent("""\
+            set(OPENTELEMETRY_CPP_FOUND TRUE)
+            set(OPENTELEMETRY_CPP_INCLUDE_DIRS ${opentelemetry-cpp_INCLUDE_DIRS}
+                                               ${opentelemetry-cpp_INCLUDE_DIRS_RELEASE}
+                                               ${opentelemetry-cpp_INCLUDE_DIRS_RELWITHDEBINFO}
+                                               ${opentelemetry-cpp_INCLUDE_DIRS_MINSIZEREL}
+                                               ${opentelemetry-cpp_INCLUDE_DIRS_DEBUG})
+            set(OPENTELEMETRY_CPP_LIBRARIES ${opentelemetry-cpp_LIBRARIES}
+                                            ${opentelemetry-cpp_LIBRARIES_RELEASE}
+                                            ${opentelemetry-cpp_LIBRARIES_RELWITHDEBINFO}
+                                            ${opentelemetry-cpp_LIBRARIES_MINSIZEREL}
+                                            ${opentelemetry-cpp_LIBRARIES_DEBUG})
+        """)
+        tools.save(module_file, content)
 
     @property
     def _source_subfolder(self):
@@ -87,6 +105,8 @@ class OpenTelemetryCppConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         protos_path = self.deps_cpp_info["opentelemetry-proto"].res_paths[0].replace("\\", "/")
         protos_cmake_path = os.path.join(
             self._source_subfolder,
@@ -108,21 +128,89 @@ class OpenTelemetryCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._otel_cmake_variables_path)
+        )
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _otel_cmake_variables_path(self):
+        return os.path.join(self._module_subfolder,
+                            "conan-official-{}-variables.cmake".format(self.name))
+
+    @property
+    def _otel_build_modules(self):
+        return [self._otel_cmake_variables_path]
+
+    @property
+    def _otel_libraries(self):
+        return [
+            "opentelemetry_version",
+            "opentelemetry_exporter_otlp_grpc",
+            "opentelemetry_exporter_otlp_http",
+            "opentelemetry_exporter_jaeger_trace",
+            "opentelemetry_exporter_ostream_span",
+            "opentelemetry_otlp_recordable",
+            "opentelemetry_proto",
+            "opentelemetry_trace",
+            "opentelemetry_resources",
+            "opentelemetry_common",
+            "http_client_curl"
+        ]
 
     def package_info(self):
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs = ["pthread"]
+        for lib in self._otel_libraries:
+            self.cpp_info.components[lib].libs = [lib]
+            self.cpp_info.components[lib].builddirs.append(self._module_subfolder)
+            self.cpp_info.components[lib].build_modules["cmake_find_package"] = self._otel_build_modules
+            self.cpp_info.components[lib].build_modules["cmake_find_package_multi"] = self._otel_build_modules
 
-        self.cpp_info.libs = [
-          "opentelemetry_version",
-          "opentelemetry_exporter_otlp_grpc",
-          "opentelemetry_exporter_otlp_http",
-          "opentelemetry_exporter_jaeger_trace",
-          "opentelemetry_exporter_ostream_span",
-          "opentelemetry_otlp_recordable",
-          "opentelemetry_proto",
-          "opentelemetry_trace",
-          "opentelemetry_resources",
-          "opentelemetry_common",
-          "http_client_curl"
-        ]
+        self.cpp_info.components["opentelemetry_proto"].requires.extend([
+            "opentelemetry-proto::opentelemetry-proto",
+            "protobuf::protobuf",
+        ])
+
+        self.cpp_info.components["opentelemetry_resources"].requires.extend(["opentelemetry_common"])
+        self.cpp_info.components["http_client_curl"].requires.extend(["libcurl::libcurl"])
+
+        self.cpp_info.components["opentelemetry_common"].requires.extend(["abseil::abseil"])
+
+        self.cpp_info.components["opentelemetry_exporter_ostream_span"].requires.extend([
+            "opentelemetry_trace"
+        ])
+
+        self.cpp_info.components["opentelemetry_trace"].requires.extend([
+            "opentelemetry_common",
+            "opentelemetry_resources",
+        ])
+
+        self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
+            "opentelemetry_trace",
+            "opentelemetry_resources",
+            "opentelemetry_proto"
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
+            "opentelemetry_otlp_recordable",
+            "http_client_curl",
+            "nlohmann_json::nlohmann_json"
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
+            "opentelemetry_otlp_recordable",
+            "protobuf::protobuf",
+            "grpc::grpc",
+        ])
+
+        self.cpp_info.components["opentelemetry_exporter_jaeger_trace"].requires.extend([
+            "opentelemetry_resources",
+            "http_client_curl",
+            "thrift::thrift",
+            "openssl::openssl",
+        ])
+
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])

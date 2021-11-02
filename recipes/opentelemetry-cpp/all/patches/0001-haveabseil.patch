@@ -1,0 +1,16 @@
+diff --git a/api/include/opentelemetry/nostd/variant.h b/api/include/opentelemetry/nostd/variant.h
+index e9ef666..293bdd0 100644
+--- a/api/include/opentelemetry/nostd/variant.h
++++ b/api/include/opentelemetry/nostd/variant.h
+@@ -9,6 +9,10 @@
+ #  include "opentelemetry/std/variant.h"
+ #else
+
++#ifndef HAVE_ABSEIL
++  #define HAVE_ABSEIL
++#endif
++
+ #  ifndef HAVE_ABSEIL
+ // We use a LOCAL snapshot of Abseil that is known to compile with Visual Studio 2015.
+ // Header-only. Without compiling the actual Abseil binary. As Abseil moves on to new
+
