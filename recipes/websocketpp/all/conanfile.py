@@ -1,11 +1,11 @@
 import os
 from conans import ConanFile, tools
-
+import conan.tools.files
 
 class WebsocketPPConan(ConanFile):
     name = "websocketpp"
     description = "Header only C++ library that implements RFC6455 The WebSocket Protocol"
-    topics = ("conan", "websocketpp", "websocket", "network", "web", "rfc6455", "header-only")
+    topics = ("websocketpp", "websocket", "network", "web", "rfc6455", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zaphoyd/websocketpp"
     license = "BSD-3-Clause"
@@ -35,7 +35,7 @@ class WebsocketPPConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        conan.tools.files.rename(self, src = extracted_dir, dst = self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
