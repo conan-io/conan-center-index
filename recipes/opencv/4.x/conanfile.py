@@ -308,16 +308,14 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_CLP"] = False
         self._cmake.definitions["WITH_NVCUVID"] = False
 
-        self._cmake.definitions["WITH_FFMPEG"] =\
-                "ON" if self.options.get_safe("with_ffmpeg") else "OFF"
-
+        self._cmake.definitions["WITH_FFMPEG"] = self.options.get_safe("with_ffmpeg")
         if self.options.get_safe("with_ffmpeg"):
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = "ON"
-            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = "ON"
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_BUILD_CHECK"] = True
+            self._cmake.definitions["OPENCV_FFMPEG_SKIP_DOWNLOAD"] = True
             # opencv will not search for ffmpeg package, but for
             # libavcodec;libavformat;libavutil;libswscale modules
-            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "OFF"
-            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = "OFF"
+            self._cmake.definitions["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = False
+            self._cmake.definitions["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
 
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_HALIDE"] = False
