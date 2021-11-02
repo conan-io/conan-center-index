@@ -33,8 +33,8 @@ class WebsocketPPConan(ConanFile):
             self.requires("boost/1.76.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
         conan.tools.files.rename(self, src = extracted_dir, dst = self._source_subfolder)
 
     def build(self):
