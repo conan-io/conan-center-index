@@ -1,0 +1,4 @@
+sources:
+  "0.13.2":
+    url: https://github.com/mackron/dr_libs/archive/f13cbcfd06afe7287f99b1bb5982cefdf3d6a974.zip
+    sha256: "f7125add822cb9381ecaf30d774be6ec9fddb148d3725a704fe30879e3b5b8a4"
