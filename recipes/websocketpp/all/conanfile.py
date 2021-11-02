@@ -11,19 +11,25 @@ class WebsocketPPConan(ConanFile):
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*"]
-    options = {"asio": ["boost", "standalone"]}
-    default_options = {"asio": "boost"}
-    
+    options = {"asio": ["boost", "standalone", "none"],
+               "openssl": [True, False],
+               "zlib": [True, False]}
+    default_options = {"asio": "boost", "openssl": True, "zlib": True}
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("openssl/1.1.1k")
-        self.requires("zlib/1.2.11")
+        if self.options.openssl:
+            self.requires("openssl/1.1.1k")
+
+        if self.options.zlib:
+            self.requires("zlib/1.2.11")
+
         if self.options.asio == "standalone":
             self.requires("asio/1.19.2")
-        else:
+        elif self.options.asio == "boost":
             self.requires("boost/1.76.0")
 
     def source(self):
