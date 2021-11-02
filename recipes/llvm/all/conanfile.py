@@ -72,13 +72,11 @@ class Llvm(ConanFile):
         enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
         self.output.info('Enabled LLVM subprojects: {}'.format(', '.join(enabled_projects)))
 
-        cmake = CMake(self, generator="Ninja");
+        cmake = CMake(self, parallel=False);
         cmake.configure(
             defs = {
                 'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
                 'LLVM_ENABLE_BINDINGS': False,
-                'LLVM_PARALLEL_LINK_JOBS': 1,
-                'LLVM_PARALLEL_COMPILE_JOBS': 1,
             },
             source_folder = os.path.join(self._source_subfolder, 'llvm')
         )
