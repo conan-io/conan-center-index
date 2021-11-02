@@ -10,7 +10,7 @@ class SpirvtoolsConan(ConanFile):
     name = "diligentgraphics-spirv-tools"
     homepage = "https://github.com/DiligentGraphics/SPIRV-Tools/"
     description = "Diligent fork. Create and optimize SPIRV shaders"
-    topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos")
+    topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos", "diligent")
     url = "https://github.com/conan-io/conan-center-index"
     provides = "spirv-tools"
     license = "Apache-2.0"
@@ -122,6 +122,8 @@ class SpirvtoolsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-link"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-opt"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
+        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-lint"))
+
         if self.options.shared:
             for file_name in ["*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link", "*SPIRV-Tools-reduce"]:
                 for ext in [".a", ".lib"]:
