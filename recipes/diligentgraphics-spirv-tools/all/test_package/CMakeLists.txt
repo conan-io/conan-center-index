@@ -12,10 +12,7 @@ if(TARGET SPIRV-Tools-shared)
 elseif(TARGET SPIRV-Tools-static)
     target_link_libraries(${PROJECT_NAME}_c SPIRV-Tools-static)
 else()
-    if(NOT TARGET SPIRV-Tools)
-        message(FATAL_ERROR "There is no SPIRV-Tools target")
-    endif()
-    target_link_libraries(${PROJECT_NAME}_c SPIRV-Tools)
+    message(FATAL_ERROR "Neither target SPIRV-Tools-shared or target SPIRV-Tools-shared exist")
 endif()
 
 # TODO: we should call find_package(SPIRV-Tools-opt REQUIRED CONFIG), but not modeled right now
