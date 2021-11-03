@@ -8,7 +8,7 @@ class JsoncppConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/open-source-parsers/jsoncpp"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "json", "parser", "config")
+    topics = ("json", "parser", "config")
     description = "A C++ library for interacting with JSON."
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -22,6 +22,10 @@ class JsoncppConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -31,9 +35,7 @@ class JsoncppConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "jsoncpp-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -68,7 +70,7 @@ class JsoncppConan(ConanFile):
             self._cmake.definitions["JSONCPP_WITH_EXAMPLE"] = False
         if jsoncpp_version >= "1.9.4":
             self._cmake.definitions["BUILD_OBJECT_LIBS"] = False
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
