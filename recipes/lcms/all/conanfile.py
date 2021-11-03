@@ -75,6 +75,7 @@ class LcmsConan(ConanFile):
                 vc_sln_subdir = "VC2017"
             else:
                 vc_sln_subdir = "VC2019"
+
         with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "16"
