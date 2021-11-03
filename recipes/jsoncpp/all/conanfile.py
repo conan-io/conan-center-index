@@ -49,11 +49,6 @@ class JsoncppConan(ConanFile):
                                   "explicit operator bool()",
                                   "operator bool()")
 
-        if tools.Version(self.version) >= "1.9.0":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
-                                  "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>",
-                                  "")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
