@@ -113,7 +113,7 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
         # FIXME: https://github.com/facebook/folly/issues/1655
-        if tools.Version(self.version) >= "2021.05.31.00" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler) >= "12.0":
+        if tools.Version(self.version) >= "2021.05.31.00" and self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0":
             raise ConanInvalidConfiguration("Apple Clang 12 can not deal with ___cxa_increment_exception_refcount")
 
     def _configure_cmake(self):
