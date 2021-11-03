@@ -61,31 +61,17 @@ class LibUSBConan(ConanFile):
         if self.options.get_safe("enable_udev"):
             if self.settings.os == "Android":
                 raise ConanInvalidConfiguration("udev can't be enabled for Android yet, since libudev recipe is missing in CCI.")
-            if self.settings.os == "Linux" and self._settings_build.os != "Linux":
-                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling to Linux from a non-Linux machine")
+            if tools.cross_building(self.settings):
+                raise ConanInvalidConfiguration("udev can't be enabled yet if cross-compiling")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._is_msvc and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
-    def system_requirements(self):
+    def requirements(self):
         if self._settings_build.os == "Linux" and self.settings.os == "Linux":
             if self.options.enable_udev:
-                package_tool = tools.SystemPackageTool(conanfile=self)
-                libudev_name = ""
-                os_info = tools.OSInfo()
-                if os_info.with_apt:
-                    libudev_name = "libudev-dev"
-                elif os_info.with_yum:
-                    libudev_name = "libudev-devel"
-                elif os_info.with_zypper:
-                    libudev_name = "libudev-devel"
-                elif os_info.with_pacman:
-                    libudev_name = "libsystemd systemd"
-                else:
-                    self.output.warn("Could not install libudev: Undefined package name for current platform.")
-                    return
-                package_tool.install(packages=libudev_name, update=True)
+                self.requires("libudev/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
