@@ -157,9 +157,6 @@ class LibUSBConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-        if self.settings.os in ["Linux", "Android"]:
-            if self.options.enable_udev:
-                self.cpp_info.system_libs.append("udev")
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs = ["objc"]
             self.cpp_info.frameworks = ["IOKit", "CoreFoundation"]
