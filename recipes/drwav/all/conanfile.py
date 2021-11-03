@@ -25,7 +25,7 @@ class DrwavConan(ConanFile):
         "no_stdio": False
     }
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "dr_wav.c"]
+    exports_sources = ["CMakeLists.txt"]
 
     _cmake = None
 
