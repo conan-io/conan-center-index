@@ -69,15 +69,15 @@ class LcmsConan(ConanFile):
         if tools.Version(self.version) <= "2.11":
             vc_sln_subdir = "VC2013"
         else:
-            if self.settings.compiler.version == 14:
+            if Version(self.settings.compiler.version) == "14":
                 vc_sln_subdir = "VC2015"
-            elif self.settings.compiler.version == 15:
+            elif Version(self.settings.compiler.version) == "15":
                 vc_sln_subdir = "VC2017"
             else:
                 vc_sln_subdir = "VC2019"
         with tools.chdir(os.path.join(self._source_subfolder, "Projects", vc_sln_subdir )):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
-            upgrade_project = Version(self.settings.compiler.version) > "12"
+            upgrade_project = Version(self.settings.compiler.version) > "16"
             properties = {
                 # Enable LTO when CFLAGS contains -GL
                 "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
