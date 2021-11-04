@@ -1,6 +1,8 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+
+required_conan_version = ">=1.36.0"
 
 
 class UTConan(ConanFile):
@@ -16,15 +18,16 @@ class UTConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 17
+        return 17 if self.settings.compiler in ["clang", "gcc"] else 20
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
-            "gcc": "9",
+            "apple-clang": "11" if tools.Version(self.version) < "1.1.8" else "12",
             "clang": "9",
-            "apple-clang": "11",
+            "gcc": "9",
+            "msvc": "19",
+            "Visual Studio": "16",
         }
 
     @property
@@ -65,9 +68,6 @@ class UTConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "boost"
-        self.cpp_info.filenames["cmake_find_package"] = "ut"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
-        self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
-        self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
+        self.cpp_info.set_property("cmake_file_name", "ut")
+        self.cpp_info.set_property("cmake_target_name", "boost")
+        self.cpp_info.components["ut"].set_property("cmake_target_name", "ut")
