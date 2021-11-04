@@ -1,0 +1,11 @@
+sources:
+  "2.15.0":
+    url: "https://github.com/scylladb/cpp-driver/archive/refs/tags/2.15.0.tar.gz"
+    sha256: "8cccffc7f3b7a8edc51c5c4344fd6a60d5a7beec27a1a3fd52742003a2675cb9"
+  "2.15.1":
+    url: "https://github.com/scylladb/cpp-driver/archive/refs/tags/2.15.1.tar.gz"
+    sha256: "b3095e154f10d7a740dfa3155f66be50880b0110a06dd02dd097f1121a72d88d"
+  "2.15.2":
+    url: "https://github.com/scylladb/cpp-driver/archive/refs/tags/2.15.2.tar.gz"
+    sha256: "69305b5624dbeeb70b055b3d72b22e875be1bc49f721f1cccd3da6d420070c14"
+patches: []
