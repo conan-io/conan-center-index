@@ -326,7 +326,7 @@ class ImageMagicConan(ConanFile):
             self, win_bash=tools.os_info.is_windows
         )
 
-        # FIXME: workaround for xorg/system adding systme includes https://github.com/conan-io/conan-center-index/issues/6880
+        # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
         xft_path = os.path.join(self.build_folder, "xft.pc")
         if os.path.exists(xft_path):
             os.remove(xft_path)
@@ -346,6 +346,7 @@ class ImageMagicConan(ConanFile):
             "--disable-docs",
             "--with-perl=no",
             "--with-x=no",
+            "--with-fontconfig=no",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-hdri={}".format(yes_no(self.options.hdri)),
