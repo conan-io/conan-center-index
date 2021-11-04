@@ -16,3 +16,5 @@ patches:
   "8.0.25":
     - base_path: "source_subfolder"
       patch_file: "patches/0004-fix-805-cpp17-build.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0005-fix-macos-12.0.x-version-detection.patch"
