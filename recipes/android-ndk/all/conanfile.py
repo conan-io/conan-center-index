@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 import shutil
 
@@ -92,6 +92,11 @@ class AndroidNDKConan(ConanFile):
         abi = "androideabi" if self.settings_target.arch == "armv7" else "android"
         return f"{arch}-linux-{abi}"
 
+    @property
+    def _ndk_version(self):
+        assert self.version[0] == "r"
+        return self.version[1:]
+
     def _fix_permissions(self):
         if os.name != "posix":
             return
@@ -127,13 +132,16 @@ class AndroidNDKConan(ConanFile):
     def _ndk_root(self):
         return os.path.join(self.package_folder, "toolchains", "llvm", "prebuilt", self._host)
 
-    def _tool_name(self, tool):
+    def _tool_name(self, tool, bare=False):
+        prefix = ""
+        suffix = ""
         if "clang" in tool:
             suffix = ".cmd" if self.settings_build.os == "Windows" else ""
-            return f"{self._clang_triplet}{self.settings_target.os.api_level}-{tool}{suffix}"
+            prefix = "llvm" if bare else f"{self._clang_triplet}{self.settings_target.os.api_level}"
         else:
             suffix = ".exe" if self.settings_build.os == "Windows" else ""
-            return f"{self._llvm_triplet}-{tool}{suffix}"
+            prefix = "llvm" if bare else f"{self._llvm_triplet}"
+        return f"{prefix}-{tool}{suffix}"
 
     @property
     def _cmake_system_processor(self):
@@ -153,9 +161,19 @@ class AndroidNDKConan(ConanFile):
             cmake_system_processor = "armv5te"
         return cmake_system_processor
 
-    def _define_tool_var(self, name, value):
+    def _define_tool_var(self, name, value, bare = False):
         ndk_bin = os.path.join(self._ndk_root, "bin")
-        path = os.path.join(ndk_bin, self._tool_name(value))
+        path = os.path.join(ndk_bin, self._tool_name(value, bare))
+        if not os.path.isfile(path):
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
+        self.output.info(f"Creating {name} environment variable: {path}")
+        return path
+
+    def _define_tool_var_naked(self, name, value):
+        ndk_bin = os.path.join(self._ndk_root, "bin")
+        path = os.path.join(ndk_bin, value)
+        if not os.path.isfile(path):
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
@@ -230,17 +248,32 @@ class AndroidNDKConan(ConanFile):
 
         self.env_info.CC = self._define_tool_var("CC", "clang")
         self.env_info.CXX = self._define_tool_var("CXX", "clang++")
-        self.env_info.LD = self._define_tool_var("LD", "ld")
-        self.env_info.AR = self._define_tool_var("AR", "ar")
-        self.env_info.AS = self._define_tool_var("AS", "as")
-        self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
-        self.env_info.STRIP = self._define_tool_var("STRIP", "strip")
-        self.env_info.ADDR2LINE = self._define_tool_var("ADDR2LINE", "addr2line")
-        self.env_info.NM = self._define_tool_var("NM", "nm")
-        self.env_info.OBJCOPY = self._define_tool_var("OBJCOPY", "objcopy")
-        self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
-        self.env_info.READELF = self._define_tool_var("READELF", "readelf")
-        self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
+        if tools.Version(self._ndk_version) >= 23:
+            # Versions greater than 23 had the naming convention
+            # changed to no longer include the triplet.
+            self.env_info.LD = self._define_tool_var_naked("LD", "ld")
+            self.env_info.AR = self._define_tool_var("AR", "ar", True)
+            self.env_info.AS = self._define_tool_var("AS", "as", True)
+            self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib", True)
+            self.env_info.STRIP = self._define_tool_var("STRIP", "strip", True)
+            self.env_info.ADDR2LINE = self._define_tool_var("ADDR2LINE", "addr2line", True)
+            self.env_info.NM = self._define_tool_var("NM", "nm", True)
+            self.env_info.OBJCOPY = self._define_tool_var("OBJCOPY", "objcopy", True)
+            self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump", True)
+            self.env_info.READELF = self._define_tool_var("READELF", "readelf", True)
+            # there doesn't seem to be an 'elfedit' included anymore.
+        else:
+            self.env_info.LD = self._define_tool_var("LD", "ld")
+            self.env_info.AR = self._define_tool_var("AR", "ar")
+            self.env_info.AS = self._define_tool_var("AS", "as")
+            self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
+            self.env_info.STRIP = self._define_tool_var("STRIP", "strip")
+            self.env_info.ADDR2LINE = self._define_tool_var("ADDR2LINE", "addr2line")
+            self.env_info.NM = self._define_tool_var("NM", "nm")
+            self.env_info.OBJCOPY = self._define_tool_var("OBJCOPY", "objcopy")
+            self.env_info.OBJDUMP = self._define_tool_var("OBJDUMP", "objdump")
+            self.env_info.READELF = self._define_tool_var("READELF", "readelf")
+            self.env_info.ELFEDIT = self._define_tool_var("ELFEDIT", "elfedit")
 
         self.env_info.ANDROID_PLATFORM = f"android-{self.settings_target.os.api_level}"
         self.env_info.ANDROID_TOOLCHAIN = "clang"
