@@ -445,7 +445,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_openexr:
             core_requires.append("openexr::openexr")
         if self.options.with_jpeg:
-            core_requires.append("libjpeg::libjpeg")
+            core_requires.append("{0}::{0}".format(self.options.with_jpeg))
         if self.options.with_openjp2:
             core_requires.append("openjpeg::openjpeg")
         if self.options.with_pango:
