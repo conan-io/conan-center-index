@@ -1,8 +1,8 @@
 diff --git a/src/lib_json/CMakeLists.txt b/src/lib_json/CMakeLists.txt
-index b7596e8..c4755c1 100644
+index b7596e8..9f612a7 100644
 --- a/src/lib_json/CMakeLists.txt
 +++ b/src/lib_json/CMakeLists.txt
-@@ -180,7 +180,6 @@ if(BUILD_OBJECT_LIBS)
+@@ -119,7 +119,6 @@ if(BUILD_SHARED_LIBS)
          OUTPUT_NAME jsoncpp
          VERSION ${PROJECT_VERSION}
          SOVERSION ${PROJECT_SOVERSION}
