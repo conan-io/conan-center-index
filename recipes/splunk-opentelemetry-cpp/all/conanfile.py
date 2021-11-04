@@ -5,7 +5,7 @@ import glob
 
 
 class SplunkOpentelemetryConan(ConanFile):
-    name = "splunk-opentelemetry"
+    name = "splunk-opentelemetry-cpp"
     license = "Apache 2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
