@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class AwsCCal(ConanFile):
     name = "aws-c-cal"
     description = "Aws Crypto Abstraction Layer: Cross-Platform, C99 wrapper for cryptography primitives."
-    topics = ("conan", "aws", "amazon", "cloud", )
+    topics = ("aws", "amazon", "cloud", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-cal"
     license = "Apache-2.0",
@@ -46,7 +46,7 @@ class AwsCCal(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-common/0.6.15")
         if self._needs_openssl:
             self.requires("openssl/1.1.1l")
 
