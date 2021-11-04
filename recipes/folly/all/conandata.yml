@@ -5,9 +5,9 @@ sources:
   "2020.08.10.00":
     url: "https://github.com/facebook/folly/archive/v2020.08.10.00.tar.gz"
     sha256: "e81140d04a4e89e3f848e528466a9b3d3ae37d7eeb9e65467fca50d70918eef6"
-  "2021.10.25.00":
-    url: "https://github.com/facebook/folly/archive/v2021.10.25.00.tar.gz"
-    sha256: "a33fda693341d176afc626e1b972cdfde8d1a36ec8dd89339b85994527920356"
+  "2021.07.20.01":
+    url: "https://github.com/facebook/folly/archive/v2021.07.20.01.tar.gz"
+    sha256: "3b6ff97ee56699362bd22579b7d01697323f7fc2b6d37477e3e542f52857e0e8"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
@@ -43,7 +43,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0015-benchmark-format-macros.patch"
       base_path: "source_subfolder"
-  "2021.10.25.00":
+  "2021.07.20.01":
     - patch_file: "patches/0016-find-packages.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0017-compiler-flags.patch"
