@@ -1,0 +1,4 @@
+sources:
+  "20.19.0":
+    url: "https://github.com/ETLCPP/etl/archive/refs/tags/20.19.0.zip"
+    sha256: "ce57c7543867b2fe2ff3c056d8ae8ebaced51c38547d19ddb3aa60aeeb1a5411"
