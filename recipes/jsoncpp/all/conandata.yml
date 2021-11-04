@@ -18,9 +18,6 @@ sources:
     url: https://github.com/open-source-parsers/jsoncpp/archive/1.8.3.tar.gz
     sha256: 3671ba6051e0f30849942cc66d1798fdf0362d089343a83f704c09ee7156604f
 patches:
-  "1.9.5":
-     - patch_file: "patches/dont-force-pic-1.9.5.patch"
-       base_path: "source_subfolder"
   "1.9.3":
      - patch_file: "patches/dont-force-pic-1.9.3.patch"
        base_path: "source_subfolder"
