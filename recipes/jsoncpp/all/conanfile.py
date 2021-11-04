@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 import textwrap
 
+required_conan_version = ">=1.33.0"
 
 class JsoncppConan(ConanFile):
     name = "jsoncpp"
