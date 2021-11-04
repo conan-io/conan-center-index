@@ -57,6 +57,8 @@ class TensorflowLiteConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
+        if self.options.shared and self.settings.os == "Linux" and not self.options["ruy"].shared:
+            raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
 
     def config_options(self):
         if self.settings.os == "Windows":
