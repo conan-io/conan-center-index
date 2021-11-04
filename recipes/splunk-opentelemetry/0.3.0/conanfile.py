@@ -12,9 +12,10 @@ class SplunkOpentelemetryConan(ConanFile):
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
-    requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
+    generators = "cmake", "cmake_find_package_multi"
+    requires = "opentelemetry-cpp/1.0.1"
     exports_sources = "CMakeLists.txt"
+    _cmake = None
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -27,6 +28,10 @@ class SplunkOpentelemetryConan(ConanFile):
     def _source_subdir(self):
         return "sources"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def _remove_unnecessary_package_files(self):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -38,80 +43,29 @@ class SplunkOpentelemetryConan(ConanFile):
             destination=self._source_subdir
         )
 
-    def _build_otel_cpp(self):
-        otel_cpp_srcdir = os.path.join(
-            self._source_subdir,
-            "opentelemetry-cpp"
-        )
-        tools.replace_in_file(
-            os.path.join(otel_cpp_srcdir, "CMakeLists.txt"),
-            "project(opentelemetry-cpp)",
-            """project(opentelemetry-cpp)
-               include({}/conanbuildinfo.cmake)
-               conan_basic_setup()""".format(self.build_folder)
-        )
-        cmake = CMake(self)
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
 
-        defs = {
-          "WITH_OTLP": True,
-          "WITH_OTLP_HTTP": False,
-          "WITH_JAEGER": False,
-          "WITH_ABSEIL": False,
-          "BUILD_TESTING": False,
-          "WITH_EXAMPLES": False
-        }
-        cmake.configure(
-          source_folder=otel_cpp_srcdir,
-          defs=defs,
-          build_folder="otelcpp_build"
-        )
-        cmake.build()
-        cmake.install()
-
-    def build(self):
-        self._build_otel_cpp()
-        cmake = CMake(self)
+        self._cmake = CMake(self)
         defs = {
           "SPLUNK_CPP_WITH_JAEGER_EXPORTER": False,
           "SPLUNK_CPP_EXAMPLES": False
         }
-        cmake.configure(defs=defs)
-        cmake.build()
-        cmake.install()
+        self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
+        return self._cmake
 
-        self._remove_unnecessary_package_files()
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subdir)
-        self.copy("*.h", dst="include", src="src")
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        self._remove_unnecessary_package_files()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SplunkOpenTelemetry"
         self.cpp_info.names["cmake_find_package_multi"] = "SplunkOpenTelemetry"
-        self.cpp_info.components["opentelemetry-cpp"].requires = [
-          "grpc::grpc",
-          "protobuf::protobuf",
-          "libcurl::libcurl"
-        ]
-
-        otel_libs = [
-          "opentelemetry_version",
-          "opentelemetry_exporter_otlp_grpc",
-          "opentelemetry_otlp_recordable",
-          "opentelemetry_proto",
-          "opentelemetry_exporter_ostream_span",
-          "opentelemetry_zpages",
-          "opentelemetry_trace",
-          "opentelemetry_resources",
-          "opentelemetry_common",
-          "http_client_curl",
-        ]
-
-        self.cpp_info.components["opentelemetry-cpp"].libs = otel_libs
-        self.cpp_info.components["SplunkOpenTelemetry"].requires = [
-          "opentelemetry-cpp"
-        ]
-        self.cpp_info.components["SplunkOpenTelemetry"].libs = [
-          "SplunkOpenTelemetry"
-        ]
+        self.cpp_info.libs = ["SplunkOpenTelemetry"]

@@ -4,9 +4,9 @@ project(test_package CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(SplunkOpenTelemetry REQUIRED)
+find_package(SplunkOpenTelemetry CONFIG REQUIRED)
 
 add_executable(test_package test_package.cpp)
 
