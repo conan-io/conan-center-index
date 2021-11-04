@@ -229,18 +229,11 @@ class LibdbConan(ConanFile):
                 if not os.listdir(bindir):
                     tools.rmdir(bindir)
 
-            for lib in self._libs:
-                la_file = os.path.join(libdir, "lib{}-{}.la".format(lib, ".".join(self._major_minor_version)))
-                if os.path.exists(la_file):
-                    os.remove(la_file)
-                if not self.options.shared:
-                    # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
-                    libfn = os.path.join(libdir, "lib{}.a".format(lib))
-                    lib_version_fn = os.path.join(libdir, "lib{}-{}.a".format(lib, ".".join(self._major_minor_version)))
-                    assert os.path.isfile(libfn)
-                    os.remove(lib_version_fn)
-
             tools.rmdir(os.path.join(self.package_folder, "docs"))
+            tools.remove_files_by_mask(libdir, "*.la")
+            if not self.options.shared:
+                # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
+                tools.remove_files_by_mask(libdir, "*-{}.a".format(".".join(self._major_minor_version)))
 
     @property
     def _major_minor_version(self):
