@@ -22,14 +22,16 @@ class TensorflowLiteConan(ConanFile):
         "fPIC": [True, False],
         "with_ruy": [True, False],
         "with_nnapi": [True, False],
-        "with_mmap": [True, False]
+        "with_mmap": [True, False],
+        "with_xnnpack": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ruy": False,
         "with_nnapi": False,
-        "with_mmap": True
+        "with_mmap": True,
+        "with_xnnpack": True,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -55,8 +57,6 @@ class TensorflowLiteConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if self.options.shared and not self.options["ruy"].shared:
-            raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} with shared=True requires ruy.shared=True")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -85,6 +85,9 @@ class TensorflowLiteConan(ConanFile):
         self.requires("gemmlowp/cci.20210928")
         self.requires("intel-neon2sse/cci.20210225")
         self.requires("ruy/cci.20210622")
+        if self.options.with_xnnpack:
+            self.requires("xnnpack/cci.20211026")
+            self.requires("fp16/cci.20200514")
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -100,7 +103,7 @@ class TensorflowLiteConan(ConanFile):
             "TFLITE_ENABLE_RUY": self.options.get_safe("with_ruy", False),
             "TFLITE_ENABLE_NNAPI": self.options.get_safe("with_nnapi", False),
             "TFLITE_ENABLE_GPU": False,
-            "TFLITE_ENABLE_XNNPACK": False,
+            "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
             "TFLITE_ENABLE_MMAP": self.options.get_safe("with_mmap", False)
         })
         self._cmake.configure(build_folder=self._build_subfolder)
