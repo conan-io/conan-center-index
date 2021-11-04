@@ -73,10 +73,10 @@ class LibdbConan(ConanFile):
     def validate(self):
         if self.options.get_safe("with_cxx"):
             if self.settings.compiler == "clang":
-                if self.settings.compiler.version <= tools.Version("5"):
+                if tools.Version(self.settings.compiler.version) <= "5":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
             if self.settings.compiler == "apple-clang":
-                if self.settings.compiler.version < tools.Version("10"):
+                if tools.Version(self.settings.compiler.version) < "10":
                     raise ConanInvalidConfiguration("This compiler version is unsupported")
 
     def build_requirements(self):
