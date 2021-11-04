@@ -5,6 +5,9 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    
+    def validate(self):
+        tools.check_min_cppstd(self, "17")
 
     def build(self):
         cmake = CMake(self)
