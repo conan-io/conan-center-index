@@ -13,6 +13,9 @@ class InversifyCppConan(ConanFile):
     license = "MIT"
     settings = "compiler"
     no_copy_source = True
+    
+    def validate(self):
+        tools.check_min_cppstd(self, "17")
 
     @property
     def _source_subfolder(self):
