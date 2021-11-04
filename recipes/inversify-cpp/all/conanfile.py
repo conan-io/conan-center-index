@@ -11,6 +11,7 @@ class InversifyCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mosure/inversify-cpp"
     license = "MIT"
+    settings = "compiler"
     no_copy_source = True
 
     @property
