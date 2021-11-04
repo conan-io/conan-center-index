@@ -18,9 +18,6 @@ class SplunkOpentelemetryConan(ConanFile):
     _cmake = None
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("OS not supported")
-
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Architecture not supported")
 
