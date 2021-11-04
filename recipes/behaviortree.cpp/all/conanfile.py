@@ -62,6 +62,8 @@ class BehaviorTreeCPPConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("BehaviorTree.CPP can not be built as shared on Windows.")
+        elif self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "12":
+            raise ConanInvalidConfiguration("Requires Apple Clang 12 or higher.")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cppstd_required)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
