@@ -1,4 +1,7 @@
 sources:
+  "0.7.3":
+    url: "https://github.com/xtensor-stack/xtl/archive/0.7.3.tar.gz"
+    sha256: "f4a81e3c9ca9ddb42bd4373967d4859ecfdca1aba60b9fa6ced6c84d8b9824ff"
   "0.7.2":
     url: "https://github.com/xtensor-stack/xtl/archive/0.7.2.tar.gz"
     sha256: "95c221bdc6eaba592878090916383e5b9390a076828552256693d5d97f78357c"
