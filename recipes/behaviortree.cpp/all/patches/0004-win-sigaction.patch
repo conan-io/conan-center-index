@@ -1,5 +1,5 @@
 diff --git a/tools/bt_recorder.cpp b/tools/bt_recorder.cpp
-index 29511e49..e5015286 100644
+index 3aa6740..4b36414 100644
 --- a/tools/bt_recorder.cpp
 +++ b/tools/bt_recorder.cpp
 @@ -16,12 +16,17 @@ static void s_signal_handler(int)
@@ -14,8 +14,8 @@ index 29511e49..e5015286 100644
      action.sa_handler = s_signal_handler;
      action.sa_flags = 0;
      sigemptyset(&action.sa_mask);
-     sigaction(SIGINT, &action, nullptr);
-     sigaction(SIGTERM, &action, nullptr);
+     sigaction(SIGINT, &action, NULL);
+     sigaction(SIGTERM, &action, NULL);
 +#endif
  }
  
