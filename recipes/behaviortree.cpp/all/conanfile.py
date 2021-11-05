@@ -68,7 +68,8 @@ class BehaviorTreeCPPConan(ConanFile):
             check_min_cppstd(self, self._minimum_cppstd_required)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("BehaviorTree.CPP requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+            self.output.warn("BehaviorTree.CPP requires C++{}. Your compiler is unknown. Assuming it supports C++14."
+                             .format(self._minimum_cppstd_required))
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("BehaviorTree.CPP requires C++{}, which your compiler does not support."
                                             .format(self._minimum_cppstd_required))
@@ -106,5 +107,5 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "BT"
         self.cpp_info.components["behaviortree_cpp_v3"].libs = ["behaviortree_cpp_v3" + postfix]
         self.cpp_info.components["behaviortree_cpp_v3"].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "boost::coroutine", "ncurses::ncurses"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["behaviortree_cpp_v3"].system_libs.append("pthread")
