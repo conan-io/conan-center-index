@@ -8,7 +8,7 @@ required_conan_version = ">=1.33.0"
 class AwsCCal(ConanFile):
     name = "aws-c-cal"
     description = "Aws Crypto Abstraction Layer: Cross-Platform, C99 wrapper for cryptography primitives."
-    topics = ("aws", "amazon", "cloud", )
+    topics = ("aws", "amazon", "cloud", "cal", "crypt", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-cal"
     license = "Apache-2.0",
@@ -22,7 +22,6 @@ class AwsCCal(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -35,6 +34,11 @@ class AwsCCal(ConanFile):
     def _needs_openssl(self):
         return self.settings.os != "Windows" and not tools.is_apple_os(self.settings.os)
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,7 +50,10 @@ class AwsCCal(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.15")
+        if tools.Version(self.version) <= "0.5.11":
+            self.requires("aws-c-common/0.6.11")
+        else:
+            self.requires("aws-c-common/0.6.15")
         if self._needs_openssl:
             self.requires("openssl/1.1.1l")
 
