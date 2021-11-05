@@ -18,17 +18,16 @@ class SpirvtoolsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
     short_paths = True
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -39,6 +38,11 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
