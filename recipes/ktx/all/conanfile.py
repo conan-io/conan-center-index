@@ -103,8 +103,7 @@ class KtxConan(ConanFile):
         self._cmake.definitions["KTX_FEATURE_LOADTEST_APPS"] = False
         self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] = not self.options.shared
         self._cmake.definitions["KTX_FEATURE_TESTS"] = False
-        if self._has_sse_support:
-            self._cmake.definitions["BASISU_SUPPORT_SSE"] = self.options.sse
+        self._cmake.definitions["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
         self._cmake.configure()
         return self._cmake
 
