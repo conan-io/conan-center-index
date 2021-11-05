@@ -57,8 +57,14 @@ class TensorflowLiteConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 14)
-        if self.options.shared and self.settings.os == "Linux" and not self.options["ruy"].shared:
-            raise ConanInvalidConfiguration(f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
+        if self.options.shared:
+            if self.settings.os == "Linux" and not self.options["ruy"].shared:
+                raise ConanInvalidConfiguration(
+                        f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
+            if self.settings.os == "Macos" and self.options.with_xnnpack:
+                # FIXME linking errors from pthreadpool
+                raise ConanInvalidConfiguration(
+                        f"The project {self.name}/{self.version} with shared=True on Macos does not currently support xnnpack")
 
     def config_options(self):
         if self.settings.os == "Windows":
