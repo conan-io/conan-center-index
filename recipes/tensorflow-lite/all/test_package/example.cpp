@@ -7,8 +7,12 @@
 #include <memory>
 
 
-int main() {
-    auto model = tflite::FlatBufferModel::BuildFromFile("model.tflite");
+int main(int argc, char * argv[]) {
+    if ( argc != 2) {
+        std::cerr << "Pass model file path as argument" << std::endl;
+        return -1;
+    }
+    auto model = tflite::FlatBufferModel::BuildFromFile(argv[1]);
     if (!model) {
         throw std::runtime_error("Failed to load TFLite model");
     }
