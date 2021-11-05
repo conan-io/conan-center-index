@@ -13,5 +13,5 @@ class TensorflowLiteTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep, run_environment=True)
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)

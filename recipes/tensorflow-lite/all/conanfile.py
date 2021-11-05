@@ -9,13 +9,12 @@ required_conan_version = ">=1.36.0"
 
 class TensorflowLiteConan(ConanFile):
     name = "tensorflow-lite"
-    version = "2.6.0"
-    license = "Apache 2.0"
+    license = "Apache-2.0"
     homepage = "https://www.tensorflow.org/lite/guide"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("TensorFlow Lite is a set of tools that enables on-device machine learning "
                    "by helping developers run their models on mobile, embedded, and IoT devices.")
-    topics = ("machine learning", "neural networks", "deep learning")
+    topics = ("machine-learning", "neural-networks", "deep-learning")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -77,6 +76,8 @@ class TensorflowLiteConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.os == "Linux":
+                self.options["ruy"].shared = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
