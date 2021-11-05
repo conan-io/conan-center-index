@@ -106,7 +106,7 @@ class XtensorConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.names["pkg_config"] = "xtensor"
-        if self.settings.compiler in ("gcc", "clang", "apple-clang"):
+        if self.settings.compiler in ("gcc", "clang", "apple-clang") and self.settings.get_safe("compiler.libcxx") == "libstdc++11":
             self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=1")
         if self.options.xsimd:
             self.cpp_info.defines.append("XTENSOR_USE_XSIMD")
