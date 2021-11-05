@@ -57,7 +57,7 @@ class KtxConan(ConanFile):
 
     def requirements(self):
         self.requires("lodepng/cci.20200615")
-        self.requires("zstd/1.4.9")
+        self.requires("zstd/1.5.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
