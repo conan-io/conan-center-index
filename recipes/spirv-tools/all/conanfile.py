@@ -252,6 +252,7 @@ class SpirvtoolsConan(ConanFile):
                 self.cpp_info.components["spirv-tools-lint"].libs = ["SPIRV-Tools-lint"]
                 self.cpp_info.components["spirv-tools-lint"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: %s" % bin_path)
-        self.env_info.path.append(bin_path)
+        if self.options.build_executables:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.path.append(bin_path)
