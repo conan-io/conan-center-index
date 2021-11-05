@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   opentelemetry::nostd::shared_ptr<opentelemetry::trace::Span> span = tracer->StartSpan(
     "child-op",
     {
-      {"my.attribute", "123"},
+      {"my.attribute", "1234"},
     },
     startOptions);
 
