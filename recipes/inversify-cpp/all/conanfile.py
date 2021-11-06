@@ -18,14 +18,15 @@ class InversifyCppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "9",
+            "gcc": "7",
             "Visual Studio": "15.7",
-            "clang": "7",
+            "clang": "6",
             "apple-clang": "11",
         }
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+        tools.check_min_cppstd(self, 17)
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
