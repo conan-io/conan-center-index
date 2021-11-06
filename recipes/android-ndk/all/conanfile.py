@@ -161,11 +161,11 @@ class AndroidNDKConan(ConanFile):
             cmake_system_processor = "armv5te"
         return cmake_system_processor
 
-    def _define_tool_var(self, name, value, bare = False, skip_check=False):
+    def _define_tool_var(self, name, value, bare = False):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, self._tool_name(value, bare))
-        if not skip_check and not os.path.isfile(path):
-            raise ConanException(f"'Environment variable {name} has no direct target: '{path}'")
+        if not os.path.isfile(path):
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
@@ -173,7 +173,7 @@ class AndroidNDKConan(ConanFile):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, value)
         if not os.path.isfile(path):
-            raise ConanException(f"'Environment variable {name} has no direct target: '{path}'")
+            raise ConanException(f"'Environment variable {name} could not be created: '{path}'")
         self.output.info(f"Creating {name} environment variable: {path}")
         return path
 
@@ -263,7 +263,9 @@ class AndroidNDKConan(ConanFile):
             self.env_info.READELF = self._define_tool_var("READELF", "readelf", True)
             # there doesn't seem to be an 'elfedit' included anymore.
         else:
-            self.env_info.LD = self._define_tool_var("LD", "ld", skip_check=True)
+            # don't define LD to $prefix-ld/$prefix-ld.gold/$prefix-bfd.
+            # Build scripts should use the compiler (CC/CXX) as frontend.
+            # self.env_info.LD = self._define_tool_var("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar")
             self.env_info.AS = self._define_tool_var("AS", "as")
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
@@ -322,3 +324,4 @@ def unzip_fix_symlinks(url, target_folder, sha256):
                     shutil.copy2(target, full_name)
 
     os.unlink(filename)
+
