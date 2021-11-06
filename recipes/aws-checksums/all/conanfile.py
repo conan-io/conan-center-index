@@ -7,11 +7,10 @@ required_conan_version = ">=1.33.0"
 class AwsChecksums(ConanFile):
     name = "aws-checksums"
     description = "Cross-Platform HW accelerated CRC32c and CRC32 with fallback to efficient SW implementations. C interface with language bindings for each of our SDKs "
-    topics = ("conan", "aws", "checksum", )
+    topics = ("aws", "checksum", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-checksums"
     license = "Apache-2.0",
-    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -29,6 +28,11 @@ class AwsChecksums(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,7 +44,7 @@ class AwsChecksums(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-common/0.6.15")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
