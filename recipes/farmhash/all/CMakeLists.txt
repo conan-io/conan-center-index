@@ -6,12 +6,14 @@ conan_basic_setup()
 
 set(FARMHASH_SOURCE_DIR source_subfolder)
 
-# Transcribed from farmhash/src/Makefile.am
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles(
-  "int main(int argc, char* argv[]) { return (int)__builtin_expect(0, 0); }"
-  FARMHASH_HAS_BUILTIN_EXPECT
-)
+if (NOT FARMHASH_NO_BUILTIN_EXPECT)
+    # Transcribed from farmhash/src/Makefile.am
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles(
+        "int main(int argc, char* argv[]) { return (int)__builtin_expect(0, 0); }"
+        FARMHASH_HAS_BUILTIN_EXPECT
+    )
+endif()
 
 add_library(farmhash "${FARMHASH_SOURCE_DIR}/src/farmhash.cc" )
 target_include_directories(farmhash PRIVATE "${FARMHASH_SOURCE_DIR}/src")

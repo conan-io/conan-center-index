@@ -14,11 +14,13 @@ class farmhashConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "no_builtin_expect": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "no_builtin_expect": False
     }
     generators = "cmake"
 
@@ -48,6 +50,7 @@ class farmhashConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["FARMHASH_NO_BUILTIN_EXPECT"] = self.options.no_builtin_expect
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
