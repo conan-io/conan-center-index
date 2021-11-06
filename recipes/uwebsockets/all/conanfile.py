@@ -3,6 +3,7 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.33.0"
 
 class UwebsocketsConan(ConanFile):
     name = "uwebsockets"
@@ -10,9 +11,17 @@ class UwebsocketsConan(ConanFile):
     description = "Simple, secure & standards compliant web server for the most demanding of applications"
     license = "Apache-2.0"
     homepage = "https://github.com/uNetworking/uWebSockets"
-    topics = ("conan", "websocket", "network")
+    topics = ("websocket", "network", "server", )
     settings = "compiler"
     no_copy_source = True
+    options = {
+        "with_zlib": [True, False,],
+        "with_libdeflate": [True, False,],
+    }
+    default_options = {
+        "with_zlib": True,
+        "with_libdeflate": False,
+    }
 
     @property
     def _source_subfolder(self):
@@ -49,17 +58,23 @@ class UwebsocketsConan(ConanFile):
                 % (self.name, minimal_cpp_standard)
             )
 
+        # libdeflate is not supported before 19.0.0
+        if tools.Version(self.version) < "19.0.0":
+            self.options.with_libdeflate = False
+
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_libdeflate:
+            self.requires("libdeflate/1.8")
 
         if tools.Version(self.version) >= "19.0.0":
-            self.requires("usockets/0.7.1")
+            self.requires("usockets/0.8.1")
         else:
             self.requires("usockets/0.4.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("uWebSockets-%s" % self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -81,3 +96,9 @@ class UwebsocketsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "uWebSockets"))
+        if not self.options.with_zlib:
+            self.cpp_info.defines.append("UWS_NO_ZLIB")
+        if self.options.with_libdeflate:
+            self.cpp_info.defines.append("UWS_USE_LIBDEFLATE")
+        self.cpp_info.filenames["cmake_find_package"] = "uwebsockets"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "uwebsockets"
