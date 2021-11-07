@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class ProjConan(ConanFile):
@@ -130,16 +130,13 @@ class ProjConan(ConanFile):
         proj_version = tools.Version(self.version)
         cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
         cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
-        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
-        self.cpp_info.names["cmake_find_package"] = cmake_namespace
-        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
-        self.cpp_info.names["pkg_config"] = "proj"
-        self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
-        self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
-        self.cpp_info.components["projlib"].names["pkg_config"] = "proj"
+        self.cpp_info.set_property("cmake_file_name", cmake_config_filename)
+        self.cpp_info.set_property("cmake_target_name", cmake_namespace)
+        self.cpp_info.set_property("pkg_config_name", "proj")
+        self.cpp_info.components["projlib"].set_property("cmake_target_name", "proj")
+        self.cpp_info.components["projlib"].set_property("pkg_config_name", "proj")
         self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.components["projlib"].system_libs.append("pthread")
