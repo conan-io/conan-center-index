@@ -49,6 +49,10 @@ class TomlPlusPlusConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires c++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 
+        if self.settings.compiler == "apple-clang" and tools.Version(self.version) < "2.3.0":
+            raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
+                    self.settings.compiler, self.settings.compiler.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
