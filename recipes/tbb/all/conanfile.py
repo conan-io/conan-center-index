@@ -30,6 +30,10 @@ that have future-proof scalability"""
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -37,6 +41,10 @@ that have future-proof scalability"""
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            
+    def validate(self):
+        if hasattr(self, "settings_build") and tools.cross_building(self):
+            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
         if self.settings.os == "Macos" and \
            self.settings.compiler == "apple-clang" and \
            tools.Version(self.settings.compiler.version) < "8.0":
@@ -53,7 +61,7 @@ that have future-proof scalability"""
         del self.info.options.tbbproxy
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows":
             if "CONAN_MAKE_PROGRAM" not in os.environ and not tools.which("make"):
                 self.build_requires("make/4.2.1")
 
@@ -73,8 +81,8 @@ that have future-proof scalability"""
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("one{}-{}".format(self.name.upper(), self.version.upper()), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination=self._source_subfolder)
 
     def build(self):
         def add_flag(name, value):
