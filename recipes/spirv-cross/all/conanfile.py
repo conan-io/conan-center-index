@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class SpirvCrossConan(ConanFile):
@@ -11,7 +11,7 @@ class SpirvCrossConan(ConanFile):
     description = "SPIRV-Cross is a practical tool and library for performing " \
                   "reflection on SPIR-V and disassembling SPIR-V back to high level languages."
     license = "Apache-2.0"
-    topics = ("conan", "spirv-cross", "reflection", "disassembler", "spirv", "spir-v", "glsl", "hlsl")
+    topics = ("reflection", "disassembler", "spirv", "spir-v", "glsl", "hlsl")
     homepage = "https://github.com/KhronosGroup/SPIRV-Cross"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -45,7 +45,6 @@ class SpirvCrossConan(ConanFile):
         "namespace": "spirv_cross",
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -56,6 +55,11 @@ class SpirvCrossConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -205,19 +209,17 @@ class SpirvCrossConan(ConanFile):
     def package_info(self):
         # FIXME: we should provide one CMake config file per target (waiting for an implementation of https://github.com/conan-io/conan/issues/9000)
         def _register_component(target_lib, requires):
-            self.cpp_info.components[target_lib].names["cmake_find_package"] = target_lib
-            self.cpp_info.components[target_lib].names["cmake_find_package_multi"] = target_lib
+            self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
             self.cpp_info.components[target_lib].builddirs.append(self._module_subfolder)
-            self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+            self.cpp_info.components[target_lib].set_property("cmake_build_modules", [self._module_file_rel_path])
             if self.options.shared:
-                self.cpp_info.components[target_lib].names["pkg_config"] = target_lib
+                self.cpp_info.components[target_lib].set_property("pkg_config_name", target_lib)
             prefix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
             self.cpp_info.components[target_lib].libs = ["{}{}".format(target_lib, prefix)]
             self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "spirv_cross"))
             self.cpp_info.components[target_lib].defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options.namespace))
             self.cpp_info.components[target_lib].requires = requires
-            if self.settings.os == "Linux" and self.options.glsl:
+            if self.settings.os in ["Linux", "FreeBSD"] and self.options.glsl:
                 self.cpp_info.components[target_lib].system_libs.append("m")
             if not self.options.shared and self.options.c_api and tools.stdcpp_library(self):
                 self.cpp_info.components[target_lib].system_libs.append(tools.stdcpp_library(self))
