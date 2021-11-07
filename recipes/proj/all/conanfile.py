@@ -160,8 +160,8 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
-        self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
-        self.env_info.PROJ_LIB.append(res_path)
+        self.output.info("Creating PROJ_LIB environment variable: {}".format(res_path))
+        self.env_info.PROJ_LIB = res_path
         if self.options.build_executables:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bin_path))
