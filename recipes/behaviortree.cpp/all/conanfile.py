@@ -38,7 +38,7 @@ class BehaviorTreeCPPConan(ConanFile):
             "Visual Studio": "15",
             "gcc": "5",
             "clang": "5",
-            "apple-clang": "5.1",
+            "apple-clang": "12",
         }
 
     def source(self):
