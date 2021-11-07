@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.35.0"
+required_conan_version = ">=1.33.0"
 
 class NVTXConan(ConanFile):
     name = "nvtx"
@@ -10,7 +10,7 @@ class NVTXConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     topics = ("profiler", "nvidia", "nsight")
-    settings = "os"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -31,5 +31,5 @@ class NVTXConan(ConanFile):
             src=os.path.join(self._source_subfolder, "c", "include"))
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
