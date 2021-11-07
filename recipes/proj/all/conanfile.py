@@ -155,8 +155,12 @@ class ProjConan(ConanFile):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
-        if self.options.shared and self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
+        if tools.Version(self.version) < "8.2.0":
+            if self.options.shared and self.settings.compiler == "Visual Studio":
+                self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
+        else:
+            if not self.options.shared:
+                self.cpp_info.components["projlib"].defines.append("PROJ_DLL=")
 
         res_path = os.path.join(self.package_folder, "res")
         self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
