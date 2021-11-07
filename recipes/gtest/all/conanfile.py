@@ -145,6 +145,7 @@ class GTestConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GTest")
         self.cpp_info.set_property("cmake_target_name", "GTest")
+        self.cpp_info.components["libgtest"].names["pkg_config"] = "gtest"
         self.cpp_info.components["libgtest"].set_property("cmake_target_name", "gtest")
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
@@ -166,12 +167,15 @@ class GTestConan(ConanFile):
             self.cpp_info.components["gtest_main"].set_property("cmake_target_name", "gtest_main")
             self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
             self.cpp_info.components["gtest_main"].requires = ["libgtest"]
+            self.cpp_info.components["gtest_main"].names["pkg_config"] = "gtest_main"
 
         if self.options.build_gmock:
             self.cpp_info.components["gmock"].set_property("cmake_target_name", "gmock")
+            self.cpp_info.components["gmock"].names["pkg_config"] = "gmock"
             self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
             self.cpp_info.components["gmock"].requires = ["libgtest"]
             if not self.options.no_main:
                 self.cpp_info.components["gmock_main"].set_property("cmake_target_name", "gmock_main")
+                self.cpp_info.components["gmock_main"].names["pkg_config"] = "gmock_main"
                 self.cpp_info.components["gmock_main"].libs = ["gmock_main{}".format(self._postfix)]
                 self.cpp_info.components["gmock_main"].requires = ["gmock"]
