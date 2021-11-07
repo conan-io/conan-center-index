@@ -27,6 +27,11 @@ class UwebsocketsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        # libdeflate is not supported before 19.0.0
+        if tools.Version(self.version) < "19.0.0":
+            del self.options.with_libdeflate
+
     def configure(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
@@ -58,14 +63,10 @@ class UwebsocketsConan(ConanFile):
                 % (self.name, minimal_cpp_standard)
             )
 
-        # libdeflate is not supported before 19.0.0
-        if tools.Version(self.version) < "19.0.0":
-            self.options.with_libdeflate = False
-
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.with_libdeflate:
+        if self.options.get_safe("with_libdeflate", False):
             self.requires("libdeflate/1.8")
 
         if tools.Version(self.version) >= "19.0.0":
@@ -92,13 +93,13 @@ class UwebsocketsConan(ConanFile):
         )
 
     def package_id(self):
-        self.info.header_only()
+        self.settings.clear()
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "uWebSockets"))
         if not self.options.with_zlib:
             self.cpp_info.defines.append("UWS_NO_ZLIB")
-        if self.options.with_libdeflate:
+        if self.options.get_safe("with_libdeflate", False):
             self.cpp_info.defines.append("UWS_USE_LIBDEFLATE")
         self.cpp_info.filenames["cmake_find_package"] = "uwebsockets"
         self.cpp_info.filenames["cmake_find_package_multi"] = "uwebsockets"
