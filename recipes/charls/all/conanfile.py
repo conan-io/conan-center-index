@@ -47,6 +47,11 @@ class CharlsConan(ConanFile):
             raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
+        # name lookup issue for gcc == 5 in charls/2.2.0
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) == "5" and tools.Version(self.version) == "2.2.0":
+            raise ConanInvalidConfiguration("CharLS can't be compiled by {0} {1}".format(self.settings.compiler,
+                                                                                         self.settings.compiler.version))
+
     def source(self):
        tools.get(**self.conan_data["sources"][self.version],
             destination=self._source_subfolder, strip_root=True)
