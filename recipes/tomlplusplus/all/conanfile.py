@@ -54,8 +54,11 @@ class TomlPlusPlusConan(ConanFile):
                     self.settings.compiler, self.settings.compiler.version))
         
         if self.settings.compiler == "Visual Studio":
+            if tools.Version(self.version) == "2.1.0":
+                raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
+                        self.settings.compiler, self.settings.compiler.version))
             if tools.Version(self.settings.compiler.version) == "15" and tools.Version(self.version) < "2.2.0":
-                raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.2.0".format(
+                raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >=2.2.0".format(
                         self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
