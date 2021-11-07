@@ -263,9 +263,11 @@ class AndroidNDKConan(ConanFile):
             self.env_info.READELF = self._define_tool_var("READELF", "readelf", True)
             # there doesn't seem to be an 'elfedit' included anymore.
         else:
-            # Don't define LD to $prefix-ld/$prefix-ld.gold/$prefix-bfd:
-            # build scripts should use the compiler (CC/CXX) as frontend.
-            # self.env_info.LD = self._define_tool_var("LD", "ld")
+            if tools.Version(self._ndk_version) >= 22:
+                # Special handling for LD in r22 required: ld has no prefix
+                self.env_info.LD = self._define_tool_var_naked("LD", "ld")
+            else:
+                self.env_info.LD = self._define_tool_var("LD", "ld")
             self.env_info.AR = self._define_tool_var("AR", "ar")
             self.env_info.AS = self._define_tool_var("AS", "as")
             self.env_info.RANLIB = self._define_tool_var("RANLIB", "ranlib")
