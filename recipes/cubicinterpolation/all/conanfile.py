@@ -39,7 +39,7 @@ class CubicInterpolationConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.72.0")
         self.requires("eigen/3.3.9")
 
     @property
