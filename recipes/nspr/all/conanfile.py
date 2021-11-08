@@ -1,7 +1,10 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
+import conan.tools.files
 from contextlib import contextmanager
 import os
 
+required_conan_version = ">=1.33"
 
 class NsprConan(ConanFile):
     name = "nspr"
@@ -31,6 +34,10 @@ class NsprConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -42,19 +49,23 @@ class NsprConan(ConanFile):
         del self.settings.compiler.libcxx
         if self.options.shared:
             del self.options.fPIC
+    
+    def validate(self):
+        # https://bugzilla.mozilla.org/show_bug.cgi?id=1658671
+        if tools.Version(self.version) < "4.29":
+            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+                raise ConanInvalidConfiguration("NSPR does not support mac M1 before 4.29")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = os.path.join("nspr-" + self.version, "nspr")
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.rmdir(os.path.join("nspr-" + self.version))
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True)
+        conan.tools.files.rename(self, "nspr", self._source_subfolder)
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._settings_build.os == "Windows" :
             self.build_requires("mozilla-build/3.3")
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            if not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     @contextmanager
     def _build_context(self):
@@ -71,7 +82,7 @@ class NsprConan(ConanFile):
         conf_args = [
             "--with-mozilla" if self.options.with_mozilla else "--without-mozilla",
             "--disable-cplus",
-            "--enable-64bit" if self.settings.arch == "x86_64" else "--disable-64bit",
+            "--enable-64bit" if self.settings.arch in ("armv8", "x86_64") else "--disable-64bit",
             "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]

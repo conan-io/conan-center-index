@@ -1,5 +1,4 @@
 import os
-import shutil
 import glob
 import textwrap
 
@@ -52,11 +51,10 @@ class QtConan(ConanFile):
     generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
-    topics = ("conan", "qt", "ui")
+    topics = ("qt", "ui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
-    exports = ["patches/*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -164,6 +162,10 @@ class QtConan(ConanFile):
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s not in self._submodules" % m
 
         return self._submodules_tree
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def export(self):
         self.copy("qtmodules%s.conf" % self.version)
@@ -324,6 +326,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
+            self.requires("xorg-proto/2021.4")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -340,11 +343,14 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebengine"):
             self.build_requires("ninja/1.10.2")
+            self.build_requires("nodejs/16.3.0")
+            self.build_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 self.build_requires("bison/3.7.1")
-                self.build_requires("gperf/3.1")
                 self.build_requires("flex/2.6.4")
+            else:
+                self.build_requires("winflexbison/2.5.24")
 
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
@@ -385,8 +391,8 @@ class QtConan(ConanFile):
             self.build_requires("wayland/1.19.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
+        tools.get(**self.conan_data["sources"][self.version],
+                  strip_root=True, destination="qt6")
 
         # patching in source method because of no_copy_source attribute
 
@@ -835,6 +841,8 @@ class QtConan(ConanFile):
             if tools.Version(self.version) >= "6.2.0":
                 self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
                 self.cpp_info.components["qtCore"].system_libs.append("synchronization")
+            if tools.Version(self.version) >= "6.2.1":
+                self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
         if tools.Version(self.version) < "6.1.0":
@@ -914,7 +922,7 @@ class QtConan(ConanFile):
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLWidgets", ["OpenGL", "Widgets"])
         if self.options.with_dbus:
-            _create_module("DBus")
+            _create_module("DBus", ["dbus::dbus"])
         _create_module("Concurrent")
         _create_module("Xml")
 
@@ -1107,7 +1115,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebengine"):
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os == "Linux":
-                webenginereqs.extend(["expat::expat", "opus::libopus"])
+                webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])

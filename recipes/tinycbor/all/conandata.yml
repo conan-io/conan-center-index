@@ -1,9 +1,14 @@
 sources:
+  "0.6.0":
+    url: "https://github.com/intel/tinycbor/archive/v0.6.0.tar.gz"
+    sha256: "512e2c9fce74f60ef9ed3af59161e905f9e19f30a52e433fc55f39f4c70d27e4"
   "0.5.3":
     url: "https://github.com/intel/tinycbor/archive/v0.5.3.tar.gz"
     sha256: "956eb4b670ea4969eaee67395b5bb6437b153960385b77357d6692e979d1b12d"
 patches:
-  "0.5.3":
-    - patch_file: "patches/001-build-system.patch"
+  "0.6.0":
+    - patch_file: "patches/0.6.0/001-build-system.patch"
       base_path: "source_subfolder"
-
+  "0.5.3":
+    - patch_file: "patches/0.5.3/001-build-system.patch"
+      base_path: "source_subfolder"

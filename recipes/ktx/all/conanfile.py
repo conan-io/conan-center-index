@@ -1,14 +1,14 @@
 from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class KtxConan(ConanFile):
     name = "ktx"
     description = "Khronos Texture library and tool."
     license = "Apache-2.0"
-    topics = ("conan", "ktx", "texture", "khronos")
+    topics = ("ktx", "texture", "khronos")
     homepage = "https://github.com/KhronosGroup/KTX-Software"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -26,7 +26,6 @@ class KtxConan(ConanFile):
         "tools": True,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -37,6 +36,11 @@ class KtxConan(ConanFile):
     @property
     def _has_sse_support(self):
         return self.settings.arch in ["x86", "x86_64"]
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,12 +54,14 @@ class KtxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("lodepng/cci.20200615")
-        self.requires("zstd/1.4.9")
+        self.requires("zstd/1.5.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
@@ -97,8 +103,7 @@ class KtxConan(ConanFile):
         self._cmake.definitions["KTX_FEATURE_LOADTEST_APPS"] = False
         self._cmake.definitions["KTX_FEATURE_STATIC_LIBRARY"] = not self.options.shared
         self._cmake.definitions["KTX_FEATURE_TESTS"] = False
-        if self._has_sse_support:
-            self._cmake.definitions["BASISU_SUPPORT_SSE"] = self.options.sse
+        self._cmake.definitions["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
         self._cmake.configure()
         return self._cmake
 
@@ -110,12 +115,9 @@ class KtxConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "Ktx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Ktx"
-        self.cpp_info.names["cmake_find_package"] = "KTX"
-        self.cpp_info.names["cmake_find_package_multi"] = "KTX"
-        self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
-        self.cpp_info.components["libktx"].names["cmake_find_package_multi"] = "ktx"
+        self.cpp_info.set_property("cmake_file_name", "Ktx")
+        self.cpp_info.set_property("cmake_target_name", "KTX")
+        self.cpp_info.components["libktx"].set_property("cmake_target_name", "ktx")
         self.cpp_info.components["libktx"].libs = ["ktx"]
         self.cpp_info.components["libktx"].defines = [
             "KTX_FEATURE_KTX1", "KTX_FEATURE_KTX2", "KTX_FEATURE_WRITE"
