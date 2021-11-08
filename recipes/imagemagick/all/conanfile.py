@@ -28,6 +28,8 @@ class ImageMagicConan(ConanFile):
         "with_lzma": [True, False],
         "with_lcms": [True, False],
         "with_openexr": [True, False],
+        "with_heic": [True, False],
+        "with_jbig": [True, False],
         "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_openjp2": [True, False],
         "with_pango": [True, False],
@@ -36,7 +38,6 @@ class ImageMagicConan(ConanFile):
         "with_webp": [True, False],
         "with_xml2": [True, False],
         "with_freetype": [True, False],
-        "with_djvu": [True, False],
         "utilities": [True, False],
     }
     default_options = {
@@ -49,6 +50,8 @@ class ImageMagicConan(ConanFile):
         "with_lzma": True,
         "with_lcms": True,
         "with_openexr": True,
+        "with_heic": True,
+        "with_jbig": True,
         "with_jpeg": "libjpeg",
         "with_openjp2": True,
         "with_pango": True,
@@ -57,7 +60,6 @@ class ImageMagicConan(ConanFile):
         "with_webp": False,
         "with_xml2": True,
         "with_freetype": True,
-        "with_djvu": False,
         "utilities": True,
     }
     exports_sources = "patches/*"
@@ -107,6 +109,10 @@ class ImageMagicConan(ConanFile):
             self.requires("lcms/2.11")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
+        if self.options.with_heic:
+            self.requires("libheif/1.12.0")
+        if self.options.with_jbig:
+            self.requires("jbig/20160605")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -125,12 +131,6 @@ class ImageMagicConan(ConanFile):
             self.requires("libxml2/2.9.10")
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
-        # TODO add when available
-        if self.options.with_djvu:
-            # FIXME: missing djvu recipe
-            self.output.warn(
-                "There is no djvu package available on Conan (yet). This recipe will use the one present on the system (if available)."
-            )
 
     def source(self):
         tools.get(
@@ -139,16 +139,17 @@ class ImageMagicConan(ConanFile):
             strip_root=True
         )
 
-        visualmagick_version = list(
-            self.conan_data["sources"][self.version]["visualmagick"].keys()
-        )[0]
-        tools.get(
-            **self.conan_data["sources"][self.version]["visualmagick"][
-                visualmagick_version
-            ],
-            destination="VisualMagick",
-            strip_root=True
-        )
+        if self._is_msvc:
+            visualmagick_version = list(
+                self.conan_data["sources"][self.version]["visualmagick"].keys()
+            )[0]
+            tools.get(
+                **self.conan_data["sources"][self.version]["visualmagick"][
+                    visualmagick_version
+                ],
+                destination="VisualMagick",
+                strip_root=True
+            )
 
     def build(self):
         if self._is_msvc:
@@ -179,13 +180,6 @@ class ImageMagicConan(ConanFile):
         tools.replace_in_file(
             os.path.join("VisualMagick", "flif", "Config.txt"),
             "#define MAGICKCORE_FLIF_DELEGATE",
-            "",
-        )
-
-        # FIXME: package libheif (High Efficiency Image File Format)
-        tools.replace_in_file(
-            os.path.join("VisualMagick", "libheif", "Config.txt"),
-            "#define MAGICKCORE_HEIC_DELEGATE",
             "",
         )
 
@@ -326,7 +320,7 @@ class ImageMagicConan(ConanFile):
             self, win_bash=tools.os_info.is_windows
         )
 
-        # FIXME: workaround for xorg/system adding systme includes https://github.com/conan-io/conan-center-index/issues/6880
+        # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
         xft_path = os.path.join(self.build_folder, "xft.pc")
         if os.path.exists(xft_path):
             os.remove(xft_path)
@@ -346,6 +340,7 @@ class ImageMagicConan(ConanFile):
             "--disable-docs",
             "--with-perl=no",
             "--with-x=no",
+            "--with-fontconfig=no",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "--enable-hdri={}".format(yes_no(self.options.hdri)),
@@ -355,6 +350,8 @@ class ImageMagicConan(ConanFile):
             "--with-lzma={}".format(yes_no(self.options.with_lzma)),
             "--with-lcms={}".format(yes_no(self.options.with_lcms)),
             "--with-openexr={}".format(yes_no(self.options.with_openexr)),
+            "--with-heic={}".format(yes_no(self.options.with_heic)),
+            "--with-jbig={}".format(yes_no(self.options.with_jbig)),
             "--with-jpeg={}".format(yes_no(self.options.with_jpeg)),
             "--with-openjp2={}".format(yes_no(self.options.with_openjp2)),
             "--with-pango={}".format(yes_no(self.options.with_pango)),
@@ -364,7 +361,6 @@ class ImageMagicConan(ConanFile):
             "--with-xml={}".format(yes_no(self.options.with_xml2)),
             "--with-freetype={}".format(yes_no(self.options.with_freetype)),
             "--with-utilities={}".format(yes_no(self.options.utilities)),
-            "--with-djvu={}".format(yes_no(self.options.with_djvu)),
         ]
         self._autotools.configure(args=args)
 
@@ -444,8 +440,12 @@ class ImageMagicConan(ConanFile):
             core_requires.append("lcms::lcms")
         if self.options.with_openexr:
             core_requires.append("openexr::openexr")
+        if self.options.with_heic:
+            core_requires.append("libheif::libheif")
+        if self.options.with_jbig:
+            core_requires.append("jbig::jbig")
         if self.options.with_jpeg:
-            core_requires.append("libjpeg::libjpeg")
+            core_requires.append("{0}::{0}".format(self.options.with_jpeg))
         if self.options.with_openjp2:
             core_requires.append("openjpeg::openjpeg")
         if self.options.with_pango:
