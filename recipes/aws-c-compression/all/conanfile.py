@@ -6,7 +6,7 @@ required_conan_version = ">=1.33.0"
 class AwsCCompression(ConanFile):
     name = "aws-c-compression"
     description = "C99 implementation of huffman encoding/decoding"
-    topics = ("conan", "aws", "amazon", "cloud", )
+    topics = ("aws", "amazon", "cloud", "compression", "huffman", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-compression"
     license = "Apache-2.0",
@@ -39,7 +39,7 @@ class AwsCCompression(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("aws-c-common/0.6.9")
+        self.requires("aws-c-common/0.6.15")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

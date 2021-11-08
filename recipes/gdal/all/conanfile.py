@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class GdalConan(ConanFile):
@@ -11,7 +11,7 @@ class GdalConan(ConanFile):
     description = "GDAL is an open source X/MIT licensed translator library " \
                   "for raster and vector geospatial data formats."
     license = "MIT"
-    topics = ("conan", "gdal", "osgeo", "geospatial", "raster", "vector")
+    topics = ("osgeo", "geospatial", "raster", "vector")
     homepage = "https://github.com/OSGeo/gdal"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -145,7 +145,6 @@ class GdalConan(ConanFile):
         "with_heif": False,
     }
 
-    exports_sources = "patches/**"
     generators = "pkg_config"
     _autotools= None
     _nmake_args = None
@@ -165,6 +164,10 @@ class GdalConan(ConanFile):
     @property
     def _has_with_heif_option(self):
         return tools.Version(self.version) >= "3.2.0"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -205,7 +208,7 @@ class GdalConan(ConanFile):
         self.requires("libgeotiff/1.7.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.3.0")
-        self.requires("proj/8.1.0")
+        self.requires("proj/8.1.1")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.0")
         if self.options.get_safe("with_zlib", True):
@@ -217,11 +220,11 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.0")
         if self.options.with_pg:
-            self.requires("libpq/13.3")
+            self.requires("libpq/13.4")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/3.490")
+            self.requires("cfitsio/4.0.0")
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
@@ -235,7 +238,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.0")
+            self.requires("libjpeg-turbo/2.1.1")
         if self.options.with_charls:
             self.requires("charls/2.1.0")
         if self.options.with_gif:
@@ -245,7 +248,7 @@ class GdalConan(ConanFile):
         # if self.options.with_sosi:
         #     self.requires("fyba/4.1.1")
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.6.2")
+            self.requires("mongo-cxx-driver/3.6.6")
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
@@ -255,7 +258,7 @@ class GdalConan(ConanFile):
         if self.options.with_netcdf:
             self.requires("netcdf/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.32")
+            self.requires("jasper/2.0.33")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         # if self.options.with_fgdb:
@@ -275,7 +278,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.78.0")
+            self.requires("libcurl/7.79.1")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.12")
         # if self.options.with_spatialite:
@@ -287,7 +290,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_pcre"):
             self.requires("pcre/8.45")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.2.1")
         if self.options.with_geos:
             self.requires("geos/3.9.1")
         # if self.options.with_sfcgal:
@@ -300,7 +303,7 @@ class GdalConan(ConanFile):
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_poppler:
-            self.requires("poppler/20.09.0")
+            self.requires("poppler/21.07.0")
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         # if self.options.with_pdfium:
@@ -314,11 +317,11 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.5.0")
         if self.options.with_crypto:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/2.5.5")
+            self.requires("openexr/2.5.7")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.12.0")
 
@@ -830,11 +833,17 @@ class GdalConan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "GDAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
-        self.cpp_info.names["pkg_config"] = "gdal"
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.set_property("cmake_file_name", "GDAL")
+        self.cpp_info.set_property("cmake_target_name", "GDAL")
+        self.cpp_info.set_property("pkg_config_name", "gdal")
+        lib_suffix = ""
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared:
+                lib_suffix += "_i"
+            if self.settings.build_type == "Debug":
+                lib_suffix += "_d"
+        self.cpp_info.libs = ["gdal{}".format(lib_suffix)]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")

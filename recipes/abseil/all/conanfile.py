@@ -175,5 +175,7 @@ class ConanRecipe(ConanFile):
                 self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
                 self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
                 self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
+                if self.settings.compiler == "Visual Studio" and self.settings.get_safe("compiler.cppstd") == "20":
+                    self.cpp_info.components[pkgconfig_name].defines.extend(["_HAS_DEPRECATED_RESULT_OF", "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING"])
 
         _register_components()
