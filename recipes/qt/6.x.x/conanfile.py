@@ -1070,7 +1070,6 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtlocation"):
             _create_module("Positioning")
-            _create_module("Location", ["Gui", "Quick"])
             _create_plugin("QGeoServiceProviderFactoryMapbox", "qtgeoservices_mapbox", "geoservices", [])
             _create_plugin("QGeoServiceProviderFactoryMapboxGL", "qtgeoservices_mapboxgl", "geoservices", [])
             _create_plugin("GeoServiceProviderFactoryEsri", "qtgeoservices_esri", "geoservices", [])
