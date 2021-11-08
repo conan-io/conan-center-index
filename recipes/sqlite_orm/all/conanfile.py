@@ -13,7 +13,6 @@ class SqliteOrmConan(ConanFile):
     homepage = "https://github.com/fnc12/sqlite_orm"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -27,6 +26,10 @@ class SqliteOrmConan(ConanFile):
             "clang": "3.4",
             "apple-clang": "5.1",
         }
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         self.requires("sqlite3/3.36.0")
@@ -53,6 +56,10 @@ class SqliteOrmConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
