@@ -1,5 +1,14 @@
 # Changelog
 
+### 11-November-2021 - 15:08 CEST
+
+- [config] Upgrade Conan client version to 1.41.0
+- [fix] Identify PRs to `CONTRIBUTING.md` as changes in docs.
+- [feature] Add `xlarge` pod size in Linux for building packages with higher memory requirements.
+- [feature] Introduce 'epoch' concept to build configurations as a strategy to build packages for new compilers.
+- [feature] Added Jenkins DSLs for job descriptions.
+- [fix] Parse integer value when assigning properties.
+
 ### 18-October-2021 - 17:05 CEST
  - [config] Upgrade Conan version to 1.40.4
  - [fix] Replace `Unauthorized User` label by `User-approval pending`
