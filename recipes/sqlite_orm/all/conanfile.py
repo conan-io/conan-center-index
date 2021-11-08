@@ -29,7 +29,7 @@ class SqliteOrmConan(ConanFile):
         }
 
     def requirements(self):
-        self.requires("sqlite3/3.34.1")
+        self.requires("sqlite3/3.36.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
