@@ -162,11 +162,9 @@ main(int argc, char** argv)
 #endif
 
   arma::vec v2{1,2,3,4};
-  v2.print("v2 (before randn)");
-
   arma::arma_rng::set_seed(1237);
   v2.randn();
-  v2.print("v2 (after randn)");
+  v2.print("v2 (randn):");
 
   return 0;
   }
