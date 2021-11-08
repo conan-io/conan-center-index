@@ -18,14 +18,16 @@ class qt(Generator):
             HostData = {1}/archdatadir
             Data = {1}/datadir
             Sysconf = {1}/sysconfdir
-            LibraryExecutables = {1}/archdatadir/bin
+            LibraryExecutables = {1}/archdatadir/{3}
             HostLibraryExecutables = {2}
             Plugins = {1}/archdatadir/plugins
             Imports = {1}/archdatadir/imports
             Qml2Imports = {1}/archdatadir/qml
             Translations = {1}/datadir/translations
             Documentation = {1}/datadir/doc
-            Examples = {1}/datadir/examples""").format(path, folder, "bin" if os_ == "Windows" else "lib")
+            Examples = {1}/datadir/examples""").format(path, folder,
+                "bin" if os_ == "Windows" else "lib",
+                "bin" if os_ == "Windows" else "libexec")
 
     @property
     def filename(self):
