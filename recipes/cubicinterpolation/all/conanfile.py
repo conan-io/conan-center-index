@@ -23,7 +23,7 @@ class CubicInterpolationConan(ConanFile):
         "fPIC": True
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
