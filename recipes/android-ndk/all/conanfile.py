@@ -326,4 +326,3 @@ def unzip_fix_symlinks(url, target_folder, sha256):
                     shutil.copy2(target, full_name)
 
     os.unlink(filename)
-
