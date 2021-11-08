@@ -1117,7 +1117,7 @@ class QtConan(ConanFile):
             if self.settings.os == "Linux":
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
             _create_module("WebEngineCore", webenginereqs)
-            _create_module("WebEngine", ["WebEngineCore"])
+            _create_module("WebEngineQuick", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
         if self.options.get_safe("qtremoteobjects"):
