@@ -33,7 +33,7 @@ class Llvm(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://github.com/llvm/llvm-project'
     license = 'Apache 2.0'
-    topics = 'conan', 'c++', 'compiler', 'tooling'
+    topics = 'c++', 'compiler', 'tooling'
 
     settings = 'os', 'arch', 'compiler', 'build_type'
 
