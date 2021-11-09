@@ -329,6 +329,7 @@ class QtConan(ConanFile):
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
+            self.requires("libxshmfence/1.3")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
