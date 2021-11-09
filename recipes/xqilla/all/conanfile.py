@@ -68,11 +68,13 @@ class ConanXqilla(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self)
         conf_args = [
             "--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath)),
+            "CXXFLAGS=-std=c++11",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
+
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
