@@ -699,7 +699,8 @@ class QtConan(ConanFile):
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
-            if not os.path.isfile(module):
+            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
+            if not os.path.isfile(module) and not [n for n in helper_modules if os.path.isfile(n)]:
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
@@ -1162,9 +1163,17 @@ class QtConan(ConanFile):
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt6", "qt")
+            if component_name == "qt":
+                component_name = "qtCore"
             if os.path.isfile(module):
                 self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+
+            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
+            for helper_module in helper_modules:
+                if os.path.isfile(helper_module):
+                    self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(helper_module)
+                    self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(helper_module)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
