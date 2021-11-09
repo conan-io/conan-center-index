@@ -265,7 +265,7 @@ class QtConan(ConanFile):
 
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
-           
+
         if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
             raise ConanInvlidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
 
@@ -700,7 +700,7 @@ class QtConan(ConanFile):
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
             helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
-            if not os.path.isfile(module) and not [n for n in helper_modules if os.path.isfile(n)]:
+            if not os.path.isfile(module) and not helper_modules:
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
@@ -1170,10 +1170,8 @@ class QtConan(ConanFile):
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
 
             helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
-            for helper_module in helper_modules:
-                if os.path.isfile(helper_module):
-                    self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(helper_module)
-                    self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(helper_module)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"].extend(helper_modules)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].extend(helper_modules)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
