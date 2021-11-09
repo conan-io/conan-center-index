@@ -1,13 +1,16 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
+import contextlib
+import functools
 import os
+
+required_conan_version = ">=1.33.0"
 
 
 class IslConan(ConanFile):
     name = "isl"
     description = "isl is a library for manipulating sets and relations of integer points bounded by linear constraints."
-    topics = ("conan", "isl", "integer", "set", "library")
+    topics = ("isl", "integer", "set", "library")
     license = "MIT"
     homepage = "http://isl.gforge.inria.fr/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -23,11 +26,13 @@ class IslConan(ConanFile):
         "with_int": "gmp",
     }
 
-    _autotools = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,9 +44,6 @@ class IslConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
-
     def requirements(self):
         if self.options.with_int == "gmp":
             self.requires("gmp/6.2.1")
@@ -50,19 +52,23 @@ class IslConan(ConanFile):
             raise ConanInvalidConfiguration("imath is not (yet) available on cci")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.3")
+            self.build_requires("automake/1.16.4")
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
-    @contextmanager
+    @contextlib.contextmanager
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
+            with tools.vcvars(self):
                 env = {
                     "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                     "CC": "{} cl -nologo -{}".format(tools.unix_path(self.deps_user_info["automake"].compile), self.settings.compiler.runtime),
@@ -77,25 +83,32 @@ class IslConan(ConanFile):
         else:
             yield
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        autotools.libs = []
         yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
+        args = [
             "--with-int={}".format(self.options.with_int),
             "--enable-portable-binary",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         if self.options.with_int == "gmp":
-            conf_args.extend([
+            args.extend([
                 "--with-gmp=system",
                 "--with-gmp-prefix={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
             ])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+        if self.settings.compiler == "Visual Studio":
+            autotools.flags.append("-FS")
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            # FIXME: should be handled by helper
+            autotools.flags.append("-arch arm64")
+            autotools.link_flags.append("-arch arm64")
+        vars = autotools.vars
+        args.append("MP_CFLAGS={} {}".format(vars["CPPFLAGS"], vars["CFLAGS"]))
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return autotools
 
     def build(self):
         with self._build_context():
@@ -108,7 +121,7 @@ class IslConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libisl.la")))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
