@@ -18,17 +18,16 @@ class SpirvtoolsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_executables": [True, False]
+        "build_executables": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_executables": True
+        "build_executables": True,
     }
 
     short_paths = True
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -39,6 +38,11 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,6 +60,7 @@ class SpirvtoolsConan(ConanFile):
     @property
     def _get_compatible_spirv_headers_version(self):
         return {
+            "2021.3": "cci.20210811",
             "2021.2": "cci.20210616",
             "2020.5": "1.5.4",
             "2020.3": "1.5.3",
@@ -81,11 +86,27 @@ class SpirvtoolsConan(ConanFile):
 
         cmake = CMake(self)
 
+        #====================
+        # Shared libs mess in Spirv-Tools (see https://github.com/KhronosGroup/SPIRV-Tools/issues/3909)
+        #====================
+        # We have 2 solutions if shared True:
+        #  - Only package SPIRV-Tools-shared lib (private symbols properly hidden), and wait resolution
+        #    of above issue before allowing to build shared for all Spirv-Tools libs.
+        #  - Build and package shared libs with all symbols exported
+        #    (it would require CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS for msvc)
+
+        # Currently this recipe implements the first solution
+
         # - Before 2020.5, the shared lib is always built, but static libs might be built as shared
         #   with BUILD_SHARED_LIBS injection (which doesn't work due to symbols visibility, at least for msvc)
         # - From 2020.5, static and shared libs are fully controlled by upstream CMakeLists.txt
         if tools.Version(self.version) < "2020.5":
             cmake.definitions["BUILD_SHARED_LIBS"] = False
+        # From 2020.6, same behavior than above but through a weird combination
+        # of SPIRV_TOOLS_BUILD_STATIC and BUILD_SHARED_LIBS.
+        if tools.Version(self.version) >= "2020.6":
+            cmake.definitions["SPIRV_TOOLS_BUILD_STATIC"] = True
+        #============
 
         # Required by the project's CMakeLists.txt
         cmake.definitions["SPIRV-Headers_SOURCE_DIR"] = self.deps_cpp_info["spirv-headers"].rootpath.replace("\\", "/")
@@ -130,6 +151,7 @@ class SpirvtoolsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-link"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-opt"))
         tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-reduce"))
+        tools.rmdir(os.path.join(self.package_folder, "SPIRV-Tools-lint"))
         if self.options.shared:
             for file_name in ["*SPIRV-Tools", "*SPIRV-Tools-opt", "*SPIRV-Tools-link", "*SPIRV-Tools-reduce"]:
                 for ext in [".a", ".lib"]:
@@ -148,6 +170,8 @@ class SpirvtoolsConan(ConanFile):
                 "SPIRV-Tools-link": "spirv-tools::SPIRV-Tools-link",
                 "SPIRV-Tools-reduce": "spirv-tools::SPIRV-Tools-reduce",
             }
+            if tools.Version(self.version) >= "2021.3":
+                targets.update({"SPIRV-Tools-lint": "spirv-tools::SPIRV-Tools-lint"})
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
             targets,
@@ -222,7 +246,17 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-reduce"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-reduce"].libs = ["SPIRV-Tools-reduce"]
             self.cpp_info.components["spirv-tools-reduce"].requires = ["spirv-tools-core", "spirv-tools-opt"]
+            # SPIRV-Tools-lint
+            if tools.Version(self.version) >= "2021.3":
+                self.cpp_info.components["spirv-tools-lint"].names["cmake_find_package"] = "SPIRV-Tools-lint"
+                self.cpp_info.components["spirv-tools-lint"].names["cmake_find_package_multi"] = "SPIRV-Tools-lint"
+                self.cpp_info.components["spirv-tools-lint"].builddirs.append(self._module_subfolder)
+                self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+                self.cpp_info.components["spirv-tools-lint"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+                self.cpp_info.components["spirv-tools-lint"].libs = ["SPIRV-Tools-lint"]
+                self.cpp_info.components["spirv-tools-lint"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: %s" % bin_path)
-        self.env_info.path.append(bin_path)
+        if self.options.build_executables:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.path.append(bin_path)
