@@ -1,4 +1,7 @@
 sources:
+  "cci.20210823":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/0e2880ab990e79ce6cc8c79c219feda42d98b1e8.tar.gz"
+    sha256: "611cf4d30d88c48a4a04848a66ae4c5d3a63ccf965fd6017d9ea86ec5c7a088d"
   "cci.20210621":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/9cdeefb5e322fc26b5fed70795fe79725648df1f.tar.gz"
     sha256: "3742c24e7ccc09fce10e9d88c2f9a2e85f5142cc742be6df5cc3ba3f96defa92"
