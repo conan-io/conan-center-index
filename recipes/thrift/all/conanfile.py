@@ -64,14 +64,14 @@ class ThriftConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("boost/1.76.0")
+        self.requires("boost/1.77.0")
 
         if self.options.with_qt:
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cci")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_libevent:
@@ -79,12 +79,12 @@ class ThriftConan(ConanFile):
 
     def build_requirements(self):
         build_os = self.settings_build.os if hasattr(self, "settings_build") else self.settings.os
-            
+
         if build_os == "Windows":
             self.build_requires("winflexbison/2.5.24")
         else:
             self.build_requires("flex/2.6.4")
-            self.build_requires("bison/3.7.1")
+            self.build_requires("bison/3.7.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
