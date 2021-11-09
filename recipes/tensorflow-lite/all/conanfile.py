@@ -60,10 +60,6 @@ class TensorflowLiteConan(ConanFile):
             if self.settings.os == "Linux" and not self.options["ruy"].shared:
                 raise ConanInvalidConfiguration(
                         f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
-            if self.settings.os in ("Macos", "Windows") and self.options.with_xnnpack:
-                # FIXME linking errors from pthreadpool
-                raise ConanInvalidConfiguration(
-                        f"The project {self.name}/{self.version} with shared=True on Macos or Windows does not currently support xnnpack")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -109,6 +105,7 @@ class TensorflowLiteConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions.update({
+            "CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS": True,
             "TFLITE_ENABLE_RUY": self.options.get_safe("with_ruy", False),
             "TFLITE_ENABLE_NNAPI": self.options.get_safe("with_nnapi", False),
             "TFLITE_ENABLE_GPU": False,
@@ -134,6 +131,9 @@ class TensorflowLiteConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=os.path.join("include", "tensorflow", "lite"), src=os.path.join(self._source_subfolder, "tensorflow", "lite"))
         self.copy("*", dst="lib", src=os.path.join(self._build_subfolder, "lib"))
+        if self.options.shared:
+            self.copy("*", dst="bin", src=os.path.join(self._build_subfolder, "bin"))
+            tools.remove_files_by_mask(self.package_folder, "*.pdb")
         self._create_cmake_module_alias_target(os.path.join(self.package_folder, self._module_subfolder, self._module_file))
 
     def package_info(self):
