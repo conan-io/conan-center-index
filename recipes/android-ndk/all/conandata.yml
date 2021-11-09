@@ -1,4 +1,14 @@
 sources:
+  "r23b":
+    url:
+      "Windows":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r23b-windows.zip"
+          sha256: "36270f8b2cfdd940f410bd8ffe6ce86ffaa8e87ff1c4fd4a8be5130268357778"
+      "Linux":
+        "x86_64":
+          url: "https://dl.google.com/android/repository/android-ndk-r23b-linux.zip"
+          sha256: "c6e97f9c8cfe5b7be0a9e6c15af8e7a179475b7ded23e2d1c1fa0945d6fb4382"
   "r23":
     url:
       "Windows":
@@ -9,10 +19,6 @@ sources:
         "x86_64":
           url: "https://dl.google.com/android/repository/android-ndk-r23-linux.zip"
           sha256: "e3eacf80016b91d4cd2c8ca9f34eebd32df912bb799c859cc5450b6b19277b4f"
-      "Macos":
-        "x86_64":
-          url: "https://dl.google.com/android/repository/android-ndk-r23-darwin.zip"
-          sha256: "163ff3bb72306ffa814de35c49819bccae9df10855a4e3fbba52ad4111fcccae"
   "r22b":
     url:
       "Windows":
