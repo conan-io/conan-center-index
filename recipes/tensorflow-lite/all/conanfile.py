@@ -60,10 +60,10 @@ class TensorflowLiteConan(ConanFile):
             if self.settings.os == "Linux" and not self.options["ruy"].shared:
                 raise ConanInvalidConfiguration(
                         f"The project {self.name}/{self.version} with shared=True on Linux requires ruy:shared=True")
-            if self.settings.os == "Macos" and self.options.with_xnnpack:
+            if self.settings.os in ("Macos", "Windows") and self.options.with_xnnpack:
                 # FIXME linking errors from pthreadpool
                 raise ConanInvalidConfiguration(
-                        f"The project {self.name}/{self.version} with shared=True on Macos does not currently support xnnpack")
+                        f"The project {self.name}/{self.version} with shared=True on Macos or Windows does not currently support xnnpack")
 
     def config_options(self):
         if self.settings.os == "Windows":
