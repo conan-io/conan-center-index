@@ -47,6 +47,8 @@ class XkbcommonConan(ConanFile):
     def config_options(self):
         if not self._has_xkbregistry_option:
             del self.options.xkbregistry
+        if self.settings.os != "Linux":
+            del self.options.with_wayland
 
     def configure(self):
         if self.options.shared:
@@ -62,14 +64,14 @@ class XkbcommonConan(ConanFile):
         self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/2.9.12")
-        if self.options.with_wayland:
+        if self.options.get_safe("with_wayland", False):
             self.requires("wayland/1.19.0")
             self.requires("wayland-protocols/1.21")  # FIXME: This should be a build-requires
 
     def build_requirements(self):
         self.build_requires("meson/0.59.1")
         self.build_requires("bison/3.7.1")
-        if self.options.with_wayland:
+        if self.options.get_safe("with_wayland", False):
             self.build_requires("wayland/1.19.0")
 
     def source(self):
@@ -92,7 +94,7 @@ class XkbcommonConan(ConanFile):
         if self._meson:
             return self._meson
         defs={
-            "enable-wayland": self.options.with_wayland,
+            "enable-wayland": self.options.get_safe("with_wayland", False),
             "enable-docs": False,
             "enable-x11": self.options.with_x11,
             "libdir": os.path.join(self.package_folder, "lib"),
@@ -139,7 +141,7 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["libxkbregistry"].names["pkg_config"] = "xkbregistry"
             self.cpp_info.components["libxkbregistry"].libs = ["xkbregistry"]
             self.cpp_info.components["libxkbregistry"].requires = ["libxml2::libxml2"]
-        if self.options.with_wayland:
+        if self.options.get_safe("with_wayland", False):
             # FIXME: This generates just executable, but I need to use the requirements to pass Conan checks
             self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland", "wayland-protocols::wayland-protocols"]

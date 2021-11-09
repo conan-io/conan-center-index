@@ -21,12 +21,14 @@ class CprConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": ["openssl", "darwinssl", "winssl", _AUTO_SSL, _NO_SSL]
+        "with_ssl": ["openssl", "darwinssl", "winssl", _AUTO_SSL, _NO_SSL],
+        "signal": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_ssl": _AUTO_SSL
+        "with_ssl": _AUTO_SSL,
+        "signal": True,
     }
 
     _cmake = None
@@ -132,6 +134,7 @@ class CprConan(ConanFile):
             self._cmake.definitions[self._get_cmake_option("CPR_BUILD_TESTS")] = False
             self._cmake.definitions[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
             self._cmake.definitions[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
+            self._cmake.definitions["CPR_CURL_NOSIGNAL"] = not self.options.signal
 
             ssl_value = str(self.options.get_safe("with_ssl"))
             SSL_OPTIONS = {
@@ -197,7 +200,7 @@ class CprConan(ConanFile):
 
         if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.options["libcurl"].with_ssl:
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='{}'.".format(self.options.get_safe('with_ssl')))
-            
+
         if ssl_library == "winssl" and self.options["libcurl"].with_ssl != "schannel":
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'")
 

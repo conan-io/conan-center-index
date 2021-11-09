@@ -92,6 +92,8 @@ class PdalConan(ConanFile):
         miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
         if self.options["boost"].header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
+        if self.settings.arch not in ("x86_64", ):
+            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],

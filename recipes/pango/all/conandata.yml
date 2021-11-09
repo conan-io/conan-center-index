@@ -32,3 +32,9 @@ sources:
   "1.49.1":
     url: "https://github.com/GNOME/pango/archive/1.49.1.tar.gz"
     sha256: "e5179f16823cf9496bbbb95e7e147e98d6eb8c6fe9c3d3581ef4e541a9bfb933"
+  "1.49.2":
+    url: "https://github.com/GNOME/pango/archive/1.49.2.tar.gz"
+    sha256: "a251bdcecce29d64a8fcd24c59965112d5249f44f35eff19af5fcd2e8a699e50"
+  "1.49.3":
+    url: "https://github.com/GNOME/pango/archive/1.49.3.tar.gz"
+    sha256: "2bba081ba680b900a1285d7c9699c0058bf93c3c6b25acaa77214708fb7cb19b"

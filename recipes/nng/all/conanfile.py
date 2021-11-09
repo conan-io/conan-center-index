@@ -29,9 +29,13 @@ class NngConan(ConanFile):
         "tls": False,
     }
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -41,15 +45,18 @@ class NngConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        if self.options.tls:
-            self.requires("mbedtls/2.25.0")
-
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.tls:
+            if tools.Version(self.version) < "1.5.2":
+                self.requires("mbedtls/2.25.0")
+            else:
+                self.requires("mbedtls/3.0.0")
 
     def validate(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -93,7 +100,7 @@ class NngConan(ConanFile):
         self.cpp_info.libs = ["nng"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
 
         if self.options.shared:

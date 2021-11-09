@@ -2,6 +2,9 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.36.0"
+
+
 class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
     description = "Microsoft implementation of the Guidelines Support Library"
@@ -66,10 +69,9 @@ class MicrosoftGslConan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
-        self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
-        self.cpp_info.components["_ms-gsl"].names["cmake_find_package"] = "GSL"
-        self.cpp_info.components["_ms-gsl"].names["cmake_find_package_multi"] = "GSL"
+        self.cpp_info.set_property("cmake_file_name", "Microsoft.GSL")
+        self.cpp_info.set_property("cmake_target_name", "Microsoft.GSL")
+        self.cpp_info.components["_ms-gsl"].set_property("cmake_target_name", "GSL")
         if tools.Version(self.version) < "3.0.0":
             self.cpp_info.components["_ms-gsl"].defines = [
                 self._contract_map[str(self.options.on_contract_violation)]

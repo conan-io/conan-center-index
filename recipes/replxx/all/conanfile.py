@@ -1,6 +1,7 @@
 import os
 from conans import CMake, ConanFile, tools
 
+required_conan_version = ">=1.33.0"
 
 class ReplxxConan(ConanFile):
     name = "replxx"
@@ -10,10 +11,10 @@ class ReplxxConan(ConanFile):
     """
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AmokHuginnsson/replxx"
-    topics = ("conan", "readline", "libedit", "UTF-8")
+    topics = ("readline", "libedit", "UTF-8")
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,12 +32,15 @@ class ReplxxConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-release-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def _configure_cmake(self):
@@ -50,7 +54,7 @@ class ReplxxConan(ConanFile):
     def build(self):
         if tools.Version(self.version) < "0.0.3":
             tools.replace_in_file(
-                os.path.join(self._source_subfolder, "src/io.cxx"),
+                os.path.join(self._source_subfolder, "src", "io.cxx"),
                 "#include <array>\n",
                 "#include <array>\n#include <stdexcept>\n"
             )
@@ -69,3 +73,5 @@ class ReplxxConan(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.defines.append("REPLXX_STATIC")
+        self.cpp_info.filenames["cmake_find_package"] = "replxx"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "replxx"

@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -11,7 +12,8 @@ class XtlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtl"
     description = "The x template library"
-    topics = ("conan", "templates", "containers", "algorithms")
+    settings = "os", "compiler"
+    topics = ("templates", "containers", "algorithms")
     no_copy_source = True
 
     @property
@@ -24,6 +26,26 @@ class XtlConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
+
+        minimum_version = {
+            "clang": "3.9",
+            "gcc": "6",
+            "Visual Studio": "15.0",
+        }.get(str(self.settings.compiler))
+
+        if not minimum_version:
+            self.output.warn(
+                "Unknown compiler {} {}. Assuming compiler supports C++14."
+                .format(self.settings.compiler, self.settings.compiler.version))
+        else:
+            version = tools.Version(self.settings.compiler.version)
+            if version < minimum_version:
+                raise ConanInvalidConfiguration(
+                    "The compiler {} {} does not support C++14."
+                    .format(self.settings.compiler, self.settings.compiler.version))
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

@@ -182,8 +182,11 @@ class QtConan(ConanFile):
                        "python2(.exe)".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
+        if self.options.qtwayland:
+            self.build_requires("wayland/1.19.0")
+
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
             del self.options.with_libalsa
@@ -198,6 +201,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.with_mysql = False
             self.options.opengl = "dynamic"
+        if self.settings.os != "Linux":
+            self.options.qtwayland = False
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -351,7 +356,7 @@ class QtConan(ConanFile):
             self.requires("openal/1.21.1")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.4")
-        if self.options.gui and self.settings.os == "Linux":
+        if self.options.gui and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.3.0")
@@ -359,16 +364,17 @@ class QtConan(ConanFile):
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.0")
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
         if self.options.get_safe("with_gstreamer", False):
-            raise ConanInvalidConfiguration("gst-plugins-base is not yet available on Conan-Center-Index, please use option with_gstreamer=False")
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+        if self.options.qtwayland:
+            self.requires("wayland/1.19.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -666,7 +672,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_linux and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
                      "-system-webengine-opus"]
 
@@ -1021,7 +1027,7 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtwebengine:
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 webenginereqs.extend(["expat::expat", "opus::libopus"])
             _create_module("WebEngineCore", webenginereqs)
             _create_module("WebEngine", ["WebEngineCore"])
@@ -1101,7 +1107,7 @@ Examples = bin/datadir/examples""")
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gstreamer::gstreamer"])
+                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
                 _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])

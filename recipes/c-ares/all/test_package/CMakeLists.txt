@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
-project(PackageTest C)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-find_package(c-ares REQUIRED)
+find_package(c-ares REQUIRED CONFIG)
 
-add_executable(example example.c)
-target_link_libraries(example c-ares::cares)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} c-ares::cares)

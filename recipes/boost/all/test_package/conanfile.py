@@ -52,7 +52,7 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             return
         self.run(os.path.join("bin", "lambda_exe"), run_environment=True)
         if self.options["boost"].header_only:

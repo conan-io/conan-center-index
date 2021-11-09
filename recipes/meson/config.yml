@@ -41,13 +41,19 @@ versions:
   #   folder: all
   "0.57.2":
     folder: all
-  "0.58.0":
-    folder: all
+  # "0.58.0":
+  #   folder: all
   "0.58.1":
     folder: all
-  "0.59.0":
+  # "0.59.0":
+  #   folder: all
+  # "0.59.1":
+  #   folder: all
+  # "0.59.2":
+  #   folder: all
+  "0.59.3":
     folder: all
-  "0.59.1":
+  "0.60.0":
     folder: all
-  "0.59.2":
+  "0.60.1":
     folder: all

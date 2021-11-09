@@ -12,10 +12,9 @@ class LibmediainfoConan(ConanFile):
     homepage = "https://mediaarea.net/en/MediaInfo"
     url = "https://github.com/conan-io/conan-center-index"
     description = "MediaInfo is a convenient unified display of the most relevant technical and tag data for video and audio files"
-    topics = ("conan", "libmediainfo", "video", "audio", "metadata", "tag")
+    topics = ("libmediainfo", "video", "audio", "metadata", "tag")
+
     settings = "os",  "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,7 +24,13 @@ class LibmediainfoConan(ConanFile):
         "fPIC": True,
     }
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
+
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -40,9 +45,9 @@ class LibmediainfoConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libcurl/7.77.0")
+        self.requires("libcurl/7.79.1")
         self.requires("libzen/0.4.38")
-        self.requires("tinyxml2/8.0.0")
+        self.requires("tinyxml2/9.0.0")
         self.requires("zlib/1.2.11")
 
     def validate(self):
