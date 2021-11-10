@@ -1,8 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import os
-import shutil
 
 required_conan_version = ">=1.33.0"
 
@@ -11,7 +9,7 @@ class VulkanValidationLayersConan(ConanFile):
     name = "vulkan-validationlayers"
     description = "Khronos official Vulkan validation layers for Windows, Linux, Android, and MacOS."
     license = "Apache-2.0"
-    topics = ("conan", "vulkan-validation-layers", "vulkan", "validation-layers")
+    topics = ("vulkan", "validation-layers")
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -19,17 +17,16 @@ class VulkanValidationLayersConan(ConanFile):
     options = {
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
-        "with_wsi_wayland": [True, False]
+        "with_wsi_wayland": [True, False],
     }
     default_options = {
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
-        "with_wsi_wayland": True
+        "with_wsi_wayland": True,
     }
 
     short_paths = True
 
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     _cmake = None
 
@@ -37,17 +34,16 @@ class VulkanValidationLayersConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
-
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     @property
     def _get_compatible_spirv_tools_version(self):
@@ -68,8 +64,14 @@ class VulkanValidationLayersConan(ConanFile):
             self.requires("wayland/1.19.0")
 
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
+
         if self.options["spirv-tools"].shared:
             raise ConanInvalidConfiguration("vulkan-validationlayers can't depend on shared spirv-tools")
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("gcc < 5 is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
