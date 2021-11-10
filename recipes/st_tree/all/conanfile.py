@@ -12,7 +12,6 @@ class STTreeConan(ConanFile):
     description = "A fast and flexible c++ template class for tree data structures"
     topics = ("stl", "container", "data-structures")
     homepage = "https://github.com/erikerlandson/st_tree"
-    generators = "cmake"
     no_copy_source = True
 
     @property
