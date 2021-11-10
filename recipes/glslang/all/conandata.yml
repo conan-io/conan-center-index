@@ -7,8 +7,5 @@ sources:
     sha256: "c58fdcf7e00943ba10f9ae565b2725ec9d5be7dab7c8e82cac72fcaa83c652ca"
 patches:
   "11.5.0":
-    - patch_file: "patches/conanize-cmake-11.5.0.patch"
-      base_path: "source_subfolder"
-  "8.13.3559":
-    - patch_file: "patches/conanize-cmake-8.13.3559.patch"
+    - patch_file: "patches/0001-no-force-glslang-pic.patch"
       base_path: "source_subfolder"

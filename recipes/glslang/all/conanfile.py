@@ -34,7 +34,7 @@ class GlslangConan(ConanFile):
 
     short_paths = True
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
