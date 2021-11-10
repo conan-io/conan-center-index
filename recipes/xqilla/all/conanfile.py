@@ -47,12 +47,6 @@ class ConanXqilla(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("xqilla is just supported for Linux")
-        #if self.settings.compiler.cppstd:
-        #    tools.check_min_cppstd(self, 11)
-        #if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
-        #    raise ConanInvalidConfiguration("libstdc++11 required")
-        #if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-        #    raise ConanInvalidConfiguration("libstdc++11 required")
 
     def configure(self):
         if self.options.shared:
