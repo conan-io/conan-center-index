@@ -1,7 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 required_conan_version = ">=1.40.0"
 
@@ -85,15 +84,22 @@ class ConanXqilla(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        shutil.copy(os.path.join(self._source_subfolder, "src", "mapm", "README"), os.path.join(self.package_folder, "licenses", "LICENSE.mapm"))
-        shutil.copy(os.path.join(self._source_subfolder, "src", "yajl", "LICENSE.yajl"), os.path.join(self.package_folder, "licenses", "LICENSE.yajl"))
+        self.copy("README", dst="licenses/LICENSE.mapm", src=os.path.join(self._source_subfolder, "src", "mapm"))
+
+        tmp = tools.load(os.path.join(self._source_subfolder, "src", "yajl", "yajl_buf.h"))
+        license_contents = tmp[2:tmp.find("*/", 1)] 
+        tools.save("LICENSE", license_contents)
+        self.copy("LICENSE", dst="licenses/LICENSE.yajl",  ignore_case=True, keep_path=False)
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libxqilla"
-        self.cpp_info.libs = ["xqilla"]
+        self.cpp_info.libs =  tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("pthread")
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.path.append(bin_path)
