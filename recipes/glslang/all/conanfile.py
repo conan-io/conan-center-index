@@ -73,8 +73,9 @@ class GlslangConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-        if self.options.shared and self.settings.os in ["Windows", "Macos"]:
-            raise ConanInvalidConfiguration("Current glslang shared library build is broken on Windows and Macos")
+        # see https://github.com/KhronosGroup/glslang/issues/2283
+        if self.options.shared and (self.settings.os == "Windows" or (tools.Version(self.version) < "11.0.0" and tools.is_apple_os(self.settings.os))):
+            raise ConanInvalidConfiguration("glslang {} shared library build is broken on {}".format(self.version, self.settings.os))
 
         if self.options.enable_optimizer and self.options["spirv-tools"].shared:
             raise ConanInvalidConfiguration("glslang with enable_optimizer requires static spirv-tools, because SPIRV-Tools-opt is not built if shared")
@@ -91,7 +92,8 @@ class GlslangConan(ConanFile):
     def _patches_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # Do not force PIC if static (but keep it if shared, because OGLCompiler and OSDependent are still static)
+        # Do not force PIC if static (but keep it if shared, because OGLCompiler, OSDependent,
+        # GenericCodeGen and MachineIndependent are still static and linked to glslang shared)
         if not self.options.shared:
             cmake_files_to_fix = [
                 {"target": "OGLCompiler", "relpath": os.path.join("OGLCompilersDLL", "CMakeLists.txt")},
@@ -101,7 +103,7 @@ class GlslangConan(ConanFile):
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
                 {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
-            if tools.Version(self.version) < "11.5.0":
+            if tools.Version(self.version) < "11.0.0":
                 cmake_files_to_fix.append({"target": "glslang"    , "relpath": os.path.join("glslang", "CMakeLists.txt")})
             else:
                 cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
@@ -154,29 +156,32 @@ class GlslangConan(ConanFile):
         self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"
         self.cpp_info.components["glslang-core"].names["cmake_find_package_multi"] = "glslang"
         self.cpp_info.components["glslang-core"].libs = ["glslang" + lib_suffix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
-        if tools.Version(self.version) >= "11.5.0":
-            self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
 
-        if tools.Version(self.version) >= "11.5.0":
-            # MachineIndependent
-            self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
-            self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
-            self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
-            self.cpp_info.components["machineindependent"].requires = ["oglcompiler", "osdependent", "genericcodegen"]
+        if tools.Version(self.version) >= "11.0.0":
+            if self.options.shared:
+                self.cpp_info.components["glslang-core"].defines.append("GLSLANG_IS_SHARED_LIBRARY")
+            else:
+                # MachineIndependent
+                self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
+                self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
+                self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
+                self.cpp_info.components["machineindependent"].requires = ["oglcompiler", "osdependent", "genericcodegen"]
+                self.cpp_info.components["glslang-core"].requires.append("machineindependent")
 
-            # GenericCodeGen
-            self.cpp_info.components["genericcodegen"].names["cmake_find_package"] = "GenericCodeGen"
-            self.cpp_info.components["genericcodegen"].names["cmake_find_package_multi"] = "GenericCodeGen"
-            self.cpp_info.components["genericcodegen"].libs = ["GenericCodeGen" + lib_suffix]
+                # GenericCodeGen
+                self.cpp_info.components["genericcodegen"].names["cmake_find_package"] = "GenericCodeGen"
+                self.cpp_info.components["genericcodegen"].names["cmake_find_package_multi"] = "GenericCodeGen"
+                self.cpp_info.components["genericcodegen"].libs = ["GenericCodeGen" + lib_suffix]
+                self.cpp_info.components["glslang-core"].requires.append("genericcodegen")
 
         # OSDependent
         self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
         self.cpp_info.components["osdependent"].names["cmake_find_package_multi"] = "OSDependent"
         self.cpp_info.components["osdependent"].libs = ["OSDependent" + lib_suffix]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["osdependent"].system_libs.append("pthread")
         # OGLCompiler
         self.cpp_info.components["oglcompiler"].names["cmake_find_package"] = "OGLCompiler"

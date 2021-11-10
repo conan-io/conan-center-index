@@ -39,13 +39,3 @@
      VERSION   "${GLSLANG_VERSION}"
      SOVERSION "${GLSLANG_VERSION_MAJOR}")
  target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent)
-@@ -206,6 +205,9 @@
-                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-+        install(TARGETS MachineIndependent GenericCodeGen
-+                EXPORT  glslangTargets
-+                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-     else()
-         install(TARGETS glslang MachineIndependent GenericCodeGen
-                 EXPORT  glslangTargets
