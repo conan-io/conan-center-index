@@ -79,4 +79,4 @@ class WasmerConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
             elif self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl", "m"]
+                self.cpp_info.system_libs = ["pthread", "dl", "m"]
