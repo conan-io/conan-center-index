@@ -126,8 +126,8 @@ class Assimp(ConanFile):
     @property
     def _depends_on_zlib(self):
         return self.options.with_assbin or self.options.with_assbin_exporter or \
-               self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
-               self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
+            self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
+            self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
 
     def requirements(self):
         # TODO: unvendor others libs:
@@ -135,7 +135,9 @@ class Assimp(ConanFile):
         #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
         # - openddlparser
-        self.requires("irrxml/1.2")
+        if tools.Version(self.version) <= tools.Version("5.0.1"):
+            self.requires("irrxml/1.2")
+
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
         if self._depends_on_kuba_zip:
@@ -154,32 +156,54 @@ class Assimp(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
         # Don't force several compiler flags
-        for before, after in [("-fPIC", ""), ("-g ", ""), ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', "")]:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), before, after)
+        replace_mapping = [
+            ("-fPIC", ""),
+            ("-g ", ""),
+            ("SET(CMAKE_POSITION_INDEPENDENT_CODE ON)", ""),
+            ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', ""),
+            ('SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")', ""),
+            ('SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")', ""),
+            ('SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")', ""),
+            ("/WX", "")
+        ]
+
+        for before, after in replace_mapping:
+            tools.replace_in_file(os.path.join(
+                self._source_subfolder, "CMakeLists.txt"), before, after, strict=False)
         # Take care to not use these vendored libs
         for vendor in ["irrXML", "poly2tri", "rapidjson", "unzip", "utf8cpp", "zip"]:
-            tools.rmdir(os.path.join(self._source_subfolder, "contrib", vendor))
+            tools.rmdir(os.path.join(
+                self._source_subfolder, "contrib", vendor))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["HUNTER_ENABLED"] = False
-        self._cmake.definitions["SYSTEM_IRRXML"] = True
-        self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
-        self._cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
-        self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
-        self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
-        self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
-        self._cmake.definitions["IGNORE_GIT_HASH"] = True
-        self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
 
+        self._cmake = CMake(self)
+        if tools.Version(self.version) > tools.Version("5.0.1"):
+            self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
+            self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
+            self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
+        else:
+            self._cmake.definitions["HUNTER_ENABLED"] = False
+            self._cmake.definitions["IGNORE_GIT_HASH"] = True
+            self._cmake.definitions["SYSTEM_IRRXML"] = True
+
+        self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
         self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
         self._cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
+        self._cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
+        self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
+        self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
+        self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
+        self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
+        self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
+
         for option, definition in self._format_option_map.items():
-            self._cmake.definitions[definition] = bool(getattr(self.options, option))
+            self._cmake.definitions[definition] = bool(
+                getattr(self.options, option))
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -190,7 +214,8 @@ class Assimp(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
