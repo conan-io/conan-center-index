@@ -12,8 +12,6 @@ class AVIRConan(ConanFile):
     description = "High-quality pro image resizing / scaling C++ library, image resize"
     topics = ("image-processing", "image-resizer", "lanczos", )
     homepage = "https://github.com/avaneev/avir"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi", "cmake_find_package"
     no_copy_source = True
 
     @property
