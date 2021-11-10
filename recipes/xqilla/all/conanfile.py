@@ -11,7 +11,7 @@ class ConanXqilla(ConanFile):
     description = (
         "XQilla is an XQuery and XPath 2 library and command line utility written in C++, implemented on top of the Xerces-C∞ library"
     )
-    topics = ("conan", "xqilla", "XML", "XQuery")
+    topics = ("xqilla", "XML", "XQuery")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xqilla.sourceforge.net/HomePage"
     license = "Apache-2.0"
@@ -45,7 +45,9 @@ class ConanXqilla(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("xqilla is just supported for Linux")
+            raise ConanInvalidConfiguration("The xqilla recipe currently only support Linux.")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def configure(self):
         if self.options.shared:
@@ -61,8 +63,11 @@ class ConanXqilla(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self)
         conf_args = [
             "--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath)),
-            "CXXFLAGS=-std=c++11",
         ]
+        
+        if not self.settings.compiler.cppstd:
+            self._autotools.cppstd_flag = "-std=c++11"
+
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
