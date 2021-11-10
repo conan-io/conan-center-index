@@ -61,6 +61,7 @@ class GlslangConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
+            "11.6.0": "2021.3",
             "11.5.0": "2021.2",
             "8.13.3559": "2020.5",
         }.get(str(self.version), False)
@@ -138,6 +139,8 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["ENABLE_PCH"] = True
         self._cmake.definitions["ENABLE_CTEST"] = False
         self._cmake.definitions["USE_CCACHE"] = False
+        if tools.Version(self.version) >= "11.6.0" and self.settings.os == "Windows":
+            self._cmake.definitions["OVERRIDE_MSVCCRT"] = False
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["CMAKE_MACOSX_BUNDLE"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
