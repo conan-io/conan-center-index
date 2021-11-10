@@ -108,9 +108,10 @@ class CharlsConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "charls")
+        self.cpp_info.set_property("cmake_target_name", "charls")
         self.cpp_info.builddirs.append(self._module_subfolder)
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
