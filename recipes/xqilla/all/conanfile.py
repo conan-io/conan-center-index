@@ -69,6 +69,9 @@ class ConanXqilla(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
 
+        if self.options.get_safe("fPIC", True):
+            conf_args.extend(["--with-pic"])
+
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
