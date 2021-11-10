@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.33.0"
 
 
 class GlslangConan(ConanFile):
@@ -10,20 +10,18 @@ class GlslangConan(ConanFile):
     description = "Khronos-reference front end for GLSL/ESSL, partial front " \
                   "end for HLSL, and a SPIR-V generator."
     license = ["BSD-3-Clause", "NVIDIA"]
-    topics = ("conan", "glslang", "glsl", "hlsl", "spirv", "spir-v", "validation", "translation")
+    topics = ("glsl", "hlsl", "spirv", "spir-v", "validation", "translation")
     homepage = "https://github.com/KhronosGroup/glslang"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "build_executables": [True, False],
         "spv_remapper": [True, False],
         "hlsl": [True, False],
-        "enable_optimizer": [True, False]
+        "enable_optimizer": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,9 +29,12 @@ class GlslangConan(ConanFile):
         "build_executables": True,
         "spv_remapper": True,
         "hlsl": True,
-        "enable_optimizer": True
+        "enable_optimizer": True,
     }
 
+    short_paths = True
+
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -44,6 +45,11 @@ class GlslangConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -51,10 +57,6 @@ class GlslangConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        if self.options.shared and self.settings.os in ["Windows", "Macos"]:
-            raise ConanInvalidConfiguration("Current glslang shared library build is broken on Windows and Macos")
 
     @property
     def _get_compatible_spirv_tools_version(self):
@@ -68,12 +70,18 @@ class GlslangConan(ConanFile):
             self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version))
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
+        if self.options.shared and self.settings.os in ["Windows", "Macos"]:
+            raise ConanInvalidConfiguration("Current glslang shared library build is broken on Windows and Macos")
+
         if self.options.enable_optimizer and self.options["spirv-tools"].shared:
             raise ConanInvalidConfiguration("glslang with enable_optimizer requires static spirv-tools, because SPIRV-Tools-opt is not built if shared")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def build(self):
         self._patches_sources()
