@@ -48,15 +48,36 @@ class VulkanValidationLayersConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
+            "1.2.189.2": "2021.3",
             "1.2.182": "2021.2",
             "1.2.154.0": "2020.5",
         }.get(str(self.version), False)
 
+    @property
+    def _get_compatible_vulkan_headers_version(self):
+        return {
+            "1.2.189.2": "1.2.189",
+            "1.2.182": "1.2.182",
+            "1.2.154.0": "1.2.154.0",
+        }.get(str(self.version), False)
+
+    @staticmethod
+    def _greater_equal_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            diff_len = len(lv2) - len(lv1)
+            if diff_len > 0:
+                lv1.extend([0] * diff_len)
+            elif diff_len < 0:
+                lv2.extend([0] * -diff_len)
+            return lv1 >= lv2
+
     def requirements(self):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
         self.requires("spirv-tools/{}".format(self._get_compatible_spirv_tools_version), private=not hasattr(self, "settings_build"))
-        self.requires("vulkan-headers/{}".format(self.version))
-        if tools.Version(self.version) >= "1.2.173":
+        self.requires("vulkan-headers/{}".format(self._get_compatible_vulkan_headers_version))
+        # TODO: use tools.Version comparison once https://github.com/conan-io/conan/issues/10000 is fixed
+        if self._greater_equal_semver(self.version, "1.2.173"):
             self.requires("robin-hood-hashing/3.11.3")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
