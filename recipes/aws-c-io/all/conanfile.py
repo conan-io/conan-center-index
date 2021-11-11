@@ -79,5 +79,5 @@ class AwsCIO(ConanFile):
             self.cpp_info.components["aws-c-io-lib"].frameworks.append("Security")
         if self.settings.os == "Windows":
             self.cpp_info.components["aws-c-io-lib"].system_libs = ["crypt32", "secur32", "shlwapi"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["aws-c-io-lib"].requires.append("s2n::s2n-lib")
