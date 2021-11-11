@@ -45,6 +45,11 @@ class InnoextractConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        # Turn off static library detection, which is on by default on Windows.
+        # This keeps the CMakeLists.txt from trying to detect static Boost
+        # libraries and use Boost components for zlib and BZip2. Getting the
+        # libraries via Conan does the correct thing without other assistance.
+        self._cmake.definitions["USE_STATIC_LIBS"] = "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
