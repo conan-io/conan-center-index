@@ -58,7 +58,7 @@ class WasmerConan(ConanFile):
         if self.options.shared:
             self.copy("wasmer.dll", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.so*", src=srclibdir, dst="lib", keep_path=False)
-            self.copy("libwasmtime.dylib", src=srclibdir,  dst="lib", keep_path=False)
+            self.copy("libwasmer.dylib", src=srclibdir,  dst="lib", keep_path=False)
         else:
             self.copy("wasmer.lib", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.a", src=srclibdir, dst="lib", keep_path=False)
