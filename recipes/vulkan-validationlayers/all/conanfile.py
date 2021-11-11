@@ -63,14 +63,14 @@ class VulkanValidationLayersConan(ConanFile):
 
     @staticmethod
     def _greater_equal_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            diff_len = len(lv2) - len(lv1)
-            if diff_len > 0:
-                lv1.extend([0] * diff_len)
-            elif diff_len < 0:
-                lv2.extend([0] * -diff_len)
-            return lv1 >= lv2
+        lv1 = [int(v) for v in v1.split(".")]
+        lv2 = [int(v) for v in v2.split(".")]
+        diff_len = len(lv2) - len(lv1)
+        if diff_len > 0:
+            lv1.extend([0] * diff_len)
+        elif diff_len < 0:
+            lv2.extend([0] * -diff_len)
+        return lv1 >= lv2
 
     def requirements(self):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
