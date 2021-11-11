@@ -4,7 +4,7 @@ import re
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibcurlConan(ConanFile):
