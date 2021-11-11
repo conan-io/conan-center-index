@@ -112,5 +112,5 @@ class XtensorConan(ConanFile):
             self.cpp_info.defines.append("XTENSOR_USE_TBB")
         if self.options.openmp:
             self.cpp_info.defines.append("XTENSOR_USE_OPENMP")
-        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
+        if self.settings.compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
             self.cpp_info.defines.append("XTENSOR_GLIBCXX_USE_CXX11_ABI=1")
