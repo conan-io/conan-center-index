@@ -42,13 +42,13 @@ class ConanXqilla(ConanFile):
     def _gnumake_cmd(self):
         make_ldflags = "LDFLAGS='{libs} -pthread'".format(
             libs=" ".join(["-L{}".format(os.path.join(self.deps_cpp_info["xerces-c"].rootpath, it)) for it in self.deps_cpp_info["xerces-c"].libdirs]))
-
-        make_ccpflags = "CPPFLAGS='{includes}'".format(
-            includes=" ".join(["-I{}".format(os.path.join(self.deps_cpp_info["xerces-c"].rootpath, it)) for it in self.deps_cpp_info["xerces-c"].includedirs]))
-
+        flags = []
+        flags.append(' '.join(["-I{}".format(os.path.join(self.deps_cpp_info["xerces-c"].rootpath, it)) for it in self.deps_cpp_info["xerces-c"].includedirs]))
+        if self.settings.compiler == "gcc":
+            flags.append('-std=c++11')
+        make_ccpflags = "CPPFLAGS='{}'".format(" ".join(flags))
         make_cmd = '{ldflags} {cppflags} {make} -j{cpucount}'.format(
             make=self._make_program, ldflags=make_ldflags, cppflags=make_ccpflags,cpucount=tools.cpu_count())
-
         return make_cmd
 
     def validate(self):
