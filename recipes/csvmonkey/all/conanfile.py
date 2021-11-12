@@ -23,6 +23,9 @@ class CSVMONEKYConan(ConanFile):
         if self.settings.arch not in ("x86", "x86_64",):
             raise ConanInvalidConfiguration("{} requires x86 architecture.".format(self.name))
 
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("{} doesn't support Visual Studio C++.".format(self.name))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
