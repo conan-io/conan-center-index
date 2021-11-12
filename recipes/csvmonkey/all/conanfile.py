@@ -14,6 +14,8 @@ class CSVMONEKYConan(ConanFile):
     homepage = "https://github.com/dw/csvmonkey/"
     settings = "arch", "compiler"
     no_copy_source = True
+    options = {"with_spirit": [True, False]}
+    default_options = {"with_spirit": False}
 
     @property
     def _source_subfolder(self):
@@ -26,6 +28,10 @@ class CSVMONEKYConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("{} doesn't support Visual Studio C++.".format(self.name))
 
+    def requirements(self):
+        if self.options.with_spirit:
+            self.requires("boost/1.77.0")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
@@ -34,10 +40,11 @@ class CSVMONEKYConan(ConanFile):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
         self.cpp_info.set_property("cmake_target_name", "csvmonkey")
         self.cpp_info.set_property("pkg_config_name", "csvmonkey")
+        if self.options.with_spirit:
             self.cpp_info.defines.append("USE_SPIRIT")
