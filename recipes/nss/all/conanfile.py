@@ -53,7 +53,8 @@ class NSSConan(ConanFile):
     @property
     def _make_args(self):
         args = []
-        args.append("USE_64=%s" % 1 if self.settings.arch in ["x86_64"] else 0)
+        if self.settings.arch in ["x86_64"]:
+            args.append("USE_64=1")
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
         args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
 
@@ -63,6 +64,9 @@ class NSSConan(ConanFile):
             "Macos": "Darwin",
             "Windows": "WinNT"
         }.get(str(self.settings.os), "UNSUPPORTED_OS"))
+        if self.settings.build_type != "Debug":
+            args.append("BUILD_OPT=1")
+
         args.append("USE_SYSTEM_ZLIB=1")
         args.append("NSS_DISABLE_GTESTS=1")
         # args.append("NSS_USE_SYSTEM_SQLITE=1")
