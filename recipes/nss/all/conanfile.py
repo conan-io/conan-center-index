@@ -50,38 +50,38 @@ class NSSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
+    @property
+    def _make_args(self):
+        args = []
+        args.append("USE_64=%s" % 1 if self.settings.arch in ["x86_64"] else 0)
+        args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
+        args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
+
+        args.append("OS_TARGET=%s" %
+        {
+            "Linux": "Linux",
+            "Macos": "Darwin",
+            "Windows": "WinNT"
+        }.get(str(self.settings.os), "UNSUPPORTED_OS"))
+        args.append("USE_SYSTEM_ZLIB=1")
+        args.append("NSS_DISABLE_GTESTS=1")
+        # args.append("NSS_USE_SYSTEM_SQLITE=1")
+        # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
+        # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
+        args.append("NSDISTMODE=copy")
+        return args
+
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         with tools.chdir(os.path.join(self._source_subfolder, "nss")):
-            args = []
-            args.append("USE_64=1")
-            args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
-            args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
-            args.append("OS_TARGET=Linux")
-            args.append("USE_SYSTEM_ZLIB=1")
-            args.append("NSS_DISABLE_GTESTS=1")
-            # args.append("NSS_USE_SYSTEM_SQLITE=1")
-            # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
-            # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
-            args.append("NSDISTMODE=copy")
-            self.run("make %s" % " ".join(args))
+            self.run("make %s" % " ".join(self._make_args))
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
         with tools.chdir(os.path.join(self._source_subfolder, "nss")):
-            args = []
-            args.append("USE_64=1")
-            args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
-            args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
-            args.append("OS_TARGET=Linux")
-            args.append("USE_SYSTEM_ZLIB=1")
-            args.append("NSS_DISABLE_GTESTS=1")
-            # args.append("NSS_USE_SYSTEM_SQLITE=1")
-            # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
-            # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
-            args.append("NSDISTMODE=copy")
-            self.run("make install %s" % " ".join(args))
+            self.run("make install %s" % " ".join(self._make_args))
         self.copy("*",
                   src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
                   dst="include")
@@ -98,9 +98,6 @@ class NSSConan(ConanFile):
         else:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
 
-        self.copy("COPYING",
-                  src = os.path.join(self._source_subfolder, "nss"),
-                  dst = "licenses")
 
 
     def package_info(self):
@@ -141,3 +138,5 @@ class NSSConan(ConanFile):
             self.cpp_info.components["ssl"].system_libs = ["pthread"]
 
         self.cpp_info.components["nss_executables"].requires = ["zlib::zlib"]
+
+        self.cpp_info.set_property("pkg_config_name", "nss")
