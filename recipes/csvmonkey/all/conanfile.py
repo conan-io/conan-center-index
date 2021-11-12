@@ -40,8 +40,4 @@ class CSVMONEKYConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
         self.cpp_info.set_property("cmake_target_name", "csvmonkey")
         self.cpp_info.set_property("pkg_config_name", "csvmonkey")
-
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.cxxflags.append("/arch:AVX")
-        else:
-            self.cpp_info.cxxflags.append("-msse4.2")
+            self.cpp_info.defines.append("USE_SPIRIT")
