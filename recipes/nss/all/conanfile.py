@@ -19,10 +19,6 @@ class NSSConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,9 +45,11 @@ class NSSConan(ConanFile):
 
     def validate(self):
         if not self.options.shared:
-            raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome")
+            raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
         if not self.options["nspr"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
+        if self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("ARM builds not yet supported. Contributions are welcome.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
