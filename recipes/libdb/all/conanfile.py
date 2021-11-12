@@ -73,7 +73,7 @@ class LibdbConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio":
             # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
-            if (self.settings.compiler.version) == "16":
+            if tools.Version(self.settings.compiler.version) == "16":
                 raise ConanInvalidConfiguration("Visual Studio 2019 not supported.")
 
         if self.options.get_safe("with_cxx"):
