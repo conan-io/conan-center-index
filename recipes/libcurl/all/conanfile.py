@@ -4,7 +4,7 @@ import re
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class LibcurlConan(ConanFile):
@@ -535,12 +535,11 @@ class LibcurlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "CURL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
-        self.cpp_info.names["pkg_config"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
-        self.cpp_info.components["curl"].names["pkg_config"] = "libcurl"
+        self.cpp_info.set_property("cmake_file_name", "CURL")
+        self.cpp_info.set_property("cmake_target_name", "CURL")
+        self.cpp_info.set_property("pkg_config_name", "libcurl")
+        self.cpp_info.components["curl"].set_property("cmake_target_name", "libcurl")
+        self.cpp_info.components["curl"].set_property("pkg_config_name", "libcurl")
 
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
