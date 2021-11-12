@@ -3,14 +3,17 @@ from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
+required_conan_version = ">=1.33.0"
+
 
 class ZimgConan(ConanFile):
     name = "zimg"
     description = "Scaling, colorspace conversion, and dithering library"
-    topics = ("conan", "zimg", "image", "manipulation")
+    topics = ("zimg", "image", "manipulation")
     homepage = "https://github.com/sekrit-twc/zimg"
     url = "https://github.com/conan-io/conan-center-index"
     license = "WTFPL"
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,9 +24,11 @@ class ZimgConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/**"
-
     _autotools = None
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     @property
     def _source_subfolder(self):
@@ -40,11 +45,12 @@ class ZimgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def validate(self):
         if self.settings.build_type not in ("Release", "Debug"):
             raise ConanInvalidConfiguration("zimg does not support the build type '{}'.".format(self.settings.build_type))
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.version < tools.Version(15):
-                raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
@@ -121,12 +127,12 @@ class ZimgConan(ConanFile):
         if self.options.shared:
             self.copy("z_imp.lib", src=sln_dir, dst="lib")
             self.copy("z.dll", src=sln_dir, dst="bin")
-            os.rename(os.path.join(self.package_folder, "lib", "z_imp.lib"),
-                      os.path.join(self.package_folder, "lib", "zimg.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "z_imp.lib"),
+                         os.path.join(self.package_folder, "lib", "zimg.lib"))
         else:
             self.copy("z.lib", src=sln_dir, dst="lib")
-            os.rename(os.path.join(self.package_folder, "lib", "z.lib"),
-                      os.path.join(self.package_folder, "lib", "zimg.lib"))
+            tools.rename(os.path.join(self.package_folder, "lib", "z.lib"),
+                         os.path.join(self.package_folder, "lib", "zimg.lib"))
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
@@ -136,6 +142,7 @@ class ZimgConan(ConanFile):
             self._package_autotools()
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "zimg"
         self.cpp_info.libs = ["zimg"]
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
