@@ -1,0 +1,5 @@
+sources:
+  "cci.20211008":
+    url: "https://github.com/DiligentGraphics/glslang/archive/baf3f8fc99b8b24f8cc279de898d944932d6442e.zip"
+    sha256: "5f0e9a2eaf2eebe9221176bf65e3d62004c0be1fc63b5b90e35d6fc185ab5e50"
+
