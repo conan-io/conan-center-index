@@ -12,14 +12,23 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "BSD-3-Clause"
-    
+
     provides = "crow"
 
-    exports_sources = ["patches/**", ]
+    options = {
+        "amalgamation": [True, False],
+    }
+    default_options = {
+        "amalgamation": False,
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def requirements(self):
         self.requires("boost/1.77.0")
@@ -37,23 +46,32 @@ class CrowConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        cmake = CMake(self)
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.build(target="amalgamation")
+        if self.options.amalgamation:
+            cmake = CMake(self)
+            cmake.definitions["BUILD_EXAMPLES"] = False
+            cmake.definitions["BUILD_TESTING"] = False
+            cmake.configure(source_folder=self._source_subfolder)
+            cmake.build(target="amalgamation")
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy(
-            "*.h",
-            dst=os.path.join("include", "crow"),
-            src=os.path.join(self._source_subfolder, "include"),
-        )
-        self.copy("crow_all.h", dst=os.path.join("include", "crow"))
+
+        if self.options.amalgamation:
+            self.copy("crow_all.h", dst="include")
+        else:
+            self.copy(
+                "*.h",
+                dst=os.path.join("include"),
+                src=os.path.join(self._source_subfolder, "include"),
+            )
+            self.copy(
+                "*.hpp",
+                dst=os.path.join("include"),
+                src=os.path.join(self._source_subfolder, "include"),
+            )
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def package_info(self):
         # These are not official targets, this is just the name (without fork prefix)

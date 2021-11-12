@@ -1,4 +1,8 @@
-#include "crow/crow_all.h"
+#ifdef CROW_AMALGAMATION
+#include "crow_all.h"
+#else
+#include "crow.h"
+#endif
 
 int main()
 {
