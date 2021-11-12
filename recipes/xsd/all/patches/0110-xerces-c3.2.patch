@@ -1,0 +1,182 @@
+Description: Remove tests for character ref. values unsupported by Xerces-C++ 3.2
+Author: Boris Kolpackov <boris@codesynthesis.com>
+Origin: https://git.codesynthesis.com/cgit/xsd/xsd/patch/?id=400651ba7fd2f80155348ed39fc02e2aa9892fb9
+Bug: <URL to the upstream bug report if any, implies patch has been forwarded, optional>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881108
+Last-Update: 2017-11-08
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: trunk/xsd/tests/cxx/tree/encoding/char/iso-8859-1/driver.cxx
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/iso-8859-1/driver.cxx
++++ b/xsd/tests/cxx/tree/encoding/char/iso-8859-1/driver.cxx
+@@ -43,7 +43,7 @@ main (int argc, char* argv[])
+       if (s[0] != "abc" ||
+           s[1] != "\xE6" ||
+           s[2] != "\xA2\xA3\xA4\xA5" ||
+-          s[3] != "???")
++          s[3] != "??")
+       {
+         cerr << "invalid encoding" << endl;
+         return 1;
+Index: trunk/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.std
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.std
++++ b/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.std
+@@ -3,7 +3,7 @@
+   <a>abc</a>
+   <a>Ê</a>
+   <a>¢£§•</a>
+-  <a>???</a>
++  <a>??</a>
+   <b>abc</b>
+   <b>a‚c</b>
+   <b>‚Úbc</b>
+Index: trunk/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.xml
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.xml
++++ b/xsd/tests/cxx/tree/encoding/char/iso-8859-1/test.xml
+@@ -5,7 +5,7 @@
+   <a>abc</a>
+   <a>&#xE6;</a>
+   <a>&#xA2;&#xA3;&#xA4;&#xA5;</a>
+-  <a>&#x100;&#xAAAA;&#xAAAAA;</a>
++  <a>&#x100;&#xAAAA;</a>
+ 
+   <b>abc</b>
+   <b>a&#xE2;c</b>
+Index: trunk/xsd/tests/cxx/tree/encoding/char/utf-8/driver.cxx
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/utf-8/driver.cxx
++++ b/xsd/tests/cxx/tree/encoding/char/utf-8/driver.cxx
+@@ -32,8 +32,7 @@ main (int argc, char* argv[])
+ 
+       if (s[0] != "abc" ||
+           s[1] != "\xD5\x95" ||
+-          s[2] != "\xEA\xAA\xAA" ||
+-          s[3] != "\xF2\xAA\xAA\xAA")
++          s[2] != "\xEA\xAA\xAA")
+       {
+         cerr << "invalid encoding" << endl;
+         return 1;
+@@ -45,8 +44,7 @@ main (int argc, char* argv[])
+ 
+       if (s[0] != strenum::abc ||
+           s[1] != strenum::a_c ||
+-          s[2] != strenum::cxx_bc ||
+-          s[3] != strenum::ab_)
++          s[2] != strenum::cxx_bc)
+       {
+         cerr << "invalid encoding" << endl;
+         return 1;
+Index: trunk/xsd/tests/cxx/tree/encoding/char/utf-8/test.std
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/utf-8/test.std
++++ b/xsd/tests/cxx/tree/encoding/char/utf-8/test.std
+@@ -3,9 +3,7 @@
+   <a>abc</a>
+   <a>&#x555;</a>
+   <a>&#xAAAA;</a>
+-  <a>&#xAAAAA;</a>
+   <b>abc</b>
+   <b>a&#x555;c</b>
+   <b>&#xAAAA;bc</b>
+-  <b>ab&#xAAAAA;</b>
+ </t:root>
+Index: trunk/xsd/tests/cxx/tree/encoding/char/utf-8/test.xml
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/utf-8/test.xml
++++ b/xsd/tests/cxx/tree/encoding/char/utf-8/test.xml
+@@ -5,11 +5,9 @@
+   <a>abc</a>
+   <a>&#x555;</a>
+   <a>&#xAAAA;</a>
+-  <a>&#xAAAAA;</a>
+ 
+   <b>abc</b>
+   <b>a&#x555;c</b>
+   <b>&#xAAAA;bc</b>
+-  <b>ab&#xAAAAA;</b>
+ 
+ </t:root>
+Index: trunk/xsd/tests/cxx/tree/encoding/char/utf-8/test.xsd
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/char/utf-8/test.xsd
++++ b/xsd/tests/cxx/tree/encoding/char/utf-8/test.xsd
+@@ -9,7 +9,6 @@
+         abc
+         a&#x555;c
+         &#xAAAA;bc
+-        ab&#xAAAAA;
+       </documentation>
+     </annotation>
+ 
+@@ -17,7 +16,6 @@
+       <enumeration value="abc"/>
+       <enumeration value="a&#x555;c"/>
+       <enumeration value="&#xAAAA;bc"/>
+-      <enumeration value="ab&#xAAAAA;"/>
+     </restriction>
+   </simpleType>
+ 
+Index: trunk/xsd/tests/cxx/tree/encoding/wchar/test.std
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/wchar/test.std
++++ b/xsd/tests/cxx/tree/encoding/wchar/test.std
+@@ -2,9 +2,9 @@
+ <t:root xmlns:t="test">
+   <a>abc</a>
+   <a>&#x1FFF;&#xD7FF;</a>
+-  <a>&#x10000;&#x10FFFD;</a>
++  <a>&#x1000;&#x10FF;</a>
+   <b>abc</b>
+   <b>a&#x1FFF;&#xD7FF;c</b>
+-  <b>&#x10000;&#x10FFFD;bc</b>
+-  <b>ab&#x10000;&#x10FFFD;</b>
++  <b>&#x1000;&#x10FF;bc</b>
++  <b>ab&#x1000;&#x10FF;</b>
+ </t:root>
+Index: trunk/xsd/tests/cxx/tree/encoding/wchar/test.xml
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/wchar/test.xml
++++ b/xsd/tests/cxx/tree/encoding/wchar/test.xml
+@@ -4,11 +4,11 @@
+ 
+   <a>abc</a>
+   <a>&#x1FFF;&#xD7FF;</a>
+-  <a>&#x10000;&#x10FFFD;</a>
++  <a>&#x1000;&#x10FF;</a>
+ 
+   <b>abc</b>
+   <b>a&#x1FFF;&#xD7FF;c</b>
+-  <b>&#x10000;&#x10FFFD;bc</b>
+-  <b>ab&#x10000;&#x10FFFD;</b>
++  <b>&#x1000;&#x10FF;bc</b>
++  <b>ab&#x1000;&#x10FF;</b>
+ 
+ </t:root>
+Index: trunk/xsd/tests/cxx/tree/encoding/wchar/test.xsd
+===================================================================
+--- a/xsd/tests/cxx/tree/encoding/wchar/test.xsd
++++ b/xsd/tests/cxx/tree/encoding/wchar/test.xsd
+@@ -8,16 +8,16 @@
+         Test enum. Valid values are:
+         abc
+         a&#x1FFF;&#xD7FF;c
+-        &#x10000;&#x10FFFD;bc
+-        ab&#x10000;&#x10FFFD;
++        &#x1000;&#x10FF;bc
++        ab&#x1000;&#x10FF;
+       </documentation>
+     </annotation>
+ 
+     <restriction base="string">
+       <enumeration value="abc"/>
+       <enumeration value="a&#x1FFF;&#xD7FF;c"/>
+-      <enumeration value="&#x10000;&#x10FFFD;bc"/>
+-      <enumeration value="ab&#x10000;&#x10FFFD;"/>
++      <enumeration value="&#x1000;&#x10FF;bc"/>
++      <enumeration value="ab&#x1000;&#x10FF;"/>
+     </restriction>
+   </simpleType>
+ 
