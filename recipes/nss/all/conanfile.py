@@ -27,6 +27,12 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def build_requirements(self):
+        if self.settings.compiler == "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/cci.latest")
+        if self.settings.os == "Windows":
+            self.build_requires("mozilla-build/3.3")
+
     def configure(self):
         self.options["nspr"].shared = True
         self.options.shared = True
@@ -55,6 +61,8 @@ class NSSConan(ConanFile):
         args = []
         if self.settings.arch in ["x86_64"]:
             args.append("USE_64=1")
+        if self.settings.arch in ["armv8"]:
+            args.append("CPU_ARCH=arm")
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
         args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
 
@@ -62,7 +70,8 @@ class NSSConan(ConanFile):
         {
             "Linux": "Linux",
             "Macos": "Darwin",
-            "Windows": "WinNT"
+            "Windows": "WINNT",
+            "FreeBSD": "FreeBSD"
         }.get(str(self.settings.os), "UNSUPPORTED_OS"))
         if self.settings.build_type != "Debug":
             args.append("BUILD_OPT=1")
@@ -126,7 +135,8 @@ class NSSConan(ConanFile):
 
         self.cpp_info.components["freebl"].libs = [_library_name("freebl", 3)]
 
-        self.cpp_info.components["freeblpriv"].libs = [_library_name("freeblpriv", 3)]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["freeblpriv"].libs = [_library_name("freeblpriv", 3)]
 
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]
