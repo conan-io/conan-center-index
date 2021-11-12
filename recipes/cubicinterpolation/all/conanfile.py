@@ -12,7 +12,7 @@ class CubicInterpolationConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
-
+    exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -88,7 +88,7 @@ class CubicInterpolationConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_EXAMPLE"] = False
         self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
