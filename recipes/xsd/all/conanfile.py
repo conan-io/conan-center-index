@@ -57,10 +57,6 @@ class ConanXqilla(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
                   destination=self._source_subfolder)
