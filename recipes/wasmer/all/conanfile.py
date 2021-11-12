@@ -28,6 +28,10 @@ class WasmerConan(ConanFile):
             return "Windows"
         return str(self.settings.os)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.shared
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -55,28 +59,18 @@ class WasmerConan(ConanFile):
         self.copy("*.h", src=os.path.join(self.source_folder, "include"), dst="include", keep_path=False)
 
         srclibdir = os.path.join(self.source_folder, "lib")
-        if self.options.shared:
+        if self.options.get_safe("shared", True):
             self.copy("wasmer.dll", src=srclibdir, dst="lib", keep_path=False)
+            self.copy("wasmer.lib", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.so*", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.dylib", src=srclibdir,  dst="lib", keep_path=False)
         else:
-            self.copy("wasmer.lib", src=srclibdir, dst="lib", keep_path=False)
             self.copy("libwasmer.a", src=srclibdir, dst="lib", keep_path=False)
 
         self.copy("LICENSE", dst="licenses", src=self.source_folder)
 
     def package_info(self):
-        if self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.libs = ["wasmer.dll"]
-            else:
-                self.cpp_info.libs = ["wasmer"]
-        else:
-            if self.settings.os == "Windows":
-                self.cpp_info.defines = ["WASM_API_EXTERN=", "WASI_API_EXTERN="]
-            self.cpp_info.libs = ["wasmer"]
-
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
-            elif self.settings.os == "Linux":
+        self.cpp_info.libs = ["wasmer"]
+        if not self.options.get_safe("shared", True):
+            if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread", "dl", "m"]
