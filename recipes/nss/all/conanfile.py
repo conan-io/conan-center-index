@@ -64,15 +64,19 @@ class NSSConan(ConanFile):
         args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
         args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
 
-        args.append("OS_TARGET=%s" %
-        {
+        os_map = {
             "Linux": "Linux",
             "Macos": "Darwin",
             "Windows": "WINNT",
             "FreeBSD": "FreeBSD"
-        }.get(str(self.settings.os), "UNSUPPORTED_OS"))
+        }
+
+        args.append("OS_TARGET=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
+        args.append("OS_ARCH=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
         if self.settings.build_type != "Debug":
             args.append("BUILD_OPT=1")
+        if self.settings.compiler == "Visual Studio":
+            args.append("NSPR31_LIB_PREFIX=$(NULL)")
 
         args.append("USE_SYSTEM_ZLIB=1")
         args.append("NSS_DISABLE_GTESTS=1")
@@ -88,7 +92,7 @@ class NSSConan(ConanFile):
             tools.patch(**patch)
         with tools.chdir(os.path.join(self._source_subfolder, "nss")):
             with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                self.run("make %s" % " ".join(self._make_args))
+                self.run("make %s" % " ".join(self._make_args), run_environment=True)
 
     def package(self):
         self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
