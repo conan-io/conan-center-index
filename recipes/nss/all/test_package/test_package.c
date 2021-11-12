@@ -1,21 +1,15 @@
-#include "X11/xshmfence.h"
+#include "nss.h"
+#include <stdio.h>
 
 int main() {
-    int		        fd;
-    struct xshmfence    *x;
+    SECStatus rv;
+    printf("NSS version: %s\n", NSS_GetVersion());
 
-    fd = xshmfence_alloc_shm();
-    if (fd < 0) {
+    rv = NSS_NoDB_Init("./tmp");
+    if (rv != SECSuccess){
+        printf("NSS_Init failed in directory tmp\n");
         return 1;
     }
-
-
-    x = xshmfence_map_shm(fd);
-    if (!x) {
-        return 1;
-    }
-
-    xshmfence_unmap_shm(x);
 
     return 0;
 }

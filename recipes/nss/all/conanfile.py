@@ -60,15 +60,43 @@ class NSSConan(ConanFile):
             # args.append("NSS_USE_SYSTEM_SQLITE=1")
             # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
             # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
+            args.append("NSDISTMODE=copy")
             self.run("make %s" % " ".join(args))
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        with tools.chdir(os.path.join(self._source_subfolder, "nss")):
+            args = []
+            args.append("USE_64=1")
+            args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
+            args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
+            args.append("OS_TARGET=Linux")
+            args.append("USE_SYSTEM_ZLIB=1")
+            args.append("NSS_DISABLE_GTESTS=1")
+            # args.append("NSS_USE_SYSTEM_SQLITE=1")
+            # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
+            # args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
+            args.append("NSDISTMODE=copy")
+            self.run("make install %s" % " ".join(args))
+        self.copy("*",
+                  src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
+                  dst="include")
+        for d in os.listdir(os.path.join(self._source_subfolder, "dist")):
+            if d in ["private","public"]:
+                continue
+            f = os.path.join(self._source_subfolder, "dist", d)
+            if not os.path.isdir(f):
+                continue
+            self.copy("*", src = f)
+
+        if self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+        else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+
+
+
 
     def package_info(self):
-        pass
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.set_property("pkg_config_name", "nss")
