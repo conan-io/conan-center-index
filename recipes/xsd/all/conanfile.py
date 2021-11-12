@@ -43,7 +43,7 @@ class ConanXqilla(ConanFile):
         make_ldflags = "LDFLAGS='{libs} -pthread'".format(
             libs=" ".join(["-L{}".format(os.path.join(self.deps_cpp_info["xerces-c"].rootpath, it)) for it in self.deps_cpp_info["xerces-c"].libdirs]))
 
-        make_ccpflags = "CPPFLAGS='{includes} -std=c++11'".format(
+        make_ccpflags = "CPPFLAGS='{includes}'".format(
             includes=" ".join(["-I{}".format(os.path.join(self.deps_cpp_info["xerces-c"].rootpath, it)) for it in self.deps_cpp_info["xerces-c"].includedirs]))
 
         make_cmd = '{ldflags} {cppflags} {make} -j{cpucount}'.format(
