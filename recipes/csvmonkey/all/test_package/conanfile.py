@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 class CSVMonkeyTestConan(ConanFile):
-    settings = "build_type"
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):

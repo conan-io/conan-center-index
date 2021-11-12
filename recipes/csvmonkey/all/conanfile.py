@@ -12,7 +12,7 @@ class CSVMONEKYConan(ConanFile):
     description = "Header-only vectorized, lazy-decoding, zero-copy CSV file parser "
     topics = ("csv parser", "header only", "vectorized")
     homepage = "https://github.com/dw/csvmonkey/"
-    settings = "arch"
+    settings = "arch", "compiler"
     no_copy_source = True
 
     @property
@@ -37,4 +37,8 @@ class CSVMONEKYConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
         self.cpp_info.set_property("cmake_target_name", "csvmonkey")
         self.cpp_info.set_property("pkg_config_name", "csvmonkey")
-        self.cpp_info.cxxflags.append("-msse4.2")
+
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags.append("/arch:AVX")
+        else:
+            self.cpp_info.cxxflags.append("-msse4.2")
