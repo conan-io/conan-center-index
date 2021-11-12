@@ -79,6 +79,7 @@ class NSSConan(ConanFile):
             args.append("NSPR31_LIB_PREFIX=$(NULL)")
 
         args.append("USE_SYSTEM_ZLIB=1")
+        args.append("ZLIB_INCLUDE_DIR=%s" % self.deps_cpp_info["zlib"].include_paths[0])
         args.append("NSS_DISABLE_GTESTS=1")
         # args.append("NSS_USE_SYSTEM_SQLITE=1")
         # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
