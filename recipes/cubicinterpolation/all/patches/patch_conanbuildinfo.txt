@@ -1,0 +1,11 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0199a76..1b0a2b4 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -46,6 +46,3 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CubicInterpolationConfig.cmake
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CubicInterpolation
+     )
+-
+-install(FILES "${PROJECT_BINARY_DIR}/conanbuildinfo.cmake"
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CubicInterpolation)
