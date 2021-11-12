@@ -28,11 +28,13 @@ class NSSConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        self.options["nspr"].shared = True
+        self.options.shared = True
+
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        self.options["nspr"].shared = True
 
     def requirements(self):
         self.requires("nspr/4.32")
@@ -40,6 +42,8 @@ class NSSConan(ConanFile):
         self.requires("zlib/1.2.11")
 
     def validate(self):
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome")
         if not self.options["nspr"].shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
 
