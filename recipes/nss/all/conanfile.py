@@ -94,7 +94,9 @@ class NSSConan(ConanFile):
         else:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
 
-
+        self.copy("COPYING",
+                  src = os.path.join(self._source_subfolder, "nss"),
+                  dst = "licenses")
 
 
     def package_info(self):
