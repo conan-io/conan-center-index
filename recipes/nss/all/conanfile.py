@@ -147,11 +147,6 @@ class NSSConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["softokn"].system_libs = ["pthread"]
 
-        self.cpp_info.components["freebl"].libs = [_library_name("freebl", 3)]
-
-        if self.settings.os == "Linux":
-            self.cpp_info.components["freeblpriv"].libs = [_library_name("freeblpriv", 3)]
-
         self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
         self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]
         if self.settings.os in ["Linux", "FreeBSD"]:
