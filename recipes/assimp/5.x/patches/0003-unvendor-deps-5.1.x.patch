@@ -88,7 +88,7 @@
  #include <memory>
 --- a/code/CMakeLists.txt
 +++ b/code/CMakeLists.txt
-@@ -903,7 +903,7 @@ ENDIF()
+@@ -919,7 +919,7 @@ ENDIF()
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(poly2tri)
    find_package(poly2tri CONFIG REQUIRED)
@@ -97,7 +97,7 @@
    SET( Poly2Tri_SRCS
      ../contrib/poly2tri/poly2tri/common/shapes.cc
      ../contrib/poly2tri/poly2tri/common/shapes.h
-@@ -924,7 +924,7 @@ ENDIF()
+@@ -940,7 +940,7 @@ ENDIF()
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(minizip)
    find_package(minizip CONFIG REQUIRED)
@@ -106,7 +106,7 @@
    SET( unzip_SRCS
      ../contrib/unzip/crypt.c
      ../contrib/unzip/crypt.h
-@@ -940,7 +940,7 @@ ENDIF()
+@@ -956,7 +956,7 @@ ENDIF()
  IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(zip)
    find_package(zip CONFIG REQUIRED)
@@ -115,7 +115,7 @@
    SET( ziplib_SRCS
      ../contrib/zip/src/miniz.h
      ../contrib/zip/src/zip.c
-@@ -1036,7 +1036,6 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -1052,7 +1052,6 @@ IF(ASSIMP_HUNTER_ENABLED)
    hunter_add_package(RapidJSON)
    find_package(RapidJSON CONFIG REQUIRED)
  ELSE()
@@ -123,7 +123,7 @@
    ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
    option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
    if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
-@@ -1072,7 +1071,7 @@ IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
+@@ -1088,7 +1087,7 @@ IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
  endif ()
  
  IF(NOT ASSIMP_HUNTER_ENABLED)
@@ -132,7 +132,7 @@
      SET (unzip_compile_SRCS "")
    else ()
      SET (unzip_compile_SRCS ${unzip_SRCS})
-@@ -1144,13 +1143,6 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
+@@ -1160,13 +1159,6 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
  
  TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
  
@@ -146,7 +146,7 @@
  # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
  TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
  
-@@ -1179,7 +1171,7 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -1195,7 +1187,7 @@ IF(ASSIMP_HUNTER_ENABLED)
      target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
    endif()
  ELSE()

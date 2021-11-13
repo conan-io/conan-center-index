@@ -56,8 +56,6 @@ class Assimp(ConanFile):
         "with_irrmesh": ("ASSIMP_BUILD_IRRMESH_IMPORTER", "5.0.0"),
         "with_lwo": ("ASSIMP_BUILD_LWO_IMPORTER", "5.0.0"),
         "with_lws": ("ASSIMP_BUILD_LWS_IMPORTER", "5.0.0"),
-        "with_m3d": ("ASSIMP_BUILD_M3D_IMPORTER", "5.1.0-rc.1"),
-        "with_m3d_exporter": ("ASSIMP_BUILD_M3D_EXPORTER", "5.1.0-rc.1"),
         "with_md2": ("ASSIMP_BUILD_MD2_IMPORTER", "5.0.0"),
         "with_md3": ("ASSIMP_BUILD_MD3_IMPORTER", "5.0.0"),
         "with_md5": ("ASSIMP_BUILD_MD5_IMPORTER", "5.0.0"),
@@ -72,7 +70,7 @@ class Assimp(ConanFile):
         "with_ogre": ("ASSIMP_BUILD_OGRE_IMPORTER", "5.0.0"),
         "with_opengex": ("ASSIMP_BUILD_OPENGEX_IMPORTER", "5.0.0"),
         "with_opengex_exporter": ("ASSIMP_BUILD_OPENGEX_EXPORTER", "5.0.0"),
-        "with_pbrt_exporter": ("ASSIMP_BUILD_PBRT_EXPORTER", "5.1.0-rc.1"),
+        "with_pbrt_exporter": ("ASSIMP_BUILD_PBRT_EXPORTER", "5.1.0"),
         "with_ply": ("ASSIMP_BUILD_PLY_IMPORTER", "5.0.0"),
         "with_ply_exporter": ("ASSIMP_BUILD_PLY_EXPORTER", "5.0.0"),
         "with_q3bsp": ("ASSIMP_BUILD_Q3BSP_IMPORTER", "5.0.0"),
@@ -164,7 +162,7 @@ class Assimp(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        # Don't force several compiler flags
+        # Don't force several compiler and linker flags
         replace_mapping = [
             ("-fPIC", ""),
             ("-g ", ""),
@@ -189,7 +187,7 @@ class Assimp(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        if tools.Version(self.version) >= tools.Version("5.1.0-rc.1"):
+        if tools.Version(self.version) >= tools.Version("5.1.0"):
             self._cmake.definitions["ASSIMP_HUNTER_ENABLED"] = False
             self._cmake.definitions["ASSIMP_IGNORE_GIT_HASH"] = True
             self._cmake.definitions["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
