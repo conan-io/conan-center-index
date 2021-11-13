@@ -145,5 +145,5 @@ class LogrConan(ConanFile):
             self.cpp_info.components["logr_boostlog"].includedirs = []
             self.cpp_info.components["logr_boostlog"].requires = [
                 "logr::logr_base",
-                "Boost::log",
+                "boost::log",
             ]
