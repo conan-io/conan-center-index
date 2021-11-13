@@ -32,6 +32,10 @@ class UchardetConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,6 +48,11 @@ class UchardetConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "${CMAKE_BINARY_DIR}/uchardet.pc",
+                              "${CMAKE_CURRENT_BINARY_DIR}/uchardet.pc")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -51,10 +60,11 @@ class UchardetConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CHECK_SSE2"] = self.options.check_sse2
         self._cmake.definitions["BUILD_BINARY"] = False
-        self._cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
