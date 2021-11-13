@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.client.build.compiler_flags import format_libraries, format_library_paths
 import os
 
 
@@ -80,6 +81,9 @@ class NSSConan(ConanFile):
 
         args.append("USE_SYSTEM_ZLIB=1")
         args.append("ZLIB_INCLUDE_DIR=%s" % self.deps_cpp_info["zlib"].include_paths[0])
+        args.append("\"ZLIB_LIBS=%s\"" % " ".join(
+            format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
+            format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
         args.append("NSS_DISABLE_GTESTS=1")
         # args.append("NSS_USE_SYSTEM_SQLITE=1")
         # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
