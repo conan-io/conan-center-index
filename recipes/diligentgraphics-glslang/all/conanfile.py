@@ -106,11 +106,17 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
         self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
+
+        self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
+        self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
+        self._cmake.definitions["ENABLE_GLSLANG_WEBMIN_DEVEL"] = False
+
         self._cmake.definitions["ENABLE_GLSLANG_WEB"] = False
         self._cmake.definitions["ENABLE_GLSLANG_WEB_DEVEL"] = False
         self._cmake.definitions["ENABLE_EMSCRIPTEN_SINGLE_FILE"] = False
         self._cmake.definitions["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
         self._cmake.definitions["ENABLE_HLSL"] = self.options.hlsl
+        self._cmake.definitions["ENABLE_RTTI"] = False
         self._cmake.definitions["ENABLE_OPT"] = self.options.enable_optimizer
         self._cmake.definitions["ENABLE_PCH"] = True
         self._cmake.definitions["ENABLE_CTEST"] = False
@@ -134,6 +140,18 @@ class GlslangConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["glslang-core"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["glslang-core"].requires = ["oglcompiler", "osdependent"]
+        self.cpp_info.components["glslang-core"].requires.extend(["genericcodegen", "machineindependent"])
+
+        # MachineIndependent
+        self.cpp_info.components["machineindependent"].names["cmake_find_package"] = "MachineIndependent"
+        self.cpp_info.components["machineindependent"].names["cmake_find_package_multi"] = "MachineIndependent"
+        self.cpp_info.components["machineindependent"].libs = ["MachineIndependent" + lib_suffix]
+        self.cpp_info.components["machineindependent"].requires = ["oglcompiler", "osdependent", "genericcodegen"]
+
+        # GenericCodeGen
+        self.cpp_info.components["genericcodegen"].names["cmake_find_package"] = "GenericCodeGen"
+        self.cpp_info.components["genericcodegen"].names["cmake_find_package_multi"] = "GenericCodeGen"
+        self.cpp_info.components["genericcodegen"].libs = ["GenericCodeGen" + lib_suffix]
 
         # OSDependent
         self.cpp_info.components["osdependent"].names["cmake_find_package"] = "OSDependent"
