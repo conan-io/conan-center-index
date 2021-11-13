@@ -55,7 +55,6 @@ class UchardetConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
