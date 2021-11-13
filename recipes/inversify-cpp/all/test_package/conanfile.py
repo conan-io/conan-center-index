@@ -3,7 +3,6 @@ import os
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "cppstd", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
