@@ -27,7 +27,7 @@ class TomlPlusPlusConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" else "15",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
