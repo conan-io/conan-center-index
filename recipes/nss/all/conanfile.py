@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.client.build.compiler_flags import format_libraries, format_library_paths
-import os
+import os, glob
 
 
 class NSSConan(ConanFile):
@@ -116,10 +116,14 @@ class NSSConan(ConanFile):
                 continue
             self.copy("*", src = f)
 
+        for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+            tools.rename(dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+
         if self.options.shared:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
         else:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
 
 
 
