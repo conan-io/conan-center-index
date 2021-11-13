@@ -10,7 +10,7 @@ class CSVMONEKYConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Header-only vectorized, lazy-decoding, zero-copy CSV file parser "
-    topics = ("csv parser", "header only", "vectorized")
+    topics = ("csv-parser", "header-only", "vectorized")
     homepage = "https://github.com/dw/csvmonkey/"
     settings = "arch", "compiler"
     no_copy_source = True
