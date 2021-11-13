@@ -33,7 +33,7 @@ class TomlPlusPlusConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def configure(self):
+    def validate(self):
         if self.options.multiple_headers != "deprecated":
             self.output.warn("The {} option 'multiple_headers' has been deprecated. Both formats are in the same package.")
 
@@ -59,9 +59,8 @@ class TomlPlusPlusConan(ConanFile):
                         self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], 
+                  destination=self._source_subfolder, strip_root=True) 
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
