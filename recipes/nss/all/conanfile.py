@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.client.build.compiler_flags import format_libraries, format_library_paths
 import os, glob
 
 
@@ -81,9 +80,49 @@ class NSSConan(ConanFile):
 
         args.append("USE_SYSTEM_ZLIB=1")
         args.append("ZLIB_INCLUDE_DIR=%s" % self.deps_cpp_info["zlib"].include_paths[0])
+
+
+        def adjust_path(path, settings):
+            """
+            adjusts path to be safely passed to the compiler command line
+            for Windows bash, ensures path is in format according to the subsystem
+            for path with spaces, places double quotes around it
+            converts slashes to backslashes, or vice versa
+            """
+            compiler = _base_compiler(settings)
+            if str(compiler) == 'Visual Studio':
+                path = path.replace('/', '\\')
+            else:
+                path = path.replace('\\', '/')
+            return '"%s"' % path if ' ' in path else path
+
+        def _base_compiler(settings):
+            return settings.get_safe("compiler.base") or settings.get_safe("compiler")
+
+        def _format_library_paths(library_paths, settings):
+            compiler = _base_compiler(settings)
+            pattern = "-LIBPATH:%s" if str(compiler) == 'Visual Studio' else "-L%s"
+            return [pattern % adjust_path(library_path, settings)
+                    for library_path in library_paths if library_path]
+
+
+        def _format_libraries(libraries, settings):
+            result = []
+            compiler = settings.get_safe("compiler")
+            compiler_base = settings.get_safe("compiler.base")
+            for library in libraries:
+                if str(compiler) == 'Visual Studio' or str(compiler_base) == 'Visual Studio':
+                    if not library.endswith(".lib"):
+                        library += ".lib"
+                    result.append(library)
+                else:
+                    result.append("-l%s" % library)
+            return result
+
+
         args.append("\"ZLIB_LIBS=%s\"" % " ".join(
-            format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
-            format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
+            _format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
+            _format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
         args.append("NSS_DISABLE_GTESTS=1")
         # args.append("NSS_USE_SYSTEM_SQLITE=1")
         # args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
