@@ -25,7 +25,8 @@ class InversifyCppConan(ConanFile):
         }
 
     def validate(self):
-        tools.check_min_cppstd(self, 17)
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 17)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
