@@ -40,7 +40,7 @@ class CSVMONEKYConan(ConanFile):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
-        self.info.settings.clear()
+        self.info.header_only()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "csvmonkey")
