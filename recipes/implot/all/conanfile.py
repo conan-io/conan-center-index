@@ -8,13 +8,13 @@ class ImplotConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/epezent/implot"
     description = "Advanced 2D Plotting for Dear ImGui"
-    topics = ("conan", "imgui", "plot", "graphics")
+    topics = ("imgui", "plot", "graphics", )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    requires = "imgui/1.83"
+    requires = "imgui/1.85"
 
     options = {
         "shared": [True, False],
@@ -59,4 +59,8 @@ class ImplotConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["implot"]
+        self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.set_property("cmake_file_name", "implot")
+        self.cpp_info.set_property("cmake_target_name", "implot")
+        self.cpp_info.set_property("pkg_config_name", "implot")
