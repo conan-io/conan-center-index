@@ -19,8 +19,8 @@ class MaddyConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("maddy-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self_source_subfolder, strip_root=True)
 
     def package_id(self):
         self.info.header_only()
