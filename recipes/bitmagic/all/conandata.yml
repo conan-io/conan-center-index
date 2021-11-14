@@ -1,4 +1,7 @@
 sources:
+  "7.7.7":
+    url: "https://github.com/tlk00/BitMagic/archive/v7.7.7.tar.gz"
+    sha256: "9f645a2aa18566462733d592f8f44c9bb283a2df52701474f620d20cee4c9e92"
   "7.6.0":
     url: "https://github.com/tlk00/BitMagic/archive/v7.6.0.tar.gz"
     sha256: "eebe39e15fc7c14d2c5aad5f07bf2c8ddf79bffafef2e748470f35d3555cf6a9"
