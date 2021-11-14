@@ -12,7 +12,7 @@
 
 int main() {
   std::stringstream markdownInput(
-      "#Hello world from maddy!\nVisit "
+      "# Hello world from maddy!\nVisit "
       "[conan-center-index](https://github.com/conan-io/conan-center-index)\n");
 
   // config is optional
