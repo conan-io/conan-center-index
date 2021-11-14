@@ -4,7 +4,9 @@ project(heatshrink C)
 SET(SOURCE_DIR ${CMAKE_SOURCE_DIR}/${SOURCE_SUBDIR} )
 
 SET (CMAKE_C_STANDARD 99)
-FILE(GLOB SRC_HEATSHRINK "${SOURCE_DIR}/heatshrink*.c")
+LIST(APPEND SRC_HEATSHRINK
+    "${SOURCE_DIR}/heatshrink_decoder.c"
+    "${SOURCE_DIR}/heatshrink_encoder.c")
 
 include_directories(${SOURCE_DIR})
 
