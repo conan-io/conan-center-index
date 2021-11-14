@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-set_target_properties(example PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED
-                                                         ON)
+find_package(maddy REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} example.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE maddy::maddy)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED
+                                                                 ON)
