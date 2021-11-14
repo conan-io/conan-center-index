@@ -8,7 +8,9 @@ class MaddyConan(ConanFile):
     name = "maddy"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/progsource/maddy"
-    description = "open-source, maddy is a C++ Markdown to HTML header-only parser library."
+    description = (
+        "open-source, maddy is a C++ Markdown to HTML header-only parser library."
+    )
     topics = ("maddy", "markdown", "header-only")
     license = "MIT"
 
@@ -19,14 +21,23 @@ class MaddyConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self_source_subfolder, strip_root=True)
+        tools.get(
+            **self.conan_data["sources"][self.version],
+            destination=self._source_subfolder,
+            strip_root=True
+        )
 
     def package_id(self):
         self.info.header_only()
 
     def package(self):
-        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         self.copy(
-            pattern="maddy/*.h", src=os.path.join(self.source_folder, self._source_subfolder, "include"), dst="include"
+            "LICENSE",
+            src=os.path.join(self.source_folder, self._source_subfolder),
+            dst="licenses",
+        )
+        self.copy(
+            pattern="maddy/*.h",
+            src=os.path.join(self.source_folder, self._source_subfolder, "include"),
+            dst="include",
         )
