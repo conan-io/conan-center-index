@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/link_targets.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/non_x86_support.patch"
+      base_path: "source_subfolder"
