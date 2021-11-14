@@ -52,6 +52,9 @@ class YASMConan(ConanFile):
                 msbuild.build_env.link_flags.append("/MACHINE:X86")
             elif self.settings.arch == "x86_64":
                 msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
+            if self.settings.build_type == "RelWithDebInfo":
+                self.output.info("YASM build type was {}, adjusting it to Release".format(self.settings.build_type))
+                self.settings.build_type = "Release"
             msbuild.build(project_file="yasm.sln",
                           targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
 
