@@ -1,0 +1,8 @@
+sources:
+  "1.1":
+    url: "https://github.com/google/bloaty/archive/refs/tags/v1.1.tar.gz"
+    sha256: "682640678a748d043eea65df48831f807d39a1e761eacc461c756256f7ec6a26"
+patches:
+  "1.1":
+    - patch_file: "patches/cmake_dependencies.patch"
+      base_path: "source_subfolder"
