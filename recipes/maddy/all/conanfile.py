@@ -1,8 +1,10 @@
-import os
 from conans import ConanFile, tools
+import os
+
+required_conan_version = ">=1.33.0"
 
 
-class maddyConan(ConanFile):
+class MaddyConan(ConanFile):
     name = "maddy"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/progsource/maddy"
