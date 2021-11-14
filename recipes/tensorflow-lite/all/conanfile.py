@@ -109,7 +109,8 @@ class TensorflowLiteConan(ConanFile):
         self.requires("fft/cci.20061228")
         self.requires("flatbuffers/2.0.0")
         self.requires("gemmlowp/cci.20210928")
-        self.requires("intel-neon2sse/cci.20210225")
+        if self.settings.arch in ("x86", "x86_64"):
+            self.requires("intel-neon2sse/cci.20210225")
         self.requires("ruy/cci.20210622")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20211026")
@@ -133,6 +134,9 @@ class TensorflowLiteConan(ConanFile):
             "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
             "TFLITE_ENABLE_MMAP": self.options.get_safe("with_mmap", False)
         })
+        if self.settings.arch == "armv8":
+            # Not defined by Conan for Apple Silicon. See https://github.com/conan-io/conan/pull/8026
+            self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR"] = "arm64"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
