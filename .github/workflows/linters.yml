@@ -29,4 +29,6 @@ jobs:
           conan config set hooks.${{ matrix.hook }}
 
       - name: run lint
-        run: python3 runlint.py ${{ github.event.pull_request.number }}
+        run:  |
+          echo "::add-matcher::${{ matrix.hook }}.json"
+          python3 runlint.py ${{ github.event.pull_request.number }}
