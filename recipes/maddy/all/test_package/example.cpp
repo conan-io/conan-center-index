@@ -20,5 +20,7 @@ int main()
    std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>(config);
    std::string htmlOutput = parser->Parse(markdownInput);
 
+   std::cout << "html:\n" << htmlOutput;
+
    return EXIT_SUCCESS;
 }
