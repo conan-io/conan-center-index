@@ -1,5 +1,7 @@
 versions:
-  "8.13.3559":
+  "11.6.0":
     folder: all
   "11.5.0":
+    folder: all
+  "8.13.3559":
     folder: all
