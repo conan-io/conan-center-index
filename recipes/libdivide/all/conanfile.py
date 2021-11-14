@@ -1,11 +1,11 @@
 from conans import ConanFile, tools
-import os
 
+required_conan_version = ">=1.33.0"
 
 class LibdivideConan(ConanFile):
     name = "libdivide"
     description = "Header-only C/C++ library for optimizing integer division."
-    topics = ("conan", "libdivide", "division", "integer")
+    topics = ("libdivide", "division", "integer", )
     license = ["Zlib", "BSL-1.0"]
     homepage = "http://libdivide.com/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -39,7 +39,7 @@ class LibdivideConan(ConanFile):
             if self.settings.arch not in ["x86", "x86_64"]:
                 del self.options.simd_intrinsics
         else:
-            del self.options.simd_intrinsics        
+            del self.options.simd_intrinsics
             if self.settings.arch not in ["x86", "x86_64"]:
                 del self.options.sse2
                 del self.options.avx2
@@ -55,8 +55,7 @@ class LibdivideConan(ConanFile):
         self.info.header_only()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
@@ -71,10 +70,10 @@ class LibdivideConan(ConanFile):
                  "avx512": "LIBDIVIDE_AVX512"}[str(simd)]
             ]
         if self.options.get_safe("sse2", False):
-            self.cpp_info.defines.append("LIBDIVIDE_SSE2")    
+            self.cpp_info.defines.append("LIBDIVIDE_SSE2")
         if self.options.get_safe("avx2", False):
-            self.cpp_info.defines.append("LIBDIVIDE_AVX2")    
+            self.cpp_info.defines.append("LIBDIVIDE_AVX2")
         if self.options.get_safe("avx512", False):
-            self.cpp_info.defines.append("LIBDIVIDE_AVX512")    
+            self.cpp_info.defines.append("LIBDIVIDE_AVX512")
         if self.options.get_safe("neon", False):
-            self.cpp_info.defines.append("LIBDIVIDE_NEON")    
+            self.cpp_info.defines.append("LIBDIVIDE_NEON")
