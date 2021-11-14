@@ -2,6 +2,7 @@
  *  This example was copied from https://github.com/progsource/maddy/blob/master/README.md
  */
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <cstdlib>
