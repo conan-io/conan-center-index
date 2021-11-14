@@ -5,11 +5,11 @@ import os, glob
 
 class NSSConan(ConanFile):
     name = "nss"
-    license = "Mozilla Public License"
+    license = "MPL-2.0"
     homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "<Description of Libxshmfence here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    description = "Network Security Services"
+    topics = ("network", "security", "crypto", "ssl")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
