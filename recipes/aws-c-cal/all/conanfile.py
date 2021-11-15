@@ -102,10 +102,13 @@ class AwsCCal(ConanFile):
                 self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
             else:
                 self.cpp_info.components["_dummy_crypto"].requires.append("openssl::crypto")
-                lib_path = os.path.join(self.deps_cpp_info["openssl"].rootpath, "lib", "libcrypto.a")
-                link_flag = "-Wl,--whole-archive,{},--no-whole-archive".format(lib_path)
-                self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(link_flag)
-                self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(link_flag)
-                self.cpp_info.components["aws-c-cal-lib"].system_libs.extend(["dl", "rt"])
-                if not self.options["openssl"].no_threads:
-                    self.cpp_info.components["aws-c-cal-lib"].system_libs.append("pthread")
+                # aws-c-cal dynamically search the openssl symbols.
+                # Mark them as undefined so the linker will include them.
+                # This avoid dynamical look-up for a system crypto library.
+                crypto_symbols = [
+                    "HMAC_CTX_init", "HMAC_CTX_cleanup", "HMAC_Update", "HMAC_Final", "HMAC_Init_ex",
+                ]
+                for crypto_symbol in cryto_symbols:
+                    link_flag = f"-Wl,-u{crypto_symbol}"
+                    self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(link_flag)
+                    self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(link_flag)
