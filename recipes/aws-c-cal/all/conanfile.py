@@ -102,9 +102,9 @@ class AwsCCal(ConanFile):
                 self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
             else:
                 self.cpp_info.components["_dummy_crypto"].requires.append("openssl::crypto")
-                # aws-c-cal dynamically search the openssl symbols.
-                # Mark them as undefined so the linker will include them.
-                # This avoid dynamical look-up for a system crypto library.
+                # aws-c-cal does not statically link to openssl and searches dynamically for openssl symbols .
+                # Mark these as undefined so the linker will include them.
+                # This avoids dynamical look-up for a system crypto library.
                 crypto_symbols = [
                     "HMAC_CTX_init", "HMAC_CTX_cleanup", "HMAC_Update", "HMAC_Final", "HMAC_Init_ex",
                 ]
