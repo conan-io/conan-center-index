@@ -27,13 +27,13 @@ class TomlPlusPlusConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "16",
+            "Visual Studio": "16" if tools.Version(self.version) < "2.2.0" else "15",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
         }
 
-    def configure(self):
+    def validate(self):
         if self.options.multiple_headers != "deprecated":
             self.output.warn("The {} option 'multiple_headers' has been deprecated. Both formats are in the same package.")
 
@@ -49,10 +49,18 @@ class TomlPlusPlusConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires c++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 
+        if self.settings.compiler == "apple-clang" and tools.Version(self.version) < "2.3.0":
+            raise ConanInvalidConfiguration("The current compiler {} {} is supported in version >= 2.3.0".format(
+                    self.settings.compiler, self.settings.compiler.version))
+        
+        if self.settings.compiler == "Visual Studio":
+            if tools.Version(self.version) == "2.1.0":
+                raise ConanInvalidConfiguration("The current compiler {} {} is unable to build version 2.1.0".format(
+                        self.settings.compiler, self.settings.compiler.version))
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], 
+                  destination=self._source_subfolder, strip_root=True) 
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
