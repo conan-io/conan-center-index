@@ -108,7 +108,6 @@ class AwsCCal(ConanFile):
                 crypto_symbols = [
                     "HMAC_CTX_init", "HMAC_CTX_cleanup", "HMAC_Update", "HMAC_Final", "HMAC_Init_ex",
                 ]
-                for crypto_symbol in cryto_symbols:
-                    link_flag = f"-Wl,-u{crypto_symbol}"
-                    self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(link_flag)
-                    self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(link_flag)
+                crypto_link_flags = "-Wl," + ",".join(f"-u,{symbol}" for symbol in crypto_symbols)
+                self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(crypto_link_flags)
+                self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(crypto_link_flags)
