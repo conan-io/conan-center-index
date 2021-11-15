@@ -80,6 +80,3 @@ class HeatshrinkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["heatshrink"]
 
-        self.cpp_info.set_property("cmake_file_name", "heatshrink")
-        self.cpp_info.set_property("cmake_target_name", "heatshrink")
-        self.cpp_info.set_property("pkg_config_name", "heatshrink")
