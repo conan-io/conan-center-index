@@ -50,8 +50,8 @@ class UchardetConan(ConanFile):
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "${CMAKE_BINARY_DIR}/uchardet.pc",
-                              "${CMAKE_CURRENT_BINARY_DIR}/uchardet.pc")
+            "${CMAKE_BINARY_DIR}",
+            "${CMAKE_CURRENT_BINARY_DIR}")
 
     def _configure_cmake(self):
         if self._cmake:
