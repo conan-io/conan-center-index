@@ -7,8 +7,8 @@ index e760513d..a0d2de9c 100644
      include
      ../../ThirdParty
 -    ../../ThirdParty/Vulkan-Headers/include
-+${CONAN_INCLUDE_DIRS_VULKAN-HEADERS}/include/
-+${CONAN_INCLUDE_DIRS_VOLK}/
++${CONAN_INCLUDE_DIRS_DILIGENTGRAPHICS-VULKAN-HEADERS}/include/
++${CONAN_INCLUDE_DIRS_DILIGENTGRAPHICS-VOLK}/
  )
  
  set(PRIVATE_DEPENDENCIES
@@ -38,14 +38,3 @@ index 6e0a8e42..5fbf4b20 100644
  #endif
  
  #include "VulkanErrors.hpp"
-diff --git a/ThirdParty/CMakeLists.txt b/ThirdParty/CMakeLists.txt
-index 66754265..c1f2c5ce 100644
---- a/ThirdParty/CMakeLists.txt
-+++ b/ThirdParty/CMakeLists.txt
-@@ -92,6 +92,5 @@ if(${DILIGENT_BUILD_GOOGLE_TEST})
- endif()
- 
- install(FILES stb/stb_image_write_license.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}")
--install(FILES volk/LICENSE.md DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME Volk-License.md)
- install(FILES DirectXShaderCompiler/LICENSE.TXT DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-License.txt)
- install(FILES DirectXShaderCompiler/ThirdPartyNotices.txt DESTINATION "Licenses/ThirdParty/${DILIGENT_CORE_DIR}" RENAME DXC-ThirdPartyNotices.txt)

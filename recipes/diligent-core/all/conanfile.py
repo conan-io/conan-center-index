@@ -65,8 +65,8 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-headers/cci.20211010")
         self.requires("spirv-tools/2021.4")
         self.requires("glslang/11.7.0")
-        self.requires("vulkan-headers/1.2.195")
-        self.requires("volk/1.2.190")
+        self.requires("diligentgraphics-vulkan-headers/cci.20211005")
+        self.requires("diligentgraphics-volk/cci.20211005")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
