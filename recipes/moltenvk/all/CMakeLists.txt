@@ -41,6 +41,15 @@ else()
     find_library_required(UIKIT_FRAMEWORK UIKit)
 endif()
 
+add_compile_options(
+    -Wno-unguarded-availability-new
+    -Wno-deprecated-declarations
+    -Wno-nonportable-include-path
+    -Wno-tautological-pointer-compare
+    -Wno-non-c-typedef-for-linkage
+    -Wno-switch
+)
+
 # MoltenVKCommon
 # * direct dependencies:
 #   - external: None
@@ -177,12 +186,6 @@ endif()
 if(MVK_VERSION VERSION_LESS "1.1.0")
     target_link_libraries(MoltenVK PUBLIC CONAN_PKG::vulkan-portability)
 endif()
-target_compile_options(MoltenVK PRIVATE
-    -Wno-unguarded-availability-new
-    -Wno-deprecated-declarations
-    -Wno-nonportable-include-path
-    -Wno-tautological-pointer-compare
-)
 list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 # Custom Target to generate internal header file required by MoltenVK target.
