@@ -9,7 +9,7 @@ class UchardetConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/freedesktop/uchardet"
     description = "uchardet is an encoding detector library, which takes a sequence of bytes in an unknown character encoding and attempts to determine the encoding of the text. Returned encoding names are iconv-compatible."
-    topics = ("conan", "encoding", "detector")
+    topics = ("encoding", "detector")
     license = "MPL 1.1"
 
     settings = "os", "arch", "compiler", "build_type"
