@@ -93,6 +93,10 @@ class GlslangConan(ConanFile):
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
                 {"target": "HLSL"       , "relpath": os.path.join("hlsl", "CMakeLists.txt")},
             ]
+            cmake_files_to_fix.append({"target": "glslang-default-resource-limits", "relpath": os.path.join("StandAlone" , "CMakeLists.txt")})
+            cmake_files_to_fix.append({"target": "MachineIndependent", "relpath": os.path.join("glslang", "CMakeLists.txt")})
+            cmake_files_to_fix.append({"target": "GenericCodeGen", "relpath": os.path.join("glslang", "CMakeLists.txt")})
+
             for cmake_file in cmake_files_to_fix:
                 tools.replace_in_file(os.path.join(self._source_subfolder, cmake_file["relpath"]),
                                       "set_property(TARGET {} PROPERTY POSITION_INDEPENDENT_CODE ON)".format(cmake_file["target"]),
@@ -106,13 +110,9 @@ class GlslangConan(ConanFile):
         self._cmake.definitions["SKIP_GLSLANG_INSTALL"] = False
         self._cmake.definitions["ENABLE_SPVREMAPPER"] = self.options.spv_remapper
         self._cmake.definitions["ENABLE_GLSLANG_BINARIES"] = self.options.build_executables
-
         self._cmake.definitions["ENABLE_GLSLANG_JS"] = False
         self._cmake.definitions["ENABLE_GLSLANG_WEBMIN"] = False
         self._cmake.definitions["ENABLE_GLSLANG_WEBMIN_DEVEL"] = False
-
-        self._cmake.definitions["ENABLE_GLSLANG_WEB"] = False
-        self._cmake.definitions["ENABLE_GLSLANG_WEB_DEVEL"] = False
         self._cmake.definitions["ENABLE_EMSCRIPTEN_SINGLE_FILE"] = False
         self._cmake.definitions["ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE"] = False
         self._cmake.definitions["ENABLE_HLSL"] = self.options.hlsl
