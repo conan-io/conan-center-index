@@ -9,7 +9,7 @@ class ConanXqilla(ConanFile):
     name = "xqilla"
     
     description = (
-        "XQilla is an XQuery and XPath 2 library and command line utility written in C++, implemented on top of the Xerces-C∞ library"
+        "XQilla is an XQuery and XPath 2 library and command line utility written in C++, implemented on top of the Xerces-C library"
     )
     topics = ("xqilla", "xml", "xquery")
     url = "https://github.com/conan-io/conan-center-index"
