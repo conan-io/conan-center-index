@@ -63,7 +63,6 @@ class HeatshrinkConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
         cmake.configure()
         return cmake
 
