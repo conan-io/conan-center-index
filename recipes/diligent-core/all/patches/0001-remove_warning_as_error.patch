@@ -1,5 +1,4 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c8fa3c2a..d92d7dd6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -290,42 +290,6 @@ foreach(REL_CONFIG ${RELEASE_CONFIGURATIONS})
@@ -45,3 +44,11 @@ index c8fa3c2a..d92d7dd6 100644
  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
      CMAKE_CXX_COMPILER_ID MATCHES "GNU")
      if(PLATFORM_APPLE)
+@@ -427,7 +427,6 @@ add_subdirectory(Primitives)
+ add_subdirectory(Platforms)
+ add_subdirectory(Common)
+ add_subdirectory(Graphics)
+-add_subdirectory(Tests)
+ 
+ 
+ # Installation instructions
