@@ -12,7 +12,7 @@ class XtensorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xtensor-stack/xtensor"
     description = "C++ tensors with broadcasting and lazy computing"
-    topics = ("conan", "numpy", "multidimensional-arrays", "tensors")
+    topics = ("numpy", "multidimensional-arrays", "tensors", )
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "xsimd": [True, False],
@@ -52,9 +52,12 @@ class XtensorConan(ConanFile):
 
     def requirements(self):
         self.requires("xtl/0.7.2")
-        self.requires("nlohmann_json/3.9.1")
+        self.requires("nlohmann_json/3.10.4")
         if self.options.xsimd:
-            self.requires("xsimd/7.4.10")
+            if tools.Version(self.version) < "0.24.0":
+                self.requires("xsimd/7.5.0")
+            else:
+                self.requires("xsimd/8.0.3")
         if self.options.tbb:
             self.requires("tbb/2020.3")
 
@@ -109,3 +112,5 @@ class XtensorConan(ConanFile):
             self.cpp_info.defines.append("XTENSOR_USE_TBB")
         if self.options.openmp:
             self.cpp_info.defines.append("XTENSOR_USE_OPENMP")
+        if self.settings.compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
+            self.cpp_info.defines.append("XTENSOR_GLIBCXX_USE_CXX11_ABI=1")
