@@ -34,11 +34,11 @@ class AutomakeConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def requirements(self):
-        self.requires("autoconf/2.71")
-        # automake requires perl-Thread-Queue package
+    #def requirements(self):
+    #    automake requires perl-Thread-Queue package
 
     def build_requirements(self):
+        self.build_requires("autoconf/2.71")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
