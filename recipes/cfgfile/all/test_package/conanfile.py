@@ -10,6 +10,10 @@ class CfgfileTestConan(ConanFile):
             cmake.configure()
             cmake.build()
 
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires(str(self.requires["cfgfile"]))
+
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "cfgfile.test")
