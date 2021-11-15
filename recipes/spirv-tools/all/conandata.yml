@@ -18,6 +18,9 @@ sources:
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/v2019.2.tar.gz"
     sha256: "1fde9d2a0df920a401441cd77253fc7b3b9ab0578eabda8caaaceaa6c7638440"
 patches:
+  "2021.4":
+    - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
+      base_path: "source_subfolder"
   "2021.3":
     - patch_file: "patches/0001-fix-cmake-iOS-tvOS-watchOS-2021.3.patch"
       base_path: "source_subfolder"
