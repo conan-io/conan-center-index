@@ -21,7 +21,7 @@ add_executable(${PROJECT_NAME}
     "${CMAKE_CURRENT_BINARY_DIR}/cfg.hpp"
 )
 
-target_link_libraries(${PROJECT_NAME} cfgfile)
+target_link_libraries(${PROJECT_NAME} cfgfile::cfgfile)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 14
