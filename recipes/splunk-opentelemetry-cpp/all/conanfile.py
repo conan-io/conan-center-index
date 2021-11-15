@@ -12,6 +12,14 @@ class SplunkOpentelemetryConan(ConanFile):
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
     settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+    }
     generators = "cmake", "cmake_find_package_multi"
     requires = "opentelemetry-cpp/1.0.1"
     exports_sources = "CMakeLists.txt"
@@ -21,9 +29,17 @@ class SplunkOpentelemetryConan(ConanFile):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Architecture not supported")
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     @property
-    def _source_subdir(self):
-        return "sources"
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _build_subfolder(self):
@@ -37,7 +53,7 @@ class SplunkOpentelemetryConan(ConanFile):
         tools.get(
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self._source_subdir
+            destination=self._source_subfolder
         )
 
     def _configure_cmake(self):
@@ -57,7 +73,7 @@ class SplunkOpentelemetryConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subdir)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         self._remove_unnecessary_package_files()
