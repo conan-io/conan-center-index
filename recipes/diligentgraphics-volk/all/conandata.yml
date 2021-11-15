@@ -1,0 +1,4 @@
+sources:
+  "cci.20211005":
+    url: "https://github.com/zeux/volk/archive/1.2.190.tar.gz"
+    sha256: "07f03720b8c70a626c98cc9545350538122bca9f853e6ed20ccad5a25d55fa4b"
