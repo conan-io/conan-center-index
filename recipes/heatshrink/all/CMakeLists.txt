@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 project(heatshrink C)
 
-if (WIN32 AND BUILD_SHARED_LIBS)
+if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif(WIN32 AND BUILD_SHARED_LIBS)
 
