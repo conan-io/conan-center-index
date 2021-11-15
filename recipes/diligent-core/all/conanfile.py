@@ -59,13 +59,13 @@ class DiligentCoreConan(ConanFile):
         self.requires("zlib/1.2.11")
         self.requires("libpng/1.6.37")
 
-        self.requires("spirv-cross/diligent-2.5.1")
+        self.requires("spirv-cross/cci.20210930")
         self.options["spirv-cross"].namespace = "diligent_spirv_cross"
 
-        self.requires("spirv-headers/diligent-2.5.1")
-        self.requires("spirv-tools/diligent-2.5.1")
-        self.requires("glslang/diligent-2.5.1")
-        self.requires("vulkan-headers/diligent-2.5.1")
+        self.requires("spirv-headers/cci.20211010")
+        self.requires("spirv-tools/2021.4")
+        self.requires("glslang/11.7.0")
+        self.requires("vulkan-headers/1.2.195")
         self.requires("volk/1.2.190")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
