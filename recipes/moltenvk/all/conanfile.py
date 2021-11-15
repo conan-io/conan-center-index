@@ -45,11 +45,11 @@ class MoltenVKConan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.0")
-        self.requires("glslang/11.5.0")
+        self.requires("glslang/11.6.0")
         self.requires("spirv-cross/{}".format(self._spirv_cross_version))
         self.requires("vulkan-headers/{}".format(self._vulkan_headers_version))
         if self.options.with_spirv_tools:
-            self.requires("spirv-tools/2021.2")
+            self.requires("spirv-tools/2021.3")
         if tools.Version(self.version) < "1.1.0":
             raise ConanInvalidConfiguration("MoltenVK < 1.1.0 requires vulkan-portability, not yet available in CCI")
             self.requires("vulkan-portability/0.2")
