@@ -7,4 +7,4 @@ conan_basic_setup()
 find_package(uchardet REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} uchardet)
+target_link_libraries(${PROJECT_NAME} PRIVATE uchardet::uchardet)
