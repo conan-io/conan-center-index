@@ -61,6 +61,7 @@ class GlslangConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
+            "11.7.0": "2021.4",
             "11.6.0": "2021.3",
             "11.5.0": "2021.2",
             "8.13.3559": "2020.5",
