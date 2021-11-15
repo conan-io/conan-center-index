@@ -98,10 +98,14 @@ class AwsCCal(ConanFile):
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")
         if self._needs_openssl:
-            self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
-            if not self.options["openssl"].shared:
+            if self.options["openssl"].shared:
                 self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
+            else:
+                self.cpp_info.components["_dummy_crypto"].requires.append("openssl::crypto")
                 lib_path = os.path.join(self.deps_cpp_info["openssl"].rootpath, "lib", "libcrypto.a")
                 link_flag = "-Wl,--whole-archive,{},--no-whole-archive".format(lib_path)
                 self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(link_flag)
                 self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(link_flag)
+                self.cpp_info.components["aws-c-cal-lib"].system_libs.extend(["dl", "rt"])
+                if not self.options["openssl"].no_threads:
+                    self.cpp_info.components["aws-c-cal-lib"].system_libs.append("pthread")
