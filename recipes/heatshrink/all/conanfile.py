@@ -46,6 +46,7 @@ class HeatshrinkConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
+    def _patch_sources(self):
         config_file = os.path.join(self._source_subfolder, "heatshrink_config.h")
         if not self.options.dynamic_alloc:
             tools.replace_in_file(config_file,
