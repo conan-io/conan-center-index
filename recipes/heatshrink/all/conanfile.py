@@ -20,7 +20,7 @@ class HeatshrinkConan(ConanFile):
         "dynamic_alloc": [True, False],
         "debug_log": [True, False],
         "use_index": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
