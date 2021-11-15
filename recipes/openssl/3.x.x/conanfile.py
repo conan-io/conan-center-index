@@ -6,7 +6,7 @@ import functools
 import os
 import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class OpenSSLConan(ConanFile):
@@ -711,13 +711,14 @@ class OpenSSLConan(ConanFile):
                             "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "OpenSSL"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
-        self.cpp_info.names["pkg_config"] = "openssl"
+        self.cpp_info.set_property("cmake_target_name", "OpenSSL")
+        self.cpp_info.set_property("pkg_config_name", "openssl")
+
         self.cpp_info.components["ssl"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["ssl"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
+
         if self._use_nmake:
             libsuffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
@@ -743,9 +744,7 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
 
-        self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
-        self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
-        self.cpp_info.components["crypto"].names["pkg_config"] = "libcrypto"
-        self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
-        self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
-        self.cpp_info.components["ssl"].names["pkg_config"] = "libssl"
+        self.cpp_info.components["crypto"].set_property("cmake_target_name", "Crypto")
+        self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
+        self.cpp_info.components["ssl"].set_property("cmake_target_name", "SSL")
+        self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
