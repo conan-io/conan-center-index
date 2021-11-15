@@ -1,4 +1,7 @@
 sources:
+  "2021.4":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2021.4.tar.gz"
+    sha256: "d68de260708dda785d109ff1ceeecde2d2ab71142fa5bf59061bb9f47dd3bb2c"
   "2021.3":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2021.3.tar.gz"
     sha256: "b6b4194121ee8084c62b20f8d574c32f766e4e9237dfe60b0658b316d19c6b13"
