@@ -21,6 +21,12 @@ if(BUILD_SHARED_LIBS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+find_package(cereal REQUIRED CONFIG)
+find_package(VulkanHeaders REQUIRED CONFIG)
+if(MVK_WITH_SPIRV_TOOLS)
+    find_package(SPIRV-Tools REQUIRED CONFIG)
+endif()
+
 # Find mandatory Apple Frameworks
 function(find_library_required foundVar framework)
     find_library(${foundVar} ${framework})
@@ -103,7 +109,7 @@ target_link_libraries(MoltenVKShaderConverter
         CONAN_PKG::spirv-cross
 )
 if(MVK_WITH_SPIRV_TOOLS)
-    target_link_libraries(MoltenVKShaderConverter PRIVATE CONAN_PKG::spirv-tools)
+    target_link_libraries(MoltenVKShaderConverter PRIVATE SPIRV-Tools)
 else()
     target_compile_definitions(MoltenVKShaderConverter PRIVATE MVK_EXCLUDE_SPIRV_TOOLS)
 endif()
@@ -166,14 +172,14 @@ target_include_directories(MoltenVK PRIVATE
 )
 target_link_libraries(MoltenVK
     PRIVATE
-        CONAN_PKG::cereal
+        cereal
         CONAN_PKG::spirv-cross
         MoltenVKCommon
         MoltenVKShaderConverter
         ${FOUNDATION_FRAMEWORK}
         ${QUARTZ_CORE_FRAMEWORK}
     PUBLIC
-        CONAN_PKG::vulkan-headers
+        Vulkan::Headers
         ${METAL_FRAMEWORK}
         ${IOSURFACE_FRAMEWORK}
         ${COREGRAPHICS_FRAMEWORK}

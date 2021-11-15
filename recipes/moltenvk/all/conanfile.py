@@ -31,7 +31,7 @@ class MoltenVKConan(ConanFile):
         "tools": True,
     }
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
