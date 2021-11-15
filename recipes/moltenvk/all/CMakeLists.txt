@@ -32,12 +32,13 @@ endfunction()
 find_library_required(METAL_FRAMEWORK Metal)
 find_library_required(FOUNDATION_FRAMEWORK Foundation)
 find_library_required(QUARTZ_CORE_FRAMEWORK QuartzCore)
-find_library_required(APPKIT_FRAMEWORK AppKit)
 find_library_required(IOSURFACE_FRAMEWORK IOSurface)
+find_library_required(COREGRAPHICS_FRAMEWORK CoreGraphics)
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_library_required(IO_OR_UI_KIT_FRAMEWORK IOKit)
+    find_library_required(APPKIT_FRAMEWORK AppKit)
+    find_library_required(IOKIT_FRAMEWORK IOKit)
 else()
-    find_library_required(IO_OR_UI_KIT_FRAMEWORK UIKit)
+    find_library_required(UIKIT_FRAMEWORK UIKit)
 endif()
 
 # MoltenVKCommon
@@ -162,13 +163,17 @@ target_link_libraries(MoltenVK
         MoltenVKShaderConverter
         ${FOUNDATION_FRAMEWORK}
         ${QUARTZ_CORE_FRAMEWORK}
-        ${APPKIT_FRAMEWORK}
-        ${IO_OR_UI_KIT_FRAMEWORK}
     PUBLIC
         CONAN_PKG::vulkan-headers
         ${METAL_FRAMEWORK}
         ${IOSURFACE_FRAMEWORK}
+        ${COREGRAPHICS_FRAMEWORK}
 )
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(MoltenVK PRIVATE ${APPKIT_FRAMEWORK} ${IOKIT_FRAMEWORK})
+else()
+    target_link_libraries(MoltenVK PRIVATE ${UIKIT_FRAMEWORK})
+endif()
 if(MVK_VERSION VERSION_LESS "1.1.0")
     target_link_libraries(MoltenVK PUBLIC CONAN_PKG::vulkan-portability)
 endif()
