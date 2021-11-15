@@ -15,7 +15,7 @@ class ConanXqilla(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://codesynthesis.com/projects/xsd/"
     license = ("GPL-2.0","FLOSSE")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     exports_sources = "patches/**"
 
@@ -47,8 +47,7 @@ class ConanXqilla(ConanFile):
         if self.settings.compiler == "gcc":
             flags.append('-std=c++11')
         make_ccpflags = "CPPFLAGS='{}'".format(" ".join(flags))
-        make_cmd = '{ldflags} {cppflags} {make} -j{cpucount}'.format(
-            make=self._make_program, ldflags=make_ldflags, cppflags=make_ccpflags,cpucount=tools.cpu_count())
+        make_cmd = f'{make_ldflags} {make_ccpflags} {self._make_program} -j{tools.cpu_count()}'
         return make_cmd
 
     def validate(self):
@@ -56,6 +55,9 @@ class ConanXqilla(ConanFile):
             raise ConanInvalidConfiguration("The xsd recipe currently only supports Linux.")
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True,
@@ -85,5 +87,5 @@ class ConanXqilla(ConanFile):
 
     @property
     def _make_install_cmd(self):
-        make_install_cmd = '{make} install_prefix={install_prefix} install'.format(make=self._make_cmd, install_prefix=self.package_folder)
+        make_install_cmd = f'{self._make_cmd} install_prefix={self.package_folder} install'
         return make_install_cmd
