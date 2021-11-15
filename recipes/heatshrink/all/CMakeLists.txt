@@ -3,7 +3,7 @@ project(heatshrink C)
 
 if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif(WIN32 AND BUILD_SHARED_LIBS)
+endif()
 
 SET(SOURCE_DIR ${CMAKE_SOURCE_DIR}/${SOURCE_SUBDIR} )
 
