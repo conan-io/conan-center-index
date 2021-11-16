@@ -23,6 +23,7 @@ class SplunkOpentelemetryConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
     requires = "opentelemetry-cpp/1.0.1"
     exports_sources = "CMakeLists.txt"
+    short_paths = True
     _cmake = None
 
     def validate(self):
