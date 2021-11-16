@@ -60,6 +60,9 @@ class LibdivideConan(ConanFile):
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy("libdivide.h", dst="include", src=self._source_subfolder)
+        self.copy("constant_fast_div.h", dst="include", src=self._source_subfolder)
+        self.copy("s16_ldparams.h", dst="include", src=self._source_subfolder)
+        self.copy("u16_ldparams.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
         simd = self.options.get_safe("simd_intrinsics", False)
