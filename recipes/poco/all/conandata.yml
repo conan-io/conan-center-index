@@ -17,6 +17,9 @@ sources:
   1.11.0:
     sha256: 8a7bfd0883ee95e223058edce8364c7d61026ac1882e29643822ce9b753f3602
     url: https://github.com/pocoproject/poco/archive/poco-1.11.0-release.tar.gz
+  1.11.1:
+    sha256: 2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0
+    url: https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz
 patches:
   1.8.1:
     - patch_file: patches/1.8.1.patch
@@ -41,6 +44,11 @@ patches:
       base_path: source_subfolder
   1.11.0:
     - patch_file: patches/1.11.0.patch
+      base_path: source_subfolder
+    - patch_file: patches/0002-mysql-include.patch
+      base_path: source_subfolder
+  1.11.1:
+    - patch_file: patches/1.11.1.patch
       base_path: source_subfolder
     - patch_file: patches/0002-mysql-include.patch
       base_path: source_subfolder
