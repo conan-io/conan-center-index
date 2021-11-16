@@ -34,7 +34,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings, skip_x64_x86=True):
+        if not tools.cross_building(self, skip_x64_x86=True):
             self.run(os.path.join("bin", "core"), run_environment=True)
             if self.options["poco"].enable_util:
                 self.run(os.path.join("bin", "util"), run_environment=True)

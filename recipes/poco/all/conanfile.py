@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanException, ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration
 from collections import namedtuple
 import os
 
@@ -10,13 +10,12 @@ class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pocoproject.org"
-    topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type"
+    topics = ("building", "networking", "server", "mobile", "embedded")
     license = "BSL-1.0"
     description = "Modern, powerful open source C++ class libraries for building network- and internet-based " \
                   "applications that run on desktop, server, mobile and embedded systems."
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -66,6 +65,7 @@ class PocoConan(ConanFile):
             default_options[comp.option] = comp.default_option
     del comp
 
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -76,9 +76,10 @@ class PocoConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def export_sources(self):
+        self.copy("CMakeLists.txt")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -105,27 +106,6 @@ class PocoConan(ConanFile):
             util_dependencies = self._poco_component_tree["Util"].dependencies
             self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = tuple(x for x in util_dependencies if x != "JSON"))
 
-    def validate(self):
-        if self.options.enable_apacheconnector:
-            raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
-        if self.settings.compiler == "Visual Studio":
-            if self.options.shared and "MT" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
-        for compopt in self._poco_component_tree.values():
-            if not compopt.option:
-                continue
-            if self.options.get_safe(compopt.option, False):
-                for compdep in compopt.dependencies:
-                    if not self._poco_component_tree[compdep].option:
-                        continue
-                    if not self.options.get_safe(self._poco_component_tree[compdep].option, False):
-                        raise ConanInvalidConfiguration("option {} requires also option {}".format(compopt.option, self._poco_component_tree[compdep].option))
-        if self.options.enable_data_sqlite:
-            if self.options["sqlite3"].threadsafe == 0:
-                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
-        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
-            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
-
     def requirements(self):
         self.requires("pcre/8.45")
         self.requires("zlib/1.2.11")
@@ -150,6 +130,31 @@ class PocoConan(ConanFile):
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
             self.requires("libmysqlclient/8.0.25")
+
+    def validate(self):
+        if self.options.enable_apacheconnector:
+            raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared and "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
+        for compopt in self._poco_component_tree.values():
+            if not compopt.option:
+                continue
+            if self.options.get_safe(compopt.option, False):
+                for compdep in compopt.dependencies:
+                    if not self._poco_component_tree[compdep].option:
+                        continue
+                    if not self.options.get_safe(self._poco_component_tree[compdep].option, False):
+                        raise ConanInvalidConfiguration("option {} requires also option {}".format(compopt.option, self._poco_component_tree[compdep].option))
+        if self.options.enable_data_sqlite:
+            if self.options["sqlite3"].threadsafe == 0:
+                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
+        if self.options.enable_netssl and self.options.get_safe("enable_netssl_win", False):
+            raise ConanInvalidConfiguration("Conflicting enable_netssl[_win] settings")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
