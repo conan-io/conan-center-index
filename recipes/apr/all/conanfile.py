@@ -147,13 +147,9 @@ class AprConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["rpcrt4"]
 
-        apr_root = self.package_folder
-        if tools.os_info.is_windows:
-            apr_root = tools.unix_path(apr_root)
+        apr_root = tools.unix_path(self.package_folder)
         self.output.info("Settings APR_ROOT environment var: {}".format(apr_root))
         self.env_info.APR_ROOT = apr_root
 
-        apr_mk_dir = os.path.join(self.package_folder, "bin", "build-1")
-        if tools.os_info.is_windows:
-            apr_mk_dir = tools.unix_path(apr_mk_dir)
+        apr_mk_dir = tools.unix_path(os.path.join(self.package_folder, "bin", "build-1"))
         self.env_info._APR_BUILDDIR = apr_mk_dir
