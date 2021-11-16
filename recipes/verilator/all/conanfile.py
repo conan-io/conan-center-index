@@ -31,6 +31,7 @@ class VerilatorConan(ConanFile):
             self.build_requires("winflexbison/2.5.22")
             self.build_requires("strawberryperl/5.30.0.1")
         else:
+            self.build_requires("autoconf/2.69")
             self.build_requires("flex/2.6.4")
             self.build_requires("bison/3.5.3")
 
@@ -61,6 +62,8 @@ class VerilatorConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        with tools.chdir(self._source_subfolder):
+            self.run("autoconf", run_environment=True)
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         self._autotools.library_paths = []

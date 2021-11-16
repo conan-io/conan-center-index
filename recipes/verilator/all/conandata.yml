@@ -2,6 +2,9 @@ sources:
   "4.034":
     url: "https://www.veripool.org/ftp/verilator-4.034.tgz"
     sha256: "54ed7b06ee28b5d21f9d0ee98406d29a508e6124b0d10e54bb32081613ddb80b"
+  "4.214":
+    url: "https://github.com/verilator/verilator/archive/refs/tags/v4.214.tar.gz"
+    sha256: "e14c7f6ffb00a6746ae2a8ea0424e90a1a30067e8ae4c96b8c42689ca1ca0b1f"
 patches:
   "4.034":
     - patch_file: "patches/0001-split-opt-and-debug-build-install.patch"
@@ -10,3 +13,4 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-add-msvc_link-sh.patch"
       base_path: "source_subfolder"
+  "4.214": []
