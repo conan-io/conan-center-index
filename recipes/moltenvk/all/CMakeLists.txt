@@ -37,7 +37,7 @@ endfunction()
 
 find_library_required(METAL_FRAMEWORK Metal)
 find_library_required(FOUNDATION_FRAMEWORK Foundation)
-find_library_required(QUARTZ_CORE_FRAMEWORK QuartzCore)
+find_library_required(QUARTZCORE_FRAMEWORK QuartzCore)
 find_library_required(IOSURFACE_FRAMEWORK IOSurface)
 find_library_required(COREGRAPHICS_FRAMEWORK CoreGraphics)
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -161,7 +161,7 @@ target_link_libraries(MoltenVK
         MoltenVKCommon
         MoltenVKShaderConverter
         ${FOUNDATION_FRAMEWORK}
-        ${QUARTZ_CORE_FRAMEWORK}
+        ${QUARTZCORE_FRAMEWORK}
     PUBLIC
         Vulkan::Headers
         ${METAL_FRAMEWORK}
