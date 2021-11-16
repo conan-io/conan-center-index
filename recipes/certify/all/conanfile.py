@@ -2,7 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.36.0"
 
 
 class CertifyConan(ConanFile):
@@ -60,5 +60,7 @@ class CertifyConan(ConanFile):
                   src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "certify"
-        self.cpp_info.names["cmake_find_package_multi"] = "certify"
+        self.cpp_info.set_property("cmake_file_name", "certify")
+        self.cpp_info.set_property("cmake_target_name", "certify")
+        self.cpp_info.components["_certify"].set_property("cmake_target_name", "core")
+        self.cpp_info.components["_certify"].requires = ["boost::boost", "openssl::openssl"]
