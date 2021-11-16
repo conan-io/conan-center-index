@@ -1,18 +1,21 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 import shutil
+
+required_conan_version = ">=1.33.0"
 
 
 class LibdbConan(ConanFile):
     name = "libdb"
     description = "Berkeley DB is a family of embedded key-value database libraries providing scalable high-performance data management services to applications"
-    topics = ("conan", "gdbm", "dbm", "hash", "database")
+    topics = ("gdbm", "dbm", "hash", "database")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.oracle.com/database/berkeley-db"
     license = ("BSD-3-Clause")
-    exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -38,6 +41,18 @@ class LibdbConan(ConanFile):
     def _mingw_build(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _user_info_build(self):
+        return getattr(self, "user_info_build", self.deps_user_info)
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,33 +62,54 @@ class LibdbConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.get_safe("with_cxx"):
-            if self.settings.compiler == "clang":
-                if self.settings.compiler.version <= tools.Version("5"):
-                    raise ConanInvalidConfiguration("This compiler version is unsupported")
-            if self.settings.compiler == "apple-clang":
-                if self.settings.compiler.version < tools.Version("10"):
-                    raise ConanInvalidConfiguration("This compiler version is unsupported")
+        if not self.options.get_safe("with_cxx", False):
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_tcl:
             self.requires("tcl/8.6.10")
 
+    def validate(self):
+        if self.settings.compiler == "Visual Studio":
+            # FIXME: it used to work with previous versions of Visual Studio 2019 in CI of CCI.
+            if tools.Version(self.settings.compiler.version) == "16":
+                raise ConanInvalidConfiguration("Visual Studio 2019 not supported.")
+
+        if self.options.get_safe("with_cxx"):
+            if self.settings.compiler == "clang":
+                if tools.Version(self.settings.compiler.version) <= "5":
+                    raise ConanInvalidConfiguration("This compiler version is unsupported")
+            if self.settings.compiler == "apple-clang":
+                if tools.Version(self.settings.compiler.version) < "10":
+                    raise ConanInvalidConfiguration("This compiler version is unsupported")
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ and \
-                    tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20190524")
+            self.build_requires("gnu-config/cci.20201022")
+            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("db-{}".format(self.version), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version],
+                  destination=self._source_subfolder, strip_root=True)
 
     def _patch_sources(self):
-        for patch_data in self.conan_data["patches"][self.version]:
-            tools.patch(**patch_data)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
-        import glob
+        if self.settings.compiler != "Visual Studio":
+            for subdir in [
+                "dist",
+                os.path.join("lang", "sql", "jdbc"),
+                os.path.join("lang", "sql", "odbc"),
+                os.path.join("lang", "sql", "sqlite"),
+            ]:
+                shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
+                            os.path.join(self._source_subfolder, subdir, "config.sub"))
+                shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
+                            os.path.join(self._source_subfolder, subdir, "config.guess"))
+
         for file in glob.glob(os.path.join(self._source_subfolder, "build_windows", "VS10", "*.vcxproj")):
             tools.replace_in_file(file,
                                   "<PropertyGroup Label=\"Globals\">",
@@ -91,6 +127,8 @@ class LibdbConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12":
+            self._autotools.flags.append("-Wno-error=implicit-function-declaration")
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
@@ -171,8 +209,8 @@ class LibdbConan(ConanFile):
 
             msvc_libs = [_lib_to_msvc_lib(lib) for lib in self._libs]
             for lib, msvc_lib in zip(self._libs, msvc_libs):
-                os.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
-                          os.path.join(libdir, "{}.lib".format(lib)))
+                tools.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
+                             os.path.join(libdir, "{}.lib".format(lib)))
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -180,7 +218,7 @@ class LibdbConan(ConanFile):
             if self.settings.os == "Windows":
                 for fn in os.listdir(libdir):
                     if fn.endswith(".dll"):
-                        os.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
+                        tools.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
                 for fn in os.listdir(bindir):
                     if not fn.endswith(".dll"):
                         binpath = os.path.join(bindir, fn)
@@ -196,18 +234,11 @@ class LibdbConan(ConanFile):
                 if not os.listdir(bindir):
                     tools.rmdir(bindir)
 
-            for lib in self._libs:
-                la_file = os.path.join(libdir, "lib{}-{}.la".format(lib, ".".join(self._major_minor_version)))
-                if os.path.exists(la_file):
-                    os.remove(la_file)
-                if not self.options.shared:
-                    # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
-                    libfn = os.path.join(libdir, "lib{}.a".format(lib))
-                    lib_version_fn = os.path.join(libdir, "lib{}-{}.a".format(lib, ".".join(self._major_minor_version)))
-                    assert os.path.isfile(libfn)
-                    os.remove(lib_version_fn)
-
             tools.rmdir(os.path.join(self.package_folder, "docs"))
+            tools.remove_files_by_mask(libdir, "*.la")
+            if not self.options.shared:
+                # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
+                tools.remove_files_by_mask(libdir, "*-{}.a".format(".".join(self._major_minor_version)))
 
     @property
     def _major_minor_version(self):
@@ -228,9 +259,9 @@ class LibdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = self._libs
-        if self.settings.compiler == "Visual Studio"and self.options.shared:
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines = ["DB_USE_DLL"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         elif self.settings.os == "Windows" :
             self.cpp_info.system_libs.append("ws2_32")
