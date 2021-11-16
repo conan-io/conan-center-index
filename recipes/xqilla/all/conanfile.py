@@ -1,4 +1,4 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
