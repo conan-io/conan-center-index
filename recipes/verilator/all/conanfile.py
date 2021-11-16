@@ -11,7 +11,7 @@ class VerilatorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.veripool.org/wiki/verilator"
     description = "Verilator compiles synthesizable Verilog and Synthesis assertions into single- or multithreaded C++ or SystemC code"
-    topics = ("conan", "verilog", "HDL", "EDA", "simulator", "hardware", "fpga")
+    topics = ("verilog", "hdl", "eda", "simulator", "hardware", "fpga")
     exports_sources = "patches/**"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -22,9 +22,12 @@ class VerilatorConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
+        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             if self.settings.compiler == "Visual Studio":
                 self.build_requires("msys2/20190524")
                 self.build_requires("automake/1.16.2")
