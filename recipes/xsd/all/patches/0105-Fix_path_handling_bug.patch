@@ -1,0 +1,19 @@
+Description: Fix path handling bug
+Author: Boris Kolpackov <boris@codesynthesis.com>
+Origin: git commit b4c3242a763e0461f454cc29be28c2ab26e4a495
+Last-Update: 2016-09-10
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: trunk/xsd/examples/cxx/tree/embedded/xsdbin.cxx
+===================================================================
+--- a/xsd/examples/cxx/tree/embedded/xsdbin.cxx
++++ b/xsd/examples/cxx/tree/embedded/xsdbin.cxx
+@@ -334,7 +334,7 @@ main (int argc, char* argv[])
+     //
+     string::size_type p (base.rfind ('/')), p1 (base.rfind ('\\'));
+ 
+-    if (p1 != string::npos && p1 > p)
++    if (p1 != string::npos && (p == string::npos || p1 > p))
+       p = p1;
+ 
+     if (p != string::npos)
