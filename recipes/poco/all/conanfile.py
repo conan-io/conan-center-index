@@ -101,10 +101,10 @@ class PocoConan(ConanFile):
             del self.options.fPIC
         if not self.options.enable_xml:
             util_dependencies = self._poco_component_tree["Util"].dependencies
-            self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = tuple(x for x in util_dependencies if x != "XML"))
+            self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "XML"])
         if not self.options.enable_json:
             util_dependencies = self._poco_component_tree["Util"].dependencies
-            self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = tuple(x for x in util_dependencies if x != "JSON"))
+            self._poco_component_tree["Util"] = self._poco_component_tree["Util"]._replace(dependencies = [x for x in util_dependencies if x != "JSON"])
 
     def requirements(self):
         self.requires("pcre/8.45")
