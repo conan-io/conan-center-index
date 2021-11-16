@@ -121,11 +121,11 @@ class PocoConan(ConanFile):
         if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1k")
+            self.requires("openssl/1.1.1l")
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.9")
         if self.options.get_safe("enable_data_postgresql", False):
-            self.requires("libpq/13.3")
+            self.requires("libpq/13.4")
         if self.options.get_safe("enable_data_mysql", False):
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
