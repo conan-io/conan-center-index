@@ -1,0 +1,179 @@
+--- a/code/AssetLib/3MF/D3MFExporter.cpp
++++ b/code/AssetLib/3MF/D3MFExporter.cpp
+@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #ifdef ASSIMP_USE_HUNTER
+ #include <zip/zip.h>
+ #else
+-#include <contrib/zip/src/zip.h>
++#include <zip/zip.h>
+ #endif
+ 
+ namespace Assimp {
+--- a/code/AssetLib/Blender/BlenderTessellator.h
++++ b/code/AssetLib/Blender/BlenderTessellator.h
+@@ -147,7 +147,7 @@ namespace Assimp
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <poly2tri/poly2tri.h>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
++#  include <poly2tri/poly2tri.h>
+ #endif
+ 
+ namespace Assimp
+--- a/code/AssetLib/IFC/IFCGeometry.cpp
++++ b/code/AssetLib/IFC/IFCGeometry.cpp
+@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #  include <poly2tri/poly2tri.h>
+ #  include <polyclipping/clipper.hpp>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
++#  include <poly2tri/poly2tri.h>
+ #  include "../contrib/clipper/clipper.hpp"
+ #endif
+ 
+--- a/code/AssetLib/IFC/IFCLoader.cpp
++++ b/code/AssetLib/IFC/IFCLoader.cpp
+@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #ifdef ASSIMP_USE_HUNTER
+ #include <minizip/unzip.h>
+ #else
+-#include <unzip.h>
++#include <minizip/unzip.h>
+ #endif
+ #endif
+ 
+--- a/code/AssetLib/IFC/IFCOpenings.cpp
++++ b/code/AssetLib/IFC/IFCOpenings.cpp
+@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #  include <poly2tri/poly2tri.h>
+ #  include <polyclipping/clipper.hpp>
+ #else
+-#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
++#  include <poly2tri/poly2tri.h>
+ #  include "../contrib/clipper/clipper.hpp"
+ #endif
+ 
+--- a/code/AssetLib/MMD/MMDPmxParser.cpp
++++ b/code/AssetLib/MMD/MMDPmxParser.cpp
+@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <utf8.h>
+ #else
+-#  include "../contrib/utf8cpp/source/utf8.h"
++#  include <utf8.h>
+ #endif
+ #include <assimp/Exceptional.h>
+ 
+--- a/code/AssetLib/SIB/SIBImporter.cpp
++++ b/code/AssetLib/SIB/SIBImporter.cpp
+@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #include <utf8.h>
+ #else
+ //#  include "../contrib/ConvertUTF/ConvertUTF.h"
+-#include "../contrib/utf8cpp/source/utf8.h"
++#include <utf8.h>
+ #endif
+ #include <assimp/importerdesc.h>
+ #include <assimp/scene.h>
+--- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp
++++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
+@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #ifdef ASSIMP_USE_HUNTER
+ #  include <utf8.h>
+ #else
+-#  include <contrib/utf8cpp/source/utf8.h>
++#  include <utf8.h>
+ #endif
+ 
+ #include <memory>
+--- a/code/CMakeLists.txt
++++ b/code/CMakeLists.txt
+@@ -919,7 +919,7 @@ ENDIF()
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(poly2tri)
+   find_package(poly2tri CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( Poly2Tri_SRCS
+     ../contrib/poly2tri/poly2tri/common/shapes.cc
+     ../contrib/poly2tri/poly2tri/common/shapes.h
+@@ -940,7 +940,7 @@ ENDIF()
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(minizip)
+   find_package(minizip CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( unzip_SRCS
+     ../contrib/unzip/crypt.c
+     ../contrib/unzip/crypt.h
+@@ -956,7 +956,7 @@ ENDIF()
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(zip)
+   find_package(zip CONFIG REQUIRED)
+-ELSE()
++ELSEIF(0)
+   SET( ziplib_SRCS
+     ../contrib/zip/src/miniz.h
+     ../contrib/zip/src/zip.c
+@@ -1052,7 +1052,6 @@ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(RapidJSON)
+   find_package(RapidJSON CONFIG REQUIRED)
+ ELSE()
+-  INCLUDE_DIRECTORIES("../contrib/rapidjson/include")
+   ADD_DEFINITIONS( -DRAPIDJSON_HAS_STDSTRING=1)
+   option( ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR "Suppress rapidjson warning on MSVC (NOTE: breaks android build)" ON )
+   if(ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR)
+@@ -1088,7 +1087,7 @@ IF( MSVC OR "${CMAKE_CXX_SIMULATE_ID}" MATCHES "MSVC") # clang with MSVC ABI
+ endif ()
+ 
+ IF(NOT ASSIMP_HUNTER_ENABLED)
+-  if (UNZIP_FOUND)
++  if (1)
+     SET (unzip_compile_SRCS "")
+   else ()
+     SET (unzip_compile_SRCS ${unzip_SRCS})
+@@ -1160,13 +1159,6 @@ ADD_LIBRARY(assimp::assimp ALIAS assimp)
+ 
+ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp)
+ 
+-# enable warnings as errors ########################################
+-IF (MSVC)
+-  TARGET_COMPILE_OPTIONS(assimp PRIVATE /WX)
+-ELSE()
+-  TARGET_COMPILE_OPTIONS(assimp PRIVATE -Werror)
+-ENDIF()
+-
+ # adds C_FLAGS required to compile zip.c on old GCC 4.x compiler
+ TARGET_COMPILE_FEATURES(assimp PUBLIC c_std_99)
+ 
+@@ -1195,7 +1187,7 @@ IF(ASSIMP_HUNTER_ENABLED)
+     target_link_libraries(assimp PUBLIC ${draco_LIBRARIES})
+   endif()
+ ELSE()
+-  TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES})
++  TARGET_LINK_LIBRARIES(assimp ${CONAN_LIBS})
+   if (ASSIMP_BUILD_DRACO)
+     target_link_libraries(assimp ${draco_LIBRARIES})
+   endif()
+--- a/code/Common/BaseImporter.cpp
++++ b/code/Common/BaseImporter.cpp
+@@ -330,7 +330,7 @@ std::string BaseImporter::GetExtension(const std::string &file) {
+ #ifdef ASSIMP_USE_HUNTER
+ #include <utf8.h>
+ #else
+-#include "../contrib/utf8cpp/source/utf8.h"
++#include <utf8.h>
+ #endif
+ 
+ // ------------------------------------------------------------------------------------------------
+--- a/code/Common/ZipArchiveIOSystem.cpp
++++ b/code/Common/ZipArchiveIOSystem.cpp
+@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #ifdef ASSIMP_USE_HUNTER
+ #    include <minizip/unzip.h>
+ #else
+-#    include <unzip.h>
++#    include <minizip/unzip.h>
+ #endif
+ 
+ namespace Assimp {
