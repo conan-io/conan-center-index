@@ -415,6 +415,7 @@ class AwsSdkCppConan(ConanFile):
             "cmake/compiler_settings.cmake",
             "cmake/initialize_project_version.cmake",
             "cmake/utilities.cmake",
+            "cmake/sdk_plugin_conf.cmake",
             "toolchains/cmakeProjectConfig.cmake",
             "toolchains/pkg-config.pc.in",
             "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
@@ -426,43 +427,6 @@ class AwsSdkCppConan(ConanFile):
         with tools.chdir(os.path.join(self.package_folder, self._res_folder)):
             rename(self, os.path.join("toolchains", "cmakeProjectConfig.cmake"), os.path.join("toolchains", "cmakeProjectConf.cmake"))
             tools.replace_in_file(os.path.join("cmake", "utilities.cmake"), "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake")
-
-        # create a cmake module to load the files above
-        contents = textwrap.dedent("""
-        get_filename_component(AWS_NATIVE_SDK_ROOT ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
-        set(SIMPLE_INSTALL TRUE)
-
-        if (CMAKE_INSTALL_BINDIR)
-            set(BINARY_DIRECTORY "${CMAKE_INSTALL_BINDIR}")
-        endif()
-
-        if (CMAKE_INSTALL_LIBDIR)
-            set(LIBRARY_DIRECTORY "${CMAKE_INSTALL_LIBDIR}")
-        endif()
-
-        if (CMAKE_INSTALL_INCLUDEDIR)
-            set(INCLUDE_DIRECTORY "${CMAKE_INSTALL_INCLUDEDIR}")
-        endif()
-
-        if(BUILD_SHARED_LIBS)
-            set(ARCHIVE_DIRECTORY "${BINARY_DIRECTORY}")
-        else()
-            set(ARCHIVE_DIRECTORY "${LIBRARY_DIRECTORY}")
-        endif()
-
-        if(DEFINED CMAKE_CXX_STANDARD)
-            set(STANDARD_DEFAULT ${CMAKE_CXX_STANDARD})
-        else()
-            set(STANDARD_DEFAULT "11")
-        endif()
-        set(CPP_STANDARD ${STANDARD_DEFAULT} CACHE STRING "Flag to upgrade the C++ standard used. The default is 11. The minimum is 11.")
-
-        include(CMakePackageConfigHelpers)
-        include(initialize_project_version)
-        include(utilities)
-        include(compiler_settings)
-        """)
-        tools.save(os.path.join(self.package_folder, self._res_folder, "cmake", "add_project.cmake"), content=contents)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -543,4 +507,4 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["plugin_scripts"].builddirs.extend([
             os.path.join(self._res_folder, "cmake"),
             os.path.join(self._res_folder, "toolchains")])
-        self.cpp_info.components["plugin_scripts"].build_modules.append(os.path.join(self._res_folder, "cmake", "add_project.cmake"))
+        self.cpp_info.components["plugin_scripts"].build_modules.append(os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake"))
