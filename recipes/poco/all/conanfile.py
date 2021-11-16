@@ -29,12 +29,12 @@ class PocoConan(ConanFile):
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
     _poco_component_tree = {
-        "mod_poco": _PocoComponent("enable_apacheconnector", False, ["Util", "Net"], ["apr::apr, apr-util::apr-util"], False),
+        "mod_poco": _PocoComponent("enable_apacheconnector", False, ["Util", "Net"], ["apr::apr", "apr-util::apr-util"], False),
         "CppParser": _PocoComponent("enable_cppparser", False, ["Foundation"], [], False),
         # "CppUnit": _PocoComponent("enable_cppunit", False, ["Foundation"], [], False)),
         "Crypto": _PocoComponent("enable_crypto", True, ["Foundation"], ["openssl::openssl"], True),
         "Data": _PocoComponent("enable_data", True, ["Foundation"], [], True),
-        "DataMySQL": _PocoComponent("enable_data_mysql", True, ["Data"], ["apr::apr, apr-util::apr-util", "libmysqlclient::libmysqlclient"], True),
+        "DataMySQL": _PocoComponent("enable_data_mysql", True, ["Data"], ["apr::apr", "apr-util::apr-util", "libmysqlclient::libmysqlclient"], True),
         "DataODBC": _PocoComponent("enable_data_odbc", False, ["Data"], [], True), # requires odbc but conditional, see package_info()
         "DataPostgreSQL": _PocoComponent("enable_data_postgresql", True, ["Data"], ["libpq::libpq"], True),
         "DataSQLite": _PocoComponent("enable_data_sqlite", True, ["Data"], ["sqlite3::sqlite3"], True),
