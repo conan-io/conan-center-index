@@ -113,3 +113,5 @@ patches:
       base_path: "qt6/qttools/src/assistant/qlitehtml/src/3rdparty/litehtml"
     - base_path: "qt6/qtbase"
       patch_file: "patches/dece6f5.patch"
+    - base_path: "qt6/qtwebengine/src/3rdparty"
+      patch_file: "patches/c76d2f6.patch"

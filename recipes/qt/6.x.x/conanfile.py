@@ -18,14 +18,16 @@ class qt(Generator):
             HostData = {1}/archdatadir
             Data = {1}/datadir
             Sysconf = {1}/sysconfdir
-            LibraryExecutables = {1}/archdatadir/bin
+            LibraryExecutables = {1}/archdatadir/{3}
             HostLibraryExecutables = {2}
             Plugins = {1}/archdatadir/plugins
             Imports = {1}/archdatadir/imports
             Qml2Imports = {1}/archdatadir/qml
             Translations = {1}/datadir/translations
             Documentation = {1}/datadir/doc
-            Examples = {1}/datadir/examples""").format(path, folder, "bin" if os_ == "Windows" else "lib")
+            Examples = {1}/datadir/examples""").format(path, folder,
+                "bin" if os_ == "Windows" else "lib",
+                "bin" if os_ == "Windows" else "libexec")
 
     @property
     def filename(self):
@@ -243,8 +245,8 @@ class QtConan(ConanFile):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
 
-            if not (self.options.gui and self.options.qtdeclarative and self.options.qtlocation and self.options.qtwebchannel):
-                raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative, qt:qtlocation and qt:qtwebchannel")
+            if not (self.options.gui and self.options.qtdeclarative and self.options.qtwebchannel):
+                raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
 
             if tools.cross_building(self.settings, skip_x64_x86=True):
                 raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
@@ -263,7 +265,7 @@ class QtConan(ConanFile):
 
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
-           
+
         if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
             raise ConanInvlidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
 
@@ -327,6 +329,7 @@ class QtConan(ConanFile):
             self.requires("expat/2.4.1")
             self.requires("opus/1.3.1")
             self.requires("xorg-proto/2021.4")
+            self.requires("libxshmfence/1.3")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.1")
         if self.options.get_safe("with_pulseaudio", False):
@@ -697,7 +700,8 @@ class QtConan(ConanFile):
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
-            if not os.path.isfile(module):
+            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
+            if not os.path.isfile(module) and not helper_modules:
                 tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
@@ -1070,7 +1074,6 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtlocation"):
             _create_module("Positioning")
-            _create_module("Location", ["Gui", "Quick"])
             _create_plugin("QGeoServiceProviderFactoryMapbox", "qtgeoservices_mapbox", "geoservices", [])
             _create_plugin("QGeoServiceProviderFactoryMapboxGL", "qtgeoservices_mapboxgl", "geoservices", [])
             _create_plugin("GeoServiceProviderFactoryEsri", "qtgeoservices_esri", "geoservices", [])
@@ -1117,7 +1120,7 @@ class QtConan(ConanFile):
             if self.settings.os == "Linux":
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto"])
             _create_module("WebEngineCore", webenginereqs)
-            _create_module("WebEngine", ["WebEngineCore"])
+            _create_module("WebEngineQuick", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
         if self.options.get_safe("qtremoteobjects"):
@@ -1161,9 +1164,15 @@ class QtConan(ConanFile):
         for m in os.listdir(os.path.join("lib", "cmake")):
             module = os.path.join("lib", "cmake", m, "%sMacros.cmake" % m)
             component_name = m.replace("Qt6", "qt")
+            if component_name == "qt":
+                component_name = "qtCore"
             if os.path.isfile(module):
                 self.cpp_info.components[component_name].build_modules["cmake_find_package"].append(module)
                 self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].append(module)
+
+            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
+            self.cpp_info.components[component_name].build_modules["cmake_find_package"].extend(helper_modules)
+            self.cpp_info.components[component_name].build_modules["cmake_find_package_multi"].extend(helper_modules)
             self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
