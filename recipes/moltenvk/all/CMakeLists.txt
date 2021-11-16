@@ -57,10 +57,6 @@ add_compile_options(
 )
 
 # MoltenVKCommon
-# * direct dependencies:
-#   - external: None
-#   - internal: None
-#   - frameworks: Foundation
 file(GLOB MVK_COMMON_SOURCES ${MVK_DIR}/common/*.mm)
 add_library(MoltenVKCommon OBJECT ${MVK_COMMON_SOURCES})
 target_include_directories(MoltenVKCommon PUBLIC ${MVK_DIR}/common)
@@ -68,10 +64,6 @@ target_compile_definitions(MoltenVKCommon PRIVATE $<$<CONFIG:Debug>:DEBUG=1>)
 target_link_libraries(MoltenVKCommon PRIVATE ${FOUNDATION_FRAMEWORK})
 
 # MoltenVKShaderConverter
-# * direct dependencies:
-#   - external: spirv-cross, glslang, and spirv-tools (optional)
-#   - internal: MoltenVKCommon
-#   - frameworks: Foundation
 if(MVK_VERSION VERSION_LESS "1.1.0")
     file(GLOB MVK_SC_CONVERTERS_SOURCES
         ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKGLSLToSPIRVConverter/*.cpp
@@ -115,10 +107,6 @@ else()
 endif()
 
 # MoltenVKShaderConverterTool
-# * direct dependencies:
-#   - external: None
-#   - internal: MoltenVKShaderConverter and MoltenVKCommon
-#   - frameworks: Metal and Foundation
 if(MVK_BUILD_SHADERCONVERTER_TOOL)
     file(GLOB MVK_SCT_SOURCES
         ${MVK_DIR}/MoltenVKShaderConverter/MoltenVKShaderConverterTool/*.cpp
@@ -150,10 +138,6 @@ if(MVK_BUILD_SHADERCONVERTER_TOOL)
 endif()
 
 # MoltenVK
-# * direct dependencies:
-#   - external: cereal, spirv-cross and vulkan-headers (+ vulkan-portability if moltenvk < 1.1.0)
-#   - internal: MoltenVKShaderConverter and MoltenVKCommon
-#   - frameworks: Foundation, Metal, QuartzCore, AppKit, IOSurface + IOKit (Macos) or UIKit (iOS/tvOS)
 file(GLOB_RECURSE MVK_SOURCES
     ${MVK_DIR}/MoltenVK/*.m
     ${MVK_DIR}/MoltenVK/*.mm
@@ -196,8 +180,8 @@ list(APPEND MVK_INSTALL_TARGETS MoltenVK)
 
 # Custom Target to generate internal header file required by MoltenVK target.
 # This header should contain:
-#  - if moltenvk < 1.44 : spirv-cross commit hash in spirvCrossRevisionString variable
-#  - if moltenvk >= 1.44: moltenvk commit hash in mvkRevString variable (but we still
+#  - if moltenvk < 1.0.44 : spirv-cross commit hash in spirvCrossRevisionString variable
+#  - if moltenvk >= 1.0.44: moltenvk commit hash in mvkRevString variable (but we still
 #    use spirv-cross commit hash, since MoltenVK hash is not available in this context,
 #    and hash value is no really important)
 set(MVK_REV_FILE ${MVK_DIR}/ExternalRevisions/SPIRV-Cross_repo_revision)
