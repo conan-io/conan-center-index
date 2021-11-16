@@ -12,8 +12,7 @@ class CertifyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/djarek/certify"
     license = "BSL-1.0"
-    settings = "compiler"
-    generators = "cmake", "cmake_find_package"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -47,6 +46,9 @@ class CertifyConan(ConanFile):
         else:
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   strip_root=True, destination=self._source_subfolder)
@@ -57,10 +59,6 @@ class CertifyConan(ConanFile):
         self.copy(pattern="*", dst="include",
                   src=os.path.join(self._source_subfolder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
-
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "certify"
         self.cpp_info.names["cmake_find_package_multi"] = "certify"
-        self.cpp_info.names["pkg_config"] = "certify"
