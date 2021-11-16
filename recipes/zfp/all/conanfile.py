@@ -15,6 +15,7 @@ class ZfpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "bit_stream_word_size": [8,16,32,64],
         "with_cuda": [True, False],
         "with_bit_stream_strided": [True, False],
         "with_aligned_alloc": [True, False],
@@ -26,6 +27,7 @@ class ZfpConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "bit_stream_word_size": 64,
         "with_cuda": False,
         "with_bit_stream_strided": False,
         "with_aligned_alloc": False,
@@ -69,6 +71,7 @@ class ZfpConan(ConanFile):
         self._cmake.definitions["BUILD_CFP"] = True
         self._cmake.definitions["BUILD_UTILITIES"] = False
         self._cmake.definitions["ZFP_WITH_CUDA"] = self.options.with_cuda
+        self._cmake.definitions["ZFP_BIT_STREAM_WORD_SIZE"] = self.options.bit_stream_word_size
         self._cmake.definitions["ZFP_WITH_BIT_STREAM_STRIDED"] = self.options.with_bit_stream_strided
         self._cmake.definitions["ZFP_WITH_ALIGNED_ALLOC"] = self.options.with_aligned_alloc
         self._cmake.definitions["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
