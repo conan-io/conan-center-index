@@ -116,6 +116,6 @@ class AwsCCal(ConanFile):
                     crypto_symbols.extend([
                         "HMAC_CTX_init", "HMAC_CTX_cleanup", "HMAC_CTX_reset",
                     ])
-                crypto_link_flags = "-Wl," + ",".join(f"-u,{symbol}" for symbol in crypto_symbols)
+                crypto_link_flags = "-Wl," + ",".join(f"-u{symbol}" for symbol in crypto_symbols)
                 self.cpp_info.components["aws-c-cal-lib"].exelinkflags.append(crypto_link_flags)
                 self.cpp_info.components["aws-c-cal-lib"].sharedlinkflags.append(crypto_link_flags)
