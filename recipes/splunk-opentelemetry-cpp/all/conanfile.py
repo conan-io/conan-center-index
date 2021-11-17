@@ -30,6 +30,13 @@ class SplunkOpentelemetryConan(ConanFile):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Architecture not supported")
 
+        if (self.settings.compiler == "Visual Studio" and
+           tools.Version(self.settings.compiler.version) < "16"):
+            raise ConanInvalidConfiguration("Visual Studio 2019 or higher required")
+
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration("Building shared libraries is only supported on Linux")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
