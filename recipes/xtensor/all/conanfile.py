@@ -24,11 +24,14 @@ class XtensorConan(ConanFile):
         "tbb": False,
         "openmp": False,
     }
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def export_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            self.copy(patch["patch_file"])
 
     def configure(self):
         if self.options.tbb and self.options.openmp:
@@ -67,6 +70,10 @@ class XtensorConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
@@ -112,5 +119,3 @@ class XtensorConan(ConanFile):
             self.cpp_info.defines.append("XTENSOR_USE_TBB")
         if self.options.openmp:
             self.cpp_info.defines.append("XTENSOR_USE_OPENMP")
-        if self.settings.compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
-            self.cpp_info.defines.append("XTENSOR_GLIBCXX_USE_CXX11_ABI=1")
