@@ -1,0 +1,9 @@
+sources:
+  2.7.18:
+    x86_64:
+      sha256: b74a3afa1e0bf2a6fc566a7b70d15c9bfabba3756fb077797d16fffa27800c05
+      url: https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi
+
+patches:
+  2.7.18:
+    - patch_file: "patches/pydebug.patch"

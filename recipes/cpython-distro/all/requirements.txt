@@ -1,0 +1,11 @@
+cryptography==2.4.2
+gevent==1.4.0
+greenlet==0.4.15
+lxml==4.6.3
+mock==3.0.5
+numpy==1.16.6
+psutil==5.4.7
+psycopg2==2.7.6.1
+pycurl==7.43.0.2
+pytest==4.6.11
+zeep==3.4.0

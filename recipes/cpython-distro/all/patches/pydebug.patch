@@ -1,0 +1,33 @@
+diff --git a/include/pyconfig.h b/include/pyconfig.h
+index 5fa6398..66b0210 100644
+--- a/include/pyconfig.h
++++ b/include/pyconfig.h
+@@ -328,11 +328,11 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ 			/* So MSVC users need not specify the .lib file in
+ 			their Makefile (other compilers are generally
+ 			taken care of by distutils.) */
+-#			ifdef _DEBUG
+-#				pragma comment(lib,"python27_d.lib")
+-#			else
++//#			ifdef _DEBUG
++//#				pragma comment(lib,"python27_d.lib")
++//#			else
+ #				pragma comment(lib,"python27.lib")
+-#			endif /* _DEBUG */
++//#			endif /* _DEBUG */
+ #		endif /* _MSC_VER */
+ #	endif /* Py_BUILD_CORE */
+ #endif /* MS_COREDLL */
+@@ -370,9 +370,9 @@ Py_NO_ENABLE_SHARED to find out.  Also support MS_NO_COREDLL for b/w compat */
+ #	endif
+ #endif
+
+-#ifdef _DEBUG
+-#	define Py_DEBUG
+-#endif
++//#ifdef _DEBUG
++//#	define Py_DEBUG
++//#endif
+
+
+ #ifdef MS_WIN32
