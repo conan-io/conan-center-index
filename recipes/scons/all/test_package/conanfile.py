@@ -16,6 +16,9 @@ class TestPackageConan(ConanFile):
             raise ConanException("an external scons was found")
 
         output = StringIO()
+        self.run("{} --version".format(scons_path), run_environment=True, output=output, ignore_errors=True)
+        self.output.info("output: %s" % output.getvalue())
+        output = StringIO()
         self.run("{} --version".format(scons_path), run_environment=True, output=output)
         text = output.getvalue()
         if self.deps_cpp_info["scons"].version not in text:
