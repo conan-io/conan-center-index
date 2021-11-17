@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 import textwrap
 
 
@@ -177,6 +178,23 @@ class ProtobufConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _create_shim(self):
+        if not tools.is_apple_os(self.settings.os) or not self.options.shared:
+            return
+
+        with tools.chdir(os.path.join(self.package_folder, "bin")):
+            shutil.move("protoc", "protoc.orig")
+            protoc = textwrap.dedent("""
+            #!/usr/bin/env bash
+            bindir=$(dirname "${BASH_SOURCE[0]}")
+            rootdir=$(dirname "${bindir}")
+            libdir="${rootdir}/lib"
+            protoc="${bindir}/protoc.orig"
+            DYLD_LIBRARY_PATH=${libdir} ${protoc} "$@"
+            """)
+            tools.save("protoc", protoc)
+            os.chmod("protoc", os.stat("protoc").st_mode | 0o111)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
@@ -191,6 +209,8 @@ class ProtobufConan(ConanFile):
         if not self.options.lite:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "libprotobuf-lite.*")
+
+        self._create_shim()
 
     def package_info(self):
         # The module name is Protobuf while the config name is protobuf
