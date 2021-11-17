@@ -11,3 +11,6 @@ sources:
   "0.2.14":
     url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.14.tar.gz"
     sha256: "d885fe16cf621f7470a45fb6e955e8aded02958bb2212819dc151feac930905b"
+  "0.2.15":
+    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.15.tar.gz"
+    sha256: "d7631d21785ddddc81b2fe04a7998d0d49323c2224168568cb80cc32093da3ac"
