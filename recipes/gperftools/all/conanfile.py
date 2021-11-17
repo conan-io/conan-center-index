@@ -10,8 +10,8 @@ class GperftoolsConan(ConanFile):
     description = "gperftools: originally Google Performance Tools"
     topics = ("malloc", "profiler")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"fPIC": False, "shared": True}
     autotools = None
 
     @property
@@ -31,12 +31,16 @@ class GperftoolsConan(ConanFile):
             autotools = AutoToolsBuildEnvironment(self)
             with tools.chdir(self._source_subfolder):
                 self.run("autoreconf -fiv")
-            default_args = ["--disable-shared"]
+            default_args = []
+            if self.options.shared:
+                default_args.append("--disable-static")
+            else:
+                default_args.append("--disable-shared")
             if self.options.fPIC:
                 default_args.append("--with-pic=yes")
             autotools.configure(
                 configure_dir=self._source_subfolder,
-                args=["--disable-shared"]
+                args=default_args
             )
             self.autotools = autotools
         return self.autotools
