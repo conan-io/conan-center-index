@@ -63,6 +63,7 @@ class EmSDKConan(ConanFile):
                 if key != 'nodejs':
                     self.run("%s install %s" % (emsdk, value))
                     self.run("%s activate %s" % (emsdk, value))
+            self.run("echo \"int main(){}\" | em++ -x c++ -") # force cache population
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
