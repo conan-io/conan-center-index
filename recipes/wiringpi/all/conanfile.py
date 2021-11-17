@@ -33,12 +33,14 @@ class WiringpiConan(ConanFile):
         return "build_subfolder"
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("WiringPi only works for Linux.")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version],
