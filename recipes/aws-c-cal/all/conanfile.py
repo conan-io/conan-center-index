@@ -92,11 +92,11 @@ class AwsCCal(ConanFile):
             self.cpp_info.components["aws-c-cal-lib"].frameworks.append("Security")
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["aws-c-cal-lib"].system_libs.append("dl")
+
+        self.user_info.with_openssl = self._needs_openssl
         if self._needs_openssl:
-            if self.options["openssl"].shared:
-                self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
-            else:
-                self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
+            self.cpp_info.components["aws-c-cal-lib"].requires.append("openssl::crypto")
+            if not self.options["openssl"].shared:
                 # aws-c-cal does not statically link to openssl and searches dynamically for openssl symbols .
                 # Mark these as undefined so the linker will include them.
                 # This avoids dynamical look-up for a system crypto library.
