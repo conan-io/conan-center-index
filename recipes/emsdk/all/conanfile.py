@@ -56,14 +56,21 @@ class EmSDKConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             emsdk = "emsdk.bat" if tools.os_info.is_windows else "./emsdk"
             self._chmod_plus_x("emsdk")
-            
+
             # Install required tools
             required_tools = self._tools_for_version()
             for key, value in required_tools.items():
                 if key != 'nodejs':
                     self.run("%s install %s" % (emsdk, value))
                     self.run("%s activate %s" % (emsdk, value))
-            self.run("echo \"int main(){}\" | em++ -x c++ -") # force cache population
+
+    @property
+    def _emscripten_path(self):
+        return os.path.join(self.package_folder, "bin", "upstream", "emscripten")
+
+    @property
+    def _emscripten_cache(self):
+        return os.path.join(self.package_folder,  "bin", ".emscripten_cache")
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -81,6 +88,10 @@ class EmSDKConan(ConanFile):
         tools.replace_in_file(toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
+        with tools.environment_append({"PATH": [self._emscripten_path],"EM_CACHE": self._emscripten_cache}):
+            tools.save("deleteme.cpp", "int main(){}")
+            self.run("em++ deleteme.cpp") # force cache population
+            tools.remove_files_by_mask(".", "deleteme.*")
 
     def _define_tool_var(self, name, value):
         suffix = ".bat" if self.settings.os == "Windows" else ""
@@ -93,8 +104,8 @@ class EmSDKConan(ConanFile):
     def package_info(self):
         emsdk = self.package_folder
         em_config = os.path.join(emsdk, "bin", ".emscripten")
-        emscripten = os.path.join(emsdk, "bin", "upstream", "emscripten")
-        em_cache = os.path.join(emsdk,  "bin", ".emscripten_cache")
+        emscripten = self._emscripten_path
+        em_cache = self._emscripten_cache
         toolchain = os.path.join(emscripten, "cmake", "Modules", "Platform", "Emscripten.cmake")
 
         self.output.info("Appending PATH environment variable: %s" % emsdk)
@@ -121,7 +132,7 @@ class EmSDKConan(ConanFile):
             return
 
         if self.settings_target.os != "Emscripten":
-            self.output.warn("You've added {}/{} as a build requirement, while os={} != Android".format(self.name, self.version, self.settings_target.os))
+            self.output.warn("You've added {}/{} as a build requirement, while os={} != Emscripten".format(self.name, self.version, self.settings_target.os))
             return
 
         self.output.info("Creating CONAN_CMAKE_TOOLCHAIN_FILE environment variable: %s" % toolchain)
@@ -140,3 +151,6 @@ class EmSDKConan(ConanFile):
             "bin/upstream/emscripten/tests/cmake/target_library",
             "bin/upstream/lib/cmake/llvm",
         ]
+
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
