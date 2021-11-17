@@ -16,6 +16,6 @@ class TestPackageConan(ConanFile):
             stream = io.StringIO()
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True, output=stream)
+            print(stream.getvalue())
             if bool(self.deps_user_info["aws-c-cal"].with_openssl):
                 assert "found static libcrypto" in stream.getvalue()
-
