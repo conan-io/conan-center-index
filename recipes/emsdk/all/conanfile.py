@@ -88,10 +88,11 @@ class EmSDKConan(ConanFile):
         tools.replace_in_file(toolchain,
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
-        with tools.environment_append(self._emscripten_env):
-            tools.save("deleteme.cpp", "int main(){}")
-            self.run("em++ deleteme.cpp", run_environment=True) # force cache population
-            tools.remove_files_by_mask(".", "deleteme.*")
+        if not tools.cross_building(self):
+            with tools.environment_append(self._emscripten_env):
+                tools.save("deleteme.cpp", "int main(){}")
+                self.run("em++ deleteme.cpp", run_environment=True) # force cache population
+                tools.remove_files_by_mask(".", "deleteme.*")
 
 
 
