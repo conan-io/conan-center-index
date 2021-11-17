@@ -1,5 +1,6 @@
-#include <splunk/opentelemetry.h>
 #include <opentelemetry/sdk/resource/resource.h>
+#include <opentelemetry/sdk/trace/tracer_provider.h>
+#include <splunk/opentelemetry.h>
 
 int main(int argc, char** argv) {
   splunk::OpenTelemetryOptions otelOptions = splunk::OpenTelemetryOptions()
@@ -19,6 +20,11 @@ int main(int argc, char** argv) {
       {"my.attribute", "1234"},
     },
     startOptions);
+
+  span->End();
+
+  dynamic_cast<opentelemetry::sdk::trace::TracerProvider*>(provider.get())
+    ->ForceFlush(std::chrono::microseconds(10));
 
   return 0;
 }
