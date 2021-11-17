@@ -30,6 +30,11 @@ class TestPackageConan(ConanFile):
         self.run("scons {}".format(" ".join(scons_args)), run_environment=True)
 
     def test(self):
+        from io import StringIO
+
         if not tools.cross_building(self):
             bin_path = os.path.join(".", "test_package")
+            output = StringIO()
+            self.run(bin_path, run_environment=True, ignore_errors=True, output=output)
+            self.output.info("output: %s" % output.getvalue())
             self.run(bin_path, run_environment=True)
