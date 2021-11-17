@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(gperftools REQUIRED)
 
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
+target_link_libraries(test_package gperftools::gperftools)

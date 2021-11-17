@@ -54,6 +54,15 @@ class GperftoolsConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "gperftools"
-        self.cpp_info.names["cmake_find_package_multi"] = "gperftools"
-        self.cpp_info.libs = ["tcmalloc", "profiler"]
+        self.cpp_info.components["tcmalloc_and_profiler"].names["cmake_find_package"] = "tcmalloc_and_profiler"
+        self.cpp_info.components["tcmalloc_and_profiler"].names["cmake_find_package_multi"] = "tcmalloc_and_profiler"
+        self.cpp_info.components["tcmalloc_and_profiler"].libs = ["tcmalloc_and_profiler"]
+
+        self.cpp_info.components["tcmalloc"].names["cmake_find_package"] = "tcmalloc"
+        self.cpp_info.components["tcmalloc"].names["cmake_find_package_multi"] = "tcmalloc"
+        self.cpp_info.components["tcmalloc"].libs = ["tcmalloc"]
+
+        self.cpp_info.components["profiler"].names["cmake_find_package"] = "profiler"
+        self.cpp_info.components["profiler"].names["cmake_find_package_multi"] = "profiler"
+        self.cpp_info.components["profiler"].libs = ["profiler"]
+
