@@ -71,6 +71,7 @@ class UchardetConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["CHECK_SSE2"] = self.options.get_safe("check_sse2", False)
         self._cmake.definitions["BUILD_BINARY"] = False
+        self._cmake.definitions["BUILD_STATIC"] = False  # disable building static libraries when self.options.shared is True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
