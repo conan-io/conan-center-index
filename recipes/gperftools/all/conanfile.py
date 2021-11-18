@@ -18,7 +18,7 @@ class GperftoolsConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": False,
     }
 
