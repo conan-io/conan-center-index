@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
+from io import StringIO
 import os
 import re
 import textwrap
@@ -565,6 +566,7 @@ class CPythonConan(ConanFile):
 
             if not os.path.exists(self._cpython_symlink):
                 os.symlink("python{}".format(self._version_suffix), self._cpython_symlink)
+        self._fix_install_name()
 
     @property
     def _cpython_symlink(self):
@@ -612,6 +614,19 @@ class CPythonConan(ConanFile):
         else:
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
         return "python{}{}".format(self._version_suffix, lib_ext)
+
+    def _fix_install_name(self):
+        if tools.is_apple_os(self.settings.os) and self.options.shared:
+            buffer = StringIO()
+            python = os.path.join(self.package_folder, "bin", "python")
+            self.run('otool -L "%s"' % python, output=buffer)
+            lines = buffer.getvalue().strip().split('\n')[1:]
+            for line in lines:
+                library = line.split()[0]
+                if library.startswith(self.package_folder):
+                    new = library.replace(self.package_folder, "@executable_path/..")
+                    self.output.info("patching {}, replace {} with {}".format(python, library, new))
+                    self.run("install_name_tool -change {} {} {}".format(library, new, python))
 
     def package_info(self):
         # FIXME: conan components Python::Interpreter component, need a target type
