@@ -27,6 +27,7 @@ class WilzegersAutotestConan(ConanFile):
 
     def package(self):
         self.copy("*.hpp", src=os.path.join(self._source_subfolder, "autotest/include"), dst="include")
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "wilzegers_autotest"
