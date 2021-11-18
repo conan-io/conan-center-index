@@ -54,6 +54,8 @@ class GperftoolsConan(ConanFile):
         return autotools
 
     def build(self):
+        with tools.chdir(self._source_subfolder):
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF"), win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
