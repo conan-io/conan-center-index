@@ -711,6 +711,7 @@ class OpenSSLConan(ConanFile):
                             "conan-official-{}-variables.cmake".format(self.name))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "OpenSSL")
         self.cpp_info.set_property("cmake_target_name", "OpenSSL")
         self.cpp_info.set_property("pkg_config_name", "openssl")
 
