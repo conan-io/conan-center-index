@@ -1,4 +1,7 @@
 sources:
+  "2.0.34":
+    url: "https://github.com/emscripten-core/emsdk/archive/2.0.34.tar.gz"
+    sha256: "a96ddf34de8de779c78be2785df04ae63c9a557da9e83e85332cda3d01bca250"
   "2.0.31":
     url: "https://github.com/emscripten-core/emsdk/archive/2.0.31.tar.gz"
     sha256: "6bf70f4522308de1941200f8cdb9bde6967ba7aacb03445e9d136a5dd812b728"
