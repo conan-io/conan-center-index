@@ -37,6 +37,8 @@ class UchardetConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
+        if self.settings.arch not in ("x86", "x86_64"):
+            del self.options.check_sse2
         if self.settings.os == "Windows":
             del self.options.fPIC
 
