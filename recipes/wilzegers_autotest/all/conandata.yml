@@ -1,0 +1,4 @@
+sources:
+  "0.1":
+    url: "https://gitlab.com/wilzegers/autotest/-/archive/master/autotest-master.tar.gz"
+    sha256: "b0801e5be7600edc5d527c7a0e88094f1d2db875c7c8b533dd2c7b90bd9f0063"
