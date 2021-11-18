@@ -90,4 +90,6 @@ class UchardetConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "uchardet"
         self.cpp_info.names["cmake_find_package_multi"] = "uchardet"
         self.cpp_info.names["pkgconfig"] = "libuchardet"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["uchardet"]
+        if self.options.shared:
+            self.cpp_info.defines.append("UCHARDET_SHARED")
