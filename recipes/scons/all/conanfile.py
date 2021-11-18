@@ -35,6 +35,9 @@ class SConsConan(ConanFile):
     def _scons_cmd(self):
         return os.path.join(self.package_folder, "bin", "scons.cmd")
 
+    def package_id(self):
+        self.info.header_only()
+
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
 
