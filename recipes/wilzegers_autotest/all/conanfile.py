@@ -26,7 +26,7 @@ class WilzegersAutotestConan(ConanFile):
                   destination=self._source_subfolder, strip_root=True)
 
     def validate(self):
-        if self.settings.compiler != 'clang':
+        if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Only clang allowed")
 
     def package_id(self):
