@@ -63,7 +63,6 @@ class SplunkOpentelemetryConan(ConanFile):
 
         self._cmake = CMake(self)
         defs = {
-          "SPLUNK_CPP_WITH_JAEGER_EXPORTER": False,
           "SPLUNK_CPP_EXAMPLES": False
         }
         self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
