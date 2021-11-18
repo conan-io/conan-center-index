@@ -41,24 +41,17 @@ class GperftoolsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version],
                   destination=self._source_subfolder, strip_root=True)
 
+    @functools.lru_cache(1)
     def _configure_autotools(self):
-        if self.autotools is None:
-            autotools = AutoToolsBuildEnvironment(self)
-            with tools.chdir(self._source_subfolder):
-                self.run("autoreconf -fiv")
-            default_args = []
-            if self.options.shared:
-                default_args.append("--disable-static")
-            else:
-                default_args.append("--disable-shared")
-            if self.options.fPIC:
-                default_args.append("--with-pic=yes")
-            autotools.configure(
-                configure_dir=self._source_subfolder,
-                args=default_args
-            )
-            self.autotools = autotools
-        return self.autotools
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        yes_no = lambda v: "yes" if v else "no"
+        args = [
+            f"--enable-shared={yes_no(self.options.shared)}",
+            f"--enable-static={yes_no(not self.options.shared)}",
+        ]
+        autotools.configure(args=args, configure_dir=self._source_subfolder)
+        autotools.fpic = self.options.get_safe("fPIC", True)
+        return autotools
 
     def build(self):
         autotools = self._configure_autotools()
