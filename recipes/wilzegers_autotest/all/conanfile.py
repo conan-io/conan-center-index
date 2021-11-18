@@ -7,7 +7,6 @@ requires_conan_version = ">=1.33.0"
 
 class WilzegersAutotestConan(ConanFile):
     name = "wilzegers_autotest"
-    version = "0.1"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/wilzegers/autotest"
