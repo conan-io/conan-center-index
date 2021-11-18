@@ -10,8 +10,14 @@ class GperftoolsConan(ConanFile):
     description = "gperftools: originally Google Performance Tools"
     topics = ("malloc", "profiler")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"fPIC": False, "shared": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": True,
+        "fPIC": False,
+    }
     autotools = None
 
     @property
