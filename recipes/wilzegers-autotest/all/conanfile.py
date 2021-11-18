@@ -6,7 +6,7 @@ requires_conan_version = ">=1.33.0"
 
 
 class WilzegersAutotestConan(ConanFile):
-    name = "wilzegers_autotest"
+    name = "wilzegers-autotest"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/wilzegers/autotest"
@@ -34,8 +34,3 @@ class WilzegersAutotestConan(ConanFile):
     def package(self):
         self.copy("*.hpp", src=os.path.join(self._source_subfolder, "autotest/include"), dst="include")
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "wilzegers_autotest"
-        self.cpp_info.names["cmake_find_package_multi"] = "wilzegers_autotest"
-        self.cpp_info.names["pkg_config"] = "wilzegers_autotest"
