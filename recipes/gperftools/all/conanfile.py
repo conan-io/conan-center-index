@@ -18,7 +18,6 @@ class GperftoolsConan(ConanFile):
         "shared": True,
         "fPIC": False,
     }
-    autotools = None
 
     @property
     def _source_subfolder(self):
