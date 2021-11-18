@@ -67,7 +67,6 @@ class UchardetConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CHECK_SSE2"] = self.options.check_sse2
         self._cmake.definitions["BUILD_BINARY"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
