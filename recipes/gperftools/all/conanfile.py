@@ -79,6 +79,6 @@ class GperftoolsConan(ConanFile):
         self.cpp_info.components["profiler"].names["cmake_find_package"] = "profiler"
         self.cpp_info.components["profiler"].names["cmake_find_package_multi"] = "profiler"
         self.cpp_info.components["profiler"].libs = ["profiler"]
-        if self.settings.os == 'Linux':
-            self.cpp_info.components['tcmalloc_and_profiler'].system_libs.extend(['pthread'])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["tcmalloc_and_profiler"].system_libs.append("pthread")
 
