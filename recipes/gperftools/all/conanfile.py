@@ -1,5 +1,8 @@
-import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+import functools
+import os
+
+from conans import ConanInvalidConfiguration
 
 
 class GperftoolsConan(ConanFile):
