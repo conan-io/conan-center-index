@@ -67,6 +67,13 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
 
     def build(self):
+        if not tools.cross_building(self, skip_x64_x86=True):
+            command = "{} --version".format(self.deps_user_info["cpython"].python)
+            buffer = StringIO()
+            self.run(command, output=buffer, ignore_errors=True, run_environment=True)
+            self.output.info("output: %s" % buffer.getvalue())
+            self.run(command, run_environment=True)
+
         cmake = CMake(self)
         py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
         cmake.definitions["BUILD_MODULE"] = self._supports_modules
