@@ -61,6 +61,8 @@ class TinyAlsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
+        if tools.Version(self.version) >= "2.0.0":
+            self.cpp_info.system_libs.append("dl")
         if self.options.with_utils:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info('Appending PATH environment variable: %s' % bin_path)
