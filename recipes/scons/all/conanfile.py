@@ -96,7 +96,7 @@ class SConsConan(ConanFile):
         self.env_info.PATH.append(bindir)
 
         if self.settings.os == "Windows":
-            scons_bin = os.path.join(bindir, "scons.bat")
+            scons_bin = os.path.join(bindir, "scons.cmd")
         else:
             scons_bin = os.path.join(bindir, "scons")
         self.user_info.scons = scons_bin
