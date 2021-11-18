@@ -52,6 +52,9 @@ class UchardetConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "${CMAKE_BINARY_DIR}",
             "${CMAKE_CURRENT_BINARY_DIR}")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            'string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} TARGET_ARCHITECTURE)',
+            'string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" TARGET_ARCHITECTURE)')
 
     def _configure_cmake(self):
         if self._cmake:
