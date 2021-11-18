@@ -79,5 +79,4 @@ class UchardetConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "uchardet"
         self.cpp_info.names["cmake_find_package_multi"] = "uchardet"
         self.cpp_info.names["pkgconfig"] = "libuchardet"
-        postfix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.libs = ["uchardet" + postfix]
+        self.cpp_info.libs = tools.collect_libs(self)
