@@ -7,7 +7,6 @@ requires_conan_version = ">=1.33.0"
 class I2cConan(ConanFile):
     name = "i2c-tools"
     license = "LGPL 2.1"
-    author = "Eirik Brandtzæg eirikb@eirikb.no"
     url = "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/"
     description = "I2C tools for the linux kernel as well as an I2C library."
     topics = ("i2c")
