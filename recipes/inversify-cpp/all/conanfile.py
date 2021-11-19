@@ -35,10 +35,6 @@ class InversifyCppConan(ConanFile):
         else:
             self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime == "MT":
-                raise ConanInvalidConfiguration("{} is only available with compiler.runtime != MT".format(self.name))
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -52,3 +48,6 @@ class InversifyCppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.includedirs = ['include']
