@@ -140,13 +140,13 @@ class Assimp(ConanFile):
         #   has 6.4.2, not API compatible with 4.8.8 vendored in assimp
         # - Open3DGC
         # - openddlparser
-        if tools.Version(self.version) <= tools.Version("5.0.1"):
+        if tools.Version(self.version) < tools.Version("5.1.0"):
             self.requires("irrxml/1.2")
+        else:
+            self.requires("pugixml/1.11")
 
         self.requires("minizip/1.2.11")
         self.requires("utfcpp/3.1.2")
-        if tools.Version(self.version) >= tools.Version("5.1.0"):
-            self.requires("pugixml/1.11")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.1.31")
         if self._depends_on_poly2tri:
