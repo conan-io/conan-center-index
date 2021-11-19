@@ -616,6 +616,13 @@ class QtConan(ConanFile):
         self._cmake.definitions["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             self._cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+            
+        if tools.cross_building(self):
+            qtHostPath = os.getenv("QT_HOST_PATH")
+            if qtHostPath:
+                self._cmake.definitions["QT_HOST_PATH"] = qtHostPath
+            else:
+                raise ConanInvalidConfiguration("In order to be able to cross-compile, you have to call `conan create` for the build machine (build architecture) first, and pass the path of that package to the cross-building `conan create` call using the `conan create` option : `--env QT_HOST_PATH=<path/to/the/conan/package/built/for/the/build/machine/architecture>`")
 
         try:
             self._cmake.configure(source_folder="qt6")
@@ -691,18 +698,10 @@ class QtConan(ConanFile):
             if module != "qtbase" and not self.options.get_safe(module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            tools.remove_files_by_mask(self.package_folder, mask)
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la*")
         tools.remove_files_by_mask(self.package_folder, "*.pdb*")
         tools.remove_files_by_mask(self.package_folder, "ensure_pro_file.cmake")
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
-
-        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
-            module = os.path.join(self.package_folder, "lib", "cmake", m, "%sMacros.cmake" % m)
-            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
-            if not os.path.isfile(module) and not helper_modules:
-                tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":
