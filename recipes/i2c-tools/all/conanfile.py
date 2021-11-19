@@ -45,7 +45,6 @@ class I2cConan(ConanFile):
         self.copy("*.h", dst="include/i2c", src=self._source_subfolder, keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.so.0", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
