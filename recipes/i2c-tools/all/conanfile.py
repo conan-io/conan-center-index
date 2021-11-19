@@ -30,7 +30,9 @@ class I2cConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        self.run("make", cwd=self._source_subfolder)
+        autotools = AutotoolsBuildEnvironment(self)
+        autotools.make(target="libi2c.so" if self.options.shared else "libi2c.a")
+        
 
     def package(self):
         self.copy("*.h", dst="include", src=self._source_subfolder, keep_path=False)
