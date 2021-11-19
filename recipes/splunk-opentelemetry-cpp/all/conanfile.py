@@ -6,7 +6,7 @@ import glob
 
 class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry-cpp"
-    license = "Apache 2.0"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
     description = "Splunk's distribution of OpenTelemetry C++"
@@ -48,7 +48,6 @@ class SplunkOpentelemetryConan(ConanFile):
 
     def _remove_unnecessary_package_files(self):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def source(self):
         tools.get(
