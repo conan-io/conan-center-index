@@ -128,8 +128,8 @@ class LibsassConan(ConanFile):
 
     def _install_visual_studio(self):
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin"))
-        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "bin"))
+        self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
+        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
