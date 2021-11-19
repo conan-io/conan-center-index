@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake, tools
-import os
+from conans import ConanFile, CMake
 
 
 class TestPackageConan(ConanFile):
@@ -12,6 +11,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "example")
-            self.run(bin_path, run_environment=True)
+        # For obvious reasons, don't run the test package (we don't want to write data to some device)
+        pass
