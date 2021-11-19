@@ -12,8 +12,14 @@ class I2cConan(ConanFile):
     topics = ("i2c")
     os = "linux"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     generators = "cmake"
 
     def validate(self):
