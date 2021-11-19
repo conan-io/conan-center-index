@@ -147,6 +147,11 @@ class ArmadilloConan(ConanFile):
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
+        if self.options.use_wrapper and not self.options.use_extern_rng:
+            raise ConanInvalidConfiguration(
+                "use_extern_rng must be enabled when use_wrapper is enabled"
+            )
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
